@@ -485,3 +485,175 @@ drafts' VM-66 paragraph). **A better shape without production changes:** none I 
 deltas against snapshots, and no test can stop another suite's late task from counting into the one recorder. No pin
 beyond the probe: the stage pieces are a whole-target run that SKIPS its 13 (Swift Testing counts skipped tests in "N
 tests … passed" — read the skipped lines) and the gated run alone, 13 passed.
+
+## Final calls (reviewer)
+
+*The round-2 reviewer, same session, after reading the implementer's responses (`35551e25f`), every commit of the
+fix pass in the code itself (`64af6d64a` · `6b6c288b1` · `28dc98ac5` · `c42078746` · `f45d25498` · `8eeafb614`), its
+closeout (§7 ▸ "Ladder round 2 — fix pass", `980c784a1` · `3b8dc24cb`) and the merged tree's stage window
+(`3dcafa735`, checked against its local logs `notes/plans/vm64-screens/mg-*.log`). One call per finding, and one for
+O-1. **Every call below is on the code AS READ:** a QUIET window holds this Mac, so none of this pass's app-target
+lines has been compiled and none of its pins has run; "confirmed as applied" means the lines do what the finding
+asked when read, and each stays conditional on its named run. Nothing here touches `Sources/VariorumCore/Sync/`.*
+
+**Finding 1 (a row acted on past the first page) — CONFIRMED; the delete and ★ legs AS APPLIED; the Put back leg:
+APPLY ARM (A).**
+*The two legs applied.* `reaskAfterRowAct` is the fix I asked for, with the right guards: it re-asks only a HELD
+listing (the `holds` count is the honest form — `.task(id:)` starts the next hold before the last one's `defer`),
+only the question its rows answer, only deeper than a page, through the one single-flight follow. The enumeration of
+every Library-row and line act is the work a MAJOR deserves and I accept its verdicts (All and Notes are not moved
+by a ★; Bookless is). **The implementer's correction to my pin text is right and I adopt it:** the follow re-reads
+the LISTED depth, so after the delete the listing is 8 deep again with the next note moved up — the Mac's `refresh`
+rule — not "7 deep". The delete pin as written (the doomed note gone; `model.all` equal to `Queries.library`'s first
+8) is the pin.
+*The Put back leg — arm (A).* (B) spells the Put back road and its refusal a second time and covers only the row's
+own delete; (C) widens the held read to answer one act. (A) is one signal for every Put back the line can make,
+and it is the Mac's own shape (`.variorumNotesDeleted`: a signal posted after the writes land, the catalog's view
+re-asking on it — `LibraryCatalogView.swift:426`). What lands, exactly: **(i)** in `MobileLine.putBack`, ONE line
+after `try await session.runner.run(body)` returns — a phone-local notification, its object the session, posted on
+the success path only (a refused Put back posts nothing; `unarchive` is a different function and posts nothing,
+correctly — an archived book still homes its notes). The notification's name is declared with its listener, not in
+`MobileLine`, so VM-55's file gains that one line and no more. **(ii)** the Library listens only while its view is
+mounted (the view's `.onReceive`, or a listener inside the hold — the implementer's choice), accepts only its own
+session's signal (object identity), and answers by re-asking the SHOWN listing through `reaskAfterRowAct` — so every
+guard above applies and a Put back inside the first page stays the held observation's. No second spelling of the
+op, the refusal words or the line. **(iii)** `MobileLine.swift:139-141`'s comment ("the row is back on the page")
+becomes true again past the first page and needs no edit. **The pin must hold:** `MobileLibraryPagingRulesTests`'
+world (limit 4, 12 notes, held on screen, 8 listed); the seventh row deleted through `confirmDeleteNote`; settle
+until it is gone; then the line's OWN Undo pressed (`session.status.current?.action?.perform()` — it must be
+non-nil); settle; the note is listed again and `model.all` equals `Queries.library`'s first 8, no note twice. It
+names old API only, so it joins the red build: RED there and on this pass's first-turn tree (the row never returns
+while the hold stands), green with (A). The (A) hunks join the reversed set of `vm64-gate2-red`.
+*Conditions, for the next reader:* the red-on-old run shows the delete pin red at its two expectations and the Put
+back pin red; both green on the fix build alone and in company; the ★ pin green (a design pin — its red-on-old is
+the delete's, said so in its header, accepted).
+
+**Finding 2 (the settle rule reads "settled" while its read is in flight) — the hole CONFIRMED; my fix shape
+WITHDRAWN on the implementer's dispute; DISMISSED from this pass to VM-226.** I rechecked the dispute in the code
+and it is right. On the ordinary road in the app the op's commit delivery is consumed while the door's own settle
+read is suspended; it is clean and non-matching, so the policy answers `.refetchFresh` and `applyPendingIfClean`
+takes the marker and starts a re-read; the door's settle then renders the post-act page and drops the latch with
+that re-read still in flight. Today the landing drains — correctly, the page holds the store. Under the one fact I
+specified it would read "not settled", and a key typed within one read of an ordinary divide would be refused and
+the sentence said; on the 100k note that is a whole-projection read after every structural act. And no fence pin
+would see it: none of their worlds starts the editor's live observation. A fix that over-fences her common road to
+close a rare one is the wrong trade, and the precise rule needs more than a few lines at the editor seam.
+**VM-226 must carry, in its body:** (1) the hole as traced (this file's finding 2: `applyPendingIfClean` clears the
+marker at `:1174` before its read lands; the settle loop's check at `:1344` and the projection hook at `:1048`
+drain on it; the road needs a tail mint inside a flight — the ticket's own road); (2) the shape that is WRONG and
+why (one fact raised where the marker is taken and lowered when the read ends — the responses' ordinary-road
+trace), so no later session re-proposes it; (3) the rule the fix needs: an in-flight settle read counts against
+"settled" only while no fresh, non-delivery apply has rendered since the marker was taken — its shape (an epoch
+pair, or a second lowering site at the render arms) is that session's to design, pin first; (4) three pins: the
+hole (a real door's flight whose own settle is deferred behind a mint, the marker taken and the read parked on the
+held store — the fence must not drain; red today), the ordinary-road GUARD (a world whose model runs its live
+observation: after a divide whose delivery's re-read is still in flight when the door's settle has rendered, a
+typed key is approved — green today, required green after), and the ticket's original idle-clock pin; (5) the
+coverage fact, first on that session's list: no fence pin's world runs the live observation
+(`makeSurfaceEditor` calls `loadOnce()` only), so every delivery-inside-a-flight ordering is unpinned today; (6) it
+is editor-seam work — a Fable cold review. The ticket's title should name both roads (the idle save's stale write,
+and the fence dropping before the page has re-read). Severity stands MINOR; status OPEN under VM-226. The
+handoff's VM-226 line in "What was found and not fixed" gains the second road in plain words. No line of
+`MobileEditorViewModel.swift` changes in this pass — correct.
+
+**Finding 3 (another wing's Bookless rows after a switch) — CONFIRMED AS APPLIED.** `landedWing` is set where the
+rows are replaced, is observed (the two-empty-listings case redraws), stores a nil scope as a value, and gates the
+three readers a face has: `visible`, the empty line, and All's books. I checked the claim that nothing else draws
+the rows: no view reads `all` or `bookless` directly — every face goes through `visible` / `rows(books:)`. The two
+additions are right and I adopt them: the filter-door trigger (the same hole by another road, with its own pin),
+and All's books waiting with its notes (drawn alone they would re-position as the notes land — P-68-4's own rule;
+display for one read, not a product call). Not gating a sort change is right (same wing; gating it would blink the
+list on every sort). One consequence, accepted and said: if a wing's first read FAILS, that listing now draws
+nothing where it used to draw the old wing's rows — the refusal is on the line, and nothing is the honest drawing.
+*Condition:* both pins red on `vm64-gate2-red` at the expectations the closeout names, green on the fix; VM-55's
+five wing types green in company (they settle with `eventually`, so the brief blank cannot fail them — to be
+shown, not assumed).
+
+**Finding 4 (the merged tree's hosted evidence) — round 1's condition on finding 2 is MET; the gate stays open.**
+Read from the logs, not the record: `mg-hold-red.log` — 5 tests in 1 suite failed with 2 issues, both in
+`aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`, at `MobileNoteHoldTests.swift:227` and `:234`,
+the two `observesAutosave` expectations round 1 named; `mg-hold-green.log` — 5 of 5 passed; `mg-merged38.log` — 234
+tests in 38 suites passed with the hold suite in company, VM-55's four re-landed Library pins, the hidden-switch
+guard and the raw-error scan among them. That is red on the hunk-reversed build, green alone and green in company:
+finding 2 of round 1 is closed. What finding 4 still holds open, all the orchestrator's: this pass's first compile
+and its red-on-old and fix runs (`vm64-gate2-red`, `vm64-gate2`); the whole phone target and the whole Mac target
+on the final tree; the whole Core package once on the final tree; the batches 6 + 7 walk.
+
+**Finding 5 ("bounded" over-claimed) — CONFIRMED AS APPLIED.** The cost table's cell, the floor paragraph's scope,
+the handoff's row and the two draft sentences now say which sort and which wing shape is a bounded seek and which
+grows with the store's notes, with the first text left legible. The ticket: ONE, Debt · Confirmed · Performance ·
+Low, a candidate member of VM-176, naming both cases (the three non-default sorts' top-N pass; the edited sort's
+walk to the index's end in a wing smaller than a page) and that an index for either is a local schema change of
+v1_38's class, hers to schedule.
+
+**Finding 6 (four statements false on the merged tree) — CONFIRMED AS APPLIED, with one clause still to scope.**
+P-2-1 and P-2-2 in the handoff and the bundle now say what her phone does (the refusal wins the line; the Undo is
+in the ⋯ sheet; P-2-2's three options in plain words), the draft contract line claims only what the fence
+guarantees, and the r2 closeout's paragraph is marked in place. Still over-claiming, in the same handoff bullet:
+"Nothing old is ever written" — scope it to the keys the bullet is about (a key refused or held back this way never
+writes old text), since VM-226's two roads stand open and are listed further down the same file. A record edit,
+the orchestrator's or the implementer's.
+
+**Finding 7 (VM-227's body) — CONFIRMED.** The paragraph goes into the ticket at the merge beside round 1's trace:
+in the unobserved state a deferred marker is never cleared, so the next structural act can leave every key refused
+until the note is reopened. It stays labelled as traced by reading, not staged.
+
+**Finding 8 (two readout pitfalls) — (a) CONFIRMED AS APPLIED; (b) the caveat ACCEPTED in place of the code.**
+(a) `boxOpenFiledNothing()` cancels both spans exactly where `file()` hands back no note; the pin reads the two
+series before and after a paint and a keyboard rise, and its guard keeps a filing Open timed. *Condition:* red on
+`vm64-gate2-red` (both spans open, a false sample each), green on the fix. (b) The reason given is right and I
+checked it: the same keep-first window is opened by the app's backgrounding and must keep counting through the
+removed screens' own leavings (two mounted notes under Castle would be cut at the first one's `noteLeft`), and the
+window does not know who opened it — closing it honestly needs an opener in the brain's window API, which is more
+than a NIT earns and puts batch 7's Castle series at risk. The handoff's "leave about ten seconds between the two"
+and the bracketed note on the table row are the fix.
+
+**Finding 9 (three small things) — CONFIRMED AS APPLIED.** The rename; the heading drawn as drafted, with the
+finer reading than mine (the edit trace's SCREEN is mixed case; only its copied transcript is capitals); the three
+test expectations following and one holding the title not upper-cased. The recorder unchanged — correct.
+
+**O-1 (the speed suite gated behind a switch) — CONFIRMED AS APPLIED, on two conditions and one ticket.** The
+reason is sound: the suite's oracle is the process's one recorder, and in a whole-target run its order among the
+other suites is not its own to choose; the probe showed company run serially with this suite first, never the
+case that matters (run after others). The gate itself is right as built (`.enabled(if:)`, the display name, the
+skip's words, the header corrected to what the probe showed). But judged as a fix it has a cost the responses do
+not name: **the gate takes bug-class pins out of every ordinary run.** Read against the suite's assertions: the
+savepoint counts have a company-safe twin (`MobileLeavingSavesOnceTests`), registry growth has two
+(`MobileNoteOpenOnceTests`, `MobileNoteHoldTests`), owner adoption has Core's; but **"a note is read once per
+open" — VM-69's headline, 2 → 1 — is asserted nowhere else** (`MobileNoteOpenOnceTests` pins the chrome and the
+chips, not the projection read), and the SHELL's hidden-Library zeros (the wiring that hands `isOnScreen` down) are
+pinned only here too. *Condition 1 — the gate's legs:* this run's merge gate has three phone-side lines, each
+recorded with its counts — the whole target, saying in words "13 skipped (the gated speed suite)", never folded
+into "passed"; the gated suite alone, 13 passed, none skipped; and the round's own red and fix runs — and the
+drafts' MobileSoul sentence gains the clause that a phone merge gate runs the gated suite as its own leg, so the
+next run's gate does not read a skip as a pass. *Condition 2 — one company-safe GUARD, test-only, this pass's
+second turn:* in `MobileNoteOpenOnceTests`, by its existing statement trace on the world's one connection, an open
+through the hosted screen runs the note's projection read exactly once between mount and the first live delivery;
+with a second arm in the same test that drives the harness's old shape (`loadOnce()` then `start()`) and counts two
+— so the oracle is shown to tell one from two in the same process. What is counted is the open's OWN road (the
+arrival's load and the live updates' first fetch — one read, not two); if the pin's mount makes the liveness grant
+owe a re-read of its own, mount without that or count it apart and say so, never fold it in. Named a guard (the
+red-on-old proof of VM-69 is the gated suite's, recorded at the stage); no production line. *The ticket:* Debt · Confirmed · Tests & tooling ·
+Medium — company-safe twins for the remaining counts only the gated suite asserts (the hidden Library's zero
+re-reads and redraws through the real shell, the covered-Library pin, editor builds per open), read off the store
+or the model rather than the process's recorder.
+
+**The optional ticket (a sync apply on a deep listed row) — YES, a ticket.** It is finding 1's mechanism with
+another writer: while the Library is on screen and listed past its first page, a remote tombstone, revival or
+re-homing of a deep note leaves the held first page unchanged, so the row stays (or stays missing) until the first
+page next moves or she leaves and returns. Outside finding 1's class — not the Library's own act — and correctly
+left out of this pass. Class: Bug · Suspected (traced by reading on a mechanism finding 1's pin proves; its own
+pin first — a direct tombstone of a deep row under a running hold) · Library & sidebar · Low; team VM, a candidate
+rider for wave 2's Library umbrella (VM-87); its body names that the Mac's catalog shares the shape and that a
+completed sync round which applied rows is the natural moment to re-ask a deep listing.
+
+*No FINDER-FIXES: finding 1's arm (A) and O-1's guard are specified above for the implementer's second turn;
+finding 2 goes to VM-226 with its body specified; everything else is applied or a record edit.*
+
+**Is anything in this pass a NEW blocker or major?** No — by reading. The pass is uncompiled, so that answer is
+owed again once `vm64-gate2` builds and its pins run.
+
+**What the next round's reader should look at first:** arm (A)'s one line in `MobileLine.putBack` and its
+listener's scope (its own session only, alive only with the Library's view) with the Put back pin's red on the
+pre-fix tree; then the red-on-old run's exact reds against the closeout's table; then that finding 2 is OPEN under
+VM-226 and the fence suite still has no world that runs the editor's live observation.
