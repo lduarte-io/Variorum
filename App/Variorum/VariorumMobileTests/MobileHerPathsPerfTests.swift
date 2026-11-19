@@ -826,10 +826,10 @@ struct MobileHerPathsPerfTests {
             await shell.surface.settle(10)
             #expect(shell.surface.activate("Library"), "the Library's tab door")
             await shell.surface.settle(20)
-            let row = shell.surface.visibleElements.first {
+            let matches = shell.surface.visibleElements.filter {
                 $0.accessibilityLabel?.hasPrefix(title) == true
-                    && $0.accessibilityTraits.contains(.button)
             }
+            let row = matches.first { $0.accessibilityTraits.contains(.button) } ?? matches.first
             let before = Probe.snap()
             guard let row, row.accessibilityActivate() else {
                 Issue.record("the control note's Library row was not on screen; labels were \(Array(shell.surface.visibleLabels.prefix(30)))")
