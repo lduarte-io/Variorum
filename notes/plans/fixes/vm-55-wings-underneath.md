@@ -268,25 +268,192 @@ Notes for the implementers:
 
 ### Batch 1 record
 
-**What this batch did NOT do (first, by the protocol):** PENDING — written at the batch's close.
+**What this batch did NOT do (first, by the protocol):** no wing switcher, swipe, dots, dropdown, follow or wing
+management (scope call 1 — wave 2, VM-72); no "Now in …" line (scope call 2); no message seam and no raw-error
+rewording (batch 2's VM-61/VM-62 — every `String(describing: error)` this batch touched is left as it was); no hoist
+of the Mac's wing brains (batch 3's VM-63 — the phone's small wings holder below is the interim face-side holder);
+no restyle (the titles change WORDS in today's path lines only — VM-47 owns sizes); nothing under
+`Features/Protection/`, `Shared/Protection/`, `Sources/VariorumCore/Sync/`, custody or the editor seam; no Core
+change. The use-shaped simulator walk is the run's, after batch 3. **PENDING at this line: the stage-window runs
+(VM-59 red-on-old, then every suite green) — the LIVE STATUS below says which are in.**
 
 Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch
 `vm-55-wings-underneath`. Reading list done in full before code (CLAUDE.md + loaded canon, MobileSoul §1–§5, the
 resiliency protocol, the catch-up plan's inherited rules, umbrella-02, sitting-1 rulings, audit A §1D/§1F/§1I/§3.1,
 this file whole, SurfaceContracts' "The app" and "The Bookcase and books" wing bullets, both mockups' build notes).
+DerivedData: one dir, `App/Variorum/DerivedData/vm55-b1` (gitignored), phone and Mac.
 
 #### Batch 1 LIVE STATUS
 
 | Piece | State |
 |---|---|
-| Record skeleton | DONE (this commit) |
-| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | DONE (219b4ac62) — tests in the tests commit: `MobileWingStandTests` (5) + the Mac pin `VM56MacWingScopePinTests` (2); runs PENDING the stage window |
-| VM-57 — every listing reads the current wing | DONE (219b4ac62) — tests `MobileWingListingTests` (8); runs PENDING the stage window |
-| VM-58 — mints in the current wing | DONE (301388409; the new root tag rides 9462d3854) — tests `MobileWingMintTests` (4); runs PENDING |
-| VM-60 — the tag manager per wing | DONE (9462d3854) — tests `MobileWingTagManagerTests` (2); runs PENDING |
-| VM-59 — the wing-blind pickers (pins, then fix, separate commits) | IN-PROGRESS — pins a690c8262 (the red-on-old tree); fix in this commit (the green tree); both builds green; the red run and the green run PENDING the stage window |
-| Mac + phone `build-for-testing` | NOT-STARTED |
-| Stage window: VM-59 red-on-old, then the batch's suites green | NOT-STARTED — PENDING the coordinator's claim line |
+| Record skeleton | DONE (b174f2754) |
+| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | DONE (219b4ac62) — tests `MobileWingStandTests` (6) + the Mac pin `VM56MacWingScopePinTests` (2), committed a0c54c57c; runs PENDING the stage window |
+| VM-57 — every listing reads the current wing | DONE (219b4ac62) — tests `MobileWingListingTests` (8), a0c54c57c; runs PENDING |
+| VM-58 — mints in the current wing | DONE (301388409; the new root tag rides 9462d3854) — tests `MobileWingMintTests` (4), a0c54c57c; runs PENDING |
+| VM-60 — the tag manager per wing | DONE (9462d3854) — tests `MobileWingTagManagerTests` (2), a0c54c57c; runs PENDING |
+| VM-59 — the wing-blind pickers | DONE in code — pins a690c8262 (THE RED-ON-OLD TREE), fix 171f514ad (the green tree); the red run and the green run PENDING the stage window |
+| Phone `build-for-testing` (`VariorumMobile`, the simulator's id) | DONE — green at 171f514ad |
+| Mac `build-for-testing` (`Variorum`, macOS) | IN-PROGRESS — PENDING |
+| Stage window | NOT-STARTED — PENDING the coordinator's claim line. Plan, in order: (1) boot the simulator fresh and let it settle; (2) the GREEN run of every suite below on the built tree (171f514ad); (3) the Mac leg; (4) VM-59's red-on-old cycle — announce here first, then `git checkout a690c8262 -- <the three fix files>`, `git diff` shows exactly the fix reverted, incremental build-for-testing, run `MobileWingBlindPickerTests` (expect 3 red), then `git checkout HEAD -- <the three files>` and `git diff` empty; (5) shut the simulator down, `Tools/stage release --who vm-55`. **No revert is in flight at this line.** |
+
+#### VM-56 — the phone stands in one wing (W-015, W-019)
+
+- `Shared/WingState.swift` — `readScope` returns `currentID` on both platforms (the `#if os(macOS)` fork is gone; the
+  Mac's answer is byte-identical — pinned by `VM56MacWingScopePinTests`).
+- `Shared/AppBootstrap.swift` — the memory block is un-fenced: the bootstrap attaches `.standard` under
+  `WingState.memoryKey` and runs the one-shot dead-wing revalidation on the phone too. (In a hosted test run the
+  bootstrap opens nothing — VX-604 — so no suite reads the host's defaults through it.)
+- `VariorumMobile/Features/Shell/MobileWing.swift` (new) — `MobileWingModel`: the HELD `Queries.wings` read (the
+  `wing` table alone, P1), whose `adopt` takes the Mac `WingsModel.adopt`'s three steps over the SHARED `WingState`
+  (`noteWingCount`, then `revalidate` — a wing deleted here or arriving deleted by sync returns the phone to Home);
+  `currentName` — "Home" (`WingWords.home`) for the virtual wing, a live wing's own name, nil while a non-Home name is
+  not yet read (never a false "Home"; a rename re-titles live). Held by the shell (`.task { await wingModel.track() }`).
+  **Interim by design:** VM-63 (batch 3) hoists `WingsModel`; wave 2's face should compose that and fold this holder.
+- The roots' title — `MobileStarredView`, `MobileShelfView`, `MobileLibraryView` gain `var wingName: String? = nil`
+  (the shell passes `wingModel.currentName`; harnesses that omit it render as before) and their path lines lead with
+  it: Study "Home · Library", Terminal "~/home/library" — today's line, today's tokens, words only
+  (`MobileWingTitle.components`; **P-55-2, PROVISIONAL**, below). No line is shown for a wing change.
+- **The readScope caller sweep (every Shared caller, what changes on iOS):**
+  1. `Shared/RecoveryActs.swift` `TrashPurge.emptyTrashConfirm` (the ask-time count) — was every wing's Trash on the
+     phone, now the current wing's — exactly what the phone's Trash room now lists (`MobileTrashModel`, VM-57).
+     Pinned: `MobileWingListingTests.theTrashListsAndEmptiesTheCurrentWing` (the confirm counts 1 note).
+  2. `TrashPurge.confirm(.emptyTrash)` (the act-time re-read) — same wing; pinned by the same test (the purge intent
+     names the wing's note alone; the other wing's deleted note survives).
+  3. `TrashPurge.deleteSelection` (VX-671's selection Delete Now) — now the current wing's present set; the phone has
+     NO Trash multi-select today (audit E9), so no phone road reaches it; a future phone selection takes only what
+     the room shows.
+  4. `Shared/AppBootstrap.swift` — the attach + revalidate above (now both platforms).
+  5. `Shared/AppSession.swift` `commandRouter.wingCount` — inside `#if os(macOS)`; unchanged.
+  6. `Shared/TypedTagPath.swift` — never read `session.wing`: it resolves in the NOTE's effective wing (13i-d U5);
+     unchanged, and the reason VM-59's suggestion fix is enough.
+  No other Shared file reads `session.wing` or `readScope` (grep at 171f514ad).
+
+#### VM-57 — every listing reads the current wing (W-033)
+
+`MobileWingScope.follow(session.wing) { wing in … }` (in `MobileWing.swift`) runs a held listing ONCE PER WING: on a
+change it cancels the run and AWAITS its end before the next starts (a task group racing the body against
+`Observations { wing.currentID }`), so a listing never shows two wings and never stays scoped to a dead id; a body
+that ends on its own (an observation error) ends the follow, exactly as before. The views' task lines are untouched —
+the Mac keys its views' tasks on the wing instead; the phone's models follow it themselves so the re-read is a model
+fact the pins drive. Call sites (each passes `wingID:` to the Core read it already made):
+
+| Surface | Model · read | Note |
+|---|---|---|
+| Library All / Notes | `MobileLibraryViewModel.startAll` · `observeLibrary(…, wingID:)` | VM-64 is changing this model's paging tonight — the edit is the wrap + one argument |
+| Pool (Bookless) | `startBookless` · `poolPosts(_:limit:wingID:)` | |
+| Books (Shelf + the Library's Books filter, one model) | `MobileShelfViewModel.start` · `bookshelf(_:wingID:)` | pins + the daily id unchanged (ids) |
+| Search (today's title catalog) | `MobileLibraryViewModel.search` · `searchCatalog(…, wingID:)` | the view's task re-keys on `[model.wingID, query]` so a standing query re-asks in a new wing (the one view-line change) |
+| Starred | `MobileStarsModel.start` / `refresh` · `starred(_:wingID:)` | the Mac's read (P-13id-U5-10); P1 unchanged — the unscoped read already held `container` (VX-643's note), the filter adds point reads ∝ the stars |
+| Archived | `MobileArchiveModel.start` · `observeArchivedPosts(limit:wingID:)` | per wing, as on the Mac |
+| Trash | `MobileTrashModel.startTrash` · `observeTrash(…, wingID:)` | per wing; Empty Trash agrees (sweep above) |
+| Snippets | `MobileScrapsModel` — untouched | scope call 3: the one shared room (pinned `snippetsStayTheOneSharedRoom`) |
+
+Reads deliberately left store-wide (each a lookup or a store fact, not a wing listing): `MobileBookDetails.refresh`
+(`bookshelf(db)` to find ONE book by id — scoping it would blank a book reached from another wing's note);
+`MobileShelfViewModel.refreshTags` (maps keyed by book id, read for the shown books); `MobileStarterJournal`'s
+virgin-store guards; the DEBUG tutorial and perf seeders. P1/P2: every changed read is the same Core read narrowed by
+a wing fragment, off the main actor; the only new held read is the `wing` table's.
+
+#### VM-58 — mints are born in the current wing (W-034)
+
+- `MobileNewNoteDoor.mint` (both + New Note doors) — `createPost(title: nil, wingId: currentID)`: the note lands in
+  the wing's Pool.
+- `MobileQuickNoteModel.mintNow` — her SW-5: `importPost(…, wingId: currentID)`, the current wing's Pool (the Mac
+  Bookcase entry bar's rule; the Mac's quick-note PAD's Home rule is a different surface).
+- `MobileCreateBookModel` — reads the wing ONCE at open (`wingID`, the sheet's snapshot) and uses it for the per-wing
+  name guard (`assertBookNameIsFree(_:inWing:)`, VX-816) and the mint (`createReading(…, wingId:)`) — the Mac's
+  VX-889 rule ("one snapshot names the wing for the name guard, the mint and the rule's tag vocabulary"); VM-59 adds
+  the third use.
+- New top-level tag — the tag manager's root create and typed path (VM-60's commit, 9462d3854). A note's typed tag
+  already mints in the NOTE's wing (`TypedTagPath`, unchanged).
+- **Today — a call the orchestrator should see:** `MobileTodayDoor.open` now passes `standingWing: currentID` to
+  `createOrOpenJournalEntry`. That is Core's own input and the Mac's own call (VX-435, her ruling "A fresh ⌘J mint
+  when no Journal lives: the wing you're standing in"): a LIVING Journal's entry is still born beside the Journal,
+  wherever it is (scope call 4 holds — pinned: from Home, Today opens Work's entry when the Journal is in Work); only
+  when NO Journal lives do the entry and the fresh Journal land where she stands (before, on the phone, always Home).
+  Not PROVISIONAL — Core's contract and her VX-435 words decide it; named here because the brief said "Today's entry
+  stays Core's".
+- Untouched mints: `newPostInReading` (Core mints in the book's wing), the snippet pool (`createPool` — shared), lens
+  mints (per note), the starter Journal's first-run seed (a virgin store, Home), the DEBUG seeders.
+
+#### VM-60 — the tag manager per wing (W-229, audit F1 + F2)
+
+`MobileTagsModel` lists the current wing's vocabulary (`allTags(_:wingID:)`) and, in the SAME read, the wing's name
+(`Queries.wingName` — the Mac `TagsViewModel.start`'s `Listing`), re-read per wing through the follow; the header
+says the Mac's words, "Tags — in ‹wing›" (R-828-2), through `WingWords.tagsTitle` — HOISTED from the Mac's
+`TagManagerCopy.title`, which now forwards (byte-identical, pinned by `VM56MacWingScopePinTests` and the existing
+`SettingsTagsWingFollowTests`). A root tag is born in the current wing, a child in its parent's (the op's rule); the
+"+ new tag" typed path resolves against the current wing's tags only and mints its missing root there
+(`MobileTagsModel.createMissing` gains a defaulted `wingID:`, forwarding to `TypedTagPath.createMissing`).
+
+#### VM-59 — the wing-blind pickers (W-035; a Bug, pin before fix)
+
+**Mechanisms, traced in code (inputs → wrong state):**
+1. *Note tags.* `MobileNoteTagsModel.refresh` read `Queries.allTags(db)` — every wing. The sheet offers
+   `suggestions(allTags…)`; a tap calls `applyTypedPath(path)` → `TypedTagPath.apply`, which resolves the PATH in the
+   note's effective wing. A path that exists only in another wing has no live match there, so `createMissing` mints
+   a root of that path in the note's wing and applies it: a Work note offered Home's "homeonly" gains a NEW Work tag
+   "homeonly" — a twin she never asked for.
+2. *Add to book.* `MobileMembershipModel.refresh` listed `Queries.readings(db)` — every wing's books and gatherings,
+   same-name twins indistinguishable. Picking another wing's book → `addPostToReading` refuses
+   `crossWingMembership` ("move the note here first" — a road the phone lacks).
+3. *The gathering picker.* `MobileCreateBookModel.loadTags` listed every wing's tags; the v1 spec's PATHS normalize in
+   the reading's own wing (`Operations.normalizedRuleSpec`), so a picked path the book's wing lacks becomes a dead
+   rule term — a gathering that cannot collect on it.
+
+**Pins** (`VariorumMobileTests/MobileWingBlindPickerTests.swift`, type `MobileWingBlindPickerTests`, commit
+a690c8262 — the red-on-old tree): `aNotesTagSuggestionsReadTheNotesOwnWing` (the app stands in Home, the note is
+Work's: the suggestions are Work's alone, and tapping every one leaves Work's vocabulary at `["trip"]` — red on old:
+the tap minted "homeonly" in Work); `theAddToBookSheetListsTheNotesOwnWingsBooks` (the app in Home, the note Work's:
+the offers are Work's "Essays" and Work's gathering alone); `theGatheringPickerWritesTermsFromTheBooksOwnWing` (the
+sheet opened in Work offers Work's tags alone, and the gathering made from them names `[workTrip]` and no dead term).
+The two note pins stand the app in a DIFFERENT wing from the note, so a fix that read the current wing stays red.
+**Red-on-old: PENDING (stage window). Green: PENDING.**
+
+**Fix** (171f514ad): the note's sheets read `Queries.effectiveWing(db, ofPost:)` inside their one read and list that
+wing's tags / books and gatherings; the gathering picker reads the sheet's wing snapshot (the wing it mints in).
+`Shared/TypedTagPath.swift` needed no change (it already resolves in the note's wing).
+
+#### Tests (all written; every run PENDING the stage window)
+
+Phone (`VariorumMobileTests`), new: `MobileWingStandTests` 6 · `MobileWingListingTests` 8 · `MobileWingMintTests` 4 ·
+`MobileWingTagManagerTests` 2 (file `MobileWingsTests.swift`, one two-wing fixture `TwoWingWorld`: a note "Field
+notes", a book "Essays" and a tag "trip" in EACH wing, plus a Home-only tag) · `MobileWingBlindPickerTests` 3. Mac
+(`VariorumTests`), new: `VM56MacWingScopePinTests` 2. Regression leg (existing suites over every model and view this
+batch touched): PENDING — listed in the READY report.
+
+#### PROVISIONAL calls (for QUESTIONS at the merge moment — the orchestrator carries them)
+
+- **P-55-2 — how a root says its wing before wave 2's band.** Her SW-1: "the wing's name is the title on every
+  root"; today's roots have one path line and no title row. Options: (a) the wing's name LEADS the path line — "Home ·
+  Library" / "~/home/library" — today's line and tokens, the page word kept until wave 2's bar carries it; (b) the
+  wing's name REPLACES the page word ("Home", "Home · 6 books") — the mockup's end shape, the page named by the tab bar
+  alone; (c) a title row of its own above the path line — a layout change, VM-47's and wave 2's. **Built: (a)** — it
+  says which wing on every root without restyling or losing the page's name, and wave 2's band replaces the line
+  whole.
+
+#### Observations for the orchestrator (not fixed — outside this batch's unit)
+
+1. **The Bookcase scopes by the literal `wing_id = ?`** (`Queries.bookcaseReadings` and its three count statements,
+   `Sources/VariorumCore/Queries/ShelfQueries.swift`), not `wingScope`'s dangling rule — so a book whose wing died
+   (the sync race the rule exists for) shows on NO Bookcase, Mac or phone, while its notes read as Home's in the
+   Library. Core, both platforms; a ticket candidate (Books area).
+2. **A TEST bootstrap that reaches ready attaches `.standard`** — on the Mac before this batch, on both platforms
+   now — so a protection-road suite reads the test host's (the Debug app's) `wing.current`, and `revalidate` writes
+   `""` there when the remembered wing is not in the test's store (WingState's own header says a pin must never
+   touch the host's defaults). Harmless on the phone today (a phone never switched, so nothing is written); a ticket
+   candidate for wave 2 (Tests & tooling).
+3. **Copy that assumes Home** — the empty Shelf's "No books yet — Today's Entry starts your journal." and the empty
+   Library's sign-in line read oddly in an empty non-Home wing; unreachable until wave 2's switcher. Wave 2's (VM-72).
+
+#### Canon deltas believed owed (the orchestrator applies at the merge)
+
+- `notes/MobileSoul.md` §6 — PL-45's wing row: the phone now stands in a wing (memory, revalidation, scoped listings,
+  mints, per-wing pickers and tag manager); the switcher, follow and management remain (wave 2).
+- `notes/SurfaceContracts.md` — none (the phone's surfaces enter as each umbrella ships them; the catch-up plan's own
+  line).
+- AppSpec — none.
 
 ## Ladder
 
