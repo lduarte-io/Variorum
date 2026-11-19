@@ -412,8 +412,14 @@ extension DynamicTypeSize {
     }
 }
 
+#endif
+
+// MARK: - The SwiftUI form (both platforms compile it; only the phone renders it)
+
 /// **The SwiftUI form**: the role's font at the environment's text size,
-/// held at xxxLarge for chrome, with the role's line pitch.
+/// held at xxxLarge for chrome, with the role's line pitch. The shared pages'
+/// phone arms (`SharedPageStyle`) read it too, so the Mac compiles it; the
+/// Mac never renders a phone arm, and its arm resolves at the table size.
 struct PhoneTypeModifier: ViewModifier {
     let role: PhoneTypeRole
     let voice: ThemeVoice
@@ -422,18 +428,29 @@ struct PhoneTypeModifier: ViewModifier {
     var shrinksToFloor = false
     @Environment(\.dynamicTypeSize) private var typeSize
 
+    /// The role at this environment's text size: font, line spacing, size.
+    private var face: (font: Font, lineSpacing: CGFloat, pointSize: CGFloat) {
+        #if os(iOS)
+        let resolved = PhoneType.resolved(role, voice: voice, at: typeSize.phoneCategory)
+        return (resolved.font, resolved.lineSpacing, resolved.pointSize)
+        #else
+        let spec = PhoneType.spec(role, voice: voice)
+        return (PhoneType.font(spec, voice: voice, pointSize: spec.size), 0, spec.size)
+        #endif
+    }
+
     @ViewBuilder
     func body(content: Content) -> some View {
-        let resolved = PhoneType.resolved(role, voice: voice, at: typeSize.phoneCategory)
+        let face = face
         if shrinksToFloor {
             content
-                .font(resolved.font)
-                .lineSpacing(resolved.lineSpacing)
-                .minimumScaleFactor(min(1, PhoneType.floorSize / resolved.pointSize))
+                .font(face.font)
+                .lineSpacing(face.lineSpacing)
+                .minimumScaleFactor(min(1, PhoneType.floorSize / face.pointSize))
         } else {
             content
-                .font(resolved.font)
-                .lineSpacing(resolved.lineSpacing)
+                .font(face.font)
+                .lineSpacing(face.lineSpacing)
         }
     }
 }
@@ -451,33 +468,50 @@ extension View {
         modifier(PhoneTypeModifier(
             role: role, voice: tokens.voice, shrinksToFloor: shrinkingToFloor))
     }
+}
 
+#if os(iOS)
+extension View {
     /// A book's Read page face (voice-independent), scaling with every text
     /// size, with the page's line pitch on the body.
     func phoneReading(_ face: PhoneType.ReadingFace) -> some View {
-        modifier(PhoneReadingModifier(face: face))
+        modifier(PhoneReadingModifier(
+            size: face.size, weight: face.weight, anchor: face.anchor,
+            pitch: face == .body ? PhoneType.readingBodyLineHeight : nil))
+    }
+
+    /// A Read page paragraph at its own size (a heading is the body scaled),
+    /// following the body's text size; `pitch` is the line pitch at the
+    /// default size, nil for the face's own line.
+    func phoneReading(
+        size: CGFloat, weight: PhoneTypeSpec.Weight, pitch: CGFloat?
+    ) -> some View {
+        modifier(PhoneReadingModifier(size: size, weight: weight, anchor: .body, pitch: pitch))
     }
 }
 
 struct PhoneReadingModifier: ViewModifier {
-    let face: PhoneType.ReadingFace
+    let size: CGFloat
+    let weight: PhoneTypeSpec.Weight
+    let anchor: PhoneTypeSpec.Anchor
+    /// The line pitch at the default size, or nil for the font's own line.
+    let pitch: CGFloat?
     @Environment(\.dynamicTypeSize) private var typeSize
 
     func body(content: Content) -> some View {
-        let metrics = UIFontMetrics(forTextStyle: face.anchor.textStyle)
-        let size = max(PhoneType.floorSize, metrics.scaledValue(
-            for: face.size,
+        let metrics = UIFontMetrics(forTextStyle: anchor.textStyle)
+        let scaled = max(PhoneType.floorSize, metrics.scaledValue(
+            for: size,
             compatibleWith: UITraitCollection(preferredContentSizeCategory: typeSize.phoneCategory)))
-        let font = Font.system(size: size, weight: face.weight.swiftUI, design: .serif)
+        let font = Font.system(size: scaled, weight: weight.swiftUI, design: .serif)
+        let system = UIFont.systemFont(ofSize: scaled, weight: weight.uiKit)
         let natural = UIFont(
-            descriptor: UIFont.systemFont(ofSize: size, weight: face.weight.uiKit)
-                .fontDescriptor.withDesign(.serif)
-                ?? UIFont.systemFont(ofSize: size).fontDescriptor,
-            size: size).lineHeight
-        let pitch = face == .body ? PhoneType.readingBodyLineHeight * size / face.size : natural
+            descriptor: system.fontDescriptor.withDesign(.serif) ?? system.fontDescriptor,
+            size: scaled).lineHeight
+        let line = pitch.map { $0 * scaled / size } ?? natural
         content
             .font(font)
-            .lineSpacing(max(0, (pitch - natural).rounded()))
+            .lineSpacing(max(0, (line - natural).rounded()))
     }
 }
 #endif

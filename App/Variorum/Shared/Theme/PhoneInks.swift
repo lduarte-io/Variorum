@@ -12,26 +12,32 @@
 //  the Classic rooms, in both voices. In dark the room is black and only
 //  `faint` needs lifting; the same rule finds that by itself.
 //
-//  The rule is the palette layer's accent correction applied to the two
-//  small inks: the same HSL hue and saturation, the lightness stepped away
-//  from the grounds by 0.005 until the floor clears, bounded, deterministic.
-//  It reproduces the sheet's Study light inks exactly (#6A6359, #8B7F6A —
-//  `PhoneInkTests` pins both). The sheet's dark faint (#736C5D) was
-//  measured against the sea-glass family only and falls to 2.91:1 on teal &
-//  rust's dark card; the every-palette floor lands one step lighter
-//  (#766F5F) — recorded in the run's §5.
+//  THE RULE (`derive`) is the palette layer's accent correction applied to
+//  the two small inks: the same HSL hue and saturation, the lightness
+//  stepped away from the grounds by 0.005 until the floor clears, bounded,
+//  deterministic. It reproduces the sheet's Study light inks exactly
+//  (#6A6359, #8B7F6A). The sheet's dark faint (#736C5D) was measured
+//  against the sea-glass family only and falls to 2.91:1 on teal & rust's
+//  dark card; the every-palette floor lands one step lighter (#766F5F) —
+//  recorded in the run's §5.
 //
-//  Values are 24-bit sRGB, so the whole rule is arithmetic a unit pin can
-//  measure; the colours are built from them in one place below.
+//  THE VALUES THE PHONE WEARS (`value`) are the rule's output, written down:
+//  the UIKit face builds its colours off the main actor and the palette
+//  table is main-actor state, so the shipped eight are constants and the
+//  rule is their oracle — `MobilePhoneInkTests` recomputes all eight and
+//  fails if a palette or a voice change would move one, so an ink never
+//  shifts silently.
 //
 
 import SwiftUI
 import VariorumCore
 #if os(iOS)
 import UIKit
+#else
+import AppKit
 #endif
 
-enum PhoneInks {
+nonisolated enum PhoneInks {
     enum Ink: CaseIterable, Sendable {
         /// Meta lines, paths, explainers, previews — words she reads.
         case muted
@@ -48,10 +54,25 @@ enum PhoneInks {
         }
     }
 
+    /// **The phone's ink for a voice in one appearance** — the rule's output
+    /// (see the header; `MobilePhoneInkTests` holds the two equal).
+    static func value(_ ink: Ink, voice: ThemeVoice, dark: Bool) -> UInt32 {
+        switch (voice, dark, ink) {
+        case (.terminal, false, .muted): 0x61655F
+        case (.terminal, false, .faint): 0x7E8376
+        case (.terminal, true, .muted): 0x8B9088
+        case (.terminal, true, .faint): 0x6B7168
+        case (.study, false, .muted): 0x6A6359
+        case (.study, false, .faint): 0x8B7F6A
+        case (.study, true, .muted): 0x948C7C
+        case (.study, true, .faint): 0x766F5F
+        }
+    }
+
     /// One voice's own values in one appearance — the source hue of each ink
     /// and the voice's Classic grounds. **A copy of `VoiceTokens`' values,
-    /// held as numbers so the rule is arithmetic;** `PhoneInkTests` resolves
-    /// the token layer's colours and fails if a copy drifts.
+    /// held as numbers so the rule is arithmetic;** `MobilePhoneInkTests`
+    /// resolves the token layer's colours and fails if a copy drifts.
     struct Source: Equatable, Sendable {
         let muted: UInt32
         let faint: UInt32
@@ -72,12 +93,17 @@ enum PhoneInks {
             Source(muted: 0x948C7C, faint: 0x6B6456, room: 0x000000, surface: 0x14120F, card: 0x1C1915)
         }
     }
+}
 
+// MARK: - The rule (the shipped values' oracle; reads the palette table)
+
+extension PhoneInks {
     /// **Every ground the app ships, for one voice in one appearance:** the
     /// Classic rooms of both voices (the sheet's "the two Classic rooms"),
     /// the voice's own paper and card, and every shipped palette's room,
     /// paper and card (a palette replaces paper and card in dark only — in
     /// light the voice keeps its own, as `VoiceTokens.applying` does).
+    @MainActor
     static func grounds(_ voice: ThemeVoice, dark: Bool) -> [UInt32] {
         let own = source(voice, dark: dark)
         var grounds = ThemeVoice.allCases.map { source($0, dark: dark).room }
@@ -94,6 +120,7 @@ enum PhoneInks {
     /// light, lighter in dark), hue and saturation held. An ink that already
     /// clears is returned unchanged — which is why dark `muted` stays the
     /// voice's.
+    @MainActor
     static func derive(_ ink: Ink, voice: ThemeVoice, dark: Bool) -> UInt32 {
         let own = source(voice, dark: dark)
         let start = ink == .muted ? own.muted : own.faint
@@ -114,36 +141,16 @@ enum PhoneInks {
         }
         return candidate
     }
-
-    /// The eight values, computed once.
-    private static let table: [String: UInt32] = {
-        var table: [String: UInt32] = [:]
-        for voice in ThemeVoice.allCases {
-            for dark in [false, true] {
-                for ink in Ink.allCases {
-                    table[key(ink, voice, dark)] = derive(ink, voice: voice, dark: dark)
-                }
-            }
-        }
-        return table
-    }()
-
-    private static func key(_ ink: Ink, _ voice: ThemeVoice, _ dark: Bool) -> String {
-        "\(ink)·\(voice.rawValue)·\(dark)"
-    }
-
-    /// The phone's ink for a voice in one appearance.
-    static func value(_ ink: Ink, voice: ThemeVoice, dark: Bool) -> UInt32 {
-        table[key(ink, voice, dark)] ?? derive(ink, voice: voice, dark: dark)
-    }
 }
+
+// MARK: - The colours
 
 #if os(iOS)
 extension PhoneInks {
     /// The ink as a DYNAMIC colour: light and dark resolve per the trait, as
     /// every colour of the phone's UIKit face does. Cached per voice, so a
     /// read hands back the same object every time.
-    static func uiColor(_ ink: Ink, voice: ThemeVoice) -> UIColor {
+    nonisolated static func uiColor(_ ink: Ink, voice: ThemeVoice) -> UIColor {
         switch (ink, voice) {
         case (.muted, .terminal): terminalMuted
         case (.faint, .terminal): terminalFaint
@@ -152,29 +159,56 @@ extension PhoneInks {
         }
     }
 
-    private static func dynamic(_ ink: Ink, _ voice: ThemeVoice) -> UIColor {
-        let light = UIColor(Color(hex: value(ink, voice: voice, dark: false)))
-        let dark = UIColor(Color(hex: value(ink, voice: voice, dark: true)))
+    nonisolated private static func dynamic(_ ink: Ink, _ voice: ThemeVoice) -> UIColor {
+        let light = uiColor(hex: value(ink, voice: voice, dark: false))
+        let dark = uiColor(hex: value(ink, voice: voice, dark: true))
         return UIColor { traits in traits.userInterfaceStyle == .dark ? dark : light }
     }
 
-    private static let terminalMuted = dynamic(.muted, .terminal)
-    private static let terminalFaint = dynamic(.faint, .terminal)
-    private static let studyMuted = dynamic(.muted, .study)
-    private static let studyFaint = dynamic(.faint, .study)
+    /// sRGB from 24 bits — `Color(hex:)`'s arithmetic, off the main actor.
+    nonisolated static func uiColor(hex: UInt32) -> UIColor {
+        UIColor(
+            red: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255,
+            blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
+    }
+
+    nonisolated private static let terminalMuted = dynamic(.muted, .terminal)
+    nonisolated private static let terminalFaint = dynamic(.faint, .terminal)
+    nonisolated private static let studyMuted = dynamic(.muted, .study)
+    nonisolated private static let studyFaint = dynamic(.faint, .study)
 }
+#endif
 
 /// **The phone layer's colours, reached from the tokens a view already
 /// holds** — `tokens.phone.muted` where the Mac reads `tokens.muted`. The
-/// SwiftUI colours are the dynamic UIKit ones, so they resolve with the
-/// environment's appearance exactly as the tokens the shell resolved do.
-struct PhoneLayer {
+/// SwiftUI colours are DYNAMIC, so they resolve with the environment's
+/// appearance exactly as the tokens the shell resolved do. The shared pages'
+/// phone arms read them, so the Mac compiles this too (a dynamic `NSColor`
+/// there; no Mac surface renders a phone arm).
+nonisolated struct PhoneLayer: Sendable {
     let muted: Color
     let faint: Color
 
     fileprivate init(voice: ThemeVoice) {
+        #if os(iOS)
         muted = Color(uiColor: PhoneInks.uiColor(.muted, voice: voice))
         faint = Color(uiColor: PhoneInks.uiColor(.faint, voice: voice))
+        #else
+        func srgb(_ hex: UInt32) -> NSColor {
+            NSColor(
+                srgbRed: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255,
+                blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
+        }
+        func dynamic(_ ink: PhoneInks.Ink) -> Color {
+            let light = srgb(PhoneInks.value(ink, voice: voice, dark: false))
+            let dark = srgb(PhoneInks.value(ink, voice: voice, dark: true))
+            return Color(nsColor: NSColor(name: nil) { appearance in
+                appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? dark : light
+            })
+        }
+        muted = dynamic(.muted)
+        faint = dynamic(.faint)
+        #endif
     }
 
     fileprivate static let terminal = PhoneLayer(voice: .terminal)
@@ -188,4 +222,3 @@ extension VoiceTokens {
         voice == .terminal ? .terminal : .study
     }
 }
-#endif

@@ -242,17 +242,26 @@ struct MobilePhoneInkTests {
     /// **The rule IS the sheet's:** it reproduces the sheet's Study light
     /// inks exactly (#6A6359 / #8B7F6A, binding on rose & moss's room).
     @Test func theRuleReproducesTheSheetsStudyInks() {
-        #expect(PhoneInks.value(.muted, voice: .study, dark: false) == 0x6A6359)
-        #expect(PhoneInks.value(.faint, voice: .study, dark: false) == 0x8B7F6A)
+        #expect(PhoneInks.derive(.muted, voice: .study, dark: false) == 0x6A6359)
+        #expect(PhoneInks.derive(.faint, voice: .study, dark: false) == 0x8B7F6A)
     }
 
-    /// The values the rule settles on, on the record (a change to a palette
-    /// or a voice moves these on purpose, and this is where it shows).
-    @Test func theShippedInksAreTheRecordedOnes() {
-        #expect(PhoneInks.value(.muted, voice: .terminal, dark: false) == 0x61655F)
-        #expect(PhoneInks.value(.faint, voice: .terminal, dark: false) == 0x7E8376)
-        #expect(PhoneInks.value(.faint, voice: .terminal, dark: true) == 0x6B7168)
-        #expect(PhoneInks.value(.faint, voice: .study, dark: true) == 0x766F5F)
+    /// **The shipped eight ARE the rule's output.** The phone wears
+    /// constants (its UIKit face is built off the main actor); this pin
+    /// recomputes every one over today's palettes and voices, so a palette
+    /// or voice change that would move an ink turns red here instead of
+    /// shifting it silently.
+    @Test func theShippedInksAreTheRulesOutput() {
+        for voice in ThemeVoice.allCases {
+            for dark in [false, true] {
+                for ink in PhoneInks.Ink.allCases {
+                    let rule = PhoneInks.derive(ink, voice: voice, dark: dark)
+                    let shipped = PhoneInks.value(ink, voice: voice, dark: dark)
+                    #expect(rule == shipped,
+                            "\(ink) \(voice) dark=\(dark): the rule says \(String(format: "#%06X", rule)), the phone ships \(String(format: "#%06X", shipped))")
+                }
+            }
+        }
     }
 
     /// Dark needs only faint lifted: dark `muted` stays the voice's own in
