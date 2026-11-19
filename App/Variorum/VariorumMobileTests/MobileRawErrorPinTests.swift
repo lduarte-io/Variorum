@@ -384,9 +384,9 @@ struct MobileErrorLogPrivacyPinTests {
             }
         }
         #expect(walked > 150, "the walk must actually reach the phone's sources (walked \(walked))")
+        let report = offenders.joined(separator: "\n")
         #expect(offenders.isEmpty,
-                "an error's dump logged in public — \(offenders.count) found:\n"
-                    + offenders.joined(separator: "\n"))
+                "an error's dump logged in public — \(offenders.count) found:\n\(report)")
         let misfits = Self.exempt.indices.filter { exemptHits[$0] != 1 }
             .map { "\(Self.exempt[$0].file): \"\(Self.exempt[$0].line)\" matched \(exemptHits[$0])" }
         #expect(misfits.isEmpty, "every exemption covers exactly one line — \(misfits)")
