@@ -80,7 +80,10 @@
 //  later batch fixes is RECORDED and never asserted**, with a comment naming
 //  the batch that will tighten it — so batches 4–7 can each turn one into an
 //  assertion that is red on today's code. No test here is red on today's
-//  code by design. The only other assertions keep the probes honest (a dead
+//  code by design. (Since then: batch 6 — VM-69/VM-70 — asserts the open's
+//  reads per open (ONE), its editor builds per open (ONE, a guard) and the
+//  registry's growth per open-and-close (ZERO), each where its series is
+//  reported; batches 4 and 5 say theirs the same way.) The only other assertions keep the probes honest (a dead
 //  probe must not pass silently: every series must have gathered its runs).
 //  **No new duration budget is set**: a budget is written with its measured
 //  basis, and the basis is the BEFORE numbers this suite produces (the
@@ -382,6 +385,55 @@ private final class Mounted<Content: View> {
     }
 }
 
+/// **A screen BUILT inside the gate's body** (VM-70, the VM-64 run's batch 6)
+/// — the shape the app holds a note screen in: the shell's NavigationStack
+/// destination builds the screen while it shows and lets it go when it
+/// leaves, so nothing outside the view tree keeps the screen, or the editor
+/// in its `@State`, alive past its leaving. `Mounted` above holds the BUILT
+/// value (a stored `Content`), and a `State(initialValue:)` keeps its initial
+/// value inside that value — so a `Mounted` screen's editor lives as long as
+/// the test holds the wrapper. Right for reading a mounted screen; wrong for
+/// asking whether a CLOSED note let its editor, and its coordinator, go.
+private struct BuiltGated<Content: View>: View {
+    let gate: MountGate
+    let build: @MainActor () -> Content
+
+    var body: some View {
+        if gate.mounted {
+            build()
+        } else {
+            Color.clear
+        }
+    }
+}
+
+@MainActor
+private final class MountedBuilt<Content: View> {
+    let gate = MountGate()
+    let surface: HostedSurface<BuiltGated<Content>>
+
+    init(_ build: @escaping @MainActor () -> Content) {
+        surface = HostedSurface(BuiltGated(gate: gate, build: build))
+    }
+
+    /// `Mounted.unmount`'s road exactly: remove the screen the app's way,
+    /// wait for its leaving to finish, take the window down.
+    func unmount(leavings: Int, sourceLocation: SourceLocation = #_sourceLocation) async {
+        let before = Probe.snap()
+        gate.mounted = false
+        if leavings > 0 {
+            await waitUntil(
+                "\(leavings) note leaving(s) to finish", timeout: .seconds(30),
+                sourceLocation: sourceLocation
+            ) {
+                Probe.newSamples(.noteLeave, since: before).count >= leavings
+            }
+        }
+        await idle(.milliseconds(100))
+        surface.tearDown()
+    }
+}
+
 /// An interior offset inside the block at `blockIndex` — one character before
 /// the block's end, so a typed key stays in the block (no crystallization).
 @MainActor
@@ -414,9 +466,10 @@ struct MobileHerPathsPerfTests {
     ///   the main thread. Batch 6's second-read fix shows HERE, after paint.
     /// · `note-reads-per-open-*` — the layer's window (`noteReadsPerOpen`):
     ///   whole-note projection reads from the arrival to the first delivery.
-    ///   **RECORDED, not asserted: audit F 2C's two reads. Batch 6 (VM-69)
-    ///   tightens it to one** — its pin turns this into an assertion red on
-    ///   today's code.
+    ///   **ASSERTED ONE (batch 6, VM-69)** — audit F 2C's two reads (the
+    ///   BEFORE table: 2 in every run) became one: the arrival's load IS the
+    ///   live observation's first value (`MobileEditorViewModel.loadLive`).
+    ///   Red on the pre-fix tree (2).
     ///
     /// One unrecorded warm-up open per note first (the process's first use of
     /// TextKit, the fonts and the screen's types is a once-per-launch cost
@@ -454,9 +507,10 @@ struct MobileHerPathsPerfTests {
                 }
                 VM64Perf.report("note-open-to-screen-\(label)", toScreen, .ms, expecting: Self.runs)
                 VM64Perf.report("note-open-to-live-\(label)", toLive, .ms, expecting: Self.runs)
-                // RECORDED (batch 6, VM-69: 2 → 1). Only the probe is held.
+                // ASSERTED (batch 6, VM-69: 2 → 1).
                 VM64Perf.report("note-reads-per-open-\(label)", readsPerOpen, .count, expecting: Self.runs)
-                #expect(readsPerOpen.allSatisfy { $0 >= 1 }, "an open reads its note at least once")
+                #expect(readsPerOpen.allSatisfy { $0 == 1 },
+                        "VM-69 (\(label)): an open reads its note ONCE — read \(readsPerOpen)")
             }
         }
     }
@@ -474,11 +528,12 @@ struct MobileHerPathsPerfTests {
     /// · `shell-box-open-to-live` — THIS TEST'S clock: Open → the first live
     ///   delivery ingested.
     /// · `shell-box-editor-builds-per-open` — the layer's counters: editor
-    ///   view models built per note arrival across the push. **RECORDED:
-    ///   audit F 2D's twin question, settled by this number; batch 6 (VM-69
-    ///   / VM-70) fixes it only if it reads above one.**
+    ///   view models built per note arrival across the push. **ASSERTED ONE
+    ///   (batch 6) — a GUARD:** audit F 2D's twin question, settled by this
+    ///   number (the BEFORE table: 1 in every run — no twin is built on this
+    ///   road), held so a twin cannot come back unseen.
     /// · `shell-box-note-reads-per-open` — as test 1's window, via the shell.
-    ///   **RECORDED (batch 6).**
+    ///   **ASSERTED ONE (batch 6, VM-69: 2 → 1).**
     ///
     /// Each run mounts a fresh shell (the push's pop is not drivable in
     /// process; a fresh shell is the honest reset). A warm-up run first.
@@ -529,11 +584,14 @@ struct MobileHerPathsPerfTests {
             VM64Perf.report("shell-box-open-to-note", openToNote, .ms, expecting: Self.runs)
             VM64Perf.report("shell-box-file", file, .ms, expecting: Self.runs)
             VM64Perf.report("shell-box-open-to-live", openToLive, .ms, expecting: Self.runs)
-            // RECORDED (batch 6 — the twin count; fixed only if above one).
+            // ASSERTED (batch 6 — the twin count: one, a guard).
             VM64Perf.report("shell-box-editor-builds-per-open", builds, .count, expecting: Self.runs)
-            // RECORDED (batch 6, VM-69: 2 → 1).
+            // ASSERTED (batch 6, VM-69: 2 → 1).
             VM64Perf.report("shell-box-note-reads-per-open", reads, .count, expecting: Self.runs)
-            #expect(builds.allSatisfy { $0 >= 1 }, "an arrival had an editor built for it")
+            #expect(builds.allSatisfy { $0 == 1 },
+                    "one editor built per arrival — no twin graph (audit F 2D): \(builds)")
+            #expect(reads.allSatisfy { $0 == 1 },
+                    "VM-69: the box's Open reads the note ONCE — read \(reads)")
         }
     }
 
@@ -546,8 +604,10 @@ struct MobileHerPathsPerfTests {
     ///
     /// · `shell-library-open-to-screen-*` — the layer's span: the screen
     ///   built by the push → its text on screen.
-    /// · `shell-library-editor-builds-per-open-*` — **RECORDED (batch 6).**
-    /// · `shell-library-note-reads-per-open-*` — **RECORDED (batch 6).**
+    /// · `shell-library-editor-builds-per-open-*` — **ASSERTED ONE (batch 6,
+    ///   a guard — no twin).**
+    /// · `shell-library-note-reads-per-open-*` — **ASSERTED ONE (batch 6,
+    ///   VM-69: 2 → 1).**
     @Test func aLibraryRowOpensItsNoteThroughTheShellsPush() async throws {
         let big = try PerfWorlds.big.get()
         let world = try DiskWorld.copy(of: big, "library-open")
@@ -604,12 +664,16 @@ struct MobileHerPathsPerfTests {
                     await shell.unmount(leavings: 1, report: false)
                 }
                 VM64Perf.report("shell-library-open-to-screen-\(label)", toScreen, .ms, expecting: Self.runs)
-                // RECORDED (batch 6).
+                // ASSERTED (batch 6 — the twin count: one, a guard).
                 VM64Perf.report(
                     "shell-library-editor-builds-per-open-\(label)", builds, .count, expecting: Self.runs)
-                // RECORDED (batch 6, VM-69: 2 → 1).
+                // ASSERTED (batch 6, VM-69: 2 → 1).
                 VM64Perf.report(
                     "shell-library-note-reads-per-open-\(label)", reads, .count, expecting: Self.runs)
+                #expect(builds.allSatisfy { $0 == 1 },
+                        "\(label): one editor built per arrival — no twin graph (audit F 2D): \(builds)")
+                #expect(reads.allSatisfy { $0 == 1 },
+                        "VM-69 (\(label)): a Library row's open reads the note ONCE — read \(reads)")
             }
         }
     }
@@ -1094,14 +1158,20 @@ struct MobileHerPathsPerfTests {
 
     // MARK: 7 · The autosave registry across opens and closes
 
-    /// **Each note opened and closed leaves its autosave coordinator behind**
-    /// (audit F §4, §12.4 — the phone never releases an editor's). The
-    /// session's registry size (`openAutosaveCount`) before and after each
-    /// open-and-close of a DIFFERENT note, through the real screen.
+    /// **A note opened and closed gives its autosave coordinator back**
+    /// (audit F §4, §12.4 — the phone never released an editor's, so the
+    /// registry grew by one per note opened). The session's registry size
+    /// (`openAutosaveCount`) before and after each open-and-close of a
+    /// DIFFERENT note, through the real screen, built and let go the way the
+    /// shell's destination builds and lets it go (`MountedBuilt` — see its
+    /// note on why `Mounted` would keep the editor alive here).
     ///
-    /// `autosave-registry-growth-per-open-close`: **RECORDED — batch 6
-    /// (VM-70) releases the coordinator when its note closes, and its pin
-    /// turns this into "no growth", red on today's code.**
+    /// `autosave-registry-growth-per-open-close`: **ASSERTED ZERO (batch 6,
+    /// VM-70)** — the BEFORE table read 1 in every run. The editor releases
+    /// its one acquisition at its end of life, which the leaving task holds
+    /// past the flush and the leaving savepoint. Red on the pre-fix tree (1).
+    /// The wait for the release is bounded and not itself a failure: the
+    /// count after it is the assertion.
     @Test func theAutosaveRegistryAcrossOpensAndCloses() async throws {
         let world = try DiskWorld.copy(of: try PerfWorlds.small.get(), "registry")
         defer { world.remove() }
@@ -1115,16 +1185,26 @@ struct MobileHerPathsPerfTests {
                 let router = MobileShellRouter()
                 let sizeBefore = session.openAutosaveCount
                 let opened = Probe.snap()
-                let mounted = Mounted(MobileWriteScreen(
-                    session: session, postID: postID, router: router, tab: .library))
-                await waitUntil("the first live delivery") {
-                    Probe.delta(.noteProjectionDelivery, since: opened) >= 1
+                do {
+                    let mounted = MountedBuilt {
+                        MobileWriteScreen(session: session, postID: postID, router: router, tab: .library)
+                    }
+                    await waitUntil("the first live delivery") {
+                        Probe.delta(.noteProjectionDelivery, since: opened) >= 1
+                    }
+                    #expect(session.openAutosaveCount == sizeBefore + 1, "the open note holds its coordinator")
+                    await mounted.unmount(leavings: 1)
                 }
-                await mounted.unmount(leavings: 1)
+                await waitUntil(
+                    "the closed note's coordinator to be given back", timeout: .seconds(5),
+                    reportTimeout: false
+                ) { session.openAutosaveCount == sizeBefore }
                 growth.append(Double(session.openAutosaveCount - sizeBefore))
             }
-            // RECORDED (batch 6, VM-70).
+            // ASSERTED (batch 6, VM-70: 1 → 0).
             VM64Perf.report("autosave-registry-growth-per-open-close", growth, .count, expecting: Self.runs)
+            #expect(growth.allSatisfy { $0 == 0 },
+                    "VM-70: a closed note gives its coordinator back — growth per open-and-close \(growth)")
             print("PERF[sim] autosave registry — \(start) → \(session.openAutosaveCount) "
                 + "after \(Self.runs) notes opened and closed")
         }
