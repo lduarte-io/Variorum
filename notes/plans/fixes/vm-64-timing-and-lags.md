@@ -3975,3 +3975,180 @@ and the drafts' bundle.
    is a value, never a removal); and the union's books withheld while the notes answer another wing.
 4. **The uncompiled state** — no build ran this turn (QUIET); the second turn's builds are the first compile of these
    lines.
+
+### Ladder round 2 — fix pass, second turn (implementer closeout)
+
+**Not done yet (first, by the record's rule):** part B — the pass's FIRST compile (phone and Mac `build-for-testing`
+into `App/Variorum/DerivedData/vm64-gate2/`), the whole Core package `swift test` once on the final tree, and the
+red-on-old phone build into `vm64-gate2-red/` — waits for the orchestrator's word that the QUIET window (from 15:13)
+has ended, so EVERY app-target line of this pass, the first turn's and this turn's, is still UNCOMPILED as this part is
+written, and no pin of the pass has run. No hosted run (the stage's). No line in `Sources/VariorumCore/Sync/`, `Server/`,
+custody/keychain code or `VariorumMobile/Features/Protection/`; no schema change; `MobileEditorViewModel.swift` untouched
+by the whole pass (`storageDidEdit`'s routing, `fallbackVerdict`, `EditorEditRouting` not opened); VM-55's `MobileLine.swift`
+gains exactly ONE line and no other VM-55 file is touched; no new user-facing copy; no shared ledger edited.
+
+**Base:** `31630a151` (the reviewer's final calls). **Commits:** `28943ac9d` (live status) · `686a07d13` (finding 1's Put
+back leg, arm (A), with its pin and the witness) · `2c8911ac0` (O-1's company-safe guard) · `167483f4d` (the timing suite's
+header, comment only) · `1dd921f7e` (the handoff and the closeout drafts) · this closeout. **Machinery honesty:** this is a
+FRESH session; the first turn's implementer reached its context limit after its closeout, with nothing uncommitted (the
+tree clean and pushed at `31630a151`) — nothing was adopted from a dead tree.
+
+#### What changed, per final call
+
+| Final call | What landed |
+|---|---|
+| 1 · the Put back leg — arm (A) (Part of VM-68) | **(i)** `MobileLine.putBack`, inside its `do`, the line after `try await session.runner.run(body)`: `NotificationCenter.default.post(name: .variorumPutBackLanded, object: session)` (a trailing comment on the same line) — the success path only; a refused Put back reaches the `catch` and posts nothing; `unarchive` is a different function and posts nothing. The name is declared with its listener: `extension Notification.Name { nonisolated static let variorumPutBackLanded }` at the end of `MobileLibraryViewModel.swift`. **(ii)** the listener lives INSIDE the hold: `holdFirstPage` registers it first (`listenForPutBack(question.listing)`, `addObserver(forName:object: session, queue: .main)`) and removes it first in its `defer` — so it hears only while a hold runs, which is only while the Library's view is on screen holding that listing (hidden, the return's first delivery re-asks anyway); `object: session` is NotificationCenter's identity filter, so another session's signal never reaches it; it answers through `reaskAfterRowAct(listing)`, so the first turn's guards hold unchanged (held, the question its rows answer, deeper than a page; a Put back inside the first page stays the held observation's). No second spelling of the op, the refusal words or the line. **(iii)** `MobileLine.swift:139-141`'s comment is untouched (now true past the first page). Two overlapping holds (`.task(id:)` starts the next before the last one's `defer`) both hear the signal; the follow's single flight folds them into one re-ask and at most one more |
+| 1 · the pin | `MobileLibraryPagingRulesTests.aPutBackThroughTheLinesUndoReturnsARowPastTheFirstPage` — the final call's words: limit 4, 12 notes, held on screen, 8 listed; the seventh row deleted through `confirmDeleteNote`; the line's own Undo read off the line as it spoke (`try #require(session.status.current?.action)` — non-nil required; read right after the delete so the line's 6 s clock cannot race a slow settle on the red build); settle until gone; the Undo pressed; settle; the note listed again, `model.all` equal to `Queries.library`'s first 8, no note twice |
+| 1 · a witness (added, said so) | `…aPutBackAfterTheLibraryCameBackReturnsARowPastTheFirstPage` — the same world and Undo, but the hold ended and taken again between the delete and the Undo (the Library left and returned), whose re-ask removes the deleted row on EVERY build. **Why:** `vm64-gate2-red` reverses the delete leg too, so there the final call's pin fails at its premise (the row never leaves) and its Put back arm is vacuous; this witness is the only test whose red on that one build is the Put back arm itself |
+| 2 | no code (dismissed to VM-226 by the final call); the handoff's VM-226 line gains the second road in plain words; the drafts' residuals row 7 and new row 48 carry it |
+| 3, 8(a), 9 | no change (confirmed as applied); their conditions are the red and fix runs below |
+| 5 | no change (confirmed as applied); its ticket is VM-240, which fills the first turn's `PENDING(id)` in the handoff and the drafts |
+| 6 | the handoff's P-2-1: "Nothing old is ever written" → "A key refused or held back this way never writes old text", with a pointer to the two rarer roads listed lower in the same file |
+| 7 | the ticket's body is the orchestrator's (already in VM-227); the drafts' residuals row 27 names it |
+| O-1 · condition 1 | the gate's legs are the stage commands below ((iii) the gated suite alone; (iv) the whole phone target saying its 13 SKIPPED); the drafts' MobileSoul sentence ((e)6) gains "a phone merge gate runs it as its own leg"; the handoff's "The next runs" says the same in plain words |
+| O-1 · condition 2 (VM-66, VM-69) | `MobileNoteOpenOnceTests.anOpenReadsTheNoteOnceAndTheOldShapeTwiceByTheSameOracle` — a GUARD, test-only. The oracle: the suite's existing statement trace on the world's one connection (an in-memory queue), counting `OpenOnceTrace.projectionRead` — `Queries.takesProjection`'s header leg, `SELECT locked, profile, entry_date FROM container WHERE id = ?`, which runs once per projection read and in no other read (checked by grep: `TakesQueries.swift:100` only; `containerHeader` is a record fetch). **Arm 1:** the real `MobileWriteScreen` with a router (her road) — counted from the mount through the first live delivery (the arrival's render, which IS it since VM-69) plus a 1.5 s quiet window: ONE. The liveness grant owes no re-read: a first open registers `refresh: false` (`MobileLivenessAuthority.register` → `takeLiveness`: the flush, then `confirmNoteStillLive` — the header record only), so nothing of the grant's is folded in. **Arm 2:** the harness's old shape on another note — `loadOnce()`, then `start()` beginning its own observation; its first delivery seen as the model's second chrome pass; the same window: TWO. Green on both builds of the round (both hold batch 6); the red-on-old proof of "read once" stays the gated suite's (`note-reads-per-open-*`, 2 → 1) |
+| O-1 · the ticket | VM-241 (Medium · Debt · Todo) — in every list of the run's tickets |
+| the optional ticket | VM-242 (Low · Bug · Backlog) — in every list |
+| records | the handoff (P-2-1's scope; VM-226's second road; the gate's own step; VM-240/241/242 in "Tickets filed" in priority order, in "What was found and not fixed" and in the reconciled table); the drafts ((b) the VM-68 paragraph gains finding 1 and VM-240, the Born line every id with its labels; (c); (d); (e)5 "an act on a listed row re-asks it in place"; (e)6 the gate's leg; (g) rows 7/23/27 and new rows 45–48; the three tickets' section; the header's slot list); `MobileTimingTests`' header ("the suites run in parallel" corrected — comment only); `MobileLibraryPagingRulesTests`' header (round 2's pins ARE in that round's red build) |
+
+**The Mac does not change:** this turn touched no file under `Shared/` or `Sources/` (`git diff --stat 31630a151..HEAD --
+App/Variorum/Shared Sources` is empty); over the whole pass the one `Shared/` line is the first turn's
+`AppTiming.boxOpenFiledNothing` (its only caller `MobileQuickNote.swift`; on the Mac no caller, every mark one relaxed
+atomic load). The Mac build is owed with the phone's because of that line.
+
+#### Compile fixes to the first turn's lines
+
+PENDING(part B — the first compile). If any is needed it is minimal, to the intent the first turn's responses and
+closeout state, and listed here line by line.
+
+#### The pins, and what each build should show (the whole pass)
+
+| Pin | Kind | `vm64-gate2-red` (expected) | `vm64-gate2` (expected) |
+|---|---|---|---|
+| `MobileLibraryPagingRulesTests.aRowDeletedPastTheFirstPageLeavesTheListing` | bug pin (finding 1, delete) | RED — 2 issues ("the deleted note left the listing"; "the listed depth is kept, in the listing's order") | green |
+| `MobileLibraryPagingRulesTests.aPutBackThroughTheLinesUndoReturnsARowPastTheFirstPage` | bug pin (finding 1, Put back — the final call's) | RED — 1 issue, at the premise ("the premise: the deleted note left the listing"); its Put back expectations pass vacuously there (the row never left) | green |
+| `MobileLibraryPagingRulesTests.aPutBackAfterTheLibraryCameBackReturnsARowPastTheFirstPage` | witness (finding 1, Put back — arm (A)'s own red) | RED — 2 issues ("the note Put back is listed again"; "in its place, the listed depth kept, in the listing's order"); its premise green | green |
+| `MobileLibraryPagingRulesTests.aWingSwitchedWhileBooklessWasNotHeldDrawsNoOtherWingsRows` | bug pin (finding 3) | RED — 2 issues ("no frame draws another wing's note"; `visible.isEmpty`); the empty-line and return expectations green | green |
+| `MobileLibraryPagingRulesTests.aDoorOpenedAfterAWingSwitchDrawsNoOtherWingsRows` | bug pin (finding 3, the filter door) | RED — 1 issue ("the door draws no other wing's note") | green |
+| `MobileLibraryRowActsTests.aStarThatTakesADeepRowOutOfTheLooseClassReAsksBookless` | design pin (finding 1, ★ — names the new door) | NOT IN THE BUILD (moved aside) | green |
+| `MobileBoxOpenTimingTests.anOpenThatFilesNothingLeavesNoOpenSpan` | bug pin (finding 8(a)) | RED — 4 issues (both spans open; a false sample each) | green |
+| `MobileBoxOpenTimingTests.anOpenThatFilesIsStillTimed` | guard | green | green |
+| `MobileTimingTests.theReadoutShowsThisBuildThenThePreviousOne` | finding 9's expectations | RED — 3 issues (the heading line twice, the title not upper-cased) | green |
+| `MobileNoteOpenOnceTests.anOpenReadsTheNoteOnceAndTheOldShapeTwiceByTheSameOracle` | GUARD (O-1 condition 2) | green (arm 1 one, arm 2 two) | green |
+| the rest of `MobileLibraryPagingRulesTests`, `MobileTimingTests`, `MobileNoteOpenOnceTests` | unchanged | green | green |
+
+**Run headless:** nothing — no Core file changed in either turn, so no Core suite is touched by the pass and none ran
+under QUIET. The whole Core package: PENDING(part B).
+
+#### The builds (part B — when the orchestrator says the QUIET window has ended; on the final tree)
+
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm64-gate2
+xcodebuild build-for-testing -project Variorum.xcodeproj -scheme Variorum \
+  -destination 'platform=macOS' -derivedDataPath DerivedData/vm64-gate2
+cd ~/dev/variorum-vm-64 && swift test   # the whole Core package, once
+```
+The red-on-old phone build — the first turn's recipe plus arm (A)'s hunks (`MobileLine.swift` joins the reversed set;
+`MobileLibraryViewModel.swift`'s listener and the name are already in it, so the two stay consistent). Announced in the
+live status and committed BEFORE it starts:
+```
+cd ~/dev/variorum-vm-64
+files=(App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift
+  App/Variorum/VariorumMobile/Features/Shell/MobileLibraryView.swift
+  App/Variorum/VariorumMobile/Features/Shell/MobileLine.swift
+  App/Variorum/VariorumMobile/Features/Shell/MobileQuickNote.swift
+  App/Variorum/Shared/AppTiming.swift
+  App/Variorum/VariorumMobile/Features/Perf/MobileTimingView.swift)
+git diff 85762803a HEAD -- $files | git apply -R
+mkdir -p App/Variorum/DerivedData/vm64-gate2-aside
+mv App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift App/Variorum/DerivedData/vm64-gate2-aside/
+cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm64-gate2-red
+cd ~/dev/variorum-vm-64 && git checkout HEAD -- $files App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift
+rm -rf App/Variorum/DerivedData/vm64-gate2-aside
+git status --short; git diff HEAD --stat   # both must be empty
+```
+Results: PENDING(part B) — each build's verdict, its error count and any warning in a touched line.
+
+#### The hosted commands — FINAL (the orchestrator's stage; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+Products: `App/Variorum/DerivedData/vm64-gate2/` (phone + Mac, the fix) and `vm64-gate2-red/` (phone, this pass's
+production hunks reversed) — PENDING(part B). Poll for the Swift Testing verdict line, not `** TEST EXECUTE **`.
+
+(i) **The red-on-old run**, ONE invocation from `vm64-gate2-red`:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileLibraryPagingRulesTests MobileBoxOpenTimingTests MobileTimingTests MobileNoteOpenOnceTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate2-red \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-r2-red>
+```
+Expected: exactly the RED column above — `aRowDeletedPastTheFirstPageLeavesTheListing` 2 · `aPutBackThroughTheLines…` 1
+(premise) · `aPutBackAfterTheLibraryCameBack…` 2 · `aWingSwitchedWhileBooklessWasNotHeld…` 2 · `aDoorOpenedAfterAWingSwitch…` 1 ·
+`anOpenThatFilesNothingLeavesNoOpenSpan` 4 · `theReadoutShowsThisBuildThenThePreviousOne` 3 — seven tests failing with 15
+issues; every other test of the four suites green, the open-once guard among them.
+
+(ii) **The fix types, alone and then in company**, from `vm64-gate2`. Alone — the pass's own types, ONE invocation:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileLibraryPagingRulesTests MobileLibraryRowActsTests MobileBoxOpenTimingTests MobileTimingTests
+  MobileNoteOpenOnceTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate2 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-r2-fix-alone>
+```
+In company — ONE invocation:
+```
+tests=(MobileLibraryPagingRulesTests MobileLibraryRowActsTests MobileBoxOpenTimingTests MobileTimingTests
+  MobileNoteOpenOnceTests MobileNoteHoldTests MobileLibraryPagingTests MobileLibraryTests MobileLibrarySortTests
+  MobileFilterTests MobileEmptyStoreTests MobileDeletionTests MobileTrashTests MobileVersionsTests
+  MobileWingListingTests MobileWingStandTests MobileWingDoorTests MobileWingDoorShellTests MobileWingDoorGeometryTests
+  MobileLineDoorTests MobileLineShowRuleTests MobileLineDirectionTests MobileStarsTests MobileQuickNoteTests
+  MobileNoRawErrorPinTests MobileErrorLogPrivacyPinTests MobileHerPathsPerfTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate2 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-r2-fix-company>
+```
+Expected: both all green; in company, `MobileHerPathsPerfTests`' 13 SKIPPED (no switch handed — the gate's own proof;
+Swift Testing counts them in "N tests … passed", so read the skipped lines), and VM-55's five wing types
+(`MobileWingListingTests` `MobileWingStandTests` `MobileWingDoorTests` `MobileWingDoorShellTests`
+`MobileWingDoorGeometryTests`) green beside finding 3's gate — the final call's condition, shown, not assumed.
+
+(iii) **The gated speed suite alone**, `vm64-gate2`:
+```
+TEST_RUNNER_VM66_PERF=1 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate2 \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-r2-perf>
+```
+Expected: 13 tests in 1 suite passed, NONE skipped; every asserted count as on the merged tree (reads per open 1, editor
+builds per open 1, the hidden Library's re-reads and redraws 0, savepoint attempts 1 on all four roads, owner-adoption
+rows 0).
+
+(iv) **The merge gate** — the whole phone target and the whole Mac target from `vm64-gate2`
+(`DerivedData/vm64-gate2/Build/Products/*.xctestrun`). Phone: the speed suite's 13 must show as SKIPPED and be said so in
+words ("13 skipped — the gated speed suite"), never folded into "passed"; the expected red from main only — VM-24's
+`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` (2 of 3 cases, 2 issues).
+Mac: the standing flake VX-701 if it appears (re-run alone). The gate's three phone-side lines, each with its counts:
+(iv)'s whole target; (iii); and (i)/(ii) — the final call's condition 1.
+
+#### For QUESTIONS at the merge
+
+None from this turn: arm (A) and the guard's shape are the reviewer's engineering calls, and no product behaviour was
+decided (a listing made honest after a Put back is the Mac's own rule, `LibraryCatalogModel.refresh`).
+
+#### What a cold reviewer should read first
+
+1. **Arm (A)'s one line and its listener's scope** — `MobileLine.putBack`'s post (success path only; `object: session`)
+   against `MobileLibraryViewModel.listenForPutBack`: alive only inside `holdFirstPage` (registered before its `defer`,
+   removed first in it), its own session only (NotificationCenter's object filter), answering only through
+   `reaskAfterRowAct` and its guards. Is a signal heard by two overlapping holds harmless (the follow's single flight)?
+2. **The red-on-old table** above against the run (i): the final call's Put back pin is red on `vm64-gate2-red` at its
+   PREMISE only (the delete leg is reversed there too); the witness is arm (A)'s own red. Is the witness's extra step
+   (the hold ended and re-taken) a fair stand-in for her road (the Library left and returned while the line still shows)?
+3. **The open-once guard's oracle** — the marker statement as "one projection read", the 1.5 s quiet window, and the
+   liveness grant's `refresh: false` at a first open (no read of its own folded in); arm 2 telling two from one.
+4. **Finding 2 is OPEN under VM-226**, and the fence suite still has no world that runs the editor's live observation
+   (`makeSurfaceEditor` calls `loadOnce()` only) — the drafts' residuals row 48.
+5. **The uncompiled state** until part B's builds: the first compile of both turns' lines.
