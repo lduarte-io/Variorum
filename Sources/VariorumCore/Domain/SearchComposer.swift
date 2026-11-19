@@ -178,45 +178,80 @@ public enum SearchComposer {
         }
     }
 
-    // MARK: - The words road (VX-954 — THE ONE PREDICATE)
+    // MARK: - The words road (VX-954 — THE ONE READING OF THE TEXT HALF)
 
-    /// **Does the question take the WORDS road?** (VX-954 — the VX-980 run,
-    /// batch 1; `notes/plans/fixes/vx-980-search-fixes.md`.) Every reader
-    /// that asks "does this question have words" reads THIS one function —
-    /// the text-less tag road's guard (`listingNarrowing`), the facet band's
-    /// arm (`Queries.searchCounts(…facet:…)`), the tag offers
+    /// **How the question's text half reads to the index** (VX-954 — the
+    /// VX-980 run, batch 1; `notes/plans/fixes/vx-980-search-fixes.md`): the
+    /// ONE reading both predicates below derive from, so the road a question
+    /// takes and what its empty answer says can never disagree.
+    public enum TextHalf: Equatable, Sendable {
+        /// No text half at all (a tag alone, a day alone).
+        case absent
+        /// Something the index can SERVE (`ftsMatch` is non-nil) — or a tree
+        /// of only negations, which the index REFUSES
+        /// (`Refusal.negativeOnlyText`): the words road either way, so a
+        /// folded word beside a negation never turns that refusal into an
+        /// answer.
+        case served
+        /// Typed words that all FOLD TO NOTHING: every leaf punctuation or
+        /// symbols the index's tokenizer keeps no token of
+        /// (`hasTokenCharacter`) — `—`, `+`, a lone `#`.
+        case foldsToNothing
+    }
+
+    /// The question's text half, as the index reads it. Pure over the AST.
+    public static func textHalf(_ query: SearchQuery) -> TextHalf {
+        guard let text = query.text else { return .absent }
+        do {
+            return try ftsMatch(text) != nil ? .served : .foldsToNothing
+        } catch {
+            return .served  // the one refusal: negations alone — the words road refuses it
+        }
+    }
+
+    /// **Does the question take the WORDS road?** Every reader that asks
+    /// "does this question have words" reads THIS one function — the
+    /// text-less tag road's guard (`listingNarrowing`), the facet band's arm
+    /// (`Queries.searchCounts(…facet:…)`), the tag offers
     /// (`Queries.searchTagOffers`) and the faces' routing (the Library's
     /// `hasWords`, the book's band, ⌘K's passages) — so a word list that
     /// FOLDS TO NOTHING beside a tag (`— #flora`, `+ #flora`) IS the tag
     /// alone, everywhere.
     ///
-    /// - The text half has something the index can SERVE (`ftsMatch` is
-    ///   non-nil) → words. A tree of only negations counts as served: it
-    ///   stays on the words road, where the index keeps refusing it
-    ///   (`Refusal.negativeOnlyText`) — a folded word beside a negation never
-    ///   turns that refusal into an answer.
-    /// - No text half at all (a tag alone, a day alone) → no words.
-    /// - Words that FOLD TO NOTHING (every leaf is punctuation or symbols the
-    ///   index's tokenizer drops — `hasTokenCharacter`) → no words when the
-    ///   question names a tag the text-less road can drive from
-    ///   (`drivingTagPaths`, the narrowing's own reading); naming none, still
-    ///   words — **PROVISIONAL P-980-1 (a)**: a field holding only
-    ///   punctuation or symbols keeps today's reading (the field is not
-    ///   blank, nothing is found — "nothing found" over "Nothing matches"),
-    ///   never blanked into the Library at rest.
+    /// - Served (or refused) words → the words road.
+    /// - No text half → the tag road (or the day's listing).
+    /// - Words that fold to nothing → the tag road when the question names a
+    ///   tag the text-less road can drive from (`drivingTagPaths`, the
+    ///   narrowing's own reading); naming none, they stay a typed search on
+    ///   the words road — the field is not blank and the Library never goes
+    ///   to rest under it — whose empty answer SAYS WHY
+    ///   (`holdsNothingSearchable` — her R-980-5, ruling P-980-1).
     ///
     /// Pure over the AST — no read is added to a question (P1).
     public static func asksWords(_ query: SearchQuery) -> Bool {
-        guard let text = query.text else { return false }
-        let served: Bool
-        do {
-            served = try ftsMatch(text) != nil
-        } catch {
-            served = true  // the one refusal: negations alone — the words road refuses it
+        switch textHalf(query) {
+        case .served: true
+        case .absent: false
+        case .foldsToNothing: !namesADrivingTag(query)
         }
-        if served { return true }
-        guard let filter = query.filter else { return true }  // P-980-1 (a)
-        return drivingTagPaths(filter).isEmpty                 // P-980-1 (a) beside a day or a state
+    }
+
+    /// **A typed field holding ONLY punctuation or symbols, and no tag** (her
+    /// R-980-5, ruling P-980-1 — "Say why"): words typed, nothing in them the
+    /// index keeps, no tag to answer instead. Such a question is a typed
+    /// search (`asksWords` — the band keeps its honest "nothing found"), and
+    /// its empty answer says WHY in place of "Nothing matches". A wordful
+    /// search that finds nothing, a folded word beside a tag (that is the tag
+    /// alone) and a negation-only tree (it refuses in its own words) are not
+    /// this state. Every face that speaks an empty answer reads this one
+    /// decision. Pure over the AST.
+    public static func holdsNothingSearchable(_ query: SearchQuery) -> Bool {
+        textHalf(query) == .foldsToNothing && !namesADrivingTag(query)
+    }
+
+    /// Does the question name a tag the text-less road can drive from?
+    private static func namesADrivingTag(_ query: SearchQuery) -> Bool {
+        query.filter.map { !drivingTagPaths($0).isEmpty } ?? false
     }
 
     /// An FTS5 string literal: double quotes, inner quotes doubled.

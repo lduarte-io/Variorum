@@ -13,7 +13,8 @@
 //  `— #flora` (and VX-888's other shapes, `+ #flora` among them) IS `#flora`
 //  in the Library's whole routed answer, in the book's band and in ⌘K; a
 //  symbol word beside real words is words (VX-955); and a field of ONLY
-//  punctuation or symbols keeps today's reading (PROVISIONAL P-980-1 (a)).
+//  punctuation or symbols is still a typed search whose empty answer says
+//  why (her R-980-5, ruling P-980-1 — `SearchEmptyAnswerSentenceTests`).
 //
 //  The core pins (`SearchFoldedWordsBesideATagTests`, `SearchSymbolWordTests`,
 //  `SearchTokenizerSweepTests`) ran red on the pre-fix tree; these were
@@ -90,8 +91,8 @@ struct SearchFoldedWordsRoutingTests {
 
     /// The three routing sites, read without a store: a folded word beside a
     /// tag has no words and still answers (its tag); a symbol beside real
-    /// words is words; a field of only punctuation keeps today's reading —
-    /// the words road, and ⌘K keeps its "all matches" row (P-980-1 (a)).
+    /// words is words; a field of only punctuation is still a typed search
+    /// (R-980-5) — the words road, and ⌘K keeps its "all matches" row.
     @Test func everyRoutingSiteReadsTheOnePredicate() {
         for text in Self.foldedBesideATag {
             let question = LibrarySearchQuestion.read(text)
@@ -103,8 +104,8 @@ struct SearchFoldedWordsRoutingTests {
             #expect(PaletteModel.passageQuestion(text) != nil, "\(text): ⌘K asks the index")
         }
         for text in ["—", "+", "#", "…", "\"—\"", "$ ©"] {
-            #expect(LibrarySearchQuestion.read(text)?.hasWords == true, "\(text): today's reading (P-980-1 (a))")
-            #expect(PaletteModel.passageQuestion(text) != nil, "\(text): ⌘K keeps today's all-matches row")
+            #expect(LibrarySearchQuestion.read(text)?.hasWords == true, "\(text): still a typed search (R-980-5)")
+            #expect(PaletteModel.passageQuestion(text) != nil, "\(text): ⌘K keeps its all-matches row")
         }
     }
 
@@ -142,7 +143,8 @@ struct SearchFoldedWordsRoutingTests {
     /// The book's band answers on the one predicate: a symbol beside a word
     /// finds the word's note (VX-955); a folded word beside a tag is the tag
     /// alone — the book's content stays (VX-954); a field of only punctuation
-    /// keeps today's reading, an answer that finds nothing (P-980-1 (a)).
+    /// is still a typed search that finds nothing, and its empty row says
+    /// why (R-980-5).
     @Test func theBooksBandReadsTheOnePredicate() async throws {
         try await withSession { session in
             let ops = session.operations
@@ -163,7 +165,13 @@ struct SearchFoldedWordsRoutingTests {
                 #expect(!search.isAnswering, "\(text) is the tag alone — the book's content stays")
             }
             await search.setText("—")
-            #expect(search.isAnswering && search.groups.isEmpty, "a field of only punctuation: today's reading")
+            #expect(search.isAnswering && search.groups.isEmpty, "a field of only punctuation: still a typed search")
+            #expect(SearchAnswerCopy.emptyAnswer(for: search.question, otherwise: BookSearchCopy.nothingRow)
+                    == SearchAnswerCopy.nothingSearchable, "its empty row says why (R-980-5)")
+            await search.setText("zzyzx ")
+            #expect(search.isAnswering && search.groups.isEmpty)
+            #expect(SearchAnswerCopy.emptyAnswer(for: search.question, otherwise: BookSearchCopy.nothingRow)
+                    == BookSearchCopy.nothingRow, "a wordful search with no hits keeps its own silence")
         }
     }
 
@@ -171,7 +179,8 @@ struct SearchFoldedWordsRoutingTests {
 
     /// ⌘K's list: a folded word beside a tag lists no passage and no "all
     /// matches" row, as the tag alone; a symbol beside real words lists the
-    /// word's passage; a field of only punctuation keeps its row (today's).
+    /// word's passage; a field of only punctuation keeps its row (a typed
+    /// search — R-980-5; ⌘K has no empty sentence, so nothing is added).
     @Test func thePalettesListReadsTheOnePredicate() async throws {
         try await withSession { session in
             let ops = session.operations
@@ -193,7 +202,7 @@ struct SearchFoldedWordsRoutingTests {
 
             model.query = "—"
             await model.refresh()
-            #expect(model.items.contains { $0.kind == .allMatches }, "today's all-matches row stays")
+            #expect(model.items.contains { $0.kind == .allMatches }, "the all-matches row stays")
             #expect(!model.items.contains { $0.kind == .passage })
         }
     }

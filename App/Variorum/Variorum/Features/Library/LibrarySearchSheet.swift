@@ -82,11 +82,16 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
                     }
                 }
                 if state.books.isEmpty, state.groups.isEmpty {
+                    // R-980-5: a field of only punctuation or symbols (no tag)
+                    // says WHY; any other empty answer keeps "Nothing matches."
+                    let empty = tokens.chromeLabel(SearchAnswerCopy.emptyAnswer(
+                        for: state.question?.query, otherwise: LibraryCopy.nothingMatches))
                     LibraryListLead()
                     LibraryListRow {
-                        Text(tokens.chromeLabel(LibraryCopy.nothingMatches))
+                        Text(empty)
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
+                            .librarySearchDrawn(.emptyAnswer, empty)
                     }
                 }
                 if let places = archivedFootPlaces {

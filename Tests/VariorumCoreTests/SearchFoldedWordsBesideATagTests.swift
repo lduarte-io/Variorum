@@ -130,24 +130,53 @@ struct SearchFoldedWordsBesideATagTests {
         #expect(SearchComposer.asksWords(SearchQuery(text: .word("—"), filter: .any([flora, .starred]))))
     }
 
-    /// **PROVISIONAL P-980-1 (a)** — a field holding ONLY punctuation or
-    /// symbols asks nothing the index can serve and names no tag: it keeps
-    /// today's reading — the words road, nothing found ("nothing found" over
-    /// "Nothing matches"), never blanked into the Library at rest — with or
-    /// without an armed day or book state beside it. Its numbers say nothing
-    /// under every facet, no listing is narrowed, and a word that literally
-    /// names a tag still offers it, as today. Pinned so a change is
-    /// deliberate (options (b) and (c) are in the run record).
+    /// **The empty answer's decision, pure** (`SearchComposer
+    /// .holdsNothingSearchable` — her R-980-5): ONLY a typed field whose words
+    /// all fold to nothing and that names no tag. A wordful search with no
+    /// hits, a folded word beside a tag (it is the tag alone), a field with no
+    /// words at all, and a negation-only tree (it refuses in its own words)
+    /// are not this state. The one reading both predicates derive from
+    /// (`textHalf`) is pinned beside it.
+    @Test func theEmptyAnswerSaysWhyOnlyForAFieldOfNothingSearchable() {
+        let flora = SearchFilter.tagPath("flora")
+        for text in ["—", "+", "#", "…", "\"—\"", "— +", "$ ©"] {
+            #expect(SearchComposer.textHalf(question(text)) == .foldsToNothing, "\(text)")
+            #expect(SearchComposer.holdsNothingSearchable(question(text)), "\(text) holds nothing searchable")
+        }
+        for text in ["zzyzx ", "red", "red +", "1 + 1", "— #flora", "+ #flora", "#flora"] {
+            #expect(!SearchComposer.holdsNothingSearchable(question(text)), "\(text) is not that state")
+        }
+        #expect(SearchComposer.textHalf(question("zzyzx ")) == .served, "a wordful search with no hits is served")
+        #expect(SearchComposer.textHalf(question("#flora")) == .absent)
+        #expect(SearchComposer.textHalf(SearchQuery(text: .not(.word("red")))) == .served, "negations alone refuse")
+        #expect(!SearchComposer.holdsNothingSearchable(SearchQuery(text: .not(.word("red")))))
+        #expect(!SearchComposer.holdsNothingSearchable(SearchQuery(text: .all([.word("—"), .not(.word("red"))]))))
+        #expect(!SearchComposer.holdsNothingSearchable(SearchQuery(filter: flora)))
+    }
+
+    /// **R-980-5 (her ruling of P-980-1, "Say why")** — a field holding ONLY
+    /// punctuation or symbols asks nothing the index can serve and names no
+    /// tag: it is still a TYPED SEARCH — the words road, never blanked into
+    /// the Library at rest, with or without an armed day or book state beside
+    /// it — its numbers say nothing under every facet (the band's honest
+    /// "nothing found"), no listing is narrowed, a word that literally names a
+    /// tag still offers it, and it holds nothing searchable, so the empty
+    /// answer says WHY (the faces read `holdsNothingSearchable` — pinned in
+    /// the app's `SearchEmptyAnswerSentenceTests`). Replaces the option (a)
+    /// pin, whose face kept "Nothing matches".
     @Test(arguments: ["—", "+", "#", "…", "\"—\"", "— +", "$ ©"])
-    func aFieldOfOnlyPunctuationOrSymbolsKeepsTodaysReading(_ text: String) throws {
+    func aFieldOfOnlyPunctuationOrSymbolsIsATypedSearchThatSaysWhy(_ text: String) throws {
         let asked = question(text)
         #expect(asked.text != nil && SearchComposer.asksWords(asked), "\(text) stays on the words road")
+        #expect(SearchComposer.holdsNothingSearchable(asked), "\(text): the empty answer says why")
         var dated = asked
         dated.filter = .days(SearchDayRange(field: .edited, start: "2026-01-01T00:00:00Z", end: "2026-01-02T00:00:00Z"))
         var stated = asked
         stated.filter = .bookState(.living)
         #expect(SearchComposer.asksWords(dated) && SearchComposer.asksWords(stated),
                 "\(text) beside an armed day or book state stays on the words road too")
+        #expect(SearchComposer.holdsNothingSearchable(dated) && SearchComposer.holdsNothingSearchable(stated),
+                "\(text) beside an armed day or book state still says why")
         try withOperations { ops, db in
             try flora(ops)
             let said = try answer(db, asked)
@@ -158,7 +187,7 @@ struct SearchFoldedWordsBesideATagTests {
             }
             #expect(said.narrowedNotes.isEmpty && said.taggedBlocks.isEmpty && said.associatedBooks.isEmpty)
             let named = ["—", "+", "…"].filter { text.contains($0) }
-            #expect(Set(said.offers) == Set(named), "\(text): a word that names a tag still offers it, as today")
+            #expect(Set(said.offers) == Set(named), "\(text): a word that names a tag still offers it")
         }
     }
 }
