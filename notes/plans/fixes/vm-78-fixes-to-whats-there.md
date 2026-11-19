@@ -1755,13 +1755,79 @@ Opened 2026-11-19 after window (3) proved VM-17 real. One member, one acceptance
 by the brief's own rule** ("if your trace says the confirmed shape would NOT remove a symptom — the 74-pt offset in
 particular — STOP and report that before building anything"). The trace below says exactly that: the confirmed shape
 removes the large strays (an off-band stale frame) and does NOT remove the 74-pt offsets (an IN-BAND badge resolved
-against a fragment TextKit re-positions after the read). No product, test or probe file changed; no
-`build-for-testing` was run (nothing to build); no stage, no simulator. **No revert is in flight; `git status` is
-clean.** (2026-11-19, a fresh `opus-implementer`.)
+against a fragment TextKit re-positions after the read). No product or probe line changed; no stage, no simulator.
+Since then, at the orchestrator's word, ONE instrument test file is added (the settle measurement, below — test target
+only, not a pin, it leaves the tree once its numbers are recorded) and built (`build-for-testing` green); its window is
+the orchestrator's, PENDING. **No revert is in flight; `git status` is clean.** (2026-11-19, a fresh
+`opus-implementer`.)
 
 | Member | State |
 |---|---|
-| VM-17 | **IN-PROGRESS — STOPPED AT THE TRACE, before code.** What remains: the reviewer's final call on a shape that also removes symptom B (options below), most likely after one short measuring window; then the build, the probe green in a window, the chrome suites green by type, the walk row. The pin stands as it is (red on the unfixed chrome, M5/M5b). |
+| VM-17 | **IN-PROGRESS — STOPPED AT THE TRACE, before code; the settle MEASUREMENT is built (the instrument below), its window PENDING.** What remains: the orchestrator's window runs the instrument alone; the reviewer's final call on a shape that also removes symptom B (options below) reads its `VM17M|` lines; then the build, the probe green in a window, the chrome suites green by type, the walk row; the instrument leaves the tree in a named commit once its numbers are in this record. The pin stands as it is (red on the unfixed chrome, M5/M5b). |
+
+**THE SETTLE MEASUREMENT — an instrument for the fix shape's call (2026-11-19, at the orchestrator's word; TEST TARGET
+ONLY: no product line, no probe edit).** `App/Variorum/VariorumMobileTests/MobileFanBadgeSettleMeasureTests.swift`,
+TYPE **`MobileFanBadgeSettleMeasureTests`**, one test (`whenDoesABandFansFragmentSettleOnTheSteppedWalk`). It asserts
+nothing about the product (only `#require`s that its setup worked) and prints `VM17M|` lines. **Run it ALONE, by type:**
+`-only-testing:VariorumMobileTests/MobileFanBadgeSettleMeasureTests`. It is not a pin: it leaves the tree in a named commit
+once its numbers are written here.
+- *The note and the walk:* the probe's fixture copied byte for byte (150 blocks, every 7th fanned; the probe's builder is
+  private to its type, so it is copied, not called), the probe's host (a scene window, shown, never key — no first
+  responder planted), the probe's settle, the probe's stepped walk (0.8 of a viewport, the end re-read live).
+- *Mount 1 — the moments.* At EVERY stop (a superset of "a fan newly enters the band"; lines flagged `newBand`/`newVis`),
+  for every fan in the chrome's band (the chrome's own `near` rule over `nearViewportBand()`, read at the pass), one
+  `VM17M|walk#…` line with, at each moment, `b:` the drawn badge's top exactly as the probe reads it, `t:` the first-line
+  fragment's top read UNFORCED (`options: []`), and `L`/`E` (`.layoutAvailable` or not); plus `ideal=` (the probe's
+  idealized layout). The moments, in order, each cumulative on the one before:
+  `pass` — inside the stop's layout pass, right after the text view's own `layoutSubviews` (so right after the chrome's
+  tick): a zero-size TEST view at the text view's subview index 0 records from its own `layoutSubviews`, which UIKit runs
+  after its superview's in the same recursion — the nearest point reachable without a product hook (`fired=0` on a line
+  = not reached at that stop) · `afterPass` — when that pass (`window.layoutIfNeeded()`) returns · `hop` — after ONE
+  main-queue hop: one `DispatchQueue.main.async` block resuming a `CheckedContinuation` (the test's own resumption is one
+  main-actor job after it) · `relayout` — after `setNeedsLayout()` + `layoutIfNeeded()` on the text view (the chrome's
+  tick runs again, with its forced reads) · `flush` — after `CATransaction.flush()` · `link` — after one `CADisplayLink`
+  callback (public API; a 0.5 s fallback resumes it if none comes, counted in `linkFired`) · `settle` — after the
+  probe's own settle: **the truth** (the unforced read there, as the probe compares).
+- *Mount 2 — option (c).* A second cold mount; at each stop, BEFORE the stop's pass, ONE
+  `NSTextLayoutManager.ensureLayout(for: NSTextRange)` from the TextKit viewport's start through the first character of
+  the last fan inside the band (the band as `nearViewportBand()` gives it then, extended by one viewport length of
+  characters to cover the step) — so no band fan is laid out ahead of its predecessors; then the pass, and
+  `VM17M|c|…` lines with the chrome-resolved badge (`bandRun=`, read at the pass) against that mount's settled truth;
+  `VM17M|c|END` carries the run count and their total time.
+- *SUMMARY lines:* per mount and moment, for the unforced read and for the badge, over every band-fan read that has a
+  laid-out truth and over the newly-visible subset (the 74-pt class): `agree` (within 1 pt of the truth) · `disagree` ·
+  `missing` (the unforced read not `.layoutAvailable`, or no badge drawn) · `largest` disagreement; plus the probe's own
+  reading after the settle, and `VM17M|walk|END` with `sentinelFired` and `linkFired` out of the stops.
+- *Every moment asked was reached without a product hook* (the pass through the test-side subview, the display turn
+  through `CATransaction.flush()` and a `CADisplayLink`). **Limits, said plainly:** both mounts carry TODAY's load-time
+  full pass (every fan force-laid-out at load, ahead of its predecessors — the confirmed shape would remove it, a test
+  cannot); every moment from `relayout` on carries the chrome's own forced reads of that pass; and whether the `pass`
+  moment precedes a TextKit-internal subview's own layout is UIKit's recursion order, which the `pass`/`afterPass` pair
+  reports rather than assumes. The shared editor harness resets the voice as it does for every editor suite; the
+  instrument flips nothing else.
+- **What each SUMMARY outcome would mean (for the newly-visible subset first, then all):**
+  - `pass` unforced already agrees → TextKit placed the fragment before the sentinel; the 74 pt is then between the
+    chrome's read and the end of the text view's own pass — re-read the trace, no option is supported yet.
+  - `pass` disagrees, `afterPass` agrees → TextKit re-positions inside the same layout recursion, after the text view's
+    own pass: a single deferred re-read after the pass suffices — **(a)** as a hop, or **(b)** with the hop.
+  - `afterPass` disagrees, `hop` agrees → **(a)** works with exactly one main-queue hop; **(b)** with the hop (its
+    `missing` count at `pass` is how many fans (b) would leave bare for that one hop).
+  - `hop` disagrees, `relayout` agrees → the re-position needs another layout pass: (a) as a hop that runs
+    `setNeedsLayout()` once per occasion (budgeted); (b) the same.
+  - only `flush` or `link` agree → display-cycle bound: the re-read rides a one-shot display link.
+  - nothing agrees before `settle` → no reachable moment carries the truth: neither (a) nor (b) as shaped; the
+    reviewer shapes a later trigger.
+  - mount 2's `bandRun` badge agrees for every read, the newly-visible above all → **(c)** removes symptom B at the
+    source with no deferred re-read (its cost: `runTotalMs` over the runs); disagreements → (c) alone does not, by its
+    `largest`.
+- *Its build:* signed phone `build-for-testing` (`-scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17
+  Pro,OS=26.2' -derivedDataPath App/Variorum/DerivedData/vm78-ios`, no boot): **TEST BUILD SUCCEEDED** — log
+  `App/Variorum/DerivedData/logs/vm78-d-bft1.log`; the file's one warning is the copied `UIWindow(frame:)` fallback (the
+  probe's own deliberate deprecation).
+- *Its run:* the probe's main test, the same walk on two mounts, took 4.29 s in window (3) (`vm78-c-M5.log`); this
+  walks once with five extra moments per stop (each at most a display frame, or 0.5 s if the display link never fires)
+  and once with a band run, so the test should take roughly ten seconds, and under a minute even if no display-link
+  callback comes, on top of the invocation's build check and app launch.
 
 **THE TRACE (by reading the chrome and window (3)'s kept logs — `DerivedData/logs/vm78-c-M5.log` and `-M5b.log`; their
 `VM17|` geometry lines are IDENTICAL line for line, only the cost note's timings differ).**
