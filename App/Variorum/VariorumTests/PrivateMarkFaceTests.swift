@@ -64,8 +64,9 @@ struct PrivateMarkFaceTests {
                 "via its book: the mark at FULL strength — the same glyph, no muted twin")
         #expect(PrivateMarkFace.note(.init(own: true, viaBooks: [vault]))
                 == .ownNote(alsoVia: [vault]), "its own mark is the door; the book is remembered for the receipt")
-        #expect(PrivateMarkFace.book(marked: true) == .ownBook)
-        #expect(PrivateMarkFace.book(marked: false) == nil)
+        // VX-1007 (A JUSTIFIED EDIT): the book rule reads the keyed fact.
+        #expect(PrivateMarkFace.book(.init(own: true)) == .ownBook)
+        #expect(PrivateMarkFace.book(nil) == nil)
     }
 
     /// **VX-934 (A FLIPPED PIN — it read "the badge family's one switch
@@ -81,7 +82,7 @@ struct PrivateMarkFaceTests {
     @Test func theEyeLeftTheBadgeFamilyForTheAIPairsOwnSwitchTheMastheadIncluded() throws {
         let fact = Queries.PrivateMark(own: true, viaBooks: [])
         #expect(PrivateMarkFace.note(fact) == .ownNote(alsoVia: []), "the fact is the mark — no badge switch")
-        #expect(PrivateMarkFace.book(marked: true) == .ownBook)
+        #expect(PrivateMarkFace.book(.init(own: true)) == .ownBook)
         let views = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("Variorum/Core/Views")
@@ -120,7 +121,7 @@ struct PrivateMarkFaceTests {
                      try Queries.privateBookMarksDrawn(db, readingIDs: [book.id]))
                 }
                 return (PrivateMarkFace.note(notes[note.id]),
-                        PrivateMarkFace.book(marked: books.contains(book.id)))
+                        PrivateMarkFace.book(books[book.id]))
             }
             let none = try await drawn()
             #expect(none.note == nil && none.book == nil, "marked + NO approved client ⇒ no mark")

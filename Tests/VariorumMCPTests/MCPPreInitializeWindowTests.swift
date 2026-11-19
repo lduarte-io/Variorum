@@ -98,7 +98,8 @@ struct MCPPreInitializeWindowTests {
     /// Preamble, probe, notification, ping, initialize, and a frame after
     /// it: the read answers the two requests IN ORDER, says nothing to the
     /// notification or the initialize, returns the initialize as the
-    /// opening's frame with the key, and leaves the next frame unread.
+    /// opening's frame with the key, and hands the next frame on whole (VX-952:
+    /// the opening's leftover — it was left unread on the fd).
     @Test func theOpeningReadAnswersTheWindowAndStopsAtInitialize() throws {
         let (server, client) = try socketPair()
         defer { close(server); close(client) }
@@ -108,8 +109,8 @@ struct MCPPreInitializeWindowTests {
             #"{"jsonrpc":"2.0","id":9,"method":"ping"}"#,
             CapturedClaudeCode.initialize,
             #"{"id":2}"#))
-        #expect(MCPHandshake.readOpening(fd: server)
-                == .init(presentedKey: "vmk1_a", firstFrame: frame(CapturedClaudeCode.initialize)))
+        let opened = MCPHandshake.readOpening(fd: server)
+        #expect(opened?.presentedKey == "vmk1_a" && opened?.firstFrame == frame(CapturedClaudeCode.initialize))
 
         setReceiveTimeout(client, milliseconds: 300)
         #expect(MCPShim.readFirstLine(client, limit: 1 << 16)
@@ -118,7 +119,11 @@ struct MCPPreInitializeWindowTests {
                 == #"{"id":9,"jsonrpc":"2.0","result":{}}"#, "then the ping")
         #expect(MCPShim.readFirstLine(client, limit: 1 << 16).isEmpty,
                 "nothing for the notification, nothing for the initialize (the admission's to answer)")
-        #expect(MCPShim.readFirstLine(server, limit: 64) == frame(#"{"id":2}"#),
+        // VX-952 (the VX-981 run, batch 4 — the justified edit): read in chunks,
+        // the frame after the opening is its LEFTOVER — the transport's, byte
+        // for byte — and nothing of it remains on the fd.
+        setReceiveTimeout(server, milliseconds: 300)
+        #expect((opened?.leftover ?? Data()) + MCPShim.readFirstLine(server, limit: 64) == lines(#"{"id":2}"#),
                 "byte-exact: the frame after the opening is the transport's")
     }
 

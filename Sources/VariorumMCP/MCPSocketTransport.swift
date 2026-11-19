@@ -15,7 +15,10 @@ import VariorumMCPSocket
 ///
 /// VX-168: the session's handshake has already read the connection's opening
 /// (the preamble and the first frame — `MCPHandshake`); that frame is REPLAYED
-/// as the stream's first line, so the SDK reads the connection whole.
+/// as the stream's first line, so the SDK reads the connection whole. VX-952:
+/// the handshake reads in chunks, so it may have read PAST that frame — those
+/// bytes (`leftover`) are split into lines before the first `read`, exactly as
+/// if a read had returned them, and nothing a client pipelined is lost.
 ///
 /// **VX-933 (the VX-940 run, W4): no write ever WAITS on the cooperative
 /// pool.** A blocking write returns only once the client has read enough; on
@@ -49,6 +52,9 @@ actor MCPSocketTransport: Transport {
     private let continuation: AsyncThrowingStream<Data, Swift.Error>.Continuation
     /// Lines read before the transport existed, yielded first (VX-168).
     private let replay: [Data]
+    /// VX-952: bytes the opening's reader read past the replayed frame — the
+    /// stream's next bytes, read as a first `read` would have returned them.
+    private let leftover: Data
     /// VX-394 (VX-348 U5): the read ended on a message past the cap (answered,
     /// then closed) — the session's end line says so.
     private(set) var endedOverLimit = false
@@ -62,8 +68,8 @@ actor MCPSocketTransport: Transport {
     /// so a client that stops reading parks this queue's thread, never a pool
     /// thread, and the writes keep the order this actor handed them over in.
     /// One per connection: one stalled client never delays another
-    /// connection's writes. (The host's announce loops, which await each
-    /// session in turn, are their own seam — VX-944.)
+    /// connection's writes — nor, since VX-944, another connection's notices
+    /// (the host's announce rounds only ask each session's own announcer).
     private nonisolated let writer = DispatchQueue(label: "variorum.mcp.writer")
     /// **VX-933: a frame is MID-WRITE while its rest waits on the writer** —
     /// its first bytes went on the fast road and the write lock was let go.
@@ -81,6 +87,18 @@ actor MCPSocketTransport: Transport {
     /// VX-933: writes handed to the writer and not yet ended. While any is,
     /// every write goes behind it (never the fast road), so the order holds.
     private var handedOver = 0
+    /// **VX-951: the opening's answer, reported** (the VX-981 run, batch 3 —
+    /// `MCPAnnounceGate`'s first half). The replayed opening frame (the
+    /// `initialize` the handshake decided on) is a request; `openingID` is its
+    /// id, read with the SDK's own `ID` decoding, kept until a frame this
+    /// transport sends ANSWERS it (a response — no method — carrying that id).
+    /// That frame's write ended, `onOpeningAnswered` is called, once: from then
+    /// on nothing this connection is sent can precede the answer on the wire.
+    /// Only frames sent BEFORE the answer are read for their id (one, for every
+    /// client the door has met — the answer is the first frame the SDK sends);
+    /// nil once answered, or when no report was asked for.
+    private var openingID: MCP.ID?
+    private var onOpeningAnswered: (@Sendable () -> Void)?
     #if DEBUG
     /// TEST-ONLY (VX-933): run in the gap between a frame's first bytes (the
     /// fast road) and its rest's hand-over — the write lock free, the stream
@@ -89,10 +107,16 @@ actor MCPSocketTransport: Transport {
     func setMidFrameProbeForTesting(_ probe: (@Sendable () -> Void)?) { midFrameProbe = probe }
     #endif
 
-    init(fd: Int32, replay: [Data] = []) {
+    init(fd: Int32, replay: [Data] = [], leftover: Data = Data(), onOpeningAnswered: (@Sendable () -> Void)? = nil) {
         self.fd = fd
         self.replay = replay
+        self.leftover = leftover
         self.step = Self.writeStep(fd)
+        // VX-951: an opening with no id the SDK could echo is one the SDK never
+        // answers as a request either — nothing to report.
+        let opening = onOpeningAnswered == nil ? nil : replay.first.flatMap { Self.identity(of: $0)?.id }
+        self.openingID = opening
+        self.onOpeningAnswered = opening == nil ? nil : onOpeningAnswered
         self.logger = Logger(label: "variorum.mcp.socket", factory: { _ in SwiftLogNoOpLogHandler() })
         var made: AsyncThrowingStream<Data, Swift.Error>.Continuation!
         self.stream = AsyncThrowingStream { made = $0 }
@@ -104,9 +128,10 @@ actor MCPSocketTransport: Transport {
         isConnected = true
         let fd = self.fd
         let continuation = self.continuation
+        let leftover = self.leftover
         for line in replay { continuation.yield(line) }
         let reader = Thread { [self] in
-            let end = MCPSocketTransport.readLines(fd: fd, cap: MCPSocketTransport.lineCap) { line in
+            let end = MCPSocketTransport.readLines(fd: fd, cap: MCPSocketTransport.lineCap, initial: leftover) { line in
                 continuation.yield(line)
             }
             if end == .overLimit {
@@ -144,9 +169,45 @@ actor MCPSocketTransport: Transport {
         guard isConnected else { throw MCPError.transportError(POSIXError(.ENOTCONN)) }
         var framed = data
         framed.append(UInt8(ascii: "\n"))
-        if let failure = await deliver(framed) {
+        // VX-951: taken BEFORE the write (a send entering meanwhile reads no
+        // id), reported once the write has ended.
+        let answered = answersTheOpening(data)
+        let failure = await deliver(framed)
+        answered?()
+        if let failure {
             throw MCPError.transportError(POSIXError(POSIXErrorCode(rawValue: failure) ?? .EIO))
         }
+    }
+
+    /// **VX-951** — `data` is the answer to the opening (a response carrying
+    /// its id): the report is taken (once), to be called once the frame is
+    /// written. nil for every other frame, and for every frame after the answer
+    /// (nothing is decoded then).
+    private func answersTheOpening(_ data: Data) -> (@Sendable () -> Void)? {
+        guard let opening = openingID,
+              let frame = Self.identity(of: data), frame.method == nil, frame.id == opening
+        else { return nil }
+        openingID = nil
+        defer { onOpeningAnswered = nil }
+        return onOpeningAnswered
+    }
+
+    /// A frame's id and method, decoded exactly as the SDK decodes a message's
+    /// id (`MCP.ID` — a `null` id is the empty string, as the SDK reads and
+    /// echoes it); nil when the frame is no JSON object.
+    private struct Identity: Decodable {
+        let id: MCP.ID?
+        let method: String?
+        private enum CodingKeys: String, CodingKey { case id, method }
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = container.contains(.id) ? try container.decode(MCP.ID.self, forKey: .id) : nil
+            method = try container.decodeIfPresent(String.self, forKey: .method)
+        }
+    }
+
+    private static func identity(of frame: Data) -> Identity? {
+        try? JSONDecoder().decode(Identity.self, from: frame)
     }
 
     /// **VX-933 — every write's one road.** While nothing of this connection
@@ -294,25 +355,34 @@ actor MCPSocketTransport: Transport {
     /// and only the NEW bytes of each read are scanned for a newline, so the
     /// cost is linear in the stream (pre-fix every read re-scanned the whole
     /// pending line: a 16 MiB message arriving ~8 KiB at a time was ~16 GB of
-    /// comparisons — never served in practice).
+    /// comparisons — never served in practice). VX-952: `initial` — the
+    /// opening's leftover — is taken first, exactly as one read's bytes (the
+    /// same split, the same cap, counted from the stream's first byte after
+    /// the replayed frame).
     @discardableResult
-    static func readLines(fd: Int32, cap: Int, yield: (Data) -> Void) -> ReadEnd {
+    static func readLines(fd: Int32, cap: Int, initial: Data = Data(), yield: (Data) -> Void) -> ReadEnd {
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
         var pending = Data()
-        while true {
-            let count = buffer.withUnsafeMutableBytes { read(fd, $0.baseAddress, $0.count) }
-            if count < 0, errno == EINTR { continue }
-            guard count > 0 else { return .closed }
-            var start = 0
-            while let newline = buffer[start..<count].firstIndex(of: UInt8(ascii: "\n")) {
-                guard pending.count + (newline - start) <= cap else { return .overLimit }
-                pending.append(contentsOf: buffer[start..<newline])
+        /// One read's bytes: every complete line yielded, the rest pending;
+        /// false once a line is past the cap.
+        func take(_ bytes: ArraySlice<UInt8>) -> Bool {
+            var start = bytes.startIndex
+            while let newline = bytes[start...].firstIndex(of: UInt8(ascii: "\n")) {
+                guard pending.count + (newline - start) <= cap else { return false }
+                pending.append(contentsOf: bytes[start..<newline])
                 if !pending.isEmpty { yield(pending) }
                 pending = Data()
                 start = newline + 1
             }
-            pending.append(contentsOf: buffer[start..<count])
-            if pending.count > cap { return .overLimit }
+            pending.append(contentsOf: bytes[start...])
+            return pending.count <= cap
+        }
+        if !initial.isEmpty, !take(ArraySlice(initial)) { return .overLimit }
+        while true {
+            let count = buffer.withUnsafeMutableBytes { read(fd, $0.baseAddress, $0.count) }
+            if count < 0, errno == EINTR { continue }
+            guard count > 0 else { return .closed }
+            guard take(buffer[0..<count]) else { return .overLimit }
         }
     }
 

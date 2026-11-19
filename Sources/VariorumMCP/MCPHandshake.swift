@@ -33,8 +33,10 @@ import VariorumMCPSocket
 /// presented, so it is no oracle; it decides nothing — the admission still
 /// decides once, on the `initialize` frame's name and the preamble's key.
 ///
-/// The reads are byte-by-byte up to each newline, so nothing past the opening's
-/// frame is consumed here — the transport's reader starts at the next byte.
+/// VX-952 (the VX-981 run, batch 4): the opening is read in chunks
+/// (`MCPOpeningWindow.Reader`), and every byte read past its frame is the
+/// opening's `leftover` — the transport's to start with, byte for byte, so a
+/// frame pipelined behind the `initialize` reaches the SDK exactly as sent.
 enum MCPHandshake {
     /// What a connection opened with.
     struct Opening: Equatable, Sendable {
@@ -44,6 +46,12 @@ enum MCPHandshake {
         /// when none came inside the pre-initialize window, the frame that
         /// ended it (VX-180), which the admission then refuses.
         let firstFrame: Data
+        /// VX-952: every byte the opening's reader read past `firstFrame`'s
+        /// newline, in order — whole frames a client pipelined behind its
+        /// `initialize`, and the start of the next one. The transport yields
+        /// it before its first read (`MCPSocketTransport`'s `leftover`); a
+        /// refusal or the over-cap answer ends the connection and drops it.
+        var leftover = Data()
     }
 
     /// The longest opening line read — `MCPOpeningWindow.lineLimit` (1 MiB):
@@ -170,11 +178,13 @@ enum MCPHandshake {
     /// VX-180 it also WRITES to that descriptor, and only the pre-initialize
     /// window's fixed answers, each before the next read. Since VX-181 the
     /// window is `MCPOpeningWindow`'s — the SAME read the shim's closed-app
-    /// refusal runs. Pinned headless over a socket pair (and over a pipe
-    /// where no frame asks for an answer).
+    /// refusal runs. Since VX-952 one buffered reader reads it all; what it
+    /// read past the frame is the opening's `leftover`. Pinned headless over
+    /// a socket pair (and over a pipe where no frame asks for an answer).
     static func readOpeningOutcome(fd: Int32) -> OpeningRead {
+        var reader = MCPOpeningWindow.Reader(fd)
         let first: Data
-        switch MCPOpeningWindow.nextLine(fd) {
+        switch reader.nextLine() {
         case .line(let line): first = line
         case .ended: return .ended
         case .overLimit: return .overLimit
@@ -186,7 +196,7 @@ enum MCPHandshake {
             presentedKey = nil
             start = first
         case .preamble(let key):
-            switch MCPOpeningWindow.nextLine(fd) {
+            switch reader.nextLine() {
             case .line(let next): start = next
             case .ended: return .ended
             case .overLimit: return .overLimit
@@ -200,8 +210,9 @@ enum MCPHandshake {
         }
         // VX-180: the pre-initialize window — bounded; the frame past it is
         // the opening's, whatever it is.
-        switch MCPOpeningWindow.read(startingWith: start, from: fd, answeringOn: fd) {
-        case .frame(let frame): return .opened(Opening(presentedKey: presentedKey, firstFrame: frame))
+        switch MCPOpeningWindow.read(startingWith: start, from: &reader, answeringOn: fd) {
+        case .frame(let frame):
+            return .opened(Opening(presentedKey: presentedKey, firstFrame: frame, leftover: reader.leftover))
         case .ended: return .ended
         case .overLimit: return .overLimit
         }

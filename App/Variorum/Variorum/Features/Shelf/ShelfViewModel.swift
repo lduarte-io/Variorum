@@ -72,11 +72,11 @@ final class ShelfViewModel {
     /// fragments). Held with `aiReach`.
     private(set) var fencedBooks: Set<String> = []
     /// **VX-831 — the board's books that wear the Private mark** (their own
-    /// stamp; a gathering never — `Queries.privateBookMarks`), held over the
-    /// board's own rows (`holdPrivateMarks`), only while a client is approved
-    /// (R-878-K3).
+    /// stamp — and, VX-1007, THE daily Journal's marker; a gathering never —
+    /// `Queries.privateBookMarks`), held over the board's own rows
+    /// (`holdPrivateMarks`), only while a client is approved (R-878-K3).
     /// Reads `reading` only — never at autosave rate.
-    private(set) var privateBookIDs: Set<String> = []
+    private(set) var privateBookMarks: [String: Queries.PrivateBookMark] = [:]
 
     // MARK: What the board said last (kept for the pins; also spoken)
 
@@ -364,8 +364,8 @@ final class ShelfViewModel {
     /// `.task(id: bookIDs)` — a new set of rows restarts it).
     func holdPrivateMarks(_ ids: [String]) async {
         await PrivateMarkHold.books(session, ids) { [weak self] value in
-            guard let self, self.privateBookIDs != value else { return }
-            self.privateBookIDs = value
+            guard let self, self.privateBookMarks != value else { return }
+            self.privateBookMarks = value
         }
     }
 

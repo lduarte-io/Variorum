@@ -267,6 +267,22 @@ extension MCPTwoStoreCatalogServerTests {
             ["edge_id": s(w.privateLink)] },
         CatalogArm(label: "unlink_versions · kin's link to the daily Journal's entry", tool: "unlink_versions") { w, _ in
             ["edge_id": s(w.journalLink)] },
+        // VX-977 (the VX-981 run, batch 2): the ruled EDIT rung — the write-new
+        // pair's link made on the wire, its unlink refused at the rung (the
+        // rung-too-low family with the asked sentence), and rung one's link to a
+        // HIDDEN note: the one shape before any rung (B and C: an id naming nothing).
+        CatalogArm(label: "link_versions · the write-new pair", tool: "link_versions",
+                   args: { w, _ in
+                       ["note_a": s(w.rungOne), "note_b": s(w.rungTwo),
+                        "pairs": .array([.object(["block_a": s(w.rungOneBlock), "block_b": s(w.rungTwoBlock)])])] },
+                   capture: { answer in
+                       let links = answer["links"] as? [[String: Any]] ?? []
+                       return ["rungLink": links.first?["edge_id"] as? String ?? ""]
+                   }),
+        CatalogArm(label: "unlink_versions · the write-new pair's link (the rung)", tool: "unlink_versions") { _, c in
+            ["edge_id": s(c["rungLink"] ?? "")] },
+        CatalogArm(label: "unlink_versions · the write-new note's link to a hidden note", tool: "unlink_versions") { w, _ in
+            ["edge_id": s(w.rungHiddenLink)] },
         CatalogArm(label: "insert_blocks · card's end", tool: "insert_blocks") { w, _ in
             ["note_id": s(w.card), "blocks": .array([.object(["text": s("Inserted.")])])] },
         CatalogArm(label: "insert_blocks · after a hidden block", tool: "insert_blocks") { w, _ in

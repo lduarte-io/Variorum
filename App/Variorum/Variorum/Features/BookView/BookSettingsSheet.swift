@@ -289,6 +289,20 @@ nonisolated enum BookSettingsFace {
         MCPGrantOpening(place: .reading(reading), origin: .place)
     }
 
+    /// **VX-1007 — the Private row's face** (books only): whether it is
+    /// ticked, whether it is LOCKED, and the one line under it.
+    struct PrivateRow: Equatable {
+        let ticked: Bool
+        let locked: Bool
+        let caption: String
+    }
+
+    static func privateRow(isPrivate: Bool, isDailyJournal: Bool) -> PrivateRow {
+        isDailyJournal
+            ? PrivateRow(ticked: true, locked: true, caption: PrivateMarkCopy.dailyJournalCaption)
+            : PrivateRow(ticked: isPrivate, locked: false, caption: PrivateMarkCopy.bookCaption)
+    }
+
     /// 13i-e U2 — the State section's Archived row: Archive or Unarchive, from
     /// the ONE archive table (`BookArchiveDoorSet` — the sheet carries no
     /// Delete door, so only its archive half draws here).
@@ -314,6 +328,11 @@ final class BookSettingsModel {
     /// 13n-b U2 (R-13nb-4): the book's Private mark (read with the rest;
     /// kept off the `Reading` model so no stale model can ever clear it).
     private(set) var isPrivate = false
+    /// **VX-1007 — THE daily Journal** (the fence's book leg, read through
+    /// the faces' one fact — `Queries.privateBookMarks`' `dailyJournal`): its
+    /// Private row is ticked and LOCKED with one line saying why (her ruling,
+    /// 2026-11-18: "ticked and locked"); nothing is ever stamped for it.
+    private(set) var isDailyJournal = false
     /// VX-641: the library has EVER had an MCP client (`MCPLibraryClients`,
     /// the pane's own fact), read with the mark.
     private(set) var libraryHasHadClient = false
@@ -351,13 +370,16 @@ final class BookSettingsModel {
         let ids = Array(RuleGrammar.tagIDs(of: RuleGrammar.decode(reading.querySpec)))
             + reading.autoTagIDs
         let readingID = readingID
-        guard let (paths, hides, marked, hadClient) = try? await session.database.read({ db in
+        guard let (paths, hides, marked, hadClient, daily) = try? await session.database.read({ db in
             (try Queries.tagPaths(db, ids: ids), try Queries.hideOwnedDefault(db),
-             try Queries.isBookPrivate(db, readingID: readingID), try Queries.mcpLibraryHasHadClient(db))
+             try Queries.isBookPrivate(db, readingID: readingID), try Queries.mcpLibraryHasHadClient(db),
+             // VX-1007: the fence's book leg, through the faces' one fact.
+             try Queries.privateBookMarks(db, readingIDs: [readingID])[readingID]?.dailyJournal ?? false)
         }) else { return }
         self.paths = paths
         hideOwnedDefault = hides
         isPrivate = marked
+        isDailyJournal = daily
         libraryHasHadClient = hadClient
         notePrivateRowShown()
     }
@@ -409,6 +431,10 @@ final class BookSettingsModel {
     /// Allowed on a finished, sealed or archived book (PROVISIONAL
     /// P-13nb-U2-1 — the mark protects rather than authors).
     func setPrivate(_ on: Bool, name: String) async {
+        // VX-1007 (contract 6): THE daily Journal's row is locked — the DOOR
+        // is closed here (the toggle is disabled too); `setBookPrivate` itself
+        // keeps its store behaviour for every other caller.
+        guard !isDailyJournal else { return }
         let id = readingID
         do {
             let wrote = try await session.runner.run { try $0.setBookPrivate(id, on) }
@@ -615,8 +641,10 @@ struct BookSettingsSheet: View {
 
     private var factsKey: String {
         guard let reading = structure.reading else { return "" }
+        // VX-1007: and the profile — the daily marker moving re-reads the
+        // Private row's lock.
         return [reading.querySpec ?? "", reading.autoTagIds ?? "",
-                "\(String(describing: reading.hideOwned))"].joined(separator: "|")
+                "\(String(describing: reading.hideOwned))", reading.profile ?? ""].joined(separator: "|")
     }
 
     // MARK: Sections
@@ -793,12 +821,19 @@ struct BookSettingsSheet: View {
         // the mark (`wrongReadingKind`), so it never renders (P-2). VX-641: and
         // only once the library has had an MCP client, or while the book is
         // marked (`model.showsPrivateRow` — the pane's one fact).
+        // VX-1007: THE daily Journal's row reads ticked and LOCKED, its line
+        // saying why (`BookSettingsFace.privateRow`); the setter refuses there.
         if reading.kind == .book, model.showsPrivateRow {
+            let row = BookSettingsFace.privateRow(isPrivate: model.isPrivate, isDailyJournal: model.isDailyJournal)
             Toggle(tokens.chromeLabel(CapabilityRegistry.capability(.markBookPrivate).verb), isOn: Binding(
-                get: { model.isPrivate },
-                set: { on in Task { await model.setPrivate(on, name: reading.name) } }))
+                get: { row.ticked },
+                set: { on in
+                    guard !row.locked else { return }
+                    Task { await model.setPrivate(on, name: reading.name) }
+                }))
                 .font(tokens.small)
-            ChromeNotice(tokens: tokens, text: PrivateMarkCopy.bookCaption, lines: 3)
+                .disabled(row.locked)
+            ChromeNotice(tokens: tokens, text: row.caption, lines: 3)
         }
         // 13n-c U3 — THE GRANT ROW (R-13n-4 named Book Settings a grant face;
         // VX-156 item 2, mockup §2): who reaches this book now, and Share… —

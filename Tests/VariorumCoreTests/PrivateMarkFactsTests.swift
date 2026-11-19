@@ -125,7 +125,7 @@ struct PrivateMarkFactsTests {
             let read = try db.read {
                 try Queries.privateBookMarks($0, readingIDs: [vault.id, open.id, dead.id, gathering.id])
             }
-            #expect(read == [vault.id])
+            #expect(Set(read.keys) == [vault.id])  // VX-1007: the facts are keyed now (own + daily)
         }
     }
 
@@ -199,7 +199,7 @@ struct PrivateMarkFactsTests {
             try ops.addPostToReading(filed.id, to: vault.id)
             try ops.setBookPrivate(vault.id, true)
             try ops.setNotePrivate(note.id, true)
-            func drawn() throws -> (notes: [String: Queries.PrivateMark], books: Set<String>) {
+            func drawn() throws -> (notes: [String: Queries.PrivateMark], books: [String: Queries.PrivateBookMark]) {
                 try db.read { db in
                     (try Queries.privateMarksDrawn(db, noteIDs: [note.id, filed.id]),
                      try Queries.privateBookMarksDrawn(db, readingIDs: [vault.id]))
@@ -213,7 +213,7 @@ struct PrivateMarkFactsTests {
             try ops.approveMCPClient(client.id, granting: nil)
             let approved = try drawn()
             #expect(Set(approved.notes.keys) == [note.id, filed.id])
-            #expect(approved.books == [vault.id])
+            #expect(Set(approved.books.keys) == [vault.id])
             try ops.denyMCPClient(client.id)
             let denied = try drawn()
             #expect(denied.notes.isEmpty && denied.books.isEmpty, "denied: no approved client")
@@ -278,7 +278,9 @@ struct PrivateMarkFactsTests {
             try ops.setBookPrivate(vault.id, true)
             try ops.setNotePrivate(note.id, true)
             _ = try ops.recordMCPContact(name: "asking", version: "1")
-            func traced() throws -> (notes: [String: Queries.PrivateMark], books: Set<String>, sqls: [String]) {
+            func traced() throws -> (
+                notes: [String: Queries.PrivateMark], books: [String: Queries.PrivateBookMark], sqls: [String]
+            ) {
                 try db.read { db in
                     var sqls: [String] = []
                     db.trace { sqls.append($0.description) }
@@ -305,7 +307,7 @@ struct PrivateMarkFactsTests {
             let whileOn = try traced()
             try ops.setMCPSwitch(.server, on: false)
             let whileOff = try traced()
-            #expect(Set(whileOn.notes.keys) == [note.id, filed.id] && whileOn.books == [vault.id],
+            #expect(Set(whileOn.notes.keys) == [note.id, filed.id] && Set(whileOn.books.keys) == [vault.id],
                     "approved: the marks are drawn (non-vacuity)")
             #expect(whileOff.notes == whileOn.notes && whileOff.books == whileOn.books,
                     "the switch off changes nothing a drawn read answers — the face dims, the mark stays")
