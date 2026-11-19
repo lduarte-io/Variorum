@@ -183,6 +183,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
 | Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 — the merge, the rebuilds, the red build, the whole Core package — is the merge block's below) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the stage |
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
+| Ladder r2 · fix pass | **IN-PROGRESS** (first turn) | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, then the agreed no-choice fixes with their pins; the reviewer's final calls, the whole Core package and the final builds in the second turn |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -786,6 +787,25 @@ The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) a
 | M10 — phone and Mac `build-for-testing`, cold, into `vm64-gate` | DONE at `f4068b3cf` — phone (`generic/platform=iOS Simulator`) `** TEST BUILD SUCCEEDED **`, 0 errors, first try; Mac (`platform=macOS`) `** TEST BUILD SUCCEEDED **`, 0 errors. No warning in a line the merge or this session wrote (the two nearest are pre-existing: `MobileStructural.swift:122`'s unused `intra`, 2026-08; VM-55's `MobileUndoDoorTests` `try`s). Logs `App/Variorum/DerivedData/vm64-gate-{phone,mac}-build.log` (local) |
 | M11 — the finding-2 red build into `vm64-gate-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | DONE — announced at `fe7bc1960`; the recipe's reverse patch applied cleanly on the merged tree (finding 2's hunk in `takeAutosaveHold` alone; the pin file kept); phone `build-for-testing` into `vm64-gate-red` `** TEST BUILD SUCCEEDED **`, 0 errors; restored by `git checkout HEAD --` the one file; `git status` and `git diff HEAD` empty |
 | M12 — §7's section, the hosted commands, the report | DONE (this commit) — §7 ▸ "The merge of main (VM-55) and what it re-landed" |
+
+### Ladder round 2 — fix pass · LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** Base: `85762803a` (the round's findings as written, `notes/plans/fixes/vm-64-ladder-round2.md`).
+The flow (cross-model): the responses to findings 1–9 and O-1 are written first, at the end of the round file, and
+pushed before any code; the agreed fixes whose shape has nothing left to choose are applied this turn with their pins;
+the rest wait for the reviewer's final call (the second turn), with the whole Core package `swift test` and the final
+`build-for-testing` (phone + Mac) into `App/Variorum/DerivedData/vm64-gate2/` and the red-on-old phone build into
+`vm64-gate2-red/` — owed once, on the final tree. The orchestrator's frozen `vm64-gate/` and `vm64-gate-red/` are never
+written.
+
+| Piece | State |
+|---|---|
+| R0 — this live status | DONE (this commit) |
+| R1 — the responses (round file ▸ "Implementer responses (round 2 fix pass)"), committed and pushed before any code | NOT-STARTED |
+| R2 — the no-choice fixes and their pins (the responses name which) | NOT-STARTED |
+| R3 — the docs corrections of findings 5 and 6 (the record, the handoff, the closeout drafts) | NOT-STARTED |
+| R4 — `swift test --filter` for every Core suite touched; §7's "Ladder round 2 — fix pass" closeout; the first turn's report | NOT-STARTED |
+| R5 — second turn: the reviewer's final calls applied; the whole Core package; `vm64-gate2` (phone + Mac) and `vm64-gate2-red` (revert announced first); the hosted commands | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
