@@ -41,8 +41,13 @@ struct VM63MacWingBrainsHoistPinTests {
     /// phone road would say something else.
     @Test func theMacsWingsBrainSpeaksTheMacsRefusalWords() throws {
         let db = try AppDatabase.inMemory()
+        // The session's clock and ids are dependencies too (`AppSession.init`
+        // reads `\.date`): a test scope supplies them, or the library records
+        // an issue for the live value (the shared window's red, 2026-11-19).
         let wings = withDependencies {
             $0.database = db
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.uuid = .incrementing
         } operation: { @MainActor in
             WingsModel(session: AppSession(database: db))
         }
