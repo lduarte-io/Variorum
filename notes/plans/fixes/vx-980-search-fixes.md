@@ -1,11 +1,11 @@
 # VX-980 — Umbrella: search fixes & small improvements (the run record)
 
-**STATUS: OPEN (kicked off 2026-11-19, overnight). Orchestrator session `vx-980`; `/run-phase`; stage coordinator this window: `nov18`.**
+**STATUS: CLOSED 2026-11-19 — merged as PR #11 (merge commit ed4d87cb7); the shared ledgers applied on main at the merge moment. FOR A LATER READER below is the record.**
 Ticket: VX-980 · Project-less umbrella (the sub-issues are the roster) · Branch: `vx-980-search-fixes` · Worktree: `~/dev/variorum-vx-980` (the Pro) · PR at close: `VX-980: …`, merge commit only.
 
 ## FOR A LATER READER
 
-**What this run was.** Four search members, three batches, one overnight `/run-phase` on 2026-11-19 (Fable orchestrating and cold-reviewing, a fresh Opus implementer per batch, nov18 coordinating the stage). She sat at kickoff and ruled R-980-1…12 (verbatim in `vx-980-her-rulings.md`); everything else was built PROVISIONAL and bundled. PR PENDING(PR) · merge PENDING(merge commit).
+**What this run was.** Four search members, three batches, one overnight `/run-phase` on 2026-11-19 (Fable orchestrating and cold-reviewing, a fresh Opus implementer per batch, nov18 coordinating the stage). She sat at kickoff and ruled R-980-1…12 (verbatim in `vx-980-her-rulings.md`); everything else was built PROVISIONAL and bundled. PR #11 · merge `ed4d87cb7`.
 
 **The mechanisms as settled.**
 - **VX-955.** The old word test (`SearchComposer.hasTokenCharacter`) counted symbol scalars (`+`, `$`, `©`) as token characters, so such a word became an FTS5 phrase the index's tokenizer (`unicode61 remove_diacritics 2`) holds no token for; ANDed beside real words it emptied the whole answer (`red +` found nothing). SQLite's own category table, not Unicode's, decides — the two disagree on 822,140 scalars.
@@ -19,7 +19,7 @@ Ticket: VX-980 · Project-less umbrella (the sub-issues are the roster) · Branc
 
 **Evidence that matters.** Core: batch 1's search suites 175/31, batch 2's 196/35, batch 3's 359/65 (each + the second product), the reviewers' own 45/8 battery twice. Red-on-old: batch 1's pins written before any fix (7 tests in 3 suites red, 40 issues); the app side by revert at gate 1 (5 tests, 65 issues). Teeth: batch 2's four road mutations (19 issues), batch 3's probes A–D, all red and restored. Gate 1 PASSED (103 tests / 17 suites, the four walk probes). Gate 2's walk PASSED (Check and Rebuild read 4,857 entries); its one red was a stale source-shape pin, fixed test-only at `2eaf1ec93`. Gate 3 PASSED — 134 tests / 19 suites, 0 skipped (`TrashSearchModelTests` 8, `TrashSearchFieldTests` 3, the existing Trash suites, `DataSafetyRoadCountsTests` green after its fix); the Trash walk's six rows; MINOR-1's pin green at head and RED with `e7b24bb71` reverse-applied (8 tests, only `anAnswerStillInFlightWhenTheFieldClearsIsDropped` failing, 5 issues), restored. The ladder: round 1 0 blocker · 0 major · 1 minor · 2 nits, all fixed; round 2 0 · 0 · 0 · 1 nit (a record line) — CLOSED. The merge gate GREEN — the whole Mac target on the merged tree `6b0e1e7ce`: 6,397 tests / 1,107 suites passed, 14 standing known issues, 0 failed. Canon: three SurfaceContracts lines in place (the closer's LIVE STATUS); `Tools/canon-size` 142,894 of 150,000, no crossing.
 
-**Open items.** The ratify bundle, QUESTIONS PENDING(QUESTIONS #) (P-980-2, P-980-3's options, P-980-B1-1, batch 1's AST-only readings, P-980-B2-1…3, P-980-B3-1…9); the wording pass (every new sentence is in her handoff); born tickets VX-1009 (Needs Lillian) · VX-1010 (Parked) · VX-1013 · VX-1014 · VX-1015 · VX-1016; the release build if this run merges last (nov18's word); the mobile parity row PL-75; her handoff `notes/handoffs/vx-980-handoff.md`.
+**Open items.** The ratify bundle, QUESTIONS #276 (P-980-2, P-980-3's options, P-980-B1-1, batch 1's AST-only readings, P-980-B2-1…3, P-980-B3-1…9); the wording pass (every new sentence is in her handoff); born tickets VX-1009 (Needs Lillian) · VX-1010 (Parked) · VX-1013 · VX-1014 · VX-1015 · VX-1016; the release build if this run merges last (nov18's word); the mobile parity row PL-75; her handoff `notes/handoffs/vx-980-handoff.md`.
 
 *(Everything below is the night's working record, kept verbatim — read it only when reopening this run.)*
 
@@ -558,7 +558,7 @@ No other string was added or changed.
 - OverallModel, CoreDescription, CLAUDE.md — nothing this run touches; **nothing false.**
 - MCPSpec — the wire's `search` reads the composer, and MCPSpec states no word-or-symbol semantics for it (searched); `red +` now answers `red`'s passages, same shape (batch 1's wire trace) — **unchanged, nothing false.**
 
-### CLOSEOUT DRAFTS (written by the closer on the branch; APPLIED by the orchestrator at the merge moment on latest main — nothing here is live yet)
+### CLOSEOUT DRAFTS (written by the closer on the branch; APPLIED by the orchestrator at the merge moment on latest main, 2026-11-19 — PR #11, merge `ed4d87cb7`, QUESTIONS #276; the slots below were filled in the applied copies, and the release line there reads that this run built none)
 
 *Every `PENDING(…)` is a fact known only at gate 3 or the merge. The four shared ledgers are touched only then, by the merging session (CLAUDE.md, Tracker & parallel work). vx-981 may merge first tonight; the drafts below assume nothing about its numbers.*
 

@@ -1,6 +1,6 @@
 # VX-980 — search fixes and small improvements: your morning handoff
 
-**STATUS: DRAFT — written before the last test window and the merge. Every `PENDING(…)` below is a fact not yet known when this was written; the orchestrator fills each one at gate 3 and at the merge, then flips this line to FINAL.**
+**STATUS: FINAL (closed 2026-11-19 — PR #11, merge commit ed4d87cb7; the decisions are QUESTIONS #276; everything below is settled).**
 
 *How to read the ids in this file:* **VX-NNN** is a ticket on the board. **R-980-N** is one of the rulings you gave at tonight's kickoff sitting (your words are kept verbatim in `notes/plans/fixes/vx-980-her-rulings.md`). **P-980-…** is a provisional call built in your absence and waiting for you. A **gate** is a test window on the shared Mac, run through **nov18** (tonight's stage coordinator session). The **ladder** is the cold-review rounds. The **dev store** is the Debug app's own library, never yours.
 
@@ -33,7 +33,7 @@ Here is each item, in plain words:
 
 ## Your checklist
 
-- [ ] Read the decisions below. They are also the QUESTIONS bundle PENDING(QUESTIONS #).
+- [ ] Read the decisions below. They are also the QUESTIONS bundle #276.
 - [ ] The restore question (VX-79): pick (a), (b) or (c) in its section below.
 - [ ] The wording pass: every new sentence the app now says is listed below, all provisional ("provisional wording is fine for now, you can keep them listed though").
 - [ ] Say whether "up to 5 review rounds as long as a major is found" was for this run only or is a standing change. The repo records no answer.
@@ -155,7 +155,7 @@ I proved each road by running it, the way the app runs it, on real files, and th
 
 ## Evidence and state
 
-- **Branch** `vx-980-search-fixes`, **worktree** `~/dev/variorum-vx-980` (the Pro). **PR** PENDING(PR). **Merge commit** PENDING(merge commit).
+- **Branch** `vx-980-search-fixes`, **worktree** `~/dev/variorum-vx-980` (the Pro). **PR** #11. **Merge commit** `ed4d87cb7`.
 - **The run record:** `notes/plans/fixes/vx-980-search-fixes.md`. Its FOR A LATER READER section at the top is the settled summary; everything under it is the night's working record.
 - **Core tests (the headless package):** batch 1's search suites 175 tests in 31 suites; batch 2's 196 in 35; batch 3's 359 in 65; both reviewers re-ran the run's eight new core suites themselves, 45 tests, zero problems.
 - **Gate 1 (batch 1): PASSED.** 103 tests in 17 suites, the four walk checks, and the check that takes the fix back out and watches the tests fail, red as it should be (5 tests, 65 problems), then restored.
