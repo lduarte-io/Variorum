@@ -1,7 +1,8 @@
 # VM-47 — the run's one walk: what the captures show
 
 **Run:** VM-47, "Sizes and look" (branch `vm-47-sizes-and-look`, worktree `~/dev/variorum-vm-47`). **Tree walked:** code
-`b20b04fad` (batches 1–5, the ladder's fixes, VM-55's re-land). **Record:** `notes/plans/vm-47-sizes-and-look.md` — §3 "One
+`b20b04fad` (batches 1–5, the ladder's fixes, VM-55's re-land) plus R-47-3's one word (`50635a674` — the Bookcase root's
+line says "Bookcase"; the walk app and driver rebuilt on it into `DerivedData/vm47-walk`). **Record:** `notes/plans/vm-47-sizes-and-look.md` — §3 "One
 walk for the whole run" (the brief), §4 rows W.0–W.8 (LIVE STATUS), §5 (the PROVISIONAL calls), §6 (each batch's results).
 
 **Who does what.** The walker DRIVES the walk (builds the driver, runs both parts, keeps them honest, records each part's
@@ -81,7 +82,9 @@ bar (W-009, P-47-20 — the captures are for her look); a remover beside a resto
 VM-153); the sheets' missing grabber and detents (VM-152); a take card's body, the comment draft field, the history rows
 (VM-152 / VM-189 / VM-14 / VM-193 / VM-41); the bar staying above the keyboard while the box or the search is focused
 (VM-73). Questions already put to her — look and describe precisely: what truncates on the Bookcase's path line in Terminal
-(P-47-27); the root saying "Shelf" under a tab saying "Bookcase" (P-47-28).
+(P-47-27 — since R-47-3 the line is three characters longer there, and in Study a two-digit count now meets the edge at
+402 pt). Ruled since: the line reads Bookcase (R-47-3) — the Bookcase root's own path line says "Bookcase" (Study) /
+"bookcase" (Terminal), matching its tab; a "Shelf" anywhere on that line is a defect.
 
 **Classify every finding:** THIS RUN'S DEFECT (a size, ink, ground, control, hit area or bar placement this run built that
 does not match the sheet or the record — the walker fixes it narrowly, with a test where one holds, and re-captures) ·
@@ -114,7 +117,7 @@ only); `seaglass-study-light-ax5--` (the wider pass only). Where part B shares a
 | k2 | `k2-settings-swiped-1.png` | the same list swiped up once | Tags ▸ Manage Tags, Help ▸ Acknowledgments, Diagnostics (Record edit trace — a system switch tinted the accent — and Edit trace…): menu rows ≥ 44, labels 17 in ink; nothing clipped |
 | k3 | `k3-settings-swiped-2.png` | swiped again — the list's foot | the DEBUG groups (Tutorial, Performance, TK2 Spike); air at the foot; at AX5 (Terminal above all) the list scrolls and nothing is cut, overlapped or truncated (batch 5's ask) |
 | k0 | `k0-bookcase-menu-open.png` | the Bookcase with its ⋯ menu open | a system pull-down anchored at the ⋯ (P-47-22) with one item, "Settings" (Terminal "settings"); the ⋯ glyph 22 pt in the accent |
-| c1 | `c1-bookcase-rest.png` | the Bookcase root at rest | **the path line, ONE line about 44 tall:** the wing door "Home · Shelf  ·  N books" (Study) / "~/home/shelf  ·  N books" (Terminal) at 13 pt, "Home" in the accent and the rest corrected muted, then 🗑, "+ New Note" (15, the accent) and ⋯ — in Terminal the words cannot all fit: record EXACTLY what is cut (P-47-9, P-47-27); the page word "Shelf" while the bar says "Bookcase" (P-47-28); **the books** on the PAPER: names 17 semibold in ink (Terminal 15), meta 13 corrected muted, rows ≥ 44, the Today chip (15 medium in a 32 pt capsule) on the Journal's row, "+ New Book" 17 in the accent; **the box at rest:** one line, its hint on ONE line (the longest of its own cuts that fits — "new note — just start typing", or "new note" — P-47-6), the dashed edge; **the bar:** "Bookcase" semibold in ink on a wash chip, Starred and Library regular corrected muted, cells a third wide and ≥ 56 tall, the hairline above, the room to the bottom edge (P-47-21); at AX5 every bar word whole, Terminal included; nothing under 13 pt anywhere |
+| c1 | `c1-bookcase-rest.png` | the Bookcase root at rest | **the path line, ONE line about 44 tall:** the wing door "Home · Bookcase  ·  N books" (Study) / "~/home/bookcase  ·  N books" (Terminal) at 13 pt, "Home" in the accent and the rest corrected muted, then 🗑, "+ New Note" (15, the accent) and ⋯ — in Terminal the words cannot all fit: record EXACTLY what is cut (P-47-9, P-47-27; in Study, too, if a two-digit count is cut); the line reads Bookcase (R-47-3), the bar's word; **the books** on the PAPER: names 17 semibold in ink (Terminal 15), meta 13 corrected muted, rows ≥ 44, the Today chip (15 medium in a 32 pt capsule) on the Journal's row, "+ New Book" 17 in the accent; **the box at rest:** one line, its hint on ONE line (the longest of its own cuts that fits — "new note — just start typing", or "new note" — P-47-6), the dashed edge; **the bar:** "Bookcase" semibold in ink on a wash chip, Starred and Library regular corrected muted, cells a third wide and ≥ 56 tall, the hairline above, the room to the bottom edge (P-47-21); at AX5 every bar word whole, Terminal included; nothing under 13 pt anywhere |
 | c2 | `c2-bookcase-box-focused.png` | the box tapped: open, the keyboard up | the box grown, a caret, its text size the note body's; the books region yielding but visible; the bar above the keyboard (recorded: VM-73) |
 | c3 | `c3-library-rows.png` | the Library root | the path line "Home · Library" + 🗑 + "+ New Note" + ⋯ on one line; the search field (paper, the take-line edge, radius 12, ≥ 44 tall) on the room; the filter row "All · Books · Notes · Bookless · Scraps" at 13 pt in ONE row, no word shrunk or cut, the sort glyph at its end (P-47-7, P-47-10); rows on the PAPER (notes and books interleaved: titles 17, dates 13 corrected muted, each ≥ 44); the bar with "Library" on the chip; the keyboard should be DOWN — if it is up, the log line `NOTE the keyboard is still up after leaving the box` says the app left it up after the box (describe it) |
 | c4 | `c4-library-search.png` | "swipe" typed into the field, the keyboard up | the typed text 17 (at AX5 about 23 pt, the field still about 44 tall — P-47-14); the hits listing under it |
@@ -254,7 +257,7 @@ The simulator is switched light → dark WHILE each surface is on screen; the bo
 
 **Which PROVISIONAL calls each part shows.** Part A: P-47-1 (the sheet's numbers as a set), P-47-4, P-47-5 (dark), P-47-6,
 P-47-7, P-47-8 (batch 1's role map), P-47-9, P-47-10, P-47-12, P-47-13 (Settings' header), P-47-14, P-47-16, P-47-17,
-P-47-21, P-47-22, P-47-24, P-47-25, P-47-26, P-47-27, P-47-28; R-47-1 and R-47-2 as built. Part B: P-47-5 (teal & rust's
+P-47-21, P-47-22, P-47-24, P-47-25, P-47-26, P-47-27; R-47-1, R-47-2 and R-47-3 (was P-47-28) as built. Part B: P-47-5 (teal & rust's
 dark card), P-47-8 (VM-55's faces), P-47-11, P-47-13 (Create Book's Cancel), P-47-14 (the tag field), P-47-16 and P-47-17
 under a second palette, P-47-18, P-47-19, P-47-20, P-47-21 (on pushed lists), P-47-22, P-47-23, P-47-27, VM-54's flip.
 **Not shown:** P-47-15 (the lobby — the only lobby face this store shows is the words card, never captured), P-47-7's
