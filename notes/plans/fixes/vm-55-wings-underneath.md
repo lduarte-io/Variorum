@@ -360,7 +360,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | DONE — P-55-11 (be6f1d0c7) and VM-62 (pins 69005ad4a/15f788dfd, fix e8609cc6f) green in the whole phone target and the Mac leg; VM-62's red-on-old RAN at 15f788dfd from a snapshot worktree: the scan red (97 lines) and all five per-case pins red, the stripper oracle green; the window's two 2a follow-ups fixed and re-run green. Record: "Batch 2b record" |
 | Batch 3 — VM-63 | BUILT (d91f97ca5) — both targets build for testing green; its suites (the Mac and phone TYPE lists in "Batch 3 record") PENDING in the shared window batch 4 runs |
 | Main merged in at the seam after batch 3 | DONE (871bde99a — main 359ae214d, VX-980's merge; clean, by the orchestrator; NOT yet built or tested on this branch — batch 4's builds and the shared window are the first on the merged tree) |
-| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line |
+| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | IN-PROGRESS — the merged tree builds green on both targets (step 0, see "Batch 4 record"); the door is being built |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
@@ -1696,6 +1696,33 @@ named file): listed in the Mac TYPE list below.
   book door's drawing rule; the phone composes them (batch 4's door; wave 2's switcher, management and moves).
 - `notes/SurfaceContracts.md`, AppSpec — none (no behaviour changed; AppSpec §2 already names `App/Variorum/Shared/` as the
   cross-platform brains' home).
+
+### Batch 4 record
+
+**What this batch did NOT do (first, by the protocol):** *(kept current; final at READY)* not the swipe or its dots, sizes
+beside the names, the ⋯ or wing management (make, rename, delete, move everything), following a note to its wing, or moving or
+copying a note or book to a wing (all wave 2 — VM-80, umbrella VM-72); no restyle of the roots (the path line keeps its
+tokens, sizes and layout — VM-47 owns sizes); nothing under `Features/Protection/`, `Shared/Protection/`,
+`Sources/VariorumCore/Sync/`, custody/keychain or the editor seam; no Core change. The run's use-shaped simulator walk is the
+run's, after the ladder.
+
+Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch `vm-55-wings-underneath`.
+Reading done in full before code: CLAUDE.md + loaded canon, MobileSoul §1–§5, the resiliency protocol, the catch-up plan's
+inherited rules, umbrella-02, sitting-1 rulings, audit A §1D/§1F/§1I/§3.1, this file whole (batches 1, 2a, 2b and 3's
+records), SurfaceContracts' Messages bullet, the wing label and the wing switcher bullet, the home-wings-capture mockup's
+frames 5–15 and its build notes, wording list 1's wing rows. DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental).
+
+#### Batch 4 LIVE STATUS
+
+| Piece | State |
+|---|---|
+| Record skeleton | DONE (this commit) |
+| 0 — build the merged tree (main 359ae214d merged at 871bde99a) | DONE — at fb6b90ee0, both targets `build-for-testing` GREEN, nothing to fix: phone ("** TEST BUILD SUCCEEDED **", no `error:`; log `DerivedData/vm55-b4-phone-merge-build.log`), then Mac (same; `vm55-b4-mac-merge-build.log`). No diagnostic in any file this run moved, split or added; the warnings are pre-existing ones in untouched test files. So no semantic conflict with VX-980's Mac search/Settings/Capability changes showed at compile time. |
+| 1 — VM-225, the interim wing door | IN-PROGRESS — design settled (below); code next |
+| Phone + Mac `build-for-testing` on the final tree | NOT-STARTED |
+| READY for the shared window (batches 3 + 4) | NOT-STARTED |
+| The shared window — claim (i) the whole phone target | NOT-STARTED — PENDING |
+| The shared window — claim (ii) the whole Mac target (QUIET) | NOT-STARTED — PENDING |
 
 ## Ladder
 
