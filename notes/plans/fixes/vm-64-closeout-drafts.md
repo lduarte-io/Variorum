@@ -120,9 +120,9 @@ Every residual, reported-not-fixed, seen-on-the-walk, not-mine-noted and stays-o
 | # | The item | Where | Owner |
 |---|---|---|---|
 | 1 | After Open, the caret sits at the START of the typed line (audit F 2F, now seen) | §5 batch 1 ▸ "Seen on the walk" (1) | **VM-77** — "Open goes straight into the note: no keyboard drop, caret at the end" |
-| 2 | A fresh install's first launch, through the first-run card, recorded none of the launch spans; the relaunch recorded all three — by design or a lost mark, untraced | §5 batch 1 ▸ "Seen on the walk" (2) | **NEEDS-TICKET(3)** |
+| 2 | A fresh install's first launch, through the first-run card, recorded none of the launch spans; the relaunch recorded all three — by design or a lost mark, untraced | §5 batch 1 ▸ "Seen on the walk" (2) | **VM-234** |
 | 3 | A hardware Return in the capture box did not open the note in the walk's harness (the "open ↵" door did) | §5 batch 1 ▸ "Seen on the walk" (3) | no ticket: the harness's key road, not shown to be the product's; and her ruling SW-4 makes Return in the capture box only ever a new line (VM-73 — "Capture box: several paragraphs, File and Open buttons, and a way to put the keyboard away") |
-| 4 | A sync round's exact rows sent and received need a `Sync/` line (the readout says "about"); splitting the minute-long round with nothing to send needs marks inside the round | §7 batch 1 ▸ "Not done", P-65-7; §7 batch 4 ▸ "Does owner adoption plausibly contribute…" | **NEEDS-TICKET(1)** |
+| 4 | A sync round's exact rows sent and received need a `Sync/` line (the readout says "about"); splitting the minute-long round with nothing to send needs marks inside the round | §7 batch 1 ▸ "Not done", P-65-7; §7 batch 4 ▸ "Does owner adoption plausibly contribute…" | **VM-232** |
 | 5 | "Tap the box → keyboard up" (and "Open → keyboard up in the note") never fill on the simulator — the software keyboard never rises there | §5 batch 1 walk; §7 batch 3 ▸ "What a hosted test can and cannot reach" | no ticket: a limit of the instrument; her phone fills them (the handoff's checklist item 2) |
 | 6 | The structural UNDO door had the fence's same window | §7 batch 2 ▸ "Residuals and follow-ups" (1) | no ticket: fixed inside the batch at r2 (the orchestrator's call 3), with its red-on-old pin |
 | 7 | The tail's idle-clock attachment can write the last block's old text while a divide or merge of that block lands (a timer's write, not a key) | §7 batch 2 ▸ Residuals (2) and "Residuals after r2" (2); midpoint finding 5 | **VM-226** — "The tail's idle save during a divide or merge of the last block can write that block's old text" |
@@ -130,14 +130,14 @@ Every residual, reported-not-fixed, seen-on-the-walk, not-mine-noted and stays-o
 | 9 | Autocorrect, dictation and composition under the fence are reasoned from her E1 trace and the pins' roads, never seen on a device | §7 batch 2 ▸ Residuals (4), "Residuals after r2" (4) | **VM-13** — "The device queue: the remaining walks on her phone, in one window" (her wave-1 sitting; matched by kind — a device walk — so check it is the home you want) |
 | 10 | M12: an unroutable gate-less insert in a non-last block heals by re-rendering from the store (writes nothing stale on either tree) — round 2's row, not this batch's | §7 batch 2 ▸ "Iteration r1" (first bullet) | **VX-68** — "Gate-less insertion watch row (archive row 30 — Mobile Round 2's M12)" |
 | 11 | The VM-5 record's M27 "DISSOLVED" holds for her keyboard road, but its "no road through the shared brain reproduces the symptom" is contradicted for the consult-less test road | §7 batch 2 ▸ "For the orchestrator" (1) | no ticket: a record note, not work — the finding lives in this record and TEXTKIT2 §3's line; the VM-5 record is not edited from this branch |
-| 12 | Delete, archive, the whole-block delete and the cross-block compound are fenced by construction (one latch), traced by reading, no pin claimed | §7 batch 2 ▸ "Row dispositions" (r0 and r2) | **NEEDS-TICKET(5)** |
+| 12 | Delete, archive, the whole-block delete and the cross-block compound are fenced by construction (one latch), traced by reading, no pin claimed | §7 batch 2 ▸ "Row dispositions" (r0 and r2) | **VM-236** |
 | 13 | Her real note count is unmeasured (the nine-wing fixture's size is a guess) | §7 batch 3 ▸ P-66-2 | no ticket: the QUESTIONS bundle's P-66-2. (The record says "her phone's readout will say" — it will not: the readout counts acts, not notes) |
 | 14 | A hosted test reaches no software keyboard, no finger, no launch or unlock span, no sync round, no real lock, no device CPU or flash | §7 batch 3 ▸ "What a hosted test can and cannot reach" | no ticket: limits of the instrument; her phone's readout covers them |
 | 15 | After every clean round the janitor reconciles the ledger before and after (network calls), then runs four full `deleted_at IS NOT NULL` scans (container, reading, block, variant) | §7 batch 4 ▸ "Reported, not fixed" (2) | **VM-182** — "A clean sync round no longer scans the whole library for deleted rows" |
 | 16 | The idle-commit sweep runs at start | §7 batch 4 ▸ "Reported, not fixed" (3) | no ticket: bounded by design (a low-water-mark window over `idx_container_touched`) |
-| 17 | A signed-out install's local purge loop runs `LocalPurge`'s own tombstone scans | §7 batch 4 ▸ "Reported, not fixed" (4) | **NEEDS-TICKET(4)** |
+| 17 | A signed-out install's local purge loop runs `LocalPurge`'s own tombstone scans | §7 batch 4 ▸ "Reported, not fixed" (4) | **VM-235** |
 | 18 | The first-write furniture's `prime()` and every held listing's first fetch on a cold store | §7 batch 4 ▸ "Reported, not fixed" (5) | no ticket: bounded windows; the corpus-shaped Bookless one was batch 5's and is fixed |
-| 19 | Every top-level mint reads the Keychain session to stamp `owner_id` (each quick note filed, each crystallized block) — unmeasured, on lag 2's mint step | §7 batch 4 ▸ "Reported, not fixed" (6) | **NEEDS-TICKET(2)** |
+| 19 | Every top-level mint reads the Keychain session to stamp `owner_id` (each quick note filed, each crystallized block) — unmeasured, on lag 2's mint step | §7 batch 4 ▸ "Reported, not fixed" (6) | **VM-233** |
 | 20 | `Queries.foreignOwnerExists` scans every owner table when the library is not foreign; no production caller today | §7 batch 4 ▸ "Reported, not fixed" (7) | no ticket: unreachable today; the record names it for its first caller |
 | 21 | `restampOwner` (the adopt road) stays O(owner tables) | §7 batch 4 ▸ "Reported, not fixed" (7) | no ticket: a rare, deliberate act whose nature is to rewrite every row |
 | 22 | `v1_38`'s one-time index build at the new build's first open | §7 batch 4 ▸ "SyncSpec §12" | no ticket: a one-time cost, said in the handoff |
@@ -146,7 +146,7 @@ Every residual, reported-not-fixed, seen-on-the-walk, not-mine-noted and stays-o
 | 25 | The floor: a wing holding fewer loose notes than a page is walked to its end by the Bookless page | §7 batch 5 ▸ "The floor, said plainly" | no ticket: the design's stated floor — only an index on looseness could beat it, and no column holds looseness |
 | 26 | A single page fetch is not faster than the old listing read at fixture scale | §5 batch 5 after-numbers; the AFTER table | no ticket: not a defect; what changed is how often it runs and how it grows |
 | 27 | A covered screen loses its autosave observer when shown again; narrowed by batch 6's r1 and the fix pass (`f589d964e`); still open: a re-show while teardown itself is suspended | §7 batch 6 ▸ Residuals (1), r1's hazard (b); §7 fix pass ▸ "VM-227 — narrowed, not closed"; round 1 finding 2's final call | **VM-227** — the record's line: "a note covered by another screen stops hearing its autosave" (Medium · Bug · Suspected · Editor). At the merge, point its body at the round-1 responses' finding-2 trace and the offered `releaseAutosaveHold(ifNotShownSince:)` conditional with its pin sketch (the reviewer's final call) |
-| 28 | A coordinator left dirty at its last release stays in the registry forever once it lands | §7 batch 6 ▸ Residuals (2) | **NEEDS-TICKET(6)** |
+| 28 | A coordinator left dirty at its last release stays in the registry forever once it lands | §7 batch 6 ▸ Residuals (2) | **VM-237** |
 | 29 | The arrival still makes two header reads (the liveness grant's and the header observation's first) | §7 batch 6 ▸ Residuals (3), D-6-5 | no ticket: folding them would move the pen's grant after the load — the liveness authority's ruled order (4.5c); recorded as an option |
 | 30 | `readingsContaining` lists every reading internally for the gatherings' rule leg | §7 batch 6 ▸ Residuals (4), D-6-4(c) | no ticket: author-scale (the number of books), a Core read both platforms share; recorded as an option |
 | 31 | The real shell's NavigationStack pop could not be driven in process (`no-back-door`) | §5 "THE STAGE WINDOW ON THE FINAL TREE" (the probe line) | no ticket: the batches 6 + 7 walk's — PENDING(walk) |
@@ -164,28 +164,28 @@ Every residual, reported-not-fixed, seen-on-the-walk, not-mine-noted and stays-o
 | 43 | The fix pass's second turn, part 2 (merge `origin/main`, the rebuilds, the red build, the whole Core package, the stage) | §5 fix pass ▸ F8 | no ticket: this run's own remaining step — PENDING |
 | 44 | VM-24's standing caret test stays red in main's exact shape through every run; the fence changes no routing of an unarmed or widened report outside a flight | §5 "Where two runs' findings meet" | **VM-24** — "MobileMarkdownCaretTests: the rescue-point replace test is red on the iOS 26.2 simulator (pre-existing; cause untraced)" — her own run after wave 1 |
 
-### The six `NEEDS-TICKET` drafts (team VM, project "Mobile — the catch-up & launch"; public copy; labels per CLAUDE.md's rule)
+### The six tickets drafted here — MINTED 2026-11-19 by the orchestrator as VM-232 … VM-237 (team VM, project "Mobile — the catch-up & launch"; VM-232 and VM-233 Todo, the rest Backlog; none seated under an umbrella — hers to seat)
 
-**NEEDS-TICKET(1) — "Time a sync round in its parts, with exact row counts, so a minute-long round with nothing to send can be split"**
+**VM-232 — "Time a sync round in its parts, with exact row counts, so a minute-long round with nothing to send can be split"**
 Body: Her phone showed a sync round of about a minute with nothing new to send, and the phone's timing readout can only time a round whole, with approximate counts of the rows sent and received. Splitting it needs marks inside the round and the engine's own push and pull counts on the scheduler's status — a change inside `Sources/VariorumCore/Sync/`, so it needs a wave's sync slot and a Fable review. (Pointers: `notes/plans/fixes/vm-64-timing-and-lags.md` §7 batch 1 P-65-7 and batch 4's "Reported, not fixed".)
 Labels: Debt · Confirmed · Performance · Medium. A candidate member of VM-176.
 
-**NEEDS-TICKET(2) — "Filing a quick note reads the Keychain to stamp its owner"**
+**VM-233 — "Filing a quick note reads the Keychain to stamp its owner"**
 Body: Every top-level mint asks the identity closure for the owner, and the closure reads the Keychain session on each call, so each quick note filed and each crystallized block pays a Keychain read. It sits on the second lag's road (the capture box's mint) and is unmeasured; the timing readout on her phone can rank it. (Pointer: the record's §7 batch 4 ▸ "Reported, not fixed" item 6.)
 Labels: Bug · Suspected · Performance · Medium. A candidate member of VM-176.
 
-**NEEDS-TICKET(3) — "The timing readout records no launch times on a fresh install's first launch"**
+**VM-234 — "The timing readout records no launch times on a fresh install's first launch"**
 Body: On the run's simulator walk, the first launch of a fresh install, which passes through the first-run card, recorded none of the three launch spans, while the next launch recorded all three. Whether that is by design (the spans waiting on her at the card) or a lost mark is untraced; an in-place install is not a fresh install, so her wave-1 sitting does not meet it. (Pointer: §5 batch 1 ▸ "Seen on the walk" (2).)
 Labels: Bug · Suspected · Performance · Low.
 
-**NEEDS-TICKET(4) — "A signed-out phone's local purge loop may scan whole tables for deleted rows"**
+**VM-235 — "A signed-out phone's local purge loop may scan whole tables for deleted rows"**
 Body: With sync not configured, the purge loop's first tick runs `LocalPurge`'s own tombstone scans, on the road a phone-only user who never signs in takes; it was traced by reading only, at the run's launch report. Measure it first, and fold it into VM-182 if the same fix covers it. (Pointer: §7 batch 4 ▸ "Reported, not fixed" item 4.)
 Labels: Bug · Suspected · Performance · Low.
 
-**NEEDS-TICKET(5) — "Pin the phone's keystroke fence on block delete, archive, the whole-block delete and the cross-block edit"**
+**VM-236 — "Pin the phone's keystroke fence on block delete, archive, the whole-block delete and the cross-block edit"**
 Body: The fence covers every door that holds the structural latch, so a key typed while one of these four lands is refused like a divide's — but they were traced by reading only, with no pin that fails on the old code. Before the fence, a key there was written into the deleted take, refused and kept pending (the buffer stuck dirty, the raw error in the status line). (Pointer: §7 batch 2 ▸ "Row dispositions".)
 Labels: Debt · Suspected · Editor · Low.
 
-**NEEDS-TICKET(6) — "A save queue left unsaved at its last release is never dropped from the phone's registry"**
+**VM-237 — "A save queue left unsaved at its last release is never dropped from the phone's registry"**
 Body: The phone's `releaseAutosave` keeps a coordinator that is dirty when its last holder lets go, so no text is lost, but nothing drops it once its write later lands — a small, bounded growth, one per such note. Pre-existing and rare (a refused write at leaving); traced by reading in the run's batch 6. (Pointer: §7 batch 6 ▸ Residuals (2).)
 Labels: Debt · Suspected · Performance · Low.

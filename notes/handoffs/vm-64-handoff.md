@@ -89,7 +89,7 @@ You asked for this run to go overnight with the rest of wave 1: first a timing r
 
 **A note's editor is released when it closes (VM-70).** Nothing on the phone gave back an editor's save queue, so the list of them grew by one per note opened. Now leaving gives it back as its last act, after your typing and the savepoint have landed. Growth per open and close: 1 → 0. The first version put the release where your app never promptly reaches it; a test window caught that and it was rebuilt.
 
-**Leaving saves once (VM-71).** Leaving a note made the one runner re-read the whole note to find what needed a savepoint (on the Mac, headless, about 216 ms for the 100,000-word note, edited or not), and backgrounding under Castle did it three times. Now a quick read off the runner finds what is owed, and the runner writes only that. Castle backgrounding 3 → 1 savepoint attempts, the lock 2 → 1. Simulator, the 100,000-word note: after only reading it, the runner is held about half a millisecond and no take is read; after one edit, about 7 ms and one take. On the Mac, headless: 216 ms → 1.07 ms. The capture box's first save right after that leaving: 7.8 ms (no before figure was recorded for that one). What leaving does to the lock did not move.
+**Leaving saves once (VM-71).** Leaving a note made the one runner re-read the whole note to find what needed a savepoint (on the Mac, headless, about 216 ms for the 100,000-word note, edited or not), and backgrounding under Castle did it three times. Now a quick read off the runner finds what is owed, and the runner writes only that. Castle backgrounding 3 → 1 savepoint attempts, the lock 2 → 1. Simulator, the 100,000-word note: after only reading it, the runner was held about 159 ms with all 1,404 takes read, and is now held about half a millisecond with none read; after one edit, about 159 ms → about 7 ms, one take read. On the Mac, headless: 216 ms → 1.07 ms. The capture box's first save right after that leaving: about 152 ms → about 8 ms on the simulator (the before figure is from the same test run on the build without this fix). What leaving does to the lock did not move.
 
 ---
 
@@ -107,13 +107,13 @@ Each has an owner; the full table, with where each item is recorded, is in `note
 
 - **The tail's idle save during a divide or merge of the note's last block** can still write that block's old text: a timer's write, not a key (**VM-226**).
 - **A note covered by another screen and shown again while its leaving is still flushing** stops hearing its save queue until a full leave-and-return: narrowed by this run, not closed (**VM-227**).
-- **The minute-long sync round with nothing to send** is not this run's to fix. The owner check is not its cause (it runs before the round, in milliseconds). Splitting the minute needs marks inside the sync engine (NEEDS-TICKET(1)).
+- **The minute-long sync round with nothing to send** is not this run's to fix. The owner check is not its cause (it runs before the round, in milliseconds). Splitting the minute needs marks inside the sync engine (VM-232).
 - **After every clean sync round the phone scans four whole tables for deleted rows** (**VM-182**, wave 4).
-- **Each quick note's filing reads the Keychain** to stamp its owner, on your second lag's road, unmeasured (NEEDS-TICKET(2)).
-- **A fresh install's first launch recorded no launch times** on the walk; whether by design is untraced (NEEDS-TICKET(3)). Your in-place install is not a fresh install.
-- **A signed-out phone's local purge loop may scan for deleted rows** (NEEDS-TICKET(4)).
-- **The fence covers block delete, archive and the cross-block edit by construction, with no test of its own** (NEEDS-TICKET(5)).
-- **A save queue left unsaved at its last release is never dropped** once its write lands: a small, bounded growth (NEEDS-TICKET(6)).
+- **Each quick note's filing reads the Keychain** to stamp its owner, on your second lag's road, unmeasured (VM-233).
+- **A fresh install's first launch recorded no launch times** on the walk; whether by design is untraced (VM-234). Your in-place install is not a fresh install.
+- **A signed-out phone's local purge loop may scan for deleted rows** (VM-235).
+- **The fence covers block delete, archive and the cross-block edit by construction, with no test of its own** (VM-236).
+- **A save queue left unsaved at its last release is never dropped** once its write lands: a small, bounded growth (VM-237).
 - **After Open, the caret sits at the start of the typed line** (**VM-77**, wave 2). **After a Castle relock, the capture box keeps using the closed library** (**VM-107**, wave 2). **The sync round still runs inside the background window before the lock** (**VM-103**, wave 2).
 - **The shown Library still re-reads its first page at each save**; narrowing that is **VX-618**, which stays open.
 
@@ -127,15 +127,15 @@ Each thing asked, read literally, against what shipped.
 
 | Asked (where) | What shipped | The remainder, and its owner |
 |---|---|---|
-| "markers at the moments she feels (tap on the capture box, keyboard up, file, note on screen, unlock, library ready) and a readout" (sitting 1) | All six marked, with the counts the fixes answer to; the readout on the phone | "Tap" starts at the box's focus, not the touch (P-65-6); "keyboard up" first fills on your phone and the in-note one undercounts (a caveat, no ticket); a round's rows are "about" (P-65-7, NEEDS-TICKET(1)) |
+| "markers at the moments she feels (tap on the capture box, keyboard up, file, note on screen, unlock, library ready) and a readout" (sitting 1) | All six marked, with the counts the fixes answer to; the readout on the phone | "Tap" starts at the box's focus, not the touch (P-65-6); "keyboard up" first fills on your phone and the in-note one undercounts (a caveat, no ticket); a round's rows are "about" (P-65-7, VM-232) |
 | "before-and-after numbers for every later fix"; the plan's "run on her phone before any fix" | Simulator before and after for every count this run changed | No phone "before", at your word ("we'll tune after the fixes, from that point"); your phone's first numbers are the baseline — your sitting, then VM-176 |
-| "the launch scan" (VM-67: "stop scanning every table") | The owner check scans nothing at launch or unlock | Still scanning: the clean round's four tables (VM-182); maybe a signed-out phone's purge loop (NEEDS-TICKET(4)); a Keychain read per filing (NEEDS-TICKET(2)) |
+| "the launch scan" (VM-67: "stop scanning every table") | The owner check scans nothing at launch or unlock | Still scanning: the clean round's four tables (VM-182); maybe a signed-out phone's purge loop (VM-235); a Keychain read per filing (VM-233) |
 | "the Library's re-reading on every write and its paging" | Hidden: no re-read at any write; every note reachable by scrolling | Shown: its first page is re-read at each save (bounded; VX-618); books in All wait for their notes (P-68-4) |
 | "notes read twice on open" | Once, on every road measured | The note's small header row is read twice where it was read three times (the liveness rule's ruled order; recorded, no ticket) |
-| "the unreleased editor models" | Released at every leaving's last act; growth 1 → 0 | A re-show while the leaving is still flushing (VM-227); a save queue left unsaved (NEEDS-TICKET(6)) |
+| "the unreleased editor models" | Released at every leaving's last act; growth 1 → 0 | A re-show while the leaving is still flushing (VM-227); a save queue left unsaved (VM-237) |
 | "the leaving savepoint work" | One runner turn per leaving that owes one, none otherwise; Castle 3 → 1, lock 2 → 1 | The quick read still reads the whole note, up to three times per Castle backgrounding, off the runner (accepted); the one-ask gap (accepted, above); P-71-1 |
-| "the keystroke-during-divide corruption" | Fixed on divide, merge, extract, make block and the undo door, each with a test that failed on the old code | Delete, archive and the cross-block edit untested (NEEDS-TICKET(5)); the tail's timer road (VM-226); real autocorrect and dictation (your sitting, VM-13) |
-| "a sync round of about a minute with nothing new to send" (seen at sitting 1) | Not a fix here; the owner check is shown not to be its cause | NEEDS-TICKET(1); VM-182 |
+| "the keystroke-during-divide corruption" | Fixed on divide, merge, extract, make block and the undo door, each with a test that failed on the old code | Delete, archive and the cross-block edit untested (VM-236); the tail's timer road (VM-226); real autocorrect and dictation (your sitting, VM-13) |
+| "a sync round of about a minute with nothing new to send" (seen at sitting 1) | Not a fix here; the owner check is shown not to be its cause | VM-232; VM-182 |
 
 ---
 
@@ -152,9 +152,9 @@ Each thing asked, read literally, against what shipped.
 Tickets filed:
 - [ ] VM-226 (Medium, Bug, Todo): the tail's idle save during a divide or merge of the note's last block can write that block's old text.
 - [ ] VM-227 (Medium, Bug, Todo): a note covered by another screen and shown again while its leaving is still flushing stops hearing its save queue — narrowed by this run, not closed.
-- [ ] NEEDS-TICKET(1) (Medium, Debt, Todo): time a sync round in its parts, with exact row counts, so the minute-long round with nothing to send can be split.
-- [ ] NEEDS-TICKET(2) (Medium, Bug, Todo): a quick note's filing reads the Keychain to stamp its owner — on the second lag's road, unmeasured.
-- [ ] NEEDS-TICKET(3) (Low, Bug, Backlog): the readout records no launch times on a fresh install's first launch; whether by design is untraced.
-- [ ] NEEDS-TICKET(4) (Low, Bug, Backlog): a signed-out phone's local purge loop may scan whole tables for deleted rows.
-- [ ] NEEDS-TICKET(5) (Low, Debt, Backlog): a test of the keystroke fence on block delete, archive, the whole-block delete and the cross-block edit.
-- [ ] NEEDS-TICKET(6) (Low, Debt, Backlog): a save queue left unsaved at its last release is never dropped from the phone's registry once its write lands.
+- [ ] VM-232 (Medium, Debt, Todo): time a sync round in its parts, with exact row counts, so the minute-long round with nothing to send can be split.
+- [ ] VM-233 (Medium, Bug, Todo): a quick note's filing reads the Keychain to stamp its owner — on the second lag's road, unmeasured.
+- [ ] VM-234 (Low, Bug, Backlog): the readout records no launch times on a fresh install's first launch; whether by design is untraced.
+- [ ] VM-235 (Low, Bug, Backlog): a signed-out phone's local purge loop may scan whole tables for deleted rows.
+- [ ] VM-236 (Low, Debt, Backlog): a test of the keystroke fence on block delete, archive, the whole-block delete and the cross-block edit.
+- [ ] VM-237 (Low, Debt, Backlog): a save queue left unsaved at its last release is never dropped from the phone's registry once its write lands.

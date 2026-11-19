@@ -87,7 +87,7 @@ Plan: `notes/plans/vm-44-mobile-catch-up-plan.md` (wave 1, umbrella 3 ⚑ — th
 | 6 | A note is read once and released | VM-69 · VM-70 | One projection read per open; the autosave coordinator released on close; the twin count settled; counts before/after. Editor seam. |
 | 7 | Leaving saves once | VM-71 | One savepoint attempt per note on leaving; the capture box's first save does not wait behind a long note's teardown; the lock's behaviour unchanged. |
 
-After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up to three rounds), then the closeout.
+After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a further round only while the last found a new BLOCKER or MAJOR), then the merge gate's whole-phone and whole-Mac windows on the tree that holds the ladder's fixes and main, then the closeout. *(Corrected at the ladder: this line first read "the whole-phone and whole-Mac windows, then the ladder (Fable, up to three rounds)" — the order as run, and the cap as ruled, are the ones above.)*
 
 ## 4. The batches
 
@@ -915,6 +915,8 @@ orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
 | `note-rereads-per-save-100k` | count | 1 | 1 | 1 |
 | `note-deliveries-per-save-100k` | count | 1 | 1 | 1 |
 | `note-delivery-ingest-100k` | ms | 4.49 (3.92–4.80) | 4.31 (3.90–4.82) | 3.83 (3.42–3.99) |
+
+**Batch 7's own BEFORE figures (the pre-VM-71 build `vm64-b7r1-red`, the perf suite alone, 2026-11-19 11:07, load 9.63; simulator, Debug, n = 5) — the series batch 7 added, which the table above shows only AFTER:** leaving the 100k note after only reading it held the runner **158.90 ms (154.01–160.00)** and took 161.09 ms to "saved", with **1,404** take reads and **1** scan on the writer; after one edit, 159.16 ms on the runner and 166.29 ms to "saved", the same 1,404 reads; **the capture box's first save after leaving the 100k note took 151.69 ms (148.94–152.09)**; the lock made **2** savepoint attempts. AFTER (run 2 above): 0.47 ms and 6.69 ms with 0 reads and 0 scans (read only); 6.71 ms and 19.68 ms with 1 read (edited); **the box's first save 7.83 ms (7.49–9.11)**; the lock 1. Log: `notes/plans/vm64-screens/b7r1-perf-red.log`.
 
 **Reading them:** every count the run set out to change has changed and is now asserted — a note is read **1** time per open (was 2); the hidden Library does **0** re-reads and **0** redraws per capture-box save (was 2 and 2); backgrounding under Castle makes **1** savepoint attempt (was 3) and the lock 1; the autosave registry grows by **0** per open-and-close (was 1); leaving the 100k note after only reading it reads **0** takes on the writer and holds the runner about half a millisecond, and after one edit reads **1**. One duration moved outside noise: the 100k note is live about 150 ms sooner after opening (496 → 342 ms), which is the second read removed. The others are unchanged within run-to-run range, and they are small simulator figures at fixture scale: the readout on her wave-1 build is what will say how much of what she feels this run removed.
 
