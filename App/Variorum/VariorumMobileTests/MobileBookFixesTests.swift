@@ -641,6 +641,38 @@ struct MobileGatheringWordTests {
         #expect(C.kindLabel(.journal) == "Journal Book")
     }
 
+    /// **The merge-in's join (VM-78 × VM-55):** main gave Book Details' delete
+    /// the shelf row's own removal line (P-55-8 — the same act says the same
+    /// line), and this run's shelf row names a GATHERING a gathering (W-073),
+    /// so Book Details' line does too. Red against main's `MobileBookDetails`
+    /// by reading (it composed `movedToTrashReceipt(.book)` for every kind);
+    /// the book control is byte-identical on both.
+    @Test func bookDetailsDeleteLineNamesAGathering() async throws {
+        try await withEditorWorld { session, _ in
+            let (gatheringID, bookID) = try await session.runner.run { ops -> (String, String) in
+                let tag = try ops.createTag(name: "quote")
+                let gathering = try ops.createReading(
+                    name: "Quotes", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(tag.id)))
+                let book = try ops.createReading(name: "Essays", kind: .book)
+                return (gathering.id, book.id)
+            }
+            let fromGathering = MobileBookDetailsModel(session: session, readingID: gatheringID)
+            await fromGathering.refresh()
+            #expect(await fromGathering.deleteBook())
+            let gatheringLine = try #require(session.status.current, "a delete speaks on the one line")
+            let gatheringReceipt: String =
+                "Gathering moved to the Trash \u{2014} \(TrashWindow.days) days to put it back."
+            #expect(gatheringLine.leavesPage)
+            #expect(gatheringLine.text == gatheringReceipt)
+
+            let fromBook = MobileBookDetailsModel(session: session, readingID: bookID)
+            await fromBook.refresh()
+            #expect(await fromBook.deleteBook())
+            let bookLine = try #require(session.status.current)
+            #expect(bookLine.text == RecoveryCopy.movedToTrashReceipt(.book), "a book's line is unchanged")
+        }
+    }
+
     /// RED ON OLD ("(empty book)"): an untitled gathering in the Trash is
     /// named by its own kind word (VX-611's `RecoveryCopy` rule).
     @Test func theTrashNamesAnUntitledGatheringAGathering() {

@@ -2280,8 +2280,8 @@ its own checkout.*
 | 1e — the back-out's check | DONE (this commit) — output below |
 | 2a — the plan, written before the merge starts | DONE (this commit) — "The plan" below |
 | 2b — the merge commit (seven conflicts resolved, the re-land) | DONE (`ed1266e2f`, merging `origin/main` at `eb18888db`) — per file in "The re-land, file by file" below; compile PENDING (row 3) |
-| 2c — the semantic merges git does not flag | IN-PROGRESS — the pins re-shaped to the one line (this commit; "The pins re-shaped" below); in the merge commit: `MobileBookDetails.requestFinish`'s two refusals moved onto VM-62's road, Book Details' delete line names a gathering; the phone sources scanned by hand for VM-62's forbidden expressions (clean but main's three exempt/log lines). NEXT: the compiler, then every test file read against the merged product |
-| 3 — phone + Mac `build-for-testing` on the merged tree | NOT-STARTED |
+| 2c — the semantic merges git does not flag | DONE — in the merge commit `ed1266e2f` (`requestFinish`'s refusals onto VM-62's road; Book Details' delete line names a gathering); the pins re-shaped to the one line `c652d1669`; the join's own pin `bookDetailsDeleteLineNamesAGathering` (this commit); every listed file read against the merged product ("The semantic read" below) |
+| 3 — phone + Mac `build-for-testing` on the merged tree | DONE — phone (signed, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot, DerivedData `vm78-ios`) **TEST BUILD SUCCEEDED** at `c652d1669` (log `App/Variorum/DerivedData/logs/vm78-mergein-ios-build.log`) and again with this commit's pin (`…-ios-build-2.log`); Mac (`-scheme Variorum -destination 'platform=macOS'`, DerivedData `vm78-mac`) **TEST BUILD SUCCEEDED** at `c652d1669` (`…-mac-build.log`; this commit is phone-test-only). 0 errors; no warning in a line this merge-in wrote |
 | 4 — the window recipe (RED, GREEN, the Mac types) | NOT-STARTED |
 
 **The trial merge** (`git merge-tree --write-tree --name-only HEAD origin/main`, at `de3bb0107` against `eb18888db`,
@@ -2421,6 +2421,43 @@ one line — beside the model's own record, which VM-61 keeps):**
   line with its words. `MobileCollectReceiptTests`' five collects: + the line is a `.refusal` with the composer's
   words (`expectOnTheLine`). RED against main's `MobileMembership.swift` by reading for the three that name the
   star or the archive (main composes "Added by tagging …"); the tags-only and already-matched controls GREEN on both.
+
+**The semantic read (2c), file by file against the merged product** — the compiler first (both targets green), then
+the assertions:
+- **VM-62's source scan** (`MobileNoRawErrorPinTests`) over every phone file: by hand with its own patterns, the
+  merged `VariorumMobile/` holds only main's two exempt `MobileStarterJournal` lines and one `privacy:` log line —
+  the two `DeletionRefusal.words(…)` this run had added in `requestFinish` were the only offenders, moved onto
+  main's road in the merge commit.
+- `Write/MobileEditorViewModel.swift`: this run's only lines are the observed `entryDate` and its one set in
+  `adoptHeader`, beside the ONE `header = value` (`:696`); main's `report(line:)` untouched. `MobileWriteView`: the
+  chip reads `dateChipDay` (auto-merged beside main's removal of the masthead's status row).
+- `MobileTrashView` (the gate's face, the gathering/version placeholder), `MobileShelfView` / `MobileShelfFaces`
+  (the row's act table, the delete confirm's kind words — main dropped the red slots, nothing of this run drew
+  one), `MobileCreateBook` (the gathering words beside main's wing snapshot and line), `Shared/RecoveryCopy.swift`
+  (the `isGathering:` overload beside main's edits), `MobileBlockHistory` (VM-43's `insuringBuffer: true` beside
+  main's report classes): auto-merged, each read, nothing to change.
+- **Tests:** `MobileDeletionTests` (this run's `deleteDoorTitle(for:)` / `deleteConfirmTitle(for:)` beside main's
+  line-reading rewrite), `MobileShellTests`, `MobileBooksTests`, `MobileMembershipTests`, `MobileTrashTests`,
+  `MobileBlockHistoryTests` (reads `blockHistory.status`, the record main keeps), `MobileTutorialWalkTests`,
+  `MobileWalkTests`, `MobileLivenessTests`: each read — they read model records main kept or pure faces, so none
+  needed a change; the slot-reading pins that ARE this run's rule were re-shaped (above). Main's own new tests over
+  files this run changed were read the other way: `MobileLineDirectionTests`' collect pin (a live tags-only collect
+  — this run's composer speaks the same bytes), `MobileLineDoorTests` (a book's delete line from the row and from
+  Book Details — byte-identical for a book), `MobileRefusalSentencePinTests` (Finish on a gathering and Reopen on a
+  sealed book through `setFinished`, which still exists), `MobileWingListingTests`, `MobileWingBlindPickerTests`.
+- **The join's own pin (this commit):** `MobileGatheringWordTests/bookDetailsDeleteLineNamesAGathering` — Book
+  Details' delete of a gathering speaks "Gathering moved to the Trash…" as a removal line; a book's is unchanged.
+  Red against main's `MobileBookDetails.swift` by reading; no file-swap red leg exists for it (main's file lacks
+  every symbol the batch-A pins name).
+- **Not changed, for the orchestrator:** VM-55's two Mac source scans read a hand-kept list of hoisted Mac BRAINS
+  (`VM61MacStatusSeamPinTests.hoistedMacBrains` — "the next hoist adds its file"). This run's hoists are WORDS
+  (`BookStateCopy`, `ArrivalsCopy`, `CollectReceiptCopy`, `StructuralUndoCopy`'s detail), not seam-speaking brains,
+  and are not on the list; grepped for the scans' patterns (seam calls, phone roads, `#if os(`, face imports) they
+  hold none. Whether word hoists join the list is that guard's owner's call — left as VM-55 built it.
+- **PROVISIONAL calls from the merge: none new.** Every place the two runs met was vocabulary, not behavior: the
+  quiet press is a refusal in main's classes (the Mac door's own); the collect receipt keeps this run's words in
+  the class main gives the act; Unarchive from Details stays silent (main's P-55-4: an unarchive is ordinary);
+  Book Details' delete line is main's P-55-8 (already PROVISIONAL there) speaking this run's ruled W-073 words.
 
 ## The ladder
 
