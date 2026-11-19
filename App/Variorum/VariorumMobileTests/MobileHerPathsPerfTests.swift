@@ -509,8 +509,8 @@ struct MobileHerPathsPerfTests {
 
                     let before = Probe.snap()
                     guard shell.surface.activate(title) else {
-                        Issue.record("the \(label) note's Library row was not on screen; labels were "
-                            + "\(shell.surface.visibleLabels.prefix(30))")
+                        let labels = Array(shell.surface.visibleLabels.prefix(30))
+                        Issue.record("the \(label) note's Library row was not on screen; labels were \(labels)")
                         await shell.unmount(leavings: 0)
                         return
                     }

@@ -530,10 +530,11 @@ struct MobilePerfFixtureTests {
             #expect(facts.gatheredWearers == gathered)
         }
         // The fixture book and its control post stay in Home, as in `.oneWing`.
+        let controlID = world.seed.controlPostID
         let controlWing = try await world.db.read { db in
             try String.fetchOne(
                 db, sql: "SELECT wing_id FROM container WHERE id = ?",
-                arguments: [world.seed.controlPostID])
+                arguments: [controlID])
         }
         #expect(controlWing == "")
         print("PERF[fixture] nine wings: \(world.seed.corpusNoteCount) notes · "
