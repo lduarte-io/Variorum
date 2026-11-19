@@ -839,9 +839,13 @@ final class MobileEditorViewModel {
         }
         // VM-2: a fence still waiting for its flight's surface to settle
         // drops at the first projection that leaves the page holding the
-        // store — on the next turn, never from inside this apply (the drain
-        // replays her keys through the input road, which must not re-enter
-        // the projection door mid-flight). A no-op otherwise.
+        // store — checked on the next turn, never from inside this apply.
+        // The drain only REPORTS (refuse-and-say: nothing is held or
+        // replayed): it lowers the fence and, if anything was refused or
+        // withheld, says the one sentence through `report`, writing the
+        // status line and its action. Deferring keeps those status/undo
+        // writes out of a projection apply, and reads the settle rule only
+        // after this apply's own bookkeeping has finished. A no-op otherwise.
         if flightFence.phase == .settling {
             Task { @MainActor [weak self] in self?.drainFlightFenceIfSettled() }
         }
