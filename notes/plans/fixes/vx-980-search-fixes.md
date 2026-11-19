@@ -466,6 +466,23 @@ No other string was added or changed.
 
 *PENDING — the canon deltas in the two-file shape, the ratify bundle (the P-980 family), the born tickets triaged, the mobile parity line, canon-size's line, the merge.*
 
+### THE CLOSER — LIVE STATUS
+
+*The closer: a fresh `opus-implementer` seated 2026-11-19 for the BRANCH-SIDE closeout writing only — no product or test file, no `xcodebuild`, no app launch, no stage claim, no Linear change. The shared ledgers (master plan, `notes/TICKETS.md`, `notes/QUESTIONS.md`, `notes/AppSpecRecord.md`) are NOT touched here; their entries are DRAFTED below for the orchestrator's merge moment. Every claim is PENDING until its commit is named.*
+
+**Read first (none delegated):** CLAUDE.md whole · this record whole · `vx-980-her-rulings.md` whole · `vx-980-ladder-round1.md` and `-round2.md` · `notes/SurfaceContracts.md` whole (The app, The Library, The Bookcase and books, Doors to the outside) · `notes/MobileSoul.md` §6 (the parity ledger's protocol and its rows, the newest PL-74) · `notes/handoffs/vx-915-handoff.md` · `vx-915-recents-sweep.md` (FOR A LATER READER, CLOSEOUT DRAFTS) · `notes/SessionResiliencyProtocol.md`.
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | This LIVE STATUS | DONE (this commit) |
+| 2 | `notes/SurfaceContracts.md` — the three contract lines in place | NOT STARTED |
+| 3 | `notes/MobileSoul.md` — the parity row | NOT STARTED |
+| 4 | This record's FOR A LATER READER | NOT STARTED |
+| 5 | `notes/handoffs/vx-980-handoff.md` — her morning handoff (DRAFT) | NOT STARTED |
+| 6 | `Tools/canon-size` — its line | NOT STARTED |
+| 7 | The ledger DRAFTS (master plan paragraph, AppSpecRecord entry, QUESTIONS bundle, in-flight retirement) | NOT STARTED |
+| 8 | The rulings reconciled (R-980-1…12 against what shipped) | NOT STARTED |
+
 ## THE LEDGER (every row owned; updated as batches close)
 
 | # | Row | State |
