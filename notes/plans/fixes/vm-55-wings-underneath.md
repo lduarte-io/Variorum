@@ -1988,7 +1988,7 @@ last pin commit (`~/dev/variorum-vm-55-pin2`, its own DerivedData `vm55-pin2`), 
 | Finding 7 pin — the three `MobileWingDoorGeometryTests` root tests assert the door's accessibility value | DONE (this commit — the LAST PIN COMMIT: the snapshot's tree) — Starred "Starred", Library "Library", Shelf "Shelf  ·  0 books" (the page and its drawn count, Study, an empty store); `withoutADoorTheLineIsPlainText` untouched |
 | Finding 2 fix — `StatusCenter.stand` / `endStanding` phone arms | DONE (this commit) — `stand`: after the item's construction, `if placement == .phoneLine { place(item); return item.id }`; `endStanding`: `if placement == .phoneLine { if current?.id == id { current = nil }; return }` BEFORE the Mac's `standing` guard; the Mac's lines untouched; P-55-6's note extended |
 | Finding 5 fix — two log lines `.private` | DONE (this commit) — `Shared/OpsRefusalTable.swift` (the unworded-failure notice, `String(reflecting: error)`) and `Shared/StatusCenter.swift` (the phone arm's dropped-receipt debug line, her words) → `privacy: .private`; main's `style=off` line (the Mac arm) byte for byte |
-| Finding 7 fix — the door's `.accessibilityValue(page + trailing)` | NOT-STARTED |
+| Finding 7 fix — the door's `.accessibilityValue(page + trailing)` | DONE (this commit) — `MobileWingPath`'s door branch, after `.accessibilityLabel(wing)`; the label stays the wing's name; the hint (new words) stays VM-216's |
 | Builds — both targets at the fix tip (`vm55-b1`); the snapshot's phone build (`vm55-pin2`) | NOT-STARTED |
 | The fix window (one claim: Mac leg, phone leg, red-on-old from the snapshot) | NOT-STARTED — PENDING |
 

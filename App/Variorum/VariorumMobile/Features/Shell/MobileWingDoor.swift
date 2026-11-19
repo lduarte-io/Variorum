@@ -176,6 +176,11 @@ struct MobileWingPath: View {
             // The wing's NAME, never its voiced casing (the tab doors'
             // precedent).
             .accessibilityLabel(wing)
+            // …and the rest of the line as it is drawn — the page, and the
+            // Shelf's count — so VoiceOver reads "Home, Library" as batch 1's
+            // plain line read the whole path. No new words (VM-55 ladder
+            // round 1, finding 7).
+            .accessibilityValue(page + trailing)
         } else {
             Text(tokens.path(MobileWingTitle.components(wing: wing, page: page)) + trailing)
                 .font(tokens.small)
