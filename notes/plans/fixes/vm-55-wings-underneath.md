@@ -282,6 +282,13 @@ mobile merger, so the hoist does not wait for, and must not assume, any other um
 
 ## BATCH 4 — the interim wing door (VM-225)
 
+**Carried from batch 3's record to this batch:** (1) the hoisted `WingsModel.currentName` answers "Home" before
+the wings have been read, while batch 1's `MobileWingModel.currentName` answers nil until loaded — folding the two
+must keep batch 1's rule (never a false "Home"; `MobileWingStandTests` pins it); (2) P-55-13 — four sentences the
+shared brain speaks name Mac doors or keys ("unseal it", "Delete Wing…", "⏎ chooses · esc closes"): the interim
+door must not put any of them on a phone screen; if the plain list can reach one, give the door its own plain
+words as a DRAFT for her wording pass and say so.
+
 **Batch 4's implementer also runs the ONE shared window for batches 3 and 4** (the note under BATCH 3): it reports
 READY for the whole phone target and the whole Mac target once both targets build-for-testing green with its own
 tests written, flips batch 3's PENDING results in batch 3's record, and owns any red in the hoist's suites.
