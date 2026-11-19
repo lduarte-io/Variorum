@@ -163,11 +163,61 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 
 | Member | State | Pin (TYPE name for `-only-testing`) |
 |---|---|---|
-| VM-16 (+VM-20) | IN-PROGRESS — code + pins committed (`48055fa9c`); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ Mac guard `UndoWarningWordsTests`) |
-| VM-43 | IN-PROGRESS — `insuringBuffer: true` wired at the ONE phone call site (`MobileBlockHistory.swift` `restore`; grep of `VariorumMobile/` + `Shared/` finds no other); pins written; compile + red/green **PENDING** | `MobileBlockHistoryTests` |
-| VM-3 | IN-PROGRESS — the lesson's two prose blocks rewritten (`MobileTutorialSeeder.swift`, "divide with takes"); the walk pin unwrapped from `withKnownIssue` and flipped to keep-on-top; an exact-words pin added; compile + red/green **PENDING** | `MobileTutorialStructureWalkTests` |
-| VM-84 | IN-PROGRESS — piece 1 (`2d66e9a30`): the seam `MobileWriteScreen.dateChipDay` (read `header`, behaviour unchanged) + the pin, red at that commit by design; piece 2: the fix (an observed `entryDate` mirror); compile + red/green **PENDING** | `MobileNoteEntryDateTests` |
-| VM-33 | IN-PROGRESS — REAL by reading (the first render precedes `.task`; `trash` starts `[]`); the Mac's rule built on the phone model; pins written; compile + red/green **PENDING** (the red-on-old run is the proof the brief asked for) | `MobileTrashTests` |
+| VM-16 (+VM-20) | IN-PROGRESS — code + pins committed (`48055fa9c`, `a11af21d0`); builds GREEN; red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ the Mac guard `UndoWarningWordsTests`, Mac leg) |
+| VM-43 | IN-PROGRESS — `insuringBuffer: true` at the ONE phone call site (`0f8ca319d`); builds GREEN; red-on-old + green **PENDING** | `MobileBlockHistoryTests` |
+| VM-3 | IN-PROGRESS — lesson rewritten (DRAFT for her wording pass), pin unwrapped + flipped, words pin added (`c29095d35`, `a11af21d0`); builds GREEN; red-on-old + green **PENDING** | `MobileTutorialStructureWalkTests` |
+| VM-84 | IN-PROGRESS — seam + pin (`2d66e9a30`), fix (`f933a4663`); builds GREEN; red-on-old + green **PENDING** | `MobileNoteEntryDateTests` |
+| VM-33 | IN-PROGRESS — REAL by reading; fix + pins (`e1d709b1b`); builds GREEN; red-on-old **PENDING — it is the proof**: a green-on-old makes the member HOLLOW (then revert the fix, keep the pin as a guard, record it) | `MobileTrashTests` |
+
+**Half 1 — DONE (2026-11-19):** every member's code + pins committed and pushed; phone `build-for-testing`
+(`-destination 'generic/platform=iOS Simulator'`, DerivedData `vm78-ios`, `CODE_SIGNING_ALLOWED=NO`) **TEST BUILD
+SUCCEEDED**, then again signed for the pinned device by name (no boot) **TEST BUILD SUCCEEDED**; Mac `build-for-testing` (DerivedData `vm78-mac`) **TEST BUILD SUCCEEDED**. No `xcodebuild test` run, no
+simulator booted, no walk. No PROVISIONAL call in this batch; the one draft is VM-3's lesson wording (her pass).
+
+**Half 2 — the stage window's recipe (a fresh session can run it from here):**
+1. Write "REVERT IN FLIGHT — product files at their pre-fix versions; restore = `git checkout -- <the seven
+   files>`" into this LIVE STATUS, commit + push, THEN revert (every fix is committed, so the restore is safe):
+   `git checkout 463411619 -- App/Variorum/VariorumMobile/Features/Write/MobileUndoDoor.swift
+   App/Variorum/VariorumMobile/Features/Takes/MobileBlockHistory.swift
+   App/Variorum/VariorumMobile/Features/Tutorial/MobileTutorialSeeder.swift
+   App/Variorum/VariorumMobile/Features/Shell/MobileTrashModel.swift
+   App/Variorum/VariorumMobile/Features/Shell/MobileTrashView.swift` and `git checkout 2d66e9a30 --
+   App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift
+   App/Variorum/VariorumMobile/Features/Write/MobileWriteView.swift` (VM-84's "old" is its seam commit, which reads
+   `header` exactly as shipped). The pins compile against this tree (none references a new product symbol except
+   VM-84's seam, present at `2d66e9a30`).
+2. RED run (the `xcodebuild test` below). Expected RED, by name: `aQuietUndoSpeaksTheRefusalAndOffersNoRedo`,
+   `aQuietRedoSpeaksTheRefusalAndOffersNoUndo` · `theWarningsDetailSaysCommittedInTheMacsSentence` ·
+   `aRestoreKeepsTheReplacedWordsAsAQuietSavepoint` · `theFannedDivideLessonSaysKeepOnTop` ·
+   `theDateChipFollowsTheDateWhenTheTitleDoesNot` · `theFirstPaintSaysNothingBeforeTheListingAnswers`. Expected GREEN
+   on both sides (controls/guards): `aLandedRedoStillOffersItsUndo`,
+   `aRestoreOverABufferEqualToItsLastSavepointAddsNoSavepoint`, `theFannedDivideLessonLandsKeepOnTop`,
+   `anEmptyTrashSaysSoOnceTheListingAnswers`, and every pre-existing test in the six types.
+   (`MobileTrashTests` carries a DESIGNED known issue — `anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`
+   — whose recorded issues are the harness diagnostic, not VM-33.)
+3. `git checkout -- <the seven files>`; `git status` clean; record "no revert is in flight".
+4. GREEN run (same invocation). Every test in the six types green.
+5. Release the stage (sim shut down, no Variorum instance left), flip this table, report.
+
+```zsh
+ONLY=(
+  -only-testing:VariorumMobileTests/MobileUndoDoorTests
+  -only-testing:VariorumMobileTests/MobileUndoWarningWordsTests
+  -only-testing:VariorumMobileTests/MobileBlockHistoryTests
+  -only-testing:VariorumMobileTests/MobileTutorialStructureWalkTests
+  -only-testing:VariorumMobileTests/MobileNoteEntryDateTests
+  -only-testing:VariorumMobileTests/MobileTrashTests
+)
+xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -derivedDataPath App/Variorum/DerivedData/vm78-ios "${ONLY[@]}"
+```
+(The project's own simulator signing, deliberately — the phone target carries keychain access-group entitlements,
+so the test host is not run unsigned. A signed `build-for-testing` for `platform=iOS Simulator,name=iPhone 17
+Pro,OS=26.2` into `vm78-ios` is already **TEST BUILD SUCCEEDED** (no boot, no install), so the GREEN run starts
+up to date; the RED run recompiles only the seven reverted files and their dependents.)
+The Mac leg (the merge gate's, not window 2's unless the orchestrator says so): `UndoWarningWordsTests` (the new
+byte-exact guard) and `DestructiveUndoWarningTests` over DerivedData `vm78-mac`.
 
 **Traced mechanisms (read in this session, before any code):**
 - **VM-16.** `MobileUndoDoor.runUndo` / `redo` called `UndoStack.undo(with:)` / `redo(with:)`, which return the
