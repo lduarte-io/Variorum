@@ -452,6 +452,51 @@ DerivedData: `App/Variorum/DerivedData/vm64-b4/` (gitignored).
 - **Pre-fix build:** 17 starts, 8 passed, **9 fence pins FAILED by assertion** ("17 tests in 2 suites failed with 22 issues"): the eight predicted (`keysTypedWhileADivideLandsReplayAtTheLandedCaret` 2 issues · `anEditTheGateIsAskedAboutDuringADivideIsRefusedAndSaid` 3 · `aGatelessEditDuringADivideIsWithheldAndThePageReReadFromTheStore` 4 · `aKeyTypedWhileAMergeLandsEndsUpInTheMergedBlock` 2 · `aGatelessEditDuringAMergeNeverLandsInAReleasedSource` 2 · `aKeyTypedWhileAnExtractLandsNeverDuplicatesTheSpan` 2 · `aKeyTypedWhileMakeBlockLandsNeverResurrectsTheWholeSource` 2 · `aKeyTypedWhileInsertBelowLandsGoesIntoTheNewBlock` 1) **and the guard `afterTheFlightLandsTypingIsOrdinaryAgain` (4 issues: the recorded desync assertion, `model.autosave.isDirty`, the stored text, `desyncRecoveryCount == 0`).** Green there: `insertBelowTwin…` and the 7 probes (the same `desyncs=0` lines as on the fix build).
 - **What is settled and what is owed:** the pins are red on old and green on the fix, per door, in one host process. NOT yet explained, and owed in the implementer's closeout before the batch closes: (1) on the OLD code, typing at the start of the minted block just after a divide lands desyncs in the key-window posture (the guard's red) while the probe's p5, the same act in the same posture, shows no desync on either build — what differs between the guard and p5; (2) the traced mechanism by which the fix build no longer desyncs there; (3) whether this is round 2's M27 (which `notes/plans/fixes/vm-5-stability-pass.md` recorded as dissolved) and what that means for that record. The six crash stacks of the first window stay the evidence beside any "posture, not the fence" claim.
 
+**Batch 2 · VM-2 — THE 49 TYPES FROM THE r1 FIX BUILD, 2026-11-19 06:57–06:59: FOUR FENCE PINS RED ON THE FIX. The batch is NOT closed.** `vm64-b2r1` (05ca99e0d), ONE host process, no restart: 352 test starts, 345 passed, 5 tests failed ("350 tests in 49 suites failed with 18 issues"). Red: VM-24's standing caret test in main's shape (2 of 3 cases, 2 issues), and `keysTypedWhileADivideLandsReplayAtTheLandedCaret` (6 issues) · `aKeyTypedWhileAnExtractLandsNeverDuplicatesTheSpan` (3) · `aKeyTypedWhileMakeBlockLandsNeverResurrectsTheWholeSource` (3) · `afterTheFlightLandsTypingIsOrdinaryAgain` (4) — each with the recorded desync assertion. The same four were green at 06:32 beside only the probe suite: their outcome depends on what earlier suites leave in the host process. Log: `notes/plans/vm64-screens/b2r1-49.log`. The implementer's trace (its §7 "Iteration r1 → r2") names the cause: a programmatic `insertText` never consults the editor's gate, while her keyboard always does, so these pins and the fence's hold-and-replay path ride a road only tests reach. **The orchestrator's call on r2 follows in the batch's section.**
+
+**Batch 3 · VM-66 — CLOSED 2026-11-19. Stage window 06:59–07:03, products `vm64-b3` at `d2cef56be`.** `MobileHerPathsPerfTests` alone, twice: 9 tests in 1 suite passed both times (run 1 started 06:59:36, load averages 16.12 77.53 71.31; run 2 started 07:01:24, 7.75 55.55 63.40 — a loaded machine, six runs sharing it). Then `MobilePerfFixtureTests` `MobilePerfWalkTests` `MobileLaunchPathTests` `MobileShelfPerfTests` `MobileTimingTests`: 21 tests in 5 suites passed. No red, no crash. Logs: `notes/plans/vm64-screens/b3-perf1.log`, `b3-perf2.log`, `b3-five.log`.
+
+**THE BEFORE NUMBERS — simulator (iPhone 17 Pro, iOS 26.2), Debug build, n = 5 per series inside each run; median (min–max); a single value means min = max. These are the figures batches 4–7 are judged against; the implementer's PENDING table in the batch-3 block above is settled by this one.** The last column is the same suite from batch 4's products (`vm64-b4`, `8e4e73e01`, started 07:03:40, load 4.71 37.11 54.81).
+
+| Series | unit | BEFORE run 1 (load 16.1) | BEFORE run 2 (load 7.8) | after batch 4 (load 4.7) |
+|---|---|---|---|---|
+| `note-open-to-screen-short` | ms | 59.26 (44.78–65.03) | 53.53 (46.93–64.85) | 56.85 (49.41–59.22) |
+| `note-open-to-live-short` | ms | 38.14 (33.19–54.85) | 37.92 (33.32–73.00) | 38.52 (35.68–55.78) |
+| `note-reads-per-open-short` | count | 2 | 2 | 2 |
+| `note-open-to-screen-100k` | ms | 359.99 (355.23–362.37) | 361.61 (357.77–365.59) | 352.60 (350.84–359.25) |
+| `note-open-to-live-100k` | ms | 486.45 (483.49–495.25) | 496.14 (494.37–500.23) | 490.69 (487.57–493.37) |
+| `note-reads-per-open-100k` | count | 2 | 2 | 2 |
+| `shell-box-open-to-note` | ms | 56.61 (49.85–64.17) | 58.08 (57.14–63.81) | 59.98 (55.44–67.06) |
+| `shell-box-file` | ms | 3.08 (2.85–6.46) | 3.60 (3.28–7.62) | 6.19 (2.88–11.84) |
+| `shell-box-open-to-live` | ms | 34.08 (32.31–34.94) | 35.46 (33.96–36.10) | 35.92 (31.75–37.67) |
+| `shell-box-editor-builds-per-open` | count | 1 | 1 | 1 |
+| `shell-box-note-reads-per-open` | count | 2 | 2 | 2 |
+| `shell-library-open-to-screen-short` | ms | 40.34 (33.68–46.40) | 49.41 (39.95–50.90) | 45.13 (37.11–48.95) |
+| `shell-library-editor-builds-per-open-short` | count | 1 | 1 | 1 |
+| `shell-library-note-reads-per-open-short` | count | 2 | 2 | 2 |
+| `shell-library-open-to-screen-100k` | ms | 311.51 (308.52–324.44) | 326.34 (315.22–329.84) | 322.16 (314.27–323.64) |
+| `shell-library-editor-builds-per-open-100k` | count | 1 | 1 | 1 |
+| `shell-library-note-reads-per-open-100k` | count | 2 | 2 | 2 |
+| `library-rereads-per-box-save` | count | 2 | 2 | 2 |
+| `library-redraws-per-box-save` | count | 2 | 2 | 2 |
+| `all-listing-rereads-per-box-save` | count | 1 | 1 | 1 |
+| `bookless-rereads-per-box-save` | count | 1 | 1 | 1 |
+| `library-listing-fetch-ninewings` | ms | 1.13 (1.03–2.69) | 1.14 (1.09–1.47) | 1.15 (1.09–2.87) |
+| `bookless-listing-fetch-ninewings` | ms | 6.52 (6.24–13.34) | 6.53 (6.35–7.09) | 6.58 (6.30–14.10) |
+| `owner-adoption-nothing-to-adopt` | ms | 1.15 (1.00–1.24) | 1.16 (1.04–1.30) | 0.88 (0.83–0.92) |
+| `owner-adoption-rows-nothing-to-adopt` | count | 0 | 0 | 0 |
+| `savepoints-per-note-leaving` | count | 1 | 1 | 1 |
+| `savepoints-per-backgrounding-standard` | count | 1 | 1 | 1 |
+| `savepoints-per-backgrounding-castle` | count | 3 | 3 | 3 |
+| `autosave-registry-growth-per-open-close` | count | 1 | 1 | 1 |
+| `note-rereads-per-save-100k` | count | 1 | 1 | 1 |
+| `note-deliveries-per-save-100k` | count | 1 | 1 | 1 |
+| `note-delivery-ingest-100k` | ms | 4.66 (4.10–4.74) | 4.49 (3.92–4.80) | 4.54 (4.02–4.88) |
+
+**Reading them (the orchestrator's, for the batches that follow):** every count repeats exactly across runs — a note is read twice per open (batch 6 → 1); the Library re-reads twice and redraws twice per capture-box save with the Library off screen (batch 5 → 0); backgrounding under Castle makes 3 savepoint attempts where Standard makes 1 (batch 7 → 1); the autosave registry grows by 1 per open-and-close (batch 6 → 0); the editor's models are built ONCE per open, so audit F's suspected twin construction (2D) is NOT happening on this road. The durations are simulator figures at fixture scale and are small: nothing here reproduces the size of what she feels on her phone, which is why the readout on her wave-1 build is the number that matters for tuning. Owner adoption with nothing to adopt: 1.15 ms before, 0.88 ms after, at a 450-note fixture (the batch-4 closeout's headless figure at 61,700 rows is 11 ms → under 1 ms).
+
+**Batch 4 · VM-67 — the phone piece, 07:03–07:05, GREEN** (`vm64-b4`): `MobileHerPathsPerfTests` alone — 9 passed, the new owner-adoption assertions included; then `MobileLaunchPathTests` `MobilePerfFixtureTests` `MobilePhoneStoreEncryptionTests` `MobileRoundOccasionTests` `MobileTypedUnlockSyncKeysTests` `MobileRelockCoordinatorTests` — 16 tests in 6 suites passed. Logs `b4-perf.log`, `b4-six.log`. The Mac piece (16 types) is still owed before the batch closes. **A file under `Features/Protection/` to name plainly (the coordinator's catch):** batch 1 added one line to `VariorumMobile/Features/Protection/MobileRoadFaces.swift` — `.onAppear { MobileTiming.lockScreenAppeared() }`, the lock screen's timing mark; it changes nothing the lock does, and it sits inside this run's custody slot.
+
 ## 6. Review foci (written at plan time, before any code)
 
 1. Does anything the timing layer records, persists or copies contain note text, a title or an id? Is its cost O(1) per mark and its memory bounded?
