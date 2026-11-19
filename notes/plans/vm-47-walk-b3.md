@@ -30,7 +30,10 @@ tree with piece 3.10, `4cca58a8e`, and the READY record). Logs: the session scra
   `theTakesPillsEdgeFollowsTheFlip()`, `theCommentDraftsEdgeFollowsTheFlip()`. All four GREEN on the fixed tree in the
   whole-target run. **Red on old, green on new: VM-54 is FIXED with its pin** (the on-screen flip rides the walk,
   part B).
-- **The Mac leg** (the 102 theme-store types + the seven theme types, §6 of the run record): PENDING its window.
+- **The Mac leg** (the 102 theme-store types + the seven theme types, §6 of the run record): ~~PENDING its window~~ —
+  RUN (the orchestrator, 10:38–10:53, the same gate snapshot; the run record's row 3.12): "Test run with 511 tests in 102
+  suites passed after 836.278 seconds with 4 known issues", none failed; 10 suites (24 tests) skipped by their own opt-in
+  gates; the 4 known issues pre-existing.
 
 ## The navigation red
 
@@ -103,7 +106,10 @@ helper (`:192`). So:
   lookup to buttons (`onScreen`, `MobileTabBarTests.swift:55–61`: label AND `.button` AND on the window) and asserts
   the trait on the on-window door (`:181`), so a selection that failed to move would turn those red.
 
-*Proposed fix — TEST ONLY, for the fix batch after batch 5 (not applied; the worktree is batch 5's).*
+*Proposed fix — TEST ONLY, for the fix batch after batch 5 (not applied; the worktree is batch 5's).* **APPLIED since**
+as `8eb727f2e` (at the coordinator's hand-off, during batch 5: the selection helper counts buttons only, as below) and
+VERIFIED: `theTabBarCarriesThreeDoorsAndEachOneMovesTheBand()` green in batch 5's short piece (the run record's row 5.7
+(a)).
 `App/Variorum/VariorumMobileTests/MobileNavigationTests.swift`, `theTabBarCarriesThreeDoorsAndEachOneMovesTheBand()`'s
 `selection` helper, line 192 at HEAD (the same line at `54cbcb9e5`):
 

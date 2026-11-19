@@ -344,7 +344,7 @@ struct MobileFilterRowGeometryTests {
                 }
                 if voice.voice == .terminal && width == 320 {
                     await withKnownIssue(
-                        "Terminal at 320 pt: five 13 pt mono words cannot hold one row — VM-50's segmented choice owns it"
+                        "Terminal at 320 pt: five 13 pt mono words cannot hold one row — VM-93 (the Library's rooms) owns it"
                     ) { try await check() }
                 } else {
                     try await check()
@@ -550,7 +550,7 @@ struct MobileFilterRowGeometryTests {
                 // so this half is a KNOWN ISSUE owned by VM-50's segmented
                 // choice — pinned, not dropped.
                 withKnownIssue(
-                    "Terminal at 320 pt: five 13 pt mono words cannot hold one row — VM-50's segmented choice owns it"
+                    "Terminal at 320 pt: five 13 pt mono words cannot hold one row — VM-93 (the Library's rooms) owns it"
                 ) {
                     for label in measured {
                         let frame = try #require(surface.frame(ofDoorLabelled: label))
