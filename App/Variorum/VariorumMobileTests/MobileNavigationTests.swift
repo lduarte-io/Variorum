@@ -189,7 +189,9 @@ struct MobileNavigationTests {
         func selection(
             _ surface: HostedSurface<MobileShellView>, _ label: String
         ) -> (copies: Int, allSelected: Bool, noneSelected: Bool) {
-            let doors = surface.visibleElements.filter { $0.accessibilityLabel == label }
+            let doors = surface.visibleElements.filter {
+                $0.accessibilityLabel == label && $0.accessibilityTraits.contains(.button)
+            }
             let selected = doors.filter { $0.accessibilityTraits.contains(.selected) }
             return (doors.count, !doors.isEmpty && selected.count == doors.count,
                     selected.isEmpty)
