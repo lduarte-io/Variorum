@@ -241,16 +241,7 @@ struct MobileBookDetailsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(tokens.chromeLabel("Book Details"))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Book Details"), tokens: tokens) { dismiss() }
             if let book = model.book {
                 identityBlock(book)
                 Divider().overlay(tokens.line)
@@ -332,7 +323,7 @@ struct MobileBookDetailsSheet: View {
             }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneMenuRowStyle())
         .accessibilityLabel(MobileShelfFaces.archiveDailyJournalDoorTitle)
     }
 
@@ -354,7 +345,7 @@ struct MobileBookDetailsSheet: View {
             }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneMenuRowStyle())
         .accessibilityLabel(MobileShelfFaces.deleteBookDoorTitle)
     }
 
@@ -371,6 +362,7 @@ struct MobileBookDetailsSheet: View {
                     .phoneType(.rowTitle, tokens)
                     .foregroundStyle(book.reading.locked ? tokens.accent : tokens.ink)
                     .lineLimit(2)
+                    .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Rename Book")
@@ -403,7 +395,7 @@ struct MobileBookDetailsSheet: View {
             }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneMenuRowStyle())
     }
 
     /// The daily-designation road (curated journal books only — P-2).
@@ -423,7 +415,8 @@ struct MobileBookDetailsSheet: View {
                         .foregroundStyle(tokens.phone.muted)
                 }
             }
-            .contentShape(Rectangle())
+            // VM-49: 44 tall; its own disabled read stays (the ✓ is a readout).
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .disabled(model.isDaily)

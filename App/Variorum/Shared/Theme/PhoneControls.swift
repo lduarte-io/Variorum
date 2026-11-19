@@ -475,6 +475,29 @@ struct PhoneMenuRow: View {
     }
 }
 
+// MARK: - The segmented choice's widths (pure)
+
+/// **How the segmented choice shares its width** — each word gets its own
+/// width plus the inside padding on each side; what is left over is shared
+/// equally; when the words do not fit (Display Zoom, a long word in mono),
+/// every segment gives up the same share of its width (the system then
+/// truncates the word it cannot draw — recorded per site in the run record).
+nonisolated enum PhoneSegmentWidths {
+    /// Inside a segment, each side (sheet §C's 12 inside buttons).
+    static let insidePadding: CGFloat = PhoneControlMetrics.insidePadding
+
+    static func widths(naturals: [CGFloat], available: CGFloat) -> [CGFloat] {
+        let wanted = naturals.map { $0 + 2 * insidePadding }
+        let total = wanted.reduce(0, +)
+        guard available > 0, total > 0 else { return wanted }
+        if total <= available {
+            let extra = (available - total) / CGFloat(wanted.count)
+            return wanted.map { $0 + extra }
+        }
+        return wanted.map { $0 * available / total }
+    }
+}
+
 // MARK: - The segmented choice (the system control, styled) — iOS
 
 #if os(iOS)
@@ -573,6 +596,7 @@ private struct PhoneSegmentedControlBridge: UIViewRepresentable {
         control.setTitleTextAttributes(
             [.font: font, .foregroundColor: UIColor(tokens.ink)], for: .selected)
         control.selectedSegmentTintColor = UIColor(tokens.surface)
+        control.titleFont = font
         control.setNeedsLayout()
     }
 
@@ -595,7 +619,28 @@ final class PhoneSegmentedControl: UISegmentedControl {
     var spokenWords: [String] = [] {
         didSet { if spokenWords != oldValue { segmentElements = [] } }
     }
+    /// The words' font — the segments are sized from it.
+    var titleFont: UIFont = .systemFont(ofSize: 15)
     private var segmentElements: [PhoneSegmentElement] = []
+    /// The widths the segments were last given (also the spoken elements'
+    /// frames), so a long word gets its room and a short one shares the
+    /// rest.
+    private(set) var segmentWidths: [CGFloat] = []
+
+    override func layoutSubviews() {
+        let widths = PhoneSegmentWidths.widths(
+            naturals: titles.map {
+                ceil(($0 as NSString).size(withAttributes: [.font: titleFont]).width)
+            },
+            available: bounds.width)
+        if widths != segmentWidths, widths.count == numberOfSegments {
+            segmentWidths = widths
+            for (index, width) in widths.enumerated() {
+                setWidth(width, forSegmentAt: index)
+            }
+        }
+        super.layoutSubviews()
+    }
 
     override var isAccessibilityElement: Bool {
         get { false }
@@ -638,13 +683,19 @@ final class PhoneSegmentElement: UIAccessibilityElement {
         super.init(accessibilityContainer: control)
     }
 
-    /// The segment's frame in the control: the system lays its segments out
-    /// at equal widths (`apportionsSegmentWidthsByContent` stays off).
+    /// The segment's frame in the control — the widths the control gave its
+    /// segments (`PhoneSegmentWidths`), or equal shares before its first
+    /// layout.
     func place() {
         guard let control, control.numberOfSegments > 0 else { return }
-        let width = control.bounds.width / CGFloat(control.numberOfSegments)
+        let widths = control.segmentWidths.count == control.numberOfSegments
+            ? control.segmentWidths
+            : Array(
+                repeating: control.bounds.width / CGFloat(control.numberOfSegments),
+                count: control.numberOfSegments)
+        let x = widths.prefix(index).reduce(0, +)
         accessibilityFrameInContainerSpace = CGRect(
-            x: width * CGFloat(index), y: 0, width: width, height: control.bounds.height)
+            x: x, y: 0, width: widths[index], height: control.bounds.height)
     }
 
     override var accessibilityLabel: String? {

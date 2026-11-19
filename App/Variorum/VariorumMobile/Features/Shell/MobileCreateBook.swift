@@ -198,28 +198,12 @@ struct MobileCreateBookSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(tokens.chromeLabel("New Book"))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Cancel")) { dismiss() }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(
+                tokens.chromeLabel("New Book"), tokens: tokens, doneWord: "Cancel"
+            ) { dismiss() }
             TextField(tokens.chromeLabel("Name"), text: $model.name)
                 .textFieldStyle(.plain)
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.ink)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(tokens.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(tokens.line, lineWidth: 1)))
+                .phoneField(tokens)
             kindRow
             Text(tokens.chromeLabel(caption))
                 .phoneType(.meta, tokens)
@@ -241,18 +225,9 @@ struct MobileCreateBookSheet: View {
                 }
             } label: {
                 Text(tokens.chromeLabel("Create Book"))
-                    .phoneType(.control, tokens)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(tokens.surface)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(tokens.line, lineWidth: 1)))
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(model.canCreate ? tokens.accent : tokens.phone.faint)
+            // VM-50: the one calm button, spanning the sheet.
+            .buttonStyle(PhoneCalmButtonStyle(tokens: tokens, fullWidth: true))
             .disabled(!model.canCreate)
         }
         .padding(20)
@@ -271,25 +246,20 @@ struct MobileCreateBookSheet: View {
         }
     }
 
+    /// VM-50: the kind is the system's segmented choice (was three words).
     private var kindRow: some View {
-        HStack(spacing: 18) {
-            kindDoor("Book", .notes)
-            kindDoor("Journal Book", .journal)
-            kindDoor("Smart Book", .smartFromTags)
-            Spacer()
-        }
+        PhoneSegmentedChoice(
+            MobileCreateBookModel.BookKind.allCases, selection: model.kind,
+            tokens: tokens, word: Self.kindWord, select: { model.kind = $0 })
     }
 
-    private func kindDoor(_ label: String, _ target: MobileCreateBookModel.BookKind) -> some View {
-        Button {
-            model.kind = target
-        } label: {
-            Text(tokens.chromeLabel(label))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(model.kind == target ? tokens.ink : tokens.phone.faint)
+    /// The three kinds' words (the Mac alert's own three).
+    static func kindWord(_ kind: MobileCreateBookModel.BookKind) -> String {
+        switch kind {
+        case .notes: "Book"
+        case .journal: "Journal Book"
+        case .smartFromTags: "Smart Book"
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(model.kind == target ? .isSelected : [])
     }
 
     private var tagPicker: some View {
@@ -308,12 +278,11 @@ struct MobileCreateBookSheet: View {
                 }
                 .frame(maxHeight: 220)
                 if model.selectedTagPaths.count > 1 {
-                    // The Mac's radio pair, as two text doors.
-                    HStack(spacing: 18) {
-                        joinDoor("any of these (OR)", false)
-                        joinDoor("all of these (AND)", true)
-                        Spacer()
-                    }
+                    // The Mac's radio pair, as the segmented choice (VM-50).
+                    PhoneSegmentedChoice(
+                        [false, true], selection: model.joinAll, tokens: tokens,
+                        word: { $0 ? "all of these (AND)" : "any of these (OR)" },
+                        select: { model.joinAll = $0 })
                 }
             }
         }
@@ -343,21 +312,10 @@ struct MobileCreateBookSheet: View {
                 Spacer()
             }
             .padding(.vertical, 8)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    private func joinDoor(_ label: String, _ target: Bool) -> some View {
-        Button {
-            model.joinAll = target
-        } label: {
-            Text(tokens.chromeLabel(label))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(model.joinAll == target ? tokens.ink : tokens.phone.faint)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(model.joinAll == target ? .isSelected : [])
-    }
 }
