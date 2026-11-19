@@ -181,7 +181,8 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | **CLOSED 2026-11-19** (r1) | see the batch 6 block; r1 code `36cddcf60` `9821ffef3` `ce3c4e75b` | first window NOT green (the release lived in `deinit`); r1 green on the final tree — "Orchestrator's stage results" below; residual VM-227 |
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
-| Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 waits for the window's end and VM-55's merge) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the merge of `origin/main`, the rebuilds, the red build, the whole Core package, the stage |
+| Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 — the merge, the rebuilds, the red build, the whole Core package — is the merge block's below) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the stage |
+| The merge of main (VM-55) | **IN-PROGRESS** (implementer, opus; started 2026-11-19) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -761,7 +762,30 @@ orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
 | F5 — builds: phone and Mac `build-for-testing` into `vm64-fix`; `swift test` for the touched suites | DONE at `f589d964e` — phone and Mac `** TEST BUILD SUCCEEDED **` (the Mac finished at 12:37, inside the window's two-minute tail), no warning in a touched file; `swift test --filter 'TimingRecorderTests\|StructuralFlightFenceTests\|LeavingSavepointTests\|LeavingSavepointMeasurementTests'` 48 tests in 4 suites passed (the gated one skipped). **To be REBUILT on the merged tree** once the orchestrator says to merge `origin/main` (VM-55) and the window has ended |
 | F6 — §7 "Fix pass" closeout with the stage commands | DONE (this commit) — §7 ▸ "Ladder round 1 — fix pass"; the turn ENDS here with only builds left (the window): the merge of `origin/main` at the orchestrator's word, then the phone and Mac rebuilds into `vm64-fix`, then the red build, then the stage |
 | F7 — finding 1 (Part of VM-71): HELD for the reviewer's call; the second turn | DONE — the call is in (`c9a2effda`: arm (a), exactly as specified, nothing of arm (b)). (i) the GUARD in `LeavingSavepointTests` ("GUARD — a take another writer dirties between the read and the turn is the next ask's") — DONE (`84a8acff8`; green by design, `LeavingSavepointTests` 8 passed); (ii) the comment corrections — DONE (`78439841e`; comments only: `Shared/AppSession.swift`'s phone branch of `savepointOnLeaving`, inside its `#else`, and `closeAutoCommit(_:takes:)`'s doc; the Mac's statements byte-unchanged); (iii) the record corrections in §7 batch 7 — DONE (`d6404029a`; in place, marked "[Ladder round 1, finding 1 — …]", the first text kept legible: hazard (a)'s pop row, hazard (b)'s "nothing can go stale" qualified to ACROSS asks, D-7-1's visibility-point note); (iv) the gated measurement stays (`12d6afde5`). The final table: §7 ▸ "Ladder round 1 — fix pass" ▸ "Second turn, part 1" (this commit); the touched filters 49 tests in 4 suites passed |
-| F8 — second turn, part 2 (after the QUIET window and VM-55's merge to main, at the orchestrator's word): merge `origin/main`, rebuild `vm64-fix` (phone and Mac) and `vm64-fix-red` on the merged tree, the whole Core package headless, the stage | NOT-STARTED |
+| F8 — second turn, part 2 (after the QUIET window and VM-55's merge to main, at the orchestrator's word): merge `origin/main`, rebuild `vm64-fix` (phone and Mac) and `vm64-fix-red` on the merged tree, the whole Core package headless, the stage | TAKEN OVER by "The merge of main (VM-55)" below — its builds go to `vm64-gate` / `vm64-gate-red` (the orchestrator's brief), never `vm64-fix*`; the stage stays the orchestrator's |
+
+### The merge of main (VM-55) · LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** Base: `48919f693` (this branch) · `origin/main` `eb18888db` (VM-55's merge `66337ff08` + its
+notes-only ledger commit; merge-base `359ae214d`). DerivedData: `App/Variorum/DerivedData/vm64-gate/` (phone + Mac, the
+merged tree) and `vm64-gate-red/` (phone, finding 2's hunk reversed) — gitignored; no other batch's folder is written.
+The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) and what it re-landed".
+
+| Piece | State |
+|---|---|
+| M0 — this live status, before any tree change | DONE (this commit) |
+| M1 — `git merge origin/main` (a merge commit); the two Shell conflicts re-landed hunk by hunk, each with its reason | NOT-STARTED |
+| M2 — (a) the wing: the Library's two paged listings scoped as VM-55's were; a switch re-asks; a hidden switch honoured on return; VM-55's Library wing pins re-landed on the paged model | NOT-STARTED |
+| M3 — (b) the one message line: this run's phone code routed through VM-55's seam (every raw error, every direct status write) | NOT-STARTED |
+| M4 — (c) `Shared/AppSession.swift` read (the phone's `savepointOnLeaving` branch, `releaseAutosave`, the status seam's move; the Mac's savepoint statements byte-identical) | NOT-STARTED |
+| M5 — (d) `MobileShellView.swift`: the wing door beside `libraryOnScreen` / `isDrawn`, both new `MobileLibraryView` arguments, batch 1's marks | NOT-STARTED |
+| M6 — (e) every `AppTiming` catalog series and counter has its call site | NOT-STARTED |
+| M7 — (f) the fence and the hold read on the merged tree (no change unless (b) needs a routing line) | NOT-STARTED |
+| M8 — step 3: the `MobileHerPathsPerfTests` registry comment corrected (comment only) | NOT-STARTED |
+| M9 — the whole Core package, `swift test`, once, at the end of the edits | NOT-STARTED |
+| M10 — phone and Mac `build-for-testing`, cold, into `vm64-gate` | NOT-STARTED |
+| M11 — the finding-2 red build into `vm64-gate-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
+| M12 — §7's section, the hosted commands, the report | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
