@@ -9,9 +9,10 @@
 //     her words are listed or read — the three roots' lists, a book's notes,
 //     Archived, the Trash, Versions — the ground is the paper
 //     (`tokens.surface`); bars, sheets and bands stay on the room. Read's
-//     cream page and Write's page sit on the VOICE's own room
-//     (`ReadingPageTokens.room` — the Mac's R-13u-10 road; P-47-16 for Write),
-//     never the palette's.
+//     cream page sits on the VOICE's own room (`ReadingPageTokens.room` — the
+//     Mac's R-13u-10 road), never the palette's. The note in Write is on the
+//     paper — the screen, the masthead and the editor's own ground (piece
+//     3.10, P-47-16; the Mac's editor and note masthead read the paper).
 //  2. **The star** reads its own token (`tokens.star` — blue in every voice),
 //     never the accent.
 //  3. **No literal colour in a phone view** — the Mac's pin covers its own
@@ -76,16 +77,33 @@ struct MobileLookSourceTests {
         }
     }
 
-    /// Read's cream page and Write's page never sit on the palette's room:
-    /// both wear the voice's own (`ReadingPageTokens.room`).
-    @Test func theReadPageAndWriteNeverSitOnThePalettesRoom() throws {
-        for file in ["Features/Read/MobileReadView.swift", "Features/Write/MobileWriteView.swift"] {
-            let lines = try code(file)
-            #expect(lines.contains { $0.contains("ReadingPageTokens.room(") },
-                    "\(file): the voice's own room")
-            #expect(!lines.contains { $0.contains(".background(tokens.room") },
-                    "\(file): never the palette's room under her words")
-        }
+    /// Read's cream page never sits on the palette's room: the room around it
+    /// is the voice's own (`ReadingPageTokens.room`).
+    @Test func theReadPageNeverSitsOnThePalettesRoom() throws {
+        let lines = try code("Features/Read/MobileReadView.swift")
+        #expect(lines.contains { $0.contains("ReadingPageTokens.room(") },
+                "MobileReadView: the voice's own room")
+        #expect(!lines.contains { $0.contains(".background(tokens.room") },
+                "MobileReadView: never the palette's room under her words")
+    }
+
+    /// **The note in Write is on the paper** (the VM-47 run, piece 3.10): the
+    /// screen's ground and her title's masthead read `tokens.surface`, and the
+    /// editor's own ground — its one line in the fenced text view — reads the
+    /// face's paper. Nothing in Write sits on a room under her words.
+    @Test func theNoteInWriteIsOnThePaper() throws {
+        let write = try code("Features/Write/MobileWriteView.swift")
+        #expect(write.contains { $0.contains(".background(tokens.surface.ignoresSafeArea())") },
+                "MobileWriteView: the screen's ground is the paper")
+        #expect(write.contains { $0.contains(".background(tokens.surface)") },
+                "MobileWriteView: her title's masthead is on the paper")
+        #expect(!write.contains { $0.contains(".background(tokens.room") || $0.contains("ReadingPageTokens.room(") },
+                "MobileWriteView: no room under her words")
+        let editor = try code("Features/Write/MobileEditorTextView.swift")
+        #expect(editor.contains { $0.contains("backgroundColor = face.paper") },
+                "MobileEditorTextView: the editor's ground is the face's paper")
+        #expect(!editor.contains { $0.contains("backgroundColor = face.room") },
+                "MobileEditorTextView: never the face's room")
     }
 
     // MARK: - 2. The star

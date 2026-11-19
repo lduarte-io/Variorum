@@ -113,19 +113,18 @@ nonisolated enum MobileEditorStyle {
         let chrome: UIFont
         let ink: UIColor
         let muted: UIColor
-        /// **The editor's ground** — its one reader is the text view's own
-        /// background (`MobileEditorTextView.applyVoiceChrome`). It stays the
-        /// VOICE's room under every palette (VM-51, PROVISIONAL P-47-16 — her
-        /// R-47-1, "prose should not be on the tint"; the Mac's own precedent
-        /// is `ReadingPageTokens.room`, the room under her words kept off the
-        /// palette, R-13u-10): the palette's tinted room would put the note
-        /// she writes on the tint. The sheet's paper here is one line in the
-        /// editor's text view, which is VM-137's (the editor seam).
+        /// The VOICE's own room — a palette never replaces it here
+        /// (`applying(palette:tint:)` carries it through). Since the VM-47
+        /// run's piece 3.10 it is no longer the editor's ground (that is
+        /// `paper`, below); no editor view reads it.
         let room: UIColor
         // The six colours below — with the markdown palette's `link` — are
         // the ones a palette replaces (`applying(palette:tint:)`; in light the
         // resolver keeps the voice's own paper and card, as
         // `VoiceTokens.applying` does). Everything else in a face is the voice's.
+        /// The paper: `tokens.surface` as the settings road resolves it — the
+        /// voice's own paper in light, the palette's hued paper in dark (R51's
+        /// room stays black). The overlays' sheets and the keyboard bar read it.
         private(set) var surface: UIColor
         private(set) var line: UIColor
         private(set) var accent: UIColor
@@ -222,6 +221,15 @@ nonisolated enum MobileEditorStyle {
                 prose: dynamic(\.ink))
         }
 
+        /// **The editor's ground — the paper** (the VM-47 run, piece 3.10; her
+        /// R-47-1, "prose should not be on the tint", whose test is the paper
+        /// wherever her words are written). The Mac's editor reads exactly this
+        /// (`EditorSurfaceChrome.paper` = `NSColor(tokens.surface)`, its scroll
+        /// view's background); its one reader here is the text view's
+        /// background (`MobileEditorTextView.applyVoiceChrome`). The same
+        /// object as `surface`, so a palette's landing moves it with the rest.
+        var paper: UIColor { surface }
+
         /// VM-48: the phone layer's UIKit type — a role in this face's voice
         /// (`PhoneType.uiFont`: scaled with the text size, chrome held at
         /// xxxLarge). The UIKit chrome reads its type through here.
@@ -237,8 +245,8 @@ nonisolated enum MobileEditorStyle {
         /// here, so the colours stay dynamic (light or dark rides the device)
         /// and are built once per landed palette, never per read. Every other
         /// slot — the type, the inks, the chosen mark, the comment ink, the
-        /// alarm, the markdown marker, chip and prose ink, the editor's ground —
-        /// is THIS face's own object, carried through untouched. A palette that
+        /// alarm, the markdown marker, chip and prose ink, the room — is THIS
+        /// face's own object, carried through untouched. A palette that
         /// names nothing returns this face itself (the byte-identical road).
         @MainActor
         func applying(palette: ThemePalette, tint: PaletteTint) -> Face {

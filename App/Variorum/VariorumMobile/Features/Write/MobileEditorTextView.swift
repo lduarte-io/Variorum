@@ -986,7 +986,7 @@ final class MobileEditorTextView: UITextView {
     /// `applyVoiceChange` (the LK2 switch).
     func applyVoiceChrome() {
         let face = MobileEditorStyle.face
-        backgroundColor = face.room
+        backgroundColor = face.paper
         tintColor = face.accent
         typingAttributes = MobileEditorStyle.baseAttributes
         if let keyboardBarController {

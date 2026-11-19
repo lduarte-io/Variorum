@@ -16,7 +16,8 @@
 //  light or dark is an argument the DEVICE supplies, never a setting; the
 //  placeholder before a library answers is exactly what an empty library
 //  reads; the editor face's adoption is object-stable and shares the voice's
-//  own colour objects; the retired phone preference is read nowhere.
+//  own colour objects; the note in Write is on the paper (piece 3.10); the
+//  retired phone preference is read nowhere.
 //
 
 import Foundation
@@ -237,7 +238,8 @@ struct MobileLibraryLookTests {
         #expect(first.palette.marker === MobileEditorStyle.studyFace.palette.marker)
         #expect(first.palette.codeTint === MobileEditorStyle.studyFace.palette.codeTint)
         #expect(first.room === MobileEditorStyle.studyFace.room,
-                "the editor's ground stays the voice's own room (P-47-16)")
+                "a palette never replaces the face's room slot")
+        #expect(first.paper === first.surface, "the editor's ground IS the face's paper (piece 3.10)")
         #expect(first.body == MobileEditorStyle.studyFace.body)
 
         var custom = study
@@ -248,22 +250,36 @@ struct MobileLibraryLookTests {
                 "a custom palette with no seed is the voice's own face (the resolver's nil road)")
     }
 
-    /// The editor's GROUND is the voice's own room under every palette — her
-    /// words never sit on the palette's tint (R-47-1; P-47-16: the paper there
-    /// is the editor seam's, VM-137). Measured over every shipped palette in
-    /// both voices and both appearances.
-    @Test func theEditorsGroundIsNeverThePalettesTint() {
+    /// **The note in Write is on the PAPER** (the VM-47 run, piece 3.10; her
+    /// R-47-1, "prose should not be on the tint" — its test is the paper
+    /// wherever her words are written; the Mac's editor reads `tokens.surface`).
+    /// Read off a real editor text view's own background: in both voices, light
+    /// and dark, under the sea-glass and a second palette, the ground is
+    /// `tokens.surface` as the settings road resolves it — never the palette's
+    /// room in light, never R51's black room in dark — and a look that lands on
+    /// an open editor (`applyVoiceChrome`, the landing road) moves it. The
+    /// face's `room` slot is untouched by the piece: still the voice's own.
+    @Test func theEditorsGroundIsThePaper() throws {
         defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
+        let view = MobileEditorTextView.make()
         for voice in ThemeVoice.allCases {
-            for palette in ThemePalette.allCases where palette != .default && palette != .custom {
+            for palette in [ThemePalette.seaglass, .tealAndRust] {
                 var settings = Queries.ThemeSettings()
                 settings.voice = voice
                 settings.palette = palette
                 MobileEditorStyle.adopt(settings)
+                view.applyVoiceChrome()
+                let ground = try #require(view.backgroundColor)
                 for dark in [false, true] {
+                    let tokens = VoiceTokens.resolve(settings: settings, dark: dark)
+                    let label = "\(voice) \(palette) dark: \(dark)"
+                    #expect(rgb(ground, dark: dark) == rgb(tokens.surface, dark: dark),
+                            "the editor's ground is the paper — \(label)")
+                    #expect(rgb(ground, dark: dark) != rgb(tokens.room, dark: dark),
+                            "never the room — \(label)")
                     let own = VoiceTokens.resolve(voice: voice, dark: dark).room
                     #expect(rgb(MobileEditorStyle.face.room, dark: dark) == rgb(own, dark: dark),
-                            "\(voice) \(palette) dark: \(dark)")
+                            "the face's room slot stays the voice's own — \(label)")
                 }
             }
         }
