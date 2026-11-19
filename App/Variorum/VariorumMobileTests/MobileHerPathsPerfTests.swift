@@ -38,9 +38,19 @@
 //  never persists it). A test cannot hand the marks a recorder of its own —
 //  the listings' fetch closures run on GRDB's queues, which inherit no
 //  task-local — so this suite reads the process's recorder, and that is why
-//  **IT MUST RUN ALONE, in an `xcodebuild` invocation of its own**: any other
-//  suite running in parallel in the same process would add its opens and
-//  saves to these windows. Inside the suite every test is serialized. Where
+//  **IT IS GATED AND RUNS ALONE, in an `xcodebuild` invocation of its own**
+//  (`TEST_RUNNER_VM66_PERF=1`, the gate at the suite; a run that does not set
+//  it skips the suite). *(Corrected at the VM-64 ladder's round 2, O-1 — this
+//  sentence first said "any other suite running in parallel in the same
+//  process would add its opens and saves to these windows". In this host no
+//  suite runs in parallel: the scheme's `parallelizable = "NO"` is built into
+//  the xctestrun as `InProcessParallelizationEnabled = false`, and a probe
+//  beside six other suites ran them one after another, this one first, every
+//  count held. What a company run does risk is order: run AFTER other suites,
+//  an earlier suite's leftovers — a late leaving's savepoint mark, a debounced
+//  save, a model still alive — can land in these windows, whose counts are
+//  asserted off the one recorder; and only a scheme flag stood between this
+//  suite and true company.)* Inside the suite every test is serialized. Where
 //  the layer does not time something (open → the first LIVE delivery, a
 //  listing's query, one delivery's main-thread ingest), the test's own clock
 //  does, and the series name and the comment say so.
@@ -480,8 +490,22 @@ private final class RunnerProbe {
 
 // MARK: - The suite
 
+/// **GATED — the suite runs only when asked, alone** (VM-64 ladder round 2,
+/// O-1; the header says why). An ordinary run — a whole-target run included —
+/// SKIPS it (Swift Testing counts the skipped tests in its "N tests … passed"
+/// line: read the skipped lines). To run it, hand the switch to the test
+/// runner and name the suite alone:
+/// `TEST_RUNNER_VM66_PERF=1 xcodebuild test-without-building … -only-testing:VariorumMobileTests/MobileHerPathsPerfTests`
+/// (xcodebuild strips the `TEST_RUNNER_` prefix and sets `VM66_PERF` in the
+/// test host — the app — that runs it; the `ShortcutsTabCaptureTests` precedent).
+private let herPathsPerfAsked = ProcessInfo.processInfo.environment["VM66_PERF"] != nil
+
 @MainActor
-@Suite("VM-66 — the speed tests run her paths (VM-65's timing layer, read)", .serialized)
+@Suite(
+    "VM-66 — the speed tests run her paths (VM-65's timing layer, read; gated: TEST_RUNNER_VM66_PERF=1 — it runs alone)",
+    .serialized,
+    .enabled(if: herPathsPerfAsked,
+             "reads the process's one timing recorder — set TEST_RUNNER_VM66_PERF=1 and run it alone"))
 struct MobileHerPathsPerfTests {
     /// Runs per series (the record's rule: n ≥ 5, a median and a range).
     private static let runs = 5
