@@ -283,9 +283,9 @@ final class RecoveryViewModel {
     @ObservationIgnored private var pendingAsk: Task<Void, Never>?
 
     /// **The QUESTION token** (the VX-408 precedent, `LibraryCatalogModel.read`):
-    /// each start of the listing is a new question, and an answer that arrives
-    /// for an older one is dropped — a superseded question never lands its rows
-    /// over the newer question's.
+    /// each ask of new words and each start of the listing is a new question,
+    /// and an answer that arrives for an older one is dropped — a superseded
+    /// question never lands its rows over the newer question's.
     @ObservationIgnored private(set) var listingQuestion: UInt64 = 0
 
     #if DEBUG
@@ -338,6 +338,10 @@ final class RecoveryViewModel {
         // A new question has not answered yet: the rows on screen stay drawn,
         // but no empty sentence speaks for them (VX-670's walk finding 1).
         trashListingLoaded = false
+        // …and the old question's answers are stale NOW, not at the restart's
+        // `startTrash` a beat later — an answer already in flight would else
+        // land in that beat (ladder round 1, MINOR-1).
+        listingQuestion &+= 1
         restartToken &+= 1
     }
 
