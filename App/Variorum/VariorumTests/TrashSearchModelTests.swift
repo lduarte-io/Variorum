@@ -88,6 +88,8 @@ private struct TrashWorld: Sendable {
 @MainActor
 private final class Held {
     var continuation: CheckedContinuation<Void, Never>?
+    /// Set once the gate has held its one answer (a gate that holds once).
+    var used = false
 }
 
 @MainActor
@@ -298,13 +300,15 @@ struct TrashSearchModelTests {
             let world = try await TrashWorld.make(editor)
             let model = RecoveryViewModel(session: editor.session)
             let held = Held()
+            model.editSearch("rhubarb")
+            model.askSearchNow()
+            // The question the next start asks — read AFTER the ask, since an
+            // ask may be a question of its own (ladder round 1, MINOR-1).
             let firstQuestion = model.listingQuestion &+ 1
             model.listingAnswerGate = { question in
                 guard question == firstQuestion, held.continuation == nil else { return }
                 await withCheckedContinuation { held.continuation = $0 }
             }
-            model.editSearch("rhubarb")
-            model.askSearchNow()
             let first = Task { await model.startTrash() }
             defer { first.cancel() }
             await settle(until: { held.continuation != nil })
@@ -323,6 +327,67 @@ struct TrashSearchModelTests {
             await settle(until: { false }, seconds: 0.3)
             #expect(model.trash.map(\.id) == [world.apple], "the superseded answer never landed")
             #expect(model.passages.isEmpty, "\"orchard\" is in the title it shows")
+        }
+    }
+
+    /// **An answer still in flight when the words change is dropped — before
+    /// the listing restarts** (ladder round 1, MINOR-1). Esc (or any edit that
+    /// changes the asked words) lowers the listing and bumps `restartToken`;
+    /// the view's `.task(id:)` restart that runs the next `startTrash` comes a
+    /// beat later, as its own main-actor job. An answer of the OLD question
+    /// already on its way in that beat — here the no-match search's own first
+    /// answer, held at the DEBUG gate while the field is cleared, with no new
+    /// start run — must not land: it would blank the rows and say "The Trash
+    /// is empty." over a Trash holding six. (Fails while only `startTrash`
+    /// moves the question: the held answer still answers its unchanged
+    /// question, and `adoptListing` raises the listing with `[]`.)
+    @Test func anAnswerStillInFlightWhenTheFieldClearsIsDropped() async throws {
+        try await withEditor { editor in
+            _ = try await TrashWorld.make(editor)
+            let model = RecoveryViewModel(session: editor.session)
+            let total = Task { await model.startTrashTotal() }
+            defer { total.cancel() }
+            var listing = Task { await model.startTrash() }
+            defer { listing.cancel() }
+            await settle(until: { model.trashListingLoaded && model.trashTotalLoaded })
+            #expect(model.trash.count == 6, "premise: the whole Trash is on screen")
+            #expect(!model.trashIsEmptyUnfiltered, "premise: the Trash holds rows")
+
+            // Words that match nothing. The view's restart cancels the plain
+            // listing and starts the search, whose first answer is held.
+            model.editSearch("zzzz")
+            model.askSearchNow()
+            listing.cancel()
+            let held = Held()
+            let searchQuestion = model.listingQuestion &+ 1
+            model.listingAnswerGate = { question in
+                guard question == searchQuestion, !held.used else { return }
+                held.used = true
+                await withCheckedContinuation { held.continuation = $0 }
+            }
+            listing = Task { await model.startTrash() }
+            await settle(until: { held.continuation != nil })
+            #expect(held.continuation != nil, "premise: the search's answer is held")
+            #expect(model.trash.count == 6 && !model.trashListingLoaded,
+                    "premise: the rows stay drawn, the question unanswered")
+
+            // Esc: the field cleared — and the view's restart has NOT run yet.
+            model.clearSearch()
+            #expect(!model.isSearching)
+            held.continuation?.resume()
+            held.continuation = nil
+            await settle(until: { model.trashListingLoaded || model.trash.isEmpty }, seconds: 0.5)
+            #expect(!model.trashListingLoaded, "the search's answer never answered the cleared question")
+            #expect(model.trash.count == 6, "the search's empty answer never blanked the rows")
+            #expect(model.trashEmptyStateLine == nil,
+                    "never \"The Trash is empty.\" over a Trash holding rows: \(String(describing: model.trashEmptyStateLine))")
+
+            // The cleared question's own start answers it: the whole Trash.
+            listing.cancel()
+            listing = Task { await model.startTrash() }
+            await settle(until: { model.trashListingLoaded })
+            #expect(model.trash.count == 6)
+            #expect(model.trashEmptyStateLine == nil)
         }
     }
 }
