@@ -170,7 +170,7 @@ The app's appearance choice is flipped AGAINST the simulator: in Study light (si
 | b6 | `b6-note-from-book-no-bar.png` | a note opened from the book ("your first take") | Write; NO bar; no message line lifted inside the note — this is a note pushed over a list, the road no test drives (§2, R2-n1) |
 | b7 | `b7-bookcase-from-its-book.png` | "Bookcase" (the current tab) tapped from the book | the Bookcase ROOT (the current tab pops its own stack) |
 | b8 | `b8-versions-listing-bar.png` | Note ▸ Versions… on the fanned lesson | the listing wears the bar ("Library" on the chip); the seeded moment's row |
-| b9 | `b9-versions-reader-no-bar.png` | the moment read | NO bar; the "‹ Versions" door |
+| b9 | `b9-versions-reader-no-bar.png` | the moment read | NO bar; the "‹ Versions" door; if a message line shows, it sits at the foot, never lifted a bar's height — the reader over its listing is the other road no test drives (ladder round 2, R2-n1) |
 | b10 | `b10-bookcase-from-versions.png` | "Bookcase" tapped from the listing | the Bookcase root |
 | b11 | `b11-library-root-after.png` | "Library" tapped | the Library ROOT — the listing and the note under it closed (P-47-19) |
 | b12 | `b12-archived-bar.png` | Library ▸ Bookless ▸ the "Archived" row | the Archived room (likely empty — its promise line) wearing the bar |
