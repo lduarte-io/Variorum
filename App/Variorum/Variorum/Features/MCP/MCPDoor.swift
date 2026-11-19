@@ -308,7 +308,6 @@ final class MCPDoor {
     /// that STAND — an undo of one of them walks it out of the count, its redo
     /// back in (the session's `UndoStack` walks, heard below).
     @ObservationIgnored private var receiptRun = MCPReceiptRun()
-    nonisolated static let receiptWindow: TimeInterval = MCPReceiptRun.window
     /// VX-133: the session undo stack's walks this door hears (`attach`), and
     /// the stack it subscribed to — let go with the session.
     @ObservationIgnored private var walkSubscription: (stack: UndoStack, token: UUID)?
@@ -1199,12 +1198,15 @@ final class MCPDoor {
         receiptRun.walked(walk)
     }
 
+    #if DEBUG
     /// VX-133: the line the run would speak now (nil with no run) — what the
-    /// count is, read by the pins.
+    /// count is, read by the pins (DEBUG only — round 1's N3: no shipped road
+    /// reads it).
     var receiptRunLine: String? {
         let standing = receiptRun.standing
         return standing.isEmpty ? nil : MCPReceiptCopy.line(standing)
     }
+    #endif
 
     /// **VX-775 — a client's call LANDED and its Activity line could not be
     /// written: its receipts, then the failure, in ONE synchronous turn** (the
