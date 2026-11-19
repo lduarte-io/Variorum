@@ -20,7 +20,8 @@ import Testing
 // THE FIX (test only): a second reader beside `isHungUp()` — `readToHangUp()`, whole lines
 // to EOF under the socket's own receive bound, TRUE only for nothing but the door's own
 // notices then EOF, and reporting what it read. Used at line 158 alone; the seven other
-// `isHungUp()` calls keep the strict check (their connections are owed no notice, so it is
+// `isHungUp()` calls keep the strict check (nothing in their tests moves the store-wide
+// grants fingerprint, so no notice is owed to their connections — and the strict check is
 // their guard that nothing of the door's follows).
 //
 // Arm (i) is the red-on-old: on the scaffold (`readToHangUp` with TODAY's one-byte

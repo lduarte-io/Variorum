@@ -98,8 +98,9 @@ struct MCPAnnounceStallServerTests {
     /// whole notices (none lost, nothing interleaved). Round 1's N5 (the VX-981
     /// ladder): "exactly two" is not assertable here — the setup's approvals owe
     /// A 0, 1 or 2 notices of their own, indistinguishable from a doubled one — so
-    /// "none doubled" is pinned where it is deterministic:
-    /// `MCPAnnounceOrderServerTests.nAsksSendNNoticesOnceTheGateIsOpen`.
+    /// "none doubled" is guarded where no setup notice can confuse it:
+    /// `MCPAnnounceOrderServerTests.nAsksSendNNoticesOnceTheGateIsOpen` (a GUARD — its
+    /// strength is said in its own doc).
     @Test func aClientThatStoppedReadingNeverDelaysAnotherSessionsAnnounce() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }

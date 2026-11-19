@@ -85,10 +85,13 @@ struct RawSocket {
 
     /// After the server's answers: EOF within the receive timeout — the VERY NEXT
     /// byte is the end, so nothing at all of the door's follows the last answer.
-    /// The strict check: every connection that no client owns (refused before any
-    /// session exists, or a pending client — outside the grants fingerprint, so no
-    /// notice is ever owed to it) relies on it as its guard that nothing of the
-    /// door's follows (round 1's F1 final call — the VX-981 ladder).
+    /// The strict check: the connections that use it (refused before any session
+    /// exists, or a lone pending client) are owed no notice only because nothing in
+    /// THOSE tests moves the store-wide grants fingerprint — every change to it asks
+    /// every live session, a pending one included, to announce. They rely on it as
+    /// their guard that nothing of the door's follows (round 1's F1 final call — the
+    /// VX-981 ladder); a test that approves or grants beside its connection reads
+    /// `readToHangUp()` instead (round 2's R2-N1).
     func isHungUp() async -> Bool {
         let fd = self.fd
         return await HarnessWait.offPool {
@@ -120,7 +123,7 @@ struct RawSocket {
 
     /// The blocking read behind `readToHangUp()` (off the pool — its caller hops):
     /// whole lines until `read` returns 0, each `read` under the socket's own
-    /// receive bound; at most `HangUpRead.lineCap` lines.
+    /// receive bound; it stops once it holds more than `HangUpRead.lineCap` lines.
     static func readToHangUp(_ fd: Int32) -> HangUpRead {
         var lines: [Data] = []
         var pending = Data()
@@ -165,7 +168,7 @@ struct HangUpRead: Sendable, Equatable, CustomStringConvertible {
         case tooManyLines
     }
 
-    /// The most lines a hang-up read takes before it stops (`.tooManyLines`).
+    /// A hang-up read stops once it holds MORE than this many lines (`.tooManyLines`).
     static let lineCap = 64
 
     let lines: [Data]

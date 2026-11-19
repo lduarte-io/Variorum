@@ -172,11 +172,15 @@ struct MCPAnnounceOrderServerTests {
 
     /// GUARD (round 1's N5, the VX-981 ladder — green on both trees): **N asks send N
     /// notices** — none doubled, none merged — on the open-gate road (batch 3's "counts
-    /// unchanged"). A PENDING client (outside the grants fingerprint), so nothing moves the
-    /// fingerprint and no round is natural: the gate opened (`initialized`, a ping
-    /// barrier), three rounds asked, three notices, a ping barrier, then exactly three.
+    /// unchanged"). A PENDING client (its row is outside the grants fingerprint), so its
+    /// admission moves nothing and no round is natural: the gate opened (`initialized`, a
+    /// ping barrier), three rounds asked, three notices, a ping barrier, then exactly three.
     /// The exactness `MCPAnnounceStallServerTests` gives up (its setup's approvals owe
-    /// 0–2 notices of their own) lives here, where it is deterministic.
+    /// 0–2 notices of their own) lives here, where no setup notice can confuse it. Its
+    /// honest strength (round 2's R2-N1): green on both trees and never a false red; it
+    /// catches a doubled notice unless the extra one is still in flight past the ping's
+    /// answer — a ping's answer and a notice ride different tasks, so the barrier orders
+    /// nothing between them.
     @Test func nAsksSendNNoticesOnceTheGateIsOpen() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
