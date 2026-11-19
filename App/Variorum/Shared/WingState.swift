@@ -17,8 +17,10 @@
 //  or writes the test host's defaults — the test host IS the Debug app's
 //  domain (the row-36/42 class).
 //
-//  The phone compiles this and never switches (its wing face is the mobile
-//  catch-up's) — so it stands in Home, which is exactly what it showed.
+//  VM-56 (the VM-55 run, batch 1): the phone stands in a wing too — the
+//  bootstrap attaches the same memory on both platforms, and every phone
+//  listing reads the wing this names. The phone has no switcher yet (the
+//  wave-2 wing face), so a device that never switched stands in Home.
 //
 
 import Foundation
@@ -44,17 +46,15 @@ final class WingState {
         self.currentID = currentID
     }
 
-    /// What a SHARED read passes as its wing: the current wing on the Mac;
-    /// nil (every wing) on the phone, whose surfaces stay unscoped until the
-    /// mobile catch-up gives it a wing face — so each platform's doors take
-    /// exactly what its surfaces show ("a door may not take what it does not
-    /// show", the Trash's own G6 letter).
+    /// What a SHARED read passes as its wing: the current wing, on both
+    /// platforms — so each platform's doors take exactly what its surfaces
+    /// show ("a door may not take what it does not show", the Trash's own G6
+    /// letter). Until VM-56 the phone answered nil (every wing) because its
+    /// surfaces were unscoped; since VM-57 every phone listing reads the
+    /// current wing, so the Trash's Empty Trash and the selection's Delete
+    /// Now take this wing's rows on the phone exactly as on the Mac.
     var readScope: String? {
-        #if os(macOS)
         currentID
-        #else
-        nil
-        #endif
     }
 
     /// Switch the whole app to `wingID` (Home is ''). Remembered.

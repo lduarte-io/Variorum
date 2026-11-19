@@ -62,9 +62,7 @@ struct MobileReadView: View {
                             .foregroundStyle(page.ink)
                             .padding(.top, 40)
                     }
-                    if let error = model.lastError {
-                        Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-                    }
+                    // VM-61: a store-read error speaks on the shell's one line.
                     ForEach(
                         Array(MobileReadPage.assemble(model.groupedRows).enumerated()),
                         id: \.offset

@@ -611,7 +611,7 @@ final class MobileTakesBrowserController {
                 try ops.reorderTake(
                     variantID, to: delta < 0 ? .before(anchor) : .after(anchor))
             }
-            model.report(delta < 0 ? Self.movedUpNote : Self.movedDownNote)
+            model.report(delta < 0 ? Self.movedUpNote : Self.movedDownNote, line: .ordinary)
             await model.refreshTakesFromStore()
             onChanged?()
         } catch {
@@ -658,7 +658,10 @@ final class MobileTakesBrowserController {
                 try await self.runner.run { ops in
                     _ = try ops.takeToBlockBelow(blockID, variantID: variantID)
                 }
-                model.report(MobileTakeStructureCopy.movedNote, action: .undo)
+                // VM-61: the original take is ARCHIVED — something left the
+                // page (the fan), so the line keeps its Undo.
+                model.report(
+                    MobileTakeStructureCopy.movedNote, action: .undo, line: .removal(.structural))
                 await model.refreshTakesFromStore()
                 await self.reloadArchived()
                 self.onChanged?()
@@ -691,7 +694,7 @@ final class MobileTakesBrowserController {
                     MobileTakeStructureCopy.convertedNote(
                         blocks: result.converted.count,
                         skippedBlanks: result.skippedBlankTakes),
-                    action: .undo)
+                    action: .undo, line: .removal(.structural))
                 await model.refreshTakesFromStore()
                 await self.reloadArchived()
                 self.onChanged?()
@@ -862,11 +865,11 @@ final class MobileTakesBrowserController {
     /// The everyday refusals get phone words (the batch-1 posture — and
     /// since parity C4a every named road lives on the PHONE: the lock
     /// and archive redirects dissolved with their doors); rarer races
-    /// speak in the operations layer's own words — the op's real
-    /// message, never invented behavior.
+    /// speak the shared table's words, else the one plain fallback (VM-62 —
+    /// never the case name), never invented behavior.
     static func refusalMessage(_ error: Error, verb: Verb) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
@@ -920,7 +923,7 @@ final class MobileTakesBrowserController {
         case .archivedVariant:
             return Self.archivedTakeRefusal
         default:
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

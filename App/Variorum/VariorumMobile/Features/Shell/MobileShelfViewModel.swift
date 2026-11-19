@@ -32,8 +32,14 @@ final class MobileShelfViewModel {
     private(set) var bookTags: [String: [String]] = [:]
     /// 13i-a: gatherings' rule tags as live paths (rules hold IDs now).
     private(set) var ruleTags: [String: [String]] = [:]
-    private(set) var lastError: String?
-    /// The Today door's shelving note (not an error — rendered muted).
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
+    /// The Today door's shelving note (not an error — rendered muted), and
+    /// the book doors' receipts. VM-61: each write below speaks on the one
+    /// line with its own class.
     private(set) var lastReport: String?
 
     /// How many values the HELD books observation has delivered. Test
@@ -59,22 +65,28 @@ final class MobileShelfViewModel {
     }
 
     /// The held half: books + pins + the daily designation (all tiny).
+    ///
+    /// VM-57: the books of the wing the phone stands in (the Shelf AND the
+    /// Library's Books filter, which wears this same model), re-read for
+    /// each wing.
     func start() async {
-        do {
-            for try await value in session.database.observe({ db in
-                Snapshot(
-                    books: try Queries.bookshelf(db),
-                    pins: try Queries.shelfPins(db),
-                    dailyBookID: try Queries.dailyJournalBookID(db))
-            }) {
-                observationTicks += 1
-                books = value.books
-                pins = value.pins
-                dailyBookID = value.dailyBookID
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await value in session.database.observe({ db in
+                    Snapshot(
+                        books: try Queries.bookshelf(db, wingID: wing),
+                        pins: try Queries.shelfPins(db),
+                        dailyBookID: try Queries.dailyJournalBookID(db))
+                }) {
+                    observationTicks += 1
+                    books = value.books
+                    pins = value.pins
+                    dailyBookID = value.dailyBookID
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
         }
     }
 
@@ -86,7 +98,7 @@ final class MobileShelfViewModel {
                 (try Queries.shelfBookTags($0), try Queries.ruleTagPaths($0))
             }
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -126,7 +138,7 @@ final class MobileShelfViewModel {
             }
             lastError = nil
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -136,7 +148,7 @@ final class MobileShelfViewModel {
         do {
             return try await MobileNewNoteDoor.mint(session: session)
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }
@@ -192,13 +204,15 @@ final class MobileShelfViewModel {
             }
             lastError = nil
             lastReport = RecoveryCopy.movedToTrashReceipt(.book)
+            MobileLine.say(
+                lastReport, as: .removal(.putBackBook(book.reading.id)), session: session)
             return true
         } catch {
             lastReport = nil
             // The ONE deletion-refusal home (A1-18) — this door used to
             // borrow the book-details table, which covered a different subset
             // of `OperationError` than the Trash's did.
-            lastError = DeletionRefusal.words(error)
+            lastError = DeletionRefusal.sentence(error, roads: .phone)
             return false
         }
     }
@@ -211,9 +225,11 @@ final class MobileShelfViewModel {
             try await session.runner.run { ops in try ops.archiveReading(book.reading.id) }
             lastError = nil
             lastReport = MobileShelfFaces.archivedDailyJournalReceipt(name: book.reading.name)
+            MobileLine.say(
+                lastReport, as: .removal(.unarchiveBook(book.reading.id)), session: session)
         } catch {
             lastReport = nil
-            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
+            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.sentence(error, roads: .phone)
         }
     }
 
@@ -224,9 +240,12 @@ final class MobileShelfViewModel {
         do {
             let outcome = try await MobileTodayDoor.open(session: session, day: day)
             lastReport = outcome.note
+            // The entry opened but was NOT filed — a direction she must see
+            // (the Mac ⌘J door's own class: `status.refuse(note)`).
+            MobileLine.say(outcome.note, as: .refusal, session: session)
             return outcome.postID
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }

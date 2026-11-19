@@ -35,6 +35,7 @@
 //
 
 import Foundation
+import OSLog
 import VariorumCore
 
 /// **THE ONE SEALED-NOTE SENTENCE** (18m U3 — her copy, PROVISIONAL:
@@ -448,6 +449,40 @@ nonisolated enum OpsRefusalCopy {
         if let error = error as? OperationError { return "Refused: \(error)" }
         return String(describing: error)
     }
+
+    // MARK: - VM-62 — never a dump (the phone's road)
+
+    /// **THE ONE PLAIN FALLBACK** (VM-62, umbrella VM-55 batch 2b — a DRAFT
+    /// line for her wording pass, PROVISIONAL P-55-12): what a face says for
+    /// a failure nobody has worded — a genuinely unexpected one (a store read
+    /// that failed, a case no table names). It is the shared deletion
+    /// fallback's own sentence with the dump dropped ("That couldn't be done —
+    /// ‹the case›." — `DeletionRefusal.fallback`, which both platforms speak),
+    /// and like it, it claims nothing about what did or did not change. Names
+    /// no door, so it is both platforms' words; today only the phone's road
+    /// (`sentence(for:roads:)`) speaks it — the Mac's `message(for:)` keeps its
+    /// shipped fallbacks.
+    static let unexpectedFailure = "That couldn't be done."
+
+    /// **The words for ANY error, never raw error text** (VM-62): the table's
+    /// sentence where it has one; otherwise the one plain fallback — and the
+    /// raw detail goes to the unified log, never the screen. A face with
+    /// better words of its own (a book's name, an act's verb, the deletion
+    /// story's arms) chains them FIRST and calls this last, so collapsing a
+    /// face onto it can only turn a dump into a sentence, never a sentence
+    /// into anything else.
+    static func sentence(for error: Error, roads: OpsRefusalRoads) -> String {
+        if let words = words(for: error, roads: roads) { return words }
+        // Private: an error's associated values can carry ids and names she
+        // typed — kept for an attached debugger, redacted in a persisted
+        // archive (VM-55 ladder round 1, finding 5; pinned by
+        // `MobileErrorLogPrivacyPinTests`).
+        unwordedLog.notice(
+            "unworded failure, said as the plain fallback: \(String(reflecting: error), privacy: .private)")
+        return unexpectedFailure
+    }
+
+    private static let unwordedLog = Logger(subsystem: "io.lduarte.Variorum", category: "refusals")
 
     // MARK: - The flush contract's refusal (VM-5 whole-round pass, MINOR 4)
 

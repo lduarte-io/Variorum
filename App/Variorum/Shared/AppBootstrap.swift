@@ -494,15 +494,14 @@ final class AppBootstrap {
                 installed = true
             }
             let readySession = AppSession(database: view, storeVariant: storeVariant)
-            #if os(macOS)
-            // 13i-d U5: the Mac stands in the wing it was last in (a LOCAL
+            // 13i-d U5: the app stands in the wing it was last in (a LOCAL
             // memory); a wing that died meanwhile returns it to Home.
+            // VM-56: both platforms — the phone remembers its wing too.
             readySession.wing.attachMemory(.standard)
             Task { @MainActor [view] in
                 let live = Set((try? await view.read { try Queries.wings($0).map(\.id) }) ?? [])
                 readySession.wing.revalidate { $0.isEmpty || live.contains($0) }
             }
-            #endif
             state = .ready(readySession)
             // pre-13x 2a: the idle clock starts at ready (decision 18 —
             // time since Variorum was last used).

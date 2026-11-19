@@ -49,6 +49,16 @@ final class MobileMembershipModel {
     private(set) var addableBooks: [Reading] = []
     private(set) var addableSmartBooks: [Reading] = []
     private(set) var status: String?
+
+    /// VM-61: the slot speaks on the phone's one line with the class its door
+    /// gives it — joining, leaving a book and diverging are ordinary acts (no
+    /// line — her ruling; leaving a book takes a pointer away, never the
+    /// note: PROVISIONAL P-55-4); a refusal always speaks, and so does a
+    /// gathering's collect-by-tagging, a direction (PROVISIONAL P-55-11).
+    private func say(_ text: String, as line: MobileLine.Class) {
+        status = text
+        MobileLine.say(text, as: line, session: session)
+    }
     /// The last diverge's landing (R67: the copy is one tap away).
     private(set) var divergedCopyID: String?
     private(set) var divergedBookName: String?
@@ -87,12 +97,18 @@ final class MobileMembershipModel {
 
     // MARK: - Reads
 
+    ///
+    /// VM-59: what the sheet OFFERS is the note's own wing's books and
+    /// gatherings — a book never spans wings, so another wing's book could
+    /// only refuse (`crossWingMembership`); the note's own wing, never the
+    /// app's current one.
     func refresh() async {
         do {
             let postID = postID
             let (membership, all) = try await session.database.read { db in
-                (try Queries.readingsContaining(db, postID: postID),
-                 try Queries.readings(db))
+                let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                return (try Queries.readingsContaining(db, postID: postID),
+                        try Queries.readings(db, wingID: wing))
             }
             books = Self.ordered(membership)
             let memberIDs = Set(membership.map(\.id))
@@ -103,7 +119,7 @@ final class MobileMembershipModel {
                 $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id)
             }
         } catch {
-            status = String(describing: error)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
     }
 
@@ -114,9 +130,9 @@ final class MobileMembershipModel {
             _ = try await session.runner.run { [postID] ops in
                 try ops.addPostToReading(postID, to: book.id)
             }
-            status = "Added to “\(book.name)”."
+            say("Added to “\(book.name)”.", as: .ordinary)
         } catch {
-            status = Self.refusal(error, bookName: book.name)
+            say(Self.refusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -127,17 +143,22 @@ final class MobileMembershipModel {
             let result = try await session.runner.run { [postID] ops in
                 try ops.collectPostIntoSmartReading(postID, into: book.id)
             }
-            status = result.alreadyMatched
-                ? "Already collected — it matches “\(book.name)”'s filter."
-                : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
+            // Already matching did nothing — a refusal (a door that did
+            // nothing says so). A tagging that seats it applied tags she did
+            // not ask for by name — a direction (P-55-11), in P-55-7's class.
+            if result.alreadyMatched {
+                say("Already collected — it matches “\(book.name)”'s filter.", as: .refusal)
+            } else {
+                say("Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter.", as: .refusal)
+            }
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
-                status = "“\(book.name)” can't take this note: \(reason)"
+                say("“\(book.name)” can't take this note: \(reason)", as: .refusal)
             } else {
-                status = Self.refusal(error, bookName: book.name)
+                say(Self.refusal(error, bookName: book.name), as: .refusal)
             }
         } catch {
-            status = String(describing: error)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
         await refresh()
     }
@@ -147,9 +168,9 @@ final class MobileMembershipModel {
             try await session.runner.run { [postID] ops in
                 try ops.removePostFromReading(postID, from: book.id)
             }
-            status = "Removed from “\(book.name)” — the note itself is untouched."
+            say("Removed from “\(book.name)” — the note itself is untouched.", as: .ordinary)
         } catch {
-            status = Self.refusal(error, bookName: book.name)
+            say(Self.refusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -162,9 +183,9 @@ final class MobileMembershipModel {
             let result = try await session.divergeForBook(postID, in: book.id)
             divergedCopyID = result.copy.post.id
             divergedBookName = book.name
-            status = "Diverged — “\(book.name)” holds the copy now, in the same place; the original is untouched elsewhere."
+            say("Diverged — “\(book.name)” holds the copy now, in the same place; the original is untouched elsewhere.", as: .ordinary)
         } catch {
-            status = Self.divergeRefusal(error, bookName: book.name)
+            say(Self.divergeRefusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -174,10 +195,12 @@ final class MobileMembershipModel {
     /// The four book arms stay HERE because they carry the book's NAME, a
     /// context the shared table has no slot for (18m U3's collapse rule);
     /// everything else the table has words for, it says (18m U3 — this arm
-    /// used to dump "Refused: …"), and where it has none this door keeps its
-    /// own fallback.
+    /// used to dump "Refused: …"), and where it has none the one plain
+    /// fallback speaks (VM-62 — never the case name).
     nonisolated static func refusal(_ error: Error, bookName: String?) -> String {
-        guard let error = error as? OperationError else { return String(describing: error) }
+        guard let error = error as? OperationError else {
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
+        }
         let book = bookName.map { "“\($0)”" } ?? "that book"
         switch error {
         case .lockedReading:
@@ -189,7 +212,7 @@ final class MobileMembershipModel {
         case .postNotInReading:
             return "This note isn't in \(book)."
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? "Refused: \(error)"
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -238,12 +261,7 @@ struct MobileMembershipSheet: View {
                             .foregroundStyle(tokens.faint)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    if let status = model.status {
-                        Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                     if let copy = model.divergedCopyID, let onOpenNote {
                         Button {
                             dismiss()

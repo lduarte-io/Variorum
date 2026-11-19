@@ -3940,3 +3940,67 @@ ORDINAL for unnamed blocks needs P1 relaxed (author-only; name-only shipped). **
 #275 — **VX-996, the pre-push guard's identity entry and other people's commits (2026-11-15; the record `notes/plans/fixes/vx-996-pre-push-guard.md`, ladder round 2's R2-4).** Her ruling covers her own address: new commits carry the GitHub noreply address. The guard's identity entry refuses ANY outgoing commit whose author or committer is not a noreply address — so a contributor's commit under their own public address is refused too (the refusal then says it is the author's call and gives no re-author advice). Options: (a) keep refusing, so every outside commit reaches `main` only by her deliberate hand; (b) judge only this clone's own `user.email`; (c) an allow line per contributor in the private list. Built: (a), PROVISIONAL. **Status: OPEN.**
 
 #276 — **THE VX-980 PROVISIONAL BUNDLE (search fixes & small improvements; 2026-11-19; the binding record is `notes/plans/fixes/vx-980-search-fixes.md`, FOR A LATER READER at its top; your checklist is `notes/handoffs/vx-980-handoff.md`, which opens in plain words; each built as described, alternatives in the record's batch sections).** **P-980-B1-1 — the band's echo beside a tag:** `— #tag` echoes the dash as the question's words ("“—” — 2 notes · #tag") where `#tag` alone echoes none; (a) the echo shows what she typed — AS BUILT; (b) words that fold to nothing drop out of the echo beside a tag. **R-980-5's reach:** her ruling named the Library field; a book's 🔍 band also says the line (the same engine's empty row) — keep, or limit to the Library. **Batch 1's two readings no door reaches today** (the v1 field parses no OR or NOT): "names no tag" reads the narrowing's own `drivingTagPaths` (a tag under ANY/NOT cannot drive the text-less road); a word literally naming a tag still offers it in a tagless field. **The negation row:** a symbol word beside a negation now refuses as a dash always did (unreachable — the field parses no negation). **P-980-2 — the Search index row's seat and words:** (a) its own section after "Restoring a copy", before the backup log — AS BUILT; (b) the pane's top; (c) a pane of its own; the twelve strings in the handoff. **P-980-3 — the post-restore check (the trace R-980-2 asked for, in the handoff whole):** (a) the row only, with the trace and its seven guard pins — AS BUILT; (b) an automatic check after a library lands (Make this my library, a plaintext export brought in, the first sync round), healing by rebuild with a quiet receipt, or check-only and say something only on a problem — its own ticket, in fenced landing code; (c) a check at every open — rejected on its face (P1). **P-980-B2-1 — the row's own latch:** (a) only the index doors wait — AS BUILT; (b) one latch for every door in the pane. **P-980-B2-2 — the answer is the visit's:** (a) AS BUILT; (b) remember the last check (new local storage). **P-980-B2-3 — Rebuild asks nothing first:** (a) no confirm — AS BUILT; (b) a confirm naming that it re-reads every note. **P-980-B3-1 — "deleted text" is every take on the exact stamp, archived included** — AS BUILT; (b) active takes only; savepoints, comments, take labels and block names are not searched either way (the reconciliation's remainder: if the picked option's "any of its text" meant those, that is the gap). **P-980-B3-2 — the fold:** (a) Foundation's case-and-accent fold, the tag offer's — AS BUILT (finds all the index's folding would, and a little more: ß/ss, the ligatures, some Greek and Cyrillic accents — 475 groups and 17 expansions, pinned); (b) the index's exact fold per character. **P-980-B3-3 — the reach:** (a) the wing's whole Trash, the 500-row window over the matches — AS BUILT; (b) only the 500 newest rows. **P-980-B3-4 — a row's name is the name it shows** (an untitled note answers to its created day) — AS BUILT; (b) the stored title only. **P-980-B3-5 — the passage:** (a) around the first occurrence, in reading order, of a typed word the row does not already show; 32 characters before and 96 after, stepped to word edges, "…" where cut — AS BUILT; (b) the first occurrence of any typed word. **P-980-B3-6 — timing and keys:** (a) 180 ms after typing pauses; an emptied field and ⏎ ask at once; esc on an empty field passes the key on — AS BUILT; (b) no debounce. **P-980-B3-7 — the field's face:** (a) an AppKit rounded field, first in the controls row, 120–200 pt by the row's room, click-only (no Tab stop, no keyboard door) — AS BUILT; (b) a borderless quiet line like the sidebar's. **P-980-B3-8 — the Delete Now confirms' version counts read the listing shown:** (a) unchanged — AS BUILT (a version the search hides goes uncounted, the window's recorded class); (b) count from the unnarrowed listing. **P-980-B3-9 — leaving clears:** (a) AS BUILT; (b) a fresh model only. **The words:** every new rendered string of the three batches, provisional per R-980-4, listed by surface in the handoff. **The ladder's cap:** R-980-4's five rounds — this run's rule, or standing? (the rulings file says it was to be asked once in chat; no answer is recorded.) **Answered at the kickoff sitting (2026-11-19), verbatim in `notes/plans/fixes/vx-980-her-rulings.md`, folded into the record:** P-980-1 → R-980-5 ("Say why") · P-980-3's question → R-980-2 (trace first; the trace whole in the handoff — its OPTIONS above stay open) · P-980-4…7 → R-980-9…12 · the reviewer → R-980-3 · the ladder and the words → R-980-4 · symbol search → R-980-6/-7 (VX-1009) · the night's plan → R-980-8. **Status: OPEN.**
+
+#277 — **THE VM-55 PROVISIONAL BUNDLE (Run: Wings underneath, the mobile catch-up's wave 1; 2026-11-19; the binding record is `notes/plans/fixes/vm-55-wings-underneath.md`, FOR A LATER READER at its top; your checklist is `notes/handoffs/vm-55-handoff.md`, which opens in plain words; each built as described, alternatives beside it).** Nineteen PROVISIONAL calls, each built on its most defensible reading while she was away ("rule provisionally in my absence", her words as relayed by the stage coordinator). Each option's reasoning is in the record's batch sections and in "The orchestrator's check of batch 2a". Each line below: the call · the options · what is built.
+
+**Wings**
+- **P-55-2 — how a root says its wing before wave 2's title band.** (a) the wing's name leads today's path line
+  ("Home · Library") · (b) the name replaces the page word · (c) a title row of its own. **Built: (a).**
+- **P-55-13 — four sentences the shared wings brain speaks name Mac doors or keys** ("(or unseal it)" ×2,
+  "Delete Wing…", "⏎ chooses · esc closes"). (a) moved byte for byte, no phone screen says them yet · (b)
+  per-platform slots now · (c) kept on the Mac side and passed in. **Built: (a)**; wave 2's wing management owes
+  their phone words.
+- **P-55-14 — what a wing switch does to screens already open on the three stacks.** (a) nothing she has open is
+  closed; the roots re-scope · (b) every stack pops to its root · (c) switching only from a root. **Built: (a).**
+- **P-55-15 — the wing's name with only one wing.** (a) still a door; the list shows Home alone · (b) plain text
+  until a second wing exists. **Built: (a).**
+- **P-55-16 — the empty-Shelf and empty-Library lines assume Home.** (a) left as they are · (b) the Mac's
+  sentence (it differs by a whole sentence, not a word). **Built: (a)**; wave 2's.
+- **P-55-17 — the interim door's look.** The name in the accent colour, the whole title the tap target, the
+  path line 10 pt taller (34 → 44 pt) so the target is a real 44 pt. Alternatives: an invisible taller target
+  (it would reach into the status bar or the rows below); a separate button. **Built as described**; wave 2's
+  band replaces it whole.
+- **P-55-18 — a draft in the home screen's quick-note box when the wing changes.** (a) the switch files it first,
+  into the wing it was written in · (b) it follows her to the new wing · (c) the switch is refused while a draft
+  stands. **Built: (a)** — what every page change already does.
+
+**The one message line**
+- **P-55-1 — `receipt_style` on the phone.** (a) honoured · (b) not read: "only removals and refusals" leaves it
+  nothing to govern · (c) "off" also silences removal lines. **Built: (b).**
+- **P-55-3 — how long a refusal stays.** (a) it fades on the seam's clock, no ✕ (the Mac's policy) · (b) it
+  stays until her ✕ or next act (two mockup captions draw this) · (c) a longer clock for refusals. **Built: (a).**
+- **P-55-4 — what "leaves the page" covers.** (a) deletes, merges, archives and the Trash's confirmed purges
+  (no Undo there); restorations and pointer acts are ordinary · (b) Put back and Unarchive also keep a line with
+  Open › (the trash mockup; wave 2's face) · (c) every row that leaves any page. **Built: (a).**
+- **P-55-5 — the merge's line.** (a) the shipped bare Undo, no words · (b) the drafted "Merged" (waits on her
+  wording pass) · (c) silence, Undo in the ⋯ sheet only. **Built: (a).**
+- **P-55-6 — an offer on the phone.** (a) always drawn, with its door; and a STANDING offer is an ordinary
+  offer until a phone face for standing offers exists (ladder finding 2) · (b) never drawn · (c) drawn only
+  with its door. **Built: (a).** No phone door raises one today.
+- **P-55-7 — directions** (an outcome other than what she asked: "Already collected — …", the shelving notes,
+  a copy that could not follow the screen). (a) the refusal class, always shown (the Mac's `direct`) · (b)
+  ordinary, silent. **Built: (a).**
+- **P-55-8 — Book Details' delete and archive.** (a) they speak the same line and Undo road as the Shelf row's
+  same acts · (b) silent as shipped. **Built: (a).**
+- **P-55-9 — the cross-block edit.** (a) a removal, with its bare Undo · (b) typing, no line. **Built: (a).**
+- **P-55-10 — where the line lives over a sheet.** (a) one overlay above everything the shell presents · (b) a
+  line per presentation · (c) the shell only (a refusal raised in a sheet unseen until it closes). **Built: (a).**
+  The overlay hides as the app leaves the foreground, so it never reaches the app-switcher snapshot.
+- **P-55-11 — a direction keeps its line** (the orchestrator's, over the lines batch 2a had silenced). (a) all
+  silent · (b) the directions among them speak — a take put back as archived, a block put back at the note's end
+  or set aside, "Added by tagging #… — “…” collects by filter." · (c) every Put back and Unarchive speaks.
+  **Built: (b).**
+- **P-55-12 — the plain fallback's words when nothing has a sentence for the failure.** (a) "That couldn't be
+  done." · (b) "Something went wrong — try again." · (c) a fallback per door. **Built: (a)** — a DRAFT for her
+  wording pass, with "Copy failed: That couldn't be done."
+- **P-55-19 — a direction's ink** (ladder finding 4). A direction rides the refusal class, and the phone inks
+  every refusal in the alarm red, so a line such as "Put back where it came from." reads as an error. (a) keep ·
+  (b) a neutral ink for directions (a new item fact and a face arm). **Built: (a)**, unruled until now.
+
+**The ordinary lines that no longer show** (her "Only removals and refusals"), listed verbatim in the record's
+batch 2a section so she can call any back with a one-word change: the clipboard copy line, Save a Version,
+"New block added below — type away.", the extract note on a fanned block, the bare Undo after a divide, an
+extract and Make Block, "Undid: ‹label›" with its Redo button and "Redid: ‹label›" (the ⋯ sheet's rows stay),
+"Take moved up/down.", "Committed — a saved moment of this take is kept.", the plain restore, unarchive and Put
+back receipts, "Unarchived — it's back in the library.", the two Versions lines, "Added to/Removed from
+“‹book›”", "Diverged — …", and the lens Adopted and restored lines.

@@ -564,7 +564,11 @@ struct WingPaletteDoorsTests {
             #expect(wings.actGeneration == 4, "move everything landed")
 
             // The bar's modifier keys its load on it (both bars compose it).
-            let source = try Self.source("Variorum/Core/Views/WingsModel.swift")
+            // (VM-63 — A JUSTIFIED EDIT, the path only: the bar's modifier is a
+            // Mac face and stayed the Mac's when the wings' brain moved to
+            // `Shared/WingsModel.swift`; it lives in `WingNoteDoors.swift` now,
+            // byte for byte.)
+            let source = try Self.source("Variorum/Core/Views/WingNoteDoors.swift")
             #expect(source.contains(".task(id: NoteMenuWingContext.loadKey(postID: postID, wings: wings))"))
         }
     }
