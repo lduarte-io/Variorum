@@ -10,8 +10,13 @@
 //  The open's COUNTS — one projection read per open, one editor build, no
 //  registry growth per open-and-close — are asserted where they are measured,
 //  in `MobileHerPathsPerfTests` (that suite reads the process's one timing
-//  recorder and must run alone). This suite holds what those counts cannot:
+//  recorder and must run alone — gated since the VM-64 ladder's round 2, so an
+//  ordinary run skips it). This suite holds what those counts cannot:
 //
+//  · **read once, company-safe** (the round-2 O-1 condition) — a GUARD that an
+//    open through the hosted screen reads the note's projection once, counted
+//    off the store's own statement trace, beside a control arm showing the
+//    same oracle counts the old shape's two (`anOpenReadsTheNoteOnce…`);
 //  · **the chrome once** — an open asks the projection road for ONE
 //    whole-document chrome pass, not three (red on the pre-fix tree: 3);
 //  · **the chips read what they show** — opening a note runs no read of every
@@ -192,6 +197,21 @@ nonisolated enum OpenOnceTrace {
     static func stop(on db: AppDatabase) throws {
         try db.writeWithoutTransaction { $0.trace(options: .statement, nil) }
     }
+
+    /// **One whole-note projection read, as the trace sees it**: the header leg
+    /// of `Queries.takesProjection` (`TakesQueries.swift`), which runs once per
+    /// projection read and in no other read anywhere (the header the editor and
+    /// the liveness grant read is `Queries.containerHeader`'s record fetch, a
+    /// different statement). Counting it counts projection reads, whatever road
+    /// asked for them.
+    static let projectionRead = "SELECT locked, profile, entry_date FROM container WHERE id = ?"
+
+    /// The projection reads in `log` so far.
+    static func projectionReads(_ log: LockIsolated<[String]>) -> Int {
+        log.value.filter {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix(projectionRead)
+        }.count
+    }
 }
 
 // MARK: - The suite
@@ -314,6 +334,73 @@ struct MobileNoteOpenOnceTests {
                     "VM-69: the open read every tag \(tagListings) time(s) — the tags chip shows only the note's")
             #expect(readingListings == count(bookLeg),
                     "VM-69: the open listed every book \(readingListings) time(s) for \(count(bookLeg)) chip feed(s)")
+        }
+    }
+
+    // MARK: Read once — the company-safe guard (VM-69; the VM-64 ladder's round 2, O-1)
+
+    /// **GUARD — an open through the hosted screen reads the note ONCE; the
+    /// harness's old shape reads it TWICE, by the same oracle in the same
+    /// process.** VM-69's headline (audit F 2C: the arrival's load, then the
+    /// live updates' first fetch — 2 → 1) was asserted only by the gated speed
+    /// suite, off the process's one timing recorder; this counts it off the
+    /// store's own statement trace instead (the world's one connection — an
+    /// in-memory queue, so every read runs there), so it may run in company.
+    ///
+    /// **What is counted is the open's OWN road**: every whole-note projection
+    /// read (`OpenOnceTrace.projectionRead`) from the mount until the open's
+    /// first live delivery has been taken, and a quiet window after it in which
+    /// nothing is written — so a second read the open made (the old shape's
+    /// live-start fetch comes right after its render) is inside the count, and
+    /// nothing outside the open is. The mount is her road (the real screen, a
+    /// router), and its liveness grant owes NO re-read of its own: a first open
+    /// registers with `refresh: false` (`MobileLivenessAuthority.register`), so
+    /// the grant flushes and reads the header only — `containerHeader`'s record
+    /// fetch, never the projection — and nothing of the grant's is folded in.
+    ///
+    /// · **Arm 1, the claim:** `MobileWriteScreen`'s `.task` — the hold, the
+    ///   grant, `arrive` (whose one read IS the live observation's first value,
+    ///   `loadLive`), `start()` continuing it. ONE read.
+    /// · **Arm 2, the control:** the old shape the harness still has —
+    ///   `loadOnce()`, then `start()` beginning its own observation, whose first
+    ///   fetch is the second read; its first delivery is seen by the model's
+    ///   second chrome pass (the load's render, then the delivery's ingest).
+    ///   TWO — so the oracle is shown to tell one from two here.
+    ///
+    /// A GUARD, not a red-on-old pin: the red-on-old proof of "read once" is the
+    /// gated suite's (`note-reads-per-open-*`, 2 → 1, recorded at the stage);
+    /// both builds of the round hold batch 6, so this is green on both.
+    @Test func anOpenReadsTheNoteOnceAndTheOldShapeTwiceByTheSameOracle() async throws {
+        try await withEditorWorld { session, db in
+            let opened = try await seedNote(session, title: "read once")
+            let control = try await seedNote(session, title: "read twice")
+            let log = try OpenOnceTrace.start(on: db)
+            defer { try? OpenOnceTrace.stop(on: db) }
+            #expect(OpenOnceTrace.projectionReads(log) == 0, "nothing read the projection before the mount")
+
+            // Arm 1 — her road: the real screen, mounted with a router.
+            let router = MobileShellRouter()
+            let screen = HostedSurface(MobileWriteScreen(
+                session: session, postID: opened.postID, router: router, tab: .library))
+            defer { screen.tearDown() }
+            #expect(await eventually { (editor(router, at: 0)?.fullRenderCount ?? 0) >= 1 },
+                    "the screen's editor arrived — its first live delivery is that render")
+            try? await Task.sleep(for: .milliseconds(1500))
+            let hosted = OpenOnceTrace.projectionReads(log)
+            #expect(hosted == 1,
+                    "VM-69: an open through the screen reads its note ONCE — it read \(hosted) time(s)")
+
+            // Arm 2 — the control: the harness's old shape, the same oracle.
+            let (model, _) = makeEditor(session, postID: control.postID)
+            await model.loadOnce()
+            let live = Task { await model.start() }
+            defer { live.cancel() }
+            #expect(await eventually { model.projectionChromePasses >= 2 },
+                    "the live updates' own first delivery reached the model")
+            try? await Task.sleep(for: .milliseconds(1500))
+            let oldShape = OpenOnceTrace.projectionReads(log) - hosted
+            #expect(oldShape == 2,
+                    "the oracle tells two from one: a load, then the live updates' own first read — it read \(oldShape)")
         }
     }
 
