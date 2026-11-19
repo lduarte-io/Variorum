@@ -33,6 +33,22 @@ the simulator ids) are in the orchestrator's private run-state memory, `vm-47-ru
   Application Support listing, no Problem Reporter, no new crash report, the measured timings and the resized
   ask for part B.
 
+## UPDATE 14:40 — RULED: the Bookcase root's page word (was P-47-28)
+
+Put to her with the question tool at 14:38, the question verbatim: "On the phone's home screen, the top line
+reads "Home · Shelf · 14 books" (in Terminal: "~/home/shelf · 14 books"), while the bottom bar's tab for that
+same screen now says "Bookcase" (your ruling: Starred · Bookcase · Library). Should the top line's word change
+from "Shelf" to "Bookcase" too?" Her answer, the option she chose: **"Bookcase (Recommended)"** — "The top
+line says Bookcase, matching the tab, your swipe names and the Mac." This is **R-47-3**. Owed, by an
+implementer, BEFORE the walk so the walk captures the final words: the Bookcase root's path word reads
+"Bookcase" in Study and "bookcase" in Terminal's path (`Home · Bookcase · N books` / `~/home/bookcase · N
+books`); every pin of either run that reads that line's words moves with this ruling as the reason; the walk
+app (the phone test host in `DerivedData/vm47-walk`) is rebuilt and the walk driver and
+`notes/plans/vm-47-walk.md` no longer expect "Shelf"; §5's P-47-28 row becomes R-47-3 with her answer; the
+changed line is listed among the run's new rendered words. A short phone window re-runs the suites that read
+the line. P-47-27 (Terminal's tail truncating at 402 pt) stands as a provisional call; the line is three
+characters longer now.
+
 ## Read first, in this order
 
 1. This file.
