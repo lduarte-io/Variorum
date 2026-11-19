@@ -6,7 +6,29 @@ Ticket: VX-981 · Project: none (an umbrella over MCP-area tickets) · Branch: `
 
 ## FOR A LATER READER
 
-*(Written at closeout, from the settled facts. Until then the run is live: read LIVE STATUS and THE LEDGER.)*
+**What this run was.** The MCP door umbrella: eleven members plus three riders she seated at kickoff (R-981-2), in five batches, run overnight 2026-11-19 under `/run-phase` with nov18 coordinating the stage — Opus implementing (a fresh session per batch), Fable orchestrating; ladder round 1 by `fable-reviewer`, round 2 by `opus-reviewer` (THE LADDER's amendment). Two tickets were born and seated in the ladder (VX-1019, VX-1025). No `Sync/`, custody, schema or editor-seam line; no `App/Variorum/Shared/` line; one core file, `Operations/UndoStack.swift` (additive). Canon applied at the closeout: CLOSEOUT — what was written, at the end.
+
+**As settled — the mechanism, then the fix (one pointer each):**
+- **VX-1007** — the eye and both Private rows read only the Private stamp, while the fence also holds a day entry and a member of THE daily Journal. The faces' facts are now built from the fence's own leg fragments (`Queries.fenceMemberRowSQL` · `journalEntryLegForNote` · `journalMemberLegForNote`, `Queries/MCPGrantQueries.swift`; `Queries.privateMarks` / `privateBookMarks`, `Queries/PrivateMarkQueries.swift`); the eye's Journal arms say and write nothing (`PrivateMarkFace`, `Core/Views/PrivateMarkView.swift`); the Journal's Book Settings row and a Journal-fenced note's ▾ row read ticked and locked (`BookSettingsFace.privateRow`; `NotePrivacyState`, `Core/Views/PrivateMark.swift`). Nothing stamps; the fence's answers did not move.
+- **VX-977** — unlink decided at write new; it reads the catalog's one rung, edit (`MCPToolCatalog.unlinkVersions`, `MCPWriteTools.unlinkRung`); lesson 3's two cards (`TutorialSeeder.swift`).
+- **VX-979** — a link or unlink too long for the bar said "made a change"; `MCPReceiptCopy.titleFreeVersionPhrase` (`Features/MCP/MCPPaneCopy.swift`).
+- **VX-961** — a landed show whose Activity row failed answered as a store failure and told her nothing; `MCPShowTool.recordShown` on VX-913's door road, and a half-landed show's own verdict, `MCPShowRule.Verdict.partial` (ladder F2).
+- **VX-133** — the coalesced receipt kept counting acts she had undone; `UndoStack`'s entry tokens and walk observers, `MCPWriteReceipt.undoEntryID`, `MCPReceiptRun` (`Sources/VariorumMCP/MCPReceiptRun.swift`).
+- **VX-705** — the move at once adopted its place with no re-read (red at gate B2 — real); `MCPDoor.agentShow`'s move arm re-reads, a gone place answers `MCPShowRule.goneWords`; every gone road now lets the place's rows and a last change on it go through one helper, `MCPDoor.retireLastChange(ifAt:)` (ladder F4 and R2-F1 — VX-1025).
+- **VX-951** — the name, set in the `initialize` hook, let `list_changed` out before the answer (the recorded flake); `MCPAnnounceGate` (answer written AND client ready), the transport's report (`MCPSocketTransport.onOpeningAnswered`), `MCPSession.hear`.
+- **VX-944** — the host's announce rounds and the unlock's resume awaited each client in turn; each connection's own announcer (`MCPSession.oweAnnounce` / `startAnnouncing`), `MCPServerHost.announceGrantsChanged` synchronous; the resume's held admissions serial again (ladder N1).
+- **VX-959** — four interleavings let a stale host remove or refuse a fresh host's socket; one in-process lock per socket path, `MCPServerHost.onTheBindRoad` / `bindAndPublish(since:)` (P-981-B4-1).
+- **VX-952** — the opening read a byte at a time; `MCPOpeningWindow.Reader` (64 KiB chunks), its leftover handed on through `MCPSocketTransport(fd:replay:leftover:onOpeningAnswered:)`.
+- **VX-963** — DISMISSED AS ALREADY FIXED by VX-933 (merge `99e1c2631`); two guards, `MCPStalledReaderPoolTests`. **VX-773** — tests only, six files' DEBUG-seam tests guarded. **VX-1019** — tests only, the accept-loop bounds back to the harness's 30 s; round 1's F1 (the size-cap red) — tests only, `RawSocket.readToHangUp`.
+- **VX-368** — the audit, no code: `notes/plans/vx-981/mcp-parity-audit.md` (T1–T22, E1–E12; the bug VX-1026). **VX-370** — HELD (R-981-1), its recipe the audit's last section.
+
+**Her rulings, by id:** her VX-1007 ruling (2026-11-18) · R-981-1…8 (Kickoff) · P-915-B6-1 ruled edit on both notes (QUESTIONS #273 addendum) · VX-979's words (#273 addendum 2) · VX-775's split, "the error goes to her, the truth goes to the client" (#267, #271). How each was honoured: THE RULINGS RECONCILED, at the end.
+
+**Evidence that matters:** GATE A 234 tests / 31 suites, its red leg 8 of 13 · GATE B2 415 / 61, legs A–D red · GATE B34 108 / 16 on the merged tree, leg E red · GATE FIX 143 / 22, LEG-R2F1, LEG-F4 and LEG-F2-DOOR red · the whole MCP target 746 / 139 three times alone (PASS 2) · the soak: the old announce red alone at repetitions 475 and 296, the fix 600 of 600 alone and 3,232 under a parallel core run · the release-configuration test build to its end twice (batch 4). The ladder: round 1 0 BLOCKER · 0 MAJOR · 4 MINOR · 5 NIT; round 2 0 · 0 · 1 MINOR · 3 NIT; no round 3 earned (R-981-5). The open reds as traced: the accept-loop red pre-existing (2 of 31 on the tip, 2 of 24 before batch 3 — start latency under load against a 10 s bound), the size-cap red a test race batch 3 widened (its signature 10 of 10 under the instrument); both fixed test-only. The closing walk: PENDING(walk). The merge gate: PENDING(merge-gate). The PR and merge commit: PENDING(PR). The release (built, never published — R-981-6, R-981-8): PENDING(release).
+
+**Open items:** the QUESTIONS bundle drafted as #277 (`notes/plans/fixes/vx-981-closeout-drafts.md`) — the P-981 family, the wording pass, the audit's T1–T22 and E1–E12 (T3 and T4 need her call first); the real-store field guide re-seed for lesson 3 (hers, behind A1); VX-370's second client (hers); the phone's eye, VM-209; born tickets VX-1012 · VX-1018 · VX-1020 · VX-1026; the remainders THE RULINGS RECONCILED names.
+
+*(Everything below is the night's working record, kept verbatim — read it only when reopening this run.)*
 
 ---
 
@@ -823,9 +845,9 @@ Round 2's fixes go to the implementer that built round 1's (its context holds th
 | Piece | State |
 |---|---|
 | C0 — this section opened | DONE (this commit) |
-| C1 — the canon lines in place (MCPSpec, SurfaceContracts, AppSpec §12's optional clause), each edit word-diff-checked | NOT-STARTED |
-| C2 — `Tools/canon-size` run, its line kept | NOT-STARTED |
-| C3 — FOR A LATER READER written at the top | NOT-STARTED |
+| C1 — the canon lines in place (MCPSpec, SurfaceContracts, AppSpec §12's optional clause), each edit word-diff-checked | DONE (`209d80a6e` MCPSpec; `463f0266b` SurfaceContracts + AppSpec) — every edit an exact-substring replacement, each anchor asserted unique, line counts unchanged, each file reverse-applied to its HEAD byte for byte |
+| C2 — `Tools/canon-size` run, its line kept | DONE — 143,021 of 150,000 (headroom 6,979; no crossing) |
+| C3 — FOR A LATER READER written at the top | DONE (this commit) |
 | C4 — THE RULINGS RECONCILED at the end | NOT-STARTED |
 | C5 — the closeout drafts file (QUESTIONS #277, AppSpecRecord, master plan, run-finals ledger, MobileSoul, the handoff, release-notes material) | NOT-STARTED |
 | C6 — this section closed: every canon edit old → new, the PENDING slots, what was not settled | NOT-STARTED |
