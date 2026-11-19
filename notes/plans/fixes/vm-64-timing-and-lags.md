@@ -423,7 +423,7 @@ owner-carrying table, through SQLCipher's page decrypt, holding the runner AND t
 | Piece | State |
 |---|---|
 | P1 — this live status | DONE (this commit) |
-| P2 — the schema commit (`v1_38`) + the index-set pins' justified edits | NOT-STARTED |
+| P2 — the schema commit (`v1_38`) + the index-set pins' justified edits | DONE (this commit) — `swift test --filter 'MigrationTests\|BlockCommentTests'` 44 tests in 5 suites passed (the new `theOwnerAdoptionIndexesArriveForAnOlderStoreOnePerOwnerTable` among them); `SyncSchemaTests\|AuthRLSDDLTests\|LocalMachineryRecreationTests\|StorePlaintextExportTests\|PlaintextExportImportTests\|LibraryClassifier` 133 tests in 6 suites passed — the registry walk (`SyncSchemaTests.swift:14-19`, `type = 'table'`), the column walk (`:93`) and the mirror-marker pin (`AuthRLSDDLTests.swift:934-949` against the constant `SyncSchema.swift:170`) all untouched by an index |
 | P3 — the op (probe-then-write) + the Core pins and state-transition tests | NOT-STARTED |
 | P4 — red-on-old (revert the two production files, run the pins, restore) | NOT-STARTED |
 | P5 — the hosted assertion in `MobileHerPathsPerfTests` | NOT-STARTED |

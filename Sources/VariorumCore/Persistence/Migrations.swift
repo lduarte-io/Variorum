@@ -1219,6 +1219,54 @@ extension AppDatabase {
             try db.execute(sql: "ALTER TABLE reading_post ADD COLUMN arrival_provenance TEXT")
             try db.execute(sql: "ALTER TABLE reading_post ADD COLUMN pinned_at TEXT")
         }
+        // **VM-67 (the VM-64 run, batch 4) — THE UNOWNED ROWS, INDEXED.** Owner
+        // adoption (`Operations.adoptOwnerID`, S4) runs at every launch with a
+        // session, every unlock, every sign-in: `UPDATE t SET owner_id = ?
+        // WHERE owner_id IS NULL` over each owner-carrying synced table. With
+        // no index serving `owner_id IS NULL`, each was `SCAN t` — every row
+        // of every one of these tables read (through SQLCipher's page
+        // decrypt) on every launch and unlock, holding the runner and the
+        // writer, even when nothing was unowned (audit F 3A/6A,
+        // `notes/plans/vm-44/audit/F-performance-trace.md`).
+        //
+        // One PARTIAL index per owner-carrying table, on the rows still
+        // lacking an owner: empty in the steady state (a signed-in mint is
+        // stamped at birth), holding exactly the rows adoption exists to
+        // find — so the probe and the update are `SEARCH t USING INDEX
+        // idx_t_unowned (owner_id=?)`, ∝ the rows to adopt, never the corpus
+        // (P1). A query on `owner_id = ?` or `owner_id IS NOT NULL` cannot
+        // use a partial index on `owner_id IS NULL`, so no other plan moves.
+        // The eleven tables are the synced tables whose DDL carries
+        // `owner_id` as this migration lands (the column is S4's, on the
+        // top-level entities); a future owner-carrying table must add its own
+        // index — `OwnerAdoptionTests` fails until it does (the adoption
+        // reaches every owner table only through its index).
+        //
+        // **NOT a SyncSpec §12 lockstep event**, on v1_34 / v1_36's reasoning:
+        // the mirrors carry no indexes beyond the PK by design (SyncSpec §2),
+        // so a local index adds no table, no column and no classification —
+        // `SyncSchema`'s completeness walk classifies COLUMNS, and
+        // `lockstepVersion` is a constant only a mirror event moves. The
+        // marker stays 15. A store (or plaintext export) that ran this reads
+        // `.newerSchema` on an older build and refuses (VX-502's classifier —
+        // standing, untouched). Its own commit, ahead of the code that uses
+        // it (CLAUDE.md). The record: `notes/plans/fixes/vm-64-timing-and-lags.md`
+        // (§5 / §7, batch 4).
+        migrator.registerMigration("v1_38_owner_adoption_index") { db in
+            try db.execute(sql: """
+                CREATE INDEX idx_container_unowned ON container(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_block_unowned ON block(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_tag_unowned ON tag(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_wing_unowned ON wing(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_shelf_unowned ON shelf(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_reading_unowned ON reading(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_reference_unowned ON reference(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_canvas_layout_unowned ON canvas_layout(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_lens_unowned ON lens(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_block_comment_unowned ON block_comment(owner_id) WHERE owner_id IS NULL;
+                CREATE INDEX idx_purge_intent_unowned ON purge_intent(owner_id) WHERE owner_id IS NULL;
+                """)
+        }
         return migrator
     }
 }
