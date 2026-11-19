@@ -158,7 +158,27 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 
 #### BATCH B — LIVE STATUS
 
-*(the implementer fills this from its first commit)*
+*Implementer: `opus-implementer`, session of 2026-11-19. Half 1 = code + pins + a green `build-for-testing` (no
+`xcodebuild test`, no simulator); half 2 = the stage window's red-on-old + green runs. **No revert is in flight.***
+
+| Member | State | Pin (TYPE name for `-only-testing`) |
+|---|---|---|
+| VM-16 (+VM-20) | IN-PROGRESS — code + pins committed; compile **PENDING** (first `build-for-testing`); red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ Mac guard `UndoWarningWordsTests`) |
+| VM-43 | NOT-STARTED — wire `insuringBuffer: true` at the one phone call site (`MobileBlockHistory.swift:483`) | `MobileBlockHistoryTests` |
+| VM-3 | NOT-STARTED — rewrite the lesson's two prose blocks; unwrap + flip the pin to keep-on-top | `MobileTutorialWalkTests` |
+| VM-84 | NOT-STARTED — an observed `entryDate` mirror set in `adoptHeader` | `MobileEditorHeaderChipTests` (new) |
+| VM-33 | NOT-STARTED — the answered flag (`trashListingLoaded`), the Mac's VX-678 rule | `MobileTrashTests` |
+
+**Traced mechanisms (read in this session, before any code):**
+- **VM-16.** `MobileUndoDoor.runUndo` / `redo` called `UndoStack.undo(with:)` / `redo(with:)`, which return the
+  entry's LABEL for a quiet press too (`UndoStack.swift:346`, `:382` — `undoReporting(...)?.label`). A quiet undo
+  RETIRES its entry and leaves the redo stack as it was, so the door said "Undid: X" and offered `.redo` — whose
+  press re-applies the redo stack's top, a DIFFERENT entry (and the mirror for a quiet redo offering `.undo`). The
+  Mac's door (`ShellActions.structuralUndo` / `structuralRedo`) reads `undoReporting` / `redoReporting` and speaks
+  `StructuralUndoCopy.undoFoundNothing` / `redoFoundNothing` with no way back on a quiet outcome.
+- **VM-20.** The phone's A12 detail (`MobileUndoDoor.discardingUndoDetail`) said "It is saved first"; the Mac's
+  (`ShellActions.discardingUndoDetail`, Mac-local) says "It is committed first". VX-342 has already landed on the
+  Mac (no shouted capitals in either detail), so nothing shouted is carried.
 
 ### BATCH A — books (VM-81 · VM-83 · VM-21)
 

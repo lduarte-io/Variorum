@@ -410,6 +410,134 @@ struct MobileUndoDoorTests {
         }
     }
 
+    // MARK: - VM-16: a QUIET press speaks a refusal and offers no way back
+
+    /// **The ticket's own pin (VM-16 — VX-276's rule, phone side).** Register
+    /// X (her Delete Block) then Y (a divide); undo Y — Y now waits on the
+    /// redo stack; reverse X through an undo-less door (her Put back from
+    /// the tray, which registers nothing and clears no future); then undo.
+    /// X's inverse finds its block already back and writes nothing — a
+    /// QUIET press, so the stack RETIRES X and leaves Y on the redo stack.
+    ///
+    /// **Red on old:** the door read `undo(with:)`'s label, so this press
+    /// said "Undid: Delete Block" and offered a Redo whose press would
+    /// re-apply Y — the divide, an entry the sentence never named.
+    @Test func aQuietUndoSpeaksTheRefusalAndOffersNoRedo() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(
+                session, blocks: ["One two three four.", "Delete me."])
+            let (model, _) = await makeSurfaceEditor(session, postID: postID)
+            let stack = session.undoStack
+
+            // X — her Delete Block on the second paragraph.
+            let doomed = try #require(model.index.entries.last?.blockID)
+            await model.structural.deleteBlock(blockID: doomed)
+            #expect(try await storedBlockTexts(db, postID: postID) == ["One two three four."])
+            // Y — a divide.
+            await model.structural.divide(atSurfaceCaret: 8)
+            #expect(try await storedBlockTexts(db, postID: postID) == ["One two", "three four."])
+
+            // Undo Y: it changed something, so Y waits on the redo stack.
+            await model.undoDoor.beginUndo(from: .receipt)
+            #expect(try await storedBlockTexts(db, postID: postID) == ["One two three four."])
+            #expect(model.statusMessage == StructuralUndoCopy.undone("Divide"))
+            #expect(model.statusAction == .redo, "a landed undo still offers its redo")
+            #expect(stack.topRedoLabel == "Divide")
+
+            // X reversed through an undo-less door — her Put back.
+            _ = try await session.runner.run { ops in try ops.restoreBlock(doomed) }
+            await model.refreshTakesFromStore()
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["One two three four.", "Delete me."])
+            #expect(stack.topLabel == "Delete Block", "her Put back registered nothing")
+            #expect(stack.topRedoLabel == "Divide", "…and cleared no future")
+
+            // The quiet press.
+            await model.undoDoor.beginUndo(from: .receipt)
+            #expect(model.statusMessage
+                == "Nothing to undo — Delete Block was already undone or changed since.",
+                    "the refusal, in the shared words: \(model.statusMessage ?? "nil")")
+            #expect(model.statusMessage == StructuralUndoCopy.undoFoundNothing("Delete Block"))
+            #expect(model.statusAction == nil,
+                    "no Redo is offered — the redo stack's top is the divide, not this entry")
+            // The stack did what VX-246 U2 says, so the door's words are the
+            // only thing this pin is about.
+            #expect(stack.depth == 0, "the quiet entry is retired")
+            #expect(stack.topRedoLabel == "Divide", "the redo future stands as it was")
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["One two three four.", "Delete me."], "her Put back stands")
+        }
+    }
+
+    /// **The mirror (VM-16): a quiet REDO offers no Undo.** Register W (a
+    /// divide) then X (her Delete Block); undo X — the block comes back and X
+    /// waits on the redo stack; the block then dies by a road that is no door
+    /// of this session's (another device's delete, landing by sync — a
+    /// stackless operations instance stands for it: it writes the same rows
+    /// and touches no session stack); then redo. X's re-apply finds its block
+    /// already gone and writes nothing — quiet, so X is RETIRED and the undo
+    /// stack stays as it was.
+    ///
+    /// **Red on old:** the door said "Redid: Delete Block" and offered an Undo
+    /// whose press would take back W — the divide.
+    @Test func aQuietRedoSpeaksTheRefusalAndOffersNoUndo() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(
+                session, blocks: ["One two three four.", "Delete me."])
+            let (model, _) = await makeSurfaceEditor(session, postID: postID)
+            let stack = session.undoStack
+
+            // W — a divide, which stays on the undo stack throughout.
+            await model.structural.divide(atSurfaceCaret: 8)
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["One two", "three four.", "Delete me."])
+            // X — her Delete Block.
+            let doomed = try #require(model.index.entries.last?.blockID)
+            await model.structural.deleteBlock(blockID: doomed)
+            #expect(try await storedBlockTexts(db, postID: postID) == ["One two", "three four."])
+
+            // Undo X: the block comes back; X waits on the redo stack.
+            await model.undoDoor.beginUndo(from: .receipt)
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["One two", "three four.", "Delete me."])
+            #expect(stack.topRedoLabel == "Delete Block")
+            #expect(stack.topLabel == "Divide")
+
+            // The block dies elsewhere: no entry, no cleared future.
+            try Operations(undoStack: nil).deleteBlock(doomed)
+            await model.refreshTakesFromStore()
+            #expect(try await storedBlockTexts(db, postID: postID) == ["One two", "three four."])
+            #expect(stack.topRedoLabel == "Delete Block", "the other delete cleared no future")
+
+            // The quiet press.
+            await model.undoDoor.redo()
+            #expect(model.statusMessage
+                == "Nothing to redo — it changed again after Delete Block was undone.",
+                    "the refusal, in the shared words: \(model.statusMessage ?? "nil")")
+            #expect(model.statusMessage == StructuralUndoCopy.redoFoundNothing("Delete Block"))
+            #expect(model.statusAction == nil,
+                    "no Undo is offered — the undo stack's top is the divide, not this entry")
+            #expect(stack.redoDepth == 0, "the quiet entry is retired")
+            #expect(stack.topLabel == "Divide", "the undo history stands as it was")
+        }
+    }
+
+    /// **The control: a press that CHANGED something keeps its way back**
+    /// (green on both sides — the fix must not strip the ping-pong her R10
+    /// asked for). A landed redo offers Undo, exactly as before.
+    @Test func aLandedRedoStillOffersItsUndo() async throws {
+        try await withEditorWorld { session, db in
+            let postID = try await makePost(session, blocks: ["One two three four."])
+            let (model, _) = await makeSurfaceEditor(session, postID: postID)
+            await model.structural.divide(atSurfaceCaret: 8)
+            await model.undoDoor.beginUndo(from: .receipt)
+            await model.undoDoor.redo()
+            #expect(try await storedBlockTexts(db, postID: postID) == ["One two", "three four."])
+            #expect(model.statusMessage == StructuralUndoCopy.redone("Divide"))
+            #expect(model.statusAction == .undo)
+        }
+    }
+
     /// **The warning is honest because the door FLUSHES first.** Type into
     /// the source half and DO NOT flush: the ROW still holds the divide's
     /// own output, so `wouldInsure` (currentText != preImage.postOpText)

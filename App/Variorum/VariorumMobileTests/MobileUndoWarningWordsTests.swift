@@ -38,4 +38,23 @@ struct MobileUndoWarningWordsTests {
             #expect(shoutedWords(StructuralUndoCopy.discardingUndoQuestion(warning)).isEmpty)
         }
     }
+
+    /// **VM-20 — the detail says "committed", the Mac's word** (the app's word
+    /// wherever a savepoint is named, AppSpec §12). The phone said "It is
+    /// saved first"; the sentence is the Mac's now (hoisted to
+    /// `StructuralUndoCopy`), with only the read-back place the phone's own.
+    /// Pinned exactly. **Red on old:** "It is saved first, …".
+    @Test func theWarningsDetailSaysCommittedInTheMacsSentence() {
+        let one = UndoStack.PendingUndoWarning(label: "Divide", bufferCount: 1)
+        #expect(MobileUndoDoor.discardingUndoDetail(one)
+            == "One take has been edited since — undoing puts back the text as it was before the "
+            + "divide, so that writing is set aside. It is committed first, so you can bring it "
+            + "back from the block's Block History at any time.")
+        let many = UndoStack.PendingUndoWarning(label: "Make Block", bufferCount: 3)
+        #expect(MobileUndoDoor.discardingUndoDetail(many)
+            == "3 takes have been edited since — undoing puts back the text as it was before the "
+            + "make block, so that writing is set aside. It is committed first, so you can bring "
+            + "it back from the block's Block History at any time.")
+        #expect(!MobileUndoDoor.discardingUndoDetail(one).contains("saved"))
+    }
 }
