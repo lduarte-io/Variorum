@@ -2745,9 +2745,9 @@ clash, the implementer STOPS and reports before any file under `App/` or `Source
 | 1 — the merge commit (`git merge --no-ff origin/main` at `ad5053002`) | DONE (`d55d22db9`, parents `d73f63067` and `ad5053002`) — exactly the two expected conflicts, both in notes, resolved as planned ("The merge commit" below); nothing under `App/` or `Sources/` resolved by hand |
 | 2 — the reads git does not flag | DONE (`1f0b23e20`) — "The reads, each with what it showed" below: no clash; nothing under `App/` or `Sources/` changed |
 | 3 — the renumbering: this run's parity row PL-78; the next free QUESTIONS number #279 | DONE (`3a347353a`) — PL-78 in `notes/MobileSoul.md` (in the merge commit) and wherever the record and the author handoff name the row (FOR A LATER READER's canon line, the Closeout's re-fit row 1, its canon deltas, "Sentences to revisit", MOBILE PARITY, the AppSpecRecord draft twice, "Not done"), each history sentence saying what the row was then; the QUESTIONS draft says #279 is next free as of this merge-in (VX-981 took #278), still re-checked at the merge. Left as written, by the brief: "The orchestrator's live state" (`:100`, `:142`), the first merge-in's section (`:2451`), the round files, and `notes/plans/vm-78-orchestrator-handoff.md` (the orchestrator's own map, `:36`, `:63`) |
-| 4 — both targets `build-for-testing` on the merged tree, headless | NOT-STARTED |
-| 5 — the red patch's `git apply --check` on the merged tree; the guards' window recipe corrected in place | DONE (this commit) — `git apply --check App/Variorum/DerivedData/vm78-scripts/guards-red.patch` on the merged tree: exit 0, never applied (`git status --short` empty after); its five `@@` hunks hold nine change groups, the recipe's "nine hunks" said so; every site's line number re-read on the merged tree (unchanged — no phone file changed); `MobileUndoDoorTests` and `MobileUndoWarningWordsTests` added to the GREEN leg, expected all green; the expected reds, the five seam pins and the type list otherwise unchanged ("The guards' window recipe", its header says what changed) |
-| 6 — the sentences made true (FOR A LATER READER, the Closeout, the author handoff); the evidence row | NOT-STARTED |
+| 4 — both targets `build-for-testing` on the merged tree, headless | DONE (this commit) — phone and Mac **TEST BUILD SUCCEEDED**, 0 errors, 0 new warnings; "The builds" below |
+| 5 — the red patch's `git apply --check` on the merged tree; the guards' window recipe corrected in place | DONE (`4e9661d3d`) — `git apply --check App/Variorum/DerivedData/vm78-scripts/guards-red.patch` on the merged tree: exit 0, never applied (`git status --short` empty after); its five `@@` hunks hold nine change groups, the recipe's "nine hunks" said so; every site's line number re-read on the merged tree (unchanged — no phone file changed); `MobileUndoDoorTests` and `MobileUndoWarningWordsTests` added to the GREEN leg, expected all green; the expected reds, the five seam pins and the type list otherwise unchanged ("The guards' window recipe", its header says what changed) |
+| 6 — the sentences made true (FOR A LATER READER, the Closeout, the author handoff); the evidence row | IN-PROGRESS — the record's sentences DONE (`2e94baf09`); the evidence row and the author handoff next |
 
 **The plan (piece 0), written before the merge starts.**
 
@@ -2933,6 +2933,24 @@ fast-forward-only pull before it, never a rebase (a rebase would flatten the mer
 - **Also re-checked, for the handoff's "Three canon lines I did not change":** on the merged `SurfaceContracts.md`
   all three still stand as the handoff quotes them ("N waiting at the door will be dismissed" once; "PROVISIONAL
   P-849-5, QUESTIONS #274; VX-849)"; "PROVISIONAL P-849-4, QUESTIONS #274; VX-443)") — VX-981 touched none of them.
+
+**The builds (piece 4) — both targets, headless, on the merged code.** Built from `1f0b23e20`, whose code is the merge
+commit's byte for byte (`git diff d55d22db9 1f0b23e20 -- App/ Sources/ Tests/ Package.swift Package.resolved`: 0
+bytes; the commits between are the record). No simulator boot, no `xcodebuild test`, no stage claim; each run started
+by this session as its own process and waited on in the foreground; nothing stopped. The invocations are THE
+MERGE-IN row 3's exactly, from `App/Variorum/`:
+- **Phone:** `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile -destination
+  "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2" -derivedDataPath DerivedData/vm78-ios` — 16:41:26–16:42:03,
+  **TEST BUILD SUCCEEDED**, exit 0, **0 errors**; 204 compile steps (VX-981's three core files rebuilt `VariorumCore`
+  and what depends on it); 57 distinct warning lines, 25 distinct (file, message) pairs, **0 new** — every pair
+  appears in an earlier phone build log of this run, and none sits in a file VX-981 changed. Log
+  `App/Variorum/DerivedData/logs/vm78-mergein2-ios-build.log`.
+- **Mac:** `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme Variorum -destination platform=macOS
+  -derivedDataPath DerivedData/vm78-mac` — 16:42:47–16:46:02, **TEST BUILD SUCCEEDED**, exit 0, **0 errors**; 97
+  distinct warning lines, 81 distinct (file, message) pairs, **0 new** against the first merge-in's Mac build
+  (`vm78-mergein-mac-build.log`, 82 pairs). Log `App/Variorum/DerivedData/logs/vm78-mergein2-mac-build.log`.
+- "New" is counted by (file, message) with line and column stripped, since a merge moves line numbers; the two
+  logs' own first and last lines carry the invocation and the verdict.
 
 ## The ladder
 
