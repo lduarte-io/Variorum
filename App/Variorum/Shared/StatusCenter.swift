@@ -355,7 +355,9 @@ final class StatusCenter {
             case .receiptStyle:
                 Self.log.debug("receipt dropped (style=off): \(trimmed, privacy: .public)")
             case .phoneLine:
-                Self.log.debug("receipt dropped (phone line, ordinary act): \(trimmed, privacy: .public)")
+                // Private: a dropped receipt carries her words (note and book
+                // titles) — VM-55 ladder round 1, finding 5.
+                Self.log.debug("receipt dropped (phone line, ordinary act): \(trimmed, privacy: .private)")
             }
             return
         }

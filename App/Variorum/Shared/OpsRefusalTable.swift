@@ -473,8 +473,12 @@ nonisolated enum OpsRefusalCopy {
     /// into anything else.
     static func sentence(for error: Error, roads: OpsRefusalRoads) -> String {
         if let words = words(for: error, roads: roads) { return words }
+        // Private: an error's associated values can carry ids and names she
+        // typed — kept for an attached debugger, redacted in a persisted
+        // archive (VM-55 ladder round 1, finding 5; pinned by
+        // `MobileErrorLogPrivacyPinTests`).
         unwordedLog.notice(
-            "unworded failure, said as the plain fallback: \(String(reflecting: error), privacy: .public)")
+            "unworded failure, said as the plain fallback: \(String(reflecting: error), privacy: .private)")
         return unexpectedFailure
     }
 
