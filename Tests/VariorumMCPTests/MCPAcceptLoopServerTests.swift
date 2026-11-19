@@ -59,6 +59,10 @@ private func socketExists(_ directory: URL) -> Bool {
 
 @Suite("VX-612 — the accept loop retries what passes and says what doesn't", .serialized)
 struct MCPAcceptLoopServerTests {
+    // VX-773 (the VX-981 run, batch 4): DEBUG-only — every test below but the pure classification drives the host's
+    // `acceptLoopFault` seam. The release-
+    // configuration test build compiles this target where that seam does not exist.
+    #if DEBUG
     private func faulted(_ h: ServerHarness) -> FaultQueue {
         let faults = FaultQueue()
         h.host.acceptLoopFault = { faults.next($0) }
@@ -254,6 +258,7 @@ struct MCPAcceptLoopServerTests {
             close(fd)
         }
     }
+    #endif
 
     /// The classification, pure: interrupts and aborted connections again at
     /// once; the resource class after a pause; everything else fatal. The

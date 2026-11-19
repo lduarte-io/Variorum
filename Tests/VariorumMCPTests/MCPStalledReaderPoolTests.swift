@@ -274,6 +274,10 @@ struct MCPStalledReaderPoolTests {
         close(pair[1])
     }
 
+    // VX-773 (the VX-981 run, batch 4): DEBUG-only — it tries the close line inside the gap through the transport's
+    // `setMidFrameProbeForTesting`. The release-
+    // configuration test build compiles this target where that seam does not exist.
+    #if DEBUG
     /// The close line never lands INSIDE a frame (VX-762's invariant, kept by
     /// the fast road): a frame to a client that stopped reading goes out in
     /// part at once, and its rest waits on the writer — the write lock is free
@@ -316,6 +320,7 @@ struct MCPStalledReaderPoolTests {
         await transport.disconnect()
         close(pair[0])
     }
+    #endif
 
     /// The close line NEVER WAITS (VX-762's contract; VX-933's face of it): a
     /// stop says it from the stopping thread — the main thread at her switch —
