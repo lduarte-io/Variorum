@@ -1,0 +1,10 @@
+# VX-980 — her rulings at the kickoff sitting (2026-11-19)
+
+Recorded verbatim as she gave them, while batch 1's implementer was live in the worktree (a file of its own so the run record has one writer at a time). Folded into `vx-980-search-fixes.md` at the next seam; this file stays as the verbatim source.
+
+She asked for the run's provisional calls through the question tool ("can you give me those calls using the question tool? what's the deal with them?"). Group 1, her answers:
+
+- **R-980-1 — the lone-punctuation field (P-980-1): NOT YET RULED — she answered with a question.** Her words: "why can we not search for punctuation? what if i wanted to find the one note where i was adding things?" The question is answered in chat and the call re-asked (see R-980-5 when it lands). Until then batch 1's built option (a) stands as PROVISIONAL.
+- **R-980-2 — the post-restore check (P-980-3): trace first; the trace goes in her handoff whole.** Her words: "make sure what the trace reveals is in my handoff with full description and options". So batch 2 builds the Settings row only and traces every restore road; the handoff carries the trace's table in full, each road described, with the options for her decision.
+- **R-980-3 — the ladder's reviewer: Fable.** She picked "Fable reviewer". `fable-reviewer` runs every round of this run's ladder.
+- **R-980-4 — the ladder's length and the words.** Her words: "also, up to 5 review rounds as long as a major is found. and provisional wording is fine for now, you can keep them listed though." So for this run the ladder's cap is FIVE rounds (CLAUDE.md's standing cap is three): a further round runs while the round before it found a MAJOR (or a BLOCKER), up to five; every round's reviewer is a fresh cold agent as ever. New rendered strings ship as provisional wording and stay listed for her wording pass. *(The orchestrator's reading, to confirm with her: the five-round cap is for this run; whether it is tonight's rule for every run or a standing change is asked once in chat.)*
