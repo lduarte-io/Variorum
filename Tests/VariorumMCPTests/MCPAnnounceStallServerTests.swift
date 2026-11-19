@@ -69,9 +69,12 @@ private struct StallWorld {
         try #require(await pollUntil(HarnessDeadline.seconds) { stalled.unreadBytes >= 4_096 },
                      "premise: A's 200 KB answer has begun, so its writer waits on A")
 
-        // The setup's own announces (the two approvals) settle before anything is
-        // counted: a pause, then a second barrier.
-        try await Task.sleep(for: .milliseconds(200))
+        // Premise: B is still served while A has stopped reading. (Round 1's N5, the
+        // VX-981 ladder: this is no barrier for the setup's own announces — a ping's
+        // answer and a notice travel on different tasks, and the two approvals owe
+        // B and A 0, 1 or 2 notices: the observation skips its first value, and two
+        // commits may coalesce into one. So nothing below counts on them having
+        // settled, and the 200 ms pause that stood here is gone.)
         await reader.write(AnnounceRawClient.ping(901))
         try #require(await reader.waitUntil { AnnounceRawClient.answer($0, to: 901) != nil })
         return StallWorld(
@@ -87,9 +90,16 @@ private struct StallWorld {
 @Suite("VX-944 — one stalled client never delays another's announce, nor the unlock", .serialized)
 struct MCPAnnounceStallServerTests {
     /// **The grants observation:** with A stalled, each grant change reaches B
-    /// within the bound — the first and the second. And the stalled client's own
-    /// notices wait in its own order: once A reads, its answer arrives whole and
-    /// both notices after it (none lost, none doubled, nothing interleaved).
+    /// within the bound — the first and the second (the second carries the teeth:
+    /// on the old serial round at most ONE notice reaches B after A stalls, so
+    /// `>= base + 2` cannot go green there, whatever the setup left pending). And
+    /// the stalled client's own notices wait in its own order: once A reads, its
+    /// answer arrives whole and AT LEAST its two notices after it, nothing but
+    /// whole notices (none lost, nothing interleaved). Round 1's N5 (the VX-981
+    /// ladder): "exactly two" is not assertable here — the setup's approvals owe
+    /// A 0, 1 or 2 notices of their own, indistinguishable from a doubled one — so
+    /// "none doubled" is pinned where it is deterministic:
+    /// `MCPAnnounceOrderServerTests.nAsksSendNNoticesOnceTheGateIsOpen`.
     @Test func aClientThatStoppedReadingNeverDelaysAnotherSessionsAnnounce() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -118,8 +128,9 @@ struct MCPAnnounceStallServerTests {
             let lines = world.stalled.lines
             if let at = answered(lines) {
                 #expect(lines[..<at].allSatisfy(AnnounceRawClient.isListChanged), "only notices came before its answer")
-                #expect(lines[(at + 1)...].count == 2 && lines[(at + 1)...].allSatisfy(AnnounceRawClient.isListChanged),
-                        "exactly its two notices after it, each whole")
+                let after = lines[(at + 1)...]
+                #expect(after.count >= 2 && after.allSatisfy(AnnounceRawClient.isListChanged),
+                        "at least its two notices after it, each whole, and nothing else (\(after.count) lines)")
             }
             await world.stalled.finish()
             await world.reader.finish()

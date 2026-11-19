@@ -170,6 +170,38 @@ struct MCPAnnounceOrderServerTests {
         }
     }
 
+    /// GUARD (round 1's N5, the VX-981 ladder — green on both trees): **N asks send N
+    /// notices** — none doubled, none merged — on the open-gate road (batch 3's "counts
+    /// unchanged"). A PENDING client (outside the grants fingerprint), so nothing moves the
+    /// fingerprint and no round is natural: the gate opened (`initialized`, a ping
+    /// barrier), three rounds asked, three notices, a ping barrier, then exactly three.
+    /// The exactness `MCPAnnounceStallServerTests` gives up (its setup's approvals owe
+    /// 0–2 notices of their own) lives here, where it is deterministic.
+    @Test func nAsksSendNNoticesOnceTheGateIsOpen() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let key = try h.setupKey(for: "claude-code")
+            let host = h.host
+            let client = try await AnnounceRawClient.open(h.directory, key: key, as: "claude-code", id: 101)
+            client.startReading()
+            #expect(await client.waitUntil { !$0.isEmpty })
+            #expect(firstIsTheAnswer(client.lines, id: 101), "\(describe(client.lines))")
+            await client.write(AnnounceRawClient.initialized + AnnounceRawClient.ping(102))
+            #expect(await client.waitUntil { AnnounceRawClient.answer($0, to: 102) != nil }, "the gate is open")
+            #expect(try h.client("claude-code").state == .pending, "premise: a pending client, outside the fingerprint")
+            #expect(client.listChangedCount == 0, "premise: no round is natural here: \(describe(client.lines))")
+
+            for _ in 0..<3 { await host.announceRoundForTesting() }
+            #expect(await client.waitUntil { $0.filter(AnnounceRawClient.isListChanged).count >= 3 },
+                    "three asks, three notices: \(describe(client.lines))")
+            await client.write(AnnounceRawClient.ping(103))
+            #expect(await client.waitUntil { AnnounceRawClient.answer($0, to: 103) != nil })
+            #expect(client.listChangedCount == 3, "exactly three — none doubled, none merged: \(describe(client.lines))")
+            await client.finish()
+        }
+    }
+
     /// **VX-818 × VX-951 — a connection HELD by the lock** (its `initialize`
     /// answered while the library was locked, naming no one) is admitted at the
     /// unlock and told its tools changed — but a held client that has not yet
