@@ -1,10 +1,11 @@
 # VM-78 — Fixes to what's there: your handoff
 
 **STATUS: OPEN — re-fitted on 2026-11-19, after the badge fix was taken out and main was merged into the branch;
-brought up to date after the fourth review round.** Still ahead: taking in the MCP run (VX-981) once it has merged
-to main, a short test window on that code for the three new safety tests the fourth review asked for, the fifth
-and last review round, and the final gate (the whole phone test suite, the Mac tests over the shared code this
-run changed, and a walk through the changed screens on the simulator). Every **PENDING(…)** slot below is filled
+brought up to date after the fourth review round, and again after the MCP run (VX-981) was taken in — main was
+merged into the branch a second time (merge commit `d55d22db9`), with no change to any code line.** Still ahead: a
+short test window on that code for the three new safety tests the fourth review asked for, the fifth and last
+review round, and the final gate (the whole phone test suite, the Mac tests over the shared code this run changed,
+and a walk through the changed screens on the simulator), then the merge. Every **PENDING(…)** slot below is filled
 as it happens; nothing marked PENDING has happened yet.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. A **test window** is a test run on the
@@ -201,11 +202,19 @@ ruled. None is this run's line, so all three are left as they are; a ticket for 
   is VM-239.
 - **After the merge:** the phone and the Mac both build for testing on the merged code, and a check confirms the
   takes badge files are exactly main's and no measurement test is left in the tree.
+- **After the MCP run was taken in** (main merged in a second time, `d55d22db9`): only two notes files needed a hand
+  resolution — `notes/MobileSoul.md`, where both runs had added a row numbered 77 (the MCP run's keeps 77, this
+  run's is now 78), and one line of `notes/SurfaceContracts.md`, where both runs had added to the book settings
+  sheet's line (both kept). No code line was resolved by hand: the MCP run changed no phone or shared file, and the
+  two Mac files and the spec line both runs touched carry each run's change intact. Its one change under the
+  phone's undo door (the undo stack now tells listeners about each undo, for the Mac's AI receipts) changes nothing
+  the phone reads. The phone and the Mac both build for testing on that code again, and the three new tests'
+  failing version still applies cleanly to it.
 - **The re-applied fixes, proved again on the merged code:** against main's versions of the undo and Trash files,
   exactly the six tests that should fail did fail (44 tests ran), and on the branch they pass; then this run's
   tests and the wings run's over the same screens — 283 tests — all passed.
-- PENDING(the short test window for the fourth review's three new tests, on the code after the MCP run is taken
-  in: each shown failing against the old faces, then passing).
+- PENDING(the short test window for the fourth review's three new tests, on the code with the MCP run taken in
+  (`d55d22db9`): each shown failing against the old faces, then passing).
 - PENDING(gate 1: the whole phone test suite on the merged code — its result, with the caret test as the one
   expected failure).
 - PENDING(gate 2: the Mac tests over the shared code this run changed — its result).
