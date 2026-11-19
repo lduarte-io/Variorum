@@ -127,6 +127,8 @@ public final class UndoStack: @unchecked Sendable {
     private var redoEntries: [Entry] = []
     private var nextID = 0
     private var changeObserver: (@Sendable () -> Void)?
+    /// VX-133 — who hears each completed undo and redo (`addWalkObserver`).
+    private var walkObservers: [UUID: @Sendable (Walk) -> Void] = [:]
     /// Non-nil while a compound registration is collecting (Phase 9's
     /// composed Make Block gesture): registrations land here instead of the
     /// stack, then fold into ONE entry.
@@ -162,6 +164,66 @@ public final class UndoStack: @unchecked Sendable {
     private func notifyChange() {
         let observer = lock.withLock { changeObserver }
         observer?()
+    }
+
+    // MARK: - VX-133: an entry's identity, and the walks that move it
+
+    /// **One completed press, said with the entry it walked** (VX-133 — the
+    /// VX-981 run, batch 2): which half ran, the entry's registration token
+    /// (`newestEntryID` / `entryIDs(newerThan:)` read the same token at
+    /// registration), its label, and whether the half CHANGED anything (a
+    /// quiet half retired its entry — VX-276). A SIGNAL carrying no decision:
+    /// the MCP door's receipt run keeps its count true by it (an undo of one
+    /// of a client's acts lowers the count, its redo raises it again).
+    public struct Walk: Equatable, Sendable {
+        public enum Direction: Equatable, Sendable { case undo, redo }
+        public let direction: Direction
+        public let entryID: Int
+        public let label: String
+        public let changed: Bool
+
+        public init(direction: Direction, entryID: Int, label: String, changed: Bool) {
+            self.direction = direction
+            self.entryID = entryID
+            self.label = label
+            self.changed = changed
+        }
+    }
+
+    /// The registration token of the NEWEST entry on the undo stack — nil
+    /// while it is empty. Read before an act runs, it bounds what the act
+    /// registers (`entryIDs(newerThan:)`).
+    public var newestEntryID: Int? {
+        lock.withLock { entries.last?.id }
+    }
+
+    /// The tokens of the entries on the undo stack registered after `token`
+    /// (every entry for nil), oldest first — what one act registered, read by
+    /// the door that ran it on the same serial runner. Tokens only grow, so a
+    /// registration is always newer than anything on either stack; a
+    /// compound's legs are never on the stack, only the compound entry is.
+    public func entryIDs(newerThan token: Int?) -> [Int] {
+        lock.withLock {
+            entries.compactMap { entry -> Int? in
+                if let token, entry.id <= token { return nil }
+                return entry.id
+            }
+        }
+    }
+
+    /// Hears every completed undo and redo (`Walk`), outside the lock, on the
+    /// walking thread (the runner's) — never a failed half (its entry stays
+    /// for retry). Returns the token `removeWalkObserver` takes. Several may
+    /// listen (a session's door; a test's).
+    @discardableResult
+    public func addWalkObserver(_ observer: @escaping @Sendable (Walk) -> Void) -> UUID {
+        let token = UUID()
+        lock.withLock { walkObservers[token] = observer }
+        return token
+    }
+
+    public func removeWalkObserver(_ token: UUID) {
+        _ = lock.withLock { walkObservers.removeValue(forKey: token) }
     }
 
     /// Registers one forward operation's two halves. `redo` is REQUIRED

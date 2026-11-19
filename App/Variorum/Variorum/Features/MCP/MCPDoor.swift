@@ -303,10 +303,15 @@ final class MCPDoor {
 
     /// U2 — the receipt RUN: consecutive acts by one client on one target
     /// within the window speak as one coalesced line (her fact-check's
-    /// "added 2 takes and saved the lens …").
-    @ObservationIgnored private var receiptRun: [MCPWriteReceipt] = []
-    @ObservationIgnored private var receiptRunAt = Date.distantPast
-    nonisolated static let receiptWindow: TimeInterval = 120
+    /// "added 2 takes and saved the lens …"). VX-133 (the VX-981 run, batch
+    /// 2): the run is the pure `MCPReceiptRun`, and her line counts the acts
+    /// that STAND — an undo of one of them walks it out of the count, its redo
+    /// back in (the session's `UndoStack` walks, heard below).
+    @ObservationIgnored private var receiptRun = MCPReceiptRun()
+    nonisolated static let receiptWindow: TimeInterval = MCPReceiptRun.window
+    /// VX-133: the session undo stack's walks this door hears (`attach`), and
+    /// the stack it subscribed to — let go with the session.
+    @ObservationIgnored private var walkSubscription: (stack: UndoStack, token: UUID)?
 
     init(
         serverAllowed: Bool = !KeychainTestTripwire.armed,
@@ -385,6 +390,13 @@ final class MCPDoor {
         self.session = session
         database = session.database
         runner = session.runner
+        // VX-133: her ⌥⌘Z and ⇧⌥⌘Z walk the session's stack on its runner; each
+        // completed walk hops here, so the receipt run's count stays true.
+        let stack = session.undoStack
+        let token = stack.addWalkObserver { [weak self] walk in
+            Task { @MainActor [weak self] in self?.heardWalk(walk) }
+        }
+        walkSubscription = (stack, token)
         // U4 (AF-11 F-2): the registry's fact for "Show the AI's Last Change" —
         // VX-676: a standing ask is what ⌥⌘O takes first.
         session.commandRouter.aiLastChangeAvailable = { [weak self] in
@@ -544,7 +556,10 @@ final class MCPDoor {
         // VX-676: and so does a standing ask to show her something.
         endShowOffer()
         answering = []
-        receiptRun = []
+        receiptRun = MCPReceiptRun()
+        // VX-133: the session's stack is let go with it.
+        if let walkSubscription { walkSubscription.stack.removeWalkObserver(walkSubscription.token) }
+        walkSubscription = nil
         lastChange = nil
         // VX-679: the trail is session-scoped — it goes with ⌥⌘O's last change.
         trail.update { $0.clear() }
@@ -1153,14 +1168,7 @@ final class MCPDoor {
     /// count, and a later single act never joins it.
     func landReceipt(_ receipt: MCPWriteReceipt, now: Date = Date()) {
         guard let session else { return }
-        if let last = receiptRun.last, last.clientName == receipt.clientName,
-           (last.runKey ?? last.targetID) == (receipt.runKey ?? receipt.targetID),
-           now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {
-            receiptRun.append(receipt)
-        } else {
-            receiptRun = [receipt]
-        }
-        receiptRunAt = now
+        receiptRun.land(receipt, now: now)
         // U4 (R-13nb-23 (a), AF-11 F-2): the line STAYS A RECEIPT (her
         // receipt_style governs it) and grows the one-press door — "Open ›"
         // to the act's landing; the same target is the session's last AI
@@ -1180,7 +1188,22 @@ final class MCPDoor {
         let door = change.map { change in
             StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(change) }
         }
-        session.status.deliver(MCPReceiptCopy.line(receiptRun), kind: .receipt, action: door)
+        session.status.deliver(MCPReceiptCopy.line(receiptRun.standing), kind: .receipt, action: door)
+    }
+
+    /// **VX-133 — a structural undo or redo completed** (the session stack's
+    /// walk, on the main actor): the run takes it (`MCPReceiptRun.walked`), so
+    /// the client's next line counts only the acts that stand. Nothing is said
+    /// here — her undo door speaks its own receipt.
+    func heardWalk(_ walk: UndoStack.Walk) {
+        receiptRun.walked(walk)
+    }
+
+    /// VX-133: the line the run would speak now (nil with no run) — what the
+    /// count is, read by the pins.
+    var receiptRunLine: String? {
+        let standing = receiptRun.standing
+        return standing.isEmpty ? nil : MCPReceiptCopy.line(standing)
     }
 
     /// **VX-775 — a client's call LANDED and its Activity line could not be
