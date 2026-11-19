@@ -559,8 +559,12 @@ final class MobileEditorViewModel {
     /// pin keeps it so). The focus raise then reveals the caret's line
     /// MINIMALLY — UIKit's own reveal, through the text view's scroll
     /// authority, which never lets it reach into the typewriter room.
+    ///
+    /// **VM-69 — the authoritative first load is the LIVE observation's
+    /// first value** (`loadLive`): one whole-note read per open, where the
+    /// arrival used to read the note and `start()` then read it again.
     func arrive(focus: Bool) async {
-        await loadOnce()
+        await loadLive()
         if let place = placeMemory?.place(for: postID) {
             textView?.restore(place)
         }
@@ -583,6 +587,9 @@ final class MobileEditorViewModel {
     /// Runs for the editor's lifetime: header + the takes projection, live.
     /// NEVER RETURNS while the editor lives (the loops end at task
     /// cancellation) — sequence nothing after it; that is `arrive`'s job.
+    /// VM-69: it CONTINUES the two observations the arrival started (their
+    /// first values were the arrival's load); with no arrival before it — the
+    /// harness's `loadOnce` + `start` — it starts its own, exactly as before.
     func start() async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.observeHeader() }
@@ -590,7 +597,66 @@ final class MobileEditorViewModel {
         }
     }
 
-    /// One authoritative load (first paint + deterministic tests).
+    /// **VM-69 — the live observations the ARRIVAL started**, handed on to
+    /// `start()`, which takes them (`observeHeader` / `observeTakesProjection`)
+    /// and continues them for the editor's life. Each holds its observation
+    /// open (GRDB cancels it when the iterator goes), so nothing here is
+    /// read twice and nothing written meanwhile is missed. nil before an
+    /// arrival and after `start()` took them.
+    @ObservationIgnored private var liveHeader: AsyncValueObservation<Queries.ContainerHeader?>.Iterator?
+    @ObservationIgnored private var liveTakes: AsyncValueObservation<Queries.TakesProjection>.Iterator?
+
+    /// **VM-69 — THE ARRIVAL'S ONE READ IS THE LIVE UPDATES' FIRST** (audit F
+    /// 2C: the arrival read the note, then `start()`'s observation read it
+    /// again before delivering the same bytes — two whole-note reads per open,
+    /// 2 → 1 here).
+    ///
+    /// Both live observations begin HERE, and their first values are the
+    /// load: the header adopted first, then the projection through the one
+    /// projection door — `loadOnce`'s order. The running observations are kept
+    /// for `start()`, so the live updates CONTINUE from the load rather than
+    /// starting over with a second read.
+    ///
+    /// **Nothing can fall in a gap, because there is none.** A write landing
+    /// after this read — a sync apply, another surface's flush — is the
+    /// observation's next value: GRDB tracks the observed region from the
+    /// first fetch on (on a pool it compares the first fetch's WAL snapshot
+    /// with the writer's and fetches again if anything committed between —
+    /// `ValueConcurrentObserver`), and the values wait in the stream until
+    /// `start()` takes them. The write is delivered, never dropped.
+    ///
+    /// **A RE-arrival takes its first value as a DELIVERY.** A screen that was
+    /// covered and shown again arrives over a page it already rendered; the
+    /// second read that used to follow a re-arrival's load is gone, so its
+    /// value goes through MAJOR 3's delivery arm (a signal: adopted when the
+    /// page already holds it, else settled by the fresh-read road), never
+    /// rewriting the page from a value whose age nothing checked. A FIRST
+    /// arrival renders it, as `loadOnce` did (the policy's `.initialRender`).
+    ///
+    /// A failure falls back to the one-shot load, which speaks as it always
+    /// has; a cancellation (a push then an immediate pop) paints nothing.
+    func loadLive() async {
+        var header = session.database.observeContainerHeader(postID).makeAsyncIterator()
+        var updates = takesObservation().makeAsyncIterator()
+        do {
+            guard let projection = try await updates.next(isolation: #isolation),
+                  let value = try await header.next(isolation: #isolation)
+            else { return }
+            adoptHeader(value)
+            ingest(projection, fromDelivery: loaded)
+            // VM-65's mark, at its meaning: the live updates' first delivery
+            // is this one (it closes the open's read count — one).
+            AppTiming.noteProjectionDelivered(first: true)
+            liveHeader = header
+            liveTakes = updates
+        } catch is CancellationError {
+        } catch {
+            await loadOnce()
+        }
+    }
+
+    /// One authoritative load (deterministic tests, and `loadLive`'s
+    /// fallback; the screen's arrival loads through `loadLive` since VM-69).
     func loadOnce() async {
         AppTiming.noteProjectionLoaded() // VM-65: a whole-note read
         do {
@@ -625,8 +691,15 @@ final class MobileEditorViewModel {
         takes.adoptFans(projection.fans)
         // S4: callout frames adopt the same way (decor bookkeeping).
         presentations = projection.presentations
+        // VM-69 — the chrome ONCE: an arm that rewrote the page (a full
+        // render, a differential) laid the chrome out as its own last act,
+        // over these same inputs (the fans and frames adopted above), so a
+        // second whole-document pass here would redo it exactly. The arms
+        // that touch nothing in the view — an echo, a deferral, a refetch —
+        // still get it: a take can arrive without a byte of text moving.
+        chromeLaidOutByApply = false
         applyProjection(takes.overlay(projection.slots), fromDelivery: fromDelivery)
-        layOutChrome()
+        if !chromeLaidOutByApply { layOutChrome() }
         // S2 batch 2: an open browser re-renders its cards from the fresh
         // fan state (and closes if its block left the surface). S4: the
         // comments sheet follows the same discipline. C4a: the history
@@ -660,7 +733,11 @@ final class MobileEditorViewModel {
 
     private func observeHeader() async {
         do {
-            for try await value in session.database.observeContainerHeader(postID) {
+            // VM-69: the arrival's observation, continued (its first value
+            // was adopted there); a start with no arrival starts its own.
+            var updates = liveHeader ?? session.database.observeContainerHeader(postID).makeAsyncIterator()
+            liveHeader = nil
+            while let value = try await updates.next(isolation: #isolation) {
                 adoptHeader(value)
             }
         } catch is CancellationError {
@@ -678,16 +755,26 @@ final class MobileEditorViewModel {
         }
     }
 
+    /// The note's live projection — `observeTakes`'s own body (`observe {
+    /// takesProjection }`), spelled out so its fetch can count itself (VM-65)
+    /// — every run, the first and each re-run on a write anywhere — for the
+    /// timing layer. One home for the arrival's start and `start()`'s own.
+    private func takesObservation() -> AsyncValueObservation<Queries.TakesProjection> {
+        session.database.observe { [postID] db in
+            AppTiming.noteProjectionFetched()
+            return try Queries.takesProjection(db, post: postID)
+        }
+    }
+
     private func observeTakesProjection() async {
         do {
-            // VM-65: `observeTakes`'s own body (`observe { takesProjection }`),
-            // spelled out so its fetch can count itself — every run, the first
-            // and each re-run on a write anywhere — for the timing layer.
-            var first = true
-            for try await value in session.database.observe({ [postID] db in
-                AppTiming.noteProjectionFetched()
-                return try Queries.takesProjection(db, post: postID)
-            }) {
+            // VM-69: the arrival's observation, continued — its first value
+            // was the arrival's load and already counted as the first live
+            // delivery; a start with no arrival starts its own.
+            var first = liveTakes == nil
+            var updates = liveTakes ?? takesObservation().makeAsyncIterator()
+            liveTakes = nil
+            while let value = try await updates.next(isolation: #isolation) {
                 AppTiming.noteProjectionDelivered(first: first)
                 first = false
                 // A delivery is a SIGNAL, never surface-rewrite authority
@@ -950,8 +1037,13 @@ final class MobileEditorViewModel {
     /// counted, so a pin can hold how many an open asks for).
     private func layOutChrome() {
         projectionChromePasses += 1
+        chromeLaidOutByApply = true
         textView?.refreshChrome()
     }
+
+    /// Set by every `layOutChrome`; `ingest` clears it before its apply and
+    /// reads it after (VM-69 — the chrome once).
+    @ObservationIgnored private var chromeLaidOutByApply = false
 
     /// **Is a projection still waiting?** A fact on the model rather than a
     /// private field a pin cannot see — the Mac's 17b P36 fact, its phone
