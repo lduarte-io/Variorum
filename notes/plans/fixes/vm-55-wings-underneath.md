@@ -32,11 +32,15 @@ run. then i can just install the build from after wave 1. i'll talk to vm-64 abo
 install: "ok - this resolves the previous blocker. i'll tell everyone. but now, i'll plan to have the wave 1 build
 installed on my phone after the last vm has merged in, by the last one. sound good? the phone step is the single
 wave-1 install after all four runs have merged. whoever is last can probably do it overnight over wifi." The
-orchestrator's answer, OPEN with her: one install after all four merge, yes; unattended over wifi, no as the
+orchestrator's answer: one install after all four merge, yes; unattended over wifi, no as the
 install runbook stands (`notes/plans/vm-44/plans/vm-45-install-runbook.md` — the phone unlocked and awake at three
 points, Variorum fully quit before the safety copy, cable-proven only); offered instead: the last merger builds
 the Release app overnight and checks main's sync marker against production's, and the install runs at her first
 touch in the morning.
+Her answer, verbatim: "ok i'll do the hands part in the morning." — SETTLED: the last wave-1 merger builds the
+Release phone app overnight from main's final wave-1 merge commit (signing verified, main's sync marker checked
+against production's, the runbook's read) and leaves her morning block; the safety copy and the install run in
+the morning with her at the phone. The coordinator names the last merger; the install is a REQUEST through it.
 
 Rulings this run builds (`notes/plans/vm-44/plans/sitting-1-rulings.md`): SW-1 (the wing's name is the title on
 every root; the swipe, dots and dropdown are wave 2) · SW-5 (a quick note lands in the current wing, in the Pool) ·
