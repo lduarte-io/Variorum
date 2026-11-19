@@ -349,3 +349,137 @@ the instruments must leave before any whole-target run, not merely before the me
   both sides there makes the fix hollow, as the record already says.
 - **Commits.** Twenty-seven, one piece each, pin commits ahead of their fixes where a seam was needed, no
   trailer, no home path, public wording.
+
+## Final calls
+
+*Made by the round-1 reviewer after the implementers' answers came back (batch C's on F2, F6, F7, N5; the
+fix pass's on F3, F4, F5, F8 and the other NITs). Nobody disputed a finding; several answers refine a fix,
+and where a refinement is taken it is said. No finding is FINDER-FIXES: none of the fixes needs more than
+what is written here, and none is a `Sync/` line. The implementers apply them.*
+
+**What changed since the review, as the orchestrator reports it:** stage window (1) has run — the
+twenty-one expected reds on the seam and no other, 84 tests green on the tip, and the Mac leg's seventeen
+types green (110 tests). That settles batch A's red/green and the hoists' bytes; the walk is still owed.
+
+**F1 — CONFIRMED, and narrowed.** Batch A's verification is no longer part of it. What the next fresh
+round must read, as new work: whatever window (3) lands for batch C (the instruments' removal included),
+this round's fix pass, and VM-16 re-landed on the message seam that arrives with main. For that
+re-landing the rule to hold is the same one: a quiet press speaks the refusal and offers no way back, and
+its two pins are shown red against a door that reads the label of a quiet press.
+
+**F2 — CONFIRMED, with the implementer's two refinements taken and two of mine added.**
+- *Reading 1 (the pile)* stays as written: an expectation, the guard the member keeps.
+- *Reading 2* becomes a printed measurement (how many off-screen badges stand off the idealized layout,
+  the largest and the mean distance), not an expectation. An off-screen badge's y against a layout the
+  live surface never promised is not something she can see; a kept guard cannot carry a line that is red
+  by TextKit's design. This departs from the brief's wording for the pin — the orchestrator records the
+  amendment in batch C's entry.
+- *Reading 3 is replaced by the viewport invariant*, reached two ways: a stepped walk down the live
+  surface (unanimated offsets of about 0.8 of a viewport, a settle after each, the maximum offset re-read
+  live at every step, ending at the live end), and the product's own jump road (`model.jumpToBlock`) to
+  each fanned block. At every stop, after the settle, with `view.bounds` as the visible rect and every
+  fragment read UNFORCED (`options: []`):
+  - (i) every badge that is drawn (in the view, not hidden) and whose frame intersects the visible rect
+    belongs to a block whose first-line fragment is `.layoutAvailable` and stands within 1 pt of the
+    badge's top. A failure is a stray or misplaced badge she can see.
+  - (ii) every fanned block whose first-line fragment is `.layoutAvailable` with its top inside the
+    visible rect has a badge within 1 pt of it. A failure is a fan she can see with no badge on it.
+  - (iii) reach: at every jump stop the target block satisfies (ii)'s premise, and across the stepped
+    walk every fanned block does at least once. These expectations carry their own message ("the probe
+    did not reach…"): a red there is the probe's, never VM-17's.
+  (My first wording asked for the line to be "inside the visible rect" in (i) as well; that would go red
+  for a badge straddling the viewport's edge. The 1 pt agreement with a laid-out fragment is the test.)
+- *The arms, replacing the record's:* (1) red ⇒ the pile, as recorded. (i) or (ii) red ⇒ VM-17 is real:
+  stop and report before any product line, as the record already promises. The fix shape I would
+  confirm is the Mac's rule made literal — an off-band badge does not stand: the `.document` pass
+  resolves badges for in-band blocks only and hides the rest, the `.nearViewport` pass hides a badge as
+  its block leaves the band and resolves it as it enters (tail reservations untouched — they are storage
+  truth). The peek markers share the standing-frame rule (`MobileTakesChrome.swift:256`); the fix covers
+  them or a ticket names them. Pin: (i)/(ii), red on the unfixed chrome. (1), (i), (ii) green ⇒ HOLLOW:
+  no product line, the probe kept as the guard, reading 2's numbers written into the record for VM-179.
+- Built headless before window (3); it gets no red/green until the window.
+
+**F3 — CONFIRMED as answered.** `MobileBookDetailsModel.refusal`: `.readingNotArchived` joins the
+`.readingSealed` arm and forwards to `OpsRefusalCopy.words(for:roads: .phone)`. Only that case — the rest
+of the table is VM-62's sweep, and the handoff line to that run is as the implementer wrote it. Pin
+`aRacedUnarchiveSpeaksTheSharedSentence`: archive, `refresh()`, unarchive through `ops`,
+`await model.unarchive()` → `lastError == "That book isn't archived any more — nothing changed."` and the
+store's book is not archived. Red on the pre-fix-pass tip (the raw fallback).
+
+**F4 — CONFIRMED, with the implementer's correction taken and one word more.** The correction is right:
+starred books sort a–z among themselves and the daily Journal is born starred, so "this one starred
+first" promises a place the guide may not hold. The lesson's first sentence becomes the implementer's
+draft — "The SHELF is home: your books at the top, starred books first — this one is starred." — and the
+pin/unpin clause goes. Because that clause is gone, the later sentence's "A long press also STARS" loses
+what "also" leaned on: drop the one word. Nothing else in the paragraph changes; "starred things sit above
+everything at the shelf's very top" (false for notes since the Starred page) is named in the record for
+VM-212. Old and new side by side in the record for her wording pass. Pin: in
+`theShelfLessonDescribesTheShelfThatExists`, the prose contains the new first sentence and does not
+contain "pins or unpins". Red on the pre-fix-pass tip. The neighbouring test's message that quotes the old
+lesson ("pinned books always sit first") is reworded with it.
+
+**F5 — CONFIRMED as answered, plus one assertion.** The Finish row gets the verb as its
+`accessibilityLabel`; `cancelFinish()` is deleted; the cancel pin drives `finishConfirmPresented = false`.
+The two hosted guards are as the implementer describes, with `writeBack: {}` — the Details sheet's own
+precedent, since the sheet owns its model; no injecting init is asked for. The one addition, in the model
+suite: after `requestFinish()` yields the confirm, write the binding back first
+(`model.finishConfirmPresented = false`) and only then `await model.confirmFinish(confirm)`; the book is
+locked and nothing waits. That is batch 4.5b's ordering stated at the model, where it can be stated
+exactly. **For the fix window's expected lines:** on the reverted product the two hosted guards are RED
+because the row has no label for the driver to find — say that reason beside their names, so the line is
+never read as "the confirm was broken". The cancel pin and the write-back assertion are green on both
+sides.
+
+**F6 — CONFIRMED, both halves.** The classification: key and first responder true in both postures with
+only the keyboard's presentation differing is arm B's protocol — stop, report, no seam line. The
+implementer's note that every input-system replace needs her to have typed or dictated first goes into
+that report as information for the ruling. The teeth: the fixed `MobileMarkdownCaretTests` test run
+against the named hand-break (`EditorEditRouting.swift`, the `>=` on the report's start made `>`), with
+the revert protocol in full — "HAND-BREAK IN FLIGHT" written into LIVE STATUS and pushed before the edit,
+the file restored by `git checkout HEAD --` straight after the build, `git status` clean recorded. The
+separate DerivedData for the hand-broken products is fine. The proof counts only if the fixed test is
+SEEN red under the hand-break and green without it. If it stays green under the hand-break, that hand-break
+does not reach the assertion: report it, and arm A does not close on the teeth suite alone.
+
+**F7 — CONFIRMED, with the implementer's extension taken.** The removal commit (the three trace suites
+and the cost note, after their numbers and traces are in the record) lands before any whole-target run;
+the probe's main test stays. M6 becomes the caret suite alone, twice more; M7 becomes
+`MobileLivenessTests` + `MobileMarkdownCaretTests` with no trace suite; the trace suites run only alone.
+One rule for reading M7: `MobileLivenessTests` flips the global voice too (`:1102-1108`), so a caret red
+under M7 is attributed to the pair only after an immediate M1 alone is green; never by M7's line alone.
+
+**F8 — CONFIRMED as a question.** The implementer's text is the one to file at the merge, its three
+options and "PROVISIONAL as built: the phone draws none". Its finding that the Mac comment's "her ruled
+shape" is an orchestrator's adjudication, not her words, belongs in the entry.
+
+**NITs.**
+- **N1 — CONFIRMED.** The implementer's guard (star "Book 10" with the shelf open, then unstar "Yak"
+  after the stars model's `refresh()`), both orders as it lists them. Green on both sides by design.
+- **N2 — CONFIRMED.** `rowTitle` reads `RecoveryCopy.rowKind(item)`. Pin: an untitled saved version's
+  placeholder equals "(empty " + `RecoveryCopy.rowKind(item)` + ")" and is not "(empty note)". Red on the
+  pre-fix-pass tip.
+- **N3 — CONFIRMED, the smallest shape:** the act takes its subject from the confirm;
+  `FinishConfirm.pendingArrivals` and its one assertion go.
+- **N4 — CONFIRMED in part, as answered:** the `BookcaseBoard.swift` comment and the test's name and
+  message now; the core doc line stays untouched and the orchestrator gives it an owner.
+- **N5 — CONFIRMED.** `defer { Self.leave(window) }`; the explicit call and its expectation stay.
+- **N6 — WITHDRAWN as a change in this run.** The implementer's reasons hold (the shelf files are open in
+  another run this wave, and the order becomes a live choice in wave 3, where caching belongs). One line
+  for that kickoff.
+- **N7 — CONFIRMED in part, as answered:** the test's comment says what it is now; the source scan comes
+  when the last two phone sites go.
+- **N8 — CONFIRMED,** the comment as the implementer words it.
+- **N9 — CONFIRMED as a walk row,** the case as stated, captured at both detents; a clipped medium detent
+  is reported with its capture, not fixed unasked.
+- **N10 — CONFIRMED as a ticket line** for the orchestrator to file (no id is invented here).
+- **N11 — CONFIRMED.** Bundles kept from here on; the lost one is recorded as lost.
+
+**The fix pass's own window, since it was asked.** Types: `MobileFinishConfirmTests`,
+`MobileArchivedStarredBookTests`, `MobileBookStateRowTests`, `MobileShelfOrderTests`,
+`MobileGatheringWordTests`, `MobileTutorialLibraryWalkTests`, `MobileShellTests`, `MobileBookDetailsTests`,
+`MobileDeletionTests`, `MobileTrashTests` (the last three host the surfaces the label and the placeholder
+change). Expected RED on the reverted product, by name and reason: F3's pin (the raw fallback), F4's
+(the old lesson), N2's ("(empty note)"), and F5's two hosted guards (no label on the row). Expected green
+on both sides: the cancel pin, the write-back assertion, N1's guard, and every other test in those types.
+Anything else red is a finding. Keep both bundles. The Mac side needs only a headless `build-for-testing`
+— the pass moves no shared string.
