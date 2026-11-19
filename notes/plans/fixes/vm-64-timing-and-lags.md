@@ -635,7 +635,11 @@ batch 7's `MobileLeavingSavesOnceTests` assumes too):**
 
 ### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**No revert is in flight.** The red-on-old revert RAN and is RESTORED: from `c9b574513` (the fix and the pins, committed
+**A REVERT IS STARTING (r1 red build — announced before it starts).** From `a61e4f7c9` + this commit (committed and
+pushed), the same four production files are checked out at `dfdd94b5a` over today's tip (batch 6's r1 included);
+phone `build-for-testing` into `App/Variorum/DerivedData/vm64-b7r1-red/`; then `git checkout HEAD --` the four and a clean
+`git status`. A successor finding this line: `git diff HEAD` shows what is reverted; restore with `git checkout HEAD --
+<the four files>`. **(The r0 red build, kept as written:)** The red-on-old revert RAN and is RESTORED: from `c9b574513` (the fix and the pins, committed
 and pushed; announced at `ba675754d`), the batch's four production files — `Sources/VariorumCore/Queries/IdleCommit.swift`,
 `Sources/VariorumCore/Operations/Operations+Variant.swift`, `App/Variorum/Shared/AppSession.swift`,
 `App/Variorum/Shared/AppTiming.swift` — were checked out at the base `dfdd94b5a`; phone `build-for-testing` into
@@ -711,7 +715,7 @@ dropped. The closeout's r0 lines are corrected in place (§7 batch 7 ▸ "Re-che
 |---|---|
 | Q1 — the re-check, per pin, and the plan (this paragraph) | DONE (this commit) |
 | Q2 — the two test changes | DONE (this commit) — `MobileLeavingSavesOnceTests`: the host's note and the header say the leaving ends at its LAST act (r1), and the new `aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped` (7 tests now). Build PENDING (Q3) |
-| Q3 — builds: phone `build-for-testing` into `vm64-b7r1` (fix); the red `vm64-b7r1-red` (the four production files at `dfdd94b5a` over today's tip; revert announced first) | NOT-STARTED |
+| Q3 — builds: phone `build-for-testing` into `vm64-b7r1` (fix); the red `vm64-b7r1-red` (the four production files at `dfdd94b5a` over today's tip; revert announced first) | IN-PROGRESS — fix `vm64-b7r1` built at `a61e4f7c9`'s tree `** TEST BUILD SUCCEEDED **` (cold), no warning in a touched file; NEXT the red build (the revert above) |
 | Q4 — §7: the r1 re-check, the corrected lines, the stage commands on the new folders | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
@@ -2832,10 +2836,11 @@ on the same give-back, and its products (`vm64-b7`) are r0's — it should be re
 
 ### Batch 7 · VM-71 — leaving saves once (implementer closeout)
 
-**Not done in this batch (first, by the record's rule):** every hosted run is PENDING the orchestrator's stage window —
-the perf suite's savepoint and leaving series (fix and red), the new company-safe suite (fix and red), batch 6's release
-pins and the lock and relock suites in company, the Mac suites over `AppSession`, and the walk (groups (i)–(v) below,
-runnable from the built products by anyone). So the simulator's AFTER numbers (`savepoints-per-*`, `leaving-100k-*`,
+**Not done in this batch (first, by the record's rule):** every PHONE run is PENDING the orchestrator's stage window —
+the perf suite's savepoint and leaving series (fix and red), the company-safe suite (fix and red), batch 6's release
+pins and the lock and relock suites in company, and the walk (groups (i)–(iii) and (v) below, runnable from the built
+products by anyone; since batch 6's r1 they run from `vm64-b7r1` / `vm64-b7r1-red`). The Mac piece (group (iv)) RAN
+GREEN at 10:37 (the orchestrator's §5 block: 48 tests in 7 suites, from `vm64-b7`). So the simulator's AFTER numbers (`savepoints-per-*`, `leaving-100k-*`,
 `box-first-save-after-100k-leaving`) have none yet; the headless Mac numbers below are the only measured before/after so
 far. Nothing in custody, keychain, `Sync/` or the schema; no line in `Features/Protection/` (so nothing for the stage
 coordinator's Protection watch from this batch); the lock, the relock decision, the grant and the network round in the
@@ -2843,8 +2848,10 @@ grant are untouched (the fence, below).
 
 **Base:** `dfdd94b5a`. **Commits:** `242c5b3e3` (live status) · `c3db1be8d` (Core: the read and the narrowed op, their pins,
 the gated measurement) · `d849b7125` (the phone's branch of `savepointOnLeaving`; the mark) · `c9b574513` (the phone pins;
-the fix products `vm64-b7` are this tree) · `ba675754d` (record: the revert announced) · this closeout (the red-on-old
-build `vm64-b7-red` built over the four production files at the base, then restored).
+the fix products `vm64-b7` are this tree) · `ba675754d` (record: the revert announced) · `1992b946f` / `20bbf402d` (this
+closeout; the red-on-old build `vm64-b7-red` built over the four production files at the base, then restored). **On
+batch 6's r1:** `03995a568` (live status: the re-check) · `a61e4f7c9` (the two test changes) · the r1 products and this
+section's r1 lines (below).
 
 #### The mechanisms, as traced on this tree (audit F 1D, 6C — TRACED as written; the lines moved)
 
@@ -2943,6 +2950,22 @@ comes down, so the removed screen's ask meets the closed store: the savepoint is
 then), the unlock finds exactly it and nothing more, and her text is whole. Guards on the ordering (green on both trees);
 RED on the pre-fix build on the writer's scans.
 
+**Re-checked on batch 6's r1** (the removed screens' leaving tasks now ALSO give their coordinator back, after their
+savepoint). The savepoint still lands before the pool closes: r1 changed nothing of the lock's order — `mobileWillLock`'s
+flush and savepoint still run inside `runWillLock` while every editor holds, before the state flip removes the screens
+and before `binding.lock()`; r1 only appends, to each removed screen's leaving task, a release that writes nothing to the
+store. A release racing the pool close cannot drop unsaved text — VERIFIED in the code, not assumed: the release is the
+statement after `savepointOnLeaving` returns in the same task, so it runs only after teardown's flush and the savepoint's
+own flush have each landed or been REFUSED; a refusal puts the text back into `pending` (`AutosaveCoordinator.flushNow`),
+so the coordinator is dirty; and the phone's `releaseAutosave` (`Shared/AppSession.swift:476-481`) drops an entry only at
+zero holders AND `!coordinator.isDirty` — a dirty one stays in the registry, reachable to `flushEveryOpenPost` and the
+sync round's flush-first. **Pinned (new, a guard on both builds):**
+`MobileLeavingSavesOnceTests.aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped` — a key typed after the lock's own
+flush and savepoint, the tree down, the pool closed: the leaving's flush is refused, the release keeps the dirty entry,
+and after the unlock one flush walk lands the key; the lock's savepoint holds what had landed before. (Whether such a
+late key survives the REAL lock — whose session ends with it — is the lock's own road, wave 2's VM-103; unchanged by
+this batch and by r1: before r1 the entry was never released at all.)
+
 #### Hazard (d) — the capture box's first save after the 100k note is not behind that note's leaving work
 
 **Mechanism:** the leaving's O(note) work — finding which takes changed — is now a READ on a reader connection: it holds
@@ -2979,7 +3002,9 @@ the read instead of the whole op. Nothing else moved; no other series was touche
 
 The Mac's `savepointOnLeaving` runs the same statements in the same order (the diff only collapses two inner
 `#if os(macOS)` guards into the outer one); `closeAutoCommit(_:)` and everything under it is byte-identical; the two new
-Core APIs have one caller, the phone's branch. PENDING: the Mac suites over the shared types (group (iv)) —
+Core APIs have one caller, the phone's branch. RAN GREEN at 10:37 (48 tests in 7 suites, from `vm64-b7`; the
+orchestrator's §5 block; batch 6's r1 changed phone files only, so that is still the tip's Mac code): the Mac suites over
+the shared types (group (iv)) —
 `SavepointOnLeaveTests` (the six leaving roads' one entry), `AutosaveRegistryReleaseTests`,
 `AutosaveRegistryLifecycleTests` and `AutosaveRegistryReleaseGuardTests` (18k C1's drop rides this function),
 `MacWillLockTests`, `AutosaveCoordinatorTests`, `TestHostInertTests`. Core, headless, on the final tree: `swift test --filter
@@ -3039,9 +3064,43 @@ The test files: VM-47's `MobileShellRouter.init()` (no `defaults:`) is what thes
    hidden stack's notes as a leaving (cheap now — a read, and a runner turn only if owed; a return and a further edit
    owe another at the next leaving). Hers: what "stops being shown anywhere" means on the phone's two live stacks.
 
+#### Re-check on batch 6's r1 — what each pin waits on now (2026-11-19, the orchestrator's message after `dd3f11d79`)
+
+r1 (`9490642e3` … `7647127f2`) made the editor's coordinator release the LAST act of the screen's leaving task (teardown's
+flush → `savepointOnLeaving` → `releaseAutosaveHold(ifNotShownSince:)` → the leave's timing mark) and the arrival's first
+act takes it back. Read pin by pin on the tip:
+- **`MobileLeavingSavesOnceTests` (the five tests that close a screen):** each waits for
+  `session.autosaveHolderCount(forPost:) == 0` after `close()`, in a host that stays up. On r0 that could come true only
+  when SwiftUI freed the removed screen's editor — which batch 6's first window showed does not happen while the host
+  lives — so on r0 these waits would have run to their 15 s bound and failed on BOTH builds (they never ran on r0). On r1
+  the count falls at the leaving's last act, after the savepoint: the waits now mean exactly "the leaving's savepoint has
+  run" (the holder count falls even when the release KEEPS a dirty entry — `holders -= 1` comes first). Expectations and
+  bounds stand (the bound is a hang guard); the host's note and the header said "the editor's end of life" — corrected
+  (`a61e4f7c9`). The red build (r1's Write files, this batch's four production files at the base) releases the same way,
+  so those waits pass there too and the designed reds stay on the writer's scans.
+- **`aTabSwitchFilesTheBoxOnce…`:** waits on no hold (the hidden note is never left); unchanged.
+- **The perf suite's five savepoint tests (two assertions tightened, three new):** they wait on the layer's `noteLeave`
+  span (`Mounted.unmount(leavings:)`, the box test's own wait), whose end — `noteLeft` — r1 placed AFTER the release; the
+  `savepointsPerLeaving` window and the `savepointAttempt` counter count only `savepointOnLeaving`'s runner asks, which r1
+  does not add to (the phone's `releaseAutosave` asks for no savepoint — only the Mac's does); the writer traces see no
+  release statement (the release is in memory). `leaving-100k-to-saved-*` now includes the release's microseconds. No
+  expectation, deadline or note in them is stale. Under r0 the injected editors these tests hold kept their holds for the
+  whole test (the test's own reference kept the model alive); under r1 each leaving gives its hold back — neither changes a
+  count they read.
+- **Hazard (c) re-checked — see "Hazard (c)" above:** the lock's order is unchanged; the removed screens' releases follow
+  their savepoints and keep a dirty coordinator; one new pin.
+- **Stale in my closeout and corrected here:** group (iii)'s expectation said the release "still comes after the flush and
+  the savepoint (the onDisappear task holds the model across both…)" — r0's mechanism; on r1 the release is the leaving
+  task's statement after `savepointOnLeaving` returns (corrected below). And the products: `vm64-b7` / `vm64-b7-red` were
+  r0's — the phone runs are now from `vm64-b7r1` / `vm64-b7r1-red`; the Mac's stays `vm64-b7` (ran green, no Mac code
+  changed since).
+- **Not mine, noted:** the perf suite's registry test note (batch 6's — "releases its one acquisition at its end of life,
+  which the leaving task holds", `MobileHerPathsPerfTests.swift` near `theAutosaveRegistryAcrossOpensAndCloses`) still
+  describes r0; batch 6 owns that series.
+
 #### The pins, and what each build should show
 
-| Pin | Fix (`vm64-b7`) | Pre-fix (`vm64-b7-red`) | Kind |
+| Pin | Fix (`vm64-b7r1`) | Pre-fix (`vm64-b7r1-red`) | Kind |
 |---|---|---|---|
 | perf `backgroundingWith…` — `savepoints-per-backgrounding-castle` == 1 | green | RED (3) | VM-71 product (6C) |
 | perf `backgroundingWith…` — `-standard` == 1 | green | green (1) | guard |
@@ -3056,6 +3115,7 @@ The test files: VM-47's `MobileShellRouter.init()` (no `defaults:`) is what thes
 | `…aCastleBackgroundingSavepointsOnceBeforeTheStoreCloses` | green | RED on the writer (2 scans, 2 reads); the savepoints and the order green | product + (a)(b)(c) guards |
 | `…theLockSavepointsOnceBeforeTheStoreCloses` | green | RED on the writer (1 scan); the rest green | product + (a)(b)(c) guards |
 | `…leavingANoteSheOnlyReadAsksTheRunnerForNothing` | green | RED (1 scan, 1 read) | VM-71 product (1D) |
+| `…aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped` (new on r1) | green | green | (c) guard under r1 (the release is batch 6's) |
 | Core `LeavingSavepointTests` (7) | green (headless, run) | not built (names the new API) | the new API's contract |
 
 Row dispositions: **VM-71 — FIXED** (the repeats: Castle 3 → 1, the lock 2 → 1; the waiting: the leaving's O(note)
@@ -3063,16 +3123,19 @@ work off the runner) with the red-on-old pins above — PENDING their stage runs
 
 #### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
 
-Products: fix `App/Variorum/DerivedData/vm64-b7/` (phone + Mac, the tree at `c9b574513`), pre-fix
-`App/Variorum/DerivedData/vm64-b7-red/` (phone; the four production files at `dfdd94b5a`). If `vm64-b7-red` is ever lost:
+Products **since batch 6's r1**: phone fix `App/Variorum/DerivedData/vm64-b7r1/` (the tip at `a61e4f7c9`: this batch,
+batch 6's r1, the two r1 test changes); phone pre-fix `App/Variorum/DerivedData/vm64-b7r1-red/` (the same tip with this
+batch's four production files at `dfdd94b5a`); Mac `App/Variorum/DerivedData/vm64-b7/` (unchanged Mac code — group (iv)
+ran green from it at 10:37). The r0 products `vm64-b7-red` (deleted by the orchestrator) and `vm64-b7`'s phone half are
+superseded — do not run phone tests from them. If `vm64-b7r1-red` is ever lost:
 `git checkout dfdd94b5a -- Sources/VariorumCore/Queries/IdleCommit.swift Sources/VariorumCore/Operations/Operations+Variant.swift App/Variorum/Shared/AppSession.swift App/Variorum/Shared/AppTiming.swift`,
-`build-for-testing` into `DerivedData/vm64-b7-red`, then `git checkout HEAD --` the same four.
+`build-for-testing` into `DerivedData/vm64-b7r1-red`, then `git checkout HEAD --` the same four.
 
 **Group (i) — the perf suite ALONE, fix build, twice** (it reads the process's one timing recorder):
 ```
 cd ~/dev/variorum-vm-64/App/Variorum
 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
-  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7 \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7r1 \
   -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-b7-perf-1>
 grep '^VM64-PERF|' <log-b7-perf-1>
 ```
@@ -3086,36 +3149,37 @@ Testing verdict line, not `** TEST EXECUTE **`.
 ```
 cd ~/dev/variorum-vm-64/App/Variorum
 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
-  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7-red \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7r1-red \
   -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-b7-red-perf>
 grep '^VM64-PERF|' <log-b7-red-perf>
 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
-  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7-red \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7r1-red \
   -only-testing:VariorumMobileTests/MobileLeavingSavesOnceTests 2>&1 | tee <log-b7-red-once>
 ```
 Expected: perf — RED `backgroundingWith…` (Castle 3), `lockingWith…` (2), `leavingTheHundredKNote…` (scans 1, reads
 ~1,400, both arms); the other ten green; `box-first-save-after-100k-leaving` is the BEFORE number. Once — RED
 `poppingAChangedNote…`, `aStandardBackgrounding…`, `aCastleBackgrounding…`, `theLockSavepointsOnce…`,
 `leavingANoteSheOnlyRead…` (each on the writer's scans/reads only — every savepoint-count and ordering expectation green);
-GREEN `aTabSwitchFilesTheBoxOnce…`.
+GREEN `aTabSwitchFilesTheBoxOnce…` and `aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped`.
 
 **Group (iii) — the batch's suites with the leaving road's, the lock's and batch 6's, fix build, ONE invocation:**
 ```
 cd ~/dev/variorum-vm-64/App/Variorum
-tests=(MobileLeavingSavesOnceTests MobileNoteOpenOnceTests MobileSavepointOnLeavingTests
+tests=(MobileLeavingSavesOnceTests MobileNoteOpenOnceTests MobileNoteHoldTests MobileSavepointOnLeavingTests
   MobileLockTeardownTests MobileRelockCoordinatorTests MobileRelockPolicyTests MobileQuickNoteUnderLockTests
   MobilePhoneStoreEncryptionTests MobilePassphraseFloorTests MobileTypedUnlockSyncKeysTests MobileRoundOccasionTests
   MobileQuickNoteTests MobileQuickNoteReadFailureTests MobileLivenessTests MobileShellTests MobileNavigationTests
   MobileDeletionTests MobileVersionsTests MobileStructuralFlightFenceTests MobileCanaryTeardownTests
   MobileTypedOverRescueTests MobileDeferredProjectionRetryTests MobileWalkTests MobileTimingTests)
 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
-  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7 \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7r1 \
   ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-b7-company>
 ```
 Expected: all green. Batch 6's three release pins (`MobileNoteOpenOnceTests.closingANoteLandsItsTextThenGivesItsCoordinatorBack`,
-`theReleaseWaitsForTheLeavingSavepoint`, `aCoordinatorAnotherHolderNeedsIsNeverLetGo`) must stay green: the release
-still comes after the flush and the savepoint (the onDisappear task holds the model across both; when the writer is held,
-the flush waits on it and the model with it). The lock and relock suites (`MobileLockTeardownTests`,
+`theReleaseWaitsForTheLeavingSavepoint`, `aCoordinatorAnotherHolderNeedsIsNeverLetGo`) and r1's `MobileNoteHoldTests` must
+stay green: since r1 the release is the leaving task's statement after `savepointOnLeaving` returns — after this batch's
+phone branch has flushed, read and (when owed) written — so when the writer is held, the flush waits on it and the
+release with it. *[r1: corrected — this line said "the onDisappear task holds the model across both", r0's mechanism.]* The lock and relock suites (`MobileLockTeardownTests`,
 `MobileRelockCoordinatorTests`, `MobileRelockPolicyTests`, `MobileQuickNoteUnderLockTests`) are UNCHANGED files and must
 be green.
 
@@ -3127,10 +3191,11 @@ tests=(SavepointOnLeaveTests AutosaveRegistryReleaseTests AutosaveRegistryLifecy
 xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
   -derivedDataPath DerivedData/vm64-b7 ${tests/#/-only-testing:VariorumTests/} 2>&1 | tee <log-b7-mac>
 ```
-Expected: all green, unchanged.
+Expected: all green, unchanged. **RAN GREEN at 10:37** (48 tests in 7 suites — the orchestrator's §5 block); no Mac
+code has changed since, so it is not owed again.
 
 **Group (v) — the walk (the batch's use-shaped evidence; the orchestrator's hands or a GO to me).** The Debug phone app
-(`DerivedData/vm64-b7/Build/Products/Debug-iphonesimulator/VariorumMobile.app`) on the `vm64-walk` simulator, dev store,
+(`DerivedData/vm64-b7r1/Build/Products/Debug-iphonesimulator/VariorumMobile.app`) on the `vm64-walk` simulator, dev store,
 signed out, never Resume, no test account. (1) Settings ▸ "Seed the 100k fixture" if the store does not hold it. (2)
 Library ▸ "the long haul" — read, back (a leaving she only read); open it again, type a word in the second block, back,
 then at once tap the capture box, type a line and File (the box's first save, right behind the long note's leaving);
