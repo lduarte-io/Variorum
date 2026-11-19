@@ -987,7 +987,7 @@ struct MobileMembershipSheetFaceTests {
             try #require(model.books.map(\.name) == premise,
                          "the fixture: the note is in the archived book and the gathering matches it")
 
-            try await withHostedSurface(
+            await withHostedSurface(
                 MobileMembershipSheet(model: model, tokens: .studyLight, onOpenNote: nil)
             ) { surface in
                 await surface.settle(30)
