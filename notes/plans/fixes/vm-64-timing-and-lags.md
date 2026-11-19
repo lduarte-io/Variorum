@@ -774,7 +774,7 @@ The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) a
 | Piece | State |
 |---|---|
 | M0 — this live status, before any tree change | DONE (this commit) |
-| M1 — `git merge origin/main` (a merge commit); the two Shell conflicts re-landed hunk by hunk, each with its reason | NOT-STARTED |
+| M1 — `git merge origin/main` (a merge commit); the two Shell conflicts re-landed hunk by hunk, each with its reason | DONE (`f03d59ae3`; the hunks and reasons in §7 ▸ "The merge of main (VM-55)…") — exactly the two expected files conflicted, no notes file; batch 5's four raw `lastError` lines converted in the merge by its recipe |
 | M2 — (a) the wing: the Library's two paged listings scoped as VM-55's were; a switch re-asks; a hidden switch honoured on return; VM-55's Library wing pins re-landed on the paged model | NOT-STARTED |
 | M3 — (b) the one message line: this run's phone code routed through VM-55's seam (every raw error, every direct status write) | NOT-STARTED |
 | M4 — (c) `Shared/AppSession.swift` read (the phone's `savepointOnLeaving` branch, `releaseAutosave`, the status seam's move; the Mac's savepoint statements byte-identical) | NOT-STARTED |
@@ -3495,3 +3495,64 @@ package).
 merge `origin/main` (batch 5's "Merging with VM-55" recipe for the two Shell files); rebuild phone and Mac into
 `vm64-fix` on the merged tree; the red build `vm64-fix-red` by the recipe above (it reverses only finding 2's hunk);
 the whole Core package headless; the stage commands above.
+*(Part 2 was taken over by the merge-in implementer — the section below; its builds went to `vm64-gate` /
+`vm64-gate-red`, not `vm64-fix*`.)*
+
+### The merge of main (VM-55) and what it re-landed (merge-in implementer closeout)
+
+**Not done here (first, by the record's rule):** no hosted run of any kind — every `xcodebuild test`, simulator boot
+and walk is the orchestrator's stage window; the commands are at the end of this section. No shared ledger touched
+(`notes/QUESTIONS.md`, `notes/TICKETS.md`, the master plan, `notes/AppSpecRecord.md`, `notes/MobileSoul.md`,
+`notes/SurfaceContracts.md` arrive from main by the merge exactly as main has them). Nothing in `Sources/VariorumCore/Sync/`,
+custody or keychain code, or `VariorumMobile/Features/Protection/`; no schema change (`v1_38` stays this run's only
+migration; VM-55 added none). `storageDidEdit`'s routing, `fallbackVerdict` and `EditorEditRouting` not opened.
+
+**The merge:** `f03d59ae3` — "Merge main (VM-55) into vm-64-timing-and-lags", a merge commit (parents `d10b167b2`, this
+branch, and `eb18888db`, `origin/main`: VM-55's merge `66337ff08` and its notes-only ledger commit). Merge-base
+`359ae214d` (the main both runs merged earlier — VX-980). `git merge-base --is-ancestor origin/main HEAD` holds. Thirteen
+code files were changed by both runs since that base; two conflicted textually, eleven merged clean (each read on both
+sides — items (a)–(f) below).
+
+#### The two conflicts, hunk by hunk (each resolution checked against both sides: every line either side ADDED is in the result but VM-55's dropped `follow` bodies; no line either side REMOVED came back)
+
+**Batch 5's recipe was checked against VM-55's code AS IT LANDED, not as it stood this morning.** VM-55's later batches did
+not touch `MobileLibraryViewModel.swift` again after batch 2b's error conversions (its batch 4 changed the shell and the
+roots' path lines, not the model); the recipe's three instructions held. One trap the recipe did not name, found by
+diffing the result against our side: see H3.
+
+`App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift` — four diff3 regions (`git checkout
+--conflict=diff3`, so each region's base was in view):
+- **H1 — our listings section (`// MARK: - The listings…` through `prime`'s read) vs VM-55's `follow`-wrapped
+  `startAll` head.** Took OURS; dropped VM-55's `MobileWingScope.follow` wrapper. *Reason:* batch 5 replaced the two
+  always-on observations with ONE keyed hold; its question carries the wing (`Question.wing = session.wing.readScope`,
+  which VM-56 made the current wing on the phone), and the view keys its task on that question, so a wing change restarts
+  the hold — a second, model-side follow would restart it twice. What VM-55's pins drove through `follow` is re-landed
+  under item (a).
+- **H2 — `prime`'s `land` + catch vs base's `startAll` catch vs nothing (VM-55 moved that catch inside its closure).**
+  Took OURS, its raw `lastError = String(describing: error)` converted to `OpsRefusalCopy.sentence(for: error, roads:
+  .phone)`. *Reason:* our line descends from the base line VM-55 converted; VM-55's intent for it (VM-62: refusals in
+  words) holds on our function.
+- **H3 — `holdFirstPage`'s head vs base's `startBookless` head vs VM-55's `follow`-wrapped `startBookless`.** Took OURS.
+  **The trap:** "ours" here does NOT carry `holdFirstPage`'s catch. Our side kept the base `startBookless` catch lines
+  verbatim inside `holdFirstPage`; VM-55 deleted them from the same place (moved inside its closure); the 3-way applied
+  VM-55's deletion to the text BETWEEN the regions, so a resolution of "ours everywhere" compiles to a `do` with no catch
+  for an observation that throws. Found by diffing the resolved file against our side (three lines missing), restored,
+  and converted as in H2. *Reason:* the catch is ours; VM-55's conversion is its intent for it.
+- **H4 — the end of our listings section vs nothing vs VM-55's `var wingID: String { session.wing.currentID }`.** Took
+  BOTH: our section, then VM-55's `wingID`. *Reason:* the search task re-keys on it (VM-57, `MobileLibraryView`'s
+  `.task(id: [model.wingID, query])`, which merged clean); nothing of ours replaces it.
+- Outside the regions git merged VM-55's other hunks clean and they are kept: the `lastError` `didSet` speaking on the
+  one line, `search`'s wing-scoped `searchCatalog(…, wingID:)` and its converted catch, the mint's converted catch, the
+  delete's `MobileLine.say(…, as: .removal(.putBackNote(…)))` and `DeletionRefusal.sentence(…, roads: .phone)`.
+- The two remaining raw lines of batch 5 (`reread`'s catch and `loadMore`'s) were converted IN THE MERGE COMMIT too, by
+  batch 5's recipe ("map this batch's `lastError = String(describing: error)` lines"): **all four** of batch 5's raw
+  `lastError` writes now speak `OpsRefusalCopy.sentence(for: error, roads: .phone)`. The pin that is red without them is
+  VM-55's own `MobileNoRawErrorPinTests.noPhoneSourceRendersARawError` (a source scan of `VariorumMobile/`): our pre-merge
+  file holds four of its offending lines.
+
+`App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift` — ONE region (the `MobileLibraryView(…)` arguments did
+NOT conflict: VM-55's `wingName:` / `onWingDoor:` after `tokens:` and our `isOnScreen:` after `onOpenArchive:` merged
+clean, in the struct's declaration order):
+- **After `.task { await starsModel.start() }`: our `.onAppear { MobileTiming.homeAppeared() }` (VM-65's "home on
+  screen") vs VM-55's `.task { await wings.track() }` (the held wings read — a dead wing returns the phone Home).** Took
+  BOTH, VM-55's task first. *Reason:* two independent modifiers on the shell; neither reads the other.
