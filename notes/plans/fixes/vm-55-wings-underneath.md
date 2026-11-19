@@ -1027,7 +1027,7 @@ only). DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental, both target
 |---|---|
 | Record skeleton | DONE (this commit) |
 | P-55-11 — a direction keeps its line (Trash, tray, Block History, lenses, membership; the shared answer) | DONE (be6f1d0c7) — both targets build-for-testing green at it; `MobileLineDirectionTests` results PENDING (the stage window) |
-| VM-62 pin (red on this tree) | DONE (this commit) — `MobileNoRawErrorPinTests` + `MobileRefusalSentencePinTests`, compiled green on the unfixed tree; the scan's throwaway mirror counts 96 offending lines there; red-on-old RUN PENDING (the stage window, AT this commit — see "Red-on-old, the method") |
+| VM-62 pin (red on this tree) | DONE (69005ad4a; strengthened in the next commit, still before any fix — it also catches the `"Refused: \(…)"` idiom under any binding name, found at `MobileTagManager`'s `\(op)`) — `MobileNoRawErrorPinTests` + `MobileRefusalSentencePinTests`, compiled green on the unfixed tree; the scan's throwaway mirror counts 97 offending lines there; red-on-old RUN PENDING (the stage window, AT the strengthened pin commit — see "Red-on-old, the method") |
 | VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | NOT-STARTED |
 | VM-62 fix | NOT-STARTED |
 | Phone + Mac `build-for-testing` at the batch's last code commit | NOT-STARTED |
@@ -1070,14 +1070,16 @@ joining a book stays silent; and the pure predicate table. Results PENDING (the 
 
 #### VM-62 — red-on-old, the method (written before the fix)
 
-The pins are committed ALONE, on the tree with 2a + P-55-11 and none of the fix (this commit); they compile there (the
+The pins are committed ALONE, on the tree with 2a + P-55-11 and none of the fix (69005ad4a, then strengthened by the
+commit "VM-62: the pin also catches the Refused idiom under any name" — a pathspec commit of the pin file and this record
+only, so its tree still holds none of the fix); they compile there (the
 per-case pins name their expected sentences through `OpsRefusalCopy.words(for:roads:)`, which exists on that tree). The
-red-on-old run is made **AT this commit**: in the stage window, after the green legs, the worktree is checked out DETACHED
+red-on-old run is made **AT the strengthened pin commit** (named by hash in this record's next commit): in the stage window, after the green legs, the worktree is checked out DETACHED
 at this commit (`git checkout <pin-commit>`), the phone target is built for testing into `vm55-b1` (incremental), the two
 pin types run (`-only-testing` `MobileNoRawErrorPinTests` `MobileRefusalSentencePinTests`), and the branch is checked
 back out (`git checkout vm-55-wings-underneath`), `git status` clean, the green products rebuilt after the release. **A
 successor finding the worktree detached at this commit is mid-red-on-old: `git checkout vm-55-wings-underneath` restores
-it — nothing uncommitted is ever left across it.** Expected red: the scan names every offending line (96 on this tree, per
+it — nothing uncommitted is ever left across it.** Expected red: the scan names every offending line (97 on that tree, per
 the throwaway mirror of the scan in the session scratchpad), and each of the five per-case pins fails on its slot/line
 text (the old doors spoke the dump or "Refused: …").
 

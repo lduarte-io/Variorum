@@ -13,7 +13,8 @@
 //      – `String(describing:` or `String(reflecting:` (the enum dump);
 //      – `.localizedDescription`;
 //      – an error binding interpolated into a string — `\(error)`, `\(err)`,
-//        `\(failure)` (the `"Refused: \(error)"` shape);
+//        `\(failure)`, `\(op)` — and the shipped `"Refused: \(…)"` idiom
+//        whatever the binding is called;
 //      – a call to one of the shared roads that END in a dump:
 //        `DeletionRefusal.fallback(` / `DeletionRefusal.words(` (its last
 //        resort is "That couldn't be done — ‹the dump›."),
@@ -34,9 +35,10 @@
 //         screen's `reason`, which `Shared/AppBootstrap.swift` builds from
 //         `String(describing:)` (custody-adjacent — VM-103's remainder, named
 //         in the batch 2b record).
-//      2. An error under another name (`"\(thrown)"`), or one passed through
-//         a variable first (`let d = "\(e)"`, with `e` not one of the three
-//         names) — the scan matches names, not types.
+//      2. An error under another name (`"\(thrown)"`) outside the
+//         "Refused: …" idiom, or one passed through a variable first
+//         (`let d = "\(e)"`, with `e` not one of the four names) — the scan
+//         matches names, not types.
 //      3. Whether a forbidden expression would actually RENDER: it forbids
 //         the expressions everywhere in phone code except the log, so a dump
 //         that only ever reached a log must be written as a log call.
@@ -68,7 +70,8 @@ struct MobileNoRawErrorPinTests {
         ("String(describing:)", /String\(\s*describing:/),
         ("String(reflecting:)", /String\(\s*reflecting:/),
         (".localizedDescription", /\.localizedDescription\b/),
-        ("an error interpolated into a string", /\\\(\s*(?:error|err|failure)\s*\)/),
+        ("an error interpolated into a string", /\\\(\s*(?:error|err|failure|op)\s*\)/),
+        ("the \"Refused: …\" dump idiom, under any name", /Refused: \\\(/),
         ("DeletionRefusal's dumping roads", /DeletionRefusal\.(?:fallback|words)\(/),
         ("OpsRefusalCopy.message (ends in \"Refused: …\")", /OpsRefusalCopy\.message\(/),
         ("VersionActs.words (falls to DeletionRefusal's dump)", /VersionActs\.words\(/),
