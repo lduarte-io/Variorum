@@ -156,7 +156,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | BUILT · **READY for the stage** | see the batch 6 block; products `vm64-b6` at `24fa9a5e2`, red `vm64-b6-red` | first commit `f0e2e696c` (the midpoint review's finding 1) |
-| 7 · VM-71 | IN-PROGRESS | see the batch 7 block | live status first; no revert in flight |
+| 7 · VM-71 | BUILT · **READY for the stage** | see the batch 7 block; products `vm64-b7` at `c9b574513`, red `vm64-b7-red` | no revert in flight; no line in `Features/Protection/` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -566,14 +566,13 @@ DerivedData: `App/Variorum/DerivedData/vm64-b6/` and `vm64-b6-red/` (gitignored)
 
 ### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**A REVERT IS STARTING (announced before it starts — the resiliency protocol's rule).** From `c9b574513` (the fix and
-the pins, committed and pushed), the batch's four production files —
-`Sources/VariorumCore/Queries/IdleCommit.swift`, `Sources/VariorumCore/Operations/Operations+Variant.swift`,
-`App/Variorum/Shared/AppSession.swift`, `App/Variorum/Shared/AppTiming.swift` — are checked out at the base `dfdd94b5a`;
-`build-for-testing` (phone) into `App/Variorum/DerivedData/vm64-b7-red/`; then `git checkout HEAD --` the four files and
-`git status` / `git diff HEAD` read empty. The phone pins name no VM-71 API, so no test file is set aside; the Core suite
-`LeavingSavepointTests` is not in the phone build. If a successor finds this line, `git diff HEAD` says what is reverted
-right now: restore with `git checkout HEAD -- <the four files>`.
+**No revert is in flight.** The red-on-old revert RAN and is RESTORED: from `c9b574513` (the fix and the pins, committed
+and pushed; announced at `ba675754d`), the batch's four production files — `Sources/VariorumCore/Queries/IdleCommit.swift`,
+`Sources/VariorumCore/Operations/Operations+Variant.swift`, `App/Variorum/Shared/AppSession.swift`,
+`App/Variorum/Shared/AppTiming.swift` — were checked out at the base `dfdd94b5a`; phone `build-for-testing` into
+`App/Variorum/DerivedData/vm64-b7-red/` `** TEST BUILD SUCCEEDED **` (cold); then `git checkout HEAD --` the four files —
+`git status` and `git diff HEAD` show only this record. No test file was set aside (the phone pins name no VM-71 API; the
+Core suite is not in the phone build).
 
 **Base:** `dfdd94b5a` (batch 6 BUILT and waiting for its window; its three release pins in `MobileNoteOpenOnceTests` are
 in this batch's stage commands).
@@ -622,8 +621,8 @@ in this batch's stage commands).
 | P2 — Core: the candidates read + the narrowed op + headless pins (equivalence, re-verification, every refusal) + a gated measurement | DONE (this commit) — `Queries.leavingSavepointCandidates` (`Queries/IdleCommit.swift`), `Operations.closeAutoCommit(_:takes:)` (`Operations+Variant.swift`); `swift test --filter 'LeavingSavepointTests\|LeavingSavepointMeasurementTests\|SavepointCadenceTests\|InsureTakesTests\|SearchSavepointCaptureTests\|SearchSavepointFacetTests'` green (`LeavingSavepointTests` 7, the measurement skipped ungated; the four neighbours unchanged). **The headless before/after** (`VARIORUM_VM71_MEASURE=1`; Mac M-series, Debug, an ENCRYPTED on-disk WAL store, one note of 1,370 blocks / 131,520 words, every take savepointed once; n = 5): the whole op (today's runner turn) **215.53 ms (214.96–216.49)** after one edit and **216.16 ms (215.01–216.90)** after only reading; the read **5.84 ms (5.83–5.89)** / **5.94 ms (5.88–6.18)** on a reader; the narrowed op **1.07 ms (1.02–1.14)** on the runner for the one owed take, and NO runner turn when nothing is owed — a Mac number, never a phone number |
 | P3 — the phone's branch of `savepointOnLeaving` + the mark | DONE (this commit) — `Shared/AppSession.swift`: the Mac's statements in their order under `#if os(macOS)` (only the two inner guards they already sat in collapse into it); the phone's `#else`: flush → the read on a reader → nothing owed: return / `StoreLockedError`: return / another read failure: today's whole op → the mark → one runner turn for the owed takes. `Shared/AppTiming.swift`: the `savepointAttempt` docs say what it counts now. Build PENDING (P5) |
 | P4 — the pins: perf suite (Castle 3 → 1 asserted, the lock road 2 → 1, note-leaving and Standard guards, the 100k leaving's writer statements, the runner-hold probe, the box's first mint after the 100k leaving); a company-safe suite for hazards (a)–(c) | DONE (this commit) — `MobileHerPathsPerfTests`: `savepoints-per-note-leaving` and `-backgrounding-{standard,castle}` ASSERTED == 1; new `lockingWithAnEditedNoteOpenCountsItsSavepointAttempts` (`savepoints-per-lock` == 1), `leavingTheHundredKNoteHoldsTheRunnerOnlyForWhatItOwes` (writer: no take scan, one last-savepoint read per take owed — 0 read-only, 1 edited; the runner probe and the `noteLeave` span recorded), `theBoxsFirstSaveAfterLeavingTheHundredKNote` (recorded); `RunnerProbe`. New `MobileLeavingSavesOnceTests` (6, company-safe: every road's one savepoint by the store's record, (b) twice per road, (c) with a REAL pool close, the writer's scans). Phone `build-for-testing` into `vm64-b7` `** TEST BUILD SUCCEEDED **`, no warning in a touched or new file; runs PENDING the stage |
-| P5 — builds: Core `swift test` (touched + savepoint suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b7/`; the red-on-old phone build into `vm64-b7-red/` (revert announced first) | IN-PROGRESS — Core suites green (P2); phone `build-for-testing` into `vm64-b7` `** TEST BUILD SUCCEEDED **` at `c9b574513` (the fix products); Mac `build-for-testing` into `vm64-b7` `** TEST BUILD SUCCEEDED **` (Shared + Core changed), no warning in a touched file. NEXT: the red-on-old build (the revert above) |
-| P6 — closeout in §7 + READY | NOT-STARTED |
+| P5 — builds: Core `swift test` (touched + savepoint suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b7/`; the red-on-old phone build into `vm64-b7-red/` (revert announced first) | DONE — Core suites green (P2); phone and Mac `build-for-testing` into `vm64-b7` `** TEST BUILD SUCCEEDED **` (the fix products, the tree at `c9b574513`), no warning in a touched file; the red-on-old phone build `vm64-b7-red` `** TEST BUILD SUCCEEDED **` (cold), restored |
+| P6 — closeout in §7 + READY | DONE (this commit) — §7 batch 7; READY: the stage groups (i)–(v) are in §7 batch 7 ▸ "The stage window"; every hosted run PENDING |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b7/` and `vm64-b7-red/` (gitignored).
 
@@ -2570,3 +2569,313 @@ in the note, go back at once — the word is in the note when reopened (capture 
 the "Note reads per open" row reads 1 across its samples (capture `b6-readout.png`). Screens go to
 `notes/plans/vm64-screens/` (gitignored). What it leaves on the device: the seeded fixture and one typed word in the short
 note.
+
+### Batch 7 · VM-71 — leaving saves once (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** every hosted run is PENDING the orchestrator's stage window —
+the perf suite's savepoint and leaving series (fix and red), the new company-safe suite (fix and red), batch 6's release
+pins and the lock and relock suites in company, the Mac suites over `AppSession`, and the walk (groups (i)–(v) below,
+runnable from the built products by anyone). So the simulator's AFTER numbers (`savepoints-per-*`, `leaving-100k-*`,
+`box-first-save-after-100k-leaving`) have none yet; the headless Mac numbers below are the only measured before/after so
+far. Nothing in custody, keychain, `Sync/` or the schema; no line in `Features/Protection/` (so nothing for the stage
+coordinator's Protection watch from this batch); the lock, the relock decision, the grant and the network round in the
+grant are untouched (the fence, below).
+
+**Base:** `dfdd94b5a`. **Commits:** `242c5b3e3` (live status) · `c3db1be8d` (Core: the read and the narrowed op, their pins,
+the gated measurement) · `d849b7125` (the phone's branch of `savepointOnLeaving`; the mark) · `c9b574513` (the phone pins;
+the fix products `vm64-b7` are this tree) · `ba675754d` (record: the revert announced) · this closeout (the red-on-old
+build `vm64-b7-red` built over the four production files at the base, then restored).
+
+#### The mechanisms, as traced on this tree (audit F 1D, 6C — TRACED as written; the lines moved)
+
+- **The waiting (1D).** A pop runs `MobileWriteScreen.onDisappear` (`MobileWriteView.swift:210-232`): `teardown()` (the
+  flush — a runner write per dirty take), then `AppSession.savepointOnLeaving`, whose whole runner turn was
+  `Operations.closeAutoCommit` (`Operations+Variant.swift:311-320` → `autoCommitDirtyVariants` `:388-411`): ONE write
+  transaction that decodes every live unlocked take of the note with its whole `working_text` and runs one last-savepoint
+  read per take (`isDirty`) — O(note) on the ONE serial runner (`Shared/OperationsRunner.swift:17-31`) and the writer,
+  whether or not anything had changed (a note she only READ paid it too). The capture box's first save — its mint,
+  `MobileQuickNote.swift:704-735`, `runner.run { importPost }` — queued behind it. Measured headless (Mac, Debug, an
+  encrypted on-disk WAL store, 1,370 blocks / 131,520 words): **216 ms per leaving**, the same after one edit or none.
+- **The repeats (6C).** A Castle backgrounding asked three times for one leaving: `performBackgroundFlush`'s savepoint
+  leg (`MobileShellRouter.swift:256-261`), then — after the network round (`:275-276`) and `relock.didLeaveTheScreen()`
+  (`:351`) — `bootstrap.lock()` → `lockOnNewRoad` (`Shared/AppBootstrap.swift:1477-1499`) → `runWillLock` →
+  `mobileWillLock`'s leg (`Features/Protection/MobileRelock.swift:91-93`), then `state = .opening` (`:1485`) removed the
+  tree and each mounted screen's `onDisappear` asked a third time, racing the pool close (`:1490-1495`). Each ask was the
+  216 ms whole op. The lock road alone (Lock now, a crossing's `runWillLock`) asked twice. The BEFORE table: Castle 3,
+  Standard 1, a pop 1.
+
+#### What shipped, file by file
+
+- `Sources/VariorumCore/Queries/IdleCommit.swift` — **`Queries.leavingSavepointCandidates(_:containerID:)`**:
+  `closeAutoCommit`'s own rule asked as a READ, in SQL — the live, unlocked takes under the note's live placements whose
+  text differs from their last savepoint (none savepointed yet: any text at all); nothing for a gone or sealed note or a
+  cadence that does not save on leaving; in id order. Text equality is BYTE equality here (SQLite BINARY) where the op's
+  `isDirty` compares Swift strings (canonical equivalence), so the read's set CONTAINS the op's — never the other way.
+- `Sources/VariorumCore/Operations/Operations+Variant.swift` — **`Operations.closeAutoCommit(_:takes:)`**: the same
+  occasion and rows for exactly the listed takes — the note's two quiet no-ops, the cadence gate, then per listed take (in
+  id order, deduped, one clock read) a re-check inside the one transaction (still live, unlocked, placed in this note,
+  still dirty) and its `kind: .auto` savepoint. `closeAutoCommit(_:)`, `autoCommitDirtyVariants` and `isDirty` are
+  untouched; the Mac calls neither new API (grep: their only caller is the phone branch below).
+- `App/Variorum/Shared/AppSession.swift` — `savepointOnLeaving`: the Mac's statements under `#if os(macOS)`, in their
+  order (the mark, `markLeaving`, the flush, the whole op on the runner, `dropAfterLeaving` — the two inner
+  `#if os(macOS)` guards they sat in collapse into the outer one; the phone's `_ = landed` line goes). **The phone's
+  `#else`:** the flush (unchanged — the read must see her last keys) → the owed takes read on a READER → none owed:
+  return, the runner never asked → a closed store (`StoreLockedError`): return (nothing can be written there; the attempt
+  this replaces failed and was swallowed) → any other read failure: today's whole op → the mark → ONE runner turn writing
+  exactly the owed takes. The doc gains one pointer line.
+- `App/Variorum/Shared/AppTiming.swift` — docs only: what `savepointAttempt` and its window count now (below).
+- Tests: `Tests/VariorumCoreTests/LeavingSavepointTests.swift` (7, headless) · `LeavingSavepointMeasurementTests.swift`
+  (gated) · `VariorumMobileTests/MobileHerPathsPerfTests.swift` (three series asserted, three tests added, `RunnerProbe`)
+  · `VariorumMobileTests/MobileLeavingSavesOnceTests.swift` (new, 6, company-safe).
+- **Not touched, by the fence:** `MobileRelock.swift`, `MobileShellRouter.swift`, `AppBootstrap.swift`,
+  `VariorumMobileApp.swift`, `MobileWriteView.swift`, `MobileQuickNote.swift`, `MobileLivenessAuthority.swift`,
+  `OperationsRunner.swift`, `AutosaveCoordinator.swift`, the relock and lock-teardown suites — `git diff dfdd94b5a --stat`
+  lists no file under `App/Variorum/VariorumMobile/` or `App/Variorum/Variorum/`.
+
+#### The fence — the lock did not move, and the savepoint stayed
+
+WHO asks, and WHEN against the lock, is byte-identical: every ask site above is unchanged, so the flush's savepoint still
+lands before the network round (its rows ride that round), `mobileWillLock`'s still lands inside `runWillLock` before the
+state flip and the pool close, and the removed screens still ask from their `onDisappear` (deduped now, never reordered).
+What changed is only what an ask COSTS and when it reaches the runner: the store is asked first, as a read, and the runner
+only for what is owed. Every leaving that owes a savepoint still writes one, exactly the rows `closeAutoCommit(_:)` would
+(pinned row for row); `closeAutoCommit`'s cadence occasion, its dedupe rule, its two quiet no-ops and its cadence gate
+are the rule the read and the narrowed op both apply.
+
+#### Hazard (a) — the five leaving roads: who asks, and what dedupes the rest
+
+| Road | Who asks (unchanged) | What happens now |
+|---|---|---|
+| Popping a note | its screen's `onDisappear` → `teardown()` → `savepointOnLeaving` (`MobileWriteView.swift:210-232`) | one ask; the read decides — owed: one runner turn for the owed takes; nothing owed (she only read it): no runner turn at all |
+| Switching tabs away | `MobileShellView.selectPage` (`:422-432`) → the capture box's `fileOnLeaving` → `file()` → `savepointOnLeaving(minted)` (`MobileQuickNote.swift:1040`) | one ask, for the box's note. The note on the stack the switch hides is NOT left — it stays mounted and registered, stood down (the liveness authority's rule), and gets its savepoint at its pop, the backgrounding or the lock (each asks for every registered note). Unchanged; see P-71-1 |
+| Backgrounding, Standard | `mobileScenePhaseChanged(.background)` → `performBackgroundFlush`: the box, then one ask per registered note (`registeredPostIDs`, deduped by note) | one ask per note, before the network round; no lock, no further ask |
+| Backgrounding, Castle, before the lock | (1) the flush's ask, as Standard; (2) `mobileWillLock`'s ask inside the lock's `runWillLock`; (3) each removed screen's `onDisappear` | (1) savepoints what is owed. (2) and (3) read the takes already savepointed and ask the runner for nothing — unless something landed after (1): the round's apply, a conflict take, or (1) skipped because the grant expired — then they savepoint it, as before. (3) meeting a closed store asks nothing |
+| The lock itself (Lock now, a crossing, a return-lock) | (2) `mobileWillLock`'s ask; (3) the removed screens' | (2) savepoints what is owed, before the state flip and the pool close; (3) as above |
+
+**What dedupes the rest is the store**, not a memory: the read is `closeAutoCommit`'s own rule ("a take whose text
+differs from its last savepoint"), asked before the runner. **Pins:** the perf suite — `savepoints-per-note-leaving` == 1
+(a guard), `-backgrounding-standard` == 1 (a guard), `-backgrounding-castle` == 1 (RED on the pre-fix build: 3, the BEFORE
+table), `savepoints-per-lock` == 1 (new; RED: 2). `MobileLeavingSavesOnceTests`, by the store's own record: the pop, the
+tab switch, Standard, Castle and the lock each leave exactly ONE new quiet savepoint holding her text (guards — the op's
+own dedupe already held this) and, on each road with an ask, the writer runs NO scan of the note's takes and one
+last-savepoint read per take owed (RED on the pre-fix build: the pop, Standard and the lock one scan each, Castle two
+before the pool closed, a read-only visit one scan and one read).
+
+#### Hazard (b) — an earlier leaving never stands in for a later one
+
+**Mechanism:** the dedupe has no memory of leavings. The read compares each take's text NOW with its LAST savepoint; any
+change after any earlier savepoint — hers, or anything else's — makes that take differ again, so it is owed and
+savepointed. Nothing is cached between asks, so nothing can go stale. **Pins:** the perf suite's backgrounding and lock
+series alternate between two notes and edit before every leaving — an earlier leaving that stood in for a later one would
+read 0, not 1; `MobileLeavingSavesOnceTests` runs the pop, the Castle backgrounding and the lock twice each with a change
+between (the second round must add a second savepoint holding the second text), and a Standard backgrounding followed by
+a change and a pop (a third savepoint). Guards: green on both trees by construction of the op.
+
+#### Hazard (c) — under Castle the savepoint is made before the store closes, never after
+
+**Mechanism:** no ask moved. The flush's ask lands before the round and the lock; `mobileWillLock`'s lands inside
+`runWillLock`, before `state = .opening` and before `binding.lock()` (`AppBootstrap.swift:1484-1491`). The only later asks
+are the removed screens', which write only if something is still owed AND the store is still open — on a closed store
+their read throws `StoreLockedError` and nothing is asked (an attempt there could only fail, as it did before, swallowed).
+**Pins:** `MobileLeavingSavesOnceTests.aCastleBackgroundingSavepointsOnceBeforeTheStoreCloses` and
+`theLockSavepointsOnceBeforeTheStoreCloses` close a REAL pool (the bootstrap's binding, `asRebindable`), after the tree
+comes down, so the removed screen's ask meets the closed store: the savepoint is in the store at the lock's start (read
+then), the unlock finds exactly it and nothing more, and her text is whole. Guards on the ordering (green on both trees);
+RED on the pre-fix build on the writer's scans.
+
+#### Hazard (d) — the capture box's first save after the 100k note is not behind that note's leaving work
+
+**Mechanism:** the leaving's O(note) work — finding which takes changed — is now a READ on a reader connection: it holds
+neither the runner nor the writer, and in WAL a reader never blocks the writer, so a box save asked meanwhile runs at
+once. What the leaving still asks of the runner is O(her edit): the flush (her pending keys, as before) and ONE turn
+writing the owed takes (none when she only read the note). The runner's serial guarantee is untouched. **Measured,
+headless** (`VARIORUM_VM71_MEASURE=1`; the Mac, Debug, encrypted on-disk WAL, 1,370 blocks / 131,520 words, every take
+savepointed once; n = 5): today's runner turn **215.53 ms (214.96–216.49)** after one edit and **216.16 ms
+(215.01–216.90)** after only reading; now the read **5.84 ms (5.83–5.89)** / **5.94 ms (5.88–6.18)** OFF the runner and the
+runner turn **1.07 ms (1.02–1.14)** for the one owed take — **none** after only reading. A Mac number, never a phone
+number. **Pins (the shape the runner allows):** `MobileHerPathsPerfTests.leavingTheHundredKNoteHoldsTheRunnerOnlyForWhatItOwes`
+— on the on-disk encrypted pool, the leaving's statements on the store's WRITER (every runner turn writes through it):
+no scan of the note's takes, and last-savepoint reads = takes owed (0 after reading, 1 after one edit) — RED on the
+pre-fix build (the scan, and one read per take: ~1,400, both arms). RECORDED beside it: `leaving-100k-runner-hold-*` (a
+`RunnerProbe` — trivial runner turns asked back to back through the leaving; the longest wait is the longest stretch the
+leaving held the runner — what a box save asked then queued behind), `leaving-100k-to-saved-*` (the layer's `noteLeave`
+span), and `theBoxsFirstSaveAfterLeavingTheHundredKNote` → `box-first-save-after-100k-leaving` (the box's real mint, asked
+the instant the leaving's flush landed her key — the moment before the savepoint asks the runner; the test's clock).
+**One inherent case, said:** a leaving that OWES many takes (a note never savepointed — a long import, a note from before
+the cadence) still writes one savepoint per owed take in its one runner turn; that is the cadence's rule, once per such
+take, never again until it changes. The fixture's 100k note is exactly that on its first leaving, so the pins savepoint
+it once before measuring ("a note she has left before").
+
+#### The timing marks (batch 1's) — what they measure now (said, per the record's rule)
+
+`savepointAttempt` (and so the `savepointsPerLeaving` window, the readout's "Savepoint tries" and "Savepoints per
+leaving") now counts **runner turns for a leaving savepoint** — the mark moved from the top of `savepointOnLeaving` to
+where the phone's branch asks the runner. Before VM-71 every call reached the runner, so the BEFORE numbers counted
+exactly this quantity; after it, an ask whose read finds nothing owed is not counted (it costs no runner turn). The
+Mac's mark is where it was (inert there). `noteLeave` ("Leave a note → saved") is unchanged in meaning: it now includes
+the read instead of the whole op. Nothing else moved; no other series was touched (batches 5 and 6 own theirs).
+
+#### The Mac does not change in behaviour
+
+The Mac's `savepointOnLeaving` runs the same statements in the same order (the diff only collapses two inner
+`#if os(macOS)` guards into the outer one); `closeAutoCommit(_:)` and everything under it is byte-identical; the two new
+Core APIs have one caller, the phone's branch. PENDING: the Mac suites over the shared types (group (iv)) —
+`SavepointOnLeaveTests` (the six leaving roads' one entry), `AutosaveRegistryReleaseTests`,
+`AutosaveRegistryLifecycleTests` and `AutosaveRegistryReleaseGuardTests` (18k C1's drop rides this function),
+`MacWillLockTests`, `AutosaveCoordinatorTests`, `TestHostInertTests`. Core, headless: the four neighbouring savepoint
+suites green with the new one (P2).
+
+#### Merging with VM-55, VM-47 and VM-78 — where a hand is needed
+
+Read from `origin/vm-55-wings-underneath`, `origin/vm-47-sizes-and-look`, `origin/vm-78-fixes-to-whats-there` against
+their merge-bases; nothing merged or cherry-picked. **None of the three touches a file this batch changed except
+VM-55's `Shared/AppSession.swift`**, whose one hunk moves `let status = StatusCenter()` from the macOS block (~line 730)
+up beside `undoMenuState` (~line 226) — far from `savepointOnLeaving` (~line 660); expected clean. VM-47's
+`MobileShellRouter.swift`, `MobileQuickNote.swift` and `MobileWriteView.swift` rewrites, VM-55's `MobileQuickNote.swift`
+/ `MobileWriteView.swift` and VM-78's `MobileWriteView.swift` meet nothing of this batch's: it left all of them alone.
+The test files: VM-47's `MobileShellRouter.init()` (no `defaults:`) is what these tests already call
+(`MobileShellRouter()`); `MobileLeavingSavesOnceTests` uses `router.quickNote.bind(session:)`, unchanged on every branch.
+
+#### Residuals (traced, not fixed here — owners for the orchestrator to assign)
+
+1. **Seen, not this batch's (the brief's own list):** after a Castle relock the quick note stays bound to the old
+   session (audit F §12.1 — wave 2); the network round runs inside the background grant before the lock (6B — wave 2,
+   VM-103); the removed screens' `onDisappear` still runs its teardown flush as the pool closes (§6) — it has nothing
+   pending after `mobileWillLock`'s `flushAll`, and its savepoint ask now writes nothing in the ordinary case and asks
+   nothing of a closed store; its ordering against the lock is unchanged (VM-103's).
+2. **The read is O(note) per ask, off the runner.** A Castle backgrounding of a long note reads it three times
+   (~6 ms each on the Mac headless; on a phone, PENDING the simulator). Cheap and concurrent, but not free; a per-leaving
+   memory could skip the later reads only with a "nothing landed since" signal the phone cannot get cheaply for writes
+   outside her coordinator (D-7-1). Recorded, not built.
+3. **A tab switch does not leave the note on the stack it hides** (P-71-1 below) — today's rule, kept.
+
+#### Design calls (options weighed; engineering, for the cold review)
+
+- **D-7-1 — where the dedupe lives.** (a) **built:** the store's own record, read before the runner is asked —
+  `closeAutoCommit`'s rule, exact, memoryless, blind to WHO wrote; (b) a per-leaving memory on the phone ("this note was
+  savepointed in this leaving") — needs a "nothing landed since" signal; her coordinator gives one, but structural acts,
+  take acts and a sync apply write around it, so it could skip a savepoint owed (hazard (a)'s failure); (c) change who
+  asks (drop the lock teardown's or the flush's ask) — moves savepoint work against the lock or out of the round; fenced.
+- **D-7-2 — the runner's turn when something is owed.** (a) **built:** `closeAutoCommit(_:takes:)` for exactly the owed
+  takes, re-checked inside the transaction — O(owed); (b) the read as a yes/no, then today's whole op — O(note) on the
+  runner whenever she edited, which is the 1D case the box meets after editing a long note.
+- **D-7-3 — a closed store at the read.** (a) **built:** ask nothing (a closed store cannot take a write; the replaced
+  attempt failed and was swallowed); (b) fall back to the whole op (fails, swallowed, one counted attempt more on the
+  lock's race). Any OTHER read failure falls back to today's whole op — never worse than before.
+- **D-7-4 — the mark.** (a) **built:** at the runner ask (the same quantity before and after, said above); (b) keep
+  counting calls and add a counter for runner turns — a new readout row is new copy, not this batch's.
+- **D-7-5 — the read compares bytes.** A superset of the op's canonical-equivalence rule, re-checked by the op (pinned:
+  byte-different equal text is listed, and neither op writes it). Normalizing in SQL is not available without a custom
+  function; the superset costs, at most, one empty runner turn on such a take.
+
+#### For QUESTIONS at the merge (the orchestrator carries these to `notes/QUESTIONS.md`)
+
+1. **P-71-1 — is switching tabs away a leaving of the note on the hidden stack?** Today (kept, unchanged by this batch):
+   no — both stacks stay alive, the hidden note stays mounted and registered (stood down), and its quiet savepoint comes
+   at its pop, the app's backgrounding or the lock; a tab switch files only the capture box. Options: (a) keep (built —
+   the note is still open on its stack; its savepoint is owed when it is truly left); (b) a tab switch savepoints the
+   hidden stack's notes as a leaving (cheap now — a read, and a runner turn only if owed; a return and a further edit
+   owe another at the next leaving). Hers: what "stops being shown anywhere" means on the phone's two live stacks.
+
+#### The pins, and what each build should show
+
+| Pin | Fix (`vm64-b7`) | Pre-fix (`vm64-b7-red`) | Kind |
+|---|---|---|---|
+| perf `backgroundingWith…` — `savepoints-per-backgrounding-castle` == 1 | green | RED (3) | VM-71 product (6C) |
+| perf `backgroundingWith…` — `-standard` == 1 | green | green (1) | guard |
+| perf `leavingAnEditedNote…` — `savepoints-per-note-leaving` == 1 | green | green (1) | guard |
+| perf `lockingWithAnEditedNote…` — `savepoints-per-lock` == 1 | green | RED (2) | VM-71 product (the lock road) |
+| perf `leavingTheHundredKNote…` — writer: no take scan; take reads 0 (read) / 1 (edited) | green | RED (1 scan; ~1,400 reads, both arms) | VM-71 product (1D) |
+| perf `theBoxsFirstSaveAfterLeavingTheHundredKNote` | records | records (the BEFORE number) | recorded |
+| perf, the other nine tests | green, unchanged | green | — |
+| `MobileLeavingSavesOnceTests.poppingAChangedNote…` | green | RED on the writer (1 scan); the savepoints green | product + (a)(b) guards |
+| `…aTabSwitchFilesTheBoxOnce…` | green | green | guard (P-71-1 stated) |
+| `…aStandardBackgrounding…` | green | RED on the writer (1 scan); the savepoints green | product + (a)(b) guards |
+| `…aCastleBackgroundingSavepointsOnceBeforeTheStoreCloses` | green | RED on the writer (2 scans, 2 reads); the savepoints and the order green | product + (a)(b)(c) guards |
+| `…theLockSavepointsOnceBeforeTheStoreCloses` | green | RED on the writer (1 scan); the rest green | product + (a)(b)(c) guards |
+| `…leavingANoteSheOnlyReadAsksTheRunnerForNothing` | green | RED (1 scan, 1 read) | VM-71 product (1D) |
+| Core `LeavingSavepointTests` (7) | green (headless, run) | not built (names the new API) | the new API's contract |
+
+Row dispositions: **VM-71 — FIXED** (the repeats: Castle 3 → 1, the lock 2 → 1; the waiting: the leaving's O(note)
+work off the runner) with the red-on-old pins above — PENDING their stage runs.
+
+#### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+Products: fix `App/Variorum/DerivedData/vm64-b7/` (phone + Mac, the tree at `c9b574513`), pre-fix
+`App/Variorum/DerivedData/vm64-b7-red/` (phone; the four production files at `dfdd94b5a`). If `vm64-b7-red` is ever lost:
+`git checkout dfdd94b5a -- Sources/VariorumCore/Queries/IdleCommit.swift Sources/VariorumCore/Operations/Operations+Variant.swift App/Variorum/Shared/AppSession.swift App/Variorum/Shared/AppTiming.swift`,
+`build-for-testing` into `DerivedData/vm64-b7-red`, then `git checkout HEAD --` the same four.
+
+**Group (i) — the perf suite ALONE, fix build, twice** (it reads the process's one timing recorder):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7 \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-b7-perf-1>
+grep '^VM64-PERF|' <log-b7-perf-1>
+```
+Expected: 13 tests pass; `savepoints-per-*` all 1 (four series); `leaving-100k-writer-take-scans-*` 0,
+`leaving-100k-writer-take-reads-read` 0 and `-edited` 1; batch 5's and batch 6's asserted series unchanged. The AFTER
+numbers (`leaving-100k-runner-hold-*`, `leaving-100k-to-saved-*`, `box-first-save-after-100k-leaving`) come from these two
+runs. It is the longest suite in the run now (three more tests open the 100k note six times each) — poll for the Swift
+Testing verdict line, not `** TEST EXECUTE **`.
+
+**Group (ii) — the pre-fix build, each suite ALONE:**
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7-red \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-b7-red-perf>
+grep '^VM64-PERF|' <log-b7-red-perf>
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7-red \
+  -only-testing:VariorumMobileTests/MobileLeavingSavesOnceTests 2>&1 | tee <log-b7-red-once>
+```
+Expected: perf — RED `backgroundingWith…` (Castle 3), `lockingWith…` (2), `leavingTheHundredKNote…` (scans 1, reads
+~1,400, both arms); the other ten green; `box-first-save-after-100k-leaving` is the BEFORE number. Once — RED
+`poppingAChangedNote…`, `aStandardBackgrounding…`, `aCastleBackgrounding…`, `theLockSavepointsOnce…`,
+`leavingANoteSheOnlyRead…` (each on the writer's scans/reads only — every savepoint-count and ordering expectation green);
+GREEN `aTabSwitchFilesTheBoxOnce…`.
+
+**Group (iii) — the batch's suites with the leaving road's, the lock's and batch 6's, fix build, ONE invocation:**
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileLeavingSavesOnceTests MobileNoteOpenOnceTests MobileSavepointOnLeavingTests
+  MobileLockTeardownTests MobileRelockCoordinatorTests MobileRelockPolicyTests MobileQuickNoteUnderLockTests
+  MobilePhoneStoreEncryptionTests MobilePassphraseFloorTests MobileTypedUnlockSyncKeysTests MobileRoundOccasionTests
+  MobileQuickNoteTests MobileQuickNoteReadFailureTests MobileLivenessTests MobileShellTests MobileNavigationTests
+  MobileDeletionTests MobileVersionsTests MobileStructuralFlightFenceTests MobileCanaryTeardownTests
+  MobileTypedOverRescueTests MobileDeferredProjectionRetryTests MobileWalkTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b7 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-b7-company>
+```
+Expected: all green. Batch 6's three release pins (`MobileNoteOpenOnceTests.closingANoteLandsItsTextThenGivesItsCoordinatorBack`,
+`theReleaseWaitsForTheLeavingSavepoint`, `aCoordinatorAnotherHolderNeedsIsNeverLetGo`) must stay green: the release
+still comes after the flush and the savepoint (the onDisappear task holds the model across both; when the writer is held,
+the flush waits on it and the model with it). The lock and relock suites (`MobileLockTeardownTests`,
+`MobileRelockCoordinatorTests`, `MobileRelockPolicyTests`, `MobileQuickNoteUnderLockTests`) are UNCHANGED files and must
+be green.
+
+**Group (iv) — the Mac suites over the shared `AppSession` (its Mac branch unchanged), ONE invocation:**
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(SavepointOnLeaveTests AutosaveRegistryReleaseTests AutosaveRegistryLifecycleTests AutosaveRegistryReleaseGuardTests
+  MacWillLockTests AutosaveCoordinatorTests TestHostInertTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
+  -derivedDataPath DerivedData/vm64-b7 ${tests/#/-only-testing:VariorumTests/} 2>&1 | tee <log-b7-mac>
+```
+Expected: all green, unchanged.
+
+**Group (v) — the walk (the batch's use-shaped evidence; the orchestrator's hands or a GO to me).** The Debug phone app
+(`DerivedData/vm64-b7/Build/Products/Debug-iphonesimulator/VariorumMobile.app`) on the `vm64-walk` simulator, dev store,
+signed out, never Resume, no test account. (1) Settings ▸ "Seed the 100k fixture" if the store does not hold it. (2)
+Library ▸ "the long haul" — read, back (a leaving she only read); open it again, type a word in the second block, back,
+then at once tap the capture box, type a line and File (the box's first save, right behind the long note's leaving);
+capture the shelf after the filing (`b7-box-filed.png`). (3) Open "the long haul" again, open the edited block's takes
+(the block menu's Takes…), the take card's ⋯ ▸ "Block History…" — under "Commits" the quiet savepoint holding the typed
+word is listed (`b7-history.png`); back. (4) Settings ▸ Timing… — "Leave a
+note → saved" and "Savepoints per leaving" rows (the leaving she only read adds a 0; the edited one a 1)
+(`b7-readout.png`). No face changed in this batch, so one voice is enough. Screens go to `notes/plans/vm64-screens/`
+(gitignored). What it leaves on the device: the seeded fixture (if seeded), one typed word in the long note, one filed
+capture.
