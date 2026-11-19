@@ -351,7 +351,7 @@ public final class MCPServerHost: @unchecked Sendable {
     /// TEST-ONLY (VX-951): the round a grants-fingerprint change runs, run now —
     /// a grant change landing exactly where a pin needs it (inside a probe).
     func announceRoundForTesting() async {
-        await announceGrantsChanged()
+        announceGrantsChanged()
     }
     #endif
 
@@ -484,8 +484,18 @@ public final class MCPServerHost: @unchecked Sendable {
         }
         guard still else { return .notSuspended }
         startObservingGrants()
-        for session in live where session.isHeld { await session.admitIfHeld() }
-        for session in live { await session.announceToolsChanged() }
+        // VX-944 (the VX-981 run, batch 3): nothing here waits on a client. The
+        // held admissions are store work only (the one op, a close line that
+        // never waits, the naming signal, an announce that only asks) and run as
+        // ONE group — none behind another; then every connection is ASKED to
+        // announce, so a client that stopped reading can no longer keep this
+        // resume — and the door's unlock face behind it — from returning.
+        await withTaskGroup(of: Void.self) { group in
+            for session in live where session.isHeld {
+                group.addTask { _ = await session.admitIfHeld() }
+            }
+        }
+        for session in live { session.announceToolsChanged() }
         onConnectionsChanged?()
         if died != nil { onStateChanged?() }
         return .resumed
@@ -799,7 +809,7 @@ public final class MCPServerHost: @unchecked Sendable {
                 for try await _ in observed {
                     if first { first = false; continue }
                     guard let self else { return }
-                    await self.announceGrantsChanged()
+                    self.announceGrantsChanged()
                     self.onConnectionsChanged?()
                 }
             } catch {}
@@ -808,10 +818,13 @@ public final class MCPServerHost: @unchecked Sendable {
     }
 
     /// **The round a grants-fingerprint change runs:** every live session is
-    /// asked to announce `tools/list_changed`.
-    func announceGrantsChanged() async {
+    /// asked to announce `tools/list_changed`. VX-944 (the VX-981 run, batch 3):
+    /// ASKED, never awaited — each session's own announcer sends it, so a client
+    /// that stopped reading delays no other session's notice, nor the next
+    /// change's round (it once awaited each session in series).
+    func announceGrantsChanged() {
         let live = lock.withLock { Array(sessions.values) }
-        for session in live { await session.announceToolsChanged() }
+        for session in live { session.announceToolsChanged() }
     }
 
     /// Everything the tool list depends on, in one small value: the decided

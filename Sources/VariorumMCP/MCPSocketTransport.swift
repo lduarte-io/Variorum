@@ -62,8 +62,8 @@ actor MCPSocketTransport: Transport {
     /// so a client that stops reading parks this queue's thread, never a pool
     /// thread, and the writes keep the order this actor handed them over in.
     /// One per connection: one stalled client never delays another
-    /// connection's writes. (The host's announce loops, which await each
-    /// session in turn, are their own seam — VX-944.)
+    /// connection's writes — nor, since VX-944, another connection's notices
+    /// (the host's announce rounds only ask each session's own announcer).
     private nonisolated let writer = DispatchQueue(label: "variorum.mcp.writer")
     /// **VX-933: a frame is MID-WRITE while its rest waits on the writer** —
     /// its first bytes went on the fast road and the write lock was let go.

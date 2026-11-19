@@ -92,13 +92,57 @@ final class MCPSession: @unchecked Sendable {
 
     /// Hear one of the gate's events (the transport's report, the client's
     /// `initialized`, its first served request). The event that OPENS the gate
-    /// with an announce remembered sends the one catch-up.
+    /// with an announce remembered owes the one catch-up.
     private func hear(_ event: MCPAnnounceGate.Event) {
         #if DEBUG
         gateEventProbe?(event)
         #endif
-        guard lock.withLock({ announceGate.hear(event) }) else { return }
-        Task { [self] in try? await server.notify(ToolListChangedNotification.message()) }
+        if lock.withLock({ announceGate.hear(event) && oweAnnounce() }) { startAnnouncing() }
+    }
+
+    // MARK: - The announcer (VX-944 — the VX-981 run, batch 3)
+
+    /// **This connection's announcer:** the notices owed to it and not yet
+    /// sent, and whether its ONE task is sending them. Guarded by `lock`. An
+    /// announce is ASKED, never awaited — the host's rounds and the unlock never
+    /// wait on a client (VX-944: one that stopped reading held the old serial
+    /// round at its session, so every later session missed the change and the
+    /// unlock never returned). Bounded: at most one task per connection and a
+    /// count; nothing is dropped or merged — N asks send N notices, one at a
+    /// time, in order, each behind this connection's earlier frames (its writer
+    /// is FIFO), so a client that stopped reading gets every one once it reads.
+    private var announcesOwed = 0
+    private var announcing = false
+
+    /// Owe one more notice; true when the caller must start the announcer.
+    /// Under `lock`.
+    private func oweAnnounce() -> Bool {
+        announcesOwed += 1
+        guard !announcing else { return false }
+        announcing = true
+        return true
+    }
+
+    /// Take one owed notice; false — and the announcer ends — when none is
+    /// owed. Under `lock`.
+    private func takeOwedAnnounce() -> Bool {
+        guard announcesOwed > 0 else {
+            announcing = false
+            return false
+        }
+        announcesOwed -= 1
+        return true
+    }
+
+    /// The announcer's task: the owed notices, one at a time. A session that
+    /// has ended answers each at once (its server has no connection), so the
+    /// task never outlives what was owed.
+    private func startAnnouncing() {
+        Task { [self] in
+            while lock.withLock({ takeOwedAnnounce() }) {
+                try? await server.notify(ToolListChangedNotification.message())
+            }
+        }
     }
 
     /// The client's self-declared name, once `initialize` has run — and,
@@ -685,7 +729,7 @@ final class MCPSession: @unchecked Sendable {
             held = nil
         }
         onNamed()
-        await announceToolsChanged()
+        announceToolsChanged()
         return true
     }
 
@@ -699,10 +743,14 @@ final class MCPSession: @unchecked Sendable {
     /// connection's gate — while it is shut (the `initialize` answer not yet
     /// written, or the client not yet ready) the announce is remembered, and
     /// the gate's opening sends exactly one (`hear`).
-    func announceToolsChanged() async {
+    ///
+    /// VX-944 (the same batch): ASKED, never awaited — the notice is owed to
+    /// this connection's announcer and this returns at once; no caller ever
+    /// waits on a client reading (the decision before it — the name, her OK —
+    /// reads only the store).
+    func announceToolsChanged() {
         guard declaredName != nil, (try? awaitsHerOK()) == false else { return }
-        guard lock.withLock({ announceGate.announce() }) else { return }
-        try? await server.notify(ToolListChangedNotification.message())
+        if lock.withLock({ announceGate.announce() && oweAnnounce() }) { startAnnouncing() }
     }
 
     /// **The descriptor's end, under ONE lock** (VX-279 — VX-184's ladder,
