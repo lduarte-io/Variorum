@@ -1760,6 +1760,9 @@ Opened 2026-11-19 after window (3) proved VM-17 real. One member, one acceptance
 
 #### BATCH D — LIVE STATUS
 
+*(The trace session's record, kept verbatim below. The BUILD of round 3's called shape has its own section, "The
+build — LIVE STATUS", at the end of batch D: read that for where the batch stands now.)*
+
 **WHAT IS NOT DONE (first, as the contract asks): NOTHING IS BUILT. The implementer STOPPED before any product line,
 by the brief's own rule** ("if your trace says the confirmed shape would NOT remove a symptom — the 74-pt offset in
 particular — STOP and report that before building anything"). The trace below says exactly that: the confirmed shape
@@ -1953,6 +1956,25 @@ and that is the reviewer's to shape. Either way the confirmed shape's hide rules
   (`jumpToBlock`), and `MobileBlockMenuTests` the block decor that shares the one refresh door (`refreshChrome`).
 - **No PROVISIONAL was ruled and no question is raised for `notes/QUESTIONS.md`:** the open point is a fix shape for the
   reviewer's final call, not product behaviour.
+
+#### The build — LIVE STATUS
+
+**WHAT IS NOT DONE (first): the build is IN PROGRESS — nothing below is verified on the stage.** A fresh
+`opus-implementer` (2026-11-19) builds round 3's called shape (`vm-78-ladder-round3.md`, "Final calls" → "VM-17's fix —
+the shape, as called", S1–S11) exactly, in five pieces plus two headless builds. It runs no `xcodebuild test` and boots
+no simulator: every red and green below is the orchestrator's window, PENDING. **No revert is in flight; `git status`
+is clean at each commit.** (The implementer's proposed shape that the reviewer amended went to the reviewer as an
+answer and is not on file in the repo; the four amended points are the ones marked "(changed)" in S1, S2, S3 and S5.)
+
+| Piece | State |
+|---|---|
+| 0 — this LIVE STATUS opens | DONE (this commit) |
+| 1 — the pins first (`MobileTakesChromeTests`: the S9 re-pins, the new marker-and-pill pin, the new empty-last-block guard; the probe's header comment, R3-N3) | NOT-STARTED |
+| 2 — the fix (`Takes/MobileTakesChrome.swift`; the "Chrome geometry" section of `Write/MobileEditorTextView.swift`; ONE comment line in `Write/MobileBlockDecor.swift`) | NOT-STARTED |
+| 3 — the decor reading (R3-F1's fair pin, its own test type; runs ALONE by type in the green window; leaves after the window, not now) | NOT-STARTED |
+| 4 — the settle instrument leaves (its result written here first, R3-F3) | NOT-STARTED |
+| 5 — record lines (VM-179 before and after; VM-218's VoiceOver line; R3-N1's sentence) | NOT-STARTED |
+| Builds — the signed phone `build-for-testing` at the tip (`DerivedData/vm78-ios`), and the RED leg's tree (the two product files at the pre-fix commit) into `DerivedData/vm78-ios-red` | NOT-STARTED |
 
 ## The ladder
 
