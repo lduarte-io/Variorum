@@ -39,15 +39,25 @@
 //          block whose first-line fragment is `.layoutAvailable` and stands
 //          within 1 pt of the badge's top — a failure is a stray or misplaced
 //          badge she can see;
+//     (i′) every such badge, asked independently of its own block's frame
+//          (ladder round 2's R2-F3): the point 1 pt under the badge's top, at
+//          the container's mid-width, must lie in a fragment that BEGINS at
+//          the badge's own block offset (`textLayoutFragment(for:)`, the
+//          product's own swipe hit-test call; nothing forces layout). A point
+//          outside the visible rect is skipped and counted. A different
+//          offset, or no fragment at all, is a miss — a badge standing beside
+//          another block's text (or over none) that (i) cannot see when the
+//          badge and its block's fragment share one stale forced layout;
 //     (ii) every fanned block whose first-line fragment is `.layoutAvailable`
 //          with its top inside the visible rect has a drawn badge within 1 pt
 //          of it — a failure is a fan she can see with no badge on it;
 //     (iii) REACH: every jump target meets (ii)'s premise at its stop, and
-//          every fanned block meets it at least once across the walk. These
-//          say "the probe did not reach…": a red there is the probe's, never
-//          VM-17's.
-//  (1), (i) or (ii) red ⇒ VM-17 is real (stop and report before any product
-//  line — the record's arm). All green ⇒ hollow: this stays as the guard.
+//          every fanned block meets it at least once across the walk, and on
+//          each road (i′) asked at least one badge. These say "the probe did
+//          not reach…": a red there is the probe's, never VM-17's.
+//  (1), (i), (i′) or (ii) red ⇒ VM-17 is real (stop and report before any
+//  product line — the record's arm). All green ⇒ hollow: this stays as the
+//  guard.
 //  The cost note prints only (VM-179's), and leaves with the instruments.
 //
 
@@ -186,6 +196,25 @@ struct MobileFanBadgePlacementProbeTests {
         /// The fanned blocks that met (ii)'s premise at this stop.
         var reached: Set<String> = []
         var badgesInView = 0
+        /// (i′) a drawn badge whose point lies in another block's fragment,
+        /// or in none.
+        var misses: [String] = []
+        /// (i′) badges asked, and badges skipped (their point off screen).
+        var asked = 0
+        var skipped = 0
+    }
+
+    /// (i′)'s question: the surface offset at which the fragment standing at
+    /// a CONTAINER point begins, or nil when no fragment stands there.
+    /// `textLayoutFragment(for:)` forces no layout.
+    private static func fragmentStart(
+        _ view: MobileEditorTextView, atContainerPoint point: CGPoint
+    ) -> Int? {
+        guard let tlm = view.textLayoutManager,
+              let cm = tlm.textContentManager,
+              let fragment = tlm.textLayoutFragment(for: point)
+        else { return nil }
+        return cm.offset(from: tlm.documentRange.location, to: fragment.rangeInElement.location)
     }
 
     private static func checkViewport(
@@ -207,6 +236,27 @@ struct MobileFanBadgePlacementProbeTests {
                 if !onLine {
                     check.astray.append(
                         "\(stop) @\(fan.offset) badge=\(badge.frame.minY) line=\(line.map { "\($0.top)" } ?? "none") laidOut=\(line?.laidOut ?? false)")
+                }
+                // (i′) — what stands AT the badge, asked without its own
+                // block's frame: 1 pt under its top, at the container's
+                // mid-width; a point off screen is skipped and counted.
+                let pointY = badge.frame.minY + 1
+                if pointY >= visible.minY, pointY < visible.maxY {
+                    check.asked += 1
+                    let point = CGPoint(
+                        x: view.textContainer.size.width / 2,
+                        y: pointY - view.textContainerInset.top)
+                    if let standing = fragmentStart(view, atContainerPoint: point) {
+                        if standing != fan.offset {
+                            check.misses.append(
+                                "(i′) \(stop) @\(fan.offset) badge=\(badge.frame.minY) stands beside the fragment at @\(standing)")
+                        }
+                    } else {
+                        check.misses.append(
+                            "(i′) \(stop) @\(fan.offset) badge=\(badge.frame.minY) no fragment at the badge's point")
+                    }
+                } else {
+                    check.skipped += 1
                 }
             }
             // (ii) — every laid-out fanned first line on screen has its badge.
@@ -232,6 +282,10 @@ struct MobileFanBadgePlacementProbeTests {
             #expect(seed.fanned.count >= 20, "non-vacuity: many fanned blocks")
             var astray: [String] = []
             var bare: [String] = []
+            var misses: [String] = []
+            var walkAsked = 0
+            var jumpAsked = 0
+            var skipped = 0
             var walkReached: Set<String> = []
             var jumpMissed: [String] = []
             var fans: [(blockID: String, offset: Int)] = []
@@ -290,8 +344,11 @@ struct MobileFanBadgePlacementProbeTests {
                     let check = Self.checkViewport(view, chrome, fans: fans, stop: "walk#\(stop)@\(Int(offset))")
                     astray += check.astray
                     bare += check.bare
+                    misses += check.misses
+                    walkAsked += check.asked
+                    skipped += check.skipped
                     walkReached.formUnion(check.reached)
-                    print("VM17|walk|stop=\(stop) offset=\(Int(offset)) badgesInView=\(check.badgesInView) fansOnScreen=\(check.reached.count) astray=\(check.astray.count) bare=\(check.bare.count)")
+                    print("VM17|walk|stop=\(stop) offset=\(Int(offset)) badgesInView=\(check.badgesInView) fansOnScreen=\(check.reached.count) astray=\(check.astray.count) bare=\(check.bare.count) asked=\(check.asked) skipped=\(check.skipped) misses=\(check.misses.count)")
                     stop += 1
                     // The end, re-read LIVE at every step (TK2's estimate moves it).
                     let end = max(0, view.contentSize.height + view.adjustedContentInset.bottom - view.bounds.height)
@@ -317,21 +374,27 @@ struct MobileFanBadgePlacementProbeTests {
                     let check = Self.checkViewport(view, chrome, fans: fans, stop: "jump@\(fan.offset)")
                     astray += check.astray
                     bare += check.bare
+                    misses += check.misses
+                    jumpAsked += check.asked
+                    skipped += check.skipped
                     if !check.reached.contains(fan.blockID) {
                         let line = Self.unforcedFirstLine(view, at: fan.offset)
                         jumpMissed.append("@\(fan.offset) line=\(line.map { "\($0.top)" } ?? "none") laidOut=\(line?.laidOut ?? false) visible=\(Int(view.bounds.minY))..<\(Int(view.bounds.maxY))")
                     }
-                    print("VM17|jump|target=@\(fan.offset) offset=\(Int(view.contentOffset.y)) badgesInView=\(check.badgesInView) fansOnScreen=\(check.reached.count) astray=\(check.astray.count) bare=\(check.bare.count) reachedTarget=\(check.reached.contains(fan.blockID))")
+                    print("VM17|jump|target=@\(fan.offset) offset=\(Int(view.contentOffset.y)) badgesInView=\(check.badgesInView) fansOnScreen=\(check.reached.count) astray=\(check.astray.count) bare=\(check.bare.count) asked=\(check.asked) skipped=\(check.skipped) misses=\(check.misses.count) reachedTarget=\(check.reached.contains(fan.blockID))")
                 }
                 #expect(model.identityAuditFailures == 0)
                 #expect(!view.canaryFired)
             }
 
-            // (i) and (ii) — VM-17's verdict.
+            // (i), (i′) and (ii) — VM-17's verdict.
             for line in astray { print("VM17|astray|\(line)") }
+            for line in misses { print("VM17|astray|\(line)") }
             for line in bare { print("VM17|bare|\(line)") }
             #expect(astray.isEmpty,
                     "VM-17: a drawn badge in the viewport stands off its own block (a stray or misplaced badge she can see) — \(Self.listed(astray))")
+            #expect(misses.isEmpty,
+                    "VM-17 (i′): a drawn badge in the viewport stands beside another block's text, or over none — \(Self.listed(misses))")
             #expect(bare.isEmpty,
                     "VM-17: a fanned block on screen has no badge on its first line — \(Self.listed(bare))")
             // (iii) — REACH: the probe's own non-vacuity, never VM-17's.
@@ -340,7 +403,11 @@ struct MobileFanBadgePlacementProbeTests {
                     "the probe did not reach these fanned blocks on its stepped walk (a red here is the probe's, never VM-17's) — \(walkUnreached)")
             #expect(jumpMissed.isEmpty,
                     "the probe did not reach these jump targets on screen (a red here is the probe's, never VM-17's) — \(Self.listed(jumpMissed))")
-            print("VM17|SUMMARY fans=\(fans.count) astray=\(astray.count) bare=\(bare.count) walkReached=\(walkReached.count) jumpMissed=\(jumpMissed.count)")
+            #expect(walkAsked > 0,
+                    "the probe did not reach: (i′) asked no badge on the stepped walk (a red here is the probe's, never VM-17's)")
+            #expect(jumpAsked > 0,
+                    "the probe did not reach: (i′) asked no badge on the jump road (a red here is the probe's, never VM-17's)")
+            print("VM17|SUMMARY fans=\(fans.count) astray=\(astray.count) bare=\(bare.count) misses=\(misses.count) asked=\(walkAsked + jumpAsked) (walk \(walkAsked), jump \(jumpAsked)) skipped=\(skipped) walkReached=\(walkReached.count) jumpMissed=\(jumpMissed.count)")
         }
     }
 
