@@ -1,12 +1,66 @@
 # VM-55 — Run: Wings underneath (mobile catch-up, wave 1, umbrella 2)
 
-**STATUS: OPEN 2026-11-19** — overnight run under `/run-phase vm-55`; stage coordinator `nov18`.
+**STATUS: GATE GREEN 2026-11-19 — built, reviewed, walked and gated; the PR is open and waits for the coordinator's merge GO.** Overnight run under `/run-phase vm-55`; stage coordinator `nov18`.
 Ticket VM-55 (team VM, project "Mobile — the catch-up & launch") · branch `vm-55-wings-underneath` · worktree
 `~/dev/variorum-vm-55` · Pro · ONE PR titled `VM-55: Wings underneath`.
 
 ## FOR A LATER READER
 
-*Written at closeout. Until then this run is open and the sections below are its working record.*
+**What this run was.** Wave 1, umbrella 2 of the mobile catch-up: the phone learns wings underneath, gets one
+message line, stops rendering raw error text, and the Mac's wing brains move to shared code. Nine members —
+VM-56 · VM-57 · VM-58 · VM-59 · VM-60 · VM-61 · VM-62 · VM-63 and, minted mid-run at her word, VM-225 — built in
+four batches (batch 2 in two halves), each by a fresh `opus-implementer`, with one `fable-reviewer` round and a
+fresh closer for the walk and the gate. Zero `Sources/` lines, zero schema, nothing under `Sync/`, custody,
+Protection or the editor brain; the sync marker is untouched. ‹MERGE-LINE›
+
+**As built, one pointer per piece** (paths under `App/Variorum/`):
+- *The phone stands in one wing (VM-56).* `Shared/WingState.swift` — `readScope` is the current wing on both
+  platforms; `Shared/AppBootstrap.swift` attaches the device memory and the dead-wing return to Home on the phone.
+  The roots' title is `VariorumMobile/Features/Shell/MobileWing.swift` (`MobileWingTitle`).
+- *Every listing reads it (VM-57).* `MobileWingScope.follow` in the same file runs a held listing once per wing;
+  each model passes `wingID:` to the Core read it already made. Snippets stay unscoped.
+- *Mints (VM-58) and the tag manager (VM-60).* Call sites only: `MobileNewNoteDoor`, `MobileQuickNoteModel`,
+  `MobileCreateBookModel` (one wing snapshot for the name guard, the mint and the tag vocabulary),
+  `MobileTodayDoor` (passes the standing wing; a living Journal's entry is still born beside it),
+  `MobileTagManager`.
+- *The wing-blind pickers (VM-59, the Bug).* `Write/MobileNoteTags.swift`, `Write/MobileMembership.swift` read
+  `Queries.effectiveWing(ofPost:)`; `Shell/MobileCreateBook.swift` reads the sheet's wing. Pins:
+  `MobileWingBlindPickerTests`, red on the old tree 3 of 3.
+- *The one message seam (VM-61).* `Shared/StatusCenter.swift` (moved from `Variorum/Registry/`); the routing is
+  the one pure rule `slot(kind:leavesPage:placement:receiptStyle:)`. The phone's vocabulary is
+  `VariorumMobile/Features/Shell/MobileLine.swift`, its face `Shell/MobileMessageLine.swift` (one passthrough
+  overlay window owned by the shell). The Mac's guard: `VM61MacStatusSeamPinTests`.
+- *Refusals in words (VM-62, the Bug).* `Shared/OpsRefusalTable.swift` — `OpsRefusalCopy.sentence(for:roads:)`,
+  the table's words else `unexpectedFailure`. Pins: `MobileNoRawErrorPinTests` (a source scan of
+  `VariorumMobile/`), `MobileRefusalSentencePinTests`; red on the old tree (97 lines, 5 of 5).
+- *The hoist (VM-63).* `Shared/WingsModel.swift`, `WingSwitcherBrain.swift`, `WingFollowRule.swift`,
+  `WingBookMoveBrain.swift`, `WingDestinationModel.swift`, `SearchPickerBrain.swift`; the Mac's halves stay in
+  `Variorum/Core/Views/WingsModel+Mac.swift` and `WingNoteDoors.swift`. Guards: `VM63MacWingBrainsHoistPinTests`,
+  `MobileWingBrainsHoistTests`, and the two Mac scans' `hoistedMacBrains` list — the next hoist adds its file.
+- *The interim wing door (VM-225).* `VariorumMobile/Features/Shell/MobileWingDoor.swift`; the shell holds the
+  shared `WingsModel`. Wave 2's VM-80 replaces it whole.
+
+**Her words that bind it** (verbatim under "Her words"): only removals and refusals show a line; the wing's name is
+the title on every root (SW-1); a quick note lands in the current wing's Pool (SW-5); the plain interim door
+("yeah - go ahead and add the plain interim door to this run."); the ladder ("up to 5 review rounds as long as a
+major is found"); the Protection remainder under VM-103 ("yeah that's fine."); the phone install ("ok i'll do the
+hands part in the morning.").
+
+**Evidence that matters.** The ladder closed at round 1 — 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT
+(`vm-55-ladder-round1.md`), three confirmed fixes pinned red-on-old. The walk: eleven rows PASS from their
+captures on a dedicated simulator in both voices; the direction row rests on `MobileLineDirectionTests`. The
+merge gate: the whole phone target 953 tests / 163 suites with main's one red (VM-24's caret test, 2 of 3 cases); the whole
+Mac target 6,409 tests / 1,111 suites in one launch — 1 failed, the standing flake `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` (VX-701), green when re-run alone; 13 standing known issues; 31 gated harnesses skipped.
+
+**Open, and where it lives.**
+- Nineteen PROVISIONAL calls, P-55-1 … P-55-19: QUESTIONS #‹QN›; her checklist is
+  `notes/handoffs/vm-55-handoff.md`.
+- The Protection screen's messages and two raw-error faces on the custody road: VM-229, VM-230 (under VM-103).
+- Phone words for the wing brains' four Mac-worded sentences and the empty-wing lines: VM-231 (under VM-72).
+- Found, not fixed: VX-1021 (a book whose wing died shows on no Bookcase), VX-1022 (the Mac's switcher can pick a
+  dead wing), VX-1023 (a ready-state test touches the host's remembered wing), VX-1024 (one public error log
+  line on main, the privacy pin's one exemption).
+- A direction draws in the refusal's alarm ink on the phone (P-55-19).
 
 ---
 
@@ -2248,4 +2302,58 @@ detached snapshot worktree — never a revert in this worktree.
 
 ## Closeout
 
-*(results, the ratify list, tickets filed, the rulings reconciled, MOBILE PARITY, canon-size)*
+**Results.** Nine members built in four batches; every member's record is under "Batch records". The ladder closed
+at round 1 (0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT), three confirmed fixes pinned red-on-old. The walk passed
+eleven of twelve rows from their captures; the twelfth rests on its pin. The merge gate, on the tree that merges
+(code `923f14f30`, main `9a78628ea` merged in, nothing outside `notes/` after it):
+- the whole phone target — 953 tests / 163 suites; 1 failed, main's `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`
+  (VM-24, 2 of 3 cases); 4 declared known issues;
+- the whole Mac target — 6,409 tests / 1,111 suites in one launch — 1 failed, the standing flake `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` (VX-701), green when re-run alone; 13 standing known issues; 31 gated harnesses skipped.
+
+**The ratify list.** Nineteen PROVISIONAL calls, P-55-1 … P-55-19, each with its options where it was made (the
+batch records, "The orchestrator's check of batch 2a", the Ladder). They go to `notes/QUESTIONS.md` as one bundle
+at the merge moment; her checklist is `notes/handoffs/vm-55-handoff.md`. The lines that no longer show are listed
+verbatim in the batch 2a record and in the handoff. The closer made no PROVISIONAL call.
+
+**Tickets filed, each triaged at mint.** VM-225 (Feature · App shell · High — built here) · VM-229 (Improvement ·
+Confirmed · Castle & sync · Medium, under VM-103) · VM-230 (Bug · Confirmed · Castle & sync · Medium, under VM-103) ·
+VM-238 (Improvement · Confirmed · Takes & Lenses · Medium, under VM-186) · VM-231 (Improvement · Wording ·
+Confirmed · App shell · Low, under VM-72) · VX-1021 (Bug · Suspected · Books · Medium, parked) · VX-1022 (Bug ·
+Suspected · App shell · Low, parked) · VX-1023 (Debt · Test-only · Tests & tooling · Low, parked) · VX-1024 (Debt ·
+Confirmed · Settings & onboarding · Low, parked). Notes left on VM-80 (the interim door; four provisional calls),
+VM-72 (the capture box's keyboard across a page change; the follow's act is still the Mac's) and VM-216 (the wing
+door's VoiceOver hint).
+
+**The rulings reconciled** (each re-read against what shipped; "every" and "all" checked by name):
+- *"the wing's name is the title on every root" (SW-1).* The three roots name it, leading today's path line
+  (P-55-2); the title band itself is wave 2's (VM-80). No remainder beyond that ticket.
+- *"Every list shows only the current wing" (VM-57).* The Library's All and Notes, the Pool, books (the Shelf and
+  the Books filter), today's title search, Starred, Archived, the Trash and its Empty Trash, the tag manager, and
+  the three pickers (their own subject's wing). Unscoped by ruling: Snippets. Left store-wide on purpose: lookups
+  of one book by id, the starter Journal's virgin-store guard, the Debug seeders. No remainder.
+- *"New notes, books and tags are born in the current wing" (VM-58, SW-5).* New note, quick note, new book, a new
+  gathering, a new top-level tag; Today beside its Journal; a note minted inside a book in the book's wing. No
+  remainder.
+- *"Only removals and refusals" — "a short line with Undo when something leaves the page (a delete, a merge, an
+  archive, a deleted tag)".* Wired: note, book, block and paragraph deletes, merges and the cross-block join,
+  archives, the Trash's confirmed purges (no Undo). NOT wired, a remainder: a comment's delete, a take's delete or
+  archive, a lens's delete — **VM-238**; a deleted tag's Undo is VM-101's. The Protection screen's messages —
+  **VM-229**.
+- *"Every refusal speaks a plain sentence" (VM-62).* Every phone site under `VariorumMobile/`, pinned by the scan.
+  A remainder on the custody road: the library-open failure's reason and a failed account deletion — **VM-230**.
+- *The wing brains named for the hoist (VM-63): WingsModel, WingSwitcherBrain, WingFollow, the move or copy
+  confirm.* All four moved or lifted; the follow's ACT stays a Mac extension (it drives the Mac's sidebar and
+  workspace) — noted on VM-72 for VM-80's follow.
+- *The interim door (her mid-run word).* On all three roots, a plain list, a pick lands on that wing's Bookcase.
+  No remainder; VM-80 replaces it.
+
+**MOBILE PARITY.** `notes/MobileSoul.md` §6, PL-76.
+
+**Canon.** SurfaceContracts' Messages bullet and wing-switcher bullet each gained the phone's half in place; one
+clause in AppSpec §12; MobileSoul PL-76. No OverallModel, CoreDescription, SyncSpec, CastleRules, MCPSpec or
+CLAUDE.md line moved. `Tools/canon-size`: 143,078 of 150,000 (headroom 6,922) — no crossing.
+
+**Not done by this run.** No release; nothing installed on her phone or in `/Applications`; nothing published. The
+wave-1 phone build is the wave's last mobile merger's, and the install is hers ("ok i'll do the hands part in the
+morning."). No next-phase plan is owed: wave 2's umbrellas are planned in
+`notes/plans/vm-44-mobile-catch-up-plan.md` and start at her kickoff once wave 1 has merged.
