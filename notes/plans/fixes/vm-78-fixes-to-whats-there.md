@@ -2273,7 +2273,7 @@ its own checkout.*
 | Piece | State |
 |---|---|
 | 0 — this LIVE STATUS opens; the trial merge's conflict list | DONE (this commit) |
-| 1a — revert the fix `f869f8667` | NOT-STARTED |
+| 1a — revert the fix `f869f8667` | DONE (this commit) — `git revert --no-commit f869f8667`; its three product files restored to their state before it (`MobileTakesChrome.swift`, `MobileEditorTextView.swift`, `MobileBlockDecor.swift`); the commit's one record line (batch D's build row 2) is KEPT as written — the record is history, and the revert conflicted there only |
 | 1b — revert the pins `15add793d` | NOT-STARTED |
 | 1c — remove the probe `MobileFanBadgePlacementProbeTests.swift` | NOT-STARTED |
 | 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | NOT-STARTED |

@@ -79,7 +79,7 @@ final class MobileBlockDecorController {
         let inset = textView.textContainerInset
         let containerWidth = textView.textContainer.size.width
 
-        // The band (the takes chrome's law too until VM-17 — notes/plans/fixes/vm-78-fixes-to-whats-there.md, batch D; no longer the sibling
+        // The band mirrors the takes chrome's exactly (the sibling
         // discipline — one scope law, two controllers): `.edit` unions
         // the edited range into the near band (parity B3's FB2-1 fix —
         // invalidation ∝ viewport + edit, never post length).
