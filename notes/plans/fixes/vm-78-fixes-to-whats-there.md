@@ -2864,7 +2864,7 @@ not merged). **No revert is in flight.***
 | Piece | State |
 |---|---|
 | 0 — this section and its LIVE STATUS | DONE (this commit) |
-| 1 — G1, `MobileNoteEntryDateTests.noPhoneFaceReadsTheEditorsUnobservedHeaderDate` | NOT-STARTED |
+| 1 — G1, `MobileNoteEntryDateTests.noPhoneFaceReadsTheEditorsUnobservedHeaderDate` | DONE (this piece's commit; `MobileMembershipTests.swift`, beside the date pin) — walks `VariorumMobile/` from `#filePath`, skips `Features/Write/MobileEditorViewModel.swift`, expects > 60 files; lines from `MobileNoRawErrorPinTests.strippingComments(_:)`; offender = `/\.header[?!]?\.entryDate\b/`; the message names the remedy (`MobileWriteScreen.dateChipDay(model)`). The date pin's doc gains the seam/face sentence. Compiled at piece 4 |
 | 2 — G2, `MobileGatheringWordTests.noPhoneStringLiteralSaysSmart` with its oracle and two exemptions | NOT-STARTED |
 | 3 — G3, `MobileMembershipSheetFaceTests` (the premise check first) | NOT-STARTED |
 | 4 — compile proof: an incremental phone `build-for-testing` into `vm78-ios` | NOT-STARTED |
