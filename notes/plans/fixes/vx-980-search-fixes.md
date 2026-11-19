@@ -399,7 +399,27 @@ No other string was added or changed.
 
 **The dev store, as found and as left (nothing of its posture changed):** not locked, no Castle face; signed out ("Sync off (dev store)"); the restore-hold banner standing, Resume Sync never pressed; the words band card showing, untouched; MCP server ON; Study voice, dark. What's New 1.4 dismissed. Content left: two notes in Home's Pool, "vx980 red apple orchard" and "vx980 blue pear harbor", tag `#vx980walk` (reused by the Trash walk). No instance left, no crash report.
 
-*Gate 2 (batches 2 and 3 — their suites and walks in one launch) is recorded here when it runs.*
+### GATE 2 — batch 2 (claim `vx980-gate2`, 2026-11-19 05:47–05:55, nov18's GO): the walk PASSED; the suites carry ONE red, a stale pin
+
+**The tree under test.** The gate snapshot `~/dev/variorum-vx-980-gate` at `8a170e934` (batches 1 + 2), `build-for-testing` done there.
+
+**The suites (test-without-building, 31 TYPE names — batch 2's READY-FOR-GATE list plus `ShellChromeTests`, added because the batch declares two registry acts).** Swift Testing: **"280 tests in 31 suites failed with 1 issue"**; XCTest "Executed 0 tests"; 0 `skipped` lines. `CapabilityRegistryTests` green, `ShellChromeTests` green, 30 of 31 types green.
+- **THE ONE RED — `DataSafetyRoadCountsTests.thePaneHandsTheOpenLibrarysRoadToTheModel`** (`App/Variorum/VariorumTests/Protection/DataSafetyRoadCountsTests.swift:136`): a source-shape pin matching the literal `roadCounts: roadStanding?.copyCounts))` in `DataSafetyPane.swift`. Batch 2 added `searchIndexDoors:` AFTER that argument, so the closing parentheses moved and the text now reads `roadCounts: roadStanding?.copyCounts,`. The hand-off the pin protects is intact (read in the source). PIN STALENESS, test-only — not a load red, so no alone re-run. The fix (the expectation matches the argument without the trailing parentheses, nothing else) went to batch 3's live implementer as a rider with its own commit; the type re-runs at gate 3.
+
+**The launch.** 05:49:30 → drawn in about TEN SECONDS, straight to the Bookcase. So gate 1's nine-minute blank was a cold read of the second backup folder (VX-1013 stands; a later launch the same night is quick). No "different library" notice this time although the launch came right after a 31-suite test-host run — the test-host cause guessed in VX-1015 is therefore doubtful (the ticket is corrected).
+
+**The walk (the snapshot's Debug product; Settings read and pressed through Accessibility — the words guard withheld every Settings capture with -25200, the known macOS 27.0.1 behaviour, so no Settings screenshot was taken).**
+1. Settings ▸ Data Safety: the Search index section after the restore matter — its line "Search reads an index Variorum keeps on this Mac, built from your notes. Nothing of yours lives only in the index, so checking it or rebuilding it is always safe.", the doors Check Index and Rebuild Index, nothing under them.
+2. Check Index → "The search index is in step with your notes — 4,857 entries."
+3. Rebuild Index → "Rebuilt from your notes. The search index is in step with them — 4,857 entries." (the same count).
+4. Left to Diagnostics and came back → the row quiet again (the answer is the visit's, P-980-B2-2).
+5. Settings search "search index" → one result, "Search index · Data Safety · Check that the index search reads matches your notes, or rebuild it from them. Nothing of yours lives only in it."; pressing it opens Data Safety on the row.
+6. ⌘K "rebuild" and "index" → only passages from notes, no index command; no index or rebuild item in File, Edit, View, Note or Help.
+(The out-of-step and failure lines are pinned by `DataSafetySearchIndexTests`, not walked — reaching them would need a raw edit of the dev store's index.)
+
+**The dev store, as found and as left:** not locked; Standard ("You're in Standard." read in Settings ▸ Protection, nothing pressed there); signed out; the restore-hold banner standing, Resume Sync never pressed; the words card untouched. Changed: only the derived search index, rebuilt in place. No Restore-list door touched (the pane lists 118 copies on the dev store). No instance left; no new `Variorum-*.ips`.
+
+*Gate 3 (batch 3 — its suites, the Trash walk, and the re-run of `DataSafetyRoadCountsTests` after the pin's fix `2eaf1ec93`) is recorded here when it runs.*
 
 ## THE LADDER
 
@@ -416,8 +436,8 @@ No other string was added or changed.
 | 1 | Kickoff: worktree, branch, in-flight row (`1d84b85a4`), VX-980 In Progress, nov18 told | DONE |
 | 1b | Her kickoff sitting: R-980-1…12 recorded verbatim (`vx-980-her-rulings.md`), folded into this record; VX-1009 and VX-1010 born | DONE |
 | 2 | BATCH 1 — VX-955 · VX-954 (+ R-980-5) | BUILT (head `1d7e4d770`): core pins red-on-old then green, the tokenizer sweep 0 of 1,112,064, search suites 175/31 + 3/3, build-for-testing green. **GATE 1 PASSED 2026-11-19** (103 tests / 17 suites; the four walk probes; the revert leg red, 5 tests / 65 issues, restored) |
-| 3 | BATCH 2 — VX-79 | BUILT (head `119f6938d`): the Settings ▸ Data Safety row, two registry acts (`.checkSearchIndex`, `.rebuildSearchIndex`), the restore-roads trace (no road lands the index out of step; seven guard pins), core 196/35 + 3/3, build-for-testing green. OWED AT GATE 2: the app suites (its TYPE list) and the walk rows |
-| 4 | BATCH 3 — VX-93 | NOT STARTED |
-| 5 | The gates and the walk (through nov18) | GATE 1 DONE (batch 1). Gate 2 REQUESTED (batches 2 + 3), the merge gate REQUESTED. Born at gate 1: VX-1013 · VX-1014 · VX-1015 |
+| 3 | BATCH 2 — VX-79 | BUILT (head `119f6938d`): the Settings ▸ Data Safety row, two registry acts (`.checkSearchIndex`, `.rebuildSearchIndex`), the restore-roads trace (no road lands the index out of step; seven guard pins), core 196/35 + 3/3, build-for-testing green. **GATE 2 2026-11-19:** the walk PASSED (Check and Rebuild read 4,857 entries); suites 280 tests / 31 suites with ONE red, a stale source-shape pin (`DataSafetyRoadCountsTests`), fixed test-only at `2eaf1ec93` — its re-run is owed at gate 3 |
+| 4 | BATCH 3 — VX-93 | BUILT (head `824b92efc`): the Trash's own search to R-980-9…12 — `Domain/TrashTextMatch`, `Queries/TrashSearch` (driven from the Trash's rows, plan pinned), the field and the passage line in `RecoveryView` / `TrashSearchField`; core 359/65 + 4/4, teeth probes red and restored, build-for-testing green. OWED AT GATE 3: the app suites (its TYPE list) and the Trash walk |
+| 5 | The gates and the walk (through nov18) | GATE 1 DONE (batch 1). GATE 2 DONE (batch 2; one stale pin fixed, re-run owed). Gate 3 (batch 3) next; the merge gate REQUESTED. Born at gate 1: VX-1013 · VX-1014 · VX-1015 |
 | 6 | The ladder | NOT STARTED |
 | 7 | Closeout: canon deltas, record, handoff, merge gate, PR, merge-moment ledgers, tickets, debris, worktree and branch removal | NOT STARTED |
