@@ -25,6 +25,28 @@ Wave 1's four umbrellas (VM-47, VM-55, VM-64, VM-78) run together, each in its o
 needs her hands is held and bundled for her next sitting while everything that does not depend on it
 continues.
 
+**Her words later the same sitting (2026-11-19), verbatim, in order:**
+
+- On the five batches and the review: "yeah that's fine on the five sequential batches - you can do a midway
+  through review it if you prefer. also - up to 5 rounds as long as a major is found." So, for this run: a
+  midway cold review is taken after batch 2 (the layer and the controls, before the screens build on them),
+  and the ladder runs up to five rounds while a round still finds a MAJOR. CLAUDE.md's standing cap of three
+  is unchanged for other runs.
+- On the phone: "ok i talked to vm-64 about that and resolved the previous install blocker with vm-55. now,
+  i'll plan to have the wave 1 build installed on my phone after the last vm has merged in, by the last one.
+  sound good? the phone step is the single wave-1 install after all four runs have merged. whoever is last
+  can probably do it overnight over wifi." The install runbook
+  (`notes/plans/vm-44/plans/vm-45-install-runbook.md`) needs her at the phone (unlocked and awake for the
+  safety copy and the install, Variorum fully quit first), and wifi is untried there. So the last merger
+  prepares overnight — a Release device build of merged main, signing verified, main's sync version checked
+  against production's — and the install itself is hers to start.
+- The two calls put to her (R-47-1, R-47-2 in §5): "grounds - prose should not be on the tint, which is what
+  I understood you mean. that sounds good. voice only row - yeah, that's fine. also - agreed, i'll do the
+  hands part in the morning."
+- Leaving for the night, relayed by the coordinator (her words to it, 04:16): "ok i'm off the mac. variorum
+  is closed. i'm leaving for overnight. good luck with everything, tell all my sessions that i'm off, rule
+  provisionally in my absence, i'll check in in the morning (which is depressingly soon)."
+
 **Cast (CLAUDE.md's standing rule; she named none at this kickoff):** Fable orchestrates; ONE Opus
 implementer per batch (`opus-implementer`), strictly sequential; the cold review is `fable-reviewer`, because
 the diff changes the editor's face values (`MobileEditorStyle`) and a default's meaning (the phone's voice).
@@ -219,10 +241,13 @@ resolves voice, palette and tint from the library's synced settings, observed, s
 arrives on the phone; a store with no palette wears the sea-glass (AppSpec §12); `MobileVoicePreference`
 retires — the phone keeps no voice of its own. Whether the phone shows a voice row that writes the library's
 voice is left to the build by the ticket: options (a) no row, (b) a row that writes the library's synced
-voice as the Mac's Settings does. Build (b) — phone-only users exist and need the choice — PROVISIONAL
-(P-47-3). The grounds follow the Mac's rule as the sizing sheet draws it (content panes on the paper,
-`tokens.surface`; bars, sheets and section bands on the room): PROVISIONAL (P-47-2), built only where it is
-the root screens' and sheets' background lines; anything deeper is listed, not built.
+voice as the Mac's Settings does. Build (b) — RULED (R-47-2): "voice only row - yeah, that's fine." The
+grounds follow the Mac's rule as the sizing sheet draws it (content panes on the paper, `tokens.surface`;
+bars, sheets and section bands on the room) — RULED (R-47-1): "grounds - prose should not be on the tint".
+The ruling's test is her prose: wherever her words are read or written (the note in Write, a book's Read
+page, list rows and previews, take cards) the ground is the paper, in light and in dark, under every
+palette. Build it at the screens' and sheets' background lines; a surface where that is more than a
+background line is listed in §6 with its owner, not rebuilt here.
 
 VM-54, the ticket: "The borders on take cards, the takes pill and the comment draft resolve their colour
 once and have no hook for an appearance change, so switching between light and dark probably leaves them in
@@ -277,12 +302,14 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 1.4 | W-024: `MobileShelfLayout` re-derived from the roles; the quick-entry text is the note body; the hint fits; pins moved | DONE (`6b02c806c`; the filter row's floor and its pins `c1e80f315`) — `quickEntryLineHeight` 24 + `metaLineHeight` 18 replace `smallLineHeight` 14; `bookRowHeight` 44, `writingBoxChromeHeight` 60, both derived on the page; the floor and the collapsed box take the box's line AT THE CURRENT TEXT SIZE (`split(…, lineHeight:)`); the box types `noteBody` on its 24 pt line; the hint shows the longest of its own cuts that fits (P-47-6); the shelf's sites read roles; `MobileShelfLayoutTests` moved + 3 new pins; phone `build-for-testing` green; tests PENDING the stage |
 | 1.5 | The source-scan guard pin (no `tokens.small`, no literal under 13, outside `Spike/`/`Perf/`) | DONE (`bb30a4132`) — `MobilePhoneTypeSourceTests` (3 tests): no Mac type slot, no literal size or caption style under 13, no literal `minimumScaleFactor`; its patterns measured red on `fe85ea6d5` (332 slot reads, 32 sub-13 sites) and clean now; run PENDING the stage |
 | 1.6 | Both schemes `build-for-testing` green → READY for the stage → the stage window: suites + walk captures | IN-PROGRESS — both schemes `build-for-testing` green at `1b2908a64` (`DerivedData/vm47-b1`); READY for the stage, awaiting the orchestrator's GO; then: the whole phone target + the Mac's theme suites, the walk into `notes/plans/vm-47-screens/` |
+| 1.6b | CUTOVER (orchestrator, machinery honesty): the batch-1 implementer ended its turn READY at about 650k tokens of context, every piece committed and both schemes building. The stage window (suites, any reds, the walk) goes to a FRESH closer briefed from this record, not to the long session | the closer adds its rows below |
 | 1.7 | §6 "Batch 1 — results" written | DONE (this commit) — counts and the walk PENDING the stage window |
 | 2 | Controls and targets (VM-50; VM-49's application) | NOT-STARTED |
 | 3 | Voice and palette; borders (VM-51, VM-54) | NOT-STARTED |
 | 4 | The bottom bar (VM-52) | NOT-STARTED |
 | 5 | Settings (VM-53, VM-27) | NOT-STARTED |
-| — | The ladder (Fable, fresh reviewer per round) | NOT-STARTED |
+| — | The midway cold review, after batch 2 (her word; Fable, fresh) | NOT-STARTED |
+| — | The ladder (Fable, fresh reviewer per round; up to five rounds while a round finds a MAJOR — her word) | NOT-STARTED |
 | — | Closeout | NOT-STARTED |
 
 Each batch's implementer adds its own piece rows under its batch line as it starts.
@@ -292,16 +319,18 @@ Each batch's implementer adds its own piece rows under its batch line as it star
 | Id | Call | Options | Built | State |
 |---|---|---|---|---|
 | P-47-1 | The sizing sheet's numbers (type roles, spacing, radii, row heights, the two inks) | as drawn · her own numbers | as drawn | PROVISIONAL — she has seen the sheet in use, not ruled it number by number |
-| P-47-2 | Grounds: content panes on the paper, chrome on the room | the Mac's rule as the sheet draws it · every screen on the room, as built today | PENDING (batch 3) | PROVISIONAL |
-| P-47-3 | A voice row on the phone that writes the library's voice | no row · a row writing the synced voice | PENDING (batch 3) | PROVISIONAL |
+| R-47-1 (was P-47-2) | Grounds: her prose never sits on the tint — notes and lists on the paper, bars and sheets on the room | the Mac's rule as the sheet draws it · every screen on the room, as built today | PENDING (batch 3) | **RULED 2026-11-19** — "grounds - prose should not be on the tint, which is what I understood you mean. that sounds good." |
+| R-47-2 (was P-47-3) | A voice row on the phone that writes the library's voice | no row · a row writing the synced voice | PENDING (batch 3) | **RULED 2026-11-19** — "voice only row - yeah, that's fine." |
 | P-47-4 | Terminal's "prose roles two points under Study's" — which roles, and the line pitch | (a) every prose-family role (body, note title, screen title, row title, row preview), size AND pitch two under: 15/25 · 22/28 · 18/23 · 15/20 · 13/18 · (b) sizes two under, pitches kept proportional (15/24 · 22/28 · 18/23 · 15/19 · 13/17) · (c) only the three roles the brief names two under, rows at Study's sizes | (a) — one rule, and a Terminal line keeps Study's leading; row preview lands on the meta pitch (13/18) | PROVISIONAL (batch 1) |
 | P-47-5 | The dark `faint` | (a) the every-palette floor the brief states — Study #766F5F, Terminal #6B7168 · (b) the sheet's #736C5D as drawn (computed over the sea-glass family only; 2.91:1 on teal & rust's dark card) | (a); the rule reproduces the sheet's light inks exactly (#6A6359, #8B7F6A) and leaves dark `muted` unchanged in both voices | PROVISIONAL (batch 1) |
 | P-47-6 | The quick-entry hint at the note-body size (42 characters; Terminal 380 pt at 15 pt mono against a 338 pt box) | (a) the longest of the hint's own cuts that fits — the hint, "new note — just start typing", "new note" (no new words) · (b) let it wrap (breaks her one-line-at-rest ruling) · (c) new shorter words — the sheet draws "New note", but no wording-list draft exists, so that waits for her wording pass | (a) | PROVISIONAL (batch 1); the capture box's rebuild (SW-3/SW-4, umbrella 5) may replace it |
 | P-47-7 | The Library/Archive filter row's five words | (a) `meta` 13, the floor: one unshrunk row at 375 and 402 pt in both voices and 320 pt in Study; Terminal at 320 pt (Display Zoom) cannot hold five 13 pt mono words + the glyph + the 20 pt gutters, so the last words truncate (no word below 13 pt) · (b) `chip` 15, the sheet's named role for filters: shrinks at 375 Terminal and 320 Study, overflows Terminal 320 · (c) scroll or wrap the row — against her #92(b) | (a); the Terminal-320 gap is a named `withKnownIssue` in two pins, owned by VM-50 (batch 2's segmented choice replaces the row) | PROVISIONAL (batch 1) |
 | P-47-8 | Role judgment calls (the brief's "the smaller of the two candidates") | listed per family in §6 "Batch 1 — results", the role-map table | the smaller candidate each time | PROVISIONAL (batch 1) |
 
-Held for her hands: a build on her phone for the look at true size (no device install runs overnight); her
-glance at which Protection door stayed (VM-27); the wording pass over any new line.
+Held for her hands: the wave-1 install on her phone (one install from merged main, after all four runs,
+prepared by the last merger; the hands part is hers in the morning) — it is where she judges P-47-1's
+numbers at true size; her glance at which Protection door stayed (VM-27); the wording pass over any new
+line.
 
 ## 6. Results, review and closeout
 
