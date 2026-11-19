@@ -566,9 +566,14 @@ DerivedData: `App/Variorum/DerivedData/vm64-b6/` and `vm64-b6-red/` (gitignored)
 
 ### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**No revert is in flight.** The red-on-old proof will be a second build of the pins against the batch's production files
-at this batch's base, made only AFTER the fix is committed and pushed, announced here first, restored with
-`git checkout HEAD --` and a clean `git status`.
+**A REVERT IS STARTING (announced before it starts — the resiliency protocol's rule).** From `c9b574513` (the fix and
+the pins, committed and pushed), the batch's four production files —
+`Sources/VariorumCore/Queries/IdleCommit.swift`, `Sources/VariorumCore/Operations/Operations+Variant.swift`,
+`App/Variorum/Shared/AppSession.swift`, `App/Variorum/Shared/AppTiming.swift` — are checked out at the base `dfdd94b5a`;
+`build-for-testing` (phone) into `App/Variorum/DerivedData/vm64-b7-red/`; then `git checkout HEAD --` the four files and
+`git status` / `git diff HEAD` read empty. The phone pins name no VM-71 API, so no test file is set aside; the Core suite
+`LeavingSavepointTests` is not in the phone build. If a successor finds this line, `git diff HEAD` says what is reverted
+right now: restore with `git checkout HEAD -- <the four files>`.
 
 **Base:** `dfdd94b5a` (batch 6 BUILT and waiting for its window; its three release pins in `MobileNoteOpenOnceTests` are
 in this batch's stage commands).
@@ -617,7 +622,7 @@ in this batch's stage commands).
 | P2 — Core: the candidates read + the narrowed op + headless pins (equivalence, re-verification, every refusal) + a gated measurement | DONE (this commit) — `Queries.leavingSavepointCandidates` (`Queries/IdleCommit.swift`), `Operations.closeAutoCommit(_:takes:)` (`Operations+Variant.swift`); `swift test --filter 'LeavingSavepointTests\|LeavingSavepointMeasurementTests\|SavepointCadenceTests\|InsureTakesTests\|SearchSavepointCaptureTests\|SearchSavepointFacetTests'` green (`LeavingSavepointTests` 7, the measurement skipped ungated; the four neighbours unchanged). **The headless before/after** (`VARIORUM_VM71_MEASURE=1`; Mac M-series, Debug, an ENCRYPTED on-disk WAL store, one note of 1,370 blocks / 131,520 words, every take savepointed once; n = 5): the whole op (today's runner turn) **215.53 ms (214.96–216.49)** after one edit and **216.16 ms (215.01–216.90)** after only reading; the read **5.84 ms (5.83–5.89)** / **5.94 ms (5.88–6.18)** on a reader; the narrowed op **1.07 ms (1.02–1.14)** on the runner for the one owed take, and NO runner turn when nothing is owed — a Mac number, never a phone number |
 | P3 — the phone's branch of `savepointOnLeaving` + the mark | DONE (this commit) — `Shared/AppSession.swift`: the Mac's statements in their order under `#if os(macOS)` (only the two inner guards they already sat in collapse into it); the phone's `#else`: flush → the read on a reader → nothing owed: return / `StoreLockedError`: return / another read failure: today's whole op → the mark → one runner turn for the owed takes. `Shared/AppTiming.swift`: the `savepointAttempt` docs say what it counts now. Build PENDING (P5) |
 | P4 — the pins: perf suite (Castle 3 → 1 asserted, the lock road 2 → 1, note-leaving and Standard guards, the 100k leaving's writer statements, the runner-hold probe, the box's first mint after the 100k leaving); a company-safe suite for hazards (a)–(c) | DONE (this commit) — `MobileHerPathsPerfTests`: `savepoints-per-note-leaving` and `-backgrounding-{standard,castle}` ASSERTED == 1; new `lockingWithAnEditedNoteOpenCountsItsSavepointAttempts` (`savepoints-per-lock` == 1), `leavingTheHundredKNoteHoldsTheRunnerOnlyForWhatItOwes` (writer: no take scan, one last-savepoint read per take owed — 0 read-only, 1 edited; the runner probe and the `noteLeave` span recorded), `theBoxsFirstSaveAfterLeavingTheHundredKNote` (recorded); `RunnerProbe`. New `MobileLeavingSavesOnceTests` (6, company-safe: every road's one savepoint by the store's record, (b) twice per road, (c) with a REAL pool close, the writer's scans). Phone `build-for-testing` into `vm64-b7` `** TEST BUILD SUCCEEDED **`, no warning in a touched or new file; runs PENDING the stage |
-| P5 — builds: Core `swift test` (touched + savepoint suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b7/`; the red-on-old phone build into `vm64-b7-red/` (revert announced first) | NOT-STARTED |
+| P5 — builds: Core `swift test` (touched + savepoint suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b7/`; the red-on-old phone build into `vm64-b7-red/` (revert announced first) | IN-PROGRESS — Core suites green (P2); phone `build-for-testing` into `vm64-b7` `** TEST BUILD SUCCEEDED **` at `c9b574513` (the fix products); Mac `build-for-testing` into `vm64-b7` `** TEST BUILD SUCCEEDED **` (Shared + Core changed), no warning in a touched file. NEXT: the red-on-old build (the revert above) |
 | P6 — closeout in §7 + READY | NOT-STARTED |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b7/` and `vm64-b7-red/` (gitignored).
