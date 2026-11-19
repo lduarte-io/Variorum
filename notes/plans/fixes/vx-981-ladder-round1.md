@@ -1,6 +1,6 @@
 # VX-981 — the ladder, ROUND 1 (cold review)
 
-**STATUS: COMPLETE (round 1's findings and clean bill). Counts: BLOCKER 0 · MAJOR 0 · MINOR 4 · NIT 5. No finding is awaiting a dispute yet — the implementer's agree/dispute returns to this reviewer for the final calls.**
+**STATUS: ROUND 1 CLOSED BY ITS REVIEWER — findings and clean bill below, then the implementer's responses and the open reds' investigation, then `## FINAL CALLS — round 1` at the end of this file (the reviewer's call on every finding; nothing FINDER-FIXES). Counts: BLOCKER 0 · MAJOR 0 · MINOR 4 · NIT 5.**
 
 ## Scope note
 
@@ -182,3 +182,87 @@ No revert is in flight. No product or test line of the run was changed by PASS 1
 ### Also seen — not one of the two reds (for the orchestrator)
 
 The OLDER tree's phase-2 run 4 HUNG: 0 % CPU for 12 minutes, then killed by this session (its own test process; rc 1). Its sample: the main thread idle in its run loop, one `variorum.mcp.reader` thread blocked in `read`, no pool thread in a job. The one suite left unfinished in its log is "VX-318 — a session's reader never reads past the session's end" — `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds(.clientHangsUp)` started and never ended. Not seen on the tip in 31 runs; NOT traced (outside this session). `77aebf864`'s MCP roads are main's plus batches 1–2, so it may exist on main — a candidate ticket, the orchestrator's call.
+
+## FINAL CALLS — round 1
+
+*(The round-1 reviewer, the same session, on the implementer's responses and THE OPEN REDS above, read at tip `e668561ca` with the three instruments under `notes/plans/vx-981/`. Each dispute was rechecked against the code before its call. Counts unchanged: BLOCKER 0 · MAJOR 0 · MINOR 4 · NIT 5 — F1 is no longer SPECULATIVE. **No call is FINDER-FIXES:** every fix below is fully specified and none needs this session's hands; the implementer applies them all in PASS 2, pin before fix where a pin is named, and round 2's fresh reviewer re-checks them. No call below rules product behaviour: the one that meets a silence of the docs (F4) is built PROVISIONAL and goes to QUESTIONS as a question.)*
+
+### F1 — CONFIRMED (a test race, measured); the dispute UPHELD; test-only
+
+- **The mechanism, as settled:** instrument (b), 10 of 10 — the over-cap answer, then 62 bytes (`{"jsonrpc":"2.0","method":"notifications/tools/list_changed"}`), then EOF; `isHungUp()` reads the first of those bytes and answers false: line 158 alone, the recorded red. Batch 3 moved the notice later (it rides the gate's catch-up: 19 of 19 measured), to within 265 ms of the answer where the older tree never came nearer than 1.46 s. No contract is broken — the answer is the last ANSWER; the connection closes right after.
+- **WITHDRAWN — my "`admittedSession` waits for the approval's notice" and "approves before it connects".** Rechecked: the host's observation skips its first value (`Sources/VariorumMCP/MCPServerHost.swift:880–886`) and that value is fetched only when the observation's task first iterates, so an approval can fall inside the skipped value and owe NO notice; the count is 0 or 1 and nothing a test can read tells which. A wait for it is a new red. `admittedSession` stays as it is.
+- **The fix (test only):** a second reader on `RawSocket`, beside `isHungUp()`, used at `Tests/VariorumMCPTests/MCPSizeCapTests.swift:158` and nowhere else. Its contract: whole lines read until `read` returns 0, under the socket's own receive bound; TRUE only when every line read is a `notifications/tools/list_changed` notification (a JSON object with that `method` and no `id` key) and EOF follows; FALSE on a line carrying an `id`, any other method, bytes with no newline before EOF, a read error, or the bound passing. **It reports what it read** — the lines and how the read ended — and line 158's failure message prints that: the diagnostic whose absence left this red untraced for a round.
+- **The other seven `isHungUp()` calls KEEP the one-byte check — a call, not a leftover.** None of those connections is owed a notice (refused before any session exists, or a pending client, outside `grantsFingerprint`), so the strict check is also their guard that nothing of the door's follows on a connection that is no client's. Loosening them would hide exactly the frame batch 3 exists to prevent.
+- **The pin (deterministic, a socketpair, no server):** (i) the over-cap answer line, the notice line, then close → the new reader TRUE and, on the same bytes, `isHungUp()` FALSE — this arm is the red-on-old, and it pins the strict helper's meaning the seven rely on; (ii) a line carrying an `id` after the answer → FALSE; (iii) bytes with no newline, then close → FALSE; (iv) no EOF within a short bound → FALSE; (v) close at once → TRUE.
+- **Instrument (b) is NOT shipped as a test.** Its notice races the teardown with nothing ordering it (when it loses, the test is vacuous), and its hold parks a cooperative-pool thread inside the SDK's receive loop — the very pressure the accept-loop trace measured. It stays whole under `notes/plans/vx-981/` as the mechanism's evidence.
+
+### The accept-loop test's bound — CONFIRMED: pre-existing, test-only, the harness's own bound
+
+- **The evidence is accepted.** In each red the listener and the retry are done by +317–440 ms; the wait is the first run of two fresh tasks — the server's session task (made → `run` started 8.4–8.6 s) and the client's own connect task (its transport connected at 9.0–9.7 s) — and every door step after takes milliseconds. The same shape on `77aebf864` (2 of 24) as on the tip (2 of 31). Nothing batches 3–4 put on this road waits. Not this run's.
+- **The fix:** the three shortenings in `Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift` — `:97`, `:119`, `:121` at this tip (the response's `:162`/`:164` are the instrumented tree's lines) — give way to the harness's bound (`HarnessDeadline.seconds`, 30 s). **Nothing is lost:** what a 10 s bound could add, "the retries are short", is pinned where it is deterministic — `theClassificationAndThePause` (`:277`: the schedule 10, 20, 40, 80, 160, 320, 640, 1,000 ms and the cap) — and "served after every fault" still fails, named, at any finite bound if a retry never serves. One comment at the suite's head says why no pin here shortens the harness's bound (VX-850's O-7 rule; this trace).
+- **The pin:** the 11 s `namingProbe` hold, run ONCE as an instrument against both forms (the 10 s-bounded connect red, the harness-bounded one served), its numbers written into the run record and the instrument kept under `notes/plans/vx-981/`. NOT shipped: an eleven-second sleeper in the suite to pin a test's own bound buys no later reader anything.
+- **It is work outside the roster, so it carries a ticket** — the orchestrator's to mint or name; none is invented here. The record says "pre-existing, measured on the pre-batch-3 tree", never "caused by load".
+
+### F2 — CONFIRMED: a partial show takes the split, through its own verdict
+
+- **The mechanism:** as found, and the response's second arm is right — `.interrupted` with no ask to present (`App/Variorum/Variorum/Features/MCP/MCPDoor.swift:1320`) is the same class as `.unfinished` (`:1318`): the note had opened.
+- **The fix:**
+  - `MCPShowRule.Verdict` gains `case partial` (`Sources/VariorumMCP/MCPShowTool.swift`, beside `refuse`): the delivery opened the note and the rest never landed. Its doc says the etiquette rule `verdict(_:dial:)` never returns it — it is a delivery's answer only.
+  - `MCPDoor.agentShow` returns `.partial` at `:1318` and as `:1320`'s fallback; its first switch treats a `.partial` from the rule exactly as `.refuse` (returned as it is) — unreachable, no new behaviour.
+  - `MCPShowTool.call`'s `.partial` arm answers `MCPShowRule.partialShowWords` with `isError`, byte for byte today's answer, and writes TODAY's row (`show_in_app`, `allowed: false`) through a caught road of `recordShown`'s shape; a failure goes to `hooks.onActivityLogFailure` (`tool` `show_in_app`, `unrecorded` 1, the store's words, no receipts). The three refusal sites where nothing landed (`:203`, `:207`, `:228`) keep `try log`.
+  - **Rejected:** recognising `partialShowWords` by identity inside the tool — a behaviour switch keyed on a sentence.
+- **The words:** no new sentence; she hears P-981-B2-3's line. That line was drafted as "true of the move and the ask alike", and "went through" is at its loosest for a show that half landed — so P-981-B2-3's QUESTIONS text names the partial arm as a third speaker, for her pass. Not ruled here.
+- **The pin (headless, before the fix):** `MCPShowActivityLogFailureServerTests.aPartialShowWhoseLogFailsAnswersPartialAndTellsHer` — `show(.partial, logFails: true)` answers `partialShowWords`, `isError`, exactly one `MCPActivityLogFailure(claude-code, show_in_app, 1, the store's words)`, no tail receipt, no line; its twin (`logFails: false`) answers the same bytes with the line `show_in_app:refused`. Order: a scaffold commit declares `.partial` with today's behaviour (`try log`) → the pin RED there → the fix → green; a named revert of the tool to the scaffold reds it again.
+- **Justified edits (app target):** `App/Variorum/VariorumTests/MCPNavigationTests.swift:168` and `MCPCompareLandingTests.swift:218` — `== .refuse(MCPShowRule.partialShowWords)` becomes `== .partial` (the same delivery, its own verdict). These are every site (searched).
+- **The three claims corrected:** the guard's doc at `Tests/VariorumMCPTests/MCPShowActivityLogFailureServerTests.swift:116` ("every refusal arm where nothing landed"); an erratum line under BATCH 2 — RECORD (the batch's text left as written); and the drafted MCPSpec line for VX-961 — "a refused show keeps the refusal line's posture" gains "; a show that opened the note and could not finish answers its partial words and takes the same split".
+- **Gate:** the door changed, so its readers ride the orchestrator's window — at least `MCPNavigationTests`' types, `MCPCompareLandingTests`, `MCPShowOfferFacesTests`, `VX775ActivityLogFailureDoorTests`.
+
+### F3 — closed for what it named; the tables are stale again by one gate
+
+At `b1351cca2` the table and the ledger read true (gates A and B2, the merge-in, round 1). At the tip `e668561ca` the commit that added GATE B34 RAN and ROUND 1's section did not flip the rows they supersede. **Stale now, in `notes/plans/fixes/vx-981-mcp-door-followups.md`:**
+- LIVE STATUS, BATCH 3 (`:20`) and BATCH 4 (`:21`): their app types still "wait for" / "ride `vx981-gate-b34` (READY, queued)" — it ran green, 108 tests in 16 suites, leg E red.
+- LIVE STATUS, Gates (`:23`): "`vx981-gate-b34` READY and queued".
+- LIVE STATUS, the OPEN reds (`:26`): "UNTRACED — the fix session's soak owns them" — one is traced, the other's mechanism confirmed; both fixes are called above.
+- THE LEDGER: VX-944 (`:211`) "app leg E at the window"; and VX-951 (`:210`), VX-944, VX-959 (`:212`) still carry "app types owed at `vx981-gate-b34`" (the same boilerplate on the batch-2 rows is not false, only confusing — worth removing with the rest).
+
+The same one-line fix as before, and the same rule: a gate's section and its rows flip in one commit. The orchestrator's; no pin.
+
+### F4 — CONFIRMED as built-PROVISIONAL (P-981-L1-1, option (a)); a QUESTIONS entry, not a ruling
+
+- **Why (a) is the spec-defensible one:** it is the same re-read (`showTargetStands`), the same proved fact, and the press roads' own rule for what follows from it — SurfaceContracts' "a gone place says so … and its rows go", MCPSpec's "a gone last change no longer lighting ⌥⌘O", P-FL2-1's "a door whose only press refuses is a dead door". Both canon sentences are written for HER press; neither names the move at once. So: built as (a), marked PROVISIONAL, **entered in `notes/QUESTIONS.md` at the merge with both options** (a) the rows and the last change go wherever the door's re-read proves the place gone · (b) they stay until she presses.
+- **The fix (`MCPDoor.swift`, the VX-705 gone arm, before its refusal):** `trail.update { $0.forget(placeOf: request.target) }`, and `lastChange` cleared when it names the same PLACE — `MCPTrail.placeKey(lastChange.target) == MCPTrail.placeKey(request.target)`. The response's catch is right and is part of the call: an exact `==` would miss a receipt's `.note(id, blockID:)` or `.compare(id, …)` against the move's `.note(id, nil)`, while the re-read is place-level. `openShow` keeps its exact compare (it re-reads the change itself).
+- **A boundary, stated so nobody widens it:** a standing ASK on the same place is not ended here — no press road ends one for another request either; her take of it says gone and lets it go.
+- **The pin (app target; committed before the fix):** in `MCPShowOfferFacesTests`, a trail row and a last change staged on the note, then VX-705's deletion inside the standing read → no row names the place and `aiLastChangeAvailable` is false. Its red leg at the orchestrator's window is the fix commit reverse-applied (gate B34's leg-E shape).
+- **Canon draft:** VX-705's MCPSpec line gains "its rows and a last change on it go (PROVISIONAL P-981-L1-1)".
+
+### N1 — CONFIRMED: the held admissions run serially again
+
+`for session in live where session.isHeld { _ = await session.admitIfHeld() }`, with the doc saying why that cannot hold the resume on a client: every step of an admission is store work or a signal that never waits (the write, a close line that only tries its lock, `onNamed`, an announce that only ASKS — true since F944). **Justification, in place of a pin (none can be red):** a task group returns only when every child has, so the group never shortened the resume; it only let up to `sessionCap` store writes sit on the pool at once where the loop holds one. Kept honest by `MCPAnnounceStallServerTests.theResumeNeverWaitsOnAClientThatStoppedReading` and `MCPLockPostureServerTests` staying green.
+
+### N2 — CONFIRMED (doc only)
+
+`MCPShim.readFirstLine`'s doc says what it is: the byte-at-a-time first-line reader the tests use as their raw client's reader, with no product caller since VX-181.
+
+### N3 — CONFIRMED
+
+`MCPAskAndReceiptTests.swift:165` reads `MCPReceiptRun.window` and `MCPDoor.receiptWindow` goes; `receiptRunLine` moves under `#if DEBUG`. Compile-proved by `build-for-testing`; the two test types ride the window.
+
+### N4 — CONFIRMED
+
+`announceRoundForTesting()` goes; its three call sites in `MCPAnnounceOrderServerTests` call `host.announceGrantsChanged()`. Any doc that names the removed seam is corrected with it.
+
+### N5 — the hazard CONFIRMED; my remedy WITHDRAWN (the dispute upheld); option (a), with one addition; option (b) REJECTED
+
+- **Withdrawn:** "count the setup's notices explicitly". The setup's approvals make 0, 1 or 2 rounds (the skipped first value; two commits coalesced into one value), so there is no share to wait for. Same fact as F1's dispute, same verdict.
+- **Option (a), confirmed:** A's half asserts what the setup lets it know — after its answer, AT LEAST its two notices, every line after the answer a whole `list_changed` and nothing else. The 200 ms sleep goes; nothing rests on it. B's two `>=` checks stay and still carry the teeth — rechecked: on the serial tree at most ONE notice can reach B after A stalls, whatever rounds are pending (the round stalls at A the first time A precedes B, and every later value waits behind it), so `>= base + 2` cannot go green there.
+- **The addition (required — a GUARD, labelled so):** the exactness the stall pin gives up moves to the world where it is deterministic. `MCPAnnounceOrderServerTests` runs a pending client, so nothing moves the fingerprint and no round is natural: gate open (`initialized`, a ping barrier), `host.announceGrantsChanged()` three times, wait for three notices, a ping barrier, `listChangedCount == 3`. It holds the record's "Counts unchanged — N asks send N notices" (none doubled, none merged) on the open-gate road; green on both trees.
+- **Option (b), rejected:** two more seams in `MCPServerHost` and `MCPSession` to keep one test's "exactly" is the wrong trade when the count has a deterministic home.
+- **Evidence owed in PASS 2:** R-944-ONLY re-run on the edited test — the stall pin's second change and the resume pin red, nothing else.
+
+### Seen in the disputes' own trace — pre-existing, not this run's, no call
+
+The skipped first value is a product fact too: a fingerprint change that commits between `startObservingGrants()` and the observation's first fetch is never announced to the connections already served (at a start there are none; at a resume the round asks every connection anyway, so the window is only her grant landing in the instant after an unlock). It needs a task to wait where a write does not — negligible in the app, and older than this branch. The orchestrator's to ticket or leave.
+
+### PASS 2, in one list
+
+Headless: F1 (the reader, its socketpair pin, line 158) · the accept-loop bound (three lines, the instrument run once and recorded) · F2's scaffold, pin and fix · N1 · N2 · N4 · N5 (the stall test's A half, the sleep, the new GUARD, R-944-ONLY re-run). App target, for the orchestrator's window: F2's door change and two justified edits · F4's pin, fix and red leg · N3. Then the whole `VariorumMCPTests` target alone and `build-for-testing`, counts recorded. Records: F3's rows; BATCH 2's erratum; P-981-L1-1 and P-981-B2-3's third speaker for QUESTIONS at the merge; the two canon drafts amended; the accept-loop ticket.
