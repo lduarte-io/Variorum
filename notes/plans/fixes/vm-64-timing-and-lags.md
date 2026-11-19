@@ -500,8 +500,8 @@ the near window's facts.
 | Piece | State |
 |---|---|
 | P1 — this live status | DONE (this commit) |
-| P2 — Core: the shared Pool predicates + the byte-identity guards (frozen pre-change builders) | NOT-STARTED |
-| P3 — Core: `keys` + `poolLoose` on the page read; the Core pins (the loose pages equal `poolPosts`' loose class; the keys equal `Queries.library`'s stamps; the plans and VM steps) | NOT-STARTED |
+| P2 — Core: the shared Pool predicates + the byte-identity guards (frozen pre-change builders) | DONE (this commit) — the guards ran GREEN on the base's builders BEFORE the extraction (2 tests), and green after it |
+| P3 — Core: `keys` + `poolLoose` on the page read; the Core pins (the loose pages equal `poolPosts`' loose class; the keys equal `Queries.library`'s stamps; the plans and VM steps) | DONE (this commit) — `LibraryPoolPagingTests` 8 tests green; with the neighbours (`LibraryPagingTests`, the Pool/ownership/rule suites, the four search suites that call the page read) **169 tests in 23 suites passed** headless. Measured: the first loose page **6,332 → 6,164 VM steps** at 300 → 1,200 notes (flat); the Mac's Pool statement **77,461 → 306,988** (∝ notes — the phone's Bookless re-read BEFORE) |
 | P4 — phone: the model's paging + hold, the view's hold key and load-more, the shell's on-screen fact (`MobileShellBand.isDrawn`) | NOT-STARTED |
 | P5 — hosted pins: the 201st note reachable by scrolling (red on old); bookless pages past its window (red on old); the return lists what was minted while hidden (guard); the perf suite's four box-save counts ASSERTED 0 and a note typed in from the Library leaves its root alone | NOT-STARTED |
 | P6 — builds (phone + Mac `build-for-testing` into `DerivedData/vm64-b5/`; the red build `vm64-b5-red/`), the headless suites, the closeout and READY | NOT-STARTED |
