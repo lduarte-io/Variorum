@@ -483,8 +483,8 @@ struct MobileNoteTraySection: View {
             }
             if let status = model.status {
                 Text(tokens.chromeLabel(status.text))
-                    .font(tokens.small)
-                    .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.phone.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityLabel(status.text)
             }
@@ -577,7 +577,7 @@ struct MobileNoteTraySection: View {
             Text(tokens.chromeLabel(
                 (takesShown ? "\u{25BE} " : "\u{25B8} ")
                 + RecoveryCopy.trayTakesDisclosure(model.takes.count)))
-                .font(tokens.small)
+                .phoneType(.controlInline, tokens)
                 .foregroundStyle(tokens.accent)
         }
         .buttonStyle(.plain)
@@ -597,13 +597,13 @@ struct MobileNoteTraySection: View {
     private func header(_ title: String, explainer: String?) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(tokens.chromeLabel(title))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.sectionHeader, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .accessibilityLabel(title)
             if let explainer {
                 Text(tokens.chromeLabel(explainer))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityLabel(explainer)
             }
@@ -615,8 +615,8 @@ struct MobileNoteTraySection: View {
     /// which the Terminal voice's lowercasing makes load-bearing.
     private func quiet(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .fixedSize(horizontal: false, vertical: true)
             .accessibilityLabel(text)
     }
@@ -658,20 +658,20 @@ struct MobileNoteTraySection: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(preview)
-                .font(tokens.body)
-                .foregroundStyle(hasText ? tokens.ink : tokens.muted)
+                .phoneType(.rowPreview, tokens)
+                .foregroundStyle(hasText ? tokens.ink : tokens.phone.muted)
                 .lineLimit(2)
             HStack(spacing: 18) {
                 Text(tokens.chromeLabel(MobileTrayRowFace.line(meta)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .lineLimit(2)
                 Spacer(minLength: 8)
                 Button {
                     Task { await putBack() }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .font(tokens.small)
+                        .phoneType(.controlInline, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -686,14 +686,14 @@ struct MobileNoteTraySection: View {
     private func takeRow(_ take: Queries.TrayTake) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(MobileTrayRowFace.takeLabel(take))
-                .font(tokens.body)
-                .foregroundStyle(take.text.isEmpty ? tokens.muted : tokens.ink)
+                .phoneType(.rowPreview, tokens)
+                .foregroundStyle(take.text.isEmpty ? tokens.phone.muted : tokens.ink)
                 .lineLimit(2)
             Text(tokens.chromeLabel(MobileTrayRowFace.line(
                 MobileTrayRowFace.takeMeta(
                     take, daysLeft: model.daysLeft(take.deletedAt)))))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.faint)
                 .lineLimit(2)
             HStack(spacing: 18) {
                 Button {
@@ -701,7 +701,7 @@ struct MobileNoteTraySection: View {
                     Task { await model.putBackTake(take.variantID) }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .font(tokens.small)
+                        .phoneType(.controlInline, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -714,7 +714,7 @@ struct MobileNoteTraySection: View {
                     model.requestDeleteNowTake(take)
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.deleteNowVerb))
-                        .font(tokens.small)
+                        .phoneType(.controlInline, tokens)
                         .foregroundStyle(tokens.alarm)
                 }
                 .buttonStyle(.plain)

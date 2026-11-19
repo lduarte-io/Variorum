@@ -217,11 +217,11 @@ struct MobileMembershipSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(tokens.chromeLabel("Books"))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
@@ -234,14 +234,14 @@ struct MobileMembershipSheet: View {
                         // (the L17 conditioning).
                         Text(tokens.chromeLabel(
                             "Editing here edits the note everywhere it appears."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.faint)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if let status = model.status {
                         Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if let copy = model.divergedCopyID, let onOpenNote {
@@ -250,7 +250,7 @@ struct MobileMembershipSheet: View {
                             onOpenNote(copy)
                         } label: {
                             Text(tokens.chromeLabel(openCopyLabel))
-                                .font(tokens.small)
+                                .phoneType(.controlInline, tokens)
                                 .foregroundStyle(tokens.accent)
                         }
                         .buttonStyle(.plain)
@@ -273,34 +273,34 @@ struct MobileMembershipSheet: View {
         if model.books.isEmpty {
             Text(tokens.chromeLabel(
                 "This note is in no book yet — it lives in the Library's bookless filter."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             ForEach(model.books, id: \.id) { book in
                 HStack(spacing: 10) {
                     Text(tokens.chromeLabel(MobileShelfFaces.name(for: book)))
-                        .font(tokens.body)
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
                     if book.kind == .gathering {
                         Text(tokens.chromeLabel("smart"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.faint)
                     }
                     Spacer()
                     Button(tokens.chromeLabel("diverge")) {
                         Task { await model.diverge(for: book) }
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.controlInline, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .buttonStyle(.plain)
                     if MobileMembershipModel.rowCarriesRemove(book) {
                         Button(tokens.chromeLabel("remove")) {
                             Task { await model.remove(from: book) }
                         }
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.controlInline, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .buttonStyle(.plain)
                     }
                 }
@@ -314,8 +314,8 @@ struct MobileMembershipSheet: View {
         if !model.addableBooks.isEmpty || !model.addableSmartBooks.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel("Add to a book"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.sectionHeader, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .padding(.top, 6)
                 ForEach(model.addableBooks, id: \.id) { book in
                     addRow(book.name) { await model.add(to: book) }
@@ -337,7 +337,7 @@ struct MobileMembershipSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("+ \(label)"))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
                 Spacer()

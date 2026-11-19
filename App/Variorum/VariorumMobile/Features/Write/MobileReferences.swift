@@ -183,11 +183,11 @@ struct MobileReferencesSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(tokens.chromeLabel("More Info"))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
@@ -196,8 +196,8 @@ struct MobileReferencesSheet: View {
                     if model.references.isEmpty {
                         Text(tokens.chromeLabel(
                             "Nothing kept beside this note yet — add a link below."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     ForEach(model.references, id: \.id) { reference in
@@ -206,8 +206,8 @@ struct MobileReferencesSheet: View {
                     addRow
                     if let status = model.status {
                         Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -249,12 +249,12 @@ struct MobileReferencesSheet: View {
                 } label: {
                     HStack(spacing: 8) {
                         Text(title)
-                            .font(tokens.body)
+                            .phoneType(.rowTitle, tokens)
                             .foregroundStyle(tokens.accent)
                             .lineLimit(1)
                         Text(tokens.chromeLabel("opens"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.faint)
                         Spacer()
                     }
                     .padding(.vertical, 6)
@@ -265,12 +265,12 @@ struct MobileReferencesSheet: View {
             case .file:
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(tokens.body)
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
                     Text(tokens.chromeLabel(MobileReferencesModel.fileRowNote))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.faint)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.vertical, 6)
@@ -279,7 +279,7 @@ struct MobileReferencesSheet: View {
                 // file sentence would be a false copy here.
                 HStack {
                     Text(title)
-                        .font(tokens.body)
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
                     Spacer()
@@ -303,7 +303,7 @@ struct MobileReferencesSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("+ add a link"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
             }

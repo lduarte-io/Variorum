@@ -384,11 +384,11 @@ struct MobileVersionsView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(tokens.path([VersionsPath.name]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.screenTitle, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Text(tokens.chromeLabel(VersionsPath.explainer))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.faint)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 12)
@@ -406,12 +406,12 @@ struct MobileVersionsView: View {
         } label: {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel(MobileVersionsModel.rowTitle(item)))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Text(tokens.chromeLabel(MobileVersionsModel.rowMeta(item)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -437,7 +437,7 @@ struct MobileVersionsView: View {
                         model.closeReader()
                     } label: {
                         Text(tokens.chromeLabel(Self.backToListing))
-                            .font(tokens.small)
+                            .phoneType(.control, tokens)
                             .foregroundStyle(tokens.accent)
                     }
                     .buttonStyle(.plain)
@@ -448,11 +448,11 @@ struct MobileVersionsView: View {
                 .padding(.top, 12)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(tokens.path([MobileVersionsModel.rowTitle(item)]))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.screenTitle, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                     Text(tokens.chromeLabel(MobileVersionsModel.rowMeta(item)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.faint)
                         .lineLimit(2)
                 }
                 .padding(.horizontal, 20)
@@ -463,7 +463,7 @@ struct MobileVersionsView: View {
                         ForEach(Array(model.readingBlocks.enumerated()), id: \.offset) {
                             _, text in
                             Text(text)
-                                .font(tokens.body)
+                                .phoneType(.noteBody, tokens)
                                 .foregroundStyle(tokens.ink)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -484,7 +484,7 @@ struct MobileVersionsView: View {
                 model.pendingRestore = item
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.restoreVerb))
-                    .font(tokens.small)
+                    .phoneType(.controlInline, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -494,7 +494,7 @@ struct MobileVersionsView: View {
                 Task { await model.promote(item) }
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.promoteVerb))
-                    .font(tokens.small)
+                    .phoneType(.controlInline, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -504,7 +504,7 @@ struct MobileVersionsView: View {
                 model.pendingDelete = item
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.deleteVerb))
-                    .font(tokens.small)
+                    .phoneType(.controlInline, tokens)
                     .foregroundStyle(tokens.alarm)
             }
             .buttonStyle(.plain)
@@ -526,8 +526,8 @@ struct MobileVersionsView: View {
     /// not chrome styling"* (`MobileWriteScreen`'s own note).
     private func line(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
@@ -540,8 +540,8 @@ struct MobileVersionsView: View {
     private var reportLine: some View {
         if let status = model.status {
             Text(tokens.chromeLabel(status.text))
-                .font(tokens.small)
-                .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.phone.muted)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 20)

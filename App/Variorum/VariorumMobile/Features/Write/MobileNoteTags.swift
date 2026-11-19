@@ -149,11 +149,11 @@ struct MobileNoteTagsSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(tokens.chromeLabel("Tags"))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
@@ -164,8 +164,8 @@ struct MobileNoteTagsSheet: View {
                     suggestionSection
                     if let status = model.status {
                         Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -182,7 +182,7 @@ struct MobileNoteTagsSheet: View {
             text: $typed
         )
         .textFieldStyle(.plain)
-        .font(tokens.small)
+        .phoneType(.control, tokens)
         .foregroundStyle(tokens.ink)
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
@@ -212,8 +212,8 @@ struct MobileNoteTagsSheet: View {
         if model.applied.isEmpty {
             Text(tokens.chromeLabel(
                 "This note wears no tags yet — type one above, or tap a suggestion."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             ForEach(model.applied, id: \.id) { tag in
@@ -221,13 +221,13 @@ struct MobileNoteTagsSheet: View {
                     // The chip says the LEAF (K3); the row beside it says
                     // the whole path (hierarchy stays surfaced, R45).
                     Text("#\(MobileShelfFaces.leaf(tag.path))")
-                        .font(tokens.body)
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
                     if tag.path.contains("/") {
                         Text(tag.path)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.faint)
                             .lineLimit(1)
                     }
                     Spacer()
@@ -235,8 +235,8 @@ struct MobileNoteTagsSheet: View {
                         let model = model
                         Task { await model.remove(tag) }
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.controlInline, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .buttonStyle(.plain)
                     .accessibilityLabel("Remove tag \(tag.path)")
                 }
@@ -252,8 +252,8 @@ struct MobileNoteTagsSheet: View {
         if !suggestions.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel("Apply a tag"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.sectionHeader, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .padding(.top, 6)
                 ForEach(suggestions, id: \.id) { tag in
                     Button {
@@ -266,7 +266,7 @@ struct MobileNoteTagsSheet: View {
                     } label: {
                         HStack {
                             Text(tokens.chromeLabel("+ #\(tag.path)"))
-                                .font(tokens.body)
+                                .phoneType(.control, tokens)
                                 .foregroundStyle(tokens.accent)
                                 .lineLimit(1)
                             Spacer()

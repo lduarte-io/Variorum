@@ -309,7 +309,7 @@ struct MobileBlockListSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(tokens.chromeLabel("Blocks"))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 // PR20's entry door: chrome, and only where there is a
@@ -330,7 +330,7 @@ struct MobileBlockListSheet: View {
                         if model.isSelecting { model.exitSelection() }
                         else { model.enterSelection() }
                     }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
                     // An EXPLICIT label, because while picking this button
@@ -354,7 +354,7 @@ struct MobileBlockListSheet: View {
                     model.exitSelection()
                     dismiss()
                 }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
@@ -444,8 +444,8 @@ struct MobileBlockListSheet: View {
         HStack(spacing: 14) {
             Text(tokens.chromeLabel(
                 MobileBlockSelectionCopy.bannerLabel(picked: model.selection.count)))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Spacer(minLength: 0)
             if !model.selection.isEmpty {
                 Button(tokens.chromeLabel(
@@ -453,7 +453,7 @@ struct MobileBlockListSheet: View {
                 ) {
                     model.deleteConfirmPresented = true
                 }
-                .font(tokens.small)
+                .phoneType(.controlInline, tokens)
                 .foregroundStyle(tokens.alarm)
                 .buttonStyle(.plain)
                 .accessibilityLabel(
@@ -473,8 +473,8 @@ struct MobileBlockListSheet: View {
                     segment = option
                 } label: {
                     Text(tokens.chromeLabel(option.word))
-                        .font(tokens.small)
-                        .foregroundStyle(segment == option ? tokens.ink : tokens.faint)
+                        .phoneType(.chip, tokens)
+                        .foregroundStyle(segment == option ? tokens.ink : tokens.phone.faint)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(option.word)
@@ -489,8 +489,8 @@ struct MobileBlockListSheet: View {
             LazyVStack(alignment: .leading, spacing: 10) {
                 if model.rows.isEmpty {
                     Text(tokens.chromeLabel(MobileBlockListModel.emptyNote))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 ForEach(model.rows, id: \.placementID) { row in
@@ -512,21 +512,22 @@ struct MobileBlockListSheet: View {
                                 // leading mark plus the same soft wash, and
                                 // the mark is what a walk can read.
                                 Text(picked ? "◉" : "○")
-                                    .font(tokens.small)
-                                    .foregroundStyle(picked ? tokens.accent : tokens.faint)
+                                    .phoneType(.meta, tokens)
+                                    .foregroundStyle(picked ? tokens.accent : tokens.phone.faint)
                             }
                             // The handle derives IN the row body —
                             // lazy rows derive only what they show.
                             Text(MobileBlockListModel.handle(row))
-                                .font(tokens.small)
+                                .phoneType(.rowPreview, tokens)
                                 .foregroundStyle(tokens.ink)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
                             Spacer(minLength: 0)
                             if row.hasFan {
                                 Text("⑂")
-                                    .font(tokens.small)
-                                    .foregroundStyle(tokens.muted)
+                                    .phoneType(.meta, tokens)
+                                    // On a picked row's wash the meta line takes the ink (sheet §D).
+                                    .foregroundStyle(picked ? tokens.ink : tokens.phone.muted)
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -540,8 +541,8 @@ struct MobileBlockListSheet: View {
                 }
                 if let status = model.status {
                     Text(status)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }

@@ -95,11 +95,11 @@ struct MobileNoteActionsSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text(tokens.chromeLabel(Self.sheetTitle))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
@@ -173,8 +173,8 @@ struct MobileNoteActionsSheet: View {
     private var reportLine: some View {
         if let message = model.statusMessage {
             Text(tokens.chromeLabel(message))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
                 .lineLimit(4)
                 .accessibilityLabel(message)
@@ -322,11 +322,11 @@ struct MobileNoteActionsSheet: View {
         Button(role: role, action: act) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(tokens.chromeLabel(title))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tint)
                 Text(tokens.chromeLabel(detail))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }

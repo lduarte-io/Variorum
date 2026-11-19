@@ -242,7 +242,7 @@ struct MobileWriteScreen: View {
                     renamePresented = true
                 } label: {
                     Text(model.displayTitle ?? "")
-                        .font(tokens.title)
+                        .phoneType(.noteTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
                 }
@@ -275,7 +275,7 @@ struct MobileWriteScreen: View {
                 lensChip
             }
             if let canary = model.canaryMessage {
-                Text(canary).font(tokens.small).foregroundStyle(.red)  // CANARY: deliberately not the voice's alarm
+                Text(canary).phoneType(.meta, tokens).foregroundStyle(.red)  // CANARY: deliberately not the voice's alarm
             }
             if model.isSealed {
                 // The state line pairs with its door (the 13b fire-and-DO
@@ -285,14 +285,14 @@ struct MobileWriteScreen: View {
                 // render voice-cased (P26/P43 — PA1-1 resolved).
                 HStack(spacing: 10) {
                     Text(tokens.chromeLabel(Self.sealedStateLine))
-                        .font(tokens.small).foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens).foregroundStyle(tokens.phone.muted)
                     Button {
                         let model = model
                         Task { await model.unlockNote() }
                     } label: {
                         Text(tokens.chromeLabel(Self.unlockDoorTitle))
                     }
-                    .font(tokens.small)
+                    .phoneType(.controlInline, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
                     .accessibilityLabel("Unlock Note")
@@ -316,7 +316,7 @@ struct MobileWriteScreen: View {
             if model.statusMessage != nil || model.statusAction != nil {
                 HStack(spacing: 10) {
                     if let status = model.statusMessage {
-                        Text(status).font(tokens.small).foregroundStyle(tokens.muted)
+                        Text(status).phoneType(.meta, tokens).foregroundStyle(tokens.phone.muted)
                     }
                     receiptAction
                 }
@@ -459,8 +459,8 @@ struct MobileWriteScreen: View {
             datePresented = true
         } label: {
             Text(model.header?.entryDate ?? tokens.chromeLabel("no date"))
-                .font(tokens.small)
-                .foregroundStyle(model.header?.entryDate != nil ? tokens.muted : tokens.faint)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(model.header?.entryDate != nil ? tokens.phone.muted : tokens.phone.faint)
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
@@ -477,8 +477,8 @@ struct MobileWriteScreen: View {
             tagsPresented = true
         } label: {
             Text(tokens.chromeLabel(noteTags.chipLine ?? "tags"))
-                .font(tokens.small)
-                .foregroundStyle(noteTags.chipLine != nil ? tokens.muted : tokens.faint)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(noteTags.chipLine != nil ? tokens.phone.muted : tokens.phone.faint)
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
@@ -495,8 +495,8 @@ struct MobileWriteScreen: View {
         } label: {
             Text(tokens.chromeLabel(
                 MobileReferencesModel.chipLabel(count: references.references.count)))
-                .font(tokens.small)
-                .foregroundStyle(references.references.isEmpty ? tokens.faint : tokens.muted)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(references.references.isEmpty ? tokens.phone.faint : tokens.phone.muted)
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
@@ -512,8 +512,8 @@ struct MobileWriteScreen: View {
             membershipPresented = true
         } label: {
             Text(tokens.chromeLabel(chipLabel))
-                .font(tokens.small)
-                .foregroundStyle(membership.books.count > 1 ? tokens.accent : tokens.muted)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(membership.books.count > 1 ? tokens.accent : tokens.phone.muted)
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
@@ -540,8 +540,8 @@ struct MobileWriteScreen: View {
             blocksPresented = true
         } label: {
             Text(tokens.chromeLabel(MobileBlockListModel.chipWord))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
@@ -566,11 +566,11 @@ struct MobileWriteScreen: View {
             // region names WHICH block and offers the way back.
             Text(tokens.chromeLabel(
                 lenses.chipLabel + (lenses.activeLensHasFallback ? " \u{26A0}" : "")))
-                .font(tokens.small)
+                .phoneType(.chip, tokens)
                 .foregroundStyle(
                     lenses.activeLensHasFallback
                         ? tokens.alarm
-                        : (lenses.activeLensID != nil ? tokens.accent : tokens.faint))
+                        : (lenses.activeLensID != nil ? tokens.accent : tokens.phone.faint))
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
@@ -595,8 +595,8 @@ struct MobileWriteScreen: View {
             Task { await model.copyNote() }
         } label: {
             Image(systemName: "doc.on.doc")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.control, tokens)
+                .foregroundStyle(tokens.phone.faint)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Copy Note")
@@ -618,7 +618,7 @@ struct MobileWriteScreen: View {
                 } label: {
                     Text(tokens.chromeLabel("Undo"))
                 }
-                .font(tokens.small)
+                .phoneType(.controlInline, tokens)
                 .foregroundStyle(tokens.accent)
                 .buttonStyle(.plain)
                 .accessibilityLabel(StructuralUndoCopy.undoDoorTitle(label))
@@ -631,7 +631,7 @@ struct MobileWriteScreen: View {
                 } label: {
                     Text(tokens.chromeLabel("Redo"))
                 }
-                .font(tokens.small)
+                .phoneType(.controlInline, tokens)
                 .foregroundStyle(tokens.accent)
                 .buttonStyle(.plain)
                 .accessibilityLabel(StructuralUndoCopy.redoDoorTitle(label))
@@ -650,8 +650,8 @@ struct MobileWriteScreen: View {
             noteActionsPresented = true
         } label: {
             Image(systemName: "ellipsis")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.control, tokens)
+                .foregroundStyle(tokens.phone.faint)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(MobileNoteActionsSheet.doorLabel)
@@ -669,8 +669,8 @@ struct MobileWriteScreen: View {
             model.presentFind()
         } label: {
             Image(systemName: "magnifyingglass")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.control, tokens)
+                .foregroundStyle(tokens.phone.faint)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Find in Note")
@@ -696,8 +696,8 @@ struct MobileWriteScreen: View {
             }
         } label: {
             Image(systemName: model.isSealed ? "lock.fill" : "lock.open")
-                .font(tokens.small)
-                .foregroundStyle(model.isSealed ? tokens.accent : tokens.faint)
+                .phoneType(.control, tokens)
+                .foregroundStyle(model.isSealed ? tokens.accent : tokens.phone.faint)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(model.isSealed ? Self.unlockDoorTitle : Self.lockDoorTitle)
