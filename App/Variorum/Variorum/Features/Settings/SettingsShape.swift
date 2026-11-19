@@ -464,6 +464,18 @@ nonisolated enum SettingsCatalog {
             blurb: "Where copies go, how fresh the last one is, and what restoring one does — "
                 + "including to things that were deleted.",
             keywords: ["backup", "restore", "copy", "folder", "safety", "icloud", "export"]),
+        // VX-79 (the VX-980 run, batch 2): the search index's row — its title IS
+        // the section's (`DataSafetyCopy.searchIndexSection`, one text), so
+        // "search" and "index" find it. Blurb and keywords are search words
+        // (PROVISIONAL), taking no other row's first finding: no "find" (the
+        // find family's word), and "check" ranks below the updates row's
+        // title.
+        SettingsRow(
+            id: "searchIndex", pane: .dataSafety, title: DataSafetyCopy.searchIndexSection,
+            blurb: "Check that the index search reads matches your notes, or rebuild it from them. "
+                + "Nothing of yours lives only in it.",
+            keywords: ["search", "index", "rebuild", "reindex", "re-index", "check", "repair", "integrity",
+                       "missing results", "fts"]),
         // 13r U3-B (R-13r-5): the crash-report opt-in, on its own pane.
         SettingsRow(
             id: "crashReports", pane: .diagnostics, title: DiagnosticsCopy.toggleTitle,

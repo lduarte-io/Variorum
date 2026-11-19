@@ -84,8 +84,11 @@ final class BookSearchModel {
     }
 
     /// **The answer shows in place of the book's content** (F1) — the field
-    /// holds WORDS the index can be asked about.
-    var isAnswering: Bool { question?.text != nil }
+    /// holds WORDS the index can be asked about: the ONE core predicate
+    /// (`SearchComposer.asksWords`, VX-954 — `— #tag` reads as `#tag` here as
+    /// everywhere; a field of only punctuation keeps today's reading,
+    /// PROVISIONAL P-980-1 (a)).
+    var isAnswering: Bool { question.map(SearchComposer.asksWords) ?? false }
 
     var hasMoreGroups: Bool { next != nil }
 
@@ -151,7 +154,8 @@ final class BookSearchModel {
         generation += 1
         let asked = generation
         let parsed = Self.read(text, visibility: visibility)
-        guard let parsed, parsed.query.text != nil else {
+        // VX-954: words are the ONE core predicate's call (`isAnswering`'s).
+        guard let parsed, SearchComposer.asksWords(parsed.query) else {
             question = parsed?.query
             words = parsed?.words ?? ""
             clearAnswer()

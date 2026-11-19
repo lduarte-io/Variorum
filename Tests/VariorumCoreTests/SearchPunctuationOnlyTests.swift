@@ -14,8 +14,9 @@
 //  (`Queries.searchCounts(…facet:…)`) says exactly what the Library SHOWS.
 //  "What it shows" is the app's own routing, read here in core over the same
 //  reads the app calls (`LibraryCatalogModel.listing` + `LibrarySearchModel
-//  .listing` / `.books`): a question with WORDS (`query.text != nil` — the
-//  app's `LibrarySearchQuestion.hasWords`) gets the answer sheet — its groups
+//  .listing` / `.books`): a question with WORDS (`SearchComposer.asksWords`
+//  since VX-954 — the app's `LibrarySearchQuestion.hasWords`; it read
+//  `query.text != nil` before) gets the answer sheet — its groups
 //  and its Books section; a `#tag` alone gets the catalog's narrowed listing —
 //  the tagged notes, the tagged blocks under Blocks, the associated books.
 //
@@ -61,9 +62,14 @@ private let library = SearchScope(wingID: "")
 private func shown(_ db: AppDatabase, _ asked: SearchQuery, _ facet: SearchFacet) throws -> Shown {
     try db.read { db in
         var out = Shown()
-        // The app's `hasWords` (`LibrarySearchQuestion.hasWords`): the field's
-        // question has a text half.
-        let hasWords = asked.text != nil
+        // The app's `hasWords` (`LibrarySearchQuestion.hasWords`). JUSTIFIED
+        // EDIT (VX-954, the VX-980 run): this mirror read `asked.text != nil`
+        // — the app's routing as it stood. The app now routes on the ONE
+        // predicate (`SearchComposer.asksWords`), so a punctuation word
+        // beside a tag takes the TAG road; the SHOWN side follows the app,
+        // and the law this suite pins (the band says what the Library shows)
+        // is unchanged.
+        let hasWords = SearchComposer.asksWords(asked)
         // The Books section (facets All and Books): the associated books, then
         // (with words) every book a book or chapter hit names — over the
         // question narrowed to Books, as `LibrarySearchModel.books` reads it.
