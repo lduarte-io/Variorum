@@ -157,6 +157,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | **CLOSED 2026-11-19** (r1) | see the batch 6 block; r1 code `36cddcf60` `9821ffef3` `ce3c4e75b` | first window NOT green (the release lived in `deinit`); r1 green on the final tree — "Orchestrator's stage results" below; residual VM-227 |
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
+| Ladder r1 · fix pass | **IN-PROGRESS** (implementer, first turn) | see the fix-pass block below | findings 2, 3, 5, 6 applied this turn; finding 1 waits on the reviewer's call between its two arms |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -716,6 +717,26 @@ dropped. The closeout's r0 lines are corrected in place (§7 batch 7 ▸ "Re-che
 | Q2 — the two test changes | DONE (this commit) — `MobileLeavingSavesOnceTests`: the host's note and the header say the leaving ends at its LAST act (r1), and the new `aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped` (7 tests now). Build PENDING (Q3) |
 | Q3 — builds: phone `build-for-testing` into `vm64-b7r1` (fix); the red `vm64-b7r1-red` (the four production files at `dfdd94b5a` over today's tip; revert announced first) | DONE — fix `vm64-b7r1` built at `a61e4f7c9`'s tree `** TEST BUILD SUCCEEDED **` (cold), no warning in a touched file; red `vm64-b7r1-red` `** TEST BUILD SUCCEEDED **` (cold), restored. No Mac build: no `Shared/` or Core file changed (the Mac product stays `vm64-b7`) |
 | Q4 — §7: the r1 re-check, the corrected lines, the stage commands on the new folders | DONE (`b6a047e82`) — §7 batch 7 ▸ "Re-check on batch 6's r1"; READY |
+
+### Ladder round 1 — fix pass · LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** Base: `4b4d64143` (the round's findings as written, `notes/plans/fixes/vm-64-ladder-round1.md`).
+The flow (cross-model): the responses to all seven findings are written first, at the end of the round file; the
+agreed fixes whose shape is the reviewer's own are applied this turn; finding 1 waits for the reviewer's call between
+its two arms and lands in a second turn, with the whole-package `swift test` on the final tree. DerivedData:
+`App/Variorum/DerivedData/vm64-fix/` (fix) and `vm64-fix-red/` (the red-on-old phone build) — gitignored; the
+orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
+
+| Piece | State |
+|---|---|
+| F0 — this live status | DONE (this commit) |
+| F1 — the responses (round file ▸ "Implementer responses (fix pass)"), committed and pushed before any fix | NOT-STARTED |
+| F2 — finding 3 (VM-65): `TimingRecorder.end` tells the change handler only when something changed; the pin red, then green, headless | NOT-STARTED |
+| F3 — finding 5 (VM-2): `surfaceSettled()` no longer `mutating`; finding 6 (VM-65): the round's "sent" says it under-reads | NOT-STARTED |
+| F4 — finding 2 (VM-70): `takeAutosaveHold` re-observes on both of its paths; the hosted pin; the red build `vm64-fix-red` | NOT-STARTED |
+| F5 — builds: phone and Mac `build-for-testing` into `vm64-fix`; `swift test` for the touched suites | NOT-STARTED |
+| F6 — §7 "Fix pass" closeout with the stage commands | NOT-STARTED |
+| F7 — finding 1 (Part of VM-71): HELD for the reviewer's call; the second turn | HELD |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
