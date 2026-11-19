@@ -262,7 +262,7 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 | P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | DONE (this commit) — phone `build-for-testing` green into `DerivedData/vm64-b2/`, no new warning in a touched file; behaviour PENDING the stage window |
 | P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | DONE (this commit) — `MobileStructuralFlightFenceTests` (10), BUILT; green run and red-on-old run PENDING the stage window |
 | P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | DONE — all three `** TEST BUILD SUCCEEDED **` at `f83122794` (the red one over the base's three phone files, cold), no new warning in a touched file |
-| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | FIRST WINDOW RAN — NOT GREEN (traps; the orchestrator's block). r1 IN-PROGRESS (diagnosis above) |
+| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | FIRST WINDOW RAN — NOT GREEN (traps; the orchestrator's block). r1 READY — `vm64-b2r1` + `vm64-b2r1-red` built; commands in §7 batch 2 ▸ "Iteration r1" |
 | P6 — closeout in §7 | DONE (this commit) — its PENDING lines flip after P5 |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
@@ -300,9 +300,9 @@ to a gate arming and whose fallback span crossed a separator. Per crashing test:
   road changes in r2 with its own red-on-old.
 - r1 pieces: the test changes + the diagnostic suite — DONE (this commit); fix build `DerivedData/vm64-b2r1/` TEST BUILD
   SUCCEEDED, no warning in a touched file (the deprecated `UIWindow(frame:)` fallback copied from the caret suite was
-  replaced by requiring the scene). The pre-fix build `vm64-b2r1-red/`: **REVERT IN FLIGHT** — the three phone production
-  files checked out from base `9cf3b3688` over `05ca99e0d`; restore = `git checkout HEAD -- <the three>`, then a clean
-  `git status`.
+  replaced by requiring the scene). The pre-fix build `vm64-b2r1-red/`: DONE — TEST BUILD SUCCEEDED (cold), the three
+  phone production files checked out from base `9cf3b3688` over `05ca99e0d` and RESTORED (`git status`, `git diff HEAD`
+  empty after). **No revert is in flight.** r1 is READY for the next short stage cycle (§7 batch 2 ▸ r1's commands).
 
 
 ### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
@@ -809,6 +809,59 @@ No `Shared/` file changed. The one Core addition is a new type no Mac code refer
 3. **P-2-3 — a composition commit or dictation inside the window is withheld and said** (built) · released when the
    flight commits nothing.
 4. **P-2-5 — insert below's keys land in the new block** (built, the Mac's rule) · exempt insert below.
+
+#### Iteration r1 — after the first stage window (2026-11-19; the window's facts are the orchestrator's §5 block)
+
+**What the first window FALSIFIED in this closeout (kept above as written, corrected here):**
+- "So the red run expects 8 failing, 2 passing; the green run expects 10 passing" — FALSE. Pre-fix: 7 failed by
+  assertion, 1 passed, 2 killed the host. Fix: 5 passed, 5 killed the host. Every kill was the DEBUG desync trap from
+  `storageDidEdit`'s `.refuse` arm.
+- Road C's red-on-old shape ("the same store, a conflict take…") — FALSE: the probe's own write trapped on BOTH trees.
+- `afterTheFlightLandsTypingIsOrdinaryAgain` "GREEN on both (a guard)" — FALSE: it trapped on both trees.
+- The evidence lines "the pins … green run PENDING" stand as PENDING; nothing was claimed green.
+
+**The diagnosis (traced from the six crash reports, the two logs and the code; §5 "Iteration r1" carries it in full).**
+One road under all six: an edit whose report did not bind to a gate arming, routed by `fallbackVerdict`, whose span
+crossed a separator → `.refuse` → `desyncRecovery` → the trap.
+- Road C (divide): the PROBE's write — a font-only insert at a non-last block's end, widened through the paragraph's
+  terminator by iOS's paragraph-style fixing (round 2's M12). The fence's belt is never reached (it sits in the
+  `.block(i)` arm). The merge pin's identical write in the last block routed on both trees, which is the control.
+- The four UIKit `insertText` traps (the guard on both trees; the divide / extract / make-block replays on the fix):
+  all at the START of a non-empty, non-last block — the caret those three doors land. The fence's logic is not on the
+  road; its replay uses the same `insertText` the guard uses on the pre-fix tree. Why the arming did not bind there is
+  NOT settled by reading; the recorded candidate is VM-19's posture class (the pins typed into a text view in no window
+  at all, never the key window's first responder).
+
+**What r1 changed (test-only — no product line moved):** the pins type in her posture (the foreground scene's key
+window, the text view first responder, leftovers resigned; `.serialized`); a debug assertion inside a pin is RECORDED
+AS A FAILING ISSUE (task-scoped `EditorAssertionSeam` handler) — never swallowed, so a desync still fails its pin and
+the host survives; road C's divide pin seeds one block so its gate-less write lands where it routes; and
+`MobileFlightFenceProbeTests` (DIAGNOSTIC, asserts nothing) prints `VM2-PROBE` lines from an armed E1 trace for a UIKit
+insert at a block start — with and without a divide before it, in both postures, and with the caret moved away and
+back.
+
+**What r1's cycle should show, and what each outcome means:**
+
+| Build | If the posture was the cause | If the block-start insert is unroutable in her posture too |
+|---|---|---|
+| fix `vm64-b2r1` | 10 of 10 pins pass | road-A divide · extract · make block and the guard FAIL with a recorded desync issue (no host kill); the other 6 pass |
+| pre-fix `vm64-b2r1-red` | 8 fail by assertion (A ×4 doors, B, C ×2, insert-below parity); `insertBelowTwin` and the guard pass | the same 8 fail, plus the guard fails with a recorded desync; `insertBelowTwin` passes |
+| `VM2-PROBE` lines | p2/p5/p7 (keyed): `rejected=0 desyncs=0` | p5 (keyed, after a divide): `desyncs=1` — then it is round 2's M27, pre-existing, and r2 moves the replay off this road with its own red-on-old |
+
+**r1's stage commands** (the orchestrator's short claim; the fence suite and the diagnostic only):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileStructuralFlightFenceTests MobileFlightFenceProbeTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b2r1 \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b2r1-red \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+Then `grep VM2-PROBE` over each log. Products: `vm64-b2r1` built at `05ca99e0d` (the fix + r1's tests);
+`vm64-b2r1-red` = r1's tests over the base's three phone production files (cold; restored after, tree clean). The first
+window's `vm64-b2`, `vm64-b2-red` are superseded (the orchestrator deletes them).
 
 ### Batch 3 · VM-66 — the speed tests run her paths (implementer closeout)
 
