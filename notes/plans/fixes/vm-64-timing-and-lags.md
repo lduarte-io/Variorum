@@ -157,7 +157,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | **CLOSED 2026-11-19** (r1) | see the batch 6 block; r1 code `36cddcf60` `9821ffef3` `ce3c4e75b` | first window NOT green (the release lived in `deinit`); r1 green on the final tree — "Orchestrator's stage results" below; residual VM-227 |
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
-| Ladder r1 · fix pass | **IN-PROGRESS** (first turn ended: only builds left — a QUIET window) | see the fix-pass block below | findings 2, 3, 5, 6 applied and committed; the merge of `origin/main`, the rebuilds and the red build wait for the window's end; finding 1 waits on the reviewer's call between its two arms |
+| Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 waits for the window's end and VM-55's merge) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the merge of `origin/main`, the rebuilds, the red build, the whole Core package, the stage |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -736,7 +736,7 @@ orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
 | F4 — finding 2 (VM-70): `takeAutosaveHold` re-observes on both of its paths; the hosted pin; the red build `vm64-fix-red` | DONE but the red build — the fix and the pin `f589d964e` (`takeAutosaveHold`: the hold guard's early return became `if !holdsAutosave { … }` around the re-acquire, the unchanged re-observe after it on both paths; pin `MobileNoteHoldTests.aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`). **HELD:** the red build `vm64-fix-red` (a cold build — the QUIET window from about 12:36 forbids it; recipe in §7 ▸ "Fix pass", reversing only the fix's hunk so it survives the VM-55 merge). No revert is in flight |
 | F5 — builds: phone and Mac `build-for-testing` into `vm64-fix`; `swift test` for the touched suites | DONE at `f589d964e` — phone and Mac `** TEST BUILD SUCCEEDED **` (the Mac finished at 12:37, inside the window's two-minute tail), no warning in a touched file; `swift test --filter 'TimingRecorderTests\|StructuralFlightFenceTests\|LeavingSavepointTests\|LeavingSavepointMeasurementTests'` 48 tests in 4 suites passed (the gated one skipped). **To be REBUILT on the merged tree** once the orchestrator says to merge `origin/main` (VM-55) and the window has ended |
 | F6 — §7 "Fix pass" closeout with the stage commands | DONE (this commit) — §7 ▸ "Ladder round 1 — fix pass"; the turn ENDS here with only builds left (the window): the merge of `origin/main` at the orchestrator's word, then the phone and Mac rebuilds into `vm64-fix`, then the red build, then the stage |
-| F7 — finding 1 (Part of VM-71): HELD for the reviewer's call; the second turn | IN-PROGRESS — the call is in (`c9a2effda`: arm (a), exactly as specified, nothing of arm (b)). (i) the GUARD in `LeavingSavepointTests` ("GUARD — a take another writer dirties between the read and the turn is the next ask's") — DONE (`84a8acff8`; green by design, `LeavingSavepointTests` 8 passed); (ii) the comment corrections — DONE (this commit; comments only: `Shared/AppSession.swift`'s phone branch of `savepointOnLeaving`, inside its `#else`, and `closeAutoCommit(_:takes:)`'s doc; the Mac's statements byte-unchanged); (iii) the record corrections in §7 batch 7 — DONE (this commit; in place, marked "[Ladder round 1, finding 1 — …]", the first text kept legible: hazard (a)'s pop row, hazard (b)'s "nothing can go stale" qualified to ACROSS asks, D-7-1's visibility-point note); (iv) the gated measurement stays (`12d6afde5`) |
+| F7 — finding 1 (Part of VM-71): HELD for the reviewer's call; the second turn | DONE — the call is in (`c9a2effda`: arm (a), exactly as specified, nothing of arm (b)). (i) the GUARD in `LeavingSavepointTests` ("GUARD — a take another writer dirties between the read and the turn is the next ask's") — DONE (`84a8acff8`; green by design, `LeavingSavepointTests` 8 passed); (ii) the comment corrections — DONE (this commit; comments only: `Shared/AppSession.swift`'s phone branch of `savepointOnLeaving`, inside its `#else`, and `closeAutoCommit(_:takes:)`'s doc; the Mac's statements byte-unchanged); (iii) the record corrections in §7 batch 7 — DONE (`d6404029a`; in place, marked "[Ladder round 1, finding 1 — …]", the first text kept legible: hazard (a)'s pop row, hazard (b)'s "nothing can go stale" qualified to ACROSS asks, D-7-1's visibility-point note); (iv) the gated measurement stays (`12d6afde5`). The final table: §7 ▸ "Ladder round 1 — fix pass" ▸ "Second turn, part 1" (this commit); the touched filters 49 tests in 4 suites passed |
 | F8 — second turn, part 2 (after the QUIET window and VM-55's merge to main, at the orchestrator's word): merge `origin/main`, rebuild `vm64-fix` (phone and Mac) and `vm64-fix-red` on the merged tree, the whole Core package headless, the stage | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
@@ -3418,3 +3418,30 @@ headless, and the Mac build compiles them; the run's whole-Mac window covers the
 
 None from this pass — no product behaviour was decided. Finding 1's arm and finding 2's closing conditional are the
 reviewer's calls (engineering).
+
+#### Second turn, part 1 — the reviewer's final calls, and what landed
+
+The calls are the reviewer's, verbatim in `notes/plans/fixes/vm-64-ladder-round1.md` ▸ "Final calls (reviewer)"
+(`c9a2effda`). Part 1 ran inside the QUIET window: comments, one test, the record — no product statement changed, no
+build, no merge.
+
+| Finding | The reviewer's call | What landed (commit) |
+|---|---|---|
+| 1 · the leaving read's visibility window (Part of VM-71) | CONFIRMED — arm (a), exactly as specified; nothing of arm (b); no pin (an over-claim corrected, not a bug fixed) | the GUARD `LeavingSavepointTests` "GUARD — a take another writer dirties between the read and the turn is the next ask's" (`84a8acff8`; green by design, named a guard, never a pin) · the comments — `Shared/AppSession.swift`'s phone branch of `savepointOnLeaving` (inside its `#else`) names the one-ask gap and its bound, `closeAutoCommit(_:takes:)`'s doc says AT THE TURN and that a take dirtied after the read is the next ask's (`78439841e`; comments only, the Mac's statements byte-unchanged) · the record — §7 batch 7's hazard (a) pop row, hazard (b) and D-7-1 corrected in place, the first text kept (`d6404029a`) · the gated measurement stays as the road not taken's cost (`12d6afde5`) |
+| 2 · a re-show mid-leaving never re-observes (VM-70) | CONFIRMED AS APPLIED — the built shape adopted over the literal hoist; owed: the red build reversing only this hunk, the pin RED on it at the two named expectations and GREEN on the fix alone and in company, the suite's other four green | `f589d964e`; the red build and the stage runs are part 2 (after the window and the merge) |
+| 2 · the remaining road (a re-show while teardown itself is suspended) | DISMISSED from this pass — stays with VM-227 | nothing; "VM-227 — narrowed, not closed" above is kept verbatim; at the merge the orchestrator points VM-227 at the responses' finding-2 trace and the offered conditional with its pin sketch |
+| 3 · `TimingRecorder.end` dirty on a no-op (VM-65) | CONFIRMED AS APPLIED | `39008cb46` (the pin RED on the pre-fix tree at the two no-op arms, 4 issues; green after) |
+| 4 · the batches 6+7 walk (or the recorded substitution) | stands, the orchestrator's | nothing here |
+| 5 · `surfaceSettled()` mutating (VM-2) | CONFIRMED AS APPLIED | `a578f0b6e` |
+| 6 · the round's "sent" clamp (VM-65) | CONFIRMED AS APPLIED | `f4801064e` |
+| 7 · FOR A LATER READER | stands, the closeout's | nothing here |
+
+**Evidence (part 1):** `swift test --filter 'TimingRecorderTests|StructuralFlightFenceTests|LeavingSavepointTests|LeavingSavepointMeasurementTests'`
+— **49 tests in 4 suites passed** (the gated measurement skipped ungated; the guard among them). The two comment
+edits in Core compile in that run; the `AppSession.swift` comment compiles in part 2's rebuild (app code — not in the
+package).
+
+**Part 2 (NOT-STARTED — at the orchestrator's word, after the window and once VM-55's merge has landed on main):**
+merge `origin/main` (batch 5's "Merging with VM-55" recipe for the two Shell files); rebuild phone and Mac into
+`vm64-fix` on the merged tree; the red build `vm64-fix-red` by the recipe above (it reverses only finding 2's hunk);
+the whole Core package headless; the stage commands above.
