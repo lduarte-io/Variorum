@@ -316,7 +316,7 @@ TEXTKIT2 §3 gains the measured `insertText` line. **No revert is in flight** un
 | P-r2-3 — the pins on her keyboard's road (+ the undo door's pin, the insert-below exemption pin, the guard); the probe suite deleted | DONE (this commit) — 10 pins BUILT; runs PENDING the stage |
 | P-r2-4 — TEXTKIT2 §3's measured line | DONE (`9b1451cad`) |
 | P-r2-5 — the r2 closeout section (before the final builds) | DONE (this commit) — §7 batch 2 ▸ "Iteration r2" |
-| P-r2-6 — builds: phone `vm64-b2r2` · Mac (the brain is Core) · pre-fix `vm64-b2r2-red` (revert announced first) | IN-PROGRESS — phone DONE at `2a3fd3a52`; Mac running; pre-fix NEXT |
+| P-r2-6 — builds: phone `vm64-b2r2` · Mac (the brain is Core) · pre-fix `vm64-b2r2-red` (revert announced first) | IN-PROGRESS — phone and Mac `build-for-testing` DONE (TEST BUILD SUCCEEDED at `2a3fd3a52`; no new warning in a touched file). **REVERT IN FLIGHT:** the four phone production files (`MobileStructural.swift`, `MobileEditorViewModel.swift`, `MobileEditorTextView.swift`, `MobileUndoDoor.swift`) checked out from base `9cf3b3688` over `d92f2e408` for `vm64-b2r2-red`; restore = `git checkout HEAD -- <the four>`, then a clean `git status` |
 
 
 ### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
