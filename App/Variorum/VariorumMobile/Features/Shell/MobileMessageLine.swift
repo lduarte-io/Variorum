@@ -55,6 +55,13 @@ final class MobileMessageLineModel {
     /// How much of the window's foot the keyboard covers, from the keyboard
     /// frame notifications (zero while it is down).
     var keyboardOverlap: CGFloat = 0
+    /// The window's own bottom safe-area inset (the home indicator's), fed by
+    /// the overlay's controller from UIKit. The face ignores the safe area so
+    /// its door's frame stays in window coordinates — and a `GeometryReader`
+    /// that ignores it reads this inset as ZERO, which put the line one
+    /// home-indicator inset too low, over the tab bar's doors (2a follow-up 2,
+    /// VM-55 batch 2b). So the inset comes from here, never from the reader.
+    var safeBottom: CGFloat = 0
 
     /// The line's door, in the overlay's coordinate space — the ONLY region
     /// that takes a touch. Not observed: hit-testing reads it, nothing draws it.
@@ -99,7 +106,7 @@ struct MobileMessageLineView: View {
 
     var body: some View {
         let tokens = VoiceTokens.resolve(voice: model.voice(), dark: scheme == .dark)
-        GeometryReader { proxy in
+        GeometryReader { _ in
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
                 if let item = model.status.current {
@@ -109,7 +116,7 @@ struct MobileMessageLineView: View {
             }
             .padding(.bottom, MobileMessageLineModel.footOffset(
                 keyboardOverlap: model.keyboardOverlap,
-                safeBottom: proxy.safeAreaInsets.bottom,
+                safeBottom: model.safeBottom,
                 chromeInset: model.chromeInset))
         }
         // The face fills the WINDOW, so the door's frame below is in the
@@ -235,6 +242,24 @@ final class MobileMessageLineController: UIViewController {
         center.addObserver(
             self, selector: #selector(keyboardWillChange(_:)),
             name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    // The window's real bottom inset, from UIKit (see `safeBottom`): on the
+    // first layout and whenever the safe area moves. Guarded, so writing the
+    // observed model never loops a layout.
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        adoptSafeBottom()
+    }
+
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        adoptSafeBottom()
+    }
+
+    private func adoptSafeBottom() {
+        let inset = view.safeAreaInsets.bottom
+        if model.safeBottom != inset { model.safeBottom = inset }
     }
 
     @objc private func keyboardWillChange(_ note: Notification) {

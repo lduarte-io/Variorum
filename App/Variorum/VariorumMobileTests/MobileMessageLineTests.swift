@@ -18,6 +18,9 @@
 //    overlay floats above the app's window (and a sheet presented on it),
 //    never becomes key, takes a touch only on its door, sits above the tab
 //    bar and the keyboard, and goes when the shell's probe goes.
+//  · `MobileMessageLineInsetTests` (VM-55 batch 2b, 2a follow-up 2) — the face
+//    in a real window on the inset it is FED, with a home indicator (34) and
+//    without (0): above the bar and the inset either way.
 //  · `MobileLineDoorTests` — the phone's doors over a REAL store: each door's
 //    class, each removal's Undo over its existing road (pressed, and the
 //    store read back), the note's line taken back as the note moves on.
@@ -303,6 +306,10 @@ struct MobileMessageLineHostTests {
             let safeBottom = overlay.rootViewController?.view.safeAreaInsets.bottom ?? 0
             #expect(door.maxY <= overlay.bounds.maxY - safeBottom - 44 + 0.5,
                     "above the tab bar's inset — door \(door), safe \(safeBottom)")
+            // 2a follow-up 2: the line stands on the WINDOW's real inset, fed
+            // from UIKit — the face's safe-area-ignoring reader reads zero.
+            #expect(model.safeBottom == safeBottom,
+                    "the window's own inset feeds the line — model \(model.safeBottom), window \(safeBottom)")
 
             model.keyboardOverlap = 336
             #expect(await eventually {
@@ -320,6 +327,56 @@ struct MobileMessageLineHostTests {
             #expect(probe.overlay == nil, "the overlay goes with the shell")
             #expect(overlay.isHidden)
             root.dismiss(animated: false)
+        }
+    }
+}
+
+// MARK: - The face on the window's real inset (2a follow-up 2)
+
+/// **The face honours the inset it is FED** (VM-55 batch 2b — 2a follow-up 2).
+/// The geometry rule's pins feed `footOffset` numbers directly, so nothing
+/// drove the face with a real window's inset — and the face read the inset
+/// from a `GeometryReader` that ignores the safe area, i.e. ZERO, which sat
+/// the line one home-indicator inset too low, over the tab bar's doors (the
+/// whole phone target's run of 2026-11-19 07:06–07:19, products of e8609cc6f:
+/// `theLineFloatsOverTheAppAndOnlyItsDoorTakesATouch` red, door maxY 822
+/// against 796.5, inset 34). Here the face stands in a real window with the
+/// tab bar's inset, once as a device WITH a home indicator (34) and once
+/// WITHOUT (0): either way its door sits above the bar AND the inset, and
+/// close above them — so a face that read zero on the first device is red,
+/// and one that floated the line arbitrarily high is red too.
+@MainActor
+@Suite("VM-61 — the one line stands on the window's real inset")
+struct MobileMessageLineInsetTests {
+    @Test(arguments: [CGFloat(34), CGFloat(0)])
+    func theLineSitsAboveTheBarOnTheInsetItIsFed(_ inset: CGFloat) async throws {
+        try await withEditorWorld { session, _ in
+            let scene = try #require(
+                UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
+                "the test host has a window scene")
+            let window = UIWindow(windowScene: scene)
+            let model = MobileMessageLineModel(status: session.status, voice: { .terminal })
+            model.safeBottom = inset
+            model.chromeInset = 44
+            window.rootViewController = UIHostingController(rootView: MobileMessageLineView(model: model))
+            window.isHidden = false
+            defer {
+                window.isHidden = true
+                window.rootViewController = nil
+            }
+            session.status.removal(
+                "Block deleted.", undo: .init(label: MobileLine.undoLabel, perform: {}))
+            #expect(await eventually {
+                window.layoutIfNeeded()
+                return model.doorFrame != nil
+            }, "the line drew its door")
+            let door = try #require(model.doorFrame)
+            let ceiling = window.bounds.maxY - inset - 44
+            #expect(door.maxY <= ceiling + 0.5,
+                    "above the bar and the inset — door \(door), inset \(inset)")
+            #expect(door.maxY >= ceiling - 30,
+                    "and close above them, not floated away — door \(door), inset \(inset)")
+            session.status.clear()
         }
     }
 }
