@@ -302,9 +302,9 @@ still says the open is main-thread — false since 13l L-c (`Shared/AppBootstrap
 | Piece | State |
 |---|---|
 | P1 — this live status | DONE (this commit) |
-| P2 — the nine-wing fixture option (seeder) + its world and shape pin | NOT-STARTED — design above |
-| P3 — `MobileHerPathsPerfTests` (the VM64-PERF series) | NOT-STARTED — design above |
-| P4 — the launch-path doc corrected; pointers in the walk and shelf suites | NOT-STARTED |
+| P2 — the nine-wing fixture option (seeder) + its world and shape pin | DONE (`fd9184011`) — build PENDING |
+| P3 — `MobileHerPathsPerfTests` (the VM64-PERF series) | DONE (`0bc11d9a9`) — build PENDING; runs PENDING the stage window |
+| P4 — the launch-path doc corrected; pointers in the walk and shelf suites | IN-PROGRESS — the doc and the walk's pointer landed in `fd9184011`; the shelf suite's pointer after the first build |
 | P5 — builds: phone `build-for-testing` into `DerivedData/vm64-b3/` (no Shared/Core change planned ⇒ no Mac build) | NOT-STARTED |
 | P6 — closeout in §7 + the READY report's stage commands | NOT-STARTED |
 
