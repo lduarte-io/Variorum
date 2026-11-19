@@ -2101,9 +2101,9 @@ device is created for the walk and deleted at its end; its id is never written h
 | Piece | State |
 |---|---|
 | Record skeleton | DONE (this commit) |
-| The instruments: seeder + UI driver, written and built in the snapshot (one cold build) | IN-PROGRESS — the snapshot exists at e19403d86; the two files and the build remain |
-| The dedicated device (created, never booted outside a claim) | NOT-STARTED |
-| READY for the walk claim | NOT-STARTED |
+| The instruments: seeder + UI driver, written and built in the snapshot (one cold build) | DONE — `VariorumMobileTests/VM55WalkSeedTests.swift` (the hosted seeder) and `VariorumMobileUITests/VM55Walk.swift` (three classes: `VM55WalkFirstRun` — the first launch past the words card with NO capture; `VM55WalkStudy` — rows a–l; `VM55WalkTerminal` — a, b, f, g) exist only in the snapshot; built for testing GREEN there (the TK2SpikeUITests scheme, then the VariorumMobile scheme so the app keeps its test PlugIn — the VM-44 runbook's ordering trap), DerivedData `vm55-walk` inside the snapshot, 1.6 GB |
+| The dedicated device (created, never booted outside a claim) | DONE — an iPhone 17 Pro on the iOS 27.0 runtime (the newest installed: closest to her phone; the gate's standing device covers iOS 26.2), named "VM55 Walk"; its id is in the READY message only |
+| READY for the walk claim | DONE (the report ending this session's first turn) — the screens folder's ignore question rides it |
 | The walk (rows a–l, Study light; a, b, f, g again in Terminal) | NOT-STARTED |
 | The snapshot and its DerivedData removed; the device deleted | NOT-STARTED |
 | The gate's builds (both targets `build-for-testing` into `vm55-b1`, the tree clean and still) | NOT-STARTED — only at the orchestrator's word after the walk |
