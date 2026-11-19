@@ -83,22 +83,54 @@ extension Operations {
     ///
     /// Refuses while signed out (`OperationError.noOwnerIdentity`) — an
     /// adoption without an identity has nothing to stamp.
+    ///
+    /// **VM-67 — it costs the rows to adopt, never the corpus, and writes
+    /// nothing when nothing is unowned.** It runs at every launch with a
+    /// session, every unlock and every sign-in, and on her phone almost every
+    /// run has nothing to do. Two parts, inside ONE access to the writer:
+    /// 1. **The probe** — per owner table, `EXISTS` through the table's
+    ///    partial index of unowned rows (`idx_<table>_unowned`, v1_38): an
+    ///    index seek, outside any transaction (a read in autocommit — no write
+    ///    lock, no WAL frame). Nothing unowned anywhere ⇒ the all-zero report,
+    ///    and no transaction was ever opened.
+    /// 2. **The adoption** — otherwise, the same UPDATE set as ever, in ONE
+    ///    IMMEDIATE transaction (GRDB's own `write` shape), each statement
+    ///    driven by the same index.
+    /// The access is the writer's own (`writeWithoutTransaction` — its FIFO
+    /// queue), not a reader's: a write already queued when adoption is called
+    /// lands first and its rows are seen, exactly as the one write
+    /// transaction this replaced saw them. The predicate is unchanged
+    /// (`owner_id IS NULL`), so the rows adopted, and the occasions that
+    /// adopt them, are today's. Pinned in `OwnerAdoptionTests` (no write
+    /// statement when nothing is unowned; every statement reads an owner
+    /// table only through its unowned index; the state transitions per road).
     @discardableResult
     public func adoptOwnerID() throws -> OwnerAdoptionReport {
         guard let owner = currentOwnerID() else {
             throw OperationError.noOwnerIdentity
         }
-        return try database.write { db in
-            var adopted: [String: Int] = [:]
+        return try database.writeWithoutTransaction { db in
+            var tables: [String] = []
             for table in SyncSchema.tables {
                 let columns = try Row.fetchAll(
                     db, sql: "PRAGMA table_info(\(table.name))")
                     .map { $0["name"] as String }
-                guard columns.contains("owner_id") else { continue }
-                try db.execute(
-                    sql: "UPDATE \(table.name) SET owner_id = ? WHERE owner_id IS NULL",
-                    arguments: [owner])
-                adopted[table.name] = db.changesCount
+                if columns.contains("owner_id") { tables.append(table.name) }
+            }
+            var adopted = Dictionary(uniqueKeysWithValues: tables.map { ($0, 0) })
+            let anyUnowned = try tables.contains { table in
+                try Bool.fetchOne(
+                    db, sql: "SELECT EXISTS (SELECT 1 FROM \(table) WHERE owner_id IS NULL)") ?? false
+            }
+            guard anyUnowned else { return OwnerAdoptionReport(adoptedByTable: adopted) }
+            try db.inTransaction {
+                for table in tables {
+                    try db.execute(
+                        sql: "UPDATE \(table) SET owner_id = ? WHERE owner_id IS NULL",
+                        arguments: [owner])
+                    adopted[table] = db.changesCount
+                }
+                return .commit
             }
             return OwnerAdoptionReport(adoptedByTable: adopted)
         }

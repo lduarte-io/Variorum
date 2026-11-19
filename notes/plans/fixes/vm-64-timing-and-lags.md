@@ -424,7 +424,7 @@ owner-carrying table, through SQLCipher's page decrypt, holding the runner AND t
 |---|---|
 | P1 — this live status | DONE (this commit) |
 | P2 — the schema commit (`v1_38`) + the index-set pins' justified edits | DONE (this commit) — `swift test --filter 'MigrationTests\|BlockCommentTests'` 44 tests in 5 suites passed (the new `theOwnerAdoptionIndexesArriveForAnOlderStoreOnePerOwnerTable` among them); `SyncSchemaTests\|AuthRLSDDLTests\|LocalMachineryRecreationTests\|StorePlaintextExportTests\|PlaintextExportImportTests\|LibraryClassifier` 133 tests in 6 suites passed — the registry walk (`SyncSchemaTests.swift:14-19`, `type = 'table'`), the column walk (`:93`) and the mirror-marker pin (`AuthRLSDDLTests.swift:934-949` against the constant `SyncSchema.swift:170`) all untouched by an index |
-| P3 — the op (probe-then-write) + the Core pins and state-transition tests | NOT-STARTED |
+| P3 — the op (probe-then-write) + the Core pins and state-transition tests | DONE (this commit) — `OwnerAdoptionTests` (8) + `OwnerIdentityTests` (8): 16 tests in 2 suites passed. On the SCHEMA-ONLY tree (`0e9948d03`: the index landed, the op unchanged) the same suite ran 8 tests, 4 issues: the three "writes nothing" pins red (the op ran `BEGIN IMMEDIATE TRANSACTION`, eleven `UPDATE … WHERE owner_id IS NULL`, `COMMIT TRANSACTION` with nothing unowned), the plan pins GREEN — the index alone fixes the scan; the probe is what stops the write |
 | P4 — red-on-old (revert the two production files, run the pins, restore) | NOT-STARTED |
 | P5 — the hosted assertion in `MobileHerPathsPerfTests` | NOT-STARTED |
 | P6 — `swift test` (touched suites + migrations / schema / sync-schema suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b4/` | NOT-STARTED |
