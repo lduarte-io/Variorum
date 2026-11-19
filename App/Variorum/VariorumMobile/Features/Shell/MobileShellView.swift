@@ -150,6 +150,12 @@ struct MobileShellView: View {
     /// `speak` door, shown by the Protection screen (one shell per open: a re-keying act's receipt owed to its reopen is
     /// spoken into the shell that re-pushes the screen).
     @State private var protectionReceipts = MobileProtectionReceipts()
+    /// VM-61 — the phone's ONE message line (the face of `session.status`),
+    /// hosted once, here, above everything this shell presents.
+    @State private var messageLine: MobileMessageLineModel
+    /// VM-61 — the tab bar's drawn height, so the line sits above its doors on
+    /// a root (measured, never assumed: umbrella VM-47 owns the bar's size).
+    @State private var tabBarHeight: CGFloat = 0
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
     // Stage 0 TK2 spike auto-run (KEPT — the executable §5 form).
@@ -171,6 +177,8 @@ struct MobileShellView: View {
         _archiveModel = State(initialValue: MobileArchiveModel(session: session))
         _starsModel = State(initialValue: MobileStarsModel(session: session))
         _wingModel = State(initialValue: MobileWingModel(session: session))
+        _messageLine = State(initialValue: MobileMessageLineModel(
+            status: session.status, voice: { [router] in router.voice }))
         // The quick-note box's session (round 2, M5). Bound HERE and not
         // in a `.task` deliberately: `bind` is idempotent and writes only
         // `@ObservationIgnored` storage, so it cannot re-enter the view
@@ -269,6 +277,11 @@ struct MobileShellView: View {
                 bandGesture(width: width),
                 including: pagingAllowed ? .all : .subviews)
         }
+        // VM-61: the one message line — its own overlay window over this
+        // scene, above every sheet and alert this shell presents; it lifts
+        // over the tab bar while a root (and so the bar) is showing.
+        .background(MobileMessageLineHost(
+            model: messageLine, chromeInset: pagingAllowed ? tabBarHeight : 0))
         // (13p Batch 4's notice bar — today's nudge and reminder — left with today's road at VX-329 U1.)
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
@@ -594,6 +607,8 @@ struct MobileShellView: View {
         .overlay(alignment: .top) {
             Rectangle().fill(tokens.line).frame(height: 1)
         }
+        // VM-61: the message line sits above the bar's doors on a root.
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabBarHeight = $0 }
     }
 
     /// A tab door. The BODY moved to `selectPage` at batch 10 so the swipe
