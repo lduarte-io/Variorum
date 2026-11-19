@@ -90,7 +90,7 @@ The release: by your word, the last of tonight's two Mac runs builds it and does
 
 ## What changed for you in the app
 
-- Your daily Journal wears the Private eye on its row in the Bookcase, the Library and the Book Panel, and each entry wears it on its row and on the note's masthead; pressing it says why, and changes nothing. (VX-1007)
+- Your daily Journal wears the Private eye on its row in the Bookcase, the Library and the Book Panel, and each entry wears it on its row and on the note's masthead; pressing it says why, and changes nothing. As before, the eye shows only while an AI client is approved and the AI-marks switch is on. (VX-1007)
 - The Journal's Book Settings shows Private ticked and greyed, with one line saying it is always Private; a note in the Journal shows the same in its ▾ menu. (VX-1007)
 - An AI needs the Edit permission on both notes to remove a version link; with less, you're asked, as for its other edits. The field guide's lesson 3 says so. (VX-977)
 - When an AI links or unlinks two notes whose titles are too long for the status line, the line now says "linked two notes as versions" or "unlinked two notes as versions" instead of "made a change". (VX-979)
