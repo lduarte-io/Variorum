@@ -169,7 +169,8 @@ struct AppSettingsView: View {
         .mcp: ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook",
                "mcpAIMarks"],
         .protection: ["protection"],
-        .dataSafety: ["backups"],
+        // VX-79: + "searchIndex", the search index's own section.
+        .dataSafety: ["backups", "searchIndex"],
         .diagnostics: ["crashReports"],
         .acknowledgments: ["acknowledgments"],
     ]

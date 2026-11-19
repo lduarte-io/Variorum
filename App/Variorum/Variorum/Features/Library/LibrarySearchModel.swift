@@ -52,7 +52,14 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// since VX-84a (D-1, superseding P-13o-U2-6), by the catalog's own
     /// listing NARROWED to the notes (and, in the Blocks scope, the blocks)
     /// it tags; a day alone by the shipped day listing (D5).
-    var hasWords: Bool { query.text != nil }
+    ///
+    /// VX-954 (the VX-980 run): the ONE core predicate decides
+    /// (`SearchComposer.asksWords`) — the same function the narrowing, the
+    /// facet band and the tag offers read — so a word list that folds to
+    /// nothing beside a tag (`— #flora`, `+ #flora`) IS the tag alone here
+    /// too, while a field of only punctuation keeps today's reading
+    /// (PROVISIONAL P-980-1 (a)). It read `query.text != nil` before.
+    var hasWords: Bool { SearchComposer.asksWords(query) }
 
     /// **The field asks something answerable** (13o U3; VX-84a): words, or a
     /// typed `#tag` — its associated books and the notes it narrows to.
