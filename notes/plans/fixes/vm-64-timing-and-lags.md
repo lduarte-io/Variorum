@@ -803,8 +803,8 @@ launch-path doc) · `0bc11d9a9` (the suite) · `51440c726` (two compile fixes) �
   new suite). No budget changed; no existing pin's assertion changed.
 - `App/Variorum/VariorumMobileTests/MobileShelfPerfTests.swift` — header only: the box's Library-wakes leg is counted
   in the new suite, and why it lives there.
-- `App/Variorum/VariorumMobileTests/MobileHerPathsPerfTests.swift` — **the new suite** (`.serialized`, nine tests'
-  worth of paths in eight tests), reading VM-65's layer off `AppTiming.recorder`; each test on its own on-disk copy of
+- `App/Variorum/VariorumMobileTests/MobileHerPathsPerfTests.swift` — **the new suite** (`.serialized`, nine tests),
+  reading VM-65's layer off `AppTiming.recorder`; each test on its own on-disk copy of
   a static world (`DiskWorld`: `backup(to:)` → `openStore(at:)`, whose migration encrypts it — a WAL pool like her
   phone's store); the real screen and the real shell mounted in a key window behind a `MountGate` (the bootstrap's
   `.ready` → `.opening` flip, as a view: removing the content fires every mounted screen's `onDisappear` exactly as
