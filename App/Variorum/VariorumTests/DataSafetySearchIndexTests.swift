@@ -50,11 +50,11 @@ private actor HeldDoor {
 struct DataSafetySearchIndexTests {
     // MARK: - The world
 
-    private static func healthy(_ docs: Int) -> SearchIndexIntegrity {
+    nonisolated private static func healthy(_ docs: Int) -> SearchIndexIntegrity {
         SearchIndexIntegrity(docCount: docs, missing: [], orphaned: [], factDrift: [], indexMatchesContent: true)
     }
 
-    private static func keys(_ count: Int, _ kind: String) -> [SearchDocKey] {
+    nonisolated private static func keys(_ count: Int, _ kind: String) -> [SearchDocKey] {
         (0..<count).map { SearchDocKey(kind: kind, srcID: "\(kind)-\($0)") }
     }
 
@@ -157,7 +157,7 @@ struct DataSafetySearchIndexTests {
             let post = try ops.createPost(title: "The lighthouse ledger")
             let minted = try ops.newBlock(in: post.id, text: "The keeper climbs the stair.", registeringUndo: false)
             _ = try ops.addBlockComment(to: minted.block.id, text: "check the tide tables")
-            try db.write { try $0.execute(sql: "DELETE FROM search_doc WHERE kind = 'comment'") }
+            try await db.write { try $0.execute(sql: "DELETE FROM search_doc WHERE kind = 'comment'") }
 
             let suite = "vx79-row-real-\(UUID().uuidString)"
             let model = DataSafetyModel(
@@ -214,7 +214,11 @@ struct DataSafetySearchIndexTests {
             check: { await door.enter(.check); return Self.healthy(5) },
             rebuild: { await door.enter(.rebuild); return Self.healthy(5) })
         let first = Task { await model.checkSearchIndex() }
-        for _ in 0..<10_000 where await door.flights.isEmpty { await Task.yield() }
+        var spins = 0
+        while await door.flights.isEmpty, spins < 10_000 {
+            spins += 1
+            await Task.yield()
+        }
         #expect(model.searchIndexWorking && model.searchIndex == .working(.check), "the row says it is working")
         #expect(Self.line(model)?.text == DataSafetyCopy.searchIndexChecking)
         #expect(Self.line(model)?.alarm == false)
@@ -293,6 +297,7 @@ struct DataSafetySearchIndexTests {
 }
 
 /// The Settings search finds the row by her words, and takes no other row's first finding.
+@MainActor
 @Suite("VX-79 — the Settings search finds the search-index row")
 struct DataSafetySearchIndexSettingsSearchTests {
     private func findings(_ query: String) -> [SettingsFinding] {
