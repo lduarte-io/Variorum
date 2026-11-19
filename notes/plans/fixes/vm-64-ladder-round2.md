@@ -273,3 +273,215 @@ diagnostics addition does not take it as licence for product state.
 *(Finding 1 is new and is the round's MAJOR. Findings 2 and 3 are new. Finding 4 is round 1's condition and gate,
 still open. Findings 5 and 6 are record and document corrections. No finding touches `Sources/VariorumCore/Sync/`;
 none is marked FINDER-FIXES at this stage — the final calls follow the implementer's responses.)*
+
+---
+
+## Implementer responses (round 2 fix pass)
+
+*The round-2 fix pass's implementer (Opus, fresh, cross-model flow): one entry per finding and one for O-1, written
+before any code and pushed first. Each says agree or dispute with its ground; the reviewer makes the final call on each.
+Line numbers are at `85762803a`. The pass's own record is the run record §5 ▸ "Ladder round 2 — fix pass" and §7 ▸
+"Ladder round 2 — fix pass". "Applied" below means applied in this pass's first turn, with its pin; everything hosted is
+PENDING the orchestrator's stage.*
+
+### 1 · [MAJOR] a deleted (or Put back) note past the first page — AGREE; the delete leg and the ★ leg applied this pass; the Put back leg needs a seam the brief's fence forbids me to cut — arms below, (A) recommended, waiting for the final call
+
+**Traced on today's code, as written.** `holdFirstPage` (`MobileLibraryViewModel.swift:499-521`) observes only
+`read(db, question, after: nil, limit: listingLimit)`; `AppDatabase.observe` ends in `.removeDuplicates()`
+(`Persistence/AppDatabase.swift:266-269`); the row's door `confirmDeleteNote` (`:814-832`) runs `deleteContainer`, whose
+`tombstoneNoteFamily` writes `deleted_at`/`updated_at` on the note and its versions only
+(`Operations+Container.swift:694-718`). A row at index ≥ `listingLimit` therefore leaves the first page byte-identical:
+the observation re-fetches, delivers nothing, `followFirstPage` never runs, and `all`/`bookless` keep the row. The Put
+back is the same hole reversed: `MobileLine.swift:123-126` → `putBack` (`:141-150`) → `restoreContainer`
+(`Operations+Container.swift:748-805`), which clears the tombstone and stamps `updated_at` and moves none of the four
+phone sorts' keys, so a deep note's return leaves the first page unchanged too. Confirmed: before VM-68 no row past 200
+was listed, so the hole is this run's.
+
+**Every act the phone's Library rows and its message line can take, and whether it re-asks** (the brief's enumeration):
+
+| Act | What it can change past the first page | Re-asks the shown listing? |
+|---|---|---|
+| A row's tap — the note opens on the Library's own stack | the Library is hidden while the note shows (`libraryOnScreen` needs `libraryPath.isEmpty`) | not needed — the return's first delivery re-asks the listed depth (`holdFirstPage` → `followFirstPage` when deeper than a page); anything done in the note is behind that |
+| A row's long-press ▸ Delete, confirmed | the note leaves All/Notes and Bookless | **YES — applied** (`confirmDeleteNote`, after the op lands) |
+| A row's long-press ▸ Star / Unstar | **All and Notes: nothing** — they list every note whatever its stars or books, and no phone sort key is a star's. **Bookless: the loose class moves** where a ★ gathering exists (it now shows, or stops showing, the note) or a living book's rule carries a ★ term (intake seats the note: it gains a home) | **YES for Bookless — applied** (the row's star button, after `stars.toggle` lands, tells the model — `rowStarLanded()`); All/Notes not re-asked |
+| The line's Undo after a NOTE's delete (Put back) — the row's door, the note's ⋯ sheet (`MobileEditorViewModel.swift:1582`) or Versions (`MobileVersions.swift:232`) — pressed while the Library is on screen | the note returns to All/Notes and, if loose, to Bookless | **needs the seam below — NOT applied** |
+| The line's Undo after a BOOK's delete (`MobileShelfViewModel.swift:208`, `MobileBookDetails.swift:165`), pressed while the Library is on screen | Bookless: the book's members regain a home and leave the loose class. (All's books come from the Shelf's own held, unbounded observation — it follows by itself) | the same seam — one `putBack` body serves both arms of the line |
+| The line's Unarchive (`.unarchiveBook`, the daily Journal's archive) | nothing a listing shows (an archived book still homes its notes; the phone's archive is plain `archiveReading`) | no |
+| "+ new note" | mints and pushes the note — the Library is hidden; the return re-asks | not needed |
+| 🗑 Trash, the Archived row | pushed rooms on the Library's stack (`MobileShellView.swift:266-267`) — their Put back / unarchive land while the Library is hidden; the return re-asks | not needed |
+| The filter, the sort, the wing | a new question: its first page | not needed (the wing: finding 3) |
+| Search | while hits show the listing is not drawn, and hit rows carry no act | not needed |
+| Not on the phone's Library rows today: archive, a move to another wing, a rename (and no title sort), a filing into a book | — | — |
+| **Not the Library's act:** a sync apply that tombstones, revives or re-homes a note past the first page while the Library is on screen | the same shape | **no — outside this finding's class.** The Mac's catalog has the same exposure (its follow is the held 200-window's membership, `LibraryViewModel.swift:85`); a ticket body for it is in my report |
+
+**The re-ask as built (the reviewer's shape):** after the act lands, the SHOWN listing is re-asked at its listed depth
+through the existing single-flight road (`followFirstPage(question)`) — only when it is deeper than one page (inside the
+first page the held observation already answers), only for the question it last landed (a newer question's own first
+landing answers otherwise), and only while that listing is held (a new `holds` count on its paging state, raised and
+lowered by `holdFirstPage`; hidden, the return re-asks anyway). ∝ the listed rows, one statement per act (P1) — the
+Mac's `refresh` rule. **One correction to the reviewer's pin text:** "stays 7 deep" — the follow re-reads the LISTED
+depth (`reread`, `:546`: `max(listingLimit, rows.count)`), so after one of 8 rows is deleted the listing is 8 deep again,
+the next note moving up — the Mac's `refresh` (`max(Self.pageSize, noteHits.count)`, `LibraryCatalogModel.swift:800`).
+The pin asserts that: the deleted note gone, 8 rows, `Queries.library`'s first 8.
+
+**The Put back leg — the choice.** The line's Undo is built inside VM-55's `MobileLine.action(for:)`, and nothing about a
+landed Put back is observable to the Library: the op runs through `session.runner` (no landed hook,
+`Shared/OperationsRunner.swift`), a landed Put back says nothing (P-55-4, `MobileLine.swift:139-141`), and the store
+change does not move the first page. The brief fences `MobileLine` ("read it, call it, do not change it"). Arms:
+- **(A) RECOMMENDED — one line in `MobileLine.putBack`:** after a landed Put back, post a phone-local notification (the
+  Mac's own `.variorumNotesDeleted` precedent, `Variorum/Features/Library/NoteDeletion.swift:192, 235`), its object the
+  session; the Library re-asks its shown listing on it while held (inside the hold, the same `reaskAfterRowAct`). It
+  covers EVERY Put back through the line — the row's, the ⋯ sheet's, Versions', a book's — with one road and no second
+  spelling. Cost: one line (and the notification's name) in VM-55's file — the fence lifted for that line.
+- **(B) the Library speaks its delete line itself** — `session.status.removal(…, undo:)` with its own action
+  (`restoreContainer`, the refusal words, then the re-ask). No VM-55 line; but it covers only the row's own delete (the
+  ⋯ sheet's and Versions' Put back stay un-re-asked while the Library shows), and spells the Put back road and its
+  refusal a second time beside `MobileLine`'s — the drift class VM-61 retired.
+- **(C) a held witness** — while on screen the held fetch also reads the liveness of the rows that recently LEFT the
+  listing (∝ that set) and a revival re-asks. No VM-55 line; covers every Put back road and a sync revival, but not a
+  note that newly turns loose; a bounded set to design and the held read's shape to widen — more machinery than the
+  finding asks.
+The pin is the same under every arm (the reviewer's second arm): delete a deep row, press the line's own Undo
+(`session.status.current?.action?.perform()` — VM-55's own pin's road, `MobileMessageLineTests.swift:470`), and require
+the row listed again in its place. RED on this tree and on this pass's tree; it lands with the arm in the second turn.
+
+**Pins applied this pass:** `MobileLibraryPagingRulesTests.aRowDeletedPastTheFirstPageLeavesTheListing` (old API only,
+so it is in the red build; red-on-old expected: the deleted note still listed after the settle) and
+`MobileLibraryRowActsTests.aStarThatTakesADeepRowOutOfTheLooseClassReAsksBookless` (a ★ gathering, 12 loose notes,
+Bookless 8 deep, row 7 starred: it leaves Bookless; it names the new door, so it lives in its own file, which the red
+build moves aside — batch 5's recipe — and it is a DESIGN pin of the same road, whose red-on-old is the delete pin's).
+
+### 2 · [MINOR] the settle rule reads "settled" while the settle read is in flight — AGREE with the hole; the one-fact shape as specified would fence her ORDINARY road; NOT applied (the brief's condition: it needs more than that one fact) — rides VM-226
+
+**The hole, traced, as written.** `applyPendingIfClean` (`:1163-1202`) nils the marker at `:1174` before its read; the
+settle rule (`flightSurfaceHoldsTheStore`, `:1327-1330`) reads only the marker and `forceFullRender`; the projection
+hook (`:1048-1050`) and the settle loop (`:1344`) both drain on it. Both of the reviewer's paths are real (the mint's
+finish reaches `host.applyPendingIfClean()` through `finishMint`'s arms, `Shared/EditorBrain/TailCrystallizer.swift`),
+and both need a mint inside a flight — VM-226's road.
+
+**Why the specified fix is wrong as written — the ordinary road, traced.** Every fencing door renders the post-act page
+with its OWN settle before its latch drops (`refreshTakesFromStore` then the `defer`, `MobileStructural.swift:115/226`,
+`:250/347`, …). In the app the editor's live observation runs (`start()`), and it delivers the op's commit. When that
+delivery is consumed BEFORE the door's settle ingests — the likelier order in production: the observation's fetch
+starts at the commit, the door's read only after the runner hop back — the page is still pre-act, clean (the flush
+landed) and non-matching, so the policy answers `.refetchFresh` (`EditorProjectionEngine.swift:157`) and
+`applyPendingIfClean` takes the marker and starts a re-read. The door's settle then renders the post-act page and drops
+the latch WHILE that re-read may still be in flight. Today the landing reads "settled" and drains — **correctly**: the
+page holds the post-act store (the door's own fresh read put it there). Under the one fact "raised where
+`applyPendingIfClean` takes the marker, lowered when its task ends", the same landing reads "not settled", the fence goes
+to `.settling`, and a key she types in the next read's time is REFUSED and "Another structural change is still
+landing." is said — on an ordinary divide with no mint anywhere; on the 100k note that window is one whole-projection
+read. **No existing pin would see it**: no fence pin's model starts its live observation (`makeSurfaceEditor`,
+`MobileMarkdownTests.swift:29-41`, calls `loadOnce()` only), so the suite would stay green over the regression.
+
+**What the precise rule needs:** the in-flight read may count only while no fresh, non-delivery apply has rendered
+since the marker was taken — the fact lowered also by every render arm of a non-delivery apply (or an epoch pair:
+deferral vs render). That is a second fact or a second lowering site, beyond the brief's condition, so **nothing is
+applied**; `MobileEditorViewModel.swift` is untouched by this pass. Proposed for VM-226 (one pin-first session for both,
+the reviewer's own alternative): the reviewer's pin (the marker taken, the read parked on the held queue, the readable
+fact raised until it lands; the fence arm: the latch dropped while it is parked must not drain — today's
+`structuralFlightChanged` drains synchronously at `:1318`, so that arm is deterministic, but it needs a real door, since
+`structuralInFlight` is `private(set)`), PLUS an ordinary-road GUARD in a world whose model runs its live observation:
+after a divide whose delivery's re-read is still in flight when the door's own settle has rendered, a typed key is
+approved (green today; red under the one-fact shape). `hasDeferredProjection` keeps its meaning either way —
+`MobileDeferredProjectionRetryTests.swift:77` asserts it clears before the re-read.
+
+### 3 · [MINOR] after a hidden wing switch, Bookless draws the previous wing's rows for one read — AGREE; applied as proposed, plus the union's books withheld while the notes answer another wing
+
+**Traced as written** (`hold(_:)` `:462-469` returns at `guard hold.onScreen` with `bookless`, `booklessLoaded` and
+`booklessWingHasNotes` still the old wing's; the body renders `visible` before the task restarts). **The same hole
+elsewhere, checked:**
+- **The notes listing:** primed in the new wing on the hidden switch (`hold(_:)` `:463-466`), so at the return it
+  normally answers the new wing — UNLESS the return comes within one read of the switch: the return's restart cancels
+  the hidden prime mid-read (`CancellationError`, nothing lands) and `all` still names the old wing until the held
+  page's first delivery. Rarer; the same gate covers it.
+- **A filter change:** Bookless opened after a switch made while All showed — its rows still name the old wing. The
+  same hole by another trigger; covered (the second pin).
+- **A sort change:** a new question in the same wing — the previous sort's rows, of the right wing, for one read, as
+  before VM-68 (`observeLibrary` restarted then too). Not a wing leak and NOT gated (gating it would blink the listing
+  empty on every sort change).
+
+**Built:** `landedWing` — the wing each listing's rows answer, OBSERVED (the `Paging` class is not, and a landing that
+moves only the wing — two empty listings — must still redraw), set in `land`. `visible` and `emptyListing` return
+nothing for a listing whose landed wing is not `session.wing.readScope`; a never-landed listing keeps today's rules.
+One addition to the reviewer's text, said: `rows(books:)` also withholds All's BOOKS while the notes answer another
+wing — otherwise the new wing's books draw alone for that read and then re-position as the notes land (P-68-4's
+"nothing jumps"). **Pins** (old API only, in the red build): `MobileLibraryPagingRulesTests.aWingSwitchedWhileBooklessWasNotHeldDrawsNoOtherWingsRows`
+(the reviewer's: red-on-old `visible == [homeNote]`; plus no empty line meanwhile and Work's row on the return — guards)
+and `…aDoorOpenedAfterAWingSwitchDrawsNoOtherWingsRows` (the filter-change trigger: red-on-old `visible == [homeNote]`).
+
+### 4 · [MINOR] the merged tree's hosted evidence — the orchestrator's.
+
+One line: the 14:43–14:51 window settles round 1's finding-2 condition (red at exactly the two named expectations on the
+hunk-reversed build, 5 of 5 on the fix, the merge-touched 38 types green in one host); the merge gate and the walk stay
+the orchestrator's, and this pass adds lines (findings 1, 3, 8(a), 9, O-1) that the final tree's gate covers.
+
+### 5 · [MINOR] "bounded" over-claimed in two cases — AGREE; the three sentences corrected
+
+Confirmed in the code: `.createdAt`, `.entryDate` and `.lastMajorRevision` take `catalogNotesPage`'s single arm with no
+index on the key (`LibraryPaging.swift:241-243`; its header `:22-30` says so of the Mac); the edited sort's touched arm is
+`INDEXED BY idx_container_touched` (`:216-227`), an index over every live container, so in a wing holding fewer notes
+than a page `LIMIT limit + 1` never fills and the walk reaches the index's end, fetching each row to test kind, archive
+and wing. Corrected in place, first text legible: the record's batch 5 cost table (the "On screen" cell) and its floor
+paragraph's scope, the handoff's "Rulings reconciled" row, the AppSpecRecord draft's VM-68 paragraph, and the same
+over-claim in the drafts' residuals row 23. No pin (a cost shape, red on the old code too). The ticket's body is in my
+report.
+
+### 6 · [MINOR] four statements false on the merged tree — AGREE; corrected
+
+The drain's `report(…, action: statusAction)` reaches `MobileLine.say(…, as: .refusal, door: undoDoor)`, which withdraws
+the note's standing Undo line and draws a refusal with no action (`MobileLine.swift:72-95`) — for every door, not only
+the removal-class ones (a divide's own receipt is an ordinary act the line never draws). Corrected: the handoff's P-2-1
+and P-2-2 (P-2-2 now carries "the fence's sentence meets the one message line" with its three options in plain words,
+left at (a)); the drafts' bundle (P-2-1's clause; P-2-2 rewritten with (a)–(c)); the drafts' SurfaceContracts fence line
+narrowed to the reviewer's guarantee ("an edit the gate is asked about, or that reaches a block's text, is never written
+toward the store during a flight") and the Undo clause corrected. Also corrected, the same false clause: the r2
+closeout's "What each input gets" paragraph in the record ("with the door's Undo/Redo kept beside it"), marked in place.
+
+### 7 · [NIT] VM-227's body — AGREE; the paragraph is in my report (Linear is the orchestrator's).
+
+### 8 · [NIT] two readout pitfalls — (a) AGREE, applied with a pin; (b) the caveat, not the code
+
+**(a) traced:** `open()` (`MobileQuickNote.swift:891-897`) begins both Open spans (`AppTiming.boxOpenPressed`,
+`Shared/AppTiming.swift:207-210`) and, when `file()` hands back nil (an empty box, a refusal, a withdrawal), nothing
+cancels them, so the next `notePainted()` or `keyboardUp()` inside 30 s records a long, false sample. **Built:**
+`AppTiming.boxOpenFiledNothing()` cancels both (the recorder's existing `cancel`), called from `open()` when `file()`
+returns nil. **Pin:** `MobileBoxOpenTimingTests.anOpenThatFilesNothingLeavesNoOpenSpan` — Open on an empty box, the box's
+task finished, then `AppTiming.notePainted()` and `AppTiming.keyboardUp()`: neither series gains a sample and neither
+span is open (red-on-old: both spans still open, and each gains one sample). Hosted; it reads the process's one recorder
+— reliable because the host runs Swift Testing serially (O-1), said in its header.
+**(b) the caveat, and why not the code:** closing the window at `noteLeft` is right only when a NOTE's leaving opened it;
+a backgrounding opens the same `.keepFirst` window and must keep counting through the removed screens' own leavings (a
+Castle backgrounding's lock teardown — the 3 → 1 series batch 7 is judged by), and the brain's window does not record who
+opened it. Closing it honestly needs an opener in the brain's window API plus an app-side rule, pinnable only hosted
+(`Shared/` is not in the Core package) — not a few lines, and a slip moves the Castle series' meaning. Written instead:
+the handoff's readout step ("leave about ten seconds between the two leavings") and a bracketed note on the row in
+batch 1's "what each number means" table.
+
+### 9 · [NIT] three small things
+
+`print` → `fingerprint` (`MobileTiming.swift:61`). **The header:** the readout ALONE forces capitals on screen — its
+title line is `title.uppercased() — heading.uppercased()` (`MobileTimingView.swift:146`), drawn as the first line of the
+sheet; the sibling edit trace's SCREEN draws its headline in mixed case (`MobileEditTrace.swift:475-493`, shown at
+`:560-564` — its upper-case "VARIORUM EDIT TRACE (E1)" is only in the COPIED transcript), and Settings' "Diagnostics"
+header is a plain `chromeLabel` (`MobileSettingsView.swift:264`), not a list style. So the two `.uppercased()` go (the
+words stay as drafted, for her wording pass); `MobileTimingTests`' three expectations follow. The recorder: no change.
+
+### O-1 · the perf suite must run alone — AGREE; gated
+
+**Confirmed by reading:** the scheme's `parallelizable = "NO"` (`VariorumMobile.xcscheme:34`) is written into the built
+xctestrun as `InProcessParallelizationEnabled = false` for `VariorumMobileTests` (`DerivedData/vm64-gate/…/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
+read with `plutil -p`). Swift Testing parallelizes within one process (Apple's "Parallelization" page); no Apple page
+names this key's effect on it (an external lookup found none — one user report ties the key to serial Swift Testing
+runs, and the probe's one-after-another order agrees). So yes: that flag is what keeps this host serial, and it is the
+only thing — nothing in the suite or the tree stops a whole-target run from including it, or a later suite's leftovers
+(a late leaving's savepoint mark, a debounced save, a model still alive) from landing in its windows when it runs after
+others. **Built:** `.enabled(if: ProcessInfo.processInfo.environment["VM66_PERF"] != nil, …)` — the
+`ShortcutsTabCaptureTests` precedent (`TEST_RUNNER_VX677_SHOTS`); the display name says "gated:
+TEST_RUNNER_VM66_PERF=1 — it runs alone"; the header's mechanism sentence corrected to the probe's facts; the skip's
+comment says how to run it; every place that tells a reader how to run it corrected (the record's batch 3 group (i) and
+the merge-in closeout's (iii), the handoff's "The next runs", the drafts' MobileSoul sentence and PR line, and the
+drafts' VM-66 paragraph). **A better shape without production changes:** none I can see — the suite already reads
+deltas against snapshots, and no test can stop another suite's late task from counting into the one recorder. No pin
+beyond the probe: the stage pieces are a whole-target run that SKIPS its 13 (Swift Testing counts skipped tests in "N
+tests … passed" — read the skipped lines) and the gated run alone, 13 passed.
