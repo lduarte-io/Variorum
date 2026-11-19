@@ -234,3 +234,121 @@ the record's own account: the walk, the whole phone target, the Mac leg on the m
   is the Mac's; her receipts ruling governs the phone); refusals in sentences on every road this run opened.
 - **Commits since round 1.** One piece each, pins ahead of fixes, no trailer, no home path, no device id,
   public wording.
+
+## Final calls
+
+*Made by the round-2 reviewer after the answers came back (the orchestrator's on R2-F1; batch C's runner on
+R2-F2, R2-F3, R2-N3, R2-N5; the fix-pass implementer on R2-N1, R2-N2, R2-N4). Nobody disputed a finding;
+three answers refine a fix, and each refinement was rechecked against the code before it was taken. No
+finding is FINDER-FIXES: none needs more than what is written here, and none is a `Sync/` line. The
+implementers apply them.*
+
+**What changed since the review, checked by me in the kept logs** (`DerivedData/logs/`, read with `grep`;
+no bundle was opened this time):
+- F4's pin is proved: `vm78-window-f4-red.log` — 4 tests in 1 suite failed,
+  `theShelfLessonDescribesTheShelfThatExists` the only failure, with 3 issues (the three expectations F4
+  added); `vm78-window-f4-green.log` — 4 tests in 1 suite passed.
+- The fix-pin window's red leg now has its log, `vm78-window-f-red.log`: 75 tests in 10 suites failed, 9
+  issues including 2 known; the four reds the record names and no other. F5's two hosted guards fail at
+  `surface.activate(BookStateCopy.finishVerb)` (and at the alert that then cannot present) — the reason the
+  record gives.
+- That same log prints the old row's labels: `"finish, finished means the table of contents is done — the
+  writing inside can still change."` for the Finish row and `"Delete Book…"` alone for the Delete row. So
+  R2-N1's premise — the caption was spoken before F5's label, and Delete's already was not — is shown by a
+  run, no longer by reading.
+
+**R2-F1 — CONFIRMED as answered.** The record's "The result bundles are kept (N11)" becomes: the red
+bundle of the fix-pin window is unreadable (stopped before it was finalized); its evidence is
+`vm78-window-f-red.log`. From here on, every run: up to 90 s of grace for `xcodebuild` to exit before it is
+stopped; `xcrun xcresulttool get test-results summary --path <bundle>` afterwards; "reads" or "unreadable —
+the log is the evidence" written beside the run; the log kept whatever the bundle does. The same rule in
+batch C's matrix text, replacing "stop a lingering `xcodebuild` once the verdict and counts are in".
+
+**R2-F2 — CONFIRMED, both columns, as the runner writes them; record only, nothing in the window changes.**
+- Under "Combinations no arm maps", line one: `realPosture`'s `waited spins=300`, or its at-act snapshot or
+  VERDICT showing `key=false` or `fr=false` ⇒ no arm from this window. The after-wait snapshot says which
+  condition failed — the window not key, the view not first responder, or both true with the keyboard's
+  willShow and didShow never agreeing; all three are the same answer: the posture the run was meant to
+  stand in was not reached, that is the finding, and the orchestrator decides after the window.
+- H1's confirmation gains its second half: the in-transaction write AND the first character report
+  reaching the terminator (`{0,6}` for "hi"). I rechecked the runner's reading of `MarkdownFace.restyle`:
+  it writes over the face's applied ranges and the new spans only; `lineRange` includes the terminator but
+  no face range does, so the settle's own write is `{0,8}` and stops short of it. The widening is fixing's.
+- Under "Combinations no arm maps", line two: where a red case and a green case differ in
+  `firstCharReport` / `didProcess … range=` while their postures agree (M1 against a green M1, suite against
+  real posture, alone against the pair), the answer is fixing's widening, not posture — neither arm; record
+  both ranges and stop for the orchestrator.
+- The hand-break's reach, read from M2, is marked as holding for a process in M2's state; the "seen red"
+  rule stands as the proof.
+- Arm A's fix shape gains one sentence: after its bounded wait `host` carries ONE expectation over
+  everything it waited for — the window is key, the view is first responder, the keyboard's willShow and
+  didShow counts agree — with a message that names the three and prints their values, so a caret test can
+  never run silently outside the posture it means. (All three, not two: arm A is taken only when
+  `realPosture` was green with all three met, so that is the posture the fixed test must stand in.)
+
+**R2-F3 — CONFIRMED, with the runner's two refinements taken and three precisions of mine.**
+- *(i′), in `checkViewport`, for each fan whose badge is drawn and meets the visible rect:* the point is
+  1 pt under the badge's top. If that y is not inside the visible rect (a badge straddling the top edge),
+  the badge is skipped and counted — refinement 1, taken: the probe never asks TextKit about a place
+  outside the viewport, and (i) still judges that badge. Otherwise ask
+  `textLayoutManager.textLayoutFragment(for:)` in container coordinates (y less the top inset); x is the
+  container's mid-width — every paragraph of this note fills its first line, and mid-width cannot fall
+  outside a frame that an indent has moved (my change from "the leading edge"). Expect the fragment's
+  `rangeInElement` to begin at the badge's own block offset. A different offset is a miss and prints
+  `VM17|astray|` with the offset it stands beside; no fragment at all is a miss too, and its line says "no
+  fragment at the badge's point" so the two can be told apart. Nothing in it forces layout.
+- *Counted and asserted:* per stop the line prints how many badges were asked and how many skipped; the
+  SUMMARY carries both totals. Two expectations: the misses are empty (VM-17's — a red reads exactly as
+  (i)'s does: real, stop and report, both lines in the report); and on each road at least one badge was
+  asked (the probe's own, "the probe did not reach…").
+- *The HOLLOW arm:* (1), (i), (i′), (ii) green ⇒ hollow. Its reach sentence, refinement 2 taken: reading
+  2's largest distance beside one viewport's height of text (about 700 pt less the insets) — the band's
+  pad is one viewport of CHARACTERS each side (`max(the viewport's characters, 512)`), so the comparison
+  is approximate and the sentence says so. Under it: no load-time estimate on this note could stand on
+  screen before its block came into the band, and "hollow" is shown for notes of this size. Over it with
+  everything green: the verdict still stands on what the walk and the jump saw, and the number goes to
+  VM-179 with the words "longer notes were not run".
+- *Order:* headless now — the lines, the arm's sentence, one `build-for-testing` into `vm78-ios`. If
+  window (3)'s GO arrives first, M5 runs as built and the (i′) probe re-runs in the second window; in that
+  case M5 alone may record REAL, never HOLLOW — hollow waits for (i′) green.
+
+**R2-N1 — CONFIRMED, the four rows.** One sheet, one shape, and each hint is the caption the row already
+draws, so nothing new is worded. On `MobileBookDetailsSheet`: the verb stays the label (F5's guards drive
+it); `.accessibilityHint` carries `MobileBookDetailsModel.finishCaption(for:)` on Finish/Reopen,
+`BookArchiveCopy.pausedSentence(for:)` on Unarchive when it has one (no hint otherwise),
+`MobileShelfFaces.archiveDailyJournalDetail` on Archive, `RecoveryCopy.deleteBookKeepsItsNotes` on Delete —
+unvoiced, as the labels are. Pin as the implementer describes it,
+`MobileBookStateRowTests.theBookDetailsRowsSpeakTheirCaptionsAsHints`: two mounts (an archived book with a
+rule; the daily Journal), each element found by its label with `#require` first, then its hint compared
+exactly. Red on the tip (every hint nil), green after; F5's two guards stay green.
+- *If the fixed tip still reads nil for every row* — the driver cannot see a SwiftUI hint — the fix is
+  unproved and does not land in this run: the modifiers and the pin come out by a new commit, and the
+  finding leaves as a line for the owner of the phone's VoiceOver pass, with the run's evidence (the old
+  label in `vm78-window-f-red.log`). No unpinned fix, and no pin kept that cannot go green.
+- *Its window:* one type, red with `MobileBookDetails.swift` at the commit before the fix. It rides the
+  next short window this run already owes; it does not earn one of its own.
+- *The identity row* (`.accessibilityLabel("Rename Book")`, from before this run, which hides the book's
+  name) is not a caption and is not changed here: a line for the orchestrator to place, no id invented.
+
+**R2-N2 — CONFIRMED as answered.** The `ONLY` array is marked "as run in window (5)" and left as it ran;
+the follow-up's one-type leg is written beside it with its two results and its logs; one line says a re-run
+of the whole recipe carries both `MobileTutorialLibraryWalkTests` and `MobilePocketGuideDeletionTests`.
+F4's row in the table flips to verified. The commit messages stay.
+
+**R2-N3 — CONFIRMED as answered:** the argument quoted whole; the "1 test in 1 suite" check stays.
+
+**R2-N4 — CONFIRMED as a line for VM-62's run, the implementer's text**, with one clause added so the sweep
+reads it rightly: only Unarchive's second press is visible today — a second Finish or Reopen repeats an
+operation that is safe to repeat, and Archive dismisses its sheet. No code now.
+
+**R2-N5 — CONFIRMED, the runner's cite:** `:1104-1146` (`aVoiceFlipReachesEveryRegisteredEditor`; the
+flips at `:1135` and `:1141`, the reset at `:1110`). One precision for whoever reads M7 by it: that test's
+flip window is synchronous by its own design — no suspension between the flip and the flip back — so no
+other suite can observe the other voice from it. M7's rule (a caret red under the pair is attributed only
+after M1 alone) stands anyway: it costs nothing and the pair shares a process. Round 1's file keeps its
+older cite; a closed round's text is history.
+
+**The ladder after this round.** No BLOCKER and no MAJOR here. By round 1's F1, which stands, that does
+not close it: a further fresh round reads window (3)'s outcome for batch C with the instruments' removal,
+the (i′) probe and its run, R2-N1's fix with its red and green, the record lines R2-F2 adds, and VM-16
+re-landed on main's message seam.
