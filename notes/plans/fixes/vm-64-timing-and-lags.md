@@ -154,7 +154,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 2 · VM-2 | **CLOSED 2026-11-19** (r2; three stage cycles) | see the batch 2 block; r2 code `2a3fd3a52` | stage results in "Orchestrator's stage results" below; PROVISIONAL P-2-1, P-2-5; residual VM-226 |
 | 3 · VM-66 | **CLOSED 2026-11-19** | see the batch 3 block; built at `d2cef56be` | the BEFORE numbers are in "Orchestrator's stage results" below |
 | 4 · VM-67 | BUILT · headless green · phone piece GREEN · **the 16 Mac types owed** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | closes when the Mac window runs |
-| 5 · VM-68 | IN-PROGRESS (implementer started 2026-11-19) | see the batch 5 block | — |
+| 5 · VM-68 | BUILT · headless green · **READY for the stage** | see the batch 5 block; code `8f1adc87c` + `5ba59a6c8`, products at `dcea98cee` (merged tree) | — |
 | 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
 | 7 · VM-71 | NOT-STARTED | — | — |
 
@@ -449,14 +449,13 @@ DerivedData: `App/Variorum/DerivedData/vm64-b4/` (gitignored).
 
 ### Batch 5 · VM-68 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**A REVERT IS IN FLIGHT (the red-on-old build), from `dcea98cee`, committed and pushed.** The five phone Shell files
-(`MobileLibraryViewModel`, `MobileLibraryView`, `MobileShellView`, `MobileShellBand`, `MobileListingFilters`) are
-checked out at base `35a3bea7a`, and `VariorumMobileTests/MobileLibraryPagingRulesTests.swift` is moved to the gitignored
-`App/Variorum/DerivedData/vm64-b5-red-aside/` (it names VM-68's API); the build goes into
-`App/Variorum/DerivedData/vm64-b5-red/`. RESTORE: `git checkout HEAD -- <the five files>
-App/Variorum/VariorumMobileTests/MobileLibraryPagingRulesTests.swift`, then `git status` and `git diff HEAD` empty.
-(Merged with main at `d893fae63` before this — VX-980, at the orchestrator's word.) A QUIET WINDOW was on at the start (no whole-package `swift test`, no cold or
-full `build-for-testing` until the orchestrator says it ended).
+**No revert is in flight.** The red-on-old revert RAN and is RESTORED: from `dcea98cee` (committed and pushed), the five
+phone Shell files (`MobileLibraryViewModel`, `MobileLibraryView`, `MobileShellView`, `MobileShellBand`,
+`MobileListingFilters`) were checked out at base `35a3bea7a` and `MobileLibraryPagingRulesTests.swift` moved aside (it
+names VM-68's API); `build-for-testing` into `App/Variorum/DerivedData/vm64-b5-red/` SUCCEEDED; then `git checkout HEAD
+--` the six files, the aside folder deleted, `git status` and `git diff HEAD` empty. The branch merged main at
+`d893fae63` (VX-980) first, at the orchestrator's word, so both product folders are built on the merged tree. (A quiet
+window held the machine when the code was written; it ended 08:33.)
 
 **Audit F re-verified on this tree:** `startAll` / `startBookless` (`MobileLibraryViewModel.swift:316-353`, VM-65's
 marks inlined), both held for the root's whole life (`MobileLibraryView.swift:130-131`); `Queries.library` orders by the
@@ -505,9 +504,9 @@ the near window's facts.
 | P1 — this live status | DONE (this commit) |
 | P2 — Core: the shared Pool predicates + the byte-identity guards (frozen pre-change builders) | DONE (this commit) — the guards ran GREEN on the base's builders BEFORE the extraction (2 tests), and green after it |
 | P3 — Core: `keys` + `poolLoose` on the page read; the Core pins (the loose pages equal `poolPosts`' loose class; the keys equal `Queries.library`'s stamps; the plans and VM steps) | DONE (this commit) — `LibraryPoolPagingTests` 8 tests green; with the neighbours (`LibraryPagingTests`, the Pool/ownership/rule suites, the four search suites that call the page read) **169 tests in 23 suites passed** headless. Measured: the first loose page **6,332 → 6,164 VM steps** at 300 → 1,200 notes (flat); the Mac's Pool statement **77,461 → 306,988** (∝ notes — the phone's Bookless re-read BEFORE) |
-| P4 — phone: the model's paging + hold, the view's hold key and load-more, the shell's on-screen fact (`MobileShellBand.isDrawn`) | WRITTEN (this commit) — **NOT YET BUILT: a quiet window holds the machine** (no cold `build-for-testing` until the orchestrator says it ended); compile PENDING |
-| P5 — hosted pins: the 201st note reachable by scrolling (red on old); bookless pages past its window (red on old); the return lists what was minted while hidden (guard); the perf suite's four box-save counts ASSERTED 0 and a note typed in from the Library leaves its root alone | WRITTEN (this commit) — `MobileLibraryPagingTests` (3, compile against both trees), `MobileLibraryPagingRulesTests` (9, VM-68's API — out of the red build), `MobileHerPathsPerfTests` (the box test's four zeros, its return series, the new reads' timings and traced plans; the new covered-Library test). Builds and runs PENDING |
-| P6 — builds (phone + Mac `build-for-testing` into `DerivedData/vm64-b5/`; the red build `vm64-b5-red/`), the headless suites, the closeout and READY | **WAITING ON THE QUIET WINDOW** — headless Core suites green (above); the closeout drafted in §7 (`5be4f09b1`) with every build and run PENDING. NEXT, in order, when the orchestrator says the window ended: cold `build-for-testing` phone + Mac into `vm64-b5/` (fix any compile error); the red build into `vm64-b5-red/` (announced here first); the stage commands written into §7; READY |
+| P4 — phone: the model's paging + hold, the view's hold key and load-more, the shell's on-screen fact (`MobileShellBand.isDrawn`) | DONE (`8f1adc87c`; the one compile error fixed at `5ba59a6c8` — `isDrawn` compares pages by index, `MobileTab`'s equality being main-actor) — phone `build-for-testing` SUCCEEDED, no warning in a touched file; behaviour PENDING the stage |
+| P5 — hosted pins: the 201st note reachable by scrolling (red on old); bookless pages past its window (red on old); the return lists what was minted while hidden (guard); the perf suite's four box-save counts ASSERTED 0 and a note typed in from the Library leaves its root alone | DONE (`8f1adc87c`, `cc7b2e4a2`, `dcea98cee`) — BUILT in both product folders; the runs PENDING the stage (§7 batch 5 ▸ "The stage window") |
+| P6 — builds, the headless suites, the closeout and READY | DONE — main merged at `d893fae63` (VX-980, at the orchestrator's word; clean); Core set re-run on the merged tree **173 tests in 24 suites passed** (the 169 + VX-980's `SearchFoldedWordsBesideATagTests`); phone + Mac `build-for-testing` into `vm64-b5/` and the red phone build into `vm64-b5-red/` all `** TEST BUILD SUCCEEDED **` on the merged tree (`dcea98cee`); READY — §7 batch 5 ▸ "The stage window" |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b5/` (gitignored).
 
@@ -1800,15 +1799,38 @@ then group (i) against `vm64-b4-red` — expect the owner test RED on its VM-67 
 
 ### Batch 5 · VM-68 — the Library pages and stops re-reading (implementer closeout)
 
-**Not done in this batch (first, by the record's rule):** the phone and Mac products are NOT YET BUILT — a quiet window
-(another session's merge gate) held the machine when the code was written, so no `build-for-testing` ran; the build,
-the red-on-old build and every hosted run are PENDING (the commands are below). No simulator walk yet (PENDING the
-stage). Row previews are not built (wave 2 — where they attach is said below). No new copy, no new face. No schema, no
-`Sync/`, no `SearchComposer` line. VX-618 is NOT closed by this batch (below).
+**Not done in this batch (first, by the record's rule):** every hosted run is PENDING the orchestrator's stage window
+(the products are built — the commands are below), so the pins' red and green, the after-numbers and the nine-wing
+plans are not yet in this record; no simulator walk yet (the stage's — group (vii) below names it). Row previews are not
+built (wave 2 — where they attach is said below). No new copy, no new face. No schema, no `Sync/`, no `SearchComposer`
+line. VX-618 is NOT closed by this batch (below).
 
 **Base:** `35a3bea7a`. **Commits:** `d8b64dd34` (live status, the Core lines said first) · `3c931e33c` (Core: the
-Pool's predicates' one home, the page's keys and its Pool-loose form, the Core pins) · `8f1adc87c` (phone, WIP — written
-under the quiet window, unbuilt) · this closeout.
+Pool's predicates' one home, the page's keys and its Pool-loose form, the Core pins) · `8f1adc87c` (phone, written under
+the quiet window) · `5be4f09b1` (this closeout, drafted) · `cc7b2e4a2` (a test's row lookup) · `5ba59a6c8` (the
+phone build's one compile error: `isDrawn` compares pages by index) · **`d893fae63` — Merge main (VX-980)**, at the
+orchestrator's word · `dcea98cee` (two test-file compile fixes) · the red-on-old revert's announcement and this
+closeout's completion.
+
+#### Main merged (VX-980) — what it means for this batch
+
+Clean merge (`d893fae63`; VX-980 touched no file this batch touches). VX-980 changed the guard inside
+`SearchComposer.listingNarrowing` (it now reads `!asksWords(query)`, so words that fold to nothing beside a tag take the
+tag road). `catalogNotesPage` calls that guard ONLY when its `narrowing:` argument is non-nil, and every read this batch
+adds passes `narrowing: nil` (the phone's `read`: the plain page and the Pool-loose page), so the new guard never runs
+on them. In `LibraryPaging.swift` this batch's lines sit NEXT TO that call — the `poolLoose:` parameter on the same
+signature line as `narrowing:`, and `let pool = …` right after the narrowing's fail-closed return — but no line of the
+call or its guard changed, and VX-980 did not edit the file. Nothing in this batch's pins depends on the old guard: the
+catalog page's byte-identity pin builds its narrowed shape from a hand-made `ListingNarrowing` (the memberwise struct,
+unchanged by VX-980) and never goes through the guard; the loose-page walk, the keys pin and the plans pass no
+narrowing. Re-run on the merged tree, headless: the Core set plus VX-980's `SearchFoldedWordsBesideATagTests` — **173
+tests in 24 suites passed**.
+
+**Builds (all on the merged tree, products at `dcea98cee`):** phone `build-for-testing` (generic iOS Simulator) and Mac
+`build-for-testing` into `App/Variorum/DerivedData/vm64-b5/` — `** TEST BUILD SUCCEEDED **`, no warning in a touched
+file; the red phone build into `App/Variorum/DerivedData/vm64-b5-red/` (the five Shell files at base `35a3bea7a` over
+merged Core, the rules pins aside) — `** TEST BUILD SUCCEEDED **`, so the pre-fix Shell files compile against merged Core;
+restored, `git status` clean.
 
 #### The mechanism, as traced on this tree (audit F §5/§7/§8 P1.1–P1.2, A·B1/B2 — TRACED as written)
 
@@ -1978,5 +2000,88 @@ autosave rate. The ticket stays open for its own road (the operations seam).
 
 #### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
 
-PENDING the builds (`DerivedData/vm64-b5/` and `vm64-b5-red/`), which wait for the quiet window to end. The commands are
-written into this section with the builds.
+Products: `App/Variorum/DerivedData/vm64-b5/` (phone + Mac, the fix) and `App/Variorum/DerivedData/vm64-b5-red/` (phone,
+the five Shell files at base `35a3bea7a`, without `MobileLibraryPagingRulesTests`), both built on the merged tree at
+`dcea98cee` (main merged at `d893fae63`). Batch 1's machinery note applies: poll for the Swift Testing verdict line,
+not `** TEST EXECUTE **`. Every phone group is its own invocation (the perf suite reads the process's one recorder).
+
+**Group (i) — the perf suite ALONE, fix build: the after-numbers and the new assertions.**
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileHerPathsPerfTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b5 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-b5-i>
+grep -E '^VM64-(PERF|PLAN)\|' <log-b5-i>
+```
+Expected: 10 tests green. `typingInTheBoxWakesTheOffScreenLibrary` with its four box-save series at 0 (asserted),
+`library-return-rereads` 1 each (recorded), the four fetch series (the two pre-VM-68 queries kept, and
+`library-page-fetch-ninewings` / `bookless-page-fetch-ninewings`) and the `VM64-PLAN|notes-page-ninewings|…` /
+`|bookless-page-ninewings|…` lines; `typingInANoteOpenedFromTheLibraryLeavesTheLibraryAlone` with its two series at 0
+(asserted). Every other series as batch 3/4's (batch 5 does not touch them; the Library opens no longer wait behind a
+held Library, so their durations may move a little).
+
+**Group (ii) — the two paging suites, fix build.**
+```
+tests=(MobileLibraryPagingTests MobileLibraryPagingRulesTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b5 \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+Expected: all green — 3 + 9 tests (the sort pin runs four cases).
+
+**Group (iii) — `MobileLibraryPagingTests` on the RED build (the red-on-old).**
+```
+tests=(MobileLibraryPagingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b5-red \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+Expected: **`theTwoHundredAndFirstNoteIsReachableByScrolling` RED** (notes 029…000 never on screen — the 200 cut) and
+**`theBooklessDoorListsEveryLooseNote` RED** (the seven oldest loose notes never on screen — `poolPosts(limit: 5)`);
+`aNoteMintedWhileTheLibraryIsAwayIsListedWhenSheReturns` GREEN (the guard).
+
+**Group (iv) — the perf suite ALONE on the RED build** (settles the covered-Library pin's question; the box-save zeros'
+red is already on record as the BEFORE table's 2 · 2 · 1 · 1):
+```
+tests=(MobileHerPathsPerfTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b5-red \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-b5-iv>
+grep -E '^VM64-PERF\|library-' <log-b5-iv>
+```
+Expected: `typingInTheBoxWakesTheOffScreenLibrary` RED on its four zeros (2 · 2 · 1 · 1, as before);
+`typingInANoteOpenedFromTheLibraryLeavesTheLibraryAlone` RED if SwiftUI kept the covered root's tasks alive under a push
+(then it is a bug pin), GREEN if it already stood them down (then the row is HOLLOW for the covered case — recorded, and
+the shell's `libraryPath.isEmpty` term is a stated belt); `library-return-rereads` reads 0 (the old listing was held).
+
+**Group (v) — the phone suites the Shell changes could disturb, fix build:**
+```
+tests=(MobileLibraryTests MobileLibrarySortTests MobileFilterTests MobileFilterRowGeometryTests MobileEmptyStoreTests
+  MobileDeletionTests MobileTrashTests MobileScrapsTests MobileStarsTests MobileShellTests MobileNavigationTests
+  MobileLivenessTests MobileShelfPerfTests MobileShelfLayoutBrainTests MobileShelfRenderedLayoutTests
+  MobileShelfTodayDoorTests MobileQuickNoteTests MobileQuickNoteReadFailureTests MobileSavepointOnLeavingTests
+  MobileWalkTests MobileTutorialLibraryWalkTests MobilePerfFixtureTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b5 \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+Expected: all green. (The orchestrator's caveat holds for reading it: VX-980's Core changes have not yet met a hosted
+phone run, so a red in a listing, filter, tag or Trash suite that does not tie to this diff may be main's.)
+
+**Group (vi) — the Mac suites over the Core reads this batch touched** (`LibraryPaging.swift` — the catalog's pages;
+`ShelfQueries.swift` — the Pool):
+```
+tests=(LibraryPagingModelTests LibraryInfiniteScrollTests VX384LibraryFollowsMintsTests VX408ListingRaceTests
+  LibraryReturnPlaceTests LibraryReturnRoadTests LibraryTagListingTests LibrarySearchOrderTests PoolPageTests
+  PoolTuckFaceTests PoolCardPreviewTests VX385PoolQuietReceiptTests LaunchFurnitureTests MembershipChoiceTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
+  -derivedDataPath DerivedData/vm64-b5 ${tests/#/-only-testing:VariorumTests/}
+```
+Expected: all green — the Mac's two statements are byte-identical (pinned headless), so nothing it runs changed.
+
+**Group (vii) — the walk (the batch's use-shaped evidence; the orchestrator's hands or a GO to me).** The Debug app on a
+dev-store simulator, signed out: seed more than 200 notes (Settings ▸ "Seed the 100k fixture" gives the 300-note corpus),
+open the Library, scroll to the end — the oldest notes come on screen (capture: the listing's foot past note 200); type
+in the capture box, swipe to the Library — the box's note leads (capture); Bookless shows the loose notes (capture);
+Settings ▸ timing… after the walk — "Library re-reads per save" holds no new non-zero samples from the box's saves.
