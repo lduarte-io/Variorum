@@ -418,8 +418,8 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Main merged in again before the walk and the gate | DONE (a192ca437 — main 9a78628ea; notes only since the first merge-in) |
 | Ladder round 1 (the FINAL round: 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT) | REVIEWED and adjudicated — the three confirmed fixes (findings 2, 5, 7) APPLIED pin-first (pins 35983f69a, 77f591154, 7af436366 + the pin compile fix 923f14f30; fixes 79e14816f, 725d58f6a, 2278790a5) and GREEN in the fix window (10:29–10:32, products 923f14f30), the pins red on the snapshot as predicted (6 of 8); finding 1's two re-runs GREEN there. REMAINING: the orchestrator's line-by-line check of the three fixes against their findings |
 | The ladder | CLOSED at round 1 (her rule: a round with no new BLOCKER or MAJOR closes it) — the fix window green 2026-11-19 10:29–10:32, the orchestrator's line-by-line check recorded under Round 1 |
-| The simulator walk (the closer; the rows are in "THE WALK AND THE MERGE GATE") | IN-PROGRESS — the closer's record is "### The walk and the gate" under Batch records (its LIVE STATUS); the instruments are being built in a snapshot worktree; the screens folder needs the orchestrator's word (not ignored) |
-| The merge gate (whole phone, whole Mac) | NOT-STARTED — the closer's, after the walk |
+| The simulator walk (the closer; the rows are in "THE WALK AND THE MERGE GATE") | DONE — claim 11:50:54–12:02:24 on a dedicated device (created, then deleted): rows a–h and j–l PASS from their captures (a, b, f, g PASS again in Terminal); row i NOT WALKED (the driver went through the Trash, which never lists takes by D1) and rests on its pin `MobileLineDirectionTests`, as the row allows; no defect found, no code touched. Record: "### The walk and the gate" ▸ "The walk" |
+| The merge gate (whole phone, whole Mac) | NOT-STARTED — the closer's, at the orchestrator's word |
 | Closeout | NOT-STARTED |
 
 Notes for the implementers:
@@ -2078,8 +2078,11 @@ out; the branch tree and the snapshot still throughout):
 
 ### The walk and the gate
 
-**What this closer has NOT done (first, by the protocol; kept current):** no walk row has run yet and no gate claim has
-run; no product code written (none is owed unless the walk finds a defect). The screens folder the brief first named,
+**What this closer has NOT done (first, by the protocol; kept current):** row i was NOT walked by hand — the driver
+went through the Trash, which never lists takes (D1, `TrashScope.listedKinds`); the take's road is its note's tray, and
+no build was allowed inside the claim to re-drive it, so row i rests on its pin as the row itself allows (below). No gate
+claim has run yet (the gate waits on the orchestrator's word). No product code written — the walk found no defect. The
+screens folder the brief first named,
 `notes/plans/fixes/vm-55-screens/`, is NOT ignored by this repo (`git check-ignore` exit 1 — `.gitignore` names each
 screens folder one by one; there is no `*-screens` rule), so nothing was ever written there. **The orchestrator's answer
 (option c):** the walk's captures and its log go to `App/Variorum/DerivedData/vm55-walk-screens/` in this worktree —
@@ -2106,11 +2109,78 @@ device is created for the walk and deleted at its end; its id is never written h
 | The instruments: seeder + UI driver, written and built in the snapshot (one cold build) | DONE — `VariorumMobileTests/VM55WalkSeedTests.swift` (the hosted seeder) and `VariorumMobileUITests/VM55Walk.swift` (three classes: `VM55WalkFirstRun` — the first launch past the words card with NO capture; `VM55WalkStudy` — rows a–l; `VM55WalkTerminal` — a, b, f, g) exist only in the snapshot; built for testing GREEN there (the TK2SpikeUITests scheme, then the VariorumMobile scheme so the app keeps its test PlugIn — the VM-44 runbook's ordering trap), DerivedData `vm55-walk` inside the snapshot, 1.6 GB |
 | The dedicated device (created, never booted outside a claim) | DONE — an iPhone 17 Pro on the iOS 27.0 runtime (the newest installed: closest to her phone; the gate's standing device covers iOS 26.2), named "VM55 Walk"; its id is in the READY message only |
 | READY for the walk claim | DONE (the report ending this session's first turn) — the screens folder answered (option c, the ignored DerivedData folder above); waiting on the coordinator's GO with the claim line |
-| The walk (rows a–l, Study light; a, b, f, g again in Terminal) | NOT-STARTED |
-| The snapshot and its DerivedData removed; the device deleted | NOT-STARTED |
+| The walk (rows a–l, Study light; a, b, f, g again in Terminal) | DONE — claim `vm-55` 11:50:54 → released 12:02:24, the coordinator's exact line. Every row PASS judged from its capture but row i, which rests on its pin (`MobileLineDirectionTests`) by the row's own "else name the pin" — a driver premise error, not an app fault. Passes: first run 1/1, seed 1/1, Study 1/1 (371 s), Terminal 1/1 (118 s). The row table below |
+| The snapshot and its DerivedData removed; the device deleted | DONE — the device deleted (`simctl delete`; listed 0 after); the snapshot worktree removed with `--force` (it held only the untracked instrument files) — 1.7 GB in all, its DerivedData `vm55-walk` 1.6 GB of it; the folder is gone and `git worktree list` no longer names it. A copy of the two instrument files and the passes' logs sits in the ignored screens folder (`instruments-copy/`) until the post-merge cleanup |
 | The gate's builds (both targets `build-for-testing` into `vm55-b1`, the tree clean and still) | NOT-STARTED — only at the orchestrator's word after the walk |
 | Gate claim (i) — the whole phone target | NOT-STARTED |
 | Gate claim (ii) — the whole Mac target (QUIET) | NOT-STARTED |
+
+#### The walk (2026-11-19, claim 11:50:54 → 12:02:24)
+
+**Where the evidence is:** every capture named below is a PNG in this worktree's ignored
+`App/Variorum/DerivedData/vm55-walk-screens/` (with the driver's `walk-log.txt` beside it), kept until the post-merge
+cleanup; `S-` is the Study pass, `T-` the Terminal pass. Each row's verdict is written from what its captures SHOW, every
+verdict capture read by eye before it was judged; the in-between captures of a road (the row menus and the delete
+confirm — `S-g1`, `S-g2`, `S-h1`, `S-j2`, `T-g1`, `T-g2`; the book before Details, `S-f1`, `T-f1`; `T-a0`; `S-k3`) are listed for
+completeness and carry no verdict of their own. The driver's log adds only the numbers a picture cannot give (frames in
+points on the 874 pt screen, the accessibility label and value).
+
+**The device and the app:** a dedicated iPhone 17 Pro on the iOS 27.0 runtime, created for the walk and deleted after
+it; the Debug phone app (`io.lduarte.VariorumMobile`, the dev store) from the tip's tree e19403d86 (this branch's
+products — the commits after it are notes only); light appearance; the voice set per pass by the launch argument
+(`-io.lduarte.variorum.mobile.themeVoice study|terminal`). Signed out throughout — never signed in, Resume and Sync never
+pressed, no secret typed, no Castle; the standing simulator and the Mac's dev store untouched.
+
+**The run, in order:** (1) boot; (2) **the first run** — the app launched on a fresh device, the once-shown words card's
+one door ("I've written them down") pressed WITHOUT any capture, no interlude owed, the shell reached, the app terminated
+with no write made (so the first-write furniture never lands); its result bundle deleted at once; (3) **the seed** — a
+hosted test opened the dev library through the road and minted, through ordinary Operations: Home — the book "Essays"
+(Slow mornings; What the river taught me ★), the bookless "Seeds to order" (#trip #garden), tags trip, garden; Work —
+"Essays" (The quarterly plan, carrying one deleted ARCHIVED take; Hiring notes), the bookless "Offsite logistics" ★
+(#trip), the gathering "Trips" (rule: Work's #trip), tags trip, meeting, and the daily Journal (named "journal", born
+starred in Work) with yesterday's entry; its summary read back exactly that; (4) the Study pass, rows a–l; (5) the
+Terminal pass, rows a, b, f, g; (6) shut down, checks, release. Her use of the Mac's keyboard until about 11:51:45 (the
+coordinator's note) overlapped only the boot and the first run, which takes no capture and passed cleanly; the first
+capture is 11:53:13 — **no row was re-taken for it**.
+
+| Row | What was done | What the capture shows | Capture | Verdict |
+|---|---|---|---|---|
+| a ★ | From the first launch (Home), each root in turn | Starred: "Home · Starred", the name in the accent, one row — What the river taught me (Home's only star). Shelf: "Home · Shelf · 1 book", Essays 2 notes alone. Library: "Home · Library" — Seeds to order, What the river taught me, Slow mornings, Essays; nothing of Work's | `S-a1-home-starred.png` `S-a2-home-shelf.png` `S-a3-home-library.png` | PASS |
+| a ★ Terminal | The same, after the door took the app back to Home | "~/home/starred" (the river note alone), "~/home/shelf · 1 book" (essays), "~/home/library" (Home's three notes + essays) | `T-a0-landed-home.png` `T-a1-home-starred.png` `T-a2-home-shelf.png` `T-a3-home-library.png` | PASS |
+| b ★ | On the Library, tapped the name "Home"; picked "Work" | The plain list over the Library: "Wings — each a separate library", "✓ Home", "Work", Done. After the pick: Work's Bookcase — "Work · Shelf · 3 books" (journal 1 entry, Essays 2 notes, Trips), the Shelf tab lit (the driver read it selected); no message line anywhere (the probe found no line and no Undo). Library: Work's only (yesterday's entry, journal, Trips, Offsite logistics, Hiring notes, The quarterly plan, Essays). Starred: Offsite logistics, journal — Work's only | `S-b1-list-home-marked.png` `S-b2-landed-work-bookcase.png` `S-b3-work-library.png` `S-b4-work-starred.png` | PASS |
+| b ★ Terminal | The same | "wings — each a separate library", "✓ home", "work", done; landed on "~/work/shelf · 3 books", no line; Library and Starred Work's only | `T-b1-list-home-marked.png` `T-b2-landed-work-bookcase.png` `T-b3-work-library.png` `T-b4-work-starred.png` | PASS |
+| c | In Work: Library ▸ + New Note, typed a line, renamed it "Walk note made in Work"; then on the Bookcase typed "Walk quick note typed in Work" into the capture box and left the Shelf (which files it) | The new note open: "Walk note made in Work", "in no book". Work's Library lists it first. The box: the words, "✓ saved". Work's Pool (Bookless): 2026-11-19 (the quick note) and Walk note made in Work. Later, from Home: Home's Library holds neither (Seeds to order, the river note, Slow mornings, Essays) and Home's Pool holds Seeds to order alone | `S-c1-new-note-in-work.png` `S-c2-work-library-with-new-note.png` `S-c3-quick-note-typed.png` `S-c4-work-pool-with-quick-note.png` `S-e2-home-library-no-work-notes.png` `S-e3-home-pool-no-quick-note.png` | PASS |
+| d | In Work: Settings ▸ Manage Tags; + new tag "walktag" | "Tags — in Work": #meeting, #trip — no #garden (Home's). After Create: #meeting, #trip, #walktag. (That the new tag is Work's shows again in row e: a Work note's suggestions offer #walktag) | `S-d1-tag-manager-work.png` `S-d2-tag-manager-after-new-tag.png` | PASS |
+| e | Switched to Home (the door); on Home's Bookcase pressed Today's Entry — the Journal lives in Work, so Today opened (minted) today's entry in Work while the app stands in Home; opened its Tags and its Books sheets; back | The entry: "2026-11-19", "in journal". Tags: "Apply a tag" — #meeting, #trip, #walktag — Work's vocabulary, no #garden. Books: "journal" (its book, with diverge · remove), "Add to a book" — one "Essays" and "Trips (by tagging)": Work's books, Home's "Essays" twin absent. Back on the Bookcase: still "Home · Shelf · 1 book" (the app does not follow the note — wave 2's) | `S-e1-landed-home-bookcase.png` `S-e4-today-entry-from-home.png` `S-e5-tag-suggestions.png` `S-e6-add-to-book-sheet.png` `S-e7-still-home-after-the-note.png` `S-e8-back-in-work.png` | PASS |
+| f ★ | In Work: the Trips gathering ▸ Details ▸ Finish | Book Details up as a sheet; at the window's foot the line in the alarm ink, in words: "That isn't a book — a gathering shows the notes its rule matches and holds none of its own." — the shared table's sentence, no case name. This screen (a pushed book with its sheet up) shows no tab bar; the line sits above the home-indicator inset (its words 804–832 pt; the inset begins at 840). 7.9 s later the line is gone, the sheet unchanged | `S-f1-trips-gathering.png` `S-f2-book-details.png` `S-f3-finish-refusal-line.png` `S-f4-after-fade.png` | PASS |
+| f ★ Terminal | The same | The same sentence at the foot, the sheet voiced in Terminal ("book details", "finish"); gone 7.9 s later | `T-f1-trips-gathering.png` `T-f2-book-details.png` `T-f3-finish-refusal-line.png` `T-f4-after-fade.png` | PASS |
+| g ★ | In Work's Library: long-press Hiring notes ▸ Delete Note… ▸ Delete; then the line's Undo | The line just above the tab bar: "Note moved to the Trash — 30 days to put it back.  Undo" (words 784–798 pt; the tab bar from 818), the row gone, Essays "1 note". After Undo: Hiring notes back, Essays "2 notes", no line | `S-g1-row-menu.png` `S-g2-delete-confirm.png` `S-g3-removal-line-with-undo.png` `S-g4-after-undo-note-back.png` | PASS |
+| g ★ Terminal | The same | "note moved to the trash — 30 days to put it back.  undo" above the tab bar (two lines at Terminal's measure); after undo the note and "2 notes" back, no line | `T-g1-row-menu.png` `T-g2-delete-confirm.png` `T-g3-removal-line-with-undo.png` `T-g4-after-undo-note-back.png` | PASS |
+| h | In Work's Library: long-press The quarterly plan ▸ Star | No line after the star (the probe found none); Work's Starred now lists Offsite logistics, journal, The quarterly plan | `S-h1-row-menu.png` `S-h2-after-star-no-line.png` `S-h3-starred-now-holds-it.png` | PASS |
+| i | In Work: the Library's 🗑 ▸ a "Takes" filter ▸ Put back take — the seed staged a deleted ARCHIVED take on The quarterly plan | Work's Trash: "Nothing in the Trash.", filters All · Notes · Books · Blocks · Snippet groups · Originals — no Takes. **By design, not a fault:** the global Trash never lists takes (D1 — `TrashScope.listedKinds` in `Shared/RecoveryActs.swift`); a deleted take is put back from its note's tray. The driver's premise was wrong; re-driving through the tray needed a rebuild, and no build was allowed inside the claim | `S-i1-trash-takes.png` | NOT WALKED — covered by its pin, as the row allows: `MobileLineDirectionTests` (P-55-11; 9/9 green in batch 2's window) drives the tray's archived take vs active take, Block History's and the lens's editions, each direction speaking as a refusal and each twin silent |
+| j | On Work's Bookcase: focused the capture box (keyboard up), then long-pressed the Journal ▸ Archive; then the line's Undo | Keyboard up, the box focused; the line ABOVE the keyboard: "Archived “journal” — it comes back when a day arrives (Today’s Entry).  Undo" (words 510–538 pt; the keyboard's top 590), the Journal row gone. After Undo: the Journal back on the Shelf, the keyboard still up | `S-j1-box-keyboard-up.png` `S-j2-journal-menu-keyboard-up.png` `S-j3-removal-line-keyboard.png` `S-j5-after-undo-journal-back.png` | PASS |
+| k | In Work: the Home button, then back to the app; then quit and relaunch | After the background: "Work · Library", Work's notes. After the relaunch (a new process): "Work · Shelf · 3 books" | `S-k1-after-background.png` `S-k2-after-relaunch.png` `S-k3-after-relaunch-library.png` | PASS |
+| l | Read the wing door from the accessibility tree on each root | Label "Work", value "Starred" / "Library" / "Shelf  ·  3 books", element type button, frame 44 pt tall at (20, 62) — VoiceOver reads "Work, Starred, button" (the page word rides as the value, finding 7). In Home (row a) the same: label "Home", values "Starred", "Shelf  ·  1 book", "Library" | `S-l1-starred-door.png` (+ the driver's log) | PASS |
+
+**After the release:** the device shut down before release, then deleted; `pgrep -lx Variorum` and `pgrep -lf
+"MacOS/Variorum$"` empty; no Problem Reporter; no new `Variorum*-*.ips` (the newest are `VariorumMobile-*` from 05:45,
+before every window tonight); the snapshot worktree and its DerivedData removed.
+
+**Observations from the walk (not this run's faults; none fixed):**
+1. **Row i's road:** the phone's Trash never lists takes (D1), so a walk of the archived-take direction goes through the
+   note's tray, not the Trash. Instrument lesson only.
+2. **The capture box can keep the keyboard across a page change** (`S-e1-landed-home-bookcase.png`): after row j left the
+   Shelf with the box focused, the switch's landing on Home's Bookcase showed the box focused and the keyboard up (the
+   probe read the keyboard's top at 590 as the landing settled). The band keeps the Shelf's page alive, so its box can
+   stay first responder. This sits with her capture-keyboard report (a way to put the keyboard away — wave 2, VM-72),
+   not with the door.
+3. **Terminal wraps the Shelf's path line** (`T-a2-home-shelf.png`, `T-b2-landed-work-bookcase.png`): "~/home/shelf  ·"
+   then "1 book" on a second line — the same letters batch 1 drew, at Terminal's monospace measure beside three doors
+   (the door's target grows with it: 48 pt). Sizes are VM-47's.
+4. **"smart · #trip"** names the gathering on the Shelf, the Library and Book Details (`S-b2-…`, `S-f2-…`) — the retired
+   word; umbrella VM-78's "gathering not smart" row.
+5. **Book Details offers Finish on a gathering** — a door that can only refuse (`S-f2-book-details.png`); the refusal is
+   now in words (VM-62), the door itself is the book-settings umbrella's.
 
 ## Ladder
 
