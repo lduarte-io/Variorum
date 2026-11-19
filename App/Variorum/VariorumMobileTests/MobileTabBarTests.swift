@@ -337,6 +337,99 @@ struct MobileTabBarTests {
         }
     }
 
+    /// **THE ONE LINE CLEARS THE BAR WHEREVER A BAR IS ON SCREEN** (the VM-55
+    /// re-land, meeting 2). VM-55's message line lifts by the bar's measured
+    /// height (`chromeInset`), and it keyed the lift to the ROOTS
+    /// (`pagingAllowed`) — written before the bar rode pushed lists (VM-52). The
+    /// shell now lifts it wherever a bar is on screen: on a root, on a pushed
+    /// list, and not inside a note. Read off the line's own model, through the
+    /// shell's host probe. RED ON THE OLD RULE by construction: on the pushed
+    /// Trash the visible stack is not at its root, so the old lift was 0 and the
+    /// line would have sat over the bar's doors.
+    @Test func theMessageLineClearsTheBarWhereverABarIsOnScreen() async throws {
+        try await withEditorWorld { session, _ in
+            let router = MobileShellRouter()
+            try await withHostedSurface(
+                MobileShellView(session: session, services: nil, router: router)
+            ) { surface in
+                await surface.settle(30)
+                let line = try #require(Self.messageLine(in: surface.host.view),
+                                        "the shell hosts its one line")
+                let rootBar = try #require(onScreen(surface, "Bookcase").first?.accessibilityFrame)
+                #expect(line.chromeInset >= MobileTabBarMetrics.target - 0.5,
+                        "on a root the line clears the bar: \(line.chromeInset), bar \(rootBar)")
+
+                // A pushed list wears the bar — and the line still clears it.
+                #expect(activateOnScreen(surface, MobileRecoveryDoors.trashLabel),
+                        "labels: \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.visibleLabels.contains(MobileTrashView.emptyTrashLine))
+                #expect(!onScreen(surface, "Bookcase").isEmpty, "the Trash wears the bar")
+                #expect(line.chromeInset >= MobileTabBarMetrics.target - 0.5,
+                        "on a pushed list the line clears the bar: \(line.chromeInset)")
+
+                // Back to the root, then into a note: no bar, no lift.
+                #expect(activateOnScreen(surface, "Bookcase"))
+                await surface.settle(40)
+                #expect(surface.activate(MobileShelfFaces.todayDoorSpoken), "labels: \(surface.visibleLabels)")
+                await surface.settle(60)
+                #expect(!router.editors.registeredPostIDs.isEmpty, "a note is open in Write")
+                #expect(line.chromeInset == 0, "inside a note there is no bar to clear: \(line.chromeInset)")
+            }
+        }
+    }
+
+    /// **A WING LANDING SHOWS THE BOOKCASE ITSELF** (the VM-55 re-land,
+    /// meeting 4). VM-55's landing changes the page to the Shelf and touches no
+    /// stack (P-55-14) — it relies on the Shelf's own stack standing at its root
+    /// while hidden. This run's tab road keeps that true (P-47-19: a tab from a
+    /// pushed list first returns the stack being left to its root), so the two
+    /// agree: the Trash pushed on the Bookcase's stack, Library by its tab, the
+    /// wing door, Work picked — the landing is Work's Bookcase ROOT, never the
+    /// Trash left behind.
+    @Test func aWingLandingAfterAListWasLeftShowsTheBookcaseItself() async throws {
+        try await withEditorWorld { session, _ in
+            let world = try TwoWingWorld.make(session)
+            let router = MobileShellRouter()
+            try await withHostedSurface(
+                MobileShellView(session: session, services: nil, router: router)
+            ) { surface in
+                await surface.settle(30)
+                let trashLine = MobileTrashView.emptyTrashLine
+                #expect(activateOnScreen(surface, MobileRecoveryDoors.trashLabel),
+                        "labels: \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.visibleLabels.contains(trashLine), "the Trash is on the Bookcase's stack")
+
+                #expect(activateOnScreen(surface, "Library"))
+                await surface.settle(40)
+                #expect(onScreen(surface, "Library").first?.accessibilityTraits.contains(.selected) == true)
+                #expect(activateOnScreen(surface, WingWords.home), "the Library's wing door: \(surface.visibleLabels)")
+                await surface.settle(30)
+                #expect(surface.host.presentedViewController != nil, "the list is up")
+                #expect(surface.activate("Work"), "labels: \(surface.visibleLabels)")
+                #expect(await eventually { session.wing.currentID == world.work })
+                await surface.settle(40)
+                #expect(surface.host.presentedViewController == nil, "the list went")
+                #expect(onScreen(surface, "Bookcase").first?.accessibilityTraits.contains(.selected) == true,
+                        "landed on the Bookcase")
+                #expect(!surface.visibleLabels.contains(trashLine),
+                        "the Bookcase's ROOT, not the Trash left on its stack — labels \(surface.visibleLabels)")
+                #expect(!onScreen(surface, "Work").isEmpty, "the Bookcase root's wing door names Work")
+            }
+        }
+    }
+
+    /// The shell's one message line, found by its host probe in the shell's
+    /// own view tree (the probe holds the line's model).
+    static func messageLine(in view: UIView) -> MobileMessageLineModel? {
+        if let probe = view as? MobileMessageLineHost.Probe { return probe.model }
+        for sub in view.subviews {
+            if let found = messageLine(in: sub) { return found }
+        }
+        return nil
+    }
+
     /// The Versions screen's own rule: the bar rides the LISTING and leaves
     /// while a moment's words are read (the reader is her words, not a list).
     @Test func theVersionsReaderDoesNotWearTheBar() async throws {
@@ -386,13 +479,18 @@ struct MobileTabBarTests {
         }
         #expect(Set(arms.keys) == ["book", "bookRead", "note", "trash", "archive", "versions", "protection"],
                 "the arms read: \(arms.keys.sorted())")
+        // MOVED at the VM-55 re-land (meeting 2): a list's bar is the same bar
+        // COUNTED while it shows (`listBar(owner)`), so the one message line
+        // knows to clear it — the rule pinned is unchanged: lists carry the
+        // bar, the note, the Read page and Protection carry none.
         for list in ["book", "trash", "archive"] {
-            #expect(arms[list]?.contains(".safeAreaInset(edge: .bottom, spacing: 0) { tabBar }") == true,
+            #expect(arms[list]?.contains(".safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }") == true,
                     "\(list) is a list and carries the bar")
         }
-        #expect(arms["versions"]?.contains("listingBar: AnyView(tabBar)") == true)
+        #expect(arms["versions"]?.contains("listingBar: AnyView(listBar(owner))") == true)
         for bare in ["bookRead", "note", "protection"] {
-            #expect(arms[bare]?.contains("tabBar") == false, "\(bare) carries no bar")
+            #expect(arms[bare]?.contains("tabBar") == false && arms[bare]?.contains("listBar") == false,
+                    "\(bare) carries no bar")
         }
     }
 }
