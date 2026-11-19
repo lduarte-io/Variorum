@@ -174,9 +174,9 @@ struct MobileLibraryLookTests {
             let dark = router.tokens(dark: true)
             #expect(rgb(dark.room, dark: true) == 0x000000, "R51: the dark room is black")
             #expect(rgb(light.room, dark: false) != rgb(dark.room, dark: true))
-            #expect(rgb(light.room, dark: false) == PaletteDerivation.derive(
-                try #require(PalettePreset.all[.seaglass]), dark: false).room,
-                "light wears the sea-glass room")
+            let seaglass = try #require(PalettePreset.all[.seaglass])
+            #expect(rgb(light.room, dark: false) == PaletteDerivation.derive(seaglass, dark: false).room,
+                    "light wears the sea-glass room")
             // The UIKit face's colours are dynamic: one object, both appearances.
             #expect(rgb(MobileEditorStyle.face.surface, dark: false)
                     != rgb(MobileEditorStyle.face.surface, dark: true))
