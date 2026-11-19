@@ -89,14 +89,14 @@ struct MobileSettingsView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(tokens.path(["Settings"]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.screenTitle, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                 Spacer()
                 Button {
                     dismiss()
                 } label: {
                     Text(tokens.chromeLabel("Done"))
-                        .font(tokens.small)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -106,8 +106,8 @@ struct MobileSettingsView: View {
             .padding(.bottom, 14)
 
             Text(tokens.chromeLabel("Voice"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.sectionHeader, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 4)
             voiceRow(.terminal, "Terminal")
@@ -118,8 +118,8 @@ struct MobileSettingsView: View {
                 .padding(.vertical, 14)
 
             Text(tokens.chromeLabel("Sync"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.sectionHeader, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.horizontal, 20)
             if let services {
                 // D1: the ONE injection site of the shared pages' phone
@@ -139,8 +139,8 @@ struct MobileSettingsView: View {
                     .padding(.horizontal, 20)
             } else {
                 Text(tokens.chromeLabel("Starting…"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .padding(.horizontal, 20)
             }
 
@@ -151,7 +151,7 @@ struct MobileSettingsView: View {
                     protectionDoor()
                 } label: {
                     Text(tokens.chromeLabel(SyncRowFace.openProtectionLabel))
-                        .font(tokens.small)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -173,7 +173,7 @@ struct MobileSettingsView: View {
                 acknowledgmentsPresented = true
             } label: {
                 Text(tokens.chromeLabel("Acknowledgments"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -189,15 +189,15 @@ struct MobileSettingsView: View {
             // Settings home mirrored: the manager is where you look at
             // tags).
             Text(tokens.chromeLabel("Tags"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.sectionHeader, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 4)
             Button {
                 tagsPresented = true
             } label: {
                 Text(tokens.chromeLabel(MobileTagManagerSheet.doorTitle))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -259,8 +259,8 @@ struct MobileSettingsView: View {
                 .overlay(tokens.line)
                 .padding(.vertical, 14)
             Text(tokens.chromeLabel("Diagnostics"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.sectionHeader, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 4)
             Button {
@@ -270,8 +270,8 @@ struct MobileSettingsView: View {
                 Text(tokens.chromeLabel(
                     traceArmed ? "Recording edit trace — tap to stop"
                                : "Record edit trace"))
-                    .font(tokens.small)
-                    .foregroundStyle(traceArmed ? tokens.accent : tokens.muted)
+                    .phoneType(.control, tokens)
+                    .foregroundStyle(traceArmed ? tokens.accent : tokens.phone.muted)
                     .lineLimit(2)
             }
             .buttonStyle(.plain)
@@ -283,7 +283,7 @@ struct MobileSettingsView: View {
                 tracePresented = true
             } label: {
                 Text(tokens.chromeLabel("Edit trace…"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -296,15 +296,15 @@ struct MobileSettingsView: View {
                 .overlay(tokens.line)
                 .padding(.vertical, 14)
             Text(tokens.chromeLabel("Tutorial (dev store)"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.sectionHeader, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 4)
             Button {
                 Task { await openGuideDoor() }
             } label: {
                 Text(tokens.chromeLabel("Open the pocket guide"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -314,7 +314,7 @@ struct MobileSettingsView: View {
                 Task { await restoreGuideDoor() }
             } label: {
                 Text(tokens.chromeLabel("Restore the pocket guide…"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -322,8 +322,8 @@ struct MobileSettingsView: View {
             .padding(.vertical, 4)
             if let tutorialNote {
                 Text(tokens.chromeLabel(tutorialNote))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.horizontal, 20)
                     .padding(.top, 2)
             }
@@ -331,15 +331,15 @@ struct MobileSettingsView: View {
                 .overlay(tokens.line)
                 .padding(.vertical, 14)
             Text(tokens.chromeLabel("Performance (dev store)"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.sectionHeader, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 4)
             Button {
                 Task { await perfDoor() }
             } label: {
                 Text(tokens.chromeLabel("Seed the 100k fixture"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -347,8 +347,8 @@ struct MobileSettingsView: View {
             .padding(.vertical, 4)
             if let perfNote {
                 Text(tokens.chromeLabel(perfNote))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.horizontal, 20)
                     .padding(.top, 2)
             }
@@ -362,7 +362,7 @@ struct MobileSettingsView: View {
                 spikePresented = true
             } label: {
                 Text(tokens.chromeLabel("TK2 Spike"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -522,16 +522,16 @@ struct MobileSettingsView: View {
             HStack(spacing: 4) {
                 if !tokens.selectionMarker.isEmpty {
                     Text(tokens.selectionMarker)
-                        .font(tokens.body)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                         .opacity(selected ? 1 : 0)
                 }
                 Text(tokens.chromeLabel(label))
-                    .font(tokens.body)
-                    .foregroundStyle(selected ? tokens.ink : tokens.muted)
+                    .phoneType(.control, tokens)
+                    .foregroundStyle(selected ? tokens.ink : tokens.phone.muted)
                 if selected, tokens.selectionMarker.isEmpty {
                     Text("✓")
-                        .font(tokens.small)
+                        .phoneType(.meta, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 Spacer()

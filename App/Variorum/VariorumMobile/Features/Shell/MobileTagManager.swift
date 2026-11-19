@@ -254,11 +254,11 @@ struct MobileTagManagerSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(tokens.chromeLabel("Tags"))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
@@ -269,8 +269,8 @@ struct MobileTagManagerSheet: View {
                     }
                     if model.tags.isEmpty {
                         Text(tokens.chromeLabel(Self.emptyStateHint))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .padding(.vertical, 20)
                     }
                     newTagRow
@@ -278,7 +278,7 @@ struct MobileTagManagerSheet: View {
             }
             if let error = model.lastError {
                 Text(error)
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.alarm)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -361,14 +361,14 @@ struct MobileTagManagerSheet: View {
         let depth = MobileTagsModel.depth(of: tag)
         return HStack(spacing: 8) {
             Text("#\(tag.name)")
-                .font(tokens.body)
+                .phoneType(.rowTitle, tokens)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
                 .padding(.leading, CGFloat(depth) * 18)
             if depth > 0 {
                 Text(tag.path)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .lineLimit(1)
             }
             Spacer()
@@ -400,7 +400,7 @@ struct MobileTagManagerSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("+ new tag"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
             }

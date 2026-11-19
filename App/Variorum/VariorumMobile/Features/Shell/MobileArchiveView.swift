@@ -99,11 +99,11 @@ struct MobileArchiveView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(tokens.path([RecoveryCopy.archivedSection]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.screenTitle, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Text(tokens.chromeLabel(RecoveryCopy.archivedForever))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.faint)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -118,8 +118,8 @@ struct MobileArchiveView: View {
     /// *"showing the first 200."* is chrome leaking into speech.
     private func line(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
             .accessibilityLabel(text)
@@ -133,11 +133,11 @@ struct MobileArchiveView: View {
             VStack(alignment: .leading, spacing: 2) {
                 if let receipt = model.receipt {
                     Text(tokens.chromeLabel(receipt))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
                 if let error = model.lastError {
-                    Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
+                    Text(error).phoneType(.meta, tokens).foregroundStyle(tokens.alarm)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -150,7 +150,7 @@ struct MobileArchiveView: View {
     private func row(_ item: Queries.TimelineItem) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(MobileLibraryViewModel.rowTitle(item))
-                .font(tokens.body)
+                .phoneType(.rowTitle, tokens)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
             HStack(spacing: 18) {
@@ -159,7 +159,7 @@ struct MobileArchiveView: View {
                     Task { await model.unarchive(item) }
                 } label: {
                     Text(tokens.chromeLabel(Self.unarchiveVerb))
-                        .font(tokens.small)
+                        .phoneType(.controlInline, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -168,7 +168,7 @@ struct MobileArchiveView: View {
                     onOpen(item.postID)
                 } label: {
                     Text(tokens.chromeLabel("Open note"))
-                        .font(tokens.small)
+                        .phoneType(.controlInline, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)

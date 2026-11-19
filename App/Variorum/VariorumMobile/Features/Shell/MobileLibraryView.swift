@@ -98,7 +98,7 @@ struct MobileLibraryView<TabBar: View>: View {
             }
             if let error = model.lastError {
                 Text(error)
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.alarm)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
@@ -107,8 +107,8 @@ struct MobileLibraryView<TabBar: View>: View {
                 // A landed act's own words, in the muted slot — never the
                 // red one (the Mac recovery model's split).
                 Text(tokens.chromeLabel(receipt))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -117,8 +117,8 @@ struct MobileLibraryView<TabBar: View>: View {
                 // clearing after a beat; "spoken where the door fired"
                 // is now structurally true, not hoped).
                 Text(tokens.chromeLabel(starsError))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
@@ -176,7 +176,7 @@ struct MobileLibraryView<TabBar: View>: View {
             Button(action: onOpenArchive) {
                 HStack {
                     Text(tokens.chromeLabel(MobileRecoveryDoors.archiveLabel))
-                        .font(tokens.small)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                     Spacer()
                 }
@@ -200,8 +200,8 @@ struct MobileLibraryView<TabBar: View>: View {
         // this strip carries two trailing doors instead of one.
         HStack(alignment: .firstTextBaseline, spacing: 16) {
             Text(tokens.path(["Library"]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Spacer()
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
@@ -215,7 +215,7 @@ struct MobileLibraryView<TabBar: View>: View {
             } label: {
                 // The ONE door word (P33: the shelf's twin reads it too).
                 Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -229,7 +229,7 @@ struct MobileLibraryView<TabBar: View>: View {
     private var searchField: some View {
         TextField(tokens.chromeLabel("Search notes, books…"), text: $query)
             .textFieldStyle(.plain)
-            .font(tokens.small)
+            .phoneType(.control, tokens)
             .foregroundStyle(tokens.ink)
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
@@ -295,7 +295,7 @@ struct MobileLibraryView<TabBar: View>: View {
             }
         } label: {
             Image(systemName: MobileSortDoor.symbol)
-                .font(tokens.small)
+                .phoneType(.chip, tokens)
                 .foregroundStyle(tokens.accent)
         }
         .accessibilityLabel(
@@ -324,8 +324,8 @@ struct MobileLibraryView<TabBar: View>: View {
         let windowed = model.windowedBooks(books.orderedBooks)
         if windowed.rows.isEmpty {
             Text(tokens.chromeLabel(MobileListingFilter.noBooksLine))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
                 .accessibilityLabel(MobileListingFilter.noBooksLine)
         }
@@ -353,14 +353,14 @@ struct MobileLibraryView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(tokens.chromeLabel(name))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(
                         book.reading.locked ? tokens.accent : tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 Text(tokens.chromeLabel(meta))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(1)
             }
             .padding(.vertical, 10)
@@ -394,8 +394,8 @@ struct MobileLibraryView<TabBar: View>: View {
             let marker = MobileRoomListing.truncationMarker(
                 shown: windowed.rows.count, of: books.orderedBooks.count)
             Text(tokens.chromeLabel(marker))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 12)
                 .accessibilityLabel(marker)
@@ -447,10 +447,10 @@ struct MobileLibraryView<TabBar: View>: View {
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotes))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
-                    .foregroundStyle(tokens.faint)
+                    .foregroundStyle(tokens.phone.faint)
             }
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
@@ -459,8 +459,8 @@ struct MobileLibraryView<TabBar: View>: View {
             // The books listing's empty-line shape (`bookRows`), and its
             // accessibility rule: the plain sentence, never voice-cased.
             Text(tokens.chromeLabel(MobileListingFilter.noBooklessLine))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
                 .accessibilityLabel(MobileListingFilter.noBooklessLine)
         case nil:
@@ -481,14 +481,14 @@ struct MobileLibraryView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(MobileLibraryViewModel.rowTitle(item))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 if let day = item.entryDate {
                     Text(day)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             }
             .padding(.vertical, 10)
@@ -521,8 +521,8 @@ struct MobileLibraryView<TabBar: View>: View {
     private func hitRows(_ hits: [Queries.CatalogHit]) -> some View {
         if hits.isEmpty {
             Text(tokens.chromeLabel("Nothing found."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
         }
         ForEach(Array(hits.enumerated()), id: \.offset) { _, hit in
@@ -532,13 +532,13 @@ struct MobileLibraryView<TabBar: View>: View {
                 } label: {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(hit.title)
-                            .font(tokens.body)
+                            .phoneType(.rowTitle, tokens)
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
                         Spacer(minLength: 12)
                         Text(tokens.chromeLabel(hitDetail(hit)))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .lineLimit(1)
                     }
                     .padding(.vertical, 10)

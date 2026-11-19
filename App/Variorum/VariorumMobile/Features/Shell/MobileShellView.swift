@@ -597,8 +597,8 @@ struct MobileShellView: View {
             selectPage(target)
         } label: {
             Text(tokens.chromeLabel(label))
-                .font(tokens.small)
-                .foregroundStyle(tab == target ? tokens.ink : tokens.faint)
+                .phoneType(.tab, tokens)
+                .foregroundStyle(tab == target ? tokens.ink : tokens.phone.faint)
         }
         .buttonStyle(.plain)
         // The door's NAME, not its rendered casing (`chromeLabel` lowercases

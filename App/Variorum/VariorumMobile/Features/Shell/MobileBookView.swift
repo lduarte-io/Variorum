@@ -87,8 +87,8 @@ struct MobileBookView: View {
                 ForEach(Array(model.groupedRows.enumerated()), id: \.offset) { _, group in
                     if let section = group.section {
                         Text(tokens.chromeLabel(MobileBookViewModel.sectionLabel(section)))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.sectionHeader, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .padding(.horizontal, 20)
                             .padding(.top, 16)
                             .padding(.bottom, 4)
@@ -99,8 +99,8 @@ struct MobileBookView: View {
                 }
                 if model.entries.isEmpty {
                     Text(tokens.chromeLabel("No notes in this book yet."))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .padding(20)
                 }
                 if model.truncated {
@@ -108,8 +108,8 @@ struct MobileBookView: View {
                     // P32's neutral reword — one shared sentence).
                     Text(tokens.chromeLabel(
                         MobileBookViewModel.truncationMarker(shown: model.entries.count)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .padding(20)
                 }
                 bookDoors
@@ -122,7 +122,7 @@ struct MobileBookView: View {
                 // that fired it for exactly this reason.
                 if let refusal = model.doorRefusal {
                     Text(refusal)
-                        .font(tokens.small)
+                        .phoneType(.meta, tokens)
                         .foregroundStyle(tokens.alarm)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 12)
@@ -139,14 +139,14 @@ struct MobileBookView: View {
                 Button(tokens.chromeLabel(Self.detailsDoorTitle)) {
                     detailsPresented = true
                 }
-                .font(tokens.small)
+                .phoneType(.control, tokens)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 // The Read door (P35): the calm continuous column, from
                 // the contents — the retired contents door's placement,
                 // mirrored.
                 Button(tokens.chromeLabel(Self.readDoorTitle)) { onRead() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
             }
         }
         .sheet(isPresented: $detailsPresented) {
@@ -215,7 +215,7 @@ struct MobileBookView: View {
     private func doorRow(_ title: String) -> some View {
         HStack {
             Text(tokens.chromeLabel(title))
-                .font(tokens.small)
+                .phoneType(.control, tokens)
                 .foregroundStyle(tokens.accent)
             Spacer()
         }
@@ -230,11 +230,11 @@ struct MobileBookView: View {
                 // ONE finished-state grammar (S3 ladder, NIT 2): the name
                 // brain speaks; this header stops respelling it.
                 Text(tokens.chromeLabel(MobileShelfFaces.name(for: reading)))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(reading.locked ? tokens.accent : tokens.ink)
             }
             if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
+                Text(error).phoneType(.meta, tokens).foregroundStyle(tokens.alarm)
             }
         }
         .padding(.horizontal, 20)
@@ -248,14 +248,14 @@ struct MobileBookView: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(MobileBookViewModel.rowTitle(entry))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 if let day = entry.entryDate {
                     Text(day)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             }
             .padding(.vertical, 10)

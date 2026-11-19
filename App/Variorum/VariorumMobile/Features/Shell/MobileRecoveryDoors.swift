@@ -92,8 +92,8 @@ struct MobileTrashDoor: View {
     var body: some View {
         Button(action: act) {
             Text(MobileRecoveryDoors.trashGlyph)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.control, tokens)
+                .foregroundStyle(tokens.phone.muted)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(MobileRecoveryDoors.trashLabel)

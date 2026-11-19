@@ -133,8 +133,8 @@ struct MobileTrashView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
                 Text(tokens.path([RecoveryCopy.trashSection]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.screenTitle, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                 Spacer()
                 sortDoor
                 if !model.trash.isEmpty {
@@ -143,7 +143,7 @@ struct MobileTrashView: View {
                         Task { await model.requestEmptyTrash() }
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.emptyTrashVerb))
-                            .font(tokens.small)
+                            .phoneType(.control, tokens)
                             .foregroundStyle(tokens.alarm)
                     }
                     .buttonStyle(.plain)
@@ -151,8 +151,8 @@ struct MobileTrashView: View {
                 }
             }
             Text(tokens.chromeLabel(RecoveryCopy.windowNote))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.faint)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -165,7 +165,7 @@ struct MobileTrashView: View {
             model.setOldestFirst(!model.oldestFirst)
         } label: {
             Text(tokens.chromeLabel(model.oldestFirst ? "oldest first" : "newest first"))
-                .font(tokens.small)
+                .phoneType(.controlInline, tokens)
                 .foregroundStyle(tokens.accent)
         }
         .buttonStyle(.plain)
@@ -183,8 +183,8 @@ struct MobileTrashView: View {
                         model.setKindFilter(kind)
                     } label: {
                         Text(tokens.chromeLabel(word))
-                            .font(tokens.small)
-                            .foregroundStyle(model.kindFilter == kind ? tokens.ink : tokens.faint)
+                            .phoneType(.chip, tokens)
+                            .foregroundStyle(model.kindFilter == kind ? tokens.ink : tokens.phone.faint)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(word)
@@ -204,8 +204,8 @@ struct MobileTrashView: View {
     /// marker pin.
     private func emptyLine(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
             .accessibilityLabel(text)
@@ -219,11 +219,11 @@ struct MobileTrashView: View {
             VStack(alignment: .leading, spacing: 2) {
                 if let receipt = model.receipt {
                     Text(tokens.chromeLabel(receipt))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
                 if let error = model.lastError {
-                    Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
+                    Text(error).phoneType(.meta, tokens).foregroundStyle(tokens.alarm)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -238,12 +238,12 @@ struct MobileTrashView: View {
     private func trashRow(_ item: Queries.TrashItem) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(Self.rowTitle(item))
-                .font(tokens.body)
+                .phoneType(.rowTitle, tokens)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(2)
             Text(tokens.chromeLabel(rowMeta(item)))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .lineLimit(2)
             HStack(spacing: 18) {
                 Button {
@@ -251,7 +251,7 @@ struct MobileTrashView: View {
                     Task { await model.putBack(item) }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .font(tokens.small)
+                        .phoneType(.controlInline, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -265,7 +265,7 @@ struct MobileTrashView: View {
                         model.requestDeleteNow(item)
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.deleteNowVerb))
-                            .font(tokens.small)
+                            .phoneType(.controlInline, tokens)
                             .foregroundStyle(tokens.alarm)
                     }
                     .buttonStyle(.plain)
@@ -278,7 +278,7 @@ struct MobileTrashView: View {
                         onOpen(noteID)
                     } label: {
                         Text(tokens.chromeLabel("Open note"))
-                            .font(tokens.small)
+                            .phoneType(.controlInline, tokens)
                             .foregroundStyle(tokens.accent)
                     }
                     .buttonStyle(.plain)

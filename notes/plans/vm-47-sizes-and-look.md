@@ -272,7 +272,7 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 0 | Kickoff: worktree, branch, in-flight row (main `635f7b93f`), VM-47 In Progress, announced to nov18 | DONE |
 | 1 | The phone layer: type, inks, metrics (VM-48; VM-49's constants) | IN-PROGRESS — pieces below |
 | 1.1 | The layer in `Shared/Theme/`: the role table (both voices, SwiftUI + UIKit forms, two scaling classes), the two corrected inks (derived, floors pinned over every palette and voice), the metrics constants and the 44 pt hit-area helper; its tests | DONE (this commit) — `PhoneType.swift` · `PhoneInks.swift` · `PhoneMetrics.swift` · `MobilePhoneLayerTests.swift`; phone `build-for-testing` green; tests PENDING the stage; Mac build PENDING |
-| 1.2 | Every phone type site reads a role — one commit per screen family (Shell · Write sheets · Takes/Read · Protection · the UIKit overlays) | NOT-STARTED |
+| 1.2 | Every phone type site reads a role — one commit per screen family (Shell · Write sheets · Takes/Read · Protection · the UIKit overlays) | IN-PROGRESS — Shell DONE (this commit; the shelf screen itself rides 1.4); Write · Takes/Read · Protection · UIKit overlays are written and compile, committing next; the keyboard bar's 14 pt chrome is DEFERRED to VM-137 (its bar shape is LK-4/LK-3's) |
 | 1.3 | The editor's face (`MobileEditorStyle`, face values only: note body per the sheet) | NOT-STARTED |
 | 1.4 | W-024: `MobileShelfLayout` re-derived from the roles; the quick-entry text is the note body; the hint fits; pins moved | NOT-STARTED |
 | 1.5 | The source-scan guard pin (no `tokens.small`, no literal under 13, outside `Spike/`/`Perf/`) | NOT-STARTED |

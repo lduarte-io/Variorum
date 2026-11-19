@@ -200,17 +200,17 @@ struct MobileCreateBookSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text(tokens.chromeLabel("New Book"))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 Button(tokens.chromeLabel("Cancel")) { dismiss() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
             TextField(tokens.chromeLabel("Name"), text: $model.name)
                 .textFieldStyle(.plain)
-                .font(tokens.body)
+                .phoneType(.control, tokens)
                 .foregroundStyle(tokens.ink)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
@@ -222,15 +222,15 @@ struct MobileCreateBookSheet: View {
                                 .stroke(tokens.line, lineWidth: 1)))
             kindRow
             Text(tokens.chromeLabel(caption))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
             if model.kind == .smartFromTags {
                 tagPicker
             }
             Spacer(minLength: 0)
             if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
+                Text(error).phoneType(.meta, tokens).foregroundStyle(tokens.alarm)
             }
             Button {
                 Task {
@@ -241,7 +241,7 @@ struct MobileCreateBookSheet: View {
                 }
             } label: {
                 Text(tokens.chromeLabel("Create Book"))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(
@@ -252,7 +252,7 @@ struct MobileCreateBookSheet: View {
                                     .stroke(tokens.line, lineWidth: 1)))
             }
             .buttonStyle(.plain)
-            .foregroundStyle(model.canCreate ? tokens.accent : tokens.faint)
+            .foregroundStyle(model.canCreate ? tokens.accent : tokens.phone.faint)
             .disabled(!model.canCreate)
         }
         .padding(20)
@@ -285,8 +285,8 @@ struct MobileCreateBookSheet: View {
             model.kind = target
         } label: {
             Text(tokens.chromeLabel(label))
-                .font(tokens.small)
-                .foregroundStyle(model.kind == target ? tokens.ink : tokens.faint)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(model.kind == target ? tokens.ink : tokens.phone.faint)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(model.kind == target ? .isSelected : [])
@@ -296,8 +296,8 @@ struct MobileCreateBookSheet: View {
         VStack(alignment: .leading, spacing: 8) {
             if model.tags.isEmpty {
                 Text(tokens.chromeLabel("No tags yet — notes get tags first; a smart book collects by them."))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
@@ -330,15 +330,15 @@ struct MobileCreateBookSheet: View {
         } label: {
             HStack(spacing: 8) {
                 Text(selected ? "✓" : " ")
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.accent)
                     .frame(width: 14, alignment: .leading)
                 Text("#\(MobileShelfFaces.leaf(tag.path))")
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Text(tag.path)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .lineLimit(1)
                 Spacer()
             }
@@ -354,8 +354,8 @@ struct MobileCreateBookSheet: View {
             model.joinAll = target
         } label: {
             Text(tokens.chromeLabel(label))
-                .font(tokens.small)
-                .foregroundStyle(model.joinAll == target ? tokens.ink : tokens.faint)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(model.joinAll == target ? tokens.ink : tokens.phone.faint)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(model.joinAll == target ? .isSelected : [])

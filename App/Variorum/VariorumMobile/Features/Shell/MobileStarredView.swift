@@ -58,8 +58,8 @@ struct MobileStarredView<TabBar: View>: View {
                 LazyVStack(spacing: 0) {
                     if stars.items.isEmpty {
                         Text(tokens.chromeLabel(MobileStarsModel.emptyLine))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 32)
                             .padding(.horizontal, 24)
@@ -76,8 +76,8 @@ struct MobileStarredView<TabBar: View>: View {
                 // un-star fired from this page reports here, and a homeless
                 // (store-read) error reports on every root including this one.
                 Text(tokens.chromeLabel(error))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
@@ -93,8 +93,8 @@ struct MobileStarredView<TabBar: View>: View {
     private var pathLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
             Text(tokens.path([MobileStarsModel.pageName]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Spacer()
         }
         .padding(.horizontal, 20)
@@ -113,16 +113,16 @@ struct MobileStarredView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("★")
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.accent)
                 Text(tokens.chromeLabel(stars.displayName(item)))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 Text(tokens.chromeLabel(item.target.kind == .reading ? "book" : "note"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)

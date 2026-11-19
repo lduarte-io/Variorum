@@ -155,7 +155,8 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
 /// `lineLimit(1)` + `minimumScaleFactor` is the degradation road her ruling
 /// leaves open: a door that cannot fit its nominal size SHRINKS rather than
 /// clipping or wrapping, exactly as the keyboard strip narrows at 320 instead
-/// of hanging off both edges. The measurements live in
+/// of hanging off both edges — and since VM-48 it shrinks no further than the
+/// phone's 13 pt floor (`chip`, `shrinkingToFloor`). The measurements live in
 /// `MobileFilterRowGeometryTests` and in the batch record.
 struct MobileFilterRow<Trailing: View>: View {
     let doors: [MobileListingFilter]
@@ -187,10 +188,9 @@ struct MobileFilterRow<Trailing: View>: View {
                     select(door)
                 } label: {
                     Text(tokens.chromeLabel(door.word))
-                        .font(tokens.small)
-                        .foregroundStyle(selection == door ? tokens.ink : tokens.faint)
+                        .phoneType(.chip, tokens, shrinkingToFloor: true)
+                        .foregroundStyle(selection == door ? tokens.ink : tokens.phone.faint)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .buttonStyle(.plain)

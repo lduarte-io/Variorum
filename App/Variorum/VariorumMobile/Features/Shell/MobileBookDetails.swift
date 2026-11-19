@@ -243,11 +243,11 @@ struct MobileBookDetailsSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text(tokens.chromeLabel("Book Details"))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Spacer()
                 Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
             }
@@ -267,7 +267,7 @@ struct MobileBookDetailsSheet: View {
                 }
             }
             if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
+                Text(error).phoneType(.meta, tokens).foregroundStyle(tokens.alarm)
             }
             Spacer(minLength: 0)
         }
@@ -322,12 +322,12 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDoorTitle))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
                 Text(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDetail))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .lineLimit(3)
             }
             .contentShape(Rectangle())
@@ -344,12 +344,12 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.alarm)
                 Spacer()
                 Text(tokens.chromeLabel(RecoveryCopy.deleteBookKeepsItsNotes))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .lineLimit(2)
             }
             .contentShape(Rectangle())
@@ -368,7 +368,7 @@ struct MobileBookDetailsSheet: View {
                 renamePresented = true
             } label: {
                 Text(tokens.chromeLabel(model.nameLine ?? ""))
-                    .font(tokens.body.weight(.semibold))
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(book.reading.locked ? tokens.accent : tokens.ink)
                     .lineLimit(2)
             }
@@ -376,8 +376,8 @@ struct MobileBookDetailsSheet: View {
             .accessibilityLabel("Rename Book")
             if let meta = model.metaLine {
                 Text(tokens.chromeLabel(meta))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
             }
         }
     }
@@ -391,14 +391,14 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(finished ? "Reopen" : "Finish"))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
                 Text(tokens.chromeLabel(finished
                     ? "finished — its notes and order are frozen"
                     : "a finished book reads ✓ and freezes its notes"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.faint)
                     .lineLimit(2)
             }
             .contentShape(Rectangle())
@@ -414,13 +414,13 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("Use as Daily Journal"))
-                    .font(tokens.body)
-                    .foregroundStyle(model.isDaily ? tokens.faint : tokens.accent)
+                    .phoneType(.control, tokens)
+                    .foregroundStyle(model.isDaily ? tokens.phone.faint : tokens.accent)
                 Spacer()
                 if model.isDaily {
                     Text(tokens.chromeLabel("daily ✓"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             }
             .contentShape(Rectangle())
