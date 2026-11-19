@@ -167,8 +167,8 @@ Ticket: VX-980 · Project-less umbrella (the sub-issues are the roster) · Branc
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | This LIVE STATUS | DONE (this commit) |
-| 2 | THE RESTORE-ROADS TRACE — guard pins (tests only) over every road reachable headless; the trace written for her (section below) | NOT-STARTED — the pins first: if a road can leave the index out of step, STOP and report |
+| 1 | This LIVE STATUS | DONE (`a90962db4`) |
+| 2 | THE RESTORE-ROADS TRACE — guard pins (tests only) over every road reachable headless; the trace written for her (section below) | IN-PROGRESS — the pins WRITTEN and GREEN (this commit): `Tests/VariorumCoreTests/SearchIndexRestoreRoadsTests.swift`, suite `SearchIndexRestoreRoadsTests`, 7 tests (8 cases): `swift test --filter SearchIndexRestoreRoadsTests` → "7 tests in 1 suite passed", EXIT=0, no skipped line (`.build/vx980-logs/b2-roads-2.log`; the first run's one red was my own fixture — the era copy's savepoint text holds the take's word, so "keeper" answers two kinds; the expectation now names each word's kinds exactly). **NO ROAD LEFT THE INDEX OUT OF STEP.** What remains: (a) the TEETH probe — two test-side mutations on this file only (no product line), applied after this commit and restored by `git checkout` from it: the landed library loses a doc kind; the fresh sync device loses one capture trigger — each must turn its pin red; (b) the trace section written for her |
 | 3 | Registry: two Data Safety acts declared the pane's way (`.surface` only) + the Settings catalog row | NOT-STARTED |
 | 4 | The row: model state + the pane's section + its words | NOT-STARTED |
 | 5 | App tests (written + compiled; RUN at the gate) | NOT-STARTED |
