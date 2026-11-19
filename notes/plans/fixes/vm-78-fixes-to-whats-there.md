@@ -1362,6 +1362,24 @@ later VM-16 re-landed on main's message seam — is new work that a further fres
 finds. State as it opens: batches A and B verified in windows (1) and (2); the fix pass verified in window (5)
 except F4's pin, which waits for a short follow-up window; batch C's matrix is queued.
 
+**Round 2's result: 0 BLOCKER · 0 MAJOR · 3 MINOR · 5 NIT** (findings `a00581328`, final calls `874da32d8`; every
+finding confirmed, none disputed, none FINDER-FIXES; it re-checked each of round 1's final calls as applied, and
+read the kept logs for window (5)'s red leg and F4's follow-up). Dispositions:
+
+| Finding | Final call | What changes |
+|---|---|---|
+| R2-F1 MINOR — window (5)'s red bundle is unreadable; the stop rule will make more | CONFIRMED (the orchestrator's answer: agreed) | recorded as unreadable with its kept log as the evidence; from here a 90 s grace before a lingering `xcodebuild` is stopped, each bundle checked with `xcresulttool`, every log kept under `DerivedData/logs/` |
+| R2-F2 MINOR — batch C's arms leave two columns unread (the real posture's own posture; the report's widening) | CONFIRMED, record only | two more "no arm" lines; H1's confirmation gains the report reaching the terminator; arm A's fixed `host` asserts the three things it waited for — applied before window (3) (`046a886fc`) |
+| R2-F3 MINOR — the probe's reading (i) trusts the badge's own fragment | CONFIRMED with refinements | reading (i′): what TextKit says stands at the badge; HOLLOW needs (1), (i), (i′), (ii) all green — applied before window (3) (`78179b765`) |
+| R2-N1 NIT — the explicit labels hide the rows' captions from VoiceOver | CONFIRMED, all four rows | `.accessibilityHint` carries each row's drawn caption; pin `theBookDetailsRowsSpeakTheirCaptionsAsHints` (`01205f799`, fix `97282e72f`); its red/green rides the next short window; if the driver cannot read SwiftUI hints the modifiers and pin come out and the line goes to the phone's VoiceOver pass |
+| R2-N2 NIT — the fix-pin recipe's array misnames F4's type | CONFIRMED | the array marked as run, the follow-up's leg and results beside it, F4's row flipped (`ed7b82ef4`) |
+| R2-N3, R2-N5 NIT — a filter to quote; a stale cite | CONFIRMED | record lines (`046a886fc`) |
+| R2-N4 NIT — Unarchive's double press meets the refusal | CONFIRMED as a line for VM-62's run | no code |
+
+**The ladder does not close on round 2** (round 1's F1): a further fresh round reads window (3)'s outcome and the
+instruments' removal, reading (i′) and its run, R2-N1's fix with its red and green, R2-F2's lines, and VM-16
+re-landed on main's message seam.
+
 ## Closeout
 
 *(written at closeout: results, the PROVISIONAL ratify list, canon deltas, the mobile parity line, born tickets)*
