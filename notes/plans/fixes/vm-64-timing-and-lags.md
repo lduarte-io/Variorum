@@ -151,7 +151,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | Batch | State | Commits | Notes |
 |---|---|---|---|
 | 1 · VM-65 | IN-PROGRESS | — | see the batch 1 block below |
-| 2 · VM-2 | NOT-STARTED | — | — |
+| 2 · VM-2 | IN-PROGRESS | — | see the batch 2 block below |
 | 3 · VM-66 | NOT-STARTED | — | — |
 | 4 · VM-67 | NOT-STARTED | — | — |
 | 5 · VM-68 | NOT-STARTED | — | — |
@@ -217,6 +217,56 @@ by this batch).
 **Held for her next sitting:** the ONE wave-1 install on her phone after all four wave-1 runs have merged (phone on the cable, unlocked, Variorum closed; `notes/plans/vm-44/plans/vm-45-install-runbook.md`), prepared by the last merger so a fresh session can run it; then her use of the phone fills the readout. Her wording pass on the readout's labels.
 
 **Machinery notes** (deaths, resumes, stage windows): none yet.
+
+### Batch 2 · VM-2 — LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** The red-on-old proof is a SECOND build of the pins against the pre-fix production files
+(`git checkout <base> -- <production files>` AFTER the fix is committed and pushed, build-for-testing into
+`App/Variorum/DerivedData/vm64-b2-red/`, then `git checkout HEAD -- <the same files>` and a clean `git status`). When
+that revert starts, this line changes to name it and the base commit; until then the tree is never mid-revert.
+
+**The traced mechanism (verified against this branch's tree, base `9cf3b3688`).** The phone's structural doors
+(`MobileStructural.swift`: divide :82, merge :217, extract / make block :357, insert below :518 — the VM-5 record's
+lines still hold) latch `structuralInFlight`, flush, then SUSPEND (the fan read, the op on the runner, the settle's
+flush and read) while the surface and `BlockRangeIndex` still show the pre-op note. The gate
+(`MobileEditorViewModel.shouldChangeText`, today :1544–1658 — audit C's :1531–1573 moved) never reads the latch, and
+the text view stays editable. A keystroke in that window routes `.block(i)` against the pre-op index;
+`recordAutosave` (:1977) records the WHOLE pre-op block text; the door's own settle (`refreshTakesFromStore`, :1449)
+flushes it after the op committed. **One correction to the VM-5 record:** it says the flush "writes unconditionally"
+— since VX-683 B the write carries `expectedText` (the ledger's pre-edit text), the row no longer holds it, so
+`Operations.autosave` RESCUES: the pre-op text + the keystroke keeps the chosen take and the op's real result becomes a
+spurious `'conflict'` take. The divide is still visibly undone and the moved half still reads twice; merge still lands
+the prose in a RELEASED source's take (gone from the note); extract and make block duplicate the lifted span the same
+way. Gate-less roads (a programmatic `replace(_:withText:)`/`deleteBackward()` — M25's measured bypass — and the
+system's autocorrect, dictation and marked-text commits) reach `storageDidEdit` with no arming, route by
+`fallbackVerdict` to the same `.block(i)` arm, and take the same stale write.
+
+**The settled design (PROVISIONAL P-2-1, options in the closeout): a fence from the latch to the settled surface —
+typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and either spoken once.**
+- **The brain** — `Sources/VariorumCore/Domain/StructuralFlightFence.swift` (pure, headless; the `MarkdownCaretRescue`
+  precedent for a live-surface brain in Core): the fence's phase (open · flying · settling), the deferred input queue
+  (insert text · delete backward, coordinate-free, in order; a composition in progress is never deferred), the
+  "something was refused or withheld" debt spoken once, and the landing rule (the fence drops only when the surface
+  holds the post-op store: no forced render and no deferred projection outstanding).
+- **The face** (the phone): the latch's `didSet` raises and lands the fence; `MobileEditorTextView.insertText` /
+  `deleteBackward` hand typed keys to it (the Mac's `beginDeferringKeystrokes`, UIKit-spelled); the gate refuses any
+  other edit while it is up with `StructuralUndoCopy.anotherIsLanding` (the one home of the existing sentence); a
+  gate-less edit while it is up keeps the tiling coherent but writes NOTHING toward the store and forces the settle to
+  re-render from the store; at landing the queue replays through the policed input path at the landed caret, and the
+  sentence is spoken if anything was refused or withheld. No new copy.
+- **Not changed:** `BlockRangeIndex`'s regions, `runStructural` (Mac), the crystallizer's declared arms, `Sync/`.
+
+| Piece | State |
+|---|---|
+| P1 — the brain `StructuralFlightFence` + headless tests | NOT-STARTED |
+| P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | NOT-STARTED |
+| P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | NOT-STARTED |
+| P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | NOT-STARTED |
+| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | NOT-STARTED |
+| P6 — closeout in §7 | NOT-STARTED |
+
+DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
+build), both gitignored.
 
 ## 6. Review foci (written at plan time, before any code)
 
