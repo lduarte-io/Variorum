@@ -83,7 +83,9 @@
 //  code by design. (Since then: batch 6 — VM-69/VM-70 — asserts the open's
 //  reads per open (ONE), its editor builds per open (ONE, a guard) and the
 //  registry's growth per open-and-close (ZERO), each where its series is
-//  reported; batches 4 and 5 say theirs the same way.) The only other assertions keep the probes honest (a dead
+//  reported; batches 4 and 5 say theirs the same way; batch 7 — VM-71 —
+//  asserts ONE savepoint attempt per edited note on each leaving road it
+//  drives, and what leaving the 100k note does on the store's writer.) The only other assertions keep the probes honest (a dead
 //  probe must not pass silently: every series must have gathered its runs).
 //  **No new duration budget is set**: a budget is written with its measured
 //  basis, and the basis is the BEFORE numbers this suite produces (the
@@ -443,6 +445,37 @@ private func interiorOffset(_ model: MobileEditorViewModel, blockIndex: Int) -> 
     let entry = entries[min(max(blockIndex, 0), entries.count - 1)]
     guard let range = model.rangeOfBlock(entry.blockID), range.length > 1 else { return nil }
     return range.location + range.length - 1
+}
+
+/// **A runner probe** (VM-71 — the VM-64 run, batch 7): trivial runner turns
+/// asked back to back, a millisecond apart, until stopped; answers the longest
+/// any one of them waited (ms). The runner is the ONE serial executor every
+/// store write rides (`OperationsRunner`), so the longest wait over a stretch
+/// is the longest single turn something else held it for in that stretch —
+/// what a write asked then (the capture box's first save) would have queued
+/// behind. It reads the runner from outside; it changes nothing about it.
+@MainActor
+private final class RunnerProbe {
+    private var running = true
+    private var longest: Double = 0
+    private var task: Task<Void, Never>?
+
+    init(_ runner: OperationsRunner) {
+        task = Task { @MainActor in
+            while self.running {
+                let t0 = CACurrentMediaTime()
+                _ = try? await runner.run { _ in 0 }
+                self.longest = max(self.longest, (CACurrentMediaTime() - t0) * 1000)
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+        }
+    }
+
+    func stop() async -> Double {
+        running = false
+        await task?.value
+        return longest
+    }
 }
 
 // MARK: - The suite
@@ -1023,9 +1056,9 @@ struct MobileHerPathsPerfTests {
     /// **A note left (popped) after an edit** — the layer's window
     /// (`savepointsPerLeaving`) from the screen's `onDisappear` over the
     /// savepoint attempts it sets off. **ASSERTED ≥ 1**: an edited note's
-    /// leaving is savepointed (PR7 — the cadence occasion, OverallModel §3);
-    /// the exact count is RECORDED (batch 7, VM-71: one per note that needs
-    /// one).
+    /// leaving is savepointed (PR7 — the cadence occasion, OverallModel §3).
+    /// **ASSERTED exactly ONE (batch 7, VM-71) — a guard:** the BEFORE table
+    /// read 1, and the pop's one ask must stay one runner turn.
     ///
     /// The window would close itself 10 s after the leaving; this test closes
     /// it once the leaving's own work has finished (the layer's `noteLeave`
@@ -1065,9 +1098,11 @@ struct MobileHerPathsPerfTests {
                     attempts += Probe.newSamples(.savepointsPerLeaving, since: before)
                 }
             }
-            // RECORDED (batch 7, VM-71) — and the guarantee below.
+            // ASSERTED (batch 7, VM-71 — a guard: one, as before).
             VM64Perf.report("savepoints-per-note-leaving", attempts, .count, expecting: Self.runs)
             #expect(attempts.allSatisfy { $0 >= 1 }, "an edited note's leaving is savepointed")
+            #expect(attempts.allSatisfy { $0 == 1 },
+                    "VM-71: one savepoint attempt per edited note left — \(attempts)")
         }
     }
 
@@ -1083,10 +1118,18 @@ struct MobileHerPathsPerfTests {
     ///   whose screen's `onDisappear` savepoints a third time. The pool close
     ///   and the key drop are not run (no store is really locked here).
     ///
-    /// `savepoints-per-backgrounding-*`: **RECORDED — audit F 6C's "up to
-    /// three"; batch 7 (VM-71) makes it one per note that needs one.**
+    /// `savepoints-per-backgrounding-*`: **ASSERTED exactly ONE (batch 7,
+    /// VM-71)** — audit F 6C's "up to three": the BEFORE table read Standard
+    /// 1 and **Castle 3** (the flush's ask, the lock's teardown's, the removed
+    /// screen's). RED on the pre-fix build (Castle 3); Standard is a guard.
+    /// The later asks still come (the lock is untouched); each finds the take
+    /// already savepointed by the read and asks the runner for nothing.
     /// **ASSERTED ≥ 1**: an edited open note is savepointed on backgrounding
-    /// (PR7 — backgrounding is the phone's ⌘Q).
+    /// (PR7 — backgrounding is the phone's ⌘Q). And the runs alternate
+    /// between two notes, each edited again before each leaving, so a later
+    /// leaving of a note an EARLIER leaving savepointed must still make its
+    /// own attempt (hazard (b): a dedupe that remembered a leaving would read
+    /// 0 here).
     @Test func backgroundingWithAnEditedNoteOpenCountsItsSavepointAttempts() async throws {
         let world = try DiskWorld.copy(of: try PerfWorlds.small.get(), "app-leaving")
         defer { world.remove() }
@@ -1149,10 +1192,220 @@ struct MobileHerPathsPerfTests {
                     await mounted.unmount(leavings: castle ? 0 : 1, report: false)
                     Probe.recorder.cancelWindow(.savepointsPerLeaving)
                 }
-                // RECORDED (batch 7, VM-71) — and the guarantee below.
+                // ASSERTED (batch 7, VM-71: Castle 3 → 1; Standard 1, a guard).
                 VM64Perf.report("savepoints-per-backgrounding-\(arm)", attempts, .count, expecting: Self.runs)
                 #expect(attempts.allSatisfy { $0 >= 1 }, "\(arm): an edited open note is savepointed")
+                #expect(attempts.allSatisfy { $0 == 1 },
+                        "VM-71 (\(arm)): one savepoint attempt per edited note per leaving — \(attempts)")
             }
+        }
+    }
+
+    /// **The lock itself with one edited note open** (Lock now; the crossings'
+    /// teardown — `AppBootstrap.lockOnNewRoad`'s order: the phone's
+    /// `onWillLock`, `mobileWillLock`, then the state flip that removes the
+    /// tree, whose screen's `onDisappear` asks again). No backgrounding, so no
+    /// leaving window opens before the lock's own ask; the attempts are read as
+    /// the layer's `savepointAttempt` COUNTER across the whole road.
+    ///
+    /// `savepoints-per-lock`: **ASSERTED exactly ONE (batch 7, VM-71)** —
+    /// RED on the pre-fix build (2: `mobileWillLock`'s ask, then the removed
+    /// screen's). The pool close and the key drop are not run here (the
+    /// company-safe twin, `MobileLeavingSavesOnceTests`, closes a real pool).
+    @Test func lockingWithAnEditedNoteOpenCountsItsSavepointAttempts() async throws {
+        let world = try DiskWorld.copy(of: try PerfWorlds.small.get(), "lock")
+        defer { world.remove() }
+
+        try await withHerWorld(world) { session in
+            let notes = try await noteIDs(session.database, titled: "corpus note", limit: 2)
+            try #require(notes.count == 2)
+            Probe.recorder.cancelWindow(.savepointsPerLeaving)
+            var attempts: [Double] = []
+            for attempt in 0...Self.runs {
+                let postID = notes[attempt % notes.count]
+                let model = MobileEditorViewModel(session: session, postID: postID)
+                let router = MobileShellRouter()
+                let opened = Probe.snap()
+                let mounted = Mounted(MobileWriteScreen(
+                    session: session, postID: postID, router: router, tab: .library, editor: model))
+                await waitUntil("the first live delivery") {
+                    Probe.delta(.noteProjectionDelivery, since: opened) >= 1
+                }
+                if let storage = model.textView?.textStorage,
+                   let at = interiorOffset(model, blockIndex: 0) {
+                    typeEdit(model, storage, range: NSRange(location: at, length: 0), replacement: "z")
+                } else {
+                    Issue.record("no text to type into")
+                }
+
+                let before = Probe.snap()
+                await mobileWillLock(session: session, editors: router.editors, stopServices: {})()
+                mounted.gate.mounted = false
+                await waitUntil("the torn-down screen's leaving") {
+                    !Probe.newSamples(.noteLeave, since: before).isEmpty
+                }
+                await idle(.milliseconds(300))
+                if attempt > 0 {
+                    attempts.append(Double(Probe.delta(.savepointAttempt, since: before)))
+                }
+                await mounted.unmount(leavings: 0, report: false)
+                Probe.recorder.cancelWindow(.savepointsPerLeaving)
+            }
+            // ASSERTED (batch 7, VM-71: 2 → 1).
+            VM64Perf.report("savepoints-per-lock", attempts, .count, expecting: Self.runs)
+            #expect(attempts.allSatisfy { $0 == 1 },
+                    "VM-71: the lock asks the runner once for an edited open note — \(attempts)")
+        }
+    }
+
+    // MARK: 6b · Leaving the 100k note: what holds the runner, and the box's first save after it
+
+    /// The writer statements that are a leaving savepoint's PER-TAKE work: the
+    /// whole op's scan of the note's takes, and the last-savepoint read it (and
+    /// the narrowed op) makes per take it examines (`Operations.isDirty`).
+    private enum LeavingWork {
+        static func isWholeNoteTakeScan(_ sql: String) -> Bool {
+            sql.contains("SELECT v.* FROM variant v") && sql.contains("ORDER BY v.id")
+        }
+
+        static func isLastSavepointRead(_ sql: String) -> Bool {
+            sql.hasPrefix("SELECT text FROM commit_point WHERE variant_id = ?")
+        }
+    }
+
+    /// **Audit F 1D, the runner's side** — leaving the 100k note (1,370 blocks)
+    /// after only READING it, and after one EDIT, on an on-disk encrypted WAL
+    /// pool (her store's shape). The note has been left once before (its takes
+    /// savepointed — any note she has had for more than one visit). Each run
+    /// mounts the real screen, (edits one block,) removes it the app's way,
+    /// and reads three things over the leaving:
+    ///
+    /// · **the store's WRITER** (the connection every runner turn writes
+    ///   through — `OwnerAdoptionTrace`): the leaving savepoint's per-take
+    ///   statements. **ASSERTED (batch 7, VM-71): no scan of the note's takes
+    ///   on the writer, and one last-savepoint read per take OWED** — zero
+    ///   after a read-only visit, one after one edit. RED on the pre-fix build
+    ///   (the whole op: the scan, and one read per take — ~1,400).
+    /// · `leaving-100k-runner-hold-*` — a RUNNER PROBE: trivial runner turns
+    ///   asked back to back for the whole leaving; the longest any of them
+    ///   waited is how long the leaving held the runner at a stretch — what
+    ///   the capture box's first save could have queued behind. RECORDED.
+    /// · `leaving-100k-to-saved-*` — the layer's `noteLeave` span (the leaving's
+    ///   teardown and savepoint, wall clock — the read included). RECORDED.
+    @Test func leavingTheHundredKNoteHoldsTheRunnerOnlyForWhatItOwes() async throws {
+        let big = try PerfWorlds.big.get()
+        let megaID = try #require(big.seed.megaPostID)
+        let world = try DiskWorld.copy(of: big, "leaving-100k")
+        defer { world.remove() }
+
+        try await withHerWorld(world) { session in
+            // Left once before: every take savepointed (the fixture never was).
+            _ = try await session.runner.run { ops in try ops.closeAutoCommit(megaID) }
+            Probe.recorder.cancelWindow(.savepointsPerLeaving)
+
+            for (arm, edits) in [("read", false), ("edited", true)] {
+                var hold: [Double] = []
+                var toSaved: [Double] = []
+                var reads: [Double] = []
+                var scans: [Double] = []
+                for attempt in 0...Self.runs {
+                    let model = MobileEditorViewModel(session: session, postID: megaID)
+                    let router = MobileShellRouter()
+                    let opened = Probe.snap()
+                    let mounted = Mounted(MobileWriteScreen(
+                        session: session, postID: megaID, router: router, tab: .library, editor: model))
+                    guard await waitUntil("\(arm): the 100k note's first live delivery", {
+                        Probe.delta(.noteProjectionDelivery, since: opened) >= 1
+                    }) else { await mounted.unmount(leavings: 0); return }
+                    await idle(.milliseconds(300))
+                    if edits {
+                        let storage = try #require(model.textView?.textStorage)
+                        let at = try #require(interiorOffset(model, blockIndex: 1))
+                        #expect(typeEdit(model, storage, range: NSRange(location: at, length: 0),
+                                         replacement: "x"), "the key was accepted")
+                    }
+
+                    let log = try OwnerAdoptionTrace.start(on: world.db)
+                    let probe = RunnerProbe(session.runner)
+                    let before = Probe.snap()
+                    await mounted.unmount(leavings: 1)
+                    let longest = await probe.stop()
+                    try OwnerAdoptionTrace.stop(on: world.db)
+                    Probe.recorder.cancelWindow(.savepointsPerLeaving)
+                    let statements = log.value.map(\.sql)
+                    if attempt > 0 {
+                        hold.append(longest)
+                        toSaved += Probe.newSamples(.noteLeave, since: before)
+                        reads.append(Double(statements.filter(LeavingWork.isLastSavepointRead).count))
+                        scans.append(Double(statements.filter(LeavingWork.isWholeNoteTakeScan).count))
+                    }
+                }
+                VM64Perf.report("leaving-100k-runner-hold-\(arm)", hold, .ms, expecting: Self.runs)
+                VM64Perf.report("leaving-100k-to-saved-\(arm)", toSaved, .ms, expecting: Self.runs)
+                // ASSERTED (batch 7, VM-71).
+                VM64Perf.report("leaving-100k-writer-take-reads-\(arm)", reads, .count, expecting: Self.runs)
+                VM64Perf.report("leaving-100k-writer-take-scans-\(arm)", scans, .count, expecting: Self.runs)
+                #expect(scans.allSatisfy { $0 == 0 },
+                        "VM-71 (\(arm)): the leaving scanned the note's takes on the writer — \(scans)")
+                #expect(reads.allSatisfy { $0 == (edits ? 1 : 0) },
+                        "VM-71 (\(arm)): the leaving's writer work grew with the note — \(reads) last-savepoint reads")
+            }
+        }
+    }
+
+    /// **Audit F 1D, as she meets it** — the capture box's FIRST save (its
+    /// mint, `MobileQuickNoteModel.mintNow` → `importPost` on the runner)
+    /// asked the moment the edited 100k note's leaving has landed her key (the
+    /// leaving's flush — the instant before its savepoint asks the runner).
+    /// `box-first-save-after-100k-leaving` — THIS TEST'S clock from the ask to
+    /// the mint's return. RECORDED (no budget: P-66-4); the pre-fix build
+    /// queues it behind the whole-note savepoint, the fix behind at most the
+    /// one owed take's.
+    @Test func theBoxsFirstSaveAfterLeavingTheHundredKNote() async throws {
+        let big = try PerfWorlds.big.get()
+        let megaID = try #require(big.seed.megaPostID)
+        let world = try DiskWorld.copy(of: big, "box-after-100k")
+        defer { world.remove() }
+
+        try await withHerWorld(world) { session in
+            _ = try await session.runner.run { ops in try ops.closeAutoCommit(megaID) }
+            Probe.recorder.cancelWindow(.savepointsPerLeaving)
+            var firstSave: [Double] = []
+            for attempt in 0...Self.runs {
+                let model = MobileEditorViewModel(session: session, postID: megaID)
+                let router = MobileShellRouter()
+                let opened = Probe.snap()
+                let mounted = Mounted(MobileWriteScreen(
+                    session: session, postID: megaID, router: router, tab: .library, editor: model))
+                guard await waitUntil("the 100k note's first live delivery", {
+                    Probe.delta(.noteProjectionDelivery, since: opened) >= 1
+                }) else { await mounted.unmount(leavings: 0); return }
+                await idle(.milliseconds(300))
+                let storage = try #require(model.textView?.textStorage)
+                let at = try #require(interiorOffset(model, blockIndex: 1))
+                #expect(typeEdit(model, storage, range: NSRange(location: at, length: 0),
+                                 replacement: "x"), "the key was accepted")
+
+                let box = MobileQuickNoteModel(session: session)
+                let before = Probe.snap()
+                mounted.gate.mounted = false
+                await waitUntil("the leaving landed her key") {
+                    Probe.delta(.autosaveWrite, since: before) >= 1
+                }
+                box.text = "A thought after the long note, run \(attempt)."
+                let t0 = CACurrentMediaTime()
+                let minted = await box.mintNow()
+                let latency = milliseconds(since: t0)
+                #expect(minted != nil, "the box minted")
+                await waitUntil("the leaving to finish", timeout: .seconds(30)) {
+                    !Probe.newSamples(.noteLeave, since: before).isEmpty
+                }
+                await box.fileOnLeaving()
+                await mounted.unmount(leavings: 0, report: false)
+                Probe.recorder.cancelWindow(.savepointsPerLeaving)
+                if attempt > 0 { firstSave.append(latency) }
+            }
+            VM64Perf.report("box-first-save-after-100k-leaving", firstSave, .ms, expecting: Self.runs)
         }
     }
 
