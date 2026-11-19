@@ -324,6 +324,13 @@ struct MCPStalledReaderPoolTests {
     /// once, never sent into a buffer that cannot take it. `MSG_DONTWAIT` does
     /// not stop such a send from waiting on a Unix-domain socket here, so the
     /// old line blocked its caller until the client read.
+    ///
+    /// VX-944's riders (the VX-981 run, batch 3): the call goes through
+    /// `sayClosingBounded` (this pin's own shape, once — it was written out
+    /// here a second time), and the DROP path is held to the mark's restore as
+    /// the sending path is (`aCloseLineGoesWholeWheneverTheSocketHasRoomForIt`):
+    /// the line raised the socket's send low-water mark for its one try, and a
+    /// mark left there would change every later fast-road step.
     @Test func aCloseLineToAClientThatStoppedReadingNeverWaits() async throws {
         var pair: [Int32] = [-1, -1]
         try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
@@ -334,34 +341,18 @@ struct MCPStalledReaderPoolTests {
         // A whole frame the client never reads, leaving the buffer FEWER free
         // bytes than the line holds (a send of the line then waits — the
         // socket also polls not-writable: less room than its low-water mark).
-        var capacity: Int32 = 0
-        var size = socklen_t(MemoryLayout<Int32>.size)
-        try #require(getsockopt(pair[0], SOL_SOCKET, SO_SNDBUF, &capacity, &size) == 0 && capacity > 64)
+        let capacity = try #require(Self.option(pair[0], SO_SNDBUF))
+        try #require(capacity > 64)
+        let mark = try #require(Self.option(pair[0], SO_SNDLOWAT))
         let closeLine = try #require(MCPCloseLine.line("Variorum closed this connection."))
-        let filler = Data(repeating: UInt8(ascii: "f"), count: Int(capacity) - 1 - 8)  // 8 bytes left free
+        let filler = Data(repeating: UInt8(ascii: "f"), count: capacity - 1 - 8)  // 8 bytes left free
         try await transport.send(filler)
         #expect(!Self.writable(pair[0]), "premise: the client's buffer holds less room than a write needs to go at once")
-        let outcome: Bool? = await withCheckedContinuation { continuation in
-            let said = LockIsolated<Bool?>(nil)
-            let returned = DispatchSemaphore(value: 0)
-            Thread {
-                said.setValue(transport.sayClosing(closeLine))
-                returned.signal()
-            }.start()
-            Thread {
-                let inTime = returned.wait(timeout: .now() + 5) == .success
-                if !inTime {
-                    // The line is stuck in a send: let the client read, so the
-                    // stuck caller is let go (and this pin reports, not hangs).
-                    var sink = [UInt8](repeating: 0, count: 64 * 1024)
-                    _ = Darwin.read(client, &sink, sink.count)
-                    _ = returned.wait(timeout: .now() + 5)
-                }
-                continuation.resume(returning: inTime ? said.value : nil)
-            }.start()
-        }
+        let outcome = await Self.sayClosingBounded(transport, closeLine, client: client)
         #expect(outcome != nil, "the close line returned at once — it never waited on a client that stopped reading")
         #expect(outcome == false, "a buffer that cannot take the line whole drops it (\(String(describing: outcome)))")
+        #expect(Self.option(pair[0], SO_SNDLOWAT) == mark,
+                "the drop path restores the low-water mark the fast road steps by, as the sending path does")
         close(client)
         for try await _ in await transport.receive() {}
         await transport.disconnect()
