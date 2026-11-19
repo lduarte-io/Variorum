@@ -304,7 +304,28 @@ I proved each road by running it, the way the app runs it, on real files, and th
 
 ## THE GATES AND THE WALK
 
-*PENDING — each stage window recorded here: the claim, the TYPE list, the Executed counts, every failing test by name, the walk's rows.*
+### GATE 1 — batch 1 (claim `vx980-gate1`, 2026-11-19 04:44–05:01, nov18's GO; renewed once at her +20): PASSED
+
+**The tree under test.** A GATE SNAPSHOT, never the implementers' tree: `~/dev/variorum-vx-980-gate`, a detached worktree at `df50cf996` (batch 1's product tree plus notes), built there with `build-for-testing` into `App/Variorum/DerivedData/vx980-gate` ("TEST BUILD SUCCEEDED"). Every gate, red leg and walk of this run uses the snapshot, moved to the newer head at each seam, so a live implementer's edits are never under test.
+
+**The suites (test-without-building, 17 TYPE names — batch 1's READY-FOR-GATE list).** Swift Testing: **"103 tests in 17 suites passed"**; XCTest "Executed 0 tests, with 0 failures"; "TEST EXECUTE SUCCEEDED"; 0 `skipped` lines; no red, so no load re-run.
+
+**The walk (the snapshot's Debug product on the dev store; the orchestrator's hands; captures local).**
+1. `red +` in the Library field → the band "“red +” — 1 note · 1 passage", the note listed with its passage. (Before the fix: nothing.)
+2. `— #vx980walk` → the tag's own narrowed listing: "2 notes", both tagged notes, no answer sheet. (Before: the tagged notes vanished.) *Seen, for her eyes: the band still echoes the dash as the question's words — "“—” — 2 notes · #vx980walk" — where the tag alone echoes none. PROVISIONAL P-980-B1-1: (a) the echo shows what she typed — BUILT; (b) words that fold to nothing drop out of the echo beside a tag.*
+3. `—` alone → the band "“—” — nothing found"; the sheet's row "Search looks for words and numbers, so punctuation on its own can't be found." (R-980-5).
+4. A gathering's 🔍 with `—` → its band "“—” — nothing in this book matches · in: this book"; the same line as its row.
+
+**The revert-red leg (VX-954's app-side change reverse-applied in the snapshot only, then restored).** `SearchFoldedWordsRoutingTests` → **"5 tests in 1 suite failed with 65 issues"**: `theLibrarysWordsAreTheCorePredicate` (6), `everyRoutingSiteReadsTheOnePredicate` (12), `theLibrarysListingForAFoldedWordBesideATagIsTheTagAlones` (42), `theBooksBandReadsTheOnePredicate` (3), `thePalettesListReadsTheOnePredicate` (2). Restored: `git status` clean, `git diff` empty. So the app-side pins are red-on-old by revert, as the core pins were by order.
+
+**What the window found that is not this run's diff (each ticketed):**
+- **The launch waited about nine minutes on a blank window (VX-1013, Bug · Confirmed · Castle & sync · Medium).** Sampled: `AppBootstrap.beginOpening` → `ProtectionOpenRoad.lobbyFacts` → `CatalogLister.walk` reading each key file of the dev store's second backup folder (`~/Documents/Variorum/Backups`, 155 files, iCloud-synced Documents) — each small read blocked long inside the sandboxed app under the night's load while the same file read at once from a shell. Nothing draws until that catalogue is read. Her real library walks the same road over a smaller folder.
+- **The lobby opened on "This is a different library than the one this Mac last had open" (VX-1015, Debt · Suspected · Tests & tooling · Low)** — most likely left by test-host runs that open other libraries. OK pressed (a notice, no secret); the library then opened with no secret asked.
+- **A book's search field in a narrow navigator overflows the column over the sidebar's edge (VX-1014, Bug · Suspected · Books · Low)** — seen at probe 4; this run changed only that surface's empty sentence.
+
+**The dev store, as found and as left (nothing of its posture changed):** not locked, no Castle face; signed out ("Sync off (dev store)"); the restore-hold banner standing, Resume Sync never pressed; the words band card showing, untouched; MCP server ON; Study voice, dark. What's New 1.4 dismissed. Content left: two notes in Home's Pool, "vx980 red apple orchard" and "vx980 blue pear harbor", tag `#vx980walk` (reused by the Trash walk). No instance left, no crash report.
+
+*Gate 2 (batches 2 and 3 — their suites and walks in one launch) is recorded here when it runs.*
 
 ## THE LADDER
 
@@ -320,9 +341,9 @@ I proved each road by running it, the way the app runs it, on real files, and th
 |---|---|---|
 | 1 | Kickoff: worktree, branch, in-flight row (`1d84b85a4`), VX-980 In Progress, nov18 told | DONE |
 | 1b | Her kickoff sitting: R-980-1…12 recorded verbatim (`vx-980-her-rulings.md`), folded into this record; VX-1009 and VX-1010 born | DONE |
-| 2 | BATCH 1 — VX-955 · VX-954 (+ R-980-5) | BUILT (head `1d7e4d770`): core pins red-on-old then green, the tokenizer sweep 0 of 1,112,064, search suites 175/31 + 3/3, build-for-testing green. OWED AT THE GATE: the app suites (the TYPE list in READY-FOR-GATE), the app routing pin's red leg by revert, the walk's rows |
-| 3 | BATCH 2 — VX-79 | NOT STARTED |
+| 2 | BATCH 1 — VX-955 · VX-954 (+ R-980-5) | BUILT (head `1d7e4d770`): core pins red-on-old then green, the tokenizer sweep 0 of 1,112,064, search suites 175/31 + 3/3, build-for-testing green. **GATE 1 PASSED 2026-11-19** (103 tests / 17 suites; the four walk probes; the revert leg red, 5 tests / 65 issues, restored) |
+| 3 | BATCH 2 — VX-79 | BUILT (head `119f6938d`): the Settings ▸ Data Safety row, two registry acts (`.checkSearchIndex`, `.rebuildSearchIndex`), the restore-roads trace (no road lands the index out of step; seven guard pins), core 196/35 + 3/3, build-for-testing green. OWED AT GATE 2: the app suites (its TYPE list) and the walk rows |
 | 4 | BATCH 3 — VX-93 | NOT STARTED |
-| 5 | The gates and the walk (through nov18) | NOT STARTED |
+| 5 | The gates and the walk (through nov18) | GATE 1 DONE (batch 1). Gate 2 REQUESTED (batches 2 + 3), the merge gate REQUESTED. Born at gate 1: VX-1013 · VX-1014 · VX-1015 |
 | 6 | The ladder | NOT STARTED |
 | 7 | Closeout: canon deltas, record, handoff, merge gate, PR, merge-moment ledgers, tickets, debris, worktree and branch removal | NOT STARTED |
