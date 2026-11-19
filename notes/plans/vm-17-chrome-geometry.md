@@ -60,7 +60,9 @@ This file is a kickoff and a set of pointers. It is NOT a design: the rule's sha
 > `main` carries no new red test). On branch `vm-78-fixes-to-whats-there`'s history, reachable from `main` after
 > its merge:
 > - the probe `MobileFanBadgePlacementProbeTests.swift` — VM-17's pin; red on today's chrome (readings (i), (i′),
->   (ii)); restore it from the commit before VM-78's back-out commit;
+>   (ii)); restore it with `git checkout 15add793d -- <its path>` (its last edition, the header brought up to date
+>   by R3-N3; the test body M5 and M5b ran is the same from `78179b765` on — the parent of VM-78's removal commit
+>   holds it too, with `16c75a5bf`'s header);
 > - the decor reading `MobileDecorPlacementReadingTests.swift` — VM-239's pin (`211221f6b`, `75984c0e6`);
 > - the settle measurement `MobileFanBadgeSettleMeasureTests.swift` (`35ce90848`; one known bug in its
 >   display-link fallback, and its second mount is void — both written up in BATCH D);
