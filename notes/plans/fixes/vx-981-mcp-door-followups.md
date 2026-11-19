@@ -16,9 +16,9 @@ Ticket: VX-981 · Project: none (an umbrella over MCP-area tickets) · Branch: `
 |---|---|
 | Kickoff: roster, worktree, in-flight row (`bc8f3d03a` on main), this record | DONE |
 | BATCH 1 — the Journal shows as Private (VX-1007) | READY — code + pins at `366fb5213` (core green, red-on-old verified); the app-target gate + its red leg and the walk wait for the orchestrator's stage window (BATCH 1 RECORD → GATE TYPES, WALK SCRIPT LINES) |
-| BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961) | NOT-STARTED |
+| BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961 · riders VX-133 · VX-705) | NOT-STARTED |
 | BATCH 3 — announces in order, never waiting on a stall (VX-951 · VX-944) | NOT-STARTED |
-| BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963) | NOT-STARTED |
+| BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963 · rider VX-773) | NOT-STARTED |
 | BATCH 5 — the parity audit (VX-368); the output-cap measurement (VX-370) HELD | NOT-STARTED |
 | Gates (Mac suites under a stage claim), the closing walk | NOT-STARTED |
 | The ladder (cold review of the whole diff, up to three rounds) | NOT-STARTED |
@@ -40,6 +40,29 @@ No revert is in flight.
 - **Riders (CLAUDE.md's rule — offered, held for her, none taken without her word):** the open Low/Medium MCP-area tickets outside the roster: VX-131 (once grants time out when left unspent) · VX-133 (the coalesced receipt count includes acts since undone) · VX-705 (move-at-once adopts its target with no liveness check) · VX-930 (record the setup tab at key-bind) · VX-875 (a setting for the AI activity feed) · VX-773 (the release test split's DEBUG-only hooks).
 - **Held at kickoff — VX-370:** no second MCP client is installed on the Pro (`codex` and `gemini` are not on the path), and installing or signing in to one is her hands. The measurement cannot run tonight; the ticket is re-owned at closeout with that reason.
 
+**Her rulings at the kickoff sitting (2026-11-19, in chat and two dialogs):**
+- Her message, verbatim: "yeah that's fine on vx-370 waiting, i'll do that later. tag that as needs lillian in linear. what are the riders? use the quesiton tool to present them to me. also present the wire shape to me. the wording - provisional wording is fine.  also, up to 5 review rounds as long as a major is found."
+- **R-981-1 — VX-370 waits on her** (a second MCP client on the Pro). Set to Needs Lillian.
+- **R-981-2 — the riders (her dialog picks):** VX-133 · VX-705 · VX-773 JOIN, seated as sub-issues; VX-131 · VX-930 · VX-875 stay on the board ("None of these"). Fourteen members. VX-133 and VX-705 ride batch 2; VX-773 rides batch 4.
+- **R-981-3 — VX-951's wire shape (her dialog pick, "Ready or first request"):** a connection's `tools/list_changed` is held until the client's `notifications/initialized` or its first request after `initialize`, whichever comes first; then ONE notice if any was held. The shape memo's option (b′) is RULED; P-981-B3-1 is retired as a provisional.
+- **R-981-4 — "provisional wording is fine":** authored sentences are drafted, built and listed for her pass; no wording ask is held.
+- **R-981-5 — the ladder's cap is five for this run:** her words "up to 5 review rounds as long as a major is found" — a further round is earned only while a round surfaces a new BLOCKER or MAJOR (the orchestrator's reading); a fresh reviewer every round. CLAUDE.md's standing cap of three is unchanged.
+- **R-981-6 — the release build.** Her words: "that's fine - there's you and one other variorum main session. whichever one of you is last should build a release but it will not BE released until i can look through the handoffs and confirm it - the same build but not release that we normally do overnight provisionally. and yes go ahead and approve your test client by hand for testing." Of this run and vx-980, the LAST merger builds the Mac release and stops before publishing (no appcast, no site upload, no `/Applications` install). nov18 names the builder when the first of the two asks to merge; no release work starts before that.
+- **R-981-7 — the walk's test client** is approved by the orchestrator's hand in the DEV store (her words above), under a held stage claim.
+- **She is away from 04:16** (her words to nov18): "rule provisionally in my absence". No question dialog until morning; her-hands asks are held and bundled.
+
+**Coordinator window facts (nov18's ack, 2026-11-19 ~03:30):**
+- The three windows are queued as REQUESTED. `vx981-gate-a` (~40 min) as asked. The second window is split at its seam into two claims — the batch 3–4 suites, then the closing walk — and takes ONE READY naming both legs with minutes each. `vx981-merge-gate` (~60 min) is the whole Mac target on the merged tree, a QUIET window, plus the phone target if a `Shared/` line landed; ask nov18 before merging.
+- No slot for this run: vm-64 holds the `Sync/`-custody slot for the window. Any `Sync/`, custody or schema line stops the batch and nov18 hears first.
+- READY is a separate ping once `build-for-testing` is done, with the exact TYPE lists. GO only by nov18's message with the exact claim line. A claim lapses silently: ask for more time before T−10; `Tools/stage renew` RESETS the clock to now+N. Never wait on her while holding a claim: release and re-request.
+- The load rule: headless work may run under another session's ordinary batch window; a timing red under load is re-run ALONE before it counts, and the result line says which reds were load re-runs. QUIET windows (every whole-Mac-target run and merge gate, announced at the GO): no whole-package or whole-target `swift test`, no whole MCP target, no cold or full `build-for-testing`; small targeted runs and editing are fine.
+- Result lines: executed counts or no verdict; every failing test by name; no Variorum instance left; any new `Variorum-*.ips` or Problem Reporter window; What's New dismissed if it showed.
+- The dev store: last written 2026-11-09 in the 1.4 release window; its posture is UNKNOWN (Castle or not, locked or not, the MCP server, the approved clients) — the walk's first launch finds out and the result line reports it. A Castle face or lock screen takes exactly the values in `~/.variorum/dev-castle.env`, and those live steps go to an Opus implementer, not the Fable orchestrator. Content is the agents' to manage: mint the daily Journal entry, turn the server and `ai_marks` on, approve the client by hand. Signed out; never Resume Sync; no test account.
+- The walk's wire client is the Debug build's own stdio bridge (this run's DerivedData `Variorum.app/Contents/MacOS/variorum-mcp`, bundle `io.lduarte.Variorum.debug`) with a FRESH setup key named for the run — never the `variorum` MCP server configured in the sessions, never `/Applications/Variorum.app`. At release: state the posture left, and the approved client and whether it was removed.
+- Reds to name, never chase, each re-run alone before leaning on it (no verified whole-target run on main since 2026-11-09): VX-701 (TakesFindBoardTests' esc-boundary test) · VX-953 (SpellingDoorTests' write arm, TakesExpansionMemoryTests' marginGrid arm) · VX-608 (DestructiveUndoWarningTests.redoNeverAsks) · VX-78 (NoteOpenLandingTests.aReopenMidNoteComesBackToThePageExactly) · VX-695 (TakesEntryBandTests past ~2,700 Debug defaults keys) · core: VX-942, VX-978, VX-134 · a main-thread SIGSEGV at exit with swift-testing's JSON encoding on top is the XCTest ↔ Swift Testing interop loop (VX-661/VX-690). Anything else is real until traced.
+- Merge order: first-ready merges first. This run and vx-980 are nearly disjoint from the mobile four. The one cross-run risk is `Shared/AppSession.swift` and `OpsRefusalTable` (vm-55 edits and moves code into both): if VX-961's line lands there, tell nov18 and expect to merge in behind vm-55. With vx-980: a pin of theirs may land in the MCP tests; `SettingsShape.swift` may be shared.
+- DerivedData: this run's one dir is `App/Variorum/DerivedData/vx981` in the worktree; dropped at close, path told to nov18.
+
 **Preflight read at kickoff (none delegated):** CLAUDE.md and its auto-loaded canon (CoreDescription, OverallModel, AppSpec) · `notes/MCPSpec.md` IN FULL · `notes/SurfaceContracts.md` — The app (the AI section, the status seam), The Bookcase and books (the Bookcase, the book settings sheet, the badge family, the Private mark), Doors (the MCP door) · the master plan's head, in-flight table and latest closeout · `notes/plans/workflow-transition-2026-10-06.md` · `notes/TICKETS.md` (the non-mobile board; every open MCP-area row) · `notes/QUESTIONS.md` — the entries this run's members cite (#270 and its addenda 2–3, #271, #273 and its addenda), not the file whole · `notes/SessionResiliencyProtocol.md` · `notes/REVIEW_PROMPT.md` · every member ticket in full · the fence's legs (`Sources/VariorumCore/Queries/MCPGrantQueries.swift`, "THE FENCE's legs") and `Queries/PrivateMarkQueries.swift`. Not triggered: SyncSpec, TEXTKIT2_NOTES, CastleRules (a line reaching their seams stops the batch).
 
 ## ENVIRONMENT & TRAPS (every batch brief carries this section verbatim)
@@ -52,6 +75,7 @@ No revert is in flight.
 - zsh `pipestatus` (not bash's PIPESTATUS). Screenshots only in gitignored dirs. Never `git checkout` over uncommitted work. No `git add -A` — pathspec adds and pathspec commits only.
 - The REAL store and `/Applications/Variorum.app` are never touched. The walk app is the DEV-STORE Debug build only (`io.lduarte.Variorum.debug`).
 - **The repo is PUBLIC:** every commit message and note is public copy. No names, emails, account ids or private paths beyond what the repo already carries; identifiers keep the placeholder vocabulary.
+- **Paths in records and commit messages are `~`-relative or repo-relative.** The pre-push guard refuses an absolute home path (batch 1 met it). A refusal is fixed in the UNPUSHED commits and never bypassed; say so in your record's machinery note. Never rewrite a pushed commit.
 - Commits carry NO attribution trailer. Member work says `Part of VX-<member>` in its commit message, stating the traced mechanism and the pin.
 - Rendered app text is sentence case; never capitalize a word for emphasis. Every new or changed sentence the app or the wire speaks is listed in your batch record under AUTHORED SENTENCES, for her pass.
 - **The hallucination guard:** no fix without a mechanism you traced yourself; every bug-class fix lands with a pin that is red on the old code, verified by revert; a pin green on both sides means the finding is hollow — record it and do not fix it. An Improvement member pins the NEW contract.
@@ -93,7 +117,7 @@ Every batch writes its record under its own heading at the END of this file's ba
 
 **Stop conditions:** any need to change `mcpNoteFacts`' answers, the grant rule, or a write road; any `Sync/`, schema or editor-seam line.
 
-### BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961)
+### BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961 · riders VX-133 · VX-705)
 
 **Reading:** Kickoff and ENVIRONMENT & TRAPS · `notes/MCPSpec.md` IN FULL · SurfaceContracts → The app (the status seam) and Doors (the MCP door) · `notes/plans/fixes/vx-915-recents-sweep.md` → FOR A LATER READER, BATCH 6 (the wire's unlink) and P-915-L2-1 · `notes/plans/fixes/vx-913-freeze-fixes.md` → FOR A LATER READER and ledger 3 (the landed-then-log split, the door road, P-913-B3-*) · QUESTIONS #271, #273 and #273's two addenda.
 
@@ -103,6 +127,10 @@ Every batch writes its record under its own heading at the END of this file's ba
 
 **VX-961 — `show_in_app` when only its Activity line fails.** The ruled split, already built for the write family (VX-775): "the error goes to her, the truth goes to the client." Confirmed present on `show_in_app`'s own road: the act lands, the Activity write throws, the client hears an error. Fix through the VX-913 door road: the client gets the act's own answer byte for byte; she gets one refusal-kind line on the status seam naming the client and the store's words; `list_my_activity` simply lacks the row. Every arm of `show_in_app` that logs is covered (the ask, the move, her take is not the client's act). Pin, red on old, per arm.
 
+**Rider VX-133 — the receipt's run count includes acts since undone (R-981-2).** Found at a walk: the coalesced receipt read "‹client› made 4 changes · ⌥⌘Z undoes" when three of the four had been walked back. Mechanism as filed: an undo never touches `MCPDoor.receiptRun`, so the run keeps counting superseded acts. Reading added: `notes/plans/phase-13n-b-mcp-door.md` → U4 UNIT RECORD, "Open items for the orchestrator". The ticket's candidate shapes: lower (or reset) the run when a structural undo walks back one of its acts, or re-word the line so the count claims acts performed. Build the count that stays TRUE — an undo of one of the run's acts lowers it, a redo raises it again, a run walked back to nothing speaks no stale count — PROVISIONAL with the options listed; the line's words are unchanged unless the count's truth needs one. Trace how the list forms' call-scoped run key (VX-812) and the quiet-retire undo (VX-276: an undo that finds its act's result already gone changes nothing) meet the count: a quiet retire lowered nothing. Pin, red on old: four acts, three undone → the line says one.
+
+**Rider VX-705 — the move-at-once road re-reads its place (R-981-2; Suspected, race-only).** The show dial's move-at-once arm adopts its target directly, with none of the press roads' gone-check: a deletion landing after the wire's read found the target readable and before the adopt opens a tombstoned note's empty page silently. Reading added: `notes/plans/fixes/vx-677-editor-panes-ai-door.md` → FOR A LATER READER and the ladder's fix record (F-L2, F-FR-2). Fix shape on the ticket: the same `MCPDoor.showTargetStands` re-read before the move-at-once adopt — and the gone place then speaks the press roads' own gone words, opening nothing. PIN FIRST, deterministic (a hook between the read and the adopt, no sleeps): red on old. No reachable red means hollow: record it, fix nothing. What the WIRE answered is already sent (fire-and-forget) and does not change.
+
 **Evidence of kind:** state-transition and wire tests headless; the app-target types at the gate; one live wire round at the closing walk (a write-new-only client refused at unlink with the ask raised; an edit client's unlink landing with the title-free receipt on two long-titled notes) — write its script lines into your record.
 
 **Stop conditions:** any change to who may unlink beyond the rung; any new refusal sentence not derivable from an existing family (draft it PROVISIONAL instead); a `Shared/` edit is allowed but must be named in your record at once.
@@ -111,13 +139,13 @@ Every batch writes its record under its own heading at the END of this file's ba
 
 **Reading:** Kickoff and ENVIRONMENT & TRAPS · `notes/MCPSpec.md` IN FULL · `notes/plans/fixes/vx-940-pre-oss-followups.md` → FOR A LATER READER, W4 whole (F-W4-1, the P5b fast road, the soak), "The ladder" (F-R1-2's disposition) · `notes/plans/fixes/vx-940-ladder-round1.md` → F-R1-2 · QUESTIONS #270 addendum 2 · `Sources/VariorumMCP/MCPSession.swift`, `MCPServerHost.swift`, `MCPSocketTransport.swift`, `App/Variorum/Variorum/Features/MCP/MCPDoor.swift` (`resumeSuspended`).
 
-**VX-951 — `tools/list_changed` never ahead of a connection's `initialize`.** Mechanism as filed: `announceToolsChanged` gates only on `declaredName != nil`, and the name is set in the SDK's `initialize` hook before the result is sent, so the grants observation can put `notifications/tools/list_changed` on a connection's wire before its `initialize` result. It is the recorded cause of `MCPSetupKeyServerTests.twoToolsUnderOneNameAreToldApart`'s load flake. Her ruling (2026-11-10, #270 addendum 2) settled WHEN (after the public flip — now) and left the SHAPE to this run's kickoff memo:
+**VX-951 — `tools/list_changed` never ahead of a connection's `initialize`.** Mechanism as filed: `announceToolsChanged` gates only on `declaredName != nil`, and the name is set in the SDK's `initialize` hook before the result is sent, so the grants observation can put `notifications/tools/list_changed` on a connection's wire before its `initialize` result. It is the recorded cause of `MCPSetupKeyServerTests.twoToolsUnderOneNameAreToldApart`'s load flake. Her ruling (2026-11-10, #270 addendum 2) settled WHEN (after the public flip — now) and left the SHAPE to this run's kickoff, where she ruled it (R-981-3):
 
-> **THE SHAPE MEMO (the orchestrator's, PROVISIONAL P-981-B3-1 — hers to flip).** MCP's lifecycle has the server send nothing but pings and logging before the client's `notifications/initialized` (confirm the sentence in the protocol's own text with your one lookup, and quote it in your record).
+> **THE SHAPE MEMO — RULED (R-981-3, her dialog pick 2026-11-19: "Ready or first request" — option (b′) below).** MCP's lifecycle has the server send nothing but pings and logging before the client's `notifications/initialized` (confirm the sentence in the protocol's own text with your one lookup, and quote it in your record).
 > - **(a) Gate on the `initialize` result having been written.** The smallest change; it closes the recorded flake. A `list_changed` can still precede the client's `notifications/initialized`, which the lifecycle also rules out.
 > - **(b) Gate on the client's `notifications/initialized`, then one catch-up.** While the gate is closed an announce is remembered, never sent; when the gate opens, exactly ONE `list_changed` goes out if any was held, none otherwise. The sitting's recorded lean.
 > - **(b′) (b), and a client's first post-`initialize` request also opens the gate.** A client that never sends `notifications/initialized` but calls `tools/list` or a tool has plainly finished initializing; without this arm such a client would never hear an announce again, and VX-258's "her Allow … serves the same connection at once (the tool list re-announced)" would silently break for it.
-> **Build (b′).** It is the lifecycle's letter, it cannot strand a lax client, and it sends nothing a conforming client did not agree to hear. If the SDK already treats a first request as initialized, say so and (b) is (b′).
+> **Build (b′) — hers.** It is the lifecycle's letter, it cannot strand a lax client, and it sends nothing a conforming client did not agree to hear. If the SDK already treats a first request as initialized, say so and (b) is (b′).
 
 The contract the fix must keep, each with a pin or a named existing pin: VX-258's Allow re-announce on the SAME connection; VX-818's held connection (answered `initialize` during a lock, names no one, admitted at the unlock, resumed with its announce); the grants observation reaching every live session that is past its gate; VX-605's naming signals; `trail_dial` changes announcing nothing. Pin, red on old, deterministic (a test hook that holds the result or forces the grant change inside the window — no sleeps as the mechanism): the first frame a connection reads is its `initialize` result, and no `list_changed` precedes the gate's opening. Then the soak: `twoToolsUnderOneNameAreToldApart` run repeatedly ALONE and under a parallel core run, counts recorded.
 
@@ -127,7 +155,7 @@ The contract the fix must keep, each with a pin or a named existing pin: VX-258'
 
 **Stop conditions:** any change to WHAT is announced or to the fingerprint; any wire byte other than the ORDER and the held-then-one catch-up; a deadline that would close a slow-but-alive client's connection (not ruled — draft it as an option, do not build it).
 
-### BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963)
+### BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963 · rider VX-773)
 
 **Reading:** Kickoff and ENVIRONMENT & TRAPS · `notes/MCPSpec.md` IN FULL · `notes/plans/fixes/vx-913-freeze-fixes.md` → FOR A LATER READER, ledger 7 and the ladder's F2 · `notes/plans/fixes/vx-913-ladder-round1.md` → the two C probes (stat-after-bind vs fstat) · `notes/plans/fixes/vx-940-pre-oss-followups.md` → FOR A LATER READER and W4 (VX-933's writer, F-W4-2, F-W4-3) · `notes/plans/fixes/vx-926-test-flakes.md` → FOR A LATER READER and U1 (F-U1-2) · `notes/plans/fixes/vx-180-discover-probe.md` (the opening window's contract) · `Sources/VariorumMCPSocket/`, `Sources/VariorumMCP/MCPSocketTransport.swift`, `MCPServerHost.swift`, `Tests/VariorumMCPTests/MCPStalledReaderPoolTests.swift`.
 
@@ -136,6 +164,8 @@ The contract the fix must keep, each with a pin or a named existing pin: VX-258'
 **VX-959 — the socket path's identity across hosts (Suspected).** A stale host can unlink a fresh host's freshly bound socket in narrow timings: three by-name unlink sites plus the double-start flicker. The first piece is chosen here: a stat-after-bind identity carried with the fd (NEVER `fstat` — it returns the socket object's identity, not the path's vnode; measured in the vx-913 round-1 probes) so a host unlinks only the path it bound, versus serializing the probe → unlink → bind sequence per directory. Write the choice and its reason into your record (a check-then-unlink is not atomic by itself — say what closes the gap). PIN FIRST: a deterministic interleaving (hooks, not sleeps) in which the old tree's stale host removes the fresh host's socket. No reachable red means the finding is hollow: record the attempts and fix nothing. "A server removes only its own socket" (MCPSpec) is the line this makes true in the narrow timings too.
 
 **VX-952 — the opening window reads buffered.** `MCPOpeningWindow.readLine` reads a byte at a time; a 1 MiB opening line costs about a million `read` calls on the handshake's own thread. Bounded, off the pool — a performance cost only. A buffered reader removes it, with the one care the ticket names: the opening must not swallow bytes past what it consumes — whatever it read beyond its own lines reaches the transport untouched, the replayed `initialize` frame and anything pipelined behind it included. Improvement — pin the NEW contract: the read count (or an injected reader's call count) for a near-cap line; byte-exact handoff with frames pipelined in one segment; and every existing arm byte-unchanged (the pre-initialize `-32601` and `ping` answers, the skipped notification, the 1 MiB cap's answer, the setup-key preamble, the closed-app shim's road).
+
+**Rider VX-773 — the release test split compiles again (R-981-2; Medium, tests only).** `swift build -c release --build-tests -Xswiftc -enable-testing` fails compiling `VariorumMCPTests`: `MCPAcceptLoopServerTests` reads `host.acceptLoopFault` and `MCPStopRoadsServerTests` reads `host.stopWindowProbe`, both `#if DEBUG` members of `MCPServerHost`, referenced unguarded. Reading added: `notes/plans/fixes/vx-500-sync-followups.md` → the closing-runs section. Fix shape on the ticket: guard the hook-consuming tests (or their suites) in `#if DEBUG` — never widen a Debug-only hook into Release. Any hook THIS batch or batch 3 added is guarded the same way. Evidence: the release split's build command runs to the end (a heavy cold build — not during a QUIET window), and the Debug run still executes the guarded tests (counts before and after, no test silently dropped from Debug).
 
 **Evidence of kind:** drills — real sockets, headless; the whole `VariorumMCPTests` target run repeatedly, alone, counts recorded.
 
@@ -163,6 +193,10 @@ The contract the fix must keep, each with a pin or a named existing pin: VX-258'
 8. **Every pin is red on the old code** (bug-class) or pins a new contract (improvements); a pin green on both sides is recorded as hollow, not fixed around.
 9. **Every authored sentence is listed** for her pass; sentence case; no ticket ids in rendered text.
 
+## THE LADDER (the rules for this run)
+
+Cold review of the run's whole diff by a fresh `fable-reviewer` each round, `notes/REVIEW_PROMPT.md` verbatim. Cross-model: findings go to the implementer verbatim, its agree/dispute returns to the reviewer, the reviewer makes the final call, the implementer applies the confirmed fixes with red-on-old pins. **Cap: five rounds (R-981-5)** — round N+1 is earned only while round N surfaces a new BLOCKER or MAJOR; a final round's fixes get the orchestrator's line-by-line check. Findings and dispositions land in `notes/plans/fixes/vx-981-ladder-round<N>.md` before the next round is spawned.
+
 ## THE LEDGER (every row owned; updated as batches close)
 
 | Member | Batch | State | Disposition |
@@ -177,7 +211,10 @@ The contract the fix must keep, each with a pin or a named existing pin: VX-258'
 | VX-952 | 4 | Todo | — |
 | VX-963 | 4 | Todo | — |
 | VX-368 | 5 | Todo | — |
-| VX-370 | 5 | HELD | no second client installed; her hands |
+| VX-370 | 5 | Needs Lillian | R-981-1: waits on a second MCP client on the Pro, hers |
+| VX-133 | 2 (rider) | Backlog | — |
+| VX-705 | 2 (rider) | Backlog | — |
+| VX-773 | 4 (rider) | Parked | — |
 
 ## BATCH RECORDS
 
@@ -287,3 +324,5 @@ No revert is in flight (row V's revert was restored and verified).
 
 
 **Machinery (batch 1):** the closing record's first push was REFUSED by the pre-push guard (VX-996) — the GATE TYPES line named the build folder by its absolute home path. Nothing had been pushed; the line was rewritten home-relative, an amend was refused by the session's permission layer, and the two unpushed local record commits were folded back (`git reset --soft` to the pushed tip — nothing lost, nothing pushed rewritten) and recommitted as `a6ab1f720`. No pushed commit was rewritten. One scaffold run hung on a held-observation pin (recorded under PINS); only that run's own processes were killed.
+
+**Orchestrator's check at the seam (batch 1, 2026-11-19):** the record is complete against the brief (mechanism, pieces, pins with their red-on-old evidence, six PROVISIONALs with options, the authored sentences, canon drafts, gate types and the red leg, the walk's eleven lines, VM-209). Branch and origin agree at `c0185bb0f`, tree clean. Not re-run: the headless suites the implementer reports green (23 → 36 → 70 + 19 tests; the revert check 10 red of 12). OWED: the app-target gate with its red leg and the walk, both in stage windows. The machinery note stands as written — two UNPUSHED record commits were folded after the pre-push guard refused an absolute home path; no pushed commit was rewritten; the session's permission layer had refused the amend, which goes in the handoff for her. **Born: VX-1012** (Low, Bug, Confirmed, Wording, Backlog — the note menu's "No longer Private." while a Private book still holds the note; the batch's "Observed, not fixed"), offered to her as a rider, not taken.
