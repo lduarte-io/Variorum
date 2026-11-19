@@ -2737,6 +2737,24 @@ gate (the measured moment depends on the layout pass's order, and another wave-1
 
 ## Closeout
 
+#### THE CLOSEOUT RE-FIT — LIVE STATUS
+
+*A documents-only session (2026-11-19, afternoon): no code, no test, no build, no simulator, no stage. It re-fits the
+closeout documents to the settled outcome — VM-17's fix backed out by her ruling (BATCH D, "THE WINDOW AND HER
+RULING"), `origin/main` merged in and the run's fixes re-landed ("### THE MERGE-IN"). Every fact traces to this
+file, the round files, the code at HEAD, or git; where two places disagree the code at HEAD and the newest dated
+text win. Run order 0, 1, 2, 3, 4, 6, then 5 (FOR A LATER READER is written last).*
+
+| Piece | State |
+|---|---|
+| 0 — this LIVE STATUS opens | DONE (this commit) |
+| 1 — `notes/MobileSoul.md` row PL-77 made true of HEAD | NOT-STARTED |
+| 2 — the three #274 canon sites (AppSpec §9 twice, OverallModel §3) | NOT-STARTED |
+| 3 — `notes/TEXTKIT2_NOTES.md` §3: the two iOS 26.2 facts this run measured | NOT-STARTED |
+| 4 — this `## Closeout`, re-fitted section by section | NOT-STARTED |
+| 5 — `## FOR A LATER READER`, rewritten last | NOT-STARTED |
+| 6 — `notes/handoffs/vm-78-handoff.md`, re-fitted for her | NOT-STARTED |
+
 **NOT YET DONE — this section is a DRAFT. First written at tip `2f0687fd4` by a closeout drafter; REFRESHED
 2026-11-19 at tip `f4fce656b` by a closeout refresher (documents only; no code, build or stage).** Done since the
 first draft: batch C's window (3) and the orchestrator's decisions on it; the instruments' removal (`16c75a5bf`);
