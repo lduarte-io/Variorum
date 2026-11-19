@@ -25,6 +25,7 @@
 
 import Foundation
 import Testing
+import VariorumCore
 @testable import Variorum
 
 @MainActor
