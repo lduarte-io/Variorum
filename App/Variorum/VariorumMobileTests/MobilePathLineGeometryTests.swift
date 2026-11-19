@@ -82,10 +82,30 @@ struct MobilePathLineGeometryTests {
                     await surface.settle(40)
                     #expect(surface.host.view.bounds.width == width)
 
-                    let pathPrefix = tokens.path(["Shelf"])
+                    // R-47-3 MOVED this lookup from "Shelf": her ruling (2026-11-19)
+                    // that the root's own line says its tab's word, "Bookcase". The
+                    // longer word (three characters more in Terminal) means the plain
+                    // line wants ≈ 422 pt in Terminal at 402 (≈ 398 with "Shelf"), so
+                    // there the path truncates at its tail — P-47-9's rule, the line's
+                    // one flexible member; the bounds below (one line, every door
+                    // 44 × 44 on it) hold by that same rule, unloosened.
+                    let pathPrefix = tokens.path(["Bookcase"])
                     let path = try #require(
                         pathFrame(surface, startingWith: pathPrefix),
                         "no path line in \(tokens.voice) at \(Int(width)): \(surface.visibleLabels)")
+                    // R-47-3's pin: the root's own line says "Bookcase" — Study
+                    // "Bookcase  ·  N books", Terminal's path "~/bookcase  ·  N books"
+                    // (its chrome lowercased) — red on the old word by construction
+                    // (the line read "Shelf  ·  …" / "~/shelf  ·  …"). Literal on
+                    // purpose: the word under test is the root's, never the path
+                    // grammar's; the count is left to the line (its read is the
+                    // model's, not this pin's).
+                    let pathLabel = surface.visibleElements.first {
+                        ($0.accessibilityLabel ?? "").hasPrefix(pathPrefix)
+                    }?.accessibilityLabel ?? ""
+                    #expect(pathLabel.hasPrefix(tokens.voice == .terminal
+                                ? "~/bookcase  \u{00B7}  " : "Bookcase  \u{00B7}  "),
+                            "the Bookcase root's line in \(tokens.voice) reads \"\(pathLabel)\" (R-47-3)")
                     // ONE line: a 13 pt line is ~16–18 tall; two would be ~34.
                     #expect(path.height < 26,
                             "the path line wrapped in \(tokens.voice) at \(Int(width)) pt: \(path)")
@@ -124,6 +144,10 @@ struct MobilePathLineGeometryTests {
     /// the words do not all fit and the path — the line's one flexible member —
     /// truncates at its tail (P-47-9's rule; PROVISIONAL P-47-27), never a door
     /// and never a second line. The + New Note door keeps its whole word.
+    /// Since R-47-3 the page word is "Bookcase" (three characters more in
+    /// Terminal): "~/home/bookcase  ·  14 books" wants ≈ 463 pt (past 430 as
+    /// well, as ≈ 438 was), and Study's "Home · Bookcase  ·  14 books" ≈ 403
+    /// meets the edge at 402 — the same rule, the same bounds below.
     @Test func theBookcaseLineWithItsWingDoorHoldsOneLineAndEveryTarget() async throws {
         try await withEditorWorld { session, _ in
             for index in 0..<14 {

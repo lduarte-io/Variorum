@@ -260,7 +260,9 @@ struct MobileWingDoorTests {
             let tokens = VoiceTokens.resolve(voice: voice, dark: false)
             for (wing, page, trailing) in [
                 ("Home", "Library", ""), ("Work", MobileStarsModel.pageName, ""),
-                ("Taxes 2025", "Shelf", tokens.chromeLabel("  ·  6 books")),
+                // R-47-3 MOVED from "Shelf": the Bookcase root's page word is its
+                // tab's, "Bookcase" (her ruling, 2026-11-19).
+                ("Taxes 2025", "Bookcase", tokens.chromeLabel("  ·  6 books")),
             ] {
                 let parts = MobileWingTitle.doorParts(
                     tokens, wing: wing, page: page, trailing: trailing)
@@ -389,10 +391,12 @@ struct MobileWingDoorGeometryTests {
                     onOpenTrash: {})
             ) { surface in
                 // The page and the count, as the line draws them (an empty
-                // store: no books).
+                // store: no books). R-47-3 MOVED both from "Shelf": the root's
+                // own line says its tab's word, "Bookcase" (her ruling,
+                // 2026-11-19) — the door's value is that line's rest.
                 try await measure(
-                    surface, pressed: { presses }, root: "Shelf",
-                    value: "Shelf" + Self.study.chromeLabel("  ·  0 books"))
+                    surface, pressed: { presses }, root: "Bookcase",
+                    value: "Bookcase" + Self.study.chromeLabel("  ·  0 books"))
             }
         }
     }

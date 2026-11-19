@@ -55,7 +55,9 @@ struct MobileRootMenuTests {
                             stars: MobileStarsModel(session: session), tokens: tokens,
                             tabBar: { EmptyView() }, onOpen: { _ in })
                             .environment(\.mobileSettingsDoor, door))),
-                    (tokens.path(["Shelf"]), AnyView(
+                    // R-47-3 MOVED from "Shelf": the Bookcase root's line says
+                    // its tab's word (her ruling, 2026-11-19).
+                    (tokens.path(["Bookcase"]), AnyView(
                         MobileShelfView(
                             model: shelfModel, stars: MobileStarsModel(session: session),
                             quickNote: MobileQuickNoteModel(session: session),
