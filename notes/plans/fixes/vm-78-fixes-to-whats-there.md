@@ -66,6 +66,14 @@ the stage rule, the report shape — after this blockquote.)*
   the editor's test and badge code); the Fable orchestrator briefs, verifies, adjudicates and records, and types
   no batch code. Cross-model ladder: the reviewer makes the final call, the implementer applies the fixes.
 - **No `Sync/`, no custody, no schema** — verified against every member's files. Not the wave's sync slot.
+- **The ladder's cap, tonight only — her ruling in this session (2026-11-19), verbatim:** "sounds good, tonight,
+  up to 5 review rounds as long as a major is found." So for this run tonight: a round that surfaces a new
+  BLOCKER or MAJOR earns the next, up to round 5; a round with neither closes the ladder. Every round is a fresh
+  `fable-reviewer`. The standing cap of three returns after tonight.
+- **Her frame for the night (2026-11-19, verbatim, in this session):** "and just to be clear, the plan is
+  sequential merges to main, overnight provisional running, but I won't get a new phone build until wave 2 is
+  done according to what another session said." This run closes on a simulator walk, not her phone; its
+  PROVISIONAL calls are bundled for her next sitting.
 - **`App/Variorum/Shared/` changes** (the `BookStateCopy` words hoist, batch A) ⇒ the merge gate adds the Mac
   suites beside the whole phone target (nov18's rule).
 - **Riders:** none offered. Every open VM ticket already has its umbrella and wave in the approved plan
@@ -418,6 +426,9 @@ first run, so its first half is reading and writing the probes headless; window 
 ## The ladder
 
 *(round files `vm-78-ladder-roundN.md` beside this one; findings and dispositions land here before the next round)*
+
+**Cap for this run: five rounds, each earned by a new BLOCKER or MAJOR in the round before it (her ruling tonight,
+Kickoff facts).**
 
 ## Closeout
 
