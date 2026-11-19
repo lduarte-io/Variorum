@@ -417,7 +417,11 @@ struct MobileWingDoorGeometryTests {
                 #expect(!surface.visibleElements.contains {
                     $0.accessibilityLabel == "Home" && $0.accessibilityTraits.contains(.button)
                 })
-                #expect(surface.visibleLabels.contains { $0.contains("Home \u{00B7} Starred") },
+                // The line as the voice draws it (Study "Home · Starred",
+                // Terminal "~/home/starred") — never a literal in one voice.
+                let line = Self.study.path(MobileWingTitle.components(
+                    wing: "Home", page: MobileStarsModel.pageName))
+                #expect(surface.visibleLabels.contains { $0.contains(line) },
                         "labels were \(surface.visibleLabels)")
             }
         }
@@ -437,14 +441,16 @@ struct MobileWingListSheetTests {
             let world = try TwoWingWorld.make(session)
             let door = MobileWingDoor(wings: MobileWingDoor.phoneWings(session))
             door.open()
+            let tokens = VoiceTokens.resolve(voice: .study, dark: false)
             await withHostedSurface(
-                MobileWingListSheet(
-                    door: door, tokens: VoiceTokens.resolve(voice: .study, dark: false))
+                MobileWingListSheet(door: door, tokens: tokens)
             ) { surface in
                 // The sheet's own read (its `.task`) fills it.
                 #expect(await eventually { door.switcher.rows.count == 2 })
                 await surface.settle(10)
-                #expect(surface.visibleLabels.contains(WingWords.switcherHeader),
+                // The header as the sheet's voice draws it (never the bare
+                // constant — a Terminal sheet lowercases it).
+                #expect(surface.visibleLabels.contains(tokens.chromeLabel(WingWords.switcherHeader)),
                         "labels were \(surface.visibleLabels)")
                 let rows = surface.visibleElements.filter {
                     ["Home", "Work"].contains($0.accessibilityLabel ?? "")
@@ -493,7 +499,12 @@ struct MobileWingDoorShellTests {
                 #expect(surface.activate("Home"), "the name is a door; labels were \(surface.visibleLabels)")
                 await surface.settle(30)
                 #expect(surface.host.presentedViewController != nil, "the list is up")
-                #expect(surface.visibleLabels.contains(WingWords.switcherHeader),
+                // The header as the shell's VOICE draws it (Terminal lowercases
+                // chrome — the window's red at 5c80d058b compared the unvoiced
+                // words); the doors' labels are names, never voiced.
+                let voiced = VoiceTokens.resolve(voice: router.voice, dark: false)
+                    .chromeLabel(WingWords.switcherHeader)
+                #expect(surface.visibleLabels.contains(voiced),
                         "labels were \(surface.visibleLabels)")
 
                 #expect(surface.activate("Work"), "labels were \(surface.visibleLabels)")
