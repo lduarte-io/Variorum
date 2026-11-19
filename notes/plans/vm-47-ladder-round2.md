@@ -59,12 +59,104 @@ VM-47 cold review — ladder ROUND 2 (the whole run's diff vs origin/main at eb1
 
 | Id | Finding | The implementer (§2a) | The reviewer's final call (§2b) | What changed |
 |---|---|---|---|---|
-| R2-n1 | NIT, SPECULATIVE — `MobileShellView.listBar(owner)`: the per-stack bar count is unclamped | PENDING | PENDING | PENDING |
-| R2-n2 | NIT — `MobileMessageLineFaceTests.swift:78–83`: the face pin's bounds are tight against font metrics | PENDING | PENDING | PENDING |
+| R2-n1 | NIT, SPECULATIVE — `MobileShellView.listBar(owner)`: the per-stack bar count is unclamped | **AGREE** — hollow. No reachable sequence gives a list's bar a disappear without its appear: every road traced pairs them, and the known SwiftUI imbalances push the count UP. The cited pin is narrower than the finding says — it reads a root, the pushed Trash and a note opened from the root; it never pushes a note over a list and never opens the Versions reader — and it could not see a negative count. A clamp does nothing on every balanced sequence, and no pin can be red on today's code. ⇒ change nothing, now or at a next touch; pointer: batch 6's self-assessment risk 1 (§2a) | PENDING | PENDING |
+| R2-n2 | NIT — `MobileMessageLineFaceTests.swift:78–83`: the face pin's bounds are tight against font metrics | **AGREE**, no action — with the mechanism corrected (§2a). `door.height <= 44.5` is tied to the hit-area helper's 44, not to fonts. The foot check is tied to one line's HEIGHT (the ascent cancels) and reds past ≈ 21 pt. It has a second coupling: the standing device's text size (chrome scales up to xxxLarge). A red would mean the line really outgrew its 44, so the bound is never loosened. If a note goes anywhere, it is one sentence on the pin's doc comment (§2a gives it), not TEXTKIT2_NOTES or MobileSoul | PENDING | PENDING |
 
 ### 2a. The implementer's answers
 
-PENDING.
+The findings reached the implementer (Opus, 2026-11-19) verbatim. Its agree/dispute is below, for this reviewer's
+final call. Nothing changed for this step: no code, no test, no build, no test run (the QUIET window).
+
+**R2-n1 (NIT, SPECULATIVE) — AGREE: hollow, and nothing to change.**
+- *How the count is built.* It has one reader and two writers. The reader is `barOnScreen` (`MobileShellView.swift:427–429`,
+  `pagingAllowed || (listBarsShowing[tab] ?? 0) > 0`), which hands the line its lift (:313–314). The writers are the
+  two closures of `listBar(owner)` (:686–690): +1 in the bar's `onAppear`, −1 in its `onDisappear`. Four places draw a
+  counted bar: the book's contents (:539), the Trash (:560), the Archive (:565) and the Versions listing (:574, drawn
+  under `if model.reading == nil` at `MobileVersions.swift:349–351`). A root draws the uncounted `tabBar`, and
+  `pagingAllowed` covers it. The count is kept per owning stack and read only for the visible one, so a hidden
+  stack's count cannot mislead it.
+- *Every road I could trace pairs each −1 with an earlier +1 of the same bar:*
+  - a list pushed (+1);
+  - a note pushed over it (−1), then popped back (+1);
+  - the list popped (−1), by Back, the swipe, `pop(in:)` (:655–661) or `popToRoot` (:719–729). This holds animated
+    or not: a pop straight to the root removes the lists it covered without appearing them, and each had already
+    paid its −1 when it was covered;
+  - the Versions listing becoming the reader and back (−1 / +1, the `if`);
+  - Protection replacing the shelf's path wholesale (:609), which pays −1 for a list on top;
+  - the shell leaving the tree (a lock, a reopen), which takes its `@State` with it, so no count carries across.
+
+  To go negative, a bar must receive an `onDisappear` with no `onAppear` before it. I cannot construct that sequence,
+  and I know of no SwiftUI behaviour that produces it. The known imbalances run the other way: a doubled `onAppear`,
+  or an appear when an interactive back-swipe starts that a cancel does not undo. Both push the count UP.
+- *A correction to the coverage the finding cites.* `theMessageLineClearsTheBarWhereverABarIsOnScreen`
+  (`MobileTabBarTests.swift:349–380`) reads the lift in three states: a root, the pushed Trash, and a note opened from
+  the root after the tab popped the Trash. It never pushes a note OVER a list, and it never opens the Versions reader.
+  No other pin reads `chromeInset` on those two roads: `insideANoteTheBarIsGoneAndTheVersionsListingWearsIt` (:302)
+  checks that the listing draws the bar, not where the line sits. On the road the pin does drive, it could not see a
+  negative count. An extra −1 on the Trash would leave −1, and the next state it reads is a note, where −1 and 0 both
+  read "no bar". The pin can only go red in the UP direction, at :377 (a note left lifted). That is batch 6's risk 1,
+  which names the missed disappear as the failure (run record §6, "Batch 6 — results", the self-assessment).
+- *What a clamp would buy* (`max(0, …)` on the decrement). On every balanced sequence, nothing: the decrement meets
+  zero only when disappears outnumber appears. On an unbalanced one, it limits the damage to the moment of the
+  unmatched −1. If the stray disappear came while a bar was still showing, the line would still sit over that bar
+  until the bar's real disappear. After that, the clamp keeps the count from staying one short, so later pairs read
+  true again. Against the UP direction it buys nothing.
+- *The guard.* Nothing reachable produces the state, so no pin through the shell can be red on today's code. A test
+  that called the closures with an extra disappear would pin the arithmetic against an input the app does not
+  produce. It would be green on both sides of every real road. By the hallucination guard the finding is hollow:
+  record it, don't fix it. I would change nothing, now or as a fold-in at that file's next touch, which would be the
+  same unlicensed change made later. The pointer stays batch 6's risk 1. If a run or a walk ever shows the line over a
+  list's bar, or lifted inside a note, it opens as its own trace, and the pin then follows the sequence that was found.
+
+**R2-n2 (NIT) — AGREE: no action. The coupling is real, but not quite as the finding words it, and one more sits
+beside it.**
+- *The bounds, as cited.* `:78` `door.width >= 43.5 && door.height >= 43.5`, `:80` `door.height <= 44.5`, `:81–83`
+  `abs(door.maxY - foot) <= 0.5` with `foot = window.bounds.maxY - 34 - 56`. The lines are as the finding gives them.
+- *The geometry, traced* (`MobileMessageLine.swift:153–192`).
+  - The parts:
+    - The line is an `HStack(alignment: .firstTextBaseline, spacing: 12)` (:154).
+    - The words are `controlInline`, padded 12 above and below (:157, :163).
+    - The act is `PhoneInlineActStyle(weight: .semibold)` (:174). Its label wears `phoneHitArea`
+      (`PhoneControls.swift:183–189`): a frame at least 44 × 44, the word centred in it (`PhoneMetrics.swift:107–113`).
+    - The stack sits in a frame at least 44 tall (:185), and its foot is placed by `footOffset`, here 34 + 56 above
+      the window's foot (:93–95, :132–135).
+  - Both texts are the same chrome face at the same size: SF in Study, SF Mono in Terminal
+    (`PhoneType.swift:177–179, 311–314`). With their baselines aligned, the ascent cancels, to the extent the two
+    weights share vertical metrics.
+  - Call h the drawn height of one line of words. The words' column then sits (20 − h)/2 below the act's top, where
+    20 is the act's 44 less the words' 12 + 12.
+  - SwiftUI's `lineSpacing` goes between lines, so one line draws at the font's own height: h ≈ 18 for SF 15. (If a
+    single line drew the role's spacing too, h would be ≈ 20 and the slack ≈ 1 pt — still green in row 6.9.) The
+    column then runs from about 1 pt to about 43 pt inside the act's 0–44. The stack is the act's 44, and the door's
+    foot IS the line's foot — exactly, not within half a point. The half point only absorbs pixel rounding.
+- *What each bound depends on.*
+  - `door.height <= 44.5` is tied to the hit-area helper's 44, not to font metrics: the door is `max(44, h)`, and h
+    is nowhere near 44.
+  - The foot check is the font-coupled one, but through the line's HEIGHT, not its ascent. Once h passes 20, the
+    column outgrows the act by (h − 20)/2 at each end and the act's foot rises off the line's, so the check reds past
+    h ≈ 21. At the default text size that is about 3 pt of slack in the line height, more than "within half a
+    point", and an iOS point release is an unlikely way to cross it.
+- *A coupling the finding does not name: the device's text size.* The chrome roles follow the text size up to
+  xxxLarge (`PhoneType.swift:72–79`; `PhoneTypeModifier` reads `\.dynamicTypeSize`, :463, :479). The pin sets no text
+  size, so it reads the standing device's setting. At the larger sizes, one line of 15 pt chrome scaled up passes
+  ≈ 21 pt and the foot check reds. That needs no OS change, and the red would be correct, because the line really is
+  taller than 44 then. What keeps the standing device at the default today is this run's own rule (§2, "Evidence a
+  batch closes on": walks run on a dedicated device created and deleted inside the walk's claim, "so the shared
+  suite device keeps its settings").
+- *A red here would be information, not a flake.* The bound states the sizing sheet's own claim, "one line 44 tall".
+  If the faces' metrics or the text size make one line of words taller than that, the claim is false and the pin
+  should say so. The batch-1 precedent the finding cites agrees: the 1/3 pt hold (run record §6, Batch 1, item 2)
+  was a real defect a tight bound caught (`4ec664f2b`), not a flake. So the bound is never loosened.
+- *Whether a note belongs in the repo, and where.* Not in `notes/TEXTKIT2_NOTES.md` §5: that matrix is the Mac
+  editor core's TextKit 2 checks, and this pin is neither. Not in `notes/MobileSoul.md`: it is canon, and its
+  per-release line names the TK2 spike. If a note goes anywhere, it belongs on the pin itself, where a red is met:
+  one sentence, comment only, in `theLinesActAnswersAcrossFortyFourOnAFortyFourLine`'s doc comment — *"The foot
+  check is metrics-coupled: it holds while one line of the 15 pt chrome face is at most about 21 pt tall (the act's
+  44 less the words' 12 above and below, plus the tolerance) — so a red after an iOS update, or on a device left at a
+  larger text size, means one line of words outgrew the 44 pt line: look at the line, never loosen the bound (VM-47
+  ladder round 2, R2-n2)."* The alternative is nothing, since this file already carries the trace. Either is
+  defensible. I lean to the sentence, because a later reader meets the red at the test, not here. The reviewer
+  decides.
 
 ### 2b. The reviewer's final calls
 
