@@ -1233,6 +1233,15 @@ implementers' answers and the reviewer's final calls are in the round file (find
 spent) and by batch C's implementer (its own files); each bug-class fix lands with its pin, shown red on the
 pre-fix-pass tip and green after in its own short stage window.
 
+### Round 2 — `vm-78-ladder-round2.md` (a fresh `fable-reviewer`; opened 2026-11-19 at tip `84fe72e50`)
+
+Round 2 re-reviews round 1's fixes and what they touched (`0180727de..84fe72e50`: the fix pass for batches A and
+B, batch C's rewritten probe and re-shaped arms) while the stage queue stands between this run and batch C's
+window. **It cannot close the ladder** (F1's final call): batch C's window (3) has not run, so its outcome — and
+later VM-16 re-landed on main's message seam — is new work that a further fresh round reads whatever round 2
+finds. State as it opens: batches A and B verified in windows (1) and (2); the fix pass verified in window (5)
+except F4's pin, which waits for a short follow-up window; batch C's matrix is queued.
+
 ## Closeout
 
 *(written at closeout: results, the PROVISIONAL ratify list, canon deltas, the mobile parity line, born tickets)*
