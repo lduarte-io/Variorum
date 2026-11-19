@@ -360,7 +360,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | DONE — P-55-11 (be6f1d0c7) and VM-62 (pins 69005ad4a/15f788dfd, fix e8609cc6f) green in the whole phone target and the Mac leg; VM-62's red-on-old RAN at 15f788dfd from a snapshot worktree: the scan red (97 lines) and all five per-case pins red, the stripper oracle green; the window's two 2a follow-ups fixed and re-run green. Record: "Batch 2b record" |
 | Batch 3 — VM-63 | BUILT (d91f97ca5) — both targets build for testing green; its suites (the Mac and phone TYPE lists in "Batch 3 record") PENDING in the shared window batch 4 runs |
 | Main merged in at the seam after batch 3 | DONE (871bde99a — main 359ae214d, VX-980's merge; clean, by the orchestrator; NOT yet built or tested on this branch — batch 4's builds and the shared window are the first on the merged tree) |
-| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | IN-PROGRESS — the merged tree builds green on both targets (step 0, see "Batch 4 record"); the door is being built |
+| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | BUILT (5c80d058b) — the merged tree built green first (step 0); the door, its pins and the fold are in; both targets build for testing green; READY for the shared window (the whole phone target, then the whole Mac target, QUIET) — every result PENDING. See "Batch 4 record" |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
@@ -392,11 +392,14 @@ Notes for the implementers:
 - Batch 1 left ONE DerivedData dir with the fixed tree's products for both targets: `App/Variorum/DerivedData/vm55-b1`
   — later batches build incrementally into it rather than starting a cold one.
 - Main moved under this run at 08:40 (VX-980: Mac search and Settings files, two `Registry/Capability*` lines, six Core
-  search files) and is merged in at 871bde99a. The coordinator's caveat: those Core search changes passed the whole
+  search files) and is merged in at 871bde99a. ~~The coordinator's caveat: those Core search changes passed the whole
   Mac target and Core's headless suite but had NOT run under the phone-hosted suites when they merged — so on the
   merged tree a red in a phone listing, filter, tag or Trash suite may be main's, not this run's: name it and tell
-  the orchestrator BEFORE chasing it. The ledger's next free QUESTIONS number is #277; MobileSoul's newest parity
-  row is PL-75.
+  the orchestrator BEFORE chasing it.~~ LIFTED (the coordinator, relayed to batch 4): the targeted phone leg on main
+  359ae214d ran green at 08:55 (128 tests in 13 suites, zero failed — the listing, filter, tag, Trash, stars,
+  navigation, deletion, tray and versions suites; only MobileTrashTests' designed known issue). So on the merged tree
+  the ONE pre-existing phone red is still VM-24's caret test; any other red is this branch's. The ledger's next free
+  QUESTIONS number is #277; MobileSoul's newest parity row is PL-75.
 - Walk screens and logs stay local (the gitignored `*-screens` convention); nothing outside the worktree.
 
 ## Batch records
@@ -1699,12 +1702,15 @@ named file): listed in the Mac TYPE list below.
 
 ### Batch 4 record
 
-**What this batch did NOT do (first, by the protocol):** *(kept current; final at READY)* not the swipe or its dots, sizes
-beside the names, the ⋯ or wing management (make, rename, delete, move everything), following a note to its wing, or moving or
-copying a note or book to a wing (all wave 2 — VM-80, umbrella VM-72); no restyle of the roots (the path line keeps its
-tokens, sizes and layout — VM-47 owns sizes); nothing under `Features/Protection/`, `Shared/Protection/`,
-`Sources/VariorumCore/Sync/`, custody/keychain or the editor seam; no Core change. The run's use-shaped simulator walk is the
-run's, after the ladder.
+**What this batch did NOT do (first, by the protocol):** *(final at READY, 5c80d058b)* **no test has run yet** — every suite
+is PENDING for the shared window this batch's READY asks for. Not the swipe or its dots, sizes beside the names, the ⋯ or wing
+management (make, rename, delete, move everything), following a note to its wing, or moving or copying a note or book to a wing
+(all wave 2 — VM-80, umbrella VM-72); no restyle of the roots beyond the door itself (the path line keeps its tokens, sizes and
+letters; it is 10 pt taller so the door's 44 pt target is real — P-55-17); no fix to the empty-wing lines (P-55-16); no line of
+the shared `WingsModel` / `WingSwitcherBrain` changed (one word, the list's header, moved into `WingWords` with the Mac's
+`WingCopy` forwarding to it — the batch's only Mac-compiled change); nothing under `Features/Protection/`,
+`Shared/Protection/`, `Sources/VariorumCore/Sync/`, custody/keychain or the editor seam; no Core change; no merge of main. The
+run's use-shaped simulator walk is the run's, after the ladder.
 
 Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch `vm-55-wings-underneath`.
 Reading done in full before code: CLAUDE.md + loaded canon, MobileSoul §1–§5, the resiliency protocol, the catch-up plan's
@@ -1718,11 +1724,196 @@ frames 5–15 and its build notes, wording list 1's wing rows. DerivedData: `App
 |---|---|
 | Record skeleton | DONE (this commit) |
 | 0 — build the merged tree (main 359ae214d merged at 871bde99a) | DONE — at fb6b90ee0, both targets `build-for-testing` GREEN, nothing to fix: phone ("** TEST BUILD SUCCEEDED **", no `error:`; log `DerivedData/vm55-b4-phone-merge-build.log`), then Mac (same; `vm55-b4-mac-merge-build.log`). No diagnostic in any file this run moved, split or added; the warnings are pre-existing ones in untouched test files. So no semantic conflict with VX-980's Mac search/Settings/Capability changes showed at compile time. |
-| 1 — VM-225, the interim wing door | IN-PROGRESS — design settled (below); code next |
-| Phone + Mac `build-for-testing` on the final tree | NOT-STARTED |
-| READY for the shared window (batches 3 + 4) | NOT-STARTED |
-| The shared window — claim (i) the whole phone target | NOT-STARTED — PENDING |
-| The shared window — claim (ii) the whole Mac target (QUIET) | NOT-STARTED — PENDING |
+| 1 — VM-225, the interim wing door (code + pins) | DONE (5c80d058b) — every result PENDING (the shared window) |
+| Phone + Mac `build-for-testing` on the final tree | DONE — both GREEN at 5c80d058b into `vm55-b1`: phone ("** TEST BUILD SUCCEEDED **", exit 0, no diagnostic in any file this batch touched; log `vm55-b4-phone-build3.log`), Mac (same; `vm55-b4-mac-build1.log`). The record commits after it change no product. |
+| READY for the shared window (batches 3 + 4) | DONE (the report ending this session's first turn) — the two claims and the TYPE lists below |
+| The shared window — claim (i) the whole phone target | PENDING |
+| The shared window — claim (ii) the whole Mac target (QUIET) | PENDING |
+
+#### What shipped — VM-225 (5c80d058b)
+
+**The door.** On each root — Starred, the Shelf, the Library — the wing's name in the path line (batch 1's P-55-2 line) is a
+door. The line stays ONE text with the same letters (`MobileWingTitle.doorParts` → `MobileWingPath.title`, an
+`AttributedString`: the voice's prefix and the rest in the line's muted ink, the wing's name in the accent), so wrapping and
+wording are batch 1's; the whole title is the door's target (P-55-17). A tap opens the plain list. Files:
+`VariorumMobile/Features/Shell/MobileWingDoor.swift` (new — the face model, the path-line door, the list) and one input per
+root (`var onWingDoor: (() -> Void)? = nil` beside `wingName`, and the path line's `Text` replaced by `MobileWingPath` —
+`MobileStarredView`, `MobileShelfView` (its "  ·  N books" rides as `trailing`), `MobileLibraryView`). A root given no door
+(every existing harness) draws exactly batch 1's `Text` (pinned: `withoutADoorTheLineIsPlainText`).
+
+**The target is 44 pt tall, and real.** The line is about 34 pt (its 14 pt top padding, the 11.5 pt text, its 6 pt bottom
+padding). A target hung invisibly beyond it would reach up into the status bar's inset (the system answers touches there — tap
+to scroll to top — so the app cannot count on them) or down into the search field / the books / the first row, which are drawn
+after the line and win the touch. So the button's label spans the line's own paddings and a 44 pt minimum, and negative
+padding hands those paddings back to the line's layout: the target covers the line top to bottom and the line grows only by
+the remainder — 10 pt at today's size (34 → 44), the text 5 pt lower, everything under the line 10 pt lower, nothing else
+changed (`MobileWingDoorMetrics` names the 44 and the roots' 14/6; the geometry pins measure the real roots, so a VM-47 change
+to those paddings that left the target spilling out of the line goes red). The width is the whole title (≥ 44 pt for any name
+plus its page word).
+
+**The list** (`MobileWingListSheet`, presented by the shell, `.presentationDetents([.medium, .large])`): the phone's sheet idiom
+(`MobileMembershipSheet`'s title row with Done, rows below, padding 20, `tokens.room`) in today's tokens. Header: the Mac's own,
+"Wings — each a separate library" (its ▾ list's header) — hoisted to `WingWords.switcherHeader`, the Mac's
+`WingCopy.switcherHeader` now forwarding byte for byte (`Variorum/Core/Views/WingsModel+Mac.swift`, the VM-60 `tagsTitle`
+precedent; the Mac's `VocabularySweepTests` pins the value). Rows: the wings in the switcher's order, Home first, each a real
+button at least 44 pt tall, the current one marked with "✓" in the accent and the `.isSelected` trait. Nothing else: no
+sizes, no ⋯, no management, no Snippets line (wave 2). It READS when it opens (`.task` → `MobileWingDoor.listOpened()` →
+`WingsModel.load()`: `Queries.wings`, the `wing` table alone, through the database's reader, off the main thread — P1/P2).
+
+**A pick** (`MobileWingDoor.pick`): `WingSwitcherBrain.pick(id)` answers `.commit(id)` (the current row too — VX-833); the wings
+are read again (a row may name a wing that died while the list stood open); if the wing is gone, NOTHING switches or lands, the
+list stays up without that row, and the door speaks a refusal in the shared table's existing words, "That library isn't there
+any more — nothing changed." (`wingNotFound`, through the brain's handed-in phone road — AppSpec's "a door that did nothing
+speaks a refusal"); otherwise the list closes, a capture draft is filed in its own wing when the wing is about to change
+(P-55-18), and `WingsModel.goTo(id, saying: false)` — the deliberate road, silent as the Mac's ▾ list is — switches the shared
+`WingState` (written through to the device memory) and calls `landInBookcase`. The door counts that landing (`landings`); the
+shell answers each count with `selectPage(.shelf)` — its one page road (the quick-note filing on a leaving, the liveness
+hand-off, the settle). Every root's held listing re-reads in the new wing through batch 1's `MobileWingScope.follow`; the roots'
+title re-reads from the same brain. **No line is shown for the switch** (her ruling; a said switch would be a receipt, which the
+phone's line drops anyway, but the road says nothing at all).
+
+#### How the hoisted brains were composed, and what was folded
+
+- **`WingsModel` (Shared, VM-63)** is now what the shell holds: `MobileWingDoor.phoneWings(session)` builds it with the phone's
+  refusal road (`OpsRefusalCopy.sentence(for:roads: .phone)` — batch 3's seam, as its own pin constructs it). The shell's held
+  `.task { await wings.track() }` replaces batch 1's; the door composes its `load()` (the open read and the pick's re-read), its
+  `switcherRows`, `currentID`, `goTo(_:saying:)`, `landInBookcase` and `refusalWords`. **No line of the shared brain changed.**
+- **`WingSwitcherBrain` (Shared, VM-63)** gives the list its rows, the marked row (`currentID`) and what a pick means
+  (`pick(_:)` → `.commit`).
+- **FOLDED: batch 1's `MobileWingModel`** (in `MobileWing.swift`) is deleted. Its `track` / `load` / `adopt` were the shared
+  brain's own three steps (count, then revalidate — a dead wing returns the phone Home), so the shared brain covers them whole.
+  The one thing the brain does NOT say is batch 1's title rule — never a false "Home" before the wings are read
+  (`WingsModel.currentName` falls back to "Home" for an unread id, right for its Mac faces, wrong for a title) — so the rule
+  stays on the phone as a pure read over the brain's rows: `MobileWingTitle.name(currentID:wings:)` / `name(of:)` ("Home" for
+  '', a live wing's name once read, nil before). The shell's three roots read it.
+- **`MobileWingStandTests` — a JUSTIFIED EDIT of three pins** (they constructed the folded type): `aWingDeletedHereReturnsThePhoneHome`
+  (the held read's delivery is now "its rows name the wing", the folded holder's `loaded`), `aWingArrivingDeletedBySync…`
+  (the construction only), `everyRootIsTitledWithTheWingsName` (the title through `MobileWingTitle.name(of:)`, every assertion
+  kept — Home without a read, nil while unread, Work after, Office after a rename — plus one added line showing WHY the rule
+  stays phone-side: the brain's own `currentName` says "Home" for the unread id). Each still fails if its fact breaks.
+- **Kept, not folded:** `MobileWingScope.follow` (the listings' once-per-wing run — no shared brain does it) and
+  `MobileWingTitle.components` (batch 1's line words).
+
+#### Words — what the door can put on a phone screen (P-55-13's binding)
+
+No NEW words. The door composes the rows and the switch only, so none of P-55-13's four Mac-worded sentences (the move acts'
+`frozen` / `bookFrozen`, `nothingToMove`, the selector's `destinationFoot`) is reachable; no draft was needed. Everything the
+door shows: the list's header "Wings — each a separate library" (the Mac's ▾ list's own, hoisted) · "Done" (the phone's
+sheets' shipped word) · "✓" (the mark; the Mac's list wears the native checkmark, the mockup's frame 8 draws "✓") · the wings'
+names · the one refusal, "That library isn't there any more — nothing changed." (the shared table's existing `wingNotFound`
+row). Pinned: `nothingTheDoorCanSayNamesAMacDoor`. The mockup's drafted heading "Wings" (`wording-list-1.md` row 25, awaiting
+her pass) is NOT used — the Mac's words where a Mac face exists, and a draft waits for her pass.
+
+#### PROVISIONAL calls (for QUESTIONS at the merge moment — the orchestrator carries them)
+
+- **P-55-14 — what a switch does to screens already pushed on the three stacks.** (a) Leave every stack as it stands — nothing
+  she has open is closed; (b) pop all three stacks to their roots, a fresh library under every root; (c) pop only the screens
+  showing another wing's things. **Built: (a)**, the least destructive, and safe: a pushed note or book reads by its own id
+  (VM-59's pickers read the note's own wing; Book Details finds its book store-wide — batch 1), never by the current wing. In
+  the shipped shell the door is reachable only on a root, a page is left only from its root, and every writer of the three paths
+  (all in `MobileShellView`, checked) pushes onto the visible stack — so a switch normally finds every stack at its root. The
+  one edge: a STANDING shell adopting a protection request (`adoptProtectionRequest`) selects the Shelf while another stack
+  may still hold a screen; (a) leaves that screen too. The Shelf's own stack is never left holding a screen while hidden, so the
+  landing always shows the Bookcase itself. The question becomes live with wave 2's follow (VM-80), where a note from another
+  wing can be open.
+- **P-55-15 — whether the name is a door while the library has one wing.** (a) A door always — the list opens with Home alone,
+  marked, and its pick lands on Home's Bookcase (the Mac's ▾ list opens with one wing; the mockup's build note "With one wing
+  it still opens"); (b) no door with one wing (nothing to switch to — P-2), the title plain; (c) a door that speaks a note, as
+  the Mac's ⌘L does (`WingCopy.switchWingUnavailable`) — its words name Mac doors (New Wing… under the Bookcase, ⌘L) and the
+  phone has no New Wing door yet, so it could only redirect to the Mac (MobileSoul §4's no-redirect). **Built: (a)** — one shape
+  for one wing or nine, and a door that acts (it lands); wave 2's ⋯ will then have its home.
+- **P-55-16 — the empty-wing lines that assume Home** (batch 1's observation 3). Now reachable: the door can stand the phone in
+  an empty non-Home wing, whose Bookcase says "No books yet — Today's Entry starts your journal." and "Have an account?
+  Settings ▸ Sync signs you in." (and the Library its sign-in line). The brief: fix only if a one-word fix exists in the Mac's
+  own words. None does — the Mac's empty Bookcase says a different sentence ("No books yet — create one, or just start typing
+  below.", `ShelfView`), and the phone's lines are not one word away from it. Options: (a) leave them (built); (b) adopt the
+  Mac's Bookcase sentence whole — a sentence swap, not a one-word fix; (c) hide the sign-in line once a second wing exists — a
+  new rule. **Left as they are**; wave 2's VM-72 owns the empty-wing faces (its drafted "No books here yet." / "1 note is in the
+  Library." wait in `wording-list-1.md` rows 23–24).
+- **P-55-17 — the door's face.** (a) The wing's name in the accent (the ink of every other text door on these lines — + New
+  Note, Settings), the whole title the target, the line grown 10 pt so the 44 pt target is real; (b) the name unchanged in the
+  muted ink with an invisible overhang and no layout change — a door nothing says is a door, and a target whose part above the
+  line sits in the status bar's inset and whose part below loses to the field or rows drawn after it; (c) as (a) plus the Mac's
+  "▾" after the name (its masthead "Home ▾") — a new glyph mid-path ("Home ▾ · Library", "~/home ▾/library"). **Built: (a)**.
+- **P-55-18 — a capture draft on a switch.** The phone's box mints as she types (about a second in — VM-58: in the current
+  wing), unlike the Mac's bar, which mints at ⏎ in the wing she stands in then. A switch from the Shelf with words in the box:
+  (a) leave the box alone — a minted draft keeps writing into the wing it was minted in while the box sits under another wing's
+  name, and an unminted tail mints in the NEW wing; (b) file the box first, in the wing it was written in, exactly as every page
+  change files it (A5-8 — `selectPage`'s leaving), so the box is empty in the new wing; (c) carry the draft to the new wing (a
+  move — wave 2's act, and a write she did not ask for). **Built: (b)** — only when the wing actually changes (picking the
+  current wing files nothing). Pinned on a REAL box: `aSwitchFilesTheCaptureDraftInTheWingItWasWrittenIn` (an unminted draft
+  lands in Home's Pool, the box empty in Work).
+
+#### Tests (written; every result PENDING — the shared window)
+
+Phone, new — file `VariorumMobileTests/MobileWingDoorTests.swift`, four types:
+- `MobileWingDoorTests` (8): `aPickSwitchesLandsOnTheBookcaseAndEveryRootRescopes` (the list's order and mark; the switch, one
+  landing, the list closed, no line, the title; the Shelf's books, the Library and Starred held listings re-read in Work) ·
+  `pickingTheCurrentWingLandsAndSwitchesNothing` (lands, switches nothing, files nothing, says nothing) ·
+  `theListIsReadWhenItOpens` (a wing the brain never read is on the list once it opens) ·
+  `thePickIsRememberedAcrossARebuiltSession` (a scratch defaults suite, never the host's: the pick writes the memory; a second
+  `AppSession` over the same store attaching the same memory stands in Work, and its own wings read keeps it) ·
+  `aWingThatDiesWhileTheListIsOpenReturnsThePhoneHome` (Work arrives deleted by sync while the list is open: Home, the row gone,
+  Home marked, the list still up; a stale pick of Work switches nothing, lands nothing, keeps the list, and speaks the table's
+  refusal) · `withOneWingTheListOpensWithHomeAlone` · `aSwitchFilesTheCaptureDraftInTheWingItWasWrittenIn` (a real
+  `MobileQuickNoteModel`, clocks off) · `theLineReadsTheSameWithItsDoor` (both voices: the pieces put together are
+  `VoiceTokens.path` plus the Shelf's count; the drawn `AttributedString` is those letters) · `nothingTheDoorCanSayNamesAMacDoor`.
+- `MobileWingDoorGeometryTests` (4) — the REAL roots hosted in a real window with a 20 pt top safe-area inset (the smallest
+  status bar a supported phone has, fed the way the device feeds it): `theStarredRootsDoor`, `theShelfRootsDoor`,
+  `theLibraryRootsDoor` — the door found by the name with a button trait; its target ≥ 44 pt tall AND wide, starting below the
+  inset, reaching no lower than the top of the first thing drawn under the line; `accessibilityActivate()` fires it ·
+  `withoutADoorTheLineIsPlainText` (no door wired: no button carries the name, the line's text is batch 1's).
+- `MobileWingListSheetTests` (1): `theListsRowsAreTheWingsInOrderAndARowPressLands` (the sheet hosted: its own `.task` read
+  fills it; the Mac's header; rows Home then Work as real buttons, Home `.selected`, each ≥ 44 pt; a press on Work switches and
+  lands, the list closed).
+- `MobileWingDoorShellTests` (1): `fromTheLibraryAPickLandsOnTheWingsBookcase` — the MOUNTED shell: to the Library by its tab
+  door; the name "Home" opens a real sheet with the header; "Work" pressed; the shared wing is Work, the sheet gone, the Shelf's
+  tab door selected (landed on the Bookcase), the title door names Work, no line.
+Phone, edited: `MobileWingStandTests` (the fold — above).
+
+#### Observations for the orchestrator (not fixed — outside this unit)
+
+1. **The Mac's lists can commit a wing that died while open.** ⌘L's sheet and the ▾ list hand `goTo` the row's id with no re-read,
+   so a wing deleted by sync while the sheet stands open can be picked: `WingState.switchTo(deadID)` stands the Mac in it until
+   the next `adopt` (none comes — the wings read already delivered). The phone's door re-reads and refuses; a Mac ticket candidate
+   (Bug · Suspected · Library & sidebar).
+2. **The status-bar claim behind P-55-17 is not measured in process** (an in-process pin cannot deliver a touch through the
+   status bar); the run's closing simulator walk taps the real door, and a tap just above the line there would show it.
+3. **No accessibility hint on the door** — VoiceOver says "Home, button" (the name is the label, as the tab doors'). A hint would
+   be new words; listed for the VoiceOver audit (VM-216) or wave 2's face.
+4. **For VM-47's merge:** the three roots' path lines now call `MobileWingPath`, and the door's target assumes the roots' 14 / 6
+   pt line paddings (`MobileWingDoorMetrics`). A size change to the line should move those two numbers with it; the geometry pins
+   measure the real roots and catch a target that spills out of the line.
+
+#### Canon deltas believed owed (the orchestrator applies at the merge)
+
+- `notes/MobileSoul.md` §6 — PL-45's wing row: the phone can switch wings (the interim door: the name on every root opens a plain
+  list; a pick lands on the wing's Bookcase); the swipe, dots, sizes, management, follow and moves remain wave 2's.
+- `notes/SurfaceContracts.md` — none (the phone's surfaces enter as each umbrella ships them; the catch-up plan's own line).
+- AppSpec — none.
+
+#### The shared window for batches 3 and 4 (READY — the two claims)
+
+**Claim (i) — the whole phone target** (`-only-testing:VariorumMobileTests`, one literal argument; test-without-building on
+5c80d058b's phone products in `vm55-b1`; the window's standing simulator booted fresh, settled 30 s, shut down before release).
+About 25 min held (batch 2's whole target ran 928 tests in about 8.5 min of test time; boot, settle and the verdict wait around
+it). Expected red from main: VM-24's `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` (2 of 3 cases) only.
+New and changed types to call out by name: batch 4 — `MobileWingDoorTests` `MobileWingDoorGeometryTests`
+`MobileWingListSheetTests` `MobileWingDoorShellTests` (new), `MobileWingStandTests` (three pins edited for the fold); batch 3 —
+`MobileWingBrainsHoistTests` (new). Neighbours whose code this batch touched: `MobileWingListingTests` `MobileWingMintTests`
+`MobileWingTagManagerTests` `MobileWingBlindPickerTests` (the fixture's suites) · `MobileNavigationTests` `MobileFilterTests`
+`MobileVersionsTests` (they mount the shell, which now holds the door and the shared brain) · `MobileEmptyStoreTests`
+`MobileDeletionTests` `MobileShelfRenderedLayoutTests` `MobileShelfLayoutBrainTests` `MobileFilterRowGeometryTests` (they
+host the roots with no door — the plain line's road) · `MobileStructuralTests` (`nothingUserFacingNamesTheMac`) ·
+`MobileNoRawErrorPinTests`.
+
+**Claim (ii) — the whole Mac target** (scheme Variorum, platform=macOS, no `-only-testing` filter; a QUIET claim;
+test-without-building on 5c80d058b's Mac products in `vm55-b1`; the dev-store Debug test host — a What's New sheet dismissed, no
+instance left, a Finder "Moving to Trash" window left alone). About 60 min held (tonight's whole Mac target on another run was
+about 6,400 tests in roughly 50 minutes). New and changed types to call out: batch 3's — `VM63MacWingBrainsHoistPinTests` (new),
+`VM61MacStatusSeamPinTests` `VM62MacRefusalWordsPinTests` `WingPaletteDoorsTests` (edited), and its four attribution groups
+(A)–(D) in "Batch 3 record" ▸ "For the shared window"; batch 4's one Mac-compiled change, the hoisted header's forward —
+`VocabularySweepTests` (it pins `WingCopy.switcherHeader`), with `WingSwitcherTests` and `WingSwitcherChordTests` beside it.
 
 ## Ladder
 
