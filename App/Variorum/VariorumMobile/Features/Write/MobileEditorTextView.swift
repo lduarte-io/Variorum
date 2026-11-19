@@ -581,10 +581,12 @@ final class MobileEditorTextView: UITextView {
     // MARK: Chrome geometry (S4 — the ONE implementation both chrome
     // controllers consult; moved here from the S2 chrome, move-only)
 
-    /// The current TK2 viewport as a character range, padded by one
-    /// viewport length each side — the `.nearViewport` band (the S2
-    /// MINOR-3 scope). nil ⇒ unavailable; callers treat everything near.
-    func nearViewportBand() -> NSRange? {
+    /// TextKit's current viewport as a character range, UNPADDED — the
+    /// takes chrome's whole geometry scope since VM-17 (batch D, round 3's
+    /// S1 — `notes/plans/fixes/vm-78-ladder-round3.md`): a takes overlay is
+    /// drawn only from text TextKit has laid out in its own viewport.
+    /// nil ⇒ unavailable (no layout manager, no viewport yet).
+    func viewportCharacterRange() -> NSRange? {
         guard let tlm = textLayoutManager,
               let cm = tlm.textContentManager,
               let viewport = tlm.textViewportLayoutController.viewportRange
@@ -592,6 +594,30 @@ final class MobileEditorTextView: UITextView {
         let start = cm.offset(from: tlm.documentRange.location, to: viewport.location)
         let end = cm.offset(from: tlm.documentRange.location, to: viewport.endLocation)
         guard start >= 0, end >= start else { return nil }
+        return NSRange(location: start, length: end - start)
+    }
+
+    /// S1's inside rule (VM-17): a block starting at `location` is INSIDE
+    /// `viewport` when `viewport.location ≤ location < viewport's end` — or
+    /// when `location` IS the viewport's end and that offset is the end of
+    /// the text (an empty last block: a strict bound would never count it).
+    static func viewport(
+        _ viewport: NSRange, holdsBlockStartAt location: Int, textLength: Int
+    ) -> Bool {
+        let end = viewport.location + viewport.length
+        if viewport.location <= location, location < end { return true }
+        return location == end && location == textLength
+    }
+
+    /// The current TK2 viewport as a character range, padded by one
+    /// viewport length each side — the `.nearViewport` band (the S2
+    /// MINOR-3 scope; the block decor's since VM-17, re-expressed over
+    /// `viewportCharacterRange()` with identical results). nil ⇒
+    /// unavailable; callers treat everything near.
+    func nearViewportBand() -> NSRange? {
+        guard let viewport = viewportCharacterRange() else { return nil }
+        let start = viewport.location
+        let end = viewport.location + viewport.length
         let pad = max(end - start, 512)
         let lower = max(start - pad, 0)
         return NSRange(location: lower, length: (end + pad) - lower)
@@ -631,6 +657,46 @@ final class MobileEditorTextView: UITextView {
         tlm.enumerateTextLayoutFragments(from: start, options: [.ensuresLayout]) { frag in
             if frag.rangeInElement.location.compare(end) != .orderedAscending,
                range.length > 0 {
+                return false
+            }
+            let frame = frag.layoutFragmentFrame
+            union = union.map { $0.union(frame) } ?? frame
+            // A zero-length block lives inside one fragment — stop there.
+            return range.length > 0
+        }
+        return union
+    }
+
+    /// The union of a block's fragment frames CLIPPED to a viewport range
+    /// (container coords) — the takes chrome's peek-marker and pill read
+    /// since VM-17 (batch D, round 3's S2; the unclipped helper above stays
+    /// the decor's). It begins at `max(block start, viewport start)` and
+    /// stops at the first fragment that starts at or after
+    /// `min(block end, viewport end)`, so it never begins outside the
+    /// viewport nor runs past its end; `.ensuresLayout` stands on
+    /// `firstLineGeometry`'s ground — begun inside the viewport it is a
+    /// lookup, or the in-place re-layout of a paragraph an edit has just
+    /// invalidated. nil when the block has nothing inside (S1's rule for
+    /// the empty last block; a zero-length block lives inside one fragment).
+    func blockRectsUnion(range: NSRange, within viewport: NSRange) -> CGRect? {
+        let textLength = textStorage.length
+        let from = max(range.location, viewport.location)
+        let to = min(range.location + range.length, viewport.location + viewport.length, textLength)
+        if range.length == 0 {
+            guard Self.viewport(viewport, holdsBlockStartAt: range.location, textLength: textLength)
+            else { return nil }
+        } else {
+            guard from < to else { return nil }
+        }
+        guard let tlm = textLayoutManager,
+              let cm = tlm.textContentManager,
+              let start = cm.location(tlm.documentRange.location, offsetBy: from),
+              let end = cm.location(tlm.documentRange.location, offsetBy: max(to, from))
+        else { return nil }
+        var union: CGRect?
+        tlm.enumerateTextLayoutFragments(from: start, options: [.ensuresLayout]) { frag in
+            if range.length > 0,
+               frag.rangeInElement.location.compare(end) != .orderedAscending {
                 return false
             }
             let frame = frag.layoutFragmentFrame

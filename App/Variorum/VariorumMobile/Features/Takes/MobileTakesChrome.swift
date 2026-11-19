@@ -34,24 +34,34 @@
 //    simultaneous with the scroll pan, scoped to fanned blocks by
 //    fragment hit-testing. Non-fanned blocks don't respond.
 //
-//  Geometry discipline: every refresh is EQUALITY-GATED (frames and
-//  reservations only write when they moved), so the steady state is
-//  write-free and the layoutSubviews hook cannot loop. Fragment lookups
-//  ride `enumerateTextLayoutFragments(.ensuresLayout)` per FANNED block —
-//  the spike's measured 0.03 ms/rect class. SCOPES (S2 ladder round 1,
-//  MINOR 3; `.edit` added at parity B3 — the P-8 shape law):
-//  projections, flips, voice, and width run `.document` — cost ∝ the
-//  post's fanned blocks (opt-in and rare by the model's own doctrine);
-//  the per-scroll-tick layoutSubviews hook runs `.nearViewport` —
-//  geometry is forced ONLY for blocks intersecting the padded TK2
-//  viewport (the queryable `viewportRange`); the KEYSTROKE road runs
-//  `.edit` — the near band ∪ the edited range — so a keystroke's
-//  invalidation ∝ viewport + edit, never post length (FB2-1's law).
-//  Off-band chrome keeps its last resolved geometry — every overlay is
-//  a content-anchored subview, so scrolling itself never moves it — and
-//  heals the moment its block scrolls near. RESERVATIONS are
-//  band-INDEPENDENT: they are storage-attribute truth (no geometry, no
-//  layout forcing to verify), checked against the paragraph's governing
+//  Geometry discipline (VM-17, batch D — ladder round 3's called shape,
+//  `notes/plans/fixes/vm-78-ladder-round3.md`; TEXTKIT2 §3): a takes
+//  overlay is drawn only from text TextKit has laid out in its OWN
+//  viewport (`MobileEditorTextView.viewportCharacterRange()`, unpadded) —
+//  outside it nothing is read, nothing is forced and nothing stands.
+//  A badge or marker VIEW exists only once placed (frame written, styled,
+//  shown); while its block has nothing inside the viewport it is HIDDEN,
+//  its frame kept and never read; it is removed when its fan or its peek
+//  dies. The pill hides the same way and keeps its fade timer and its
+//  block, coming back with it. Every read BEGINS inside the viewport
+//  (`firstLineGeometry` at a block start that is inside;
+//  `blockRectsUnion(range:within:)`, clipped to it), so its
+//  `.ensuresLayout` is a lookup, or the in-place re-layout of a paragraph
+//  an edit just invalidated — never layout ahead of unlaid text, the
+//  read that once left badges 74 pt off their line, and never a frame
+//  left standing while TextKit re-positions its fragment (the 1,260-pt
+//  strays). TWO WALKS PER LAYOUT PASS: every refresh runs ONE geometry
+//  walk over the viewport as TextKit last reported it, then arms the
+//  RE-READ — a zero-size anchor subview whose `layoutSubviews` runs after
+//  TextKit's own subviews in the same pass, on the fresh viewport (where
+//  the unforced read was measured equal to the settled position, 118 of
+//  118). The three SCOPES share that one geometry walk; a scope decides
+//  only the reservation walk's continuation heal and the `.edit` road's
+//  residue heal. Every write is EQUALITY-GATED (frames and reservations
+//  write only when they moved), so the steady state is write-free and
+//  the layoutSubviews hook cannot loop. RESERVATIONS are
+//  viewport-INDEPENDENT: storage-attribute truth (no geometry, no layout
+//  forcing to verify), checked against the paragraph's governing
 //  character every pass and written only on real change — one paragraph
 //  invalidated per real change, zero at steady state.
 //
@@ -92,14 +102,20 @@ final class MobileTakesChromeController {
     /// targeting only (which paragraphs to CLEAR when a fan dies); the
     /// reservation's truth always lives in storage, never here.
     private var reservedBlocks: Set<String> = []
-    /// The container width of the last full-geometry pass — a width
-    /// change moves every overlay frame, so a banded pass under a new
-    /// width escalates to full.
-    private var lastFullPassWidth: CGFloat = -1
     /// Test seam (the MINOR-3 call-shape pin): the blocks whose geometry
-    /// the most recent refresh actually resolved (fragment layout forced).
+    /// the LATEST geometry walk read — whichever walk ran last, a
+    /// refresh's or the anchor's re-read (VM-17). Only blocks inside
+    /// TextKit's viewport are ever read.
     private(set) var lastGeometryResolvedBlockIDs: Set<String> = []
     private var refreshing = false
+    /// The re-read's anchor (VM-17, round 3's S6): a zero-size subview
+    /// added AFTER TextKit's own, so its `layoutSubviews` runs once TextKit
+    /// has laid out the fresh viewport.
+    private let anchor: MobileTakesChromeAnchor
+    /// The latest refresh's ranges, kept for the re-read (FIX-B2's one
+    /// index walk per event stands — the re-read never builds its own);
+    /// nil = nothing armed.
+    private var rereadRanges: [String: NSRange]?
 
     /// The pill's fade-out delay ("fades after a beat" — LK6). Test seam.
     var pillFadeDelay: TimeInterval = 2.4
@@ -107,6 +123,10 @@ final class MobileTakesChromeController {
     init(textView: MobileEditorTextView, model: MobileEditorViewModel) {
         self.textView = textView
         self.model = model
+        let anchor = MobileTakesChromeAnchor(frame: .zero)
+        self.anchor = anchor
+        anchor.controller = self
+        textView.addSubview(anchor)
     }
 
     // MARK: Test-visible lookups
@@ -118,59 +138,32 @@ final class MobileTakesChromeController {
 
     // MARK: The refresh (all input axes land here; equality-gated)
 
-    /// The refresh's cost scope (S2 ladder round 1, MINOR 3; the third
-    /// case is parity B3's FB2-1 fix): `.document` for content/styling
-    /// input axes (deliveries, flips, voice — user-act or settle
-    /// cadence, never keystroke); `.nearViewport` for the
-    /// per-scroll-tick hook — geometry forced only inside the padded TK2
-    /// viewport, off-band chrome untouched (content-anchored; scrolling
-    /// never moves it); `.edit` for the KEYSTROKE road — the band is
-    /// the near-viewport band ∪ the edited range, so invalidation ∝
-    /// viewport + edit, never post length (P-8's law; the pre-B3
-    /// `.document` keystroke pass was FB2-1's 70×-off-flat mechanism).
+    /// The refresh's scope — which input axis called (S2 ladder round 1,
+    /// MINOR 3; the third case is parity B3's FB2-1 fix): `.document` for
+    /// content/styling axes (deliveries, flips, voice — user-act or settle
+    /// cadence, never keystroke); `.nearViewport` for the per-layout-pass
+    /// hook; `.edit` for the KEYSTROKE road. Since VM-17 the three share
+    /// ONE geometry walk over TextKit's own viewport — nothing outside it
+    /// is read, forced or left standing (the header) — so no scope ever
+    /// forces layout for a block off screen, and an edit no longer widens
+    /// what geometry reads (an edit made off screen keeps its overlays
+    /// hidden until it scrolls in). A scope decides only the reservation
+    /// walk's continuation heal (the `.edit`/`.document` roads) and the
+    /// `.edit` road's typing-residue heal over the edited range
+    /// (invalidation ∝ viewport + edit, never post length — FB2-1's law).
     enum RefreshScope { case document, nearViewport, edit(NSRange) }
 
     /// `ranges`: the per-event ranges index the ONE `refreshChrome` door
     /// builds and shares with both controllers (FIX-B2 — one O(entries)
     /// walk per refresh event, not one per controller). nil ⇒ this
     /// controller was refreshed alone (peek/pill roads, direct test
-    /// calls) and builds its own.
+    /// calls) and builds its own. Whichever, the refresh KEEPS them for
+    /// the re-read it arms (VM-17, round 3's S5).
     func refresh(scope: RefreshScope = .document, ranges: [String: NSRange]? = nil) {
         guard !refreshing, let textView, let model,
               textView.bounds.width > 0 else { return }
         refreshing = true
         defer { refreshing = false }
-        let face = MobileEditorStyle.face
-        let inset = textView.textContainerInset
-        let containerWidth = textView.textContainer.size.width
-
-        // The near band. A banded pass under a changed width escalates to
-        // a full pass (every rect moved); an unavailable viewport reads as
-        // everything-near (honest fallback — never a silently skipped
-        // block). nil band = full pass. The `.edit` band unions the edited
-        // range in (NSUnionRange — a covering span is an honest superset),
-        // so the edit's own blocks resolve even when the caret sits
-        // outside the viewport (a dictation landing while scrolled away).
-        var band: NSRange?
-        switch scope {
-        case .document:
-            lastFullPassWidth = containerWidth
-        case .nearViewport, .edit:
-            guard containerWidth == lastFullPassWidth else {
-                lastFullPassWidth = containerWidth
-                break
-            }
-            band = textView.nearViewportBand()
-            if case .edit(let edited) = scope, let near = band {
-                band = NSUnionRange(near, edited)
-            }
-        }
-        lastGeometryResolvedBlockIDs = []
-        func near(_ range: NSRange) -> Bool {
-            guard let band else { return true }
-            return range.location < band.location + band.length
-                && band.location < range.location + max(range.length, 1)
-        }
         // Every decorated block's range from ONE index walk (B3 —
         // per-block `rangeOfBlock` is O(entries), and the per-pass
         // decorated×entries scans were real per-tick milliseconds at
@@ -185,12 +178,12 @@ final class MobileTakesChromeController {
             return true
         }()
 
-        // 1 — badges + first-paragraph tail reservations for FANNED
-        // blocks (LK3/LK10; B3's mechanism — see the header and
-        // `MobileEditorTextView.setTailReservation`). The RESERVATION
-        // walk is band-independent (storage truth, no layout forcing to
-        // verify) and writes only on real change; the BADGE walk is
-        // geometry and stays band-gated with off-band frames standing.
+        // 1 — first-paragraph tail RESERVATIONS for FANNED blocks
+        // (LK3/LK10; B3's mechanism — see the header and
+        // `MobileEditorTextView.setTailReservation`): viewport-independent
+        // storage truth, every fan on every pass, written only on real
+        // change. A dead fan's badge view goes with it (the view's life,
+        // not its geometry — the geometry walk below places or hides).
         var seen: Set<String> = []
         for slot in model.slots where slot.hasFan {
             guard let range = ranges[slot.blockID] else { continue }
@@ -203,24 +196,6 @@ final class MobileTakesChromeController {
                     + (slot.commentCount > 0 ? Self.commentMarkRoom : 0),
                 blockRange: range, healContinuations: healContinuations)
             reservedBlocks.insert(slot.blockID)
-            if !near(range), badges[slot.blockID] != nil {
-                // Off the band: the badge's last resolved frame stands
-                // (content-anchored); styling belongs to the full pass.
-                continue
-            }
-            guard let line = textView.firstLineGeometry(atOffset: range.location)
-            else { continue }
-            lastGeometryResolvedBlockIDs.insert(slot.blockID)
-            // The badge: view (content) coordinates, inside the gutter.
-            let badge = badges[slot.blockID] ?? makeBadge(blockID: slot.blockID)
-            let frame = CGRect(
-                x: inset.left + containerWidth - Self.gutterWidth + 4,
-                y: inset.top + line.fragmentMinY,
-                width: Self.gutterWidth - 4,
-                height: max(line.firstLineHeight, 18))
-            if badge.frame != frame { badge.frame = frame }
-            badge.setTitleColor(face.muted, for: .normal)
-            badge.titleLabel?.font = face.chrome.withSize(12)
         }
         for (blockID, badge) in badges where !seen.contains(blockID) {
             badge.removeFromSuperview()
@@ -249,19 +224,99 @@ final class MobileTakesChromeController {
                 skippingParagraphsAt: Set(seen.compactMap { ranges[$0]?.location }))
         }
 
-        // 2 — peek markers (M9: sticky, visible, per-block).
-        var peeked: Set<String> = []
-        for blockID in model.takes.peeks.keys {
-            guard let range = ranges[blockID] else { continue }
-            if !near(range), markers[blockID] != nil {
-                // Off the band: the marker keeps its content-anchored
-                // frame; it heals when the block scrolls near.
-                peeked.insert(blockID)
+        // 2 — the overlays' lives (never their geometry): an ended peek's
+        // marker goes; the pill hides for its two causes only — no content
+        // left, or its fan gone (its block merely off screen is the
+        // geometry walk's, which hides it and keeps its timer and block).
+        for (blockID, marker) in markers
+        where model.takes.peeks[blockID] == nil || ranges[blockID] == nil {
+            marker.removeFromSuperview()
+            markers[blockID] = nil
+        }
+        if let pillBlockID,
+           !(pill != nil && seen.contains(pillBlockID)
+             && model.takes.pillContent(blockID: pillBlockID) != nil
+             && ranges[pillBlockID] != nil) {
+            hidePill()
+        }
+
+        // 3 — ONE geometry walk over the viewport as TextKit last reported
+        // it, then the re-read armed: the anchor lays out after TextKit's
+        // own subviews — in this layout pass when the refresh runs inside
+        // one (the scroll tick), else in the next — and walks again on the
+        // fresh viewport with these same ranges.
+        geometryWalk(ranges: ranges)
+        rereadRanges = ranges
+        anchor.setNeedsLayout()
+    }
+
+    /// The re-read (VM-17, round 3's S5): the anchor's `layoutSubviews`.
+    /// The geometry walk once more, on the viewport TextKit has just laid
+    /// out, with the ranges the latest refresh kept — which it then drops.
+    /// It writes no reservation, never arms itself, and never builds a
+    /// ranges index of its own (FIX-B2): with nothing kept it does nothing.
+    fileprivate func reread() {
+        guard !refreshing, let ranges = rereadRanges else { return }
+        rereadRanges = nil
+        guard let textView, textView.bounds.width > 0 else { return }
+        refreshing = true
+        defer { refreshing = false }
+        geometryWalk(ranges: ranges)
+    }
+
+    /// The ONE geometry walk every scope and both walks share (VM-17,
+    /// round 3's S1–S4): reads begin only inside TextKit's viewport, a view
+    /// is made only when placed, and an overlay whose block has nothing
+    /// inside is hidden with its frame kept — never read, never forced.
+    /// A nil viewport resolves NOTHING: it makes nothing, shows nothing
+    /// and hides nothing (the re-read decides; the everything-near
+    /// fallback is the block decor's alone now).
+    private func geometryWalk(ranges: [String: NSRange]) {
+        guard let textView, let model else { return }
+        lastGeometryResolvedBlockIDs = []
+        guard let viewport = textView.viewportCharacterRange() else { return }
+        let face = MobileEditorStyle.face
+        let inset = textView.textContainerInset
+        let containerWidth = textView.textContainer.size.width
+        let textLength = textView.textStorage.length
+
+        // The badges (LK3): a fan whose first line starts inside the
+        // viewport is placed from it; any other fan's view (if it has
+        // one) is hidden, frame kept, not read.
+        var fans: Set<String> = []
+        for slot in model.slots where slot.hasFan {
+            guard let range = ranges[slot.blockID] else { continue }
+            fans.insert(slot.blockID)
+            guard MobileEditorTextView.viewport(
+                      viewport, holdsBlockStartAt: range.location, textLength: textLength),
+                  let line = textView.firstLineGeometry(atOffset: range.location)
+            else {
+                badges[slot.blockID]?.isHidden = true
                 continue
             }
-            guard let union = textView.blockRectsUnion(range: range) else { continue }
+            lastGeometryResolvedBlockIDs.insert(slot.blockID)
+            // The badge: view (content) coordinates, inside the gutter.
+            let badge = badges[slot.blockID] ?? makeBadge(blockID: slot.blockID)
+            let frame = CGRect(
+                x: inset.left + containerWidth - Self.gutterWidth + 4,
+                y: inset.top + line.fragmentMinY,
+                width: Self.gutterWidth - 4,
+                height: max(line.firstLineHeight, 18))
+            if badge.frame != frame { badge.frame = frame }
+            badge.setTitleColor(face.muted, for: .normal)
+            badge.titleLabel?.font = face.chrome.withSize(12)
+            if badge.isHidden { badge.isHidden = false }
+        }
+
+        // The peek markers (M9: sticky, visible, per-block): placed from
+        // the block's part inside the viewport, hidden while it has none.
+        for blockID in model.takes.peeks.keys {
+            guard let range = ranges[blockID] else { continue }
+            guard let union = textView.blockRectsUnion(range: range, within: viewport) else {
+                markers[blockID]?.isHidden = true
+                continue
+            }
             lastGeometryResolvedBlockIDs.insert(blockID)
-            peeked.insert(blockID)
             let marker = markers[blockID] ?? makeMarker(blockID: blockID)
             let frame = CGRect(
                 x: inset.left + union.minX,
@@ -276,34 +331,29 @@ final class MobileTakesChromeController {
             }
             marker.backgroundColor = face.takeTint
             marker.subviews.first?.backgroundColor = face.takeLine
-        }
-        for (blockID, marker) in markers where !peeked.contains(blockID) {
-            marker.removeFromSuperview()
-            markers[blockID] = nil
+            if marker.isHidden { marker.isHidden = false }
         }
 
-        // 3 — the pill follows its block (and dies with a vanished fan).
-        if let pillBlockID {
-            if let pill, seen.contains(pillBlockID),
-               let content = model.takes.pillContent(blockID: pillBlockID),
-               let range = ranges[pillBlockID] {
-                if near(range) {
-                    guard let union = textView.blockRectsUnion(range: range) else {
-                        hidePill()
-                        return
-                    }
-                    lastGeometryResolvedBlockIDs.insert(pillBlockID)
-                    pill.apply(content: content, face: face)
-                    pill.sizeToFitContent()
-                    let origin = CGPoint(
-                        x: inset.left + union.minX,
-                        y: inset.top + union.maxY + 6)
-                    if pill.frame.origin != origin { pill.frame.origin = origin }
-                }
-                // Off the band: untouched this tick (content-anchored;
-                // it fades on its own timer).
+        // The pill (LK6) follows its block while it is alive for it (its
+        // life is the refresh's — above): placed under the block's part
+        // inside the viewport, hidden while it has none — `isHidden`, never
+        // `hidePill()`: it keeps its timer and its block and comes back
+        // with it. It carries the one choosing act (✓), so it never stands
+        // where its block is not.
+        if let pillBlockID, let pill, fans.contains(pillBlockID),
+           let content = model.takes.pillContent(blockID: pillBlockID),
+           let range = ranges[pillBlockID] {
+            if let union = textView.blockRectsUnion(range: range, within: viewport) {
+                lastGeometryResolvedBlockIDs.insert(pillBlockID)
+                pill.apply(content: content, face: face)
+                pill.sizeToFitContent()
+                let origin = CGPoint(
+                    x: inset.left + union.minX,
+                    y: inset.top + union.maxY + 6)
+                if pill.frame.origin != origin { pill.frame.origin = origin }
+                if pill.isHidden { pill.isHidden = false }
             } else {
-                hidePill()
+                pill.isHidden = true
             }
         }
     }
@@ -412,6 +462,37 @@ final class MobileTakesChromeController {
         return marker
     }
 
+}
+
+// MARK: - The re-read's anchor (VM-17, round 3's S6)
+
+/// A zero-size, never-hidden subview of the text view, added with
+/// `addSubview` when the chrome controller is made — so it sits after
+/// TextKit's own subviews (the peek markers and the decor's washes still go
+/// in at index 0, beneath the text). Every chrome refresh marks it for
+/// layout; UIKit then lays it out after its superview, in the same layout
+/// pass when the refresh ran inside one, and its `layoutSubviews` runs the
+/// chrome's RE-READ on the viewport TextKit has just laid out. It is the
+/// settle measurement's sentinel made product: zero-size and not hidden is
+/// the configuration that fired at every stop (61 of 61). No interaction,
+/// not an accessibility element, a weak hold on its controller.
+@MainActor
+private final class MobileTakesChromeAnchor: UIView {
+    weak var controller: MobileTakesChromeController?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        isAccessibilityElement = false
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("not used") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        controller?.reread()
+    }
 }
 
 // MARK: - The pill (LK6, shape A)
