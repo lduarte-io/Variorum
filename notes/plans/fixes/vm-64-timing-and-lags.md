@@ -150,7 +150,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 
 | Batch | State | Commits | Notes |
 |---|---|---|---|
-| 1 · VM-65 | IN-PROGRESS | — | see the batch 1 block below |
+| 1 · VM-65 | **CLOSED 2026-11-19** | `65d70fe9f` `feef85c7a` `f6389e3b5` `808f333a8` `914278cfa` | code state `808f333a8`; stage results in "Orchestrator's stage results" below |
 | 2 · VM-2 | READY (stage) | `2358f33cb` `76dbf89b2` `f83122794` `1f292b1ec` `5b40f1984` + closeout | see the batch 2 block below |
 | 3 · VM-66 | NOT-STARTED | — | — |
 | 4 · VM-67 | NOT-STARTED | — | — |
@@ -212,7 +212,7 @@ persisted form.
 DerivedData: `App/Variorum/DerivedData/vm64-b1/` (gitignored). Screens: `notes/plans/vm64-screens/` (gitignored, added
 by this batch).
 
-**The BEFORE build (her phone's first install at her sitting):** PENDING — the commit that closes batch 1.
+**The BEFORE build:** code state `808f333a8` (today's app plus the timing layer, nothing else). Named for the record; by her word (§2) it is not installed — her phone's first timing numbers come from the wave-1 build.
 
 **Held for her next sitting:** the ONE wave-1 install on her phone after all four wave-1 runs have merged (phone on the cable, unlocked, Variorum closed; `notes/plans/vm-44/plans/vm-45-install-runbook.md`), prepared by the last merger so a fresh session can run it; then her use of the phone fills the readout. Her wording pass on the readout's labels.
 
@@ -267,6 +267,15 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 
 DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
 build), both gitignored.
+
+### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
+
+**Batch 1 · VM-65 — CLOSED 2026-11-19.** Run from `DerivedData/vm64-b1` (built at `808f333a8`), `test-without-building` against the batch's `.xctestrun` files.
+- **Mac, 04:44** — the nine suites over the shared types the marks touch (`AutosaveCoordinatorTests` `AutosaveConsolidationTests` `SavepointOnLeaveTests` `SyncBeforeRoundTests` `FirstRoundRoadTests` `SyncSessionFenceTests` `Phase9cAuthWiringTests` `AppBootstrapOffMainTests` `TestHostInertTests`): Swift Testing **61 tests in 9 suites passed**; no red, no skip.
+- **Phone, 05:03** — the 23 suites the batch named (`MobileTimingTests` first), standing simulator: Swift Testing **173 tests in 23 suites passed** in 76 s; no red, no skip. Machinery: `xcodebuild` never printed its `** TEST EXECUTE **` line and had to be stopped by hand nine minutes after the Swift Testing verdict; poll for the Swift Testing verdict line.
+- **The walk, 05:13–05:22** — the orchestrator's own hands, on a dedicated simulator device (`vm64-walk`, created for this run so the shared device takes nothing; kept shut down for later walks, deleted at closeout), the Debug app, signed out. Fresh install → the first-run words card → the shelf; the capture box → a typed line → Open → back → Library → the note opened from its row → back → Settings ▸ timing…; then one cold relaunch and the readout again. Captures (local, gitignored): `notes/plans/vm64-screens/w12-readout.png`, `w14-readout-relaunch.png`. **The readout showed, on this build's table (1.0 (1) Debug, simulator — simulator numbers, single runs, not medians):** File → box clear 15 ms · Open → note on screen 267 ms · Open → keyboard up in the note 949 ms · Open a note → on screen n 2, 96–220 ms · Leave a note → saved n 2, 1.8–8.5 ms · after the relaunch, Launch → library open 2,190 ms · Launch → home on screen 2,461 ms · Launch → Library ready 2,472 ms. Empty as expected: the unlock spans (no lock on this library), owner check and sync round (signed out), and "Tap the box → keyboard up" (this simulator never raises the software keyboard under Device Hub — first filled on her phone).
+- **Seen on the walk, for later batches and the ladder (not fixed here):** (1) after Open the caret sits at the START of the typed line (audit F 2F, now seen). (2) The first launch of a fresh install, which passes through the words card, recorded NO launch spans; the relaunch recorded all three — say whether that is by design in the closeout's table, or mark it. (3) A hardware Return in the capture box did not open the note in this harness (the "open ↵" door did); not chased — the harness's key road, not the product's, until shown otherwise.
+- **Walk machinery (for the run's later walks):** Device Hub's process is `DeviceHub`; select the device's row in its sidebar to get the live screen; phone point → host point is a plain scale (0.737 at the default zoom) from the screen's top-left; a bare `cliclick c:` leaves the simulator's touch stuck down — use `dd:` · `w:70` · `du:` (70 ms is a tap; 180 ms on a list row opens its long-press menu); the author guard needs two seconds between synthetic acts because they reset HID idle; the toolbar's keyboard button captures the Mac keyboard for typing and is switched back off afterwards; the calibration helper needs a Python with numpy.
 
 ## 6. Review foci (written at plan time, before any code)
 
