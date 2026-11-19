@@ -147,9 +147,40 @@ final class MobileBookDetailsModel {
         }
     }
 
-    /// **The Finish door was pressed** (VM-81, W-105).
+    /// **The Finish door was pressed** (VM-81, W-105 — her ruling; the Mac's
+    /// `BookStateDoors.open(.finishBook)`). `lockReading` dismisses every
+    /// waiting arrival in its own transaction (AppSpec §9), so when anything
+    /// waits the door ASKS first, naming how many: N is read FRESH by the
+    /// dismissal's own predicate (`Queries.pendingArrivalCount`), so the
+    /// confirm can never promise a different set than the act takes. With
+    /// nothing waiting it simply acts (`finishNeedsConfirm`). The Mac's
+    /// "Open Arrivals first" button waits for the phone's Arrivals review
+    /// (VM-175, wave 4).
     func requestFinish() async {
-        await setFinished(true)
+        let id = readingID
+        let opening: (name: String, waiting: Int)?
+        do {
+            opening = try await session.database.read { db -> (name: String, waiting: Int)? in
+                guard let reading = try Queries.reading(db, id: id) else { return nil }
+                return (reading.name, try Queries.pendingArrivalCount(db, readingID: id))
+            }
+        } catch {
+            lastError = DeletionRefusal.words(error)
+            return
+        }
+        guard let opening else {
+            lastError = DeletionRefusal.words(OperationError.readingNotFound(id: id))
+            return
+        }
+        guard BookStateCopy.finishNeedsConfirm(pendingArrivals: opening.waiting) else {
+            await setFinished(true)
+            return
+        }
+        lastError = nil
+        pendingFinish = FinishConfirm(
+            readingID: id, title: BookStateCopy.finishTitle(opening.name),
+            line: BookStateCopy.waitingLine(opening.waiting),
+            pendingArrivals: opening.waiting)
     }
 
     /// The confirm's Finish. The confirm is PASSED IN, never read back (the
@@ -294,6 +325,9 @@ struct MobileBookDetailsSheet: View {
     @State private var renamePresented = false
     @State private var renameField = ""
     @State private var deletePresented = false
+    /// VM-81: the Finish confirm's title, held so it never blanks while the
+    /// alert animates away (the model clears `pendingFinish` on dismissal).
+    @State private var finishTitle = BookStateCopy.finishVerb
     @Environment(\.dismiss) private var dismiss
 
     init(
@@ -352,6 +386,27 @@ struct MobileBookDetailsSheet: View {
             // R1-3): a blank name never fires a silent no-op.
             .disabled(!MobileBookDetailsModel.canRename(renameField))
             Button("Cancel", role: .cancel) {}
+        }
+        // VM-81 (W-105) — THE FINISH CONFIRM: the title and the Mac's line
+        // ("N waiting at Arrivals will be dismissed."), Finish and Cancel. The
+        // confirm rides into the action through `presenting:` (the shelf's
+        // delete rule: a binding setter clears state before an action's task
+        // runs, so the act takes its subject as a parameter).
+        .alert(
+            model.pendingFinish?.title ?? finishTitle,
+            isPresented: $model.finishConfirmPresented,
+            presenting: model.pendingFinish
+        ) { confirm in
+            Button(tokens.chromeLabel(BookStateCopy.finishVerb)) {
+                let model = model
+                Task { await model.confirmFinish(confirm) }
+            }
+            Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
+        } message: { confirm in
+            Text(confirm.line)
+        }
+        .onChange(of: model.pendingFinish) { _, confirm in
+            if let confirm { finishTitle = confirm.title }
         }
         // PR4's confirm — a real `@State` binding (§15's trap (a)).
         .alert(

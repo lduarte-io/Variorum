@@ -395,7 +395,7 @@ flight.***
 | The hoist (words) | DONE (`68f7e7eab`) — Mac `build` GREEN | the Mac's existing copy pins (Mac leg) |
 | VM-21's hoist (the collect receipt family) | DONE (`4118af9b3`) — Mac `build` GREEN | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
 | Seams + pins (all three members) | DONE (this commit) — phone `build-for-testing` GREEN (unsigned, generic sim); every pin compiles against this tree; red-on-old **PENDING** (stage window) | see the members' rows |
-| VM-81 | NOT-STARTED | — |
+| VM-81 | IN-PROGRESS — the Finish confirm (W-105) DONE (this commit), phone `build-for-testing` GREEN; the caption, Finish off gatherings, the sealed Reopen's words, Diverge off gathering rows, and the archived book's way out are NEXT; red-on-old + green **PENDING** | `MobileFinishConfirmTests`, `MobileBookStateRowTests`, `MobileArchivedStarredBookTests` |
 | VM-83 | NOT-STARTED | — |
 | VM-21 | NOT-STARTED | — |
 
