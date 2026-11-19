@@ -166,7 +166,7 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 | VM-16 (+VM-20) | IN-PROGRESS — code + pins committed (`48055fa9c`); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ Mac guard `UndoWarningWordsTests`) |
 | VM-43 | IN-PROGRESS — `insuringBuffer: true` wired at the ONE phone call site (`MobileBlockHistory.swift` `restore`; grep of `VariorumMobile/` + `Shared/` finds no other); pins written; compile + red/green **PENDING** | `MobileBlockHistoryTests` |
 | VM-3 | IN-PROGRESS — the lesson's two prose blocks rewritten (`MobileTutorialSeeder.swift`, "divide with takes"); the walk pin unwrapped from `withKnownIssue` and flipped to keep-on-top; an exact-words pin added; compile + red/green **PENDING** | `MobileTutorialStructureWalkTests` |
-| VM-84 | IN-PROGRESS — piece 1 committed: the seam `MobileWriteScreen.dateChipDay` (still reads `header`, behaviour unchanged) + the pin (EXPECTED RED at this commit); piece 2 (the fix) next | `MobileNoteEntryDateTests` |
+| VM-84 | IN-PROGRESS — piece 1 (`2d66e9a30`): the seam `MobileWriteScreen.dateChipDay` (read `header`, behaviour unchanged) + the pin, red at that commit by design; piece 2: the fix (an observed `entryDate` mirror); compile + red/green **PENDING** | `MobileNoteEntryDateTests` |
 | VM-33 | NOT-STARTED — the answered flag (`trashListingLoaded`), the Mac's VX-678 rule | `MobileTrashTests` |
 
 **Traced mechanisms (read in this session, before any code):**
@@ -211,6 +211,27 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
   alone (1 take); the original released with both takes in lineage. It is green on both sides by design (the
   phone's divide did not change); `theFannedDivideLessonSaysKeepOnTop` (exact words, no "both halves"/"copies") is
   the red-on-old pin.
+- VM-84 (EDITOR SEAM — the editor view model and the masthead; no `EditorTextView`, `BlockRangeIndex` or
+  `runStructural` line is touched): **mechanism** — `header` is `@ObservationIgnored`
+  (`MobileEditorViewModel.swift`, "Editor internals (never observed)", so since S1 batch 1); the chip read
+  `header?.entryDate`, so its body re-ran only when an OBSERVED sibling changed in the same `adoptHeader` pass —
+  `displayTitle`, which is the date only on an untitled note. The `@Observable` macro on this SDK skips equal-value
+  sets (`shouldNotifyObservers`, in the iOS 27.1 SDK's `Observation.swiftinterface` macro declaration), so on a
+  TITLED note nothing the masthead observed changed and the chip kept the old day. **Options weighed (the brief's
+  three):** (a) a small observed `entryDate` mirror set in `adoptHeader` — CHOSEN: it is this file's own pattern
+  (`isSealed` and `displayTitle` are exactly such mirrors of header fields), and a set notifies only when the day
+  changes, so no header delivery that leaves the date alone re-renders anything (pinned: the pin's third arm);
+  (b) un-ignore `header` — rejected as wider than the chip needs: `header` is the keystroke road's read
+  (`segmentationMode`, the seal check), and every body that reads any header field would then re-render on any
+  header field's change (cheap in steady state — `ContainerHeader` is Equatable and carries no touched stamp — but
+  it widens what the editor's views observe, against the brief's "smallest change"); (c) the chip reading its own
+  narrow observation — rejected: a second `observeContainerHeader`-class DB observation per open note for one
+  field (P1's direction is fewer held observations, audit F §7). Not PROVISIONAL (an implementation choice; no
+  product behaviour changes). **Files:** `MobileEditorViewModel.swift` (`entryDate`, set in `adoptHeader`);
+  `MobileWriteView.swift` (`dateChipDay`, read by the chip's words, ink and alert seed). **Pin shape:** the pin
+  holds the chip's one read under `withObservationTracking` (SwiftUI's re-render mechanism) because the chip's
+  rendered day is not in the accessibility tree (its label is "Entry Date"); the seam commit `2d66e9a30` is the
+  "old" for the revert (it reads `header`, byte-for-byte the shipped behaviour).
 
 ### BATCH A — books (VM-81 · VM-83 · VM-21)
 

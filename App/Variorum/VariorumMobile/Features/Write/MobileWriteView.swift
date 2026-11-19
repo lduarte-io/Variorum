@@ -470,9 +470,11 @@ struct MobileWriteScreen: View {
 
     /// **The date chip's one fact** (VM-84): the day it shows, read in ONE
     /// place — the chip's words, its ink and the alert's seed — so what the
-    /// chip OBSERVES is exactly what a pin can hold.
+    /// chip OBSERVES is exactly what a pin can hold. It reads the model's
+    /// OBSERVED `entryDate`, never `header` (deliberately unobserved), so a
+    /// date change re-renders the chip whether or not the title moved.
     static func dateChipDay(_ model: MobileEditorViewModel) -> String? {
-        model.header?.entryDate
+        model.entryDate
     }
 
     /// The tags chip (parity C3 — "tag posts", the LK5 expansion's "full

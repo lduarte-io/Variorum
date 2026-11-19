@@ -107,6 +107,15 @@ final class MobileEditorViewModel {
     /// `DisplayTitle` chain — the stored title, else the entry date (the
     /// 13k K1 rule rides for free because the brain is core's).
     private(set) var displayTitle: String?
+    /// **The note's entry date, OBSERVED** (VM-84) — the masthead date chip's
+    /// fact. `header` below is deliberately never observed (editor internals:
+    /// the keystroke road reads it), so the chip that read `header?.entryDate`
+    /// re-rendered only when `displayTitle` changed in the same pass — never
+    /// on a TITLED note. A mirror set where `header` is set, like `isSealed`
+    /// and `displayTitle`: a set notifies only when the day actually changes
+    /// (the `@Observable` macro's equality check), so an unchanged header
+    /// delivery re-renders nothing.
+    private(set) var entryDate: String?
 
     // MARK: - Editor internals (never observed)
 
@@ -686,6 +695,7 @@ final class MobileEditorViewModel {
     func adoptHeader(_ value: Queries.ContainerHeader?) {
         header = value
         isSealed = value?.locked ?? false
+        entryDate = value?.entryDate
         displayTitle = value.map {
             DisplayTitle.note(
                 title: $0.title, entryDate: $0.entryDate, createdAt: $0.createdAt)
