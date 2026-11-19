@@ -183,9 +183,9 @@ no more:
   is VM-239.
 - **After the merge:** the phone and the Mac both build for testing on the merged code, and a check confirms the
   takes badge files are exactly main's and no measurement test is left in the tree.
-- PENDING(the re-land's stage window: the re-applied undo and Trash fixes shown failing against main's versions of
-  those files and passing on the branch, then this run's tests and the wings run's over the same screens, all
-  passing).
+- **The re-applied fixes, proved again on the merged code:** against main's versions of the undo and Trash files,
+  exactly the six tests that should fail did fail (44 tests ran), and on the branch they pass; then this run's
+  tests and the wings run's over the same screens — 283 tests — all passed.
 - PENDING(gate 1: the whole phone test suite on the merged code — its result, with the caret test as the one
   expected failure).
 - PENDING(gate 2: the Mac tests over the shared code this run changed — its result).
@@ -226,8 +226,9 @@ the merge and the undo fix re-applied. PENDING(ladder round 4: its outcome).
   run took 75 and 76 first).
 - **VM-20 and VM-19 were already closed** as duplicates when the plan was minted; their work is done here under
   VM-16 and VM-24.
-- **The orchestrator changed hands once.** The first orchestrator session handed over at a clean point
-  (`notes/plans/vm-78-orchestrator-handoff.md`); nothing was half-done.
+- **The orchestrator did not change hands.** The session's context was compacted once at a clean point, at your
+  word; `notes/plans/vm-78-orchestrator-handoff.md` was written in case a successor was wanted and served as the
+  same session's map.
 
 ## The phone install
 

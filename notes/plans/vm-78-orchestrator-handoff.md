@@ -1,5 +1,9 @@
 # VM-78 — orchestrator handoff (a cutover inside the still-open run)
 
+**NOT USED AS A CUTOVER (added 2026-11-19, 15:20): at the author's word the same session's context was compacted
+and it continued; no successor session ran. This file served as that session's own map, and the run record's live
+state carries what happened after it.**
+
 Written 2026-11-19 by the first orchestrator session (`vm-78`), at a clean seam: the back-out and the merge-in are
 committed, both targets build on the merged tree, no agent is live. The first session's context had grown past
 the project's cutover guideline; this file lets a fresh orchestrator finish the run from the repo.
