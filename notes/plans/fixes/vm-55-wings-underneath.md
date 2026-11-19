@@ -600,9 +600,9 @@ line notes, `wording-list-2.md`). DerivedData: `App/Variorum/DerivedData/vm55-b1
 
 | Piece | State |
 |---|---|
-| Record skeleton | IN-PROGRESS — this commit |
+| Record skeleton | DONE (f058dcea5) |
 | The inventory (every slot outside Protection: file · words · class · what became of it) | NOT-STARTED |
-| The seam shared (`StatusCenter` to `Shared/`, `session.status` on both platforms, the phone's placement rule) | NOT-STARTED |
+| The seam shared (`StatusCenter` to `Shared/`, `session.status` on both platforms, the phone's placement rule) | DONE (this commit) — `git mv` to `Shared/StatusCenter.swift`; `Item.leavesPage` + `Item.owner`; `Placement` (.receiptStyle Mac / .phoneLine phone); `removal(_:undo:owner:)`; `withdraw(owner:)`; the pure `slot(kind:leavesPage:placement:receiptStyle:)`; `AppSession.status` out of the macOS fence. Phone build-for-testing green; Mac build PENDING (next piece) |
 | The phone's one line (the face, hosted once by the shell) | NOT-STARTED |
 | The slots moved onto the line (Shell, Write, Takes) | NOT-STARTED |
 | Tests (the seam's kinds, the phone's show rule, the Mac byte-identical pin, the moved slots) | NOT-STARTED |

@@ -1,6 +1,22 @@
 //
 //  StatusCenter.swift
-//  Variorum (Mac)
+//  Variorum (shared: Mac + Mobile)
+//
+//  **VM-61 (2026-11-19) — ONE SEAM, TWO FACES.** This file moved here from
+//  the Mac's `Registry/` so the phone speaks through the same
+//  `session.status`: the kinds are decided at the door on both platforms
+//  (refusal · offer · receipt), and a brain hoisted to `Shared/` speaks
+//  without a platform `#if`. What differs is WHERE a message shows — the
+//  placement, one pure rule (`slot(kind:leavesPage:placement:receiptStyle:)`):
+//  the Mac's is her receipt style (toast · quiet · off, below, unchanged);
+//  the phone's is her VM-44 ruling — *"no line for ordinary acts; a short
+//  line with Undo when something leaves the page, and for refusals"* — so a
+//  receipt draws on the phone only when its door says it took something off
+//  the page (`removal(_:undo:owner:)`), and `receipt_style` is not read there
+//  (PROVISIONAL P-55-1). The Mac's toast, quiet line and standing offer are
+//  byte-identical: no Mac caller sets the placement, says `removal` or
+//  `withdraw`s (pinned, `VM61MacStatusSeamPinTests`). The phone's face is
+//  `MobileMessageLine` (the one line, hosted once by the phone's shell).
 //
 //  Phase 13b, Stage 1b (AD-14): ONE refusal/status presentation. Every
 //  transient outcome — refusals, confirmations, undo reports — lands here
@@ -92,6 +108,17 @@ final class StatusCenter {
         /// the toast's ✕, which only sends a standing offer to the line.
         /// Defaulted, so every other item reads unchanged.
         var dismiss: Action? = nil
+        /// **VM-61 — a receipt whose act took something OFF THE PAGE** (a
+        /// delete, a merge, an archive). Decided at the door
+        /// (`removal(_:undo:owner:)`), never inferred from the words or from
+        /// an action riding along. The phone's placement draws a receipt only
+        /// when this is set; the Mac's ignores it. Defaulted, so every other
+        /// item reads unchanged.
+        var leavesPage: Bool = false
+        /// **VM-61 — who spoke it**, so a speaker going away can take back a
+        /// line whose door was its own (`withdraw(owner:)` — the phone's note
+        /// screen, whose structural Undo dies with it). Defaulted nil.
+        var owner: ObjectIdentifier? = nil
 
         struct Action: Equatable {
             let label: String
@@ -164,6 +191,27 @@ final class StatusCenter {
     /// `@ObservationIgnored` deliberately: it is read at SPEAK time and
     /// nothing renders from it, so changing it must not invalidate a view.
     @ObservationIgnored var receiptStyle: ReceiptStyle = .quiet
+
+    /// **VM-61 — where a message shows: the platform's face.**
+    enum Placement: Equatable, Sendable {
+        /// The Mac: refusals and offers toast; a receipt goes where her
+        /// `receipt_style` says.
+        case receiptStyle
+        /// The phone's ONE line (her VM-44 ruling): refusals and offers
+        /// always; a receipt only when it took something off the page;
+        /// `receipt_style` is not read (PROVISIONAL P-55-1). Everything that
+        /// draws lands in `current` — the phone has one line, no quiet slot.
+        case phoneLine
+    }
+
+    /// The platform's placement, read at SPEAK time like `receiptStyle`
+    /// (nothing renders from it). Composition, not a brain: no caller sets
+    /// it; each platform's build answers it once, here.
+    #if os(macOS)
+    @ObservationIgnored var placement: Placement = .receiptStyle
+    #else
+    @ObservationIgnored var placement: Placement = .phoneLine
+    #endif
 
     /// The one auto-dismiss policy (injectable for tests).
     @ObservationIgnored var dismissAfter: Duration = .seconds(6)
@@ -255,16 +303,60 @@ final class StatusCenter {
     ) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        let item = Item(id: UUID(), text: trimmed, action: action, kind: kind, secondary: secondary)
-        guard let slot = slot(for: kind) else {
-            // `.off`: she asked for nothing, so nothing shows — and a
-            // dropped receipt leaves whatever is already on screen alone
-            // (a refusal she is still reading is not swept away by an act
-            // that says nothing).
+        place(Item(id: UUID(), text: trimmed, action: action, kind: kind, secondary: secondary))
+    }
+
+    /// **VM-61 — REMOVAL: an act landed AND took something off the page** (a
+    /// delete, a merge, an archive — her VM-44 ruling's own list). A receipt
+    /// in kind (her receipt style governs it on the Mac, exactly as
+    /// `receipt(_:)`); the phone draws it — and only it, of all receipts —
+    /// with its `undo` door, which is only ever a road that already exists
+    /// (structural undo, Put back, unarchive; scope call 7).
+    ///
+    /// A removal may carry its Undo ALONE, with no words: the phone's merge
+    /// and cross-block join shipped a wordless Undo (no words were ever
+    /// ruled for them — PROVISIONAL P-55-5), so the empty-text guard yields
+    /// to an Undo here, and only here. `owner` names the speaker whose
+    /// going-away withdraws the line (`withdraw(owner:)`).
+    func removal(_ text: String, undo: Item.Action? = nil, owner: ObjectIdentifier? = nil) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty || undo != nil else { return }
+        place(Item(
+            id: UUID(), text: trimmed, action: undo, kind: .receipt,
+            leavesPage: true, owner: owner))
+    }
+
+    /// **VM-61 — take back what `owner` said, if it is still showing.** The
+    /// phone's note screen calls it as it goes away: its structural Undo is
+    /// that screen's door, and a line offering it over another screen would
+    /// press a door with no note behind it. Anything else said since stands.
+    func withdraw(owner: ObjectIdentifier) {
+        if current?.owner == owner { current = nil }
+        if quietLine?.owner == owner { quietLine = nil }
+    }
+
+    /// The one placement step every door's item takes (VM-61 split it out of
+    /// `deliver` so `removal` shares it; the Mac's order — route, replace,
+    /// re-arm the clock — is unchanged).
+    private func place(_ item: Item) {
+        let trimmed = item.text
+        guard let slot = Self.slot(
+            kind: item.kind, leavesPage: item.leavesPage,
+            placement: placement, receiptStyle: receiptStyle)
+        else {
+            // `.off` (and, on the phone, an ordinary act's receipt): she
+            // asked for nothing, so nothing shows — and a dropped receipt
+            // leaves whatever is already on screen alone (a refusal she is
+            // still reading is not swept away by an act that says nothing).
 #if DEBUG
             lastDroppedReceipt = trimmed
 #endif
-            Self.log.debug("receipt dropped (style=off): \(trimmed, privacy: .public)")
+            switch placement {
+            case .receiptStyle:
+                Self.log.debug("receipt dropped (style=off): \(trimmed, privacy: .public)")
+            case .phoneLine:
+                Self.log.debug("receipt dropped (phone line, ordinary act): \(trimmed, privacy: .public)")
+            }
             return
         }
         // ONE message at a time, wherever it sits: a new one clears the
@@ -322,19 +414,33 @@ final class StatusCenter {
         if current?.id == id { current = nil }
     }
 
-    private enum Slot { case toast, quiet }
+    /// Where an item lands. `toast` is the prominent slot (`current`) — the
+    /// Mac's toast card, and the phone's ONE line; `quiet` is the Mac's
+    /// muted line at the bottom bar's trailing end (the phone has none).
+    enum Slot: Equatable, Sendable { case toast, quiet }
 
-    /// The ONE routing rule. Refusals and offers are not the setting's to
-    /// govern; a receipt goes where she said.
-    private func slot(for kind: Kind) -> Slot? {
+    /// **The ONE routing rule, pure** (VM-61 made it a static over its
+    /// inputs so both platforms' answers are pinned as a table). Refusals and
+    /// offers are not the setting's to govern; on the Mac a receipt goes
+    /// where she said; on the phone a receipt draws only when it took
+    /// something off the page — her VM-44 ruling — and the receipt style is
+    /// never consulted there (PROVISIONAL P-55-1). `nil` = nothing shows.
+    static func slot(
+        kind: Kind, leavesPage: Bool, placement: Placement, receiptStyle: ReceiptStyle
+    ) -> Slot? {
         switch kind {
         case .refusal, .offer:
             return .toast
         case .receipt:
-            switch receiptStyle {
-            case .toast: return .toast
-            case .quiet: return .quiet
-            case .off: return nil
+            switch placement {
+            case .receiptStyle:
+                switch receiptStyle {
+                case .toast: return .toast
+                case .quiet: return .quiet
+                case .off: return nil
+                }
+            case .phoneLine:
+                return leavesPage ? .toast : nil
             }
         }
     }

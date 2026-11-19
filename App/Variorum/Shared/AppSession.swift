@@ -226,6 +226,11 @@ final class AppSession {
     let runner: OperationsRunner
     /// The Edit menu's window onto the undo stack (top label, live).
     let undoMenuState = UndoMenuState()
+    /// Phase 13b Stage 1b (AD-14): the ONE status/refusal presentation —
+    /// transient outcomes land here and render as the shell's toast.
+    /// **VM-61: both platforms' seam** (it sat inside the macOS block until
+    /// then) — the phone's shell draws it as its one message line.
+    let status = StatusCenter()
     /// 13i-d U5 — THE CURRENT WING (`WingState`): the library every surface
     /// reads. Held in memory here; the bootstrap attaches the device's
     /// memory, so no pin ever touches the test host's defaults.
@@ -729,9 +734,6 @@ final class AppSession {
     /// through this; surfaces register handlers by composition. Replaces
     /// the notification regimes (see `Registry/CommandRouter.swift`).
     let commandRouter = CommandRouter()
-    /// Phase 13b Stage 1b (AD-14): the ONE status/refusal presentation —
-    /// transient outcomes land here and render as the shell's toast.
-    let status = StatusCenter()
 
     /// The window's recently-visited books, most recent first — wired by the
     /// shell to ITS workspace (the `openNoteCount` idiom: the workspace is
