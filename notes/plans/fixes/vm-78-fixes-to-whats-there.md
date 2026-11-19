@@ -99,7 +99,40 @@ VM-218, VM-99 and VM-96's Trash face.
 
 ### CURRENT STATE — 2026-11-19, late morning (she is back). Read this block; what follows it is the night's log, kept as written.
 
-**UPDATE — 2026-11-19, 15:20 (the newest; it outranks everything below it).**
+**UPDATE — 2026-11-19, 17:00 (the newest; it outranks everything below it).**
+- **Ladder round 4 is closed** ("The ladder", "### Round 4"; `notes/plans/fixes/vm-78-ladder-round4.md`): 0 BLOCKER
+  · 1 MAJOR · 0 MINOR · 5 NIT, no defect on the tree; the MAJOR (R4-F1) is the NEXT wave-1 merge — VM-47 conflicts
+  with this run on four phone face files and the wrong side of those hunks leaves every seam pin green. Its fix
+  pass is applied (tests and documents only): the guards G1, G2 and G3 (`43fec9e9c`, `e9823efaf`, `905a12eb0`),
+  the NITs, and "The map, final" kept in the round file for the other runs' orchestrators.
+- **The coordinator's merge order (its call):** VX-981 first — MERGED, main `7629cf049`, ledger `ce153a715`,
+  snapshot `ad5053002`; then VM-64 and this run in whichever order their gates come READY (the two merge clean
+  against each other; the second re-reads the five shared files); VM-47 last, with this run's guards on main. From
+  a gate's GO until that run's merge the coordinator holds main still.
+- **THE SECOND MERGE-IN is done** ("### THE SECOND MERGE-IN (main after VX-981)"; merge commit `d55d22db9` over
+  main `ad5053002`; tip `f9464b7c1`): two conflicts, both in notes; **this run's parity row is PL-78** (VX-981
+  took PL-77) **and its QUESTIONS numbers start at #279** (VX-981 took #278) — both re-checked at the merge;
+  no file under `App/` or `Sources/` changed by hand; both targets build for testing on the merged tree.
+- **The guards' stage window RAN on that tree, 16:43:57–16:46:39, clean and as predicted** ("### Round 4", "The
+  guards' window — RAN"): RED 26 tests in 5 suites failed on exactly the four expected tests while the five seam
+  pins stayed green on the same wrong tree; GREEN 42 tests in 7 suites passed.
+- **One departure from round 4's called plan, the stage coordinator's call and taken:** round 4's reviewer called
+  (v) "send the gate's READY first, open round 5 only on the coordinator's word that this run's gate is next".
+  The coordinator ruled the other order — **round 5 reads BEFORE the gate**: the gate's tested tree must be the
+  tree that merges, and a round-5 fix landing after the whole-target legs would cost those legs twice. So round 5
+  opens now, and the gate's READY goes when round 5 is closed and any fix it earns is built. What (v) protected
+  is kept by (vi): if VM-64's gate READY comes first, its merge is merged in here; a textually clean merge-in
+  whose `git diff` shows this run's lines in `MobileEditorViewModel.swift` and `MobileWriteView.swift` exactly as
+  the map states is acceptable evidence and goes to the author plainly as unread by a cold round; a hand-resolved
+  line in either file is the editor-seam class and is asked of her before the merge.
+- **What remains, in order:** ladder round 5 (a fresh `fable-reviewer`, the last under the cap;
+  `notes/plans/fixes/vm-78-ladder-round5.md`) and its fixes → the gate on the merged tree: the whole phone target
+  (read against main's one red, VM-24's caret test) → the whole Mac target (a QUIET window) → the simulator walk
+  → the remaining `PENDING(…)` slots → the merge moment at the coordinator's GO, where "The map, final" is handed
+  to the coordinator → the wave-1 phone install prepared if this run is the last mobile merger (with VM-47 last,
+  it is not expected to be).
+
+**UPDATE — 2026-11-19, 15:20.**
 - **The orchestrator did NOT change hands.** At the author's word the same session (`vm-78`) had its context
   compacted at the 14:45 seam and continued; `notes/plans/vm-78-orchestrator-handoff.md` served as its own map.
 - **The closeout documents were re-fitted BEFORE round 4** (a fresh documents-only `opus-implementer`, while the

@@ -1,5 +1,8 @@
 # VM-78 — orchestrator handoff (a cutover inside the still-open run)
 
+**After this file was written main moved again (VX-981): this run's parity row is PL-78, not PL-77, and its
+QUESTIONS numbers start at #279; the run record's live state is current.**
+
 **NOT USED AS A CUTOVER (added 2026-11-19, 15:20): at the author's word the same session's context was compacted
 and it continued; no successor session ran. This file served as that session's own map, and the run record's live
 state carries what happened after it.**
