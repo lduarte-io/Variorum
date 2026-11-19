@@ -736,7 +736,7 @@ orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
 | F4 — finding 2 (VM-70): `takeAutosaveHold` re-observes on both of its paths; the hosted pin; the red build `vm64-fix-red` | DONE but the red build — the fix and the pin `f589d964e` (`takeAutosaveHold`: the hold guard's early return became `if !holdsAutosave { … }` around the re-acquire, the unchanged re-observe after it on both paths; pin `MobileNoteHoldTests.aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`). **HELD:** the red build `vm64-fix-red` (a cold build — the QUIET window from about 12:36 forbids it; recipe in §7 ▸ "Fix pass", reversing only the fix's hunk so it survives the VM-55 merge). No revert is in flight |
 | F5 — builds: phone and Mac `build-for-testing` into `vm64-fix`; `swift test` for the touched suites | DONE at `f589d964e` — phone and Mac `** TEST BUILD SUCCEEDED **` (the Mac finished at 12:37, inside the window's two-minute tail), no warning in a touched file; `swift test --filter 'TimingRecorderTests\|StructuralFlightFenceTests\|LeavingSavepointTests\|LeavingSavepointMeasurementTests'` 48 tests in 4 suites passed (the gated one skipped). **To be REBUILT on the merged tree** once the orchestrator says to merge `origin/main` (VM-55) and the window has ended |
 | F6 — §7 "Fix pass" closeout with the stage commands | DONE (this commit) — §7 ▸ "Ladder round 1 — fix pass"; the turn ENDS here with only builds left (the window): the merge of `origin/main` at the orchestrator's word, then the phone and Mac rebuilds into `vm64-fix`, then the red build, then the stage |
-| F7 — finding 1 (Part of VM-71): HELD for the reviewer's call; the second turn | IN-PROGRESS — the call is in (`c9a2effda`: arm (a), exactly as specified, nothing of arm (b)). (i) the GUARD in `LeavingSavepointTests` ("GUARD — a take another writer dirties between the read and the turn is the next ask's") — DONE (`84a8acff8`; green by design, `LeavingSavepointTests` 8 passed); (ii) the comment corrections — DONE (this commit; comments only: `Shared/AppSession.swift`'s phone branch of `savepointOnLeaving`, inside its `#else`, and `closeAutoCommit(_:takes:)`'s doc; the Mac's statements byte-unchanged); (iii) the record corrections in §7 batch 7 (hazard (b), hazard (a)'s pop row, D-7-1) — NOT-STARTED; (iv) the gated measurement stays (`12d6afde5`) |
+| F7 — finding 1 (Part of VM-71): HELD for the reviewer's call; the second turn | IN-PROGRESS — the call is in (`c9a2effda`: arm (a), exactly as specified, nothing of arm (b)). (i) the GUARD in `LeavingSavepointTests` ("GUARD — a take another writer dirties between the read and the turn is the next ask's") — DONE (`84a8acff8`; green by design, `LeavingSavepointTests` 8 passed); (ii) the comment corrections — DONE (this commit; comments only: `Shared/AppSession.swift`'s phone branch of `savepointOnLeaving`, inside its `#else`, and `closeAutoCommit(_:takes:)`'s doc; the Mac's statements byte-unchanged); (iii) the record corrections in §7 batch 7 — DONE (this commit; in place, marked "[Ladder round 1, finding 1 — …]", the first text kept legible: hazard (a)'s pop row, hazard (b)'s "nothing can go stale" qualified to ACROSS asks, D-7-1's visibility-point note); (iv) the gated measurement stays (`12d6afde5`) |
 | F8 — second turn, part 2 (after the QUIET window and VM-55's merge to main, at the orchestrator's word): merge `origin/main`, rebuild `vm64-fix` (phone and Mac) and `vm64-fix-red` on the merged tree, the whole Core package headless, the stage | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
@@ -2995,7 +2995,7 @@ are the rule the read and the narrowed op both apply.
 
 | Road | Who asks (unchanged) | What happens now |
 |---|---|---|
-| Popping a note | its screen's `onDisappear` → `teardown()` → `savepointOnLeaving` (`MobileWriteView.swift:210-232`) | one ask; the read decides — owed: one runner turn for the owed takes; nothing owed (she only read it): no runner turn at all |
+| Popping a note | its screen's `onDisappear` → `teardown()` → `savepointOnLeaving` (`MobileWriteView.swift:210-232`) | one ask; the read decides — owed: one runner turn for the owed takes; nothing owed (she only read it): no runner turn at all. *[Ladder round 1, finding 1 — qualified: the read and the turn are two transactions, so a take ANOTHER writer dirties between them (a sync apply, which writes through the writer and never queues on the runner) is not written by this one ask; it stays owed and is the note's next leaving's — the pop has no later ask in the same leaving. Her typing is always inside: the flush lands it before the read. The cell's first text is kept as written.]* |
 | Switching tabs away | `MobileShellView.selectPage` (`:422-432`) → the capture box's `fileOnLeaving` → `file()` → `savepointOnLeaving(minted)` (`MobileQuickNote.swift:1040`) | one ask, for the box's note. The note on the stack the switch hides is NOT left — it stays mounted and registered, stood down (the liveness authority's rule), and gets its savepoint at its pop, the backgrounding or the lock (each asks for every registered note). Unchanged; see P-71-1 |
 | Backgrounding, Standard | `mobileScenePhaseChanged(.background)` → `performBackgroundFlush`: the box, then one ask per registered note (`registeredPostIDs`, deduped by note) | one ask per note, before the network round; no lock, no further ask |
 | Backgrounding, Castle, before the lock | (1) the flush's ask, as Standard; (2) `mobileWillLock`'s ask inside the lock's `runWillLock`; (3) each removed screen's `onDisappear` | (1) savepoints what is owed. (2) and (3) read the takes already savepointed and ask the runner for nothing — unless something landed after (1): the round's apply, a conflict take, or (1) skipped because the grant expired — then they savepoint it, as before. (3) meeting a closed store asks nothing |
@@ -3014,7 +3014,14 @@ before the pool closed, a read-only visit one scan and one read).
 
 **Mechanism:** the dedupe has no memory of leavings. The read compares each take's text NOW with its LAST savepoint; any
 change after any earlier savepoint — hers, or anything else's — makes that take differ again, so it is owed and
-savepointed. Nothing is cached between asks, so nothing can go stale. **Pins:** the perf suite's backgrounding and lock
+savepointed. Nothing is cached between asks, so nothing can go stale. **[Ladder round 1, finding 1 — qualified: "nothing
+can go stale" holds ACROSS asks. Inside ONE ask the read and the runner turn are two transactions, so the ask sees what
+had committed at the read's snapshot: a take another writer dirties between that snapshot and the turn (the sync
+engine's apply — it writes through the writer, never the runner) is not listed, so that ask does not write it. It stays
+owed, and the NEXT ask writes it: the same leaving's later ask on the Castle and lock roads, the note's next leaving on
+the pop road. Her typing never falls in the window (the leaving's flush lands it before the read, in the same task).
+The bound is held by `LeavingSavepointTests`' GUARD (green by design). The text around this note is kept as
+written.]** **Pins:** the perf suite's backgrounding and lock
 series alternate between two notes and edit before every leaving — an earlier leaving that stood in for a later one would
 read 0, not 1; `MobileLeavingSavesOnceTests` runs the pop, the Castle backgrounding and the lock twice each with a change
 between (the second round must add a second savepoint holding the second text), and a Standard backgrounding followed by
@@ -3125,6 +3132,17 @@ The test files: VM-47's `MobileShellRouter.init()` (no `defaults:`) is what thes
   savepointed in this leaving") — needs a "nothing landed since" signal; her coordinator gives one, but structural acts,
   take acts and a sync apply write around it, so it could skip a savepoint owed (hazard (a)'s failure); (c) change who
   asks (drop the lock teardown's or the flush's ask) — moves savepoint work against the lock or out of the round; fenced.
+  **[Ladder round 1, finding 1 — the visibility point, added: (a) moves the point an ask sees the store at. The whole
+  op decided and wrote in ONE write transaction, so it saw everything committed before the runner turn's transaction
+  began — an apply already holding the writer, runner turns queued ahead; (a) decides at the READ's snapshot, earlier
+  by the read itself (~6 ms at 100k words, the Mac, headless) and, when something is owed, by the runner hop and any
+  wait for the writer. A take another writer dirties in between is the next ask's. Accepted, at the reviewer's call
+  (`notes/plans/fixes/vm-64-ladder-round1.md` ▸ "Final calls"): the occasion is one savepoint per take she edited, and
+  every such take is listed and written; the gap admits only another device's writes through sync (and, in the S5
+  case, her words moved onto a conflict take — a live, synced take, savepointed at the next leaving); the old road's
+  catch of an in-gap apply was timing, not a rule. The road not taken — re-running the read inside the turn — costs
+  ~11–12 ms of O(note) on the runner on every edited leaving of a 100k note and leaves the read-only case's gap open
+  anyway (measured: the gated `union-turn-one-edit` series, `12d6afde5`).]**
 - **D-7-2 — the runner's turn when something is owed.** (a) **built:** `closeAutoCommit(_:takes:)` for exactly the owed
   takes, re-checked inside the transaction — O(owed); (b) the read as a yes/no, then today's whole op — O(note) on the
   runner whenever she edited, which is the 1D case the box meets after editing a long note.
