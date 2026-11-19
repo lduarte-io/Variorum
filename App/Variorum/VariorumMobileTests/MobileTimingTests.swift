@@ -16,7 +16,13 @@
 //     clean and leaves the first build's table readable as the previous one.
 //
 //  Each test drives a recorder and a temporary file of its OWN — never the
-//  app's recorder or its timing file (the suites run in parallel).
+//  app's recorder or its timing file, which other suites in the same process
+//  read and write. *(Corrected at the VM-64 ladder's round 2: this line first
+//  said "the suites run in parallel". In this host they run one after another
+//  — the scheme's `parallelizable = "NO"` is built into the xctestrun as
+//  `InProcessParallelizationEnabled = false`, and the round's probe saw seven
+//  suites run in turn; what a shared recorder or file risks here is an earlier
+//  suite's leftovers, not a neighbour running beside it.)*
 //  NEW-MECHANISM tests, green by design (no fix in this batch).
 //
 
