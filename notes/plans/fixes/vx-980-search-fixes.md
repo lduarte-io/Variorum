@@ -484,6 +484,8 @@ No other string was added or changed.
 
 ### THE CLOSER — LIVE STATUS
 
+**NOT DONE BY THE CLOSER (first, by the contract):** gate 3 and the merge gate (no `xcodebuild`, no app launch, no stage claim); the PR, the merge and the STATUS banner; the four shared ledgers (drafted only — CLOSEOUT DRAFTS A–D below); any Linear change (tickets, states, the members' closes); the release; the memory repo. Every fact those produce is a `PENDING(…)` slot in the FOR A LATER READER section, the handoff and the drafts. **All eight closer pieces below are DONE**; the closer's commits touch `notes/` only (`a06672327` → `92277ea59` and this line's commit).
+
 *The closer: a fresh `opus-implementer` seated 2026-11-19 for the BRANCH-SIDE closeout writing only — no product or test file, no `xcodebuild`, no app launch, no stage claim, no Linear change. The shared ledgers (master plan, `notes/TICKETS.md`, `notes/QUESTIONS.md`, `notes/AppSpecRecord.md`) are NOT touched here; their entries are DRAFTED below for the orchestrator's merge moment. Every claim is PENDING until its commit is named.*
 
 **Read first (none delegated):** CLAUDE.md whole · this record whole · `vx-980-her-rulings.md` whole · `vx-980-ladder-round1.md` and `-round2.md` · `notes/SurfaceContracts.md` whole (The app, The Library, The Bookcase and books, Doors to the outside) · `notes/MobileSoul.md` §6 (the parity ledger's protocol and its rows, the newest PL-74) · `notes/handoffs/vx-915-handoff.md` · `vx-915-recents-sweep.md` (FOR A LATER READER, CLOSEOUT DRAFTS) · `notes/SessionResiliencyProtocol.md`.
