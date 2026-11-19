@@ -1028,10 +1028,10 @@ only). DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental, both target
 | Record skeleton | DONE (this commit) |
 | P-55-11 — a direction keeps its line (Trash, tray, Block History, lenses, membership; the shared answer) | DONE (be6f1d0c7) — both targets build-for-testing green at it; `MobileLineDirectionTests` results PENDING (the stage window) |
 | VM-62 pin (red on this tree) | DONE (69005ad4a; strengthened in the next commit, still before any fix — it also catches the `"Refused: \(…)"` idiom under any binding name, found at `MobileTagManager`'s `\(op)`) — `MobileNoRawErrorPinTests` + `MobileRefusalSentencePinTests`, compiled green on the unfixed tree; the scan's throwaway mirror counts 97 offending lines there; red-on-old RUN PENDING (the stage window, AT the strengthened pin commit — see "Red-on-old, the method") |
-| VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | NOT-STARTED |
-| VM-62 fix | NOT-STARTED |
-| Phone + Mac `build-for-testing` at the batch's last code commit | NOT-STARTED |
-| Stage window (2a's suites + 2b's; red-on-old) | NOT-STARTED — READY at the end; no revert is in flight |
+| VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | DONE (69005ad4a, in `MobileRawErrorPinTests.swift`, type `MobileRefusalSentencePinTests`) — red-on-old and green runs PENDING (the stage window) |
+| VM-62 fix | DONE (e8609cc6f) — the scan's throwaway mirror counts 0 offending lines on it (2 exemptions, 1 match each); `MobileRefusalFallbackTests` (phone) and `VM62MacRefusalWordsPinTests` (Mac) written; results PENDING |
+| Phone + Mac `build-for-testing` at the batch's last code commit | DONE — both green at e8609cc6f (`vm55-b1`, incremental) |
+| Stage window (2a's suites + 2b's; red-on-old) | PENDING — READY handed to the orchestrator at the commit after e8609cc6f (this record); the legs and types are under "Batch 2's one stage window"; no revert is in flight; the worktree is on the branch |
 
 #### P-55-11 — a direction keeps its line (the orchestrator's ruling, applied)
 
@@ -1082,6 +1082,200 @@ successor finding the worktree detached at this commit is mid-red-on-old: `git c
 it — nothing uncommitted is ever left across it.** Expected red: the scan names every offending line (97 on that tree, per
 the throwaway mirror of the scan in the session scratchpad), and each of the five per-case pins fails on its slot/line
 text (the old doors spoke the dump or "Refused: …").
+
+The strengthened pin commit, by hash: **15f788dfd** (the red-on-old checkout target).
+
+#### VM-62 — refusals in plain words (a Bug: the mechanism, the pins, the fix)
+
+**Mechanism, traced (inputs → wrong output).** A phone door catches an error and hands its words to the one line (2a's
+`MobileLine` / a slot's `didSet` / the editor's `report`). Three expression shapes put raw error text there: (1) 69 sites
+wrote `String(describing: error)` — the enum dump, e.g. `wrongReadingKind(id: "…", expected: …)`; (2) three wrote the
+`"Refused: \(…)"` idiom (`MobileStars`, `MobileMembership`, and `MobileTagManager` under the name `op`); (3) about thirty
+reached a dump ONE STEP DOWN, in shared code: `DeletionRefusal.words`/`.fallback` end in "That couldn't be done — ‹the
+dump›." and `VersionActs.words` falls to it. The audit's named cases, each traced: **Finish on a gathering** —
+`MobileBookDetailsModel.setFinished(true)` → `lockReading` throws `wrongReadingKind(expected: .book)` → `refusal(_:)` →
+`DeletionRefusal.words` → no arm → `fallback` → "That couldn't be done — wrongReadingKind(…)." (B §0.6/I3); **Reopen on a
+sealed book** — `unlockReading` throws `readingSealed` → the same road → the dump (B I4); **rename** — the note's
+`renameNote` → `renameContainer` on a note gone under it throws `containerNotFound` → `report(String(describing:))` (C N1);
+**unseal** — `unlockNote` → `unlockPost` throws `noteInSealedBook` → `report(String(describing:))` (C N5); **star** —
+`MobileStarsModel.toggle` on a note gone under the press → `setStarred` throws `containerNotFound` → `"Refused: \(error)"`
+(B M2).
+
+**The pins — committed alone, before the fix** (69005ad4a, strengthened at 15f788dfd; file
+`VariorumMobileTests/MobileRawErrorPinTests.swift`):
+
+- `MobileNoRawErrorPinTests` (2) — **what it checks:** every `.swift` file under `VariorumMobile/` (all folders, Protection
+  and Spike included), comments stripped and code + string contents kept (line numbers preserved), fails on any line
+  holding `String(describing:`, `String(reflecting:`, `.localizedDescription`, an interpolated `\(error)` / `\(err)` /
+  `\(failure)` / `\(op)`, the `"Refused: \(…)"` idiom under any binding, or a call to `DeletionRefusal.fallback(` /
+  `DeletionRefusal.words(` / `OpsRefusalCopy.message(` / `VersionActs.words(`. Exempt: an `os.Logger` call line or a wrapped
+  line of one (an `OSLogMessage` `privacy:` argument), and two named never-surfaced lines in `MobileStarterJournal.swift`
+  (its `.refused` outcome, which only the first-write notice logs) — each exemption must match exactly one line. Plus an
+  oracle test of the comment stripper. **What it cannot see:** (1) Shared code the phone renders that dumps inside itself
+  (below, "Remainders"); (2) an error under another name outside the "Refused:" idiom, or passed through a variable first —
+  it matches names, not types; (3) whether a forbidden expression would render — it forbids them everywhere in phone code
+  but the log; (4) a `//` inside a literal nested in an interpolation can hide the rest of that line (the
+  `stringLiteralContents` walk's recorded limit). Red on old: 97 offending lines (the throwaway mirror's count).
+- `MobileRefusalSentencePinTests` (5) — each named refusal through its REAL door over a real store, asserting the shared
+  table's phone-road sentence (`OpsRefusalCopy.words(for:roads: .phone)`) on the model's slot AND on the one line (kind
+  `.refusal`), and no case name on the screen: `finishOnAGatheringSpeaksTheTablesSentence`,
+  `reopenOnASealedBookSpeaksTheTablesSentence`, `renamingANoteThatIsGoneSpeaksTheTablesSentence`,
+  `unsealingANoteInASealedBookSpeaksTheTablesSentence`, `starringANoteThatIsGoneSpeaksTheTablesSentence`.
+
+**The fix (e8609cc6f).**
+
+- `Shared/OpsRefusalTable.swift` — `OpsRefusalCopy.unexpectedFailure` (the ONE plain fallback, DRAFT — P-55-12) and
+  `OpsRefusalCopy.sentence(for:roads:)`: the table's words, else the plain fallback, the raw detail to the unified log
+  (`io.lduarte.Variorum` / `refusals`, `notice`, `String(reflecting:)`). **No table row added; no row's words moved** (the Mac
+  pin holds a spread, and `words(for:)`'s switch is untouched).
+- `Shared/RecoveryActs.swift` — `DeletionRefusal` split into `knownWords(_:act:)` (its arms, nil where none) and its last
+  resort: `words` = `knownWords ?? fallback` (byte-identical); the phone's `sentence(_:act:roads:)` = `knownWords ??
+  OpsRefusalCopy.sentence`; `plainFallback(_:roads:)` = `fallback`'s twin (a `RecoveryRefusal`'s sentence, else the table,
+  else the plain fallback — never the deletion arms, which a `fallback` door never meant).
+- `Shared/VersionActs.swift` — the same split: `knownWords(_:seal:)`; `words` byte-identical; the phone's
+  `sentence(_:roads:)` = `knownWords(seal: roads.seal) ?? DeletionRefusal.sentence(roads:)`.
+- Every phone site moved onto these roads (by file, the changed lines at e8609cc6f): `Shell/MobileArchiveModel` 108,140,142 ·
+  `MobileBookDetails` 99,171,194,212,235 (+doc 228) · `MobileBookViewModel` 147 · `MobileCreateBook` 78,189 ·
+  `MobileLibraryViewModel` 333,353,400,425,494 · `MobileLine` 148,162 · `MobileScraps` 142,171,190,222 ·
+  `MobileSettingsView` 448,476,510 (the DEBUG developer readouts) · `MobileShelfViewModel` 88,101,141,151,215,232,248 ·
+  `MobileStars` 146,159,182,211–213 (the two catch arms merged — both spoke at the door's root) · `MobileTagManager`
+  88,100,190,200 · `MobileTrashModel` 112,148,153,223,251 · `Takes/MobileBlockHistory` 283,578,588 · `MobileLenses`
+  303,330,557 · `MobileTakesBrowser` 872,926 (+doc 868) · `MobileTakesController` 251,264 (+doc 257) · `Write/MobileBlockList`
+  147,169 · `MobileBlockMenu` 461,468 (+doc 458) · `MobileComments` 137,290,296 (+doc 286) · `MobileMembership`
+  122,161,201,215 (+doc 198) · `MobileNoteTags` 93 · `MobileNoteTray` 187,395,397 · `MobileReferences` 132,158,171 ·
+  `MobileUndoDoor` 303,310 (+doc 297) · `MobileVersions` 150,178,202,218,236.
+- **The editor-seam files — the error-to-words EXPRESSION only, no control flow, no seam behaviour (focus 10):**
+  `Write/MobileEditorViewModel.swift` lines 227 (autosave `onError`), 595, 663, 676 (the observation/delivery catches), 1079
+  (the copy failure's `.failed(…)` detail), 1203 (rename), 1262 (Save a Version: `VersionActs.sentence`), 1298
+  (`deleteNoteRefusal`: `DeletionRefusal.sentence(act: .delete)`), 1320 (seal/unseal), 1355, 1358 (entry date),
+  2323 (`reportOperationError`), and two doc comments made true again (1291–1292, 2320–2321);
+  `Write/MobileStructural.swift` lines 140, 281 (the fan reads' catches), 965 (`refusalMessage`'s non-op guard), 1014 (its
+  `default`). `Shared/EditorBrain/`, `MobileEditorTextView`, `BlockRangeIndex` untouched.
+
+**Sentences — the DRAFTS for her wording pass (new or newly composed words), verbatim, with their sites:**
+
+1. **"That couldn't be done."** — `OpsRefusalCopy.unexpectedFailure` (`Shared/OpsRefusalTable.swift`); spoken at every phone
+   site above wherever no table or family has words (a failed store read, an unworded case). PROVISIONAL P-55-12.
+2. **"Copy failed: That couldn't be done."** — the note's Copy door on a failed read (`Write/MobileEditorViewModel.swift:1079`
+   → `MobileNoteClipboard.Outcome.failed`'s "Copy failed: ‹detail›" — the Mac's own shape, `TakeClipboard`'s "Copy failed:
+   ‹OpsRefusalCopy.message›"); "Copy failed: ‹the table's sentence›" where the table words the case.
+
+**Existing sentences the phone now reaches where it dumped before** (no new words; for her eye, since two are the table's
+PHONE-ROAD forms — the phone has no book Unseal door yet, so the shared table's book-seal road is `verb: nil`):
+Finish on a gathering — "That isn't a book — a gathering shows the notes its rule matches and holds none of its own." (the
+Mac's own `wrongReadingKind` sentence) · Reopen on a sealed book — "This book is sealed, so it can't be reopened here."
+(the Mac's: "This book is sealed — unseal it to reopen it.") · unsealing a note in a sealed book — "This note is in a book
+that is sealed, so it can't be changed here." (the Mac's: "… — unseal the book to change it.") · a note gone under a rename
+or a star — "That note isn't there any more — it may have just been deleted." (the Mac's, byte for byte — its StarsModel
+speaks `OpsRefusalCopy.message`) · the autosave refused by a seal arriving by sync — "This note is locked — unlock it
+first." (the table's phone-road sentence, was `lockedPost(id: …)`).
+
+**Tests.** Phone: the pins above; `MobileRefusalFallbackTests` (5, `VariorumMobileTests/MobileRefusalFallbackTests.swift` —
+the plain fallback; the table first; the deletion and versions families keep every arm and end plain while their Mac
+roads keep the shipped last resort; no phone road carries a case name or an associated value over a spread of 16 errors).
+**Two justified edits** of guards that pinned the dump VM-62 retires (`MobileRefusalTableTests`):
+`eachSiteKeepsItsOwnFallbackWhereTheTableHasNoWords` → `eachSiteSpeaksThePlainFallbackWhereTheTableHasNoWords` (five sites
+now speak the plain fallback for `referenceNotFound`); `theCrystallizersErrorVoiceSpeaksTheTable`'s last line (a
+non-operation error now speaks the plain fallback, not its description). Mac: `VM62MacRefusalWordsPinTests` (4,
+`VariorumTests/VM62MacRefusalWordsPinTests.swift` — `DeletionRefusal.words`/`.fallback`, `VersionActs.words`,
+`OpsRefusalCopy.message` answer as shipped; a spread of rows unchanged and none added; a source scan that no Mac file
+speaks the phone's new roads). Results PENDING (the stage window).
+
+**PROVISIONAL (for QUESTIONS at the merge moment — the orchestrator carries it):**
+
+- **P-55-12 — the one plain fallback's words.** Options: (a) "That couldn't be done." — the shared deletion fallback's own
+  sentence with the dump dropped (both platforms already speak its stem); (b) "Something went wrong — try again." — the
+  Protection faces' register (`ProtectionWords.somethingWentWrong`); (c) a fallback per door naming its act ("This list
+  couldn't be read.", "The tag wasn't saved.") — plainer, but some thirty new lines for her pass. **Built: (a)** — the
+  brief's "ONE plain fallback sentence from the table", the closest existing words, claiming nothing about what changed.
+
+**Remainders — raw error text the phone can still render that this batch could not reach (fenced, named for their
+owners; the pin cannot see them):**
+
+1. The store-open failure screen (`VariorumMobile/MobileStoreFailureView.swift`) renders `error.reason`, which
+   `Shared/AppBootstrap.swift` (lines ~466 and ~1536) builds from `String(describing: error)` — the Mac's
+   `StoreFailureView` shows the same. `AppBootstrap` is the store-open/custody road: **VM-103's remainder** (the lock
+   umbrella), with D-27.
+2. The account's deletion failure (`Shared/AppServices.swift` ~644–646: a non-network error becomes `String(describing:)`
+   in `account.lastError`), rendered by `Shared/AuthViews.swift`'s `AccountView` — on the phone from the Protection screen
+   and the sync row. Custody/account: **VM-103's remainder** (or the first-run umbrella VM-197's account face).
+3. `Features/Protection/`: the grep finds no raw-error expression there; it renders `lobby.lastError`
+   (`MobileLibraryMissingView`, from `AppBootstrap`'s `create()`) and `ErrorCauseNote` — the verbatim cause is her R94
+   ruling (the sync row's "detail renders inline"), not a dump to fix. **VM-103's** to read with the rest.
+4. Shared helpers with a `String(describing:)` the phone does not render today (`PlaintextExportModel`, `MarkdownInsurance`,
+   `StarredGatheringSeeder`, `SampleLibrary*`, `IdleCommitScheduler.lastError`) — none reached from `VariorumMobile/`;
+   listed so the next face that renders one knows.
+
+**Observations for the orchestrator (not fixed — outside this unit):** `.lockedReading` stays Mac-half-only in the table
+(its sentence says "unseal", the Mac's door word); the phone speaks it through `DeletionRefusal`'s platform-neutral arm
+wherever a deletion-family door meets it, and a non-deletion phone door meeting it would now speak the plain fallback
+(none found). `MobileMembership`'s, `MobileQuickNote`'s and the other door-local arms are unchanged.
+
+**Canon deltas believed owed (the orchestrator applies at the merge):** `notes/SurfaceContracts.md` "The app", the
+Messages bullet (the phone's half, extending 2a's owed delta): a refusal on the phone always speaks in words — the shared
+table's sentence where it has one (the Mac's wherever the road is the same), else one plain fallback; the raw detail goes to
+the log, never the screen (VM-62); and a restoration that landed somewhere other than where she would look keeps its line
+as a direction (P-55-11). AppSpec — none. MobileSoul §6 — none beyond 2a's.
+
+#### Batch 2's one stage window (READY — the legs, by TYPE)
+
+Leg 1 — **the whole phone target** (`-only-testing:VariorumMobileTests`; 2a's reason stands: nearly every phone test file
+touches a changed type, and 2b changed thirty phone files' error expressions), test-without-building on e8609cc6f's
+products, the window's standing simulator booted fresh. ~25 min (batch 1's 32-suite slice took 3 min; the target is ~5×
+that, plus the host and pointer suites).
+
+Leg 2 — **the Mac**, the dev-store Debug test host, test-without-building on e8609cc6f's products. 2a's 41-type READY list
+is NOT in this repo record (its READY line points at "the stage window" without naming the types); the orchestrator's copy
+of it may stand in for the first group below. As written here: **(A) the types every Mac test file that reads the seam
+names or its slots declares** (`StatusCenter`, `StatusToast`, `QuietReceiptLine`, `.status.current`/`.quietLine` — a
+superset of 2a's 41), and **(B) every Mac type whose file names what 2b changed in `Shared/`** (`OpsRefusalCopy`,
+`OpsRefusalRoads`, `SealedNoteCopy`, `DeletionRefusal`, `VersionActs`, `TrashPutBack`, `PreservedOriginPutBack`,
+`RecoveryRefusal`, the landing/take receipts, the tray/recovery/lineage/versions faces) — 172 types in all, each declared
+exactly once (checked). ~15 min.
+
+(A) `AscentDoorTests AscentRoutingTests AutosaveRegistryLifecycleTests AutosaveRegistryReleaseGuardTests BindDoorTests
+BlockHistoryPaletteDoorTests BlockTOCStatusTests BookAnchorTests BookArrivalsReviewTests BookArrivalsTests BookCarryTests
+BookcaseBoardBrainTests BookcaseStarredShelfBrainTests BookcaseStarredShelfDropTests BookcaseViewModelTests
+BookChooserOrderTests BookIndexEditingTests BookNamePerWingDoorTests BookPanelActingTests BookPanelBrainTests
+BookPanelDeclarationTests BookPanelDragGateTests BookSettingsSheetTests BookStateDoorsTests BoundaryFluidityTests
+CalmAsksTests CaptureMicrosyntaxDoorTests CommandRouterTests ConfirmationsSettingTests ContextBarTests CopyAllTakesDoorTests
+DestructiveUndoWarningTests DivergeDoorTests DuplicateDoorsTests EncryptionBookDoorTests FormattingSurfacesTests
+LaunchFurnitureTests MCPGonePlaceNamesTests MCPNavigationTests MCPShareFacesCaptureTests MCPShowOfferFacesTests
+MCPTrailDoorTests MCPTrailFoldTests MCPTrailHandDoorTests MCPTrailHandModelTests MCPTrailModelTests MCPWingFacesTests
+MembershipChoiceTests MoveAndExecuteTests MoveToShelfGateTests MultiBookEditNoteRuleTests MultiBookEditNoteTriggerTests
+OutflowChooserTests PagedAnchorReportTests PrinceFreshStoreTests PrinceSeedTests PrivateMarkFaceTests
+QuickEntryFileWithoutOpeningDeclarationTests QuickEntryFileWithoutOpeningKeyTests QuickEntryFileWithoutOpeningModelTests
+QuickNoteDoorTests QuickNoteMintTests QuickNoteParkTests QuickNoteWindowTests QuickNoteWordTests RemoveReleaseDoorTests
+RuleEditorMakeTagTests RuleEditorTests SampleLibraryWelcomeTests SealDoorTests SealedBookMemberDoorTests
+SearchPickerBrainTests StaleWriteIntentTests StarActingTests StarDeclarationTests StarTargetingTests StatusCenterTests
+StatusSeamVocabularyTests StatusToastPlacementRuleTests StatusToastPlacementShellTests TakesLandingTests TakesWordCountTests
+TakeToBlockDoorTests TimelineAndReadingsTests TourClosingCardTests TourEndCardAsideGateTests TourEndCardTests
+TourEngineTests TourEntryTests TourPoolTuckTests TourScriptTests TourSpotlightTests TutorialBookShapeTests
+TutorialDeletionActsTests TutorialDoorTests TutorialFannedMatrixTests TutorialLibraryActsTests TutorialLookingActsTests
+TutorialPrivacyChapterTests TutorialStructureActsTests TutorialTakesActsTests TutorialWherePlacesActsTests
+TutorialWritingActsTests VM61MacStatusSeamPinTests VocabularySweepTests VX385PoolQuietReceiptTests
+VX775ActivityLogFailureDoorTests`
+
+(B, the ones not already in A) `ArchivedBooksGroupTests ArchivedMarkTests BlockHighlightTests BlockHistoryPaneTests
+BlockSelectionRegistryTests BlockSelectionRuleTests BoardBlockSelectionTests BookArchiveDeclarationTests
+BookArchiveDoorActTests BookSettingsArchiveRowTests CapabilityRegistryTests ChromeMinHeightTests ComesBackReceiptTests
+CommentPanelFixLeg2Tests CommentPanelGeometryRuleTests CommentPanelWordsTests CommentTextAreaMountedTests
+CommitVocabularyTests CompareCompositionTests CompareViewModelTests FreeTypedTagTests GatheringKindWordTests
+IAAndTrashShapeTests LifecycleFacesTests LineageFaceModelTests MCPWireRefusalSweepTests NoteTrayTests NoteVersionsPaneTests
+OpsRefusalTableIntegrityTests PaletteDerivationTests RecoveryDoorsTests RefusalTableConvergenceTests SavepointCommitDoorTests
+SavepointNameAskTests SavepointNameCopyTests SavepointNameFaceTests SavepointRenameDoorTests SavepointSealedDoorTests
+SavepointTakesDoorTests SideColumnTests SnippetGroupTrashTests SurfaceSizeMemoryTests TagAndFolderTests TakeCardDoorTests
+TrashBookNotesTests TrashConfirmEdgeTests TrashEmptyBlockSweepTests TrashFirstPaintTests TrashMessageBandTests
+TrashMultiSelectTests TrashPoolHonestyTests TrashPurgeDoorsTests TrashPurgeSharedLayerTests TrashSurfaceTests
+TrayArchivedTruncationTests TrayFilterTests TrayPanelMoveTests TrayPanelShapeTests VersionDoorsTests
+VM62MacRefusalWordsPinTests VX347CommitLeavesMountTests VX889GatheringMintWingTests WingBookMoveDoorTests
+WingContentsArchivedWordsTests WriteBlockSelectionTests`
+
+Leg 3 — **red-on-old** (VM-62's pins; the method above): detached at 15f788dfd, phone build-for-testing into `vm55-b1`,
+`-only-testing` `MobileNoRawErrorPinTests` `MobileRefusalSentencePinTests` on the same simulator, back to the branch.
+~12 min (most of it the incremental build). After the release: the green products rebuilt (build only).
+
+**Results:** PENDING (this section is filled in the window).
 
 ## Ladder
 
