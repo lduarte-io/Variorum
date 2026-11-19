@@ -8,11 +8,12 @@
 //  8's `MobileRootView` + capture stack.
 //
 //  Both tab stacks stay ALIVE (opacity-switched) so each keeps its
-//  navigation state; the voiced tab bar renders on tab ROOTS only (a
-//  pushed book list or note shows no tab bar — the ratified mockup's own
-//  geometry). Pushed screens keep the system navigation back door in
-//  minimal inline form (functional; the nav chrome's exact voice is
-//  look-track material, recorded PROVISIONAL).
+//  navigation state; the bottom bar (`MobileTabBar`, VM-52) renders on the
+//  tab ROOTS and on every pushed LIST, never inside a note (her LK-5 —
+//  "Roots and lists, not notes"). Pushed screens keep the system navigation
+//  back door in minimal inline form (functional; the nav chrome's exact
+//  voice is look-track material, recorded PROVISIONAL — and VM-52's trace
+//  of each screen's top edge is P-47-20).
 //
 //  The Stage 0 spike's DEBUG auto-run cover survives at the root (the
 //  gate record's KEPT deviation — `TK2SpikeUITests` drives it); the
@@ -465,6 +466,8 @@ struct MobileShellView: View {
                 // PR4: the book went — never leave a contents list standing
                 // on a tombstone.
                 onDeleted: { pop(in: owner) })
+                // VM-52: a LIST — the bar rides its foot.
+                .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
         case .bookRead(let readingID):
             MobileReadView(
                 session: session, readingID: readingID, tokens: tokens,
@@ -485,16 +488,26 @@ struct MobileShellView: View {
             MobileTrashView(
                 model: trashModel, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) })
+                .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }  // VM-52: a list
         case .archive:
             MobileArchiveView(
                 model: archiveModel, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) })
+                .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }  // VM-52: a list
         case .versions(let postID):
             // Built per push: a note's moments are that note's, and this
             // screen's whole lifetime is one visit (the read is the note's
             // own version count — never corpus-shaped).
-            MobileVersionsScreen(session: session, postID: postID, tokens: tokens)
+            // VM-52: the bar rides the LISTING (a list) and leaves while a
+            // moment's words are read (the reader is her words, not a list).
+            MobileVersionsScreen(
+                session: session, postID: postID, tokens: tokens,
+                listingBar: AnyView(tabBar))
         case .protection:
+            // VM-52: NO bar here (PROVISIONAL P-47-18) — not a root, not a
+            // list, and while new words are held on screen it gives no way off
+            // it but her close (the screen's `navigationBarBackButtonHidden`);
+            // a tab would be one.
             // VM-8 unit 1: the bootstrap's standing faces (kept across every reopen with the presenter and the account
             // section's model); the services for the Account sheet.
             MobileProtectionScreen(standing: bootstrap?.roadStanding, services: services, tokens: tokens)
@@ -575,51 +588,56 @@ struct MobileShellView: View {
         }
     }
 
-    /// LK7's tab bar: text-only, voice-cased (terminal lowercase / study
-    /// normal case), hairline top rule — the ratified shape A.
+    /// **The bottom bar** (VM-52, her LK-5 — "Words on a chip"): Starred ·
+    /// Bookcase · Library, the current one on a chip, 56 pt targets — the
+    /// face is `MobileTabBar`. Each root draws it at its foot and the
+    /// destination builder gives it to every pushed LIST, so a note pushed
+    /// over a list covers it ("Roots and lists, not notes").
     ///
-    /// **The third door arrives at batch 10, and it IS the band's index**:
-    /// the doors are in `MobileShellBand.pages` order, so what the bar shows
-    /// and what a swipe traverses are one arrangement. It is also the whole
-    /// answer to discoverability — a page reachable only by a gesture is a
-    /// page a VoiceOver user cannot reach at all, and a swipe nobody has
-    /// been told about is not a door.
-    ///
-    /// *(PROVISIONAL — the alternative is two doors with `Shelf` lit while
-    /// Starred shows, which would leave the bar naming a surface that is not
-    /// on screen. Recorded in the batch record.)*
+    /// **It IS the band's index** (batch 10): its doors are in
+    /// `MobileShellBand.pages` order, so what the bar shows and what a swipe
+    /// traverses are one arrangement — and a page reachable only by a gesture
+    /// would be a page a VoiceOver user cannot reach at all.
     private var tabBar: some View {
-        HStack(spacing: 26) {
-            tabDoor(MobileStarsModel.pageName, .starred)
-            tabDoor("Shelf", .shelf)
-            tabDoor("Library", .library)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
-        .background(tokens.room)
-        .overlay(alignment: .top) {
-            Rectangle().fill(tokens.line).frame(height: 1)
-        }
+        MobileTabBar(current: tab, tokens: tokens, select: { tabSelected($0) })
     }
 
-    /// A tab door. The BODY moved to `selectPage` at batch 10 so the swipe
-    /// and the tap are the same act — the liveness handoff (S3 ladder
-    /// BLOCKER; the review's MAJOR 2 ordering) and A5-8's leaving-files-it
-    /// rule both live there now, and neither road can drift from the other.
-    private func tabDoor(_ label: String, _ target: MobileTab) -> some View {
-        Button {
-            selectPage(target)
-        } label: {
-            Text(tokens.chromeLabel(label))
-                .phoneType(.tab, tokens)
-                .foregroundStyle(tab == target ? tokens.ink : tokens.phone.faint)
+    /// **A TAB TAP RETURNS TO THAT ROOT** (VM-52 — the ticket's "changing
+    /// room means backing out first", answered). The page change itself is
+    /// `selectPage`, the ONE road a swipe also takes (the liveness handoff,
+    /// A5-8's leaving-files-it rule and the settle all live there).
+    ///
+    /// · The CURRENT tab, from a pushed list: back to its root (the system's
+    ///   own tab grammar).
+    /// · Another tab: the stack being left returns to ITS root first, then
+    ///   the page changes. So a hidden stack always stands at its root
+    ///   (PROVISIONAL P-47-19) — the band never reveals a pushed screen, a page
+    ///   change always lands on a root, and nothing she left open in another
+    ///   room keeps a note mounted behind the one on screen. (The bar shows
+    ///   on lists only, so the screen she taps from is never a note; a note
+    ///   BELOW a list — Versions pushed over its note — closes exactly as
+    ///   Back would close it, its leaving road and savepoint included.)
+    private func tabSelected(_ target: MobileTab) {
+        let leaving = tab
+        guard target != leaving else {
+            popToRoot(leaving, animated: true)
+            return
         }
-        .buttonStyle(.plain)
-        // The door's NAME, not its rendered casing (`chromeLabel` lowercases
-        // in the Terminal voice) — the `+ New Note` precedent, and the only
-        // way an assistive reader hears the same word in both voices.
-        .accessibilityLabel(label)
-        .accessibilityAddTraits(tab == target ? .isSelected : [])
+        popToRoot(leaving, animated: false)
+        selectPage(target)
+    }
+
+    /// One stack back to its root — the OWNING stack's path, by the S3 rule.
+    /// Unanimated when the page is leaving (the slide is the motion).
+    private func popToRoot(_ owner: MobileTab, animated: Bool) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = !animated
+        withTransaction(transaction) {
+            switch owner {
+            case .starred: if !starredPath.isEmpty { starredPath = NavigationPath() }
+            case .shelf: if !shelfPath.isEmpty { shelfPath = NavigationPath() }
+            case .library: if !libraryPath.isEmpty { libraryPath = NavigationPath() }
+            }
+        }
     }
 }

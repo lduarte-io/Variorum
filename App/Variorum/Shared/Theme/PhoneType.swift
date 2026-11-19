@@ -535,6 +535,18 @@ extension View {
     ) -> some View {
         modifier(PhoneTypeModifier(role: role, voice: tokens.voice, weight: weight))
     }
+
+    /// Both at once: a site's own weight, on a label that may shrink to fit —
+    /// never below the floor (the bottom bar's words, VM-52: the current one
+    /// semibold, and every one allowed to shrink only where its cell cannot
+    /// hold it at its size).
+    func phoneType(
+        _ role: PhoneTypeRole, _ tokens: VoiceTokens,
+        weight: PhoneTypeSpec.Weight, shrinkingToFloor: Bool
+    ) -> some View {
+        modifier(PhoneTypeModifier(
+            role: role, voice: tokens.voice, shrinksToFloor: shrinkingToFloor, weight: weight))
+    }
 }
 
 #if os(iOS)

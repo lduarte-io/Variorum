@@ -295,20 +295,30 @@ final class MobileVersionsModel {
 struct MobileVersionsScreen: View {
     @State private var model: MobileVersionsModel
     let tokens: VoiceTokens
+    /// VM-52: the shell's bottom bar, for the listing (see `MobileVersionsView`).
+    let listingBar: AnyView?
 
-    init(session: AppSession, postID: String, tokens: VoiceTokens) {
+    init(
+        session: AppSession, postID: String, tokens: VoiceTokens,
+        listingBar: AnyView? = nil
+    ) {
         _model = State(initialValue: MobileVersionsModel(session: session, postID: postID))
         self.tokens = tokens
+        self.listingBar = listingBar
     }
 
     var body: some View {
-        MobileVersionsView(model: model, tokens: tokens)
+        MobileVersionsView(model: model, tokens: tokens, listingBar: listingBar)
     }
 }
 
 struct MobileVersionsView: View {
     @Bindable var model: MobileVersionsModel
     let tokens: VoiceTokens
+    /// VM-52 (her LK-5, "Roots and lists, not notes"): the shell's bottom bar
+    /// rides the LISTING, a list, and leaves while a moment's words are read.
+    /// nil in harness use.
+    var listingBar: AnyView? = nil
 
     /// The reader's back door, and the proposal's own drawn path line.
     static let backToListing = "\u{2039} \(VersionsPath.name)"
@@ -326,6 +336,9 @@ struct MobileVersionsView: View {
         .background(tokens.surface.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) { reportLine }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if model.reading == nil, let listingBar { listingBar }
+        }
         .task { await model.load() }
         .alert(
             VersionsPath.restoreConfirmTitle,

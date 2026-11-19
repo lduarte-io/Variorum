@@ -202,7 +202,10 @@ struct MobileNavigationTests {
             ) { surface in
                 await surface.settle(30)
                 // The three doors exist, and the band's own page is on screen.
-                for door in ["Starred", "Shelf", "Library"] {
+                // (VM-52 MOVED this pin's middle word: the Shelf's door is
+                // "Bookcase" — SW-1, the Mac's name — spoken and drawn; the
+                // page is still `.shelf`.)
+                for door in ["Starred", "Bookcase", "Library"] {
                     #expect(surface.element(labeled: door) != nil,
                             "labels were \(surface.visibleLabels)")
                 }
@@ -210,7 +213,7 @@ struct MobileNavigationTests {
                         "the starred page's root really rendered; labels were \(surface.visibleLabels)")
 
                 // HOME.
-                #expect(selection(surface, "Shelf").allSelected, "the shelf is home")
+                #expect(selection(surface, "Bookcase").allSelected, "the Bookcase is home")
                 #expect(selection(surface, "Starred").noneSelected)
                 #expect(selection(surface, "Library").noneSelected)
 
@@ -220,7 +223,7 @@ struct MobileNavigationTests {
                 await surface.settle(30)
                 #expect(selection(surface, "Starred").allSelected,
                         "the door moved the band")
-                #expect(selection(surface, "Shelf").noneSelected)
+                #expect(selection(surface, "Bookcase").noneSelected)
 
                 // And all the way RIGHT, across home.
                 #expect(surface.activate("Library"),
@@ -231,7 +234,7 @@ struct MobileNavigationTests {
 
                 // Every root wears the bar, so the doors come in threes —
                 // stated rather than left as a surprise for the next reader.
-                #expect(selection(surface, "Shelf").copies == MobileShellBand.pages.count)
+                #expect(selection(surface, "Bookcase").copies == MobileShellBand.pages.count)
             }
         }
     }
