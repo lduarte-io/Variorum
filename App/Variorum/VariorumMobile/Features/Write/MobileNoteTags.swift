@@ -68,11 +68,19 @@ final class MobileNoteTagsModel {
 
     // MARK: - Reads
 
+    ///
+    /// VM-59: the suggestions are the NOTE's own wing's vocabulary (the wing
+    /// `TypedTagPath.apply` resolves a tapped path in) — never every wing's,
+    /// where a tap on another wing's path minted a same-path twin here, and
+    /// never the app's current wing, which differs while a note from another
+    /// wing is open.
     func refresh() async {
         do {
             let postID = postID
             let (mine, all) = try await session.database.read { db in
-                (try Queries.postTags(db, postID: postID), try Queries.allTags(db))
+                let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                return (try Queries.postTags(db, postID: postID),
+                        try Queries.allTags(db, wingID: wing))
             }
             applied = mine
             allTags = all

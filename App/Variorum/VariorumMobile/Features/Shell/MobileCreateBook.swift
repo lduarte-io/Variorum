@@ -62,9 +62,14 @@ final class MobileCreateBookModel {
     /// One flight at a time — this sheet's only write is the mint.
     let latch = MobileWriteLatch()
 
+    ///
+    /// VM-59: the BOOK's own wing's vocabulary — the sheet's one snapshot,
+    /// the wing the mint lands in, where Core resolves the rule's paths. A
+    /// path from another wing would have become a dead term.
     func loadTags() async {
         do {
-            tags = try await session.database.read { try Queries.allTags($0) }
+            let wing = wingID
+            tags = try await session.database.read { try Queries.allTags($0, wingID: wing) }
         } catch {
             lastError = String(describing: error)
         }

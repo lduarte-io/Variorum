@@ -87,12 +87,18 @@ final class MobileMembershipModel {
 
     // MARK: - Reads
 
+    ///
+    /// VM-59: what the sheet OFFERS is the note's own wing's books and
+    /// gatherings — a book never spans wings, so another wing's book could
+    /// only refuse (`crossWingMembership`); the note's own wing, never the
+    /// app's current one.
     func refresh() async {
         do {
             let postID = postID
             let (membership, all) = try await session.database.read { db in
-                (try Queries.readingsContaining(db, postID: postID),
-                 try Queries.readings(db))
+                let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                return (try Queries.readingsContaining(db, postID: postID),
+                        try Queries.readings(db, wingID: wing))
             }
             books = Self.ordered(membership)
             let memberIDs = Set(membership.map(\.id))
