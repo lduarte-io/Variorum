@@ -899,3 +899,20 @@ Kickoff facts).**
 ## Closeout
 
 *(written at closeout: results, the PROVISIONAL ratify list, canon deltas, the mobile parity line, born tickets)*
+
+### The run's state when ladder round 1 opened (2026-11-19, tip `e2c4c0c6e`)
+
+The closeout proper is written when the last batch closes. Until then each batch's LIVE STATUS above is the
+record of what was built and why, and this is what is and is not yet proved:
+
+| Batch | Members | Code and pins | Red-on-old and green |
+|---|---|---|---|
+| B | VM-16 (+VM-20), VM-43, VM-3, VM-84, VM-33 | on the branch (`48055fa9c` … `a11af21d0`) | **VERIFIED** in stage window (2): the seven pins red on the pre-fix tree, 68 tests in 6 suites green on the fix. The Mac guard for the hoisted undo sentence is **PENDING** (the Mac leg). |
+| A | VM-81, VM-83, VM-21 | on the branch (`68f7e7eab` … `5681d8304`); phone and Mac `build-for-testing` green | **PENDING** — stage window (1) is queued: 21 reds expected on the seam commit `7c9fc0151`, then green, then the Mac types that read the hoisted words. No simulator run has happened for this batch yet. |
+| C | VM-24 (+VM-19), VM-17 | half 1 only: the trace instruments, the fan-badge probe, VM-19's pin and fix (`a570d3960` … `fec0e478b`) | **PENDING** — stage window (3) is queued. The three diagnostic trace suites and the probe's cost note are instruments, not pins; they leave the tree in a named commit once the trace is read. VM-24's cause is not yet traced and VM-17 is not yet decided real or hollow. |
+
+Not yet done, by design: the whole phone target, the Mac leg on the merged tree, the simulator walk, the canon
+deltas, the mobile parity row. Her rulings and the PROVISIONAL calls so far are in Kickoff facts and in batch A's
+LIVE STATUS (one PROVISIONAL: an archived gathering's add row wearing "(archived)"); the drafted words waiting for
+her wording pass are VM-3's lesson, the create sheet's three gathering lines, and whether the collect receipt and
+the sealed book's Reopen sentence read rightly on the phone.
