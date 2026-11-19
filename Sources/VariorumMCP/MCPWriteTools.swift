@@ -58,10 +58,15 @@ struct MCPWriteTools: Sendable {
             // the would-be seat bells (`IntakeDecision.verdict`'s step 6).
             // VX-808 Unit B2 (A-808-6): named, so every arrival its acts ring,
             // re-pose or demote is stamped "by ‹client›".
-            let result: Result<Landed, Refused> = try await executor.run { ops in
-                try self.perform(job, ops: ops.heardAsWireClient(named: clientName), clientName: clientName)
+            // VX-133 (the VX-981 run, batch 2): the entries the act registered
+            // are read in the SAME serial body — nothing else can register
+            // between — so each landed receipt can name its own (`stamped`).
+            let (result, registered): (Result<Landed, Refused>, [Int]) = try await executor.run { ops in
+                let before = ops.undoStack?.newestEntryID
+                let result = try self.perform(job, ops: ops.heardAsWireClient(named: clientName), clientName: clientName)
+                return (result, ops.undoStack?.entryIDs(newerThan: before) ?? [])
             }
-            switch result {
+            switch result.map({ $0.stamped(registered) }) {
             case .success(let landed):
                 // VX-775: a call whose Activity line the store refused tells her
                 // ONCE — its receipts and then the failure through ONE hook, so
@@ -301,6 +306,19 @@ struct MCPWriteTools: Sendable {
         }
 
         var receipt: MCPWriteReceipt? { receipts.first }
+
+        /// **VX-133 — each receipt names the undo entry its act registered**: the call's
+        /// undoable receipts (a commit registers none — I5) take the entries registered during
+        /// the call (`UndoStack.entryIDs(newerThan:)`, oldest first) one for one, in landing
+        /// order — a list call's items each their own. Paired only when the counts agree; any
+        /// other shape stamps nothing, so the app's run counts as it always did.
+        func stamped(_ entries: [Int]) -> Landed {
+            let undoable = receipts.indices.filter { receipts[$0].act.isUndoable }
+            guard !entries.isEmpty, undoable.count == entries.count else { return self }
+            var stamped = receipts
+            for (index, entry) in zip(undoable, entries) { stamped[index].undoEntryID = entry }
+            return Landed(answer: answer, receipts: stamped, activityLogFailure: activityLogFailure)
+        }
     }
 
     struct Refused: Error, Sendable {

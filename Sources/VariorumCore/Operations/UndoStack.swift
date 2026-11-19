@@ -226,6 +226,12 @@ public final class UndoStack: @unchecked Sendable {
         _ = lock.withLock { walkObservers.removeValue(forKey: token) }
     }
 
+    /// Tells every walk observer, outside the lock (`notifyChange`'s posture).
+    private func notifyWalk(_ walk: Walk) {
+        let observers = lock.withLock { Array(walkObservers.values) }
+        for observer in observers { observer(walk) }
+    }
+
     /// Registers one forward operation's two halves. `redo` is REQUIRED
     /// (never defaulted): a new registration site must decide how its act
     /// is re-applied rather than silently shipping a hole in redo — pass
@@ -430,6 +436,7 @@ public final class UndoStack: @unchecked Sendable {
             }
         }
         notifyChange()
+        notifyWalk(Walk(direction: .undo, entryID: entry.id, label: entry.label, changed: changed))
         return Outcome(label: entry.label, changed: changed)
     }
 
@@ -460,6 +467,7 @@ public final class UndoStack: @unchecked Sendable {
             if changed { entries.append(entry) }
         }
         notifyChange()
+        notifyWalk(Walk(direction: .redo, entryID: entry.id, label: entry.label, changed: changed))
         return Outcome(label: entry.label, changed: changed)
     }
 

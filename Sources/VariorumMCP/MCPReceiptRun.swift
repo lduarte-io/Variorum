@@ -30,7 +30,7 @@ public struct MCPReceiptRun: Sendable, Equatable {
 
     /// The receipts her line counts — every receipt of the run whose act stands.
     public var standing: [MCPWriteReceipt] {
-        receipts
+        receipts.filter { receipt in receipt.undoEntryID.map { !walkedBack.contains($0) } ?? true }
     }
 
     /// A receipt landed: it joins the run (same client, same key, inside the window) or starts
@@ -47,7 +47,15 @@ public struct MCPReceiptRun: Sendable, Equatable {
         landedAt = now
     }
 
-    /// A structural undo or redo completed (`UndoStack.addWalkObserver`).
+    /// A structural undo or redo completed (`UndoStack.addWalkObserver`): an undo that CHANGED
+    /// something walks its act out of the count, a redo that did walks it back in; a quiet half
+    /// (VX-276 — nothing written) and a walk naming no act of this run (her own entry, an older
+    /// run's) change nothing.
     public mutating func walked(_ walk: UndoStack.Walk) {
+        guard walk.changed, receipts.contains(where: { $0.undoEntryID == walk.entryID }) else { return }
+        switch walk.direction {
+        case .undo: walkedBack.insert(walk.entryID)
+        case .redo: walkedBack.remove(walk.entryID)
+        }
     }
 }
