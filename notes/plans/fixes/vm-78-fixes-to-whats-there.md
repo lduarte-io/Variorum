@@ -5,52 +5,61 @@ the merges. Branch `vm-78-fixes-to-whats-there`, worktree `~/dev/variorum-vm-78`
 
 ## FOR A LATER READER
 
-*A DRAFT, written 2026-11-19 before batch C's window (3), ladder round 3, the merge and the gate; its PENDING slots
-are filled at closeout. Everything below this section is the night's working record.*
+*A DRAFT, refreshed 2026-11-19 at tip `f4fce656b`; its PENDING slots are filled at closeout. Everything below
+this section is the night's working record.*
 
 **What the run was.** The mobile catch-up's wave 1, umbrella 4: ten small fixes to faces the phone already had, pin
-before fix per member, with no `Sync/`, custody, schema or `Sources/` line. Three batches (B, A, C); VM-20 rides
-VM-16 and VM-19 rides VM-24 (both closed earlier as duplicates of their carriers).
+before fix per member, with no `Sync/`, custody, schema or `Sources/` line. Four batches (B, A, C, then D for
+VM-17's fix); VM-20 rides VM-16 and VM-19 rides VM-24 (both closed earlier as duplicates of their carriers).
 
-**The mechanisms, as settled** (traced in each batch's LIVE STATUS; one paragraph each in the Closeout):
-VM-16 — `undo(with:)` / `redo(with:)` return a label for a quiet press too, so the door said "Undid: X" and offered
-a Redo acting on another entry · VM-43 — the phone's one restore door passed no `insuringBuffer` · VM-84 — the chip
-read the unobserved `header` and woke only when `displayTitle` changed · VM-33 — the empty line drew before the
-observing `.task` could run (the Mac's VX-670 mechanism; found real) · VM-3 and round 1's F4 — two guide lessons
-outlived the behaviour they taught · VM-81 — Finish's `lockReading` dismisses pending arrivals unseen; Details
-resolved its book from the shelf listing, which drops archived books, while Starred keeps them; two refusals fell
-through to raw text · VM-83 — the retired `ShelfOrder` (case-sensitive, pins then journals), two doors over one
-star, "smart" in the faces · VM-21 — the phone composed its own collect receipt, blind to the op's `starred` and
-`gatheringArchived` · VM-24, VM-19, VM-17 — PENDING(window 3: the arm and the mechanism, or hollow).
+**The mechanisms, as settled** (one paragraph each in the Closeout): VM-16 — `undo(with:)` / `redo(with:)` return
+a label for a quiet press too, so the door said "Undid: X" and offered a Redo acting on another entry · VM-43 — the
+phone's one restore door passed no `insuringBuffer` · VM-84 — the chip read the unobserved `header` · VM-33 — the
+empty line drew before the observing `.task` ran (found real) · VM-3 and F4 — two guide lessons outlived what they
+taught · VM-81 — Finish's `lockReading` dismisses pending arrivals unseen; Details resolved its book from a listing
+that drops archived books; two refusals fell through to raw text · VM-83 — the retired `ShelfOrder`, two doors over
+one star, "smart" in the faces · VM-21 — a home-made collect receipt blind to `starred` and `gatheringArchived` ·
+**VM-17 (real, two mechanisms):** an off-band badge kept a stale load-time frame while TextKit moved its
+fragment; an in-band badge was read before TextKit placed its fragment (74 pt short) · **VM-24 (the phone editor's
+edit routing):** an unarmed edit (autocorrect, dictation, marked text, sometimes a typed character) is routed from
+the storage's report; when attribute fixing widens it past the block's terminator the edit is refused and
+re-rendered away — the word just entered snaps back; stored text is never at risk · VM-19 — a test's stale first
+responder; its desync did not reproduce on this toolchain.
 
 **The fixes as built, one pointer per piece:** VM-16 `48055fa9c` (PENDING: re-landed on vm-55's message seam after
-the merge) · VM-20 `48055fa9c` · VM-43 `0f8ca319d` · VM-3 `c29095d35` · VM-84 `2d66e9a30` + `f933a4663` · VM-33
+the merge) · VM-20 `48055fa9c` · VM-43 `0f8ca319d` · VM-3 `c29095d35` · VM-84 `f933a4663` (seam `2d66e9a30`) · VM-33
 `e1d709b1b` · the word hoists `68f7e7eab`, `4118af9b3` · batch A's seams and pins `7c9fc0151` · VM-81 `aa4a8670f`,
 `081af74b0`, `326d61da4`, `97282e72f` · VM-83 `0abaf3938`, `36ace0aa5` · VM-21 `ea3b965af` · face polish
-`5681d8304` · VM-19 `615a12189`, `5ec59922c`, `839d86dd9` · VM-17's probe `a570d3960`, `e3f406086`, `78179b765` ·
-batch C's outcome and the instruments' removal: PENDING.
+`5681d8304` · VM-19 `615a12189`, `5ec59922c`, `839d86dd9` · VM-17: probe `a570d3960` (re-shaped `e3f406086`,
+`78179b765`), pins `15add793d`, the fix `f869f8667` (the takes chrome reads only inside TextKit's own viewport and
+re-reads in the same layout pass; PENDING its window), the decor reading `211221f6b` · VM-24: no fix — the write-up `65fe3a114` and the
+later run's kickoff `notes/plans/vm-24-unwarned-edit-routing.md` (`f4fce656b`) · the instruments out `16c75a5bf`,
+`5a57abdf0`.
 
-**Her rulings** are quoted verbatim in Kickoff facts (the ladder cap of five tonight; the night's frame; the shelf
-order left to wave 3, the collect receipt kept, the single wave-1 install after all four mobile runs) and in the
-Closeout's "Her rulings built here" (the Finish confirm — her "Keep it" for "Open Arrivals first", NOT built here,
-VM-175; "Only removals and refusals"; QUESTIONS #274 addendum 2's ratified insured restore, wired by VM-43). Two
-PROVISIONAL calls wait for her: an archived gathering's "(archived)" mark, and F8 (Diverge on a gathering's row) —
-QUESTIONS PENDING(number).
+**Her rulings** are quoted verbatim in Kickoff facts (the cap of five rounds tonight; the night's frame; the shelf
+order left to wave 3; the collect receipt kept; one wave-1 install after all four mobile runs), in the live state
+(VM-24: "Own run after wave 1 (Recommended)" and her words to the stage coordinator) and in the Closeout's "Her
+rulings built here". Two PROVISIONAL calls wait for her: an archived gathering's "(archived)" mark, and F8 (Diverge
+on a gathering's row) — QUESTIONS PENDING(number).
 
-**The evidence that matters.** Stage windows (2) 68/6, (1) 84/16 plus the Mac's 17 types 110/17 over the hoists,
-(5) 75/10, F4's follow-up 4/1 and R2-N1's 11/2 — each green after exactly its expected reds. Batch B's red bundle
-was lost and two red bundles are unreadable (`fixpass-red`, `r2n1-red`); the kept logs under
-`App/Variorum/DerivedData/logs/` are the evidence and agree with the record. Ladder: round 1 0 BLOCKER / 2 MAJOR /
-6 MINOR / 11 NIT; round 2 0 / 0 / 3 / 5; round 3 PENDING. PENDING(window 3; the whole phone target and the Mac leg
-on the merged tree; the simulator walk).
+**The evidence that matters.** Stage windows (2) 68/6, (1) 84/16 plus the Mac's 110/17, (5) 75/10, F4's 4/1 and
+R2-N1's 11/2, each green after exactly its expected reds; window (3): the caret pin red by design, VM-17's probe red
+on the stepped walk (35 astray · 35 misses · 9 bare), VM-19's pin red on the old teardown and green on the fix; the
+settle measurement: the unforced read is already placed in 118 of 118 band-fan reads at the first subview after the
+text view's layout. Three red bundles are lost or unreadable; the kept logs under `App/Variorum/DerivedData/logs/`
+are the evidence. Ladder: round 1 0 BLOCKER / 2 MAJOR / 6 MINOR / 11 NIT; round 2 0 / 0 / 3 / 5; round 3 0 / 1 / 5 /
+3 (R3-F1: the block decor shares the badge's rule). PENDING(batch D's window and the decor reading; round 4; the
+whole phone target and the Mac leg on the merged tree; the simulator walk).
 
 **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (`786f50af9`). MobileSoul §6:
-PL-75 (`224bb9c38`). AppSpec §9 and OverallModel §3's insured-restore lines: proposed in the Closeout,
-PENDING(applied or held).
+the run's row, drafted as PL-75 — it takes the next free number at the merge (main's PL-75 is VX-980's).
+AppSpec §9 and OverallModel §3's insured-restore lines: proposed in the Closeout, PENDING(applied or held).
 
-**Open items.** VM-16 re-landed after vm-55 merges; batch C's window and arm; the instruments out before any
-whole-target run; ladder round 3; her ratify list and wording pass; the tickets to mint (the Closeout's list). The
-remainders are carried by VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94, VM-218, VM-99 and VM-179.
+**Open items.** VM-24's own run (`/architect-phase vm-24` once all four wave-1 mobile runs merge; it starts with a
+measuring session on her phone); its pin stays red on main by decision. Batch D's window, then the decor reading's
+removal and its ticket (red) or hollow verdict (green). VM-16 re-landed after vm-55; round 4; the gate; her ratify
+list and wording pass; the tickets to mint (the Closeout's list). The remainders are carried by VM-24,
+VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94, VM-218, VM-99 and VM-179.
 
 ---
 
