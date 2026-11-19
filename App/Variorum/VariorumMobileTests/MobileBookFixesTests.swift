@@ -949,3 +949,75 @@ struct MobileCollectReceiptTests {
         }
     }
 }
+
+// MARK: - The membership sheet's FACE, hosted (VM-78 ladder round 4, G3)
+
+@MainActor
+@Suite("VM-78 — the membership sheet draws the marks and the doors its brains decide (round 4, G3)")
+struct MobileMembershipSheetFaceTests {
+    /// **A GUARD on the face** (R4-F1, G3). The pins above hold the sheet's
+    /// pure brains (`memberRowName`, `kindMark`, `rowCarriesDiverge`), so a
+    /// row that stops calling them passes them all — and the next wave-1
+    /// merge conflicts on exactly this row, whose other side is the face from
+    /// before VM-21 and VM-83 (the bare name, the "smart" mark), while
+    /// VM-47's type scan, red on the Diverge button inside its `if`, invites
+    /// unwrapping that `if` (VM-81's W-110). This mounts the REAL sheet over a
+    /// real store and reads what it draws: a note in an ARCHIVED book that a
+    /// live gathering also matches.
+    @Test func theSheetMarksAnArchivedBookAndAGatheringAndDrawsDivergeOnTheBookOnly() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await session.runner.run { ops -> String in
+                let quote = try ops.createTag(name: "quote")
+                let book = try ops.createReading(name: "Old projects", kind: .book)
+                _ = try ops.createReading(
+                    name: "Quotes", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(quote.id)))
+                let note = try ops.createPost(title: "a note")
+                _ = try ops.addPostToReading(note.id, to: book.id)
+                try ops.archiveReading(book.id)
+                _ = try ops.applyTag(quote.id, toPost: note.id)
+                return note.id
+            }
+            let model = MobileMembershipModel(session: session, postID: postID)
+            await model.refresh()
+            // THE PREMISE, first and on its own — it stops the test, so a red
+            // here is the fixture's, never the face's. The archived book keeps
+            // its membership row; the live gathering lists because its rule
+            // matches the note.
+            let premise: [String] = ["Old projects", "Quotes"]
+            try #require(model.books.map(\.name) == premise,
+                         "the fixture: the note is in the archived book and the gathering matches it")
+
+            try await withHostedSurface(
+                MobileMembershipSheet(model: model, tokens: .studyLight, onOpenNote: nil)
+            ) { surface in
+                await surface.settle(30)
+                let labels = surface.visibleLabels
+                let archivedName: String = "Old projects (archived)"
+                #expect(labels.contains(archivedName),
+                        "the archived book's row wears the mark (VM-21) — labels were \(labels)")
+                #expect(labels.contains("Quotes"), "the gathering's row — labels were \(labels)")
+                #expect(labels.contains("gathering"),
+                        "the gathering's row wears its kind word (VM-83) — labels were \(labels)")
+                #expect(!labels.contains { Self.saysSmart($0) },
+                        "no drawn label says \"smart\" (W-073) — labels were \(labels)")
+                #expect(labels.filter { $0 == "diverge" }.count == 1,
+                        "Diverge on the BOOK's row only (VM-81, W-110) — labels were \(labels)")
+            }
+        }
+    }
+
+    /// "smart" as a whole word, case-insensitive (the Mac's rule — the word
+    /// scan's twin above, kept local so this suite stands alone).
+    private static func saysSmart(_ text: String) -> Bool {
+        var search = text.startIndex..<text.endIndex
+        while let range = text.range(of: "smart", options: .caseInsensitive, range: search) {
+            let before = range.lowerBound > text.startIndex
+                ? text[text.index(before: range.lowerBound)] : " "
+            let after = range.upperBound < text.endIndex ? text[range.upperBound] : " "
+            let boundary: (Character) -> Bool = { !($0.isLetter || $0.isNumber || $0 == "_") }
+            if boundary(before) && boundary(after) { return true }
+            search = range.upperBound..<text.endIndex
+        }
+        return false
+    }
+}
