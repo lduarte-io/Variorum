@@ -19,12 +19,13 @@
 //  leaf; the full path stays the Mac's tooltip concern) — phone width
 //  demands it and the ruling supplies it.
 //
-//  Mirrored SEMANTICS, never Mac chrome: the count/smart split is the Mac
-//  `ShelfView.metaColumn`'s own (a smart book's membership is derived —
-//  `postCount` counts `reading_post` rows, so smart books say "smart",
-//  never a count); the tags-column source is `ShelfViewModel.tagsColumn`'s
-//  (smart books show their own query tags — the spec IS their identity;
-//  curated books show their member posts' most-applied paths).
+//  Mirrored SEMANTICS, never Mac chrome: the count/kind split is the Mac
+//  shelf row's own (a gathering's membership is derived — `postCount`
+//  counts `reading_post` rows, so a gathering says "gathering", never a
+//  count — VM-83, W-073: the word was "smart", retired app-wide at 13i-d);
+//  the tags-column source is `ShelfViewModel.tagsColumn`'s (a gathering
+//  shows its own rule's tags — the rule IS its identity; a book shows its
+//  member posts' most-applied paths).
 //
 
 import Foundation
@@ -72,7 +73,7 @@ nonisolated enum MobileShelfFaces {
     ) -> String {
         var parts: [String] = []
         if book.reading.kind == .gathering {
-            parts.append("smart")
+            parts.append(gatheringWord)
         } else {
             let unit = Queries.hasJournalTrait(book.reading.profile) ? "entr" : "note"
             let count = book.postCount
@@ -102,23 +103,15 @@ nonisolated enum MobileShelfFaces {
         meta.isEmpty ? name : "\(name), \(meta)"
     }
 
-    /// The pin door's word, state-mirroring (parity C2 — the Mac shelf
-    /// menu's own words; voice-cased at render). Pure so the door's
-    /// vocabulary is pinned, not promised.
-    static func pinDoorTitle(pinned: Bool) -> String {
-        pinned ? "Unpin from Shelf Top" : "Pin to Shelf Top"
-    }
+    /// **A gathering's kind word** (VM-83, W-073) — the Mac shelf row's own
+    /// ("gathering", never "smart"): the shelf's meta line and the
+    /// membership sheet's row mark both say it.
+    static let gatheringWord = "gathering"
 
-    /// Shelf order — **the Mac's own rule, not a mirror of it, since 13u1
-    /// UNIT 1** (the sweep's P40 hoisted the two byte-identical copies into
-    /// `Shared/ShelfOrder.swift`): pinned books first in pin order (R38),
-    /// then journal-profile books by name, then the rest by name. A
-    /// forwarder, so every phone caller and pin reads as it did.
-    static func ordered(
-        books: [Queries.ShelfBook], pins: [String]
-    ) -> [Queries.ShelfBook] {
-        ShelfOrder.ordered(books: books, pins: pins)
-    }
+    // (VM-83: `pinDoorTitle` — "Pin to Shelf Top" — retired with the Pin door
+    // (W-071), and `ordered(books:pins:)` with the retired `ShelfOrder` rule
+    // (W-068): the shelf orders by `BookcaseBoard` —
+    // `MobileShelfViewModel.orderedBooks`.)
 
     // MARK: - Today's Entry (round 2, batch 5 — R26.2)
 
@@ -139,17 +132,18 @@ nonisolated enum MobileShelfFaces {
 
     /// The door's word, in ONE place: two doors offer it (the shelf row's
     /// long-press and the book-details sheet) and they must not drift.
-    static let deleteBookDoorTitle = "Delete Book…"
-    static let deleteBookConfirmTitle = "Delete Book"
-
-    /// The delete door's label for a reading of `kind` (VM-83, W-073).
+    ///
+    /// VM-83 (W-073): **the words follow the reading's KIND** — the Mac's
+    /// `BookStateCopy.deleteDoorLabel(_:)` / `deleteVerb(_:)` (VX-611, hoisted
+    /// to `Shared/`): "Delete Book…" / "Delete Book" on a book, "Delete
+    /// Gathering…" / "Delete Gathering" on a gathering.
     static func deleteDoorTitle(for kind: ReadingKind) -> String {
-        deleteBookDoorTitle
+        BookStateCopy.deleteDoorLabel(kind)
     }
 
-    /// The delete confirm's title for a reading of `kind` (VM-83, W-073).
+    /// The delete confirm's title for a reading of `kind`.
     static func deleteConfirmTitle(for kind: ReadingKind) -> String {
-        deleteBookConfirmTitle
+        BookStateCopy.deleteVerb(kind)
     }
 
     /// **13i-e U2 — the daily Journal's doors (the sitting record §10; P-2):**
@@ -197,15 +191,16 @@ nonisolated enum MobileShelfFaces {
 /// (P-1: gating is data, never a per-view if), so the row's doors are pinned
 /// rather than promised. `MobileShelfViewModel.rowActs(for:starred:)` decides
 /// which a row carries; the view renders them in order.
+///
+/// VM-83 (W-071): no Pin act — "Pin to Shelf Top" wrote the same union star
+/// as Star (`setShelfPinned` IS `setStarred`), so the Star door is the one.
 nonisolated enum MobileShelfRowAct: Equatable, Sendable {
-    case pin(pinned: Bool)
     case star(starred: Bool)
     case archiveDailyJournal
     case delete(ReadingKind)
 
     var title: String {
         switch self {
-        case .pin(let pinned): MobileShelfFaces.pinDoorTitle(pinned: pinned)
         case .star(let starred): MobileStarsModel.doorTitle(starred: starred)
         case .archiveDailyJournal: MobileShelfFaces.archiveDailyJournalDoorTitle
         case .delete(let kind): MobileShelfFaces.deleteDoorTitle(for: kind)

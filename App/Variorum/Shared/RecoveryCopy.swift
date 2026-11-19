@@ -942,7 +942,15 @@ nonisolated enum RecoveryCopy {
         "Its notes stay in the library."
 
     static func movedToTrashReceipt(_ kind: Queries.TrashItem.Kind) -> String {
-        "\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) moved to the "
+        movedToTrashReceipt(kind, isGathering: false)
+    }
+
+    /// …and naming a GATHERING a gathering (VX-611's rule, VM-83 — the phone
+    /// shelf's delete receipt): "Gathering moved to the Trash — 30 days to put
+    /// it back." Every other kind reads byte-for-byte as above.
+    static func movedToTrashReceipt(_ kind: Queries.TrashItem.Kind, isGathering: Bool) -> String {
+        let word = rowKind(kind, isGathering: isGathering)
+        return "\(word.prefix(1).uppercased())\(word.dropFirst()) moved to the "
             + "\(trashSection) — \(TrashWindow.days) days to put it back."
     }
 

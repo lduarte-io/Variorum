@@ -311,12 +311,12 @@ struct MobileShelfView<TabBar: View>: View {
             }
         }
         .padding(.trailing, 12)
-        // Pin/unpin (parity C2): the long-press menu — the act belongs
-        // where the list it orders lives (the Mac shelf row's own context
-        // menu, the phone's long-press grammar). One state-mirroring door;
-        // the book's other acts live on its details surface, not here.
-        // VM-83: the menu is the model's act table (`rowActs`), drawn in its
-        // order — the doors are data, so a pin reads what she sees.
+        // The long-press menu (parity C2/C3 — the Mac shelf row's own context
+        // menu, the phone's long-press grammar): Star, then Delete (or
+        // Archive on the daily Journal); the book's other acts live on its
+        // details surface. VM-83 (W-071): the Pin door is retired — it wrote
+        // the same star. The menu is the model's act table (`rowActs`), drawn
+        // in its order — the doors are data, so a pin reads what she sees.
         .contextMenu {
             let target = StarTarget.reading(book.reading.id)
             ForEach(
@@ -338,10 +338,6 @@ struct MobileShelfView<TabBar: View>: View {
         _ act: MobileShelfRowAct, book: Queries.ShelfBook, target: StarTarget
     ) -> some View {
         switch act {
-        case .pin(let pinned):
-            Button(tokens.chromeLabel(act.title)) {
-                Task { await model.setPinned(book.reading.id, pinned: !pinned) }
-            }
         case .star:
             Button(tokens.chromeLabel(act.title)) {
                 let stars = stars

@@ -307,7 +307,10 @@ struct MobileTrashView: View {
     static func rowTitle(_ item: Queries.TrashItem) -> String {
         if let title = item.title, !title.isEmpty { return title }
         if let text = item.text, !text.isEmpty { return text }
-        return "(empty \(RecoveryCopy.rowKind(item.kind)))"
+        // VM-83 (W-073): an untitled GATHERING is named by its own kind word
+        // (VX-611's rule — the row's kind word already was), never "(empty
+        // book)".
+        return "(empty \(RecoveryCopy.rowKind(item.kind, isGathering: item.isGathering)))"
     }
 
     /// The row's second line: what it is · where it came from · and the

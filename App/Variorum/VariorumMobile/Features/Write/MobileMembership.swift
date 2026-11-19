@@ -96,9 +96,10 @@ final class MobileMembershipModel {
     }
 
     /// The small kind word a membership row wears after its name (VM-83,
-    /// W-073), or nil for a book.
+    /// W-073 — "gathering", never "smart"; the shelf row's word), or nil for
+    /// a book.
     nonisolated static func kindMark(for reading: Reading) -> String? {
-        reading.kind == .gathering ? "smart" : nil
+        reading.kind == .gathering ? MobileShelfFaces.gatheringWord : nil
     }
 
     /// A membership row's name (VM-21, F5).

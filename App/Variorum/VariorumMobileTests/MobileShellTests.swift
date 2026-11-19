@@ -87,31 +87,12 @@ struct MobileShellTests {
         #expect(!meta.contains("finished"), "the state lives on the name")
     }
 
-    /// The Mac `ShelfViewModel.ordered` semantics, mirrored: pins first
-    /// in pin order, then journal-profile books by name, then the rest by
-    /// name.
-    @Test func shelfOrderPutsPinsFirstThenJournalsThenName() throws {
-        func book(_ id: String, _ name: String, profile: String? = nil) -> Queries.ShelfBook {
-            Queries.ShelfBook(
-                reading: Reading(
-                    id: id, ownerId: nil, name: name, kind: .book, profile: profile,
-                    sortField: .manual, sortDir: .asc, groupingTagId: nil,
-                    querySpec: nil, maxPosts: nil, wordTarget: nil, locked: false,
-                    createdAt: Date(), updatedAt: Date(), deletedAt: nil,
-                    syncVersion: 0),
-                postCount: 0, sectionCount: 0)
-        }
-        let books = [
-            book("z", "Zebra"), book("j", "Journal", profile: "journal"),
-            book("a", "Aster"), book("d", "Dreams", profile: "journal"),
-            book("p", "Pinned late"),
-        ]
-        let ordered = MobileShelfFaces.ordered(books: books, pins: ["p", "z"])
-        #expect(ordered.map(\.reading.id) == ["p", "z", "d", "j", "a"],
-                "pin order · journals by name · the rest by name")
-    }
+    // (VM-83, W-068: `shelfOrderPutsPinsFirstThenJournalsThenName` RETIRED with
+    // the rule it pinned — `ShelfOrder.ordered`, deleted in the same commit. The
+    // shelf orders by the Mac Bookcase's `BookcaseBoard` rule now, pinned by
+    // `MobileShelfOrderTests` in `MobileBookFixesTests.swift`.)
 
-    /// The held observation delivers books + pins + the daily mark, and
+    /// The held observation delivers books (with their union star) + the daily mark, and
     /// the row faces compose from a real store (tags one-shot).
     @Test func theShelfObservationDeliversBooksPinsAndTheDailyMark() async throws {
         try await withEditorWorld { session, _ in
