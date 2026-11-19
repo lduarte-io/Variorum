@@ -1274,7 +1274,9 @@ final class MCPDoor {
     /// `stillStanding` re-check after the wait's suspension) lands the rest as
     /// the ask — her amendment's letter (PROVISIONAL P-676-4). VX-705: a move
     /// re-reads its place first (the press roads' gone table) and then where
-    /// she stands, so a place that died since the wire's read opens nothing.
+    /// she stands, so a place that died since the wire's read opens nothing —
+    /// and (round 1's F4, PROVISIONAL P-981-L1-1) its rows and a last change on
+    /// it go, as the press roads let them go.
     func agentShow(_ request: MCPShowRequest) async -> MCPShowRule.Verdict {
         let (standing, router) = currentStanding()
         let verdict = MCPShowRule.verdict(standing, dial: request.dial)
@@ -1295,6 +1297,18 @@ final class MCPDoor {
             // roads' own gone words; the client hears the one not-shared shape, the
             // answer a call one moment later gets (PROVISIONAL P-981-B2-5).
             guard await placeStands(request.target) else {
+                // Round 1's F4 (the VX-981 ladder — PROVISIONAL P-981-L1-1, option (a)):
+                // the press roads' table on this re-read too. The place is proved gone,
+                // so its rows go (a dead door — P-2) and a last change on that PLACE
+                // stops lighting ⌥⌘O (P-FL2-1) — matched by place (`MCPTrail.placeKey`):
+                // a receipt's target and a move's differ in shape (`.note(…, blockID:)`
+                // against `.note(…, nil)`) while the re-read is place-level. A standing
+                // ASK on the same place is not ended here — no press road ends one for
+                // another request; her take of it says gone and lets it go.
+                trail.update { $0.forget(placeOf: request.target) }
+                if let change = lastChange, MCPTrail.placeKey(change.target) == MCPTrail.placeKey(request.target) {
+                    lastChange = nil
+                }
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return .refuse(MCPShowRule.goneWords(request.target))
             }
