@@ -19,7 +19,7 @@ Ticket: VX-981 · Project: none (an umbrella over MCP-area tickets) · Branch: `
 | BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961 · riders VX-133 · VX-705) | DONE but for the wire round — code + pins at `b69e3a35f`; GATE B2 green (415 tests in 61 suites) with red legs A–D exact; the live wire round rides the closing walk |
 | BATCH 3 — announces in order, never waiting on a stall (VX-951 · VX-944) | DONE — code + pins at `6c7042c81`; headless green (MCP 726/136; the soak 600/600 alone, 3,232 under load); GATE B34 green on the merged tree with leg E red |
 | BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963 · rider VX-773) | DONE — code + pins at `c43595bef`; headless green (the whole MCP target alone 739/138 ×3); GATE B34 green on the merged tree |
-| BATCH 5 — the parity audit (VX-368); the output-cap measurement (VX-370) HELD | NOT-STARTED — runs after the ladder's code rounds, in a stage-queue gap |
+| BATCH 5 — the parity audit (VX-368); the output-cap measurement (VX-370) HELD | IN PROGRESS — a fresh `opus-implementer`, a document only (`notes/plans/vx-981/mcp-parity-audit.md`); see BATCH 5 — RECORD |
 | Gates (Mac suites under a stage claim), the closing walk | GATE A RAN (batch 1) · GATE B2 RAN (batch 2) · GATE B34 RAN (batches 3–4 on the merged tree) · `vx981-gate-fix` (both rounds' fixes: 22 types + LEG-R2F1, LEG-F4, LEG-F2-DOOR) REQUESTED on the final tree · the closing walk (80 min) and the merge gate (the whole Mac target + a targeted phone leg over structural undo, nov18's addition) NOT-STARTED |
 | The ladder (cold review of the whole diff, cap five, R-981-5) | CLOSED — ROUND 1: 0 BLOCKER · 0 MAJOR · 4 MINOR · 5 NIT, every finding fixed (`63187558d`) · ROUND 2 (`notes/plans/fixes/vx-981-ladder-round2.md`): 0 BLOCKER · 0 MAJOR · 1 MINOR · 3 NIT, no round 3 earned (R-981-5); its fixes built at `558ca7101` and CHECKED LINE BY LINE by the orchestrator (a final round's fixes); their app pins and red legs ride `vx981-gate-fix` |
 | The merge-in of main | DONE — `c7ea26c74` (origin/main `9a78628ea`), clean; repeated before the merge gate if main moves |
@@ -740,3 +740,16 @@ Round 2's fixes go to the implementer that built round 1's (its context holds th
 - **Red legs for the gate, as amended for this tip:** LEG-R2F1 = `fa02dda91` reverse-applied → `MCPShowOfferFacesTests`, the two R2-F1 pins red · LEG-F4 = `fa02dda91` then `aadc36db1` reverse-applied → F4's pin and the two R2-F1 pins red (3 tests, 7 issues) · LEG-F2-DOOR = `5e8958e61` reverse-applied → `MCPNavigationTests` + `MCPCompareLandingTests`, two tests red.
 
 **THE CODE TREE IS FINAL at `558ca7101` (plus record commits), barring a red at the gate, the walk or the merge gate.** What remains: `vx981-gate-fix` · BATCH 5 (the parity audit, a document) · the closing walk · the merge-in of main if it moved, then the merge gate (the whole Mac target, plus nov18's targeted phone leg over structural undo because `UndoStack.swift` changed) · the closeout · the merge · the release build (made, never published — R-981-8).
+
+### BATCH 5 — RECORD (VX-368 — the MCP parity audit; VX-370's measurement recipe, HELD)
+
+**Not done in this batch (first line, by the protocol):** no code, test, canon or tool file changed (the batch is a document); no test run and no build (none needed); no stage claim, walk or store touched; nothing minted on Linear (the proposed tickets below are for the orchestrator); `notes/QUESTIONS.md` untouched (any question lives in this record until the merge); VX-370's measurement itself not run (no second MCP client on this Mac — R-981-1), only its recipe written.
+
+**LIVE STATUS (implementer, flipped in the same commit as each piece):**
+
+| Piece | State |
+|---|---|
+| R0 — this record's opening; the reading done (CLAUDE.md + canon, this record's Kickoff, ENVIRONMENT & TRAPS and BATCH 5, MCPSpec whole, SurfaceContracts whole, the residuals ledger, the vx-336 record's D6 / OWED / U7 and U8 stage runs, the catalog whole, the registry's declaration list and the menus) | DONE (this commit) |
+| A1 — the audit's act table (her acts × the catalog), the reads table, the ruled and proposed exceptions, the five named gaps | NOT-STARTED |
+| A2 — VX-370's measurement recipe (the audit's last section) | NOT-STARTED |
+| C — this record's closing sections (method, counts, proposed tickets, bugs found, PROVISIONALs); the run's table + ledger flipped | NOT-STARTED |
