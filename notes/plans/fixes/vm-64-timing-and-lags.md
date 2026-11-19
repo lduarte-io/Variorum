@@ -155,7 +155,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 3 · VM-66 | **CLOSED 2026-11-19** | see the batch 3 block; built at `d2cef56be` | the BEFORE numbers are in "Orchestrator's stage results" below |
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | BUILT · headless green · **READY for the stage** | see the batch 5 block; code `8f1adc87c` + `5ba59a6c8`, products at `dcea98cee` (merged tree) | — |
-| 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
+| 6 · VM-69 · VM-70 | IN-PROGRESS (headless) | see the batch 6 block | first commit `f0e2e696c` (the midpoint review's finding 1) |
 | 7 · VM-71 | NOT-STARTED | — | — |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
@@ -509,6 +509,57 @@ the near window's facts.
 | P6 — builds, the headless suites, the closeout and READY | DONE — main merged at `d893fae63` (VX-980, at the orchestrator's word; clean); Core set re-run on the merged tree **173 tests in 24 suites passed** (the 169 + VX-980's `SearchFoldedWordsBesideATagTests`); phone + Mac `build-for-testing` into `vm64-b5/` and the red phone build into `vm64-b5-red/` all `** TEST BUILD SUCCEEDED **` on the merged tree (`dcea98cee`); READY — §7 batch 5 ▸ "The stage window" |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b5/` (gitignored).
+
+### Batch 6 · VM-69 · VM-70 — LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** The red-on-old build will be the batch's pins over the production files checked out at the
+INSTRUMENT commit (P2 below — the counter only, today's behaviour), after the fix is committed and pushed, into
+`App/Variorum/DerivedData/vm64-b6-red/`, then `git checkout HEAD --` the same files and a clean `git status`. This line
+changes to name the revert before it starts.
+
+**Audit F re-verified on this tree** (`d893fae63` + `f0e2e696c`): the screen's `.task` registers (the liveness grant's
+flush + one header read, `MobileLivenessAuthority.swift:154-265`), then `arrive` → `loadOnce` (projection + header in one
+read, `MobileEditorViewModel.swift:556-605`), then `start()` → two observations whose FIRST fetches re-read the header and
+the whole projection (`:580-585`, `:655-695`) — the second projection read audit F 2C names, and the BEFORE count 2. The
+first delivery's `ingest` is the third `.document` chrome request (`ingest` `:623` after `renderFull` `:896`, and again per
+delivery). The editor acquires the post's coordinator at `init` (`:213`) and nothing on the phone releases it
+(`releaseAutosave` has one phone caller, the quick note) — the BEFORE growth 1. The chips (`MobileWriteView.swift:492,527`)
+call the sheets' full `refresh()`: `Queries.readings(db)` (every book) and `Queries.allTags(db)` (every tag) at every
+open, though the masthead shows only the note's own rows; the two sheets already re-read on appear (`.task`).
+
+**The settled design:**
+- **VM-69, one read:** the arrival's ONE authoritative load IS the live observation's first value. `arrive` starts both
+  live observations (header + projection), takes their first values (header adopted first, then the projection ingested
+  — `loadOnce`'s order), and hands the running observations to `start()`, which continues them. No second read, so no
+  gap to fall into: GRDB's own guarantee covers the window between an observation's first fetch and its tracking start
+  (on a pool it compares WAL snapshots and re-fetches if anything committed — `ValueConcurrentObserver`), and nothing else
+  sits between the load and the live updates. `loadOnce()` stays for the harness (unchanged). A RE-arrival (a covered
+  screen shown again, already rendered) takes its first value as a DELIVERY — a signal that never rewrites the surface
+  (MAJOR 3), since the second read that used to follow is gone.
+- **The chrome once per open:** an apply arm that rewrote the page (a full render, a differential) already laid the
+  chrome out as its last act; `ingest` lays it out only when the arm did not (echo, deferred, refetch) — the same inputs,
+  never a second pass over them.
+- **VM-70, released on close:** the model releases its ONE acquisition at its end of life — `isolated deinit`, the Mac's
+  18k C1 shape (`EditorViewModel`'s own), phone-side only; `AppSession` unchanged. The `onDisappear` task holds the model
+  through teardown's flush and the leaving savepoint, so the release lands after both by construction; the phone's
+  `releaseAutosave` keeps a dirty coordinator and any coordinator another holder (a second tab, the quick note) still holds.
+- **The chips:** each chip reads only what it shows — membership `Queries.readingsContaining` (the Mac chip's feed), tags
+  `Queries.postTags`; the sheets keep their full `refresh()` on appear. References already read only the note's rows.
+- **No Core, no `Shared/`, no `Sync/`, no schema.** The Mac does not compile any changed file.
+
+| Piece | State |
+|---|---|
+| P0 — the midpoint review's finding 1 (the fence's projection-seam comment) | DONE (`f0e2e696c`) |
+| P1 — this live status | DONE (this commit) |
+| P2 — the instrument: the projection road's document-scope chrome requests counted (no behaviour change) | NOT-STARTED |
+| P3 — VM-69: the arrival through the live observation; the chrome once | NOT-STARTED |
+| P4 — VM-70: the release at the model's end of life | NOT-STARTED |
+| P5 — the chips' scoped reads | NOT-STARTED |
+| P6 — the pins: the perf suite's counts asserted (reads 1, builds 1, registry 0); the hazard pins (a)–(d); the chrome count | NOT-STARTED |
+| P7 — builds: phone `build-for-testing` into `DerivedData/vm64-b6/`; red-on-old into `vm64-b6-red/` | NOT-STARTED |
+| P8 — closeout in §7 + READY | NOT-STARTED |
+
+DerivedData: `App/Variorum/DerivedData/vm64-b6/` and `vm64-b6-red/` (gitignored).
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
