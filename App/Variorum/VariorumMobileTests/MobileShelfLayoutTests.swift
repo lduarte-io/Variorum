@@ -132,7 +132,8 @@ private func textInputView<V: View>(in surface: HostedSurface<V>) -> UIView? {
 @MainActor
 private func shelfSurface(
     _ session: AppSession, size: CGSize,
-    quickNote: MobileQuickNoteModel? = nil
+    quickNote: MobileQuickNoteModel? = nil,
+    tokens: VoiceTokens = .terminalLight
 ) -> HostedSurface<MobileShelfView<EmptyView>> {
     let shelf = MobileShelfViewModel(session: session)
     let stars = MobileStarsModel(session: session)
@@ -140,7 +141,7 @@ private func shelfSurface(
     return HostedSurface(
         MobileShelfView(
             model: shelf, stars: stars, quickNote: box,
-            tokens: .terminalLight, tabBar: { EmptyView() },
+            tokens: tokens, tabBar: { EmptyView() },
             onOpenBook: { _ in }, onOpenForWriting: { _ in },
             onSettings: {}),
         size: size)
@@ -380,8 +381,29 @@ struct MobileShelfLayoutBrainTests {
         // A floor expressed in points would drift the moment the type or
         // the box's chrome changed; this one is derived from both.
         #expect(floor == CGFloat(MobileShelfLayout.guaranteedWritingLines)
-                * MobileShelfLayout.smallLineHeight
+                * MobileShelfLayout.quickEntryLineHeight
                 + MobileShelfLayout.writingBoxChromeHeight)
+    }
+
+    /// **VM-48 (W-024): the floor is in lines of the box's OWN text, at its
+    /// own size.** The box types in the note body, which grows with Dynamic
+    /// Type; the shelf hands the brain that line, and her six lines are six
+    /// of THOSE — at the default size and at a doubled one alike.
+    @Test func theFloorIsInLinesOfTheBoxsTextAtAnySize() {
+        for line in [MobileShelfLayout.quickEntryLineHeight, CGFloat(48)] {
+            let floor = MobileShelfLayout.minimumWritingHeight(lineHeight: line)
+            #expect(MobileShelfLayout.writingLineCap(writingHeight: floor, lineHeight: line)
+                    >= MobileShelfLayout.guaranteedWritingLines)
+            for region in stride(from: floor, through: 900.0, by: 25.0) {
+                let split = MobileShelfLayout.split(
+                    region: region, bookRows: 40, extraRows: 1, lineHeight: line)
+                #expect(split.writingHeight >= floor - 0.001,
+                        "line \(line) region \(region): writing \(split.writingHeight)")
+            }
+            let rest = MobileShelfLayout.split(
+                region: 746, bookRows: 4, extraRows: 1, writing: .collapsed, lineHeight: line)
+            #expect(rest.writingHeight == MobileShelfLayout.collapsedWritingHeight(lineHeight: line))
+        }
     }
 
     /// **FOCUSING MUST NOT PUSH THE WRITING AREA UNDER THE FLOOR** — the
@@ -407,10 +429,13 @@ struct MobileShelfLayoutBrainTests {
     /// The floor wins when the room is genuinely small: the books yield
     /// entirely rather than leaving her a one-line box.
     @Test func theWritingFloorOutranksTheBooks() {
+        // Ten points above the floor — the shape this pin had at 150 over
+        // the old 140 pt floor, re-derived for VM-48's 24 pt box line.
+        let region = MobileShelfLayout.minimumWritingHeight + 10
         let split = MobileShelfLayout.split(
-            region: 150, bookRows: 20, extraRows: 1)
+            region: region, bookRows: 20, extraRows: 1)
         #expect(split.writingHeight >= MobileShelfLayout.minimumWritingHeight)
-        #expect(split.booksHeight <= 150 - MobileShelfLayout.minimumWritingHeight)
+        #expect(split.booksHeight <= region - MobileShelfLayout.minimumWritingHeight)
     }
 
     /// A region smaller than the floor is still partitioned honestly —
@@ -427,7 +452,9 @@ struct MobileShelfLayoutBrainTests {
         let roomy = MobileShelfLayout.writingLineCap(writingHeight: 380)
         let cramped = MobileShelfLayout.writingLineCap(writingHeight: 140)
         #expect(roomy > cramped)
-        #expect(roomy >= 20, "half a big phone is a real page — got \(roomy)")
+        // Half a big phone is a real page: thirteen lines of the 17 pt note
+        // body on the box's 24 pt line (twenty at the old 11.5 pt caption).
+        #expect(roomy >= 12, "half a big phone is a real page — got \(roomy)")
         #expect(cramped >= MobileShelfLayout.minimumWritingLines)
         // Degenerate inputs stay honest rather than crashing or going wild.
         #expect(MobileShelfLayout.writingLineCap(writingHeight: 0)
@@ -441,7 +468,7 @@ struct MobileShelfLayoutBrainTests {
     @Test(arguments: [140.0, 220.0, 380.0, 520.0])
     func theLineCapFitsInsideItsOwnRegion(writingHeight: Double) {
         let cap = MobileShelfLayout.writingLineCap(writingHeight: CGFloat(writingHeight))
-        let drawn = CGFloat(cap) * MobileShelfLayout.smallLineHeight
+        let drawn = CGFloat(cap) * MobileShelfLayout.quickEntryLineHeight
             + MobileShelfLayout.writingBoxChromeHeight
         // The floor case (3 lines) may exceed a tiny region by design —
         // everywhere else the cap must fit.
@@ -451,20 +478,43 @@ struct MobileShelfLayoutBrainTests {
         }
     }
 
-    /// The `smallLineHeight` constant is MEASURED, not assumed — against
-    /// the real fonts both voices resolve `tokens.small` to (11.5 pt,
-    /// monospaced in terminal, system in study).
-    @Test func smallFontLineHeightMatchesTheConstant() {
-        let terminal = UIFont.monospacedSystemFont(ofSize: 11.5, weight: .regular).lineHeight
-        let study = UIFont.systemFont(ofSize: 11.5).lineHeight
-        print("PERF[sim] shelf small line height — terminal \(terminal) · study \(study) "
-              + "· constant \(MobileShelfLayout.smallLineHeight)")
+    /// The box's line constants are MEASURED, not assumed — against the
+    /// real fonts both voices resolve the box's roles to (VM-48, W-024: the
+    /// box types in the note body — Iowan 17 / SF Mono 15 — and its status
+    /// row is meta with a controlInline door). Moved here from the old
+    /// 11.5 pt `smallLineHeight` pin.
+    @Test @MainActor func theBoxLinesMatchTheRealFonts() {
+        let terminal = PhoneType.uiFont(.noteBody, voice: .terminal).lineHeight
+        let study = PhoneType.uiFont(.noteBody, voice: .study).lineHeight
+        print("PERF[sim] shelf box line height — terminal \(terminal) · study \(study) "
+              + "· constant \(MobileShelfLayout.quickEntryLineHeight)")
         // Generous, because the constant only needs to be right enough to
         // keep the cap inside its region: a constant BELOW the truth would
         // over-cap and overflow, so the lower bound is the load-bearing one.
-        #expect(MobileShelfLayout.smallLineHeight >= terminal - 0.5)
-        #expect(MobileShelfLayout.smallLineHeight >= study - 0.5)
-        #expect(MobileShelfLayout.smallLineHeight <= max(terminal, study) + 4)
+        // (The box draws its text ON this pitch, so a font whose own line
+        // is shorter takes the difference as line spacing.)
+        #expect(MobileShelfLayout.quickEntryLineHeight >= terminal - 0.5)
+        #expect(MobileShelfLayout.quickEntryLineHeight >= study - 0.5)
+        #expect(MobileShelfLayout.quickEntryLineHeight <= max(terminal, study) + 8)
+        // The status row: a meta line and the controlInline `open` door.
+        for voice in ThemeVoice.allCases {
+            for role in [PhoneTypeRole.meta, .controlInline] {
+                let line = PhoneType.uiFont(role, voice: voice).lineHeight
+                #expect(MobileShelfLayout.metaLineHeight >= line - 0.5, "\(role) \(voice): \(line)")
+            }
+        }
+    }
+
+    /// **The hint's fit rule uses only her words** (W-024): every cut is the
+    /// hint itself or the hint cut at one of its own separators, longest
+    /// first — no new words.
+    @Test @MainActor func theHintsCutsAreTheHintsOwnWords() {
+        let cuts = MobileQuickNoteCopy.hintFits
+        #expect(cuts.first == MobileQuickNoteCopy.hint)
+        #expect(cuts == ["new note — just start typing · ⏎ opens it",
+                         "new note — just start typing", "new note"])
+        for cut in cuts { #expect(MobileQuickNoteCopy.hint.hasPrefix(cut)) }
+        #expect(zip(cuts, cuts.dropFirst()).allSatisfy { $0.0.count > $0.1.count })
     }
 }
 
@@ -707,6 +757,32 @@ struct MobileShelfRenderedLayoutTests {
             #expect(regions.writing.height
                     >= MobileShelfLayout.minimumWritingHeight - 1,
                     "largest text left \(regions.writing.height) pt to write in")
+        }
+    }
+
+    /// **THE HINT FITS ITS LINE** (VM-48, W-024): at the note body's size
+    /// the box shows the longest cut of its own hint that fits — never a
+    /// clipped one — in both voices, on her phone's width and at Display
+    /// Zoom's 320.
+    @Test(arguments: [CGFloat(320), 402])
+    @MainActor func theHintFitsItsLineInBothVoices(width: CGFloat) async throws {
+        for tokens in [VoiceTokens.terminalLight, .studyLight] {
+            try await withEditorWorld { session, _ in
+                let surface = shelfSurface(
+                    session, size: CGSize(width: width, height: 852), tokens: tokens)
+                defer { surface.tearDown() }
+                await surface.settle(30)
+                let cuts = MobileQuickNoteCopy.hintFits.map(tokens.chromeLabel)
+                let shown = surface.visibleElements.filter {
+                    cuts.contains($0.accessibilityLabel ?? "")
+                }
+                print("PERF[sim] hint at \(Int(width)) \(tokens.voice): \(shown.map { ($0.accessibilityLabel ?? "", $0.accessibilityFrame) })")
+                #expect(shown.count == 1, "exactly one cut renders — labels were \(surface.visibleLabels)")
+                let frame = try #require(shown.first?.accessibilityFrame)
+                // Inside the box: the 20 pt margin and the 12 pt padding.
+                #expect(frame.minX >= 20 && frame.maxX <= width - 20 - 12 + 0.5,
+                        "the hint \(frame) overflows a \(Int(width)) pt box")
+            }
         }
     }
 

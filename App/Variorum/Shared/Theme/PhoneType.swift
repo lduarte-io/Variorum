@@ -426,12 +426,23 @@ struct PhoneTypeModifier: ViewModifier {
     /// A label that may shrink to fit (a row of doors) shrinks no further
     /// than the floor — never below 13 pt.
     var shrinksToFloor = false
+    /// A site whose drawing names its own line pitch at the default size
+    /// (the quick-entry box's 24 pt line — sheet §E) overrides the role's;
+    /// it scales with the size like the role's own.
+    var linePitch: CGFloat?
     @Environment(\.dynamicTypeSize) private var typeSize
 
     /// The role at this environment's text size: font, line spacing, size.
     private var face: (font: Font, lineSpacing: CGFloat, pointSize: CGFloat) {
         #if os(iOS)
         let resolved = PhoneType.resolved(role, voice: voice, at: typeSize.phoneCategory)
+        if let linePitch {
+            let spec = PhoneType.spec(role, voice: voice)
+            let natural = PhoneType.baseUIFont(
+                spec, voice: voice, pointSize: resolved.pointSize).lineHeight
+            let pitch = linePitch * resolved.pointSize / spec.size
+            return (resolved.font, max(0, (pitch - natural).rounded()), resolved.pointSize)
+        }
         return (resolved.font, resolved.lineSpacing, resolved.pointSize)
         #else
         let spec = PhoneType.spec(role, voice: voice)
@@ -459,6 +470,13 @@ extension View {
     /// The phone's type: one role, in the voice the tokens carry.
     func phoneType(_ role: PhoneTypeRole, _ tokens: VoiceTokens) -> some View {
         modifier(PhoneTypeModifier(role: role, voice: tokens.voice))
+    }
+
+    /// A role drawn on a line pitch of its site's own (at the default size).
+    func phoneType(
+        _ role: PhoneTypeRole, _ tokens: VoiceTokens, linePitch: CGFloat
+    ) -> some View {
+        modifier(PhoneTypeModifier(role: role, voice: tokens.voice, linePitch: linePitch))
     }
 
     /// A role whose label may shrink to fit its row — never below the floor.

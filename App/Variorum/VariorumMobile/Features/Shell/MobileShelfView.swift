@@ -75,6 +75,9 @@ struct MobileShelfView<TabBar: View>: View {
     /// getting it back. One declaration (`MobileRecoveryDoors`), two
     /// renderers, no new surface. nil in harness/preview use.
     var onOpenTrash: (() -> Void)?
+    /// VM-48: the quick-entry box types in the note body, which follows the
+    /// text size; the layout brain's floor is in lines of it.
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     @State private var createBookPresented = false
 
@@ -92,7 +95,11 @@ struct MobileShelfView<TabBar: View>: View {
                     bookRows: model.orderedBooks.count,
                     extraRows: extraBooksRegionRows,
                     // Her 2026-08-30 ruling: one line until she clicks in.
-                    writing: quickNote.isFocused ? .expanded : .collapsed)
+                    writing: quickNote.isFocused ? .expanded : .collapsed,
+                    // VM-48 (W-024): her floor in lines of the box's own
+                    // text, at the current text size.
+                    lineHeight: MobileShelfLayout.quickEntryLineHeight(
+                        voice: tokens.voice, typeSize: typeSize))
                 VStack(spacing: 0) {
                     booksRegion
                         .frame(height: split.booksHeight)
@@ -114,15 +121,15 @@ struct MobileShelfView<TabBar: View>: View {
             }
             if let report = model.lastReport {
                 Text(tokens.chromeLabel(report))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
             }
             if let error = model.lastError {
                 Text(error)
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.alarm)
                     .lineLimit(3)
                     .padding(.horizontal, 20)
@@ -133,8 +140,8 @@ struct MobileShelfView<TabBar: View>: View {
                 // it speaks at its own door's root and clears after a
                 // beat; the old one-field rendering sat on both tabs).
                 Text(tokens.chromeLabel(starsError))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 4)
@@ -201,10 +208,10 @@ struct MobileShelfView<TabBar: View>: View {
                     VStack(spacing: 6) {
                         Text(tokens.chromeLabel(MobileEmptyStoreCopy.noBooks))
                         Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
-                            .foregroundStyle(tokens.faint)
+                            .foregroundStyle(tokens.phone.faint)
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 20)
@@ -225,8 +232,8 @@ struct MobileShelfView<TabBar: View>: View {
     private var pathLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
             Text(tokens.path(["Shelf"]) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Spacer()
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
@@ -239,7 +246,7 @@ struct MobileShelfView<TabBar: View>: View {
                 }
             } label: {
                 Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -248,7 +255,7 @@ struct MobileShelfView<TabBar: View>: View {
                 onSettings()
             } label: {
                 Text(tokens.chromeLabel("Settings"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
@@ -275,12 +282,12 @@ struct MobileShelfView<TabBar: View>: View {
                     // at rest — rows are doors, not a selection.
                     if !tokens.selectionMarker.isEmpty {
                         Text(tokens.selectionMarker)
-                            .font(tokens.body)
+                            .phoneType(.rowTitle, tokens)
                             .foregroundStyle(tokens.accent)
                             .opacity(0)
                     }
                     Text(tokens.chromeLabel(model.rowName(for: book)))
-                        .font(tokens.body.weight(.semibold))
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(book.reading.locked ? tokens.accent : tokens.ink)
                         .lineLimit(1)
                     Spacer(minLength: 12)
@@ -291,8 +298,8 @@ struct MobileShelfView<TabBar: View>: View {
                     // untouched, so every other surface still reads
                     // `meta(…, isDaily:)` exactly as before.)
                     Text(tokens.chromeLabel(model.rowMeta(for: book, showingDailyMarker: !isDaily)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .lineLimit(1)
                 }
                 // The padding rides INSIDE the button's label, so the whole
@@ -380,7 +387,7 @@ struct MobileShelfView<TabBar: View>: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileCreateBookSheet.doorTitle))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
             }
@@ -408,7 +415,7 @@ struct MobileShelfView<TabBar: View>: View {
             openToday()
         } label: {
             Text(tokens.chromeLabel(MobileShelfFaces.todayDoorTitle))
-                .font(tokens.small)
+                .phoneType(.chip, tokens)
                 .foregroundStyle(tokens.accent)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
@@ -435,7 +442,7 @@ struct MobileShelfView<TabBar: View>: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileShelfFaces.todayDoorRowTitle))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
             }
