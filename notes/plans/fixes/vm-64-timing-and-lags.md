@@ -154,7 +154,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 2 · VM-2 | **CLOSED 2026-11-19** (r2; three stage cycles) | see the batch 2 block; r2 code `2a3fd3a52` | stage results in "Orchestrator's stage results" below; PROVISIONAL P-2-1, P-2-5; residual VM-226 |
 | 3 · VM-66 | **CLOSED 2026-11-19** | see the batch 3 block; built at `d2cef56be` | the BEFORE numbers are in "Orchestrator's stage results" below |
 | 4 · VM-67 | BUILT · headless green · phone piece GREEN · **the 16 Mac types owed** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | closes when the Mac window runs |
-| 5 · VM-68 | NOT-STARTED | — | — |
+| 5 · VM-68 | IN-PROGRESS (implementer started 2026-11-19) | see the batch 5 block | — |
 | 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
 | 7 · VM-71 | NOT-STARTED | — | — |
 
@@ -446,6 +446,67 @@ owner-carrying table, through SQLCipher's page decrypt, holding the runner AND t
 | P7 — closeout in §7 (the S4 road list, the three options with plans, the first-seconds report) + READY | DONE (this commit) — §7 batch 4; the plans read through this build's SQLite (3.53.4) by the gated measurement; the whole Core package green (4,119 tests in 566 suites, 5 standing known issues; 703 in 130; 32 in 4). READY — the stage commands are in §7 batch 4 ▸ "The stage window" |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b4/` (gitignored).
+
+### Batch 5 · VM-68 — LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** The red-on-old proof for the hosted pins is a second phone build of the pins over the
+pre-fix production files (`git checkout <base> -- <files>` AFTER the fix is committed and pushed, build into
+`App/Variorum/DerivedData/vm64-b5-red/`, `git checkout HEAD -- <the same files>`, clean `git status`); this line names
+it before it starts. Base: `35a3bea7a`. A QUIET WINDOW was on at the start (no whole-package `swift test`, no cold or
+full `build-for-testing` until the orchestrator says it ended).
+
+**Audit F re-verified on this tree:** `startAll` / `startBookless` (`MobileLibraryViewModel.swift:316-353`, VM-65's
+marks inlined), both held for the root's whole life (`MobileLibraryView.swift:130-131`); `Queries.library` orders by the
+un-indexable COALESCE (`Timeline.swift:214-255`); `poolPosts` → `notePoolListingSQL` classifies every bookless note
+against every gathering's rule, then window-counts both classes (`ShelfQueries.swift:499-503, 576-655`); the silent cut
+(`MobileLibraryView.swift:419-422`); `observe` / `observe(tracking:)` (`AppDatabase.swift:237-296`, no phone list uses
+the second); the box's 500 ms debounce (`MobileQuickNote.swift:309`); the Library alive off screen in the band
+(`MobileShellView.swift:227-241`). All TRACED as written.
+
+**How the Mac keeps its Library fresh (read before designing — MobileSoul §3):** the catalog is ONE-SHOT keyset pages
+(`catalogNotesPage`, first page 80, growing), re-asked at the LISTED depth on mount (`listingAppeared`), on a new
+question, after its own row acts, on the deleted-notes signal, and when the held 200-window sidebar listing's MEMBERSHIP
+moves (`LibraryViewModel.listingMoves` → `followListingMove`, single-flight). Nothing the catalog shows is held except
+the near window's facts.
+
+**The settled design (the Mac's shape, phone-spelled):**
+- **A page, never a cap.** Both note listings (All/Notes, and Bookless) are keyset pages through `Queries.catalogNotesPage`
+  — the Mac's read — of `listingLimit` rows (200, the phone's existing window, so the resting listing is unchanged);
+  the next page is asked for as a row near the end appears, appended once (a note listed twice is listed where it was
+  first read — the Mac's landing rule). No face is added: rows simply continue (the Mac's precedent).
+- **Held only while the Library is on screen** (the shell's fact: the Library page is drawn at all — the current page
+  or revealed by a band drag — and its stack is at its root). While hidden NOTHING is held: a write sets off no Library
+  fetch and no landing. On screen, ONE observation holds the shown listing's FIRST page (a bounded keyset page — the
+  Mac's held window); a delivery lands directly when only that page is listed, else re-asks the LISTED depth in place,
+  single-flight (the Mac's `followListingMove`).
+- **The return is current:** becoming on screen (re)starts the held page, whose first fetch IS the re-ask; between the
+  return and that fetch's landing the pre-return rows show (one bounded statement). The Note listing is read ONCE at mount
+  whatever shows (the "Library ready" mark keeps its meaning; the bookless empty line's store fact).
+- **The bookless (Pool) listing** is held only while it is the filter shown AND the page is on screen, and is the same
+  paged read with the Pool's LOOSE predicate added (the Mac's `notePoolListingSQL` predicates, shared, its statement
+  byte-identical): a page walks `idx_container_touched` and stops when the page fills, so a re-read tests the notes it
+  walks — never every note against every gathering (the floor, stated: when the wing holds fewer loose notes than a page,
+  the walk reaches the wing's end).
+- **Core changes — said first, as the brief asks, with why:** `Queries/LibraryPaging.swift` (VX-980 calls into it; it
+  does not edit it): (1) `CatalogNotesPage` gains `keys` — each hit's sort-key value, which the statement already
+  selects — because the phone's All interleaves books by the row's sort stamp and `CatalogHit` carries no
+  `last_major_revision_at`; (2) `catalogNotesPage(…, poolLoose:)`, default false and byte-identical, adds the Pool's loose
+  predicate to each arm. `Queries/ShelfQueries.swift`: the Pool's two predicates (the gatherings' `shown` OR and the
+  live-book home) move to one home both statements read; `notePoolListingSQL`'s text stays byte-identical (a guard pins
+  it against a frozen copy of the pre-change builder). No `SearchComposer` line, no schema, no `Sync/`.
+- **Not built (wave 2):** row previews. They attach as a one-shot read over the LANDED rows' ids (the Mac's
+  `loadNearExtras` place), never inside the held page's fetch.
+
+| Piece | State |
+|---|---|
+| P1 — this live status | DONE (this commit) |
+| P2 — Core: the shared Pool predicates + the byte-identity guards (frozen pre-change builders) | NOT-STARTED |
+| P3 — Core: `keys` + `poolLoose` on the page read; the Core pins (the loose pages equal `poolPosts`' loose class; the keys equal `Queries.library`'s stamps; the plans and VM steps) | NOT-STARTED |
+| P4 — phone: the model's paging + hold, the view's hold key and load-more, the shell's on-screen fact (`MobileShellBand.isDrawn`) | NOT-STARTED |
+| P5 — hosted pins: the 201st note reachable by scrolling (red on old); bookless pages past its window (red on old); the return lists what was minted while hidden (guard); the perf suite's four box-save counts ASSERTED 0 and a note typed in from the Library leaves its root alone | NOT-STARTED |
+| P6 — builds (phone + Mac `build-for-testing` into `DerivedData/vm64-b5/`; the red build `vm64-b5-red/`), the headless suites, the closeout and READY | NOT-STARTED |
+
+DerivedData: `App/Variorum/DerivedData/vm64-b5/` (gitignored).
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
