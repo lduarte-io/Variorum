@@ -110,6 +110,12 @@ public enum MCPShowRule {
         case offer
         /// Nothing was shown or offered, and this says why.
         case refuse(String)
+        /// **The show PARTLY landed** (round 1's F2 — the VX-981 ladder): the
+        /// delivery opened the note in front of her, and the rest (the takes, a
+        /// lens, Compare's columns) never arrived — answered `partialShowWords`,
+        /// `isError`. A DELIVERY's answer only: the etiquette rule
+        /// (`verdict(_:dial:)`) never returns it.
+        case partial
     }
 
     public static func verdict(_ standing: Standing, dial: MCPShowDial) -> Verdict {
@@ -227,6 +233,11 @@ struct MCPShowTool: Sendable {
                 case .refuse(let words):
                     try log(clientName, kind, id, title, allowed: false)
                     return Outcome(text: words, isError: true)
+                case .partial:
+                    // F2-S SCAFFOLD (pin before fix): TODAY's behaviour — exactly
+                    // `.refuse(partialShowWords)`'s road.
+                    try log(clientName, kind, id, title, allowed: false)
+                    return Outcome(text: MCPShowRule.partialShowWords, isError: true)
                 }
             }
         } catch let failure as ArgumentFailure {

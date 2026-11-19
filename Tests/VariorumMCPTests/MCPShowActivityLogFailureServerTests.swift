@@ -110,6 +110,31 @@ struct MCPShowActivityLogFailureServerTests {
         #expect(broken.tail.isEmpty && broken.lines.isEmpty)
     }
 
+    /// **RED ON THE SCAFFOLD — a PARTIAL show (round 1's F2, the VX-981 ladder).** The app opened
+    /// the note in front of her and the rest never landed (`.partial`: the delivery's `.unfinished`,
+    /// or `.interrupted` with no ask to present), then the store refused the Activity line: the
+    /// client hears the partial show's own words byte for byte, `isError` (what its twin with a
+    /// working log hears — R-825), and she is told once — the client, the tool, the store's words,
+    /// no receipts; Activity simply lacks the row. Its twin writes TODAY's row, `show_in_app` refused
+    /// (the refusal it is — what it asked for did not finish). Old (the scaffold — `.partial` on
+    /// `.refuse(partialShowWords)`'s `try log`): the store-failure sentence, and she is told nothing.
+    @Test func aPartialShowWhoseLogFailsAnswersPartialAndTellsHer() async throws {
+        let twin = try await show(.partial, logFails: false)
+        #expect(twin.isError && twin.answer == MCPShowRule.partialShowWords, "the control: \(twin.answer)")
+        #expect(twin.lines == ["show_in_app:refused"] && twin.failures.isEmpty,
+                "non-vacuity: its line lands, today's row — \(twin.lines)")
+
+        let broken = try await show(.partial, logFails: true)
+        #expect(broken.isError, "a partial show is still an error answer — \(broken.answer)")
+        #expect(broken.answer == twin.answer,
+                "RED ON THE SCAFFOLD: the partial show's own words, byte for byte the twin's — \(broken.answer)")
+        #expect(broken.failures == [
+            MCPActivityLogFailure(clientName: "claude-code", tool: "show_in_app", unrecorded: 1, storeWords: storeWords),
+        ], "RED ON THE SCAFFOLD: the app is told — once, naming the client, the tool and the store's words")
+        #expect(broken.tail.isEmpty, "a show carries no receipt")
+        #expect(broken.lines.isEmpty, "Activity lacks the row — nothing synthesized")
+    }
+
     /// A GUARD (green on both trees): a REFUSED show keeps the write family's refusal-line posture —
     /// nothing landed, so a store that cannot take the refusal's line answers VX-369's store-failure
     /// sentence ("…may not have landed…", true: nothing did) and the app hears no landed-act failure.

@@ -1276,7 +1276,9 @@ final class MCPDoor {
         let (standing, router) = currentStanding()
         let verdict = MCPShowRule.verdict(standing, dial: request.dial)
         switch verdict {
-        case .refuse:
+        case .refuse, .partial:
+            // Round 1's F2: the rule never answers `.partial` (a delivery's
+            // answer only) — returned as it is, `.refuse`'s road.
             return verdict
         case .offer:
             return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.unavailableWords)
