@@ -53,6 +53,33 @@ struct UndoStackWalkTests {
         #expect(try #require(stack.newestEntryID) > top, "tokens only grow")
     }
 
+    /// A GUARD for the read's P1 walk (it stops at the token, trusting the stack's order): through
+    /// undos, redos, a quiet retire, a registration that clears the redo future and a compound, the
+    /// undo stack stays in token order, so the walk-back answers exactly what a full scan would.
+    @Test func theStackStaysInTokenOrderSoTheReadWalksBackOnlyTheNewest() throws {
+        let stack = UndoStack()
+        let ops = Operations(undoStack: stack)
+        let quiet = Toy()
+        register(quiet, "one", on: stack)
+        register(Toy(), "two", on: stack)
+        register(Toy(), "three", on: stack)
+        _ = try stack.undo(with: ops)
+        _ = try stack.undo(with: ops)
+        _ = try stack.redo(with: ops)
+        register(Toy(), "four", on: stack)  // clears the redo future
+        try stack.withCompound(label: "five", operations: ops) {
+            register(Toy(), "leg a", on: stack)
+            register(Toy(), "leg b", on: stack)
+        }
+        _ = try stack.undo(with: ops)
+        _ = try stack.redo(with: ops)
+        let all = stack.entryIDs(newerThan: nil)
+        #expect(all == all.sorted() && all.count == 4, "\(all)")
+        for token in all {
+            #expect(stack.entryIDs(newerThan: token) == all.filter { $0 > token }, "after \(token)")
+        }
+    }
+
     /// **RED ON THE SCAFFOLD.** Every completed press is told — an undo and a redo that changed
     /// something, and a QUIET undo (its entry retired, `changed: false`) — each with the entry's
     /// own token and label, to every observer; a removed observer hears nothing more; a FAILED

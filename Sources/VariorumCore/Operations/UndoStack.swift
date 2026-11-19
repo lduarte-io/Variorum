@@ -202,12 +202,19 @@ public final class UndoStack: @unchecked Sendable {
     /// the door that ran it on the same serial runner. Tokens only grow, so a
     /// registration is always newer than anything on either stack; a
     /// compound's legs are never on the stack, only the compound entry is.
+    /// **∝ what the act registered (P1), never the session's history:** the
+    /// stack holds its entries in token order — a registration appends the
+    /// newest token, a redo re-appends what LIFO took last (any registration
+    /// having cleared the redo future), a compound's rollback appends its own
+    /// newer legs — so the read walks back from the top and stops at `token`.
     public func entryIDs(newerThan token: Int?) -> [Int] {
         lock.withLock {
-            entries.compactMap { entry -> Int? in
-                if let token, entry.id <= token { return nil }
-                return entry.id
+            var newer: [Int] = []
+            for entry in entries.reversed() {
+                if let token, entry.id <= token { break }
+                newer.append(entry.id)
             }
+            return newer.reversed()
         }
     }
 
