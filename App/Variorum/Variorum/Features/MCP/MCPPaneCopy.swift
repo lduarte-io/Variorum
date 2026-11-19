@@ -1699,9 +1699,33 @@ nonisolated enum MCPReceiptCopy {
             let short = "\(first.clientName) deleted a book \u{2014} \(whereNotesWent)\(tail)"
             if short.count <= budget { return short }
         }
+        // VX-979 (the VX-981 run, batch 2 — her words, QUESTIONS #273 addendum 2:
+        // "A title free arm might be nice in the longrun"): ONE version link or
+        // unlink keeps WHAT it did — two notes linked or unlinked as versions —
+        // dropping only the titles (Open › opens the pair; Settings ▸ MCP's
+        // Activity keeps the names), the wing move's precedent above. The
+        // unlink's words are hers; the link's twin is its plain mirror and the
+        // one-note unlink says "inside a note" (PROVISIONAL P-981-B2-1, -2).
+        if run.count == 1, let words = titleFreeVersionPhrase(first) {
+            let short = "\(first.clientName) \(words)\(tail)"
+            if short.count <= budget { return short }
+        }
         // 13n-c U6, D-U6-1 (red-on-old): ONE act is "a change", never "1 changes".
         let made = run.count == 1 ? "made a change" : "made \(run.count) changes"
         return "\(first.clientName) \(made)\(tail)"
+    }
+
+    /// **VX-979 — a version link or unlink without its titles**: the two-note
+    /// unlink in her words ("unlinked two notes as versions"), the link's plain
+    /// mirror, and the one-note unlink's "inside a note" (PROVISIONAL
+    /// P-981-B2-1, -2); nil for every other act.
+    private static func titleFreeVersionPhrase(_ receipt: MCPWriteReceipt) -> String? {
+        switch receipt.act {
+        case .versionLink: "linked two notes as versions"
+        case .versionUnlink:
+            receipt.detail == nil ? "removed a version link inside a note" : "unlinked two notes as versions"
+        default: nil
+        }
     }
 
     /// One wing move, as her door's receipt says it (`WingCopy.moved`): the
@@ -1843,7 +1867,8 @@ nonisolated enum MCPReceiptCopy {
         // versions") — the VX-915 gate36 disposition: the first wording,
         // "removed the version link between “A” and “B”", overran `budget`
         // even at three-letter titles, so the count fallback always spoke; the
-        // mirror shares the link's own long-title fallback class. A link inside
+        // mirror shares the link's own long-title class — which, since VX-979,
+        // drops the titles rather than the act (`titleFreeVersionPhrase`). A link inside
         // ONE note (her moveBlock re-homed an end) arrives with no far side
         // (`detail` nil — the tool carries the note once), and says so rather
         // than "… “A” and “A” …" (the VX-915 ladder's F-7; PROVISIONAL words,

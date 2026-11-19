@@ -122,4 +122,46 @@ struct MCPDoorErgonomicsFacesTests {
                 "her ruling: \"i imagine with edit to both, they should also be able to unlink something a user made\"")
         #expect(MCPToolFacts.rung(of: "link_versions") == .writeNew, "making the link stays write new (R-VX187-1)")
     }
+
+    // MARK: - VX-979 (the VX-981 run, batch 2 — APPENDED): the title-free arm
+
+    /// **VX-979 — a version link or unlink too long for the bar keeps WHAT it did** (her words,
+    /// QUESTIONS #273 addendum 2: "A title free arm might be nice in the longrun"): past
+    /// `MCPReceiptCopy.budget` the two titles go — "unlinked two notes as versions" (hers), the
+    /// link's plain mirror "linked two notes as versions" and the one-note unlink's "removed a
+    /// version link inside a note" (PROVISIONAL P-981-B2-1, -2) — never the generic "made a
+    /// change". At the boundary: the longest pair that fits keeps its titled form byte for byte
+    /// (72 characters with "claude-code"); one character more takes the title-free arm. RED ON OLD
+    /// by mechanism: past the budget the old line said "claude-code made a change · ⌥⌘Z undoes".
+    @Test func aVersionLinkOrUnlinkTooLongForTheBarKeepsWhatItDidWithoutTheTitles() {
+        func t(_ n: Int, _ c: Character) -> String { String(repeating: c, count: n) }
+        // The unlink — titles totalling 17 fit (55 + 17 = 72); 18 do not.
+        let fits = MCPReceiptCopy.line([receipt(.versionUnlink, title: t(9, "a"), detail: t(8, "b"))])
+        #expect(fits == "claude-code unlinked \u{201C}\(t(9, "a"))\u{201D} and \u{201C}\(t(8, "b"))\u{201D} as versions"
+                + undoes, "the longest pair that fits keeps its titled form: \(fits)")
+        #expect(fits.count == MCPReceiptCopy.budget, "the boundary is exact: \(fits.count)")
+        #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: t(9, "a"), detail: t(9, "b"))])
+                == "claude-code unlinked two notes as versions" + undoes, "one character more: title-free")
+        // The link — titles totalling 19 fit (53 + 19 = 72); 20 do not.
+        let linkFits = MCPReceiptCopy.line([receipt(.versionLink, title: t(10, "a"), detail: t(9, "b"))])
+        #expect(linkFits == "claude-code linked \u{201C}\(t(10, "a"))\u{201D} and \u{201C}\(t(9, "b"))\u{201D} as versions"
+                + undoes, "the link's longest fitting pair keeps its titled form: \(linkFits)")
+        #expect(linkFits.count == MCPReceiptCopy.budget)
+        #expect(MCPReceiptCopy.line([receipt(.versionLink, title: t(10, "a"), detail: t(10, "b"))])
+                == "claude-code linked two notes as versions" + undoes, "the link's twin")
+        // A link inside ONE note (the VX-915 ladder's F-7): a title of 15 fits (57 + 15 = 72); 16 not.
+        let insideFits = MCPReceiptCopy.line([receipt(.versionUnlink, title: t(15, "a"), detail: nil)])
+        #expect(insideFits == "claude-code removed a version link inside \u{201C}\(t(15, "a"))\u{201D}" + undoes)
+        #expect(insideFits.count == MCPReceiptCopy.budget)
+        #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: t(16, "a"), detail: nil)])
+                == "claude-code removed a version link inside a note" + undoes)
+        // The generic fallback is no longer reachable from this pair, at any title length.
+        for (act, detail) in [(Operations.MCPWriteAct.versionUnlink, t(400, "b")), (.versionLink, t(400, "b")),
+                              (.versionUnlink, nil)] {
+            let line = MCPReceiptCopy.line([receipt(act, title: t(400, "a"), detail: detail)])
+            #expect(!line.contains("made a change") && line.count <= MCPReceiptCopy.budget, "\(act): \(line)")
+        }
+        // A GUARD: every other single act past the budget keeps the count fallback (D-U6-1).
+        #expect(MCPReceiptCopy.line([receipt(.note, title: t(80, "a"))]) == "claude-code made a change" + undoes)
+    }
 }
