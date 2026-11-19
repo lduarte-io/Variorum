@@ -51,6 +51,22 @@ private func withCompareWorld<T>(
     }
 }
 
+// VX-705 (the VX-981 run, batch 2 — STAGING ONLY, assertions unchanged): a move at once now
+// re-reads its place before it moves (the press roads' gone table), as a real show's place always
+// stands when the wire's read found it — so a pin moving onto a literal id stages that row under
+// the SAME id. Rows only: no operation, no undo, no behaviour.
+private let vx705Stamp = DateFormatter.variorumISO8601.string(from: Date(timeIntervalSince1970: 1_782_864_000))
+
+private func vx705StageNotes(_ db: AppDatabase, _ ids: [String]) async throws {
+    try await db.write { db in
+        for id in ids {
+            try db.execute(
+                sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                arguments: [id, id, vx705Stamp, vx705Stamp])
+        }
+    }
+}
+
 @MainActor
 @Suite("VX-298 — Compare from the wire: the delivery, the board's landing, its posture", .serialized)
 struct MCPCompareLandingTests {
@@ -179,7 +195,8 @@ struct MCPCompareLandingTests {
     /// The anchor opened, the landing parked, then her Compare mode requested — and a show
     /// that cannot finish (the note never registered) refuses with no landing left parked.
     @Test func theNavigatorDeliversCompareOnHerOwnRoad() async throws {
-        try await withCompareWorld { session, _ in
+        try await withCompareWorld { session, db in
+            try await vx705StageNotes(db, ["n1", "n9"])  // VX-705: STAGING ONLY (the anchors; peers are not read)
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }

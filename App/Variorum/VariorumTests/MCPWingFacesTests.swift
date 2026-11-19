@@ -92,7 +92,16 @@ struct MCPWingFacesTests {
     // MARK: - show_in_app → a wing (her switcher's own act)
 
     @Test func showInAppToAWingSwitchesItAsHerSwitcherDoesAndSaysWho() async throws {
-        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            // VX-705 (the VX-981 run, batch 2 — STAGING ONLY, assertions unchanged): a move at once
+            // re-reads its place first (the press roads' gone table), as a real show's wing always
+            // stands when the wire's read found it — so the wing "w1" is staged as a row.
+            let stamp = DateFormatter.variorumISO8601.string(from: Date(timeIntervalSince1970: 1_782_864_000))
+            try await db.write { db in
+                try db.execute(
+                    sql: "INSERT INTO wing (id, name, position, created_at, updated_at) VALUES ('w1', 'variorum', 'a0', ?, ?)",
+                    arguments: [stamp, stamp])
+            }
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }

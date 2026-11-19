@@ -712,8 +712,12 @@ struct MCPShowOfferFacesTests {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
             // F-L2 (the VX-677 ladder round 1) — STAGING ONLY, assertions unchanged: the take half's
             // version is one of its note's saved versions, as a real ask's is (her press now re-reads
-            // it). The move half never meets the read (the agent road is unchanged).
+            // it). (VX-705 since: the move half meets the read too — below.)
             try await stageVersion(db, note: "n2", version: "v2")
+            // VX-705 (the VX-981 run, batch 2) — STAGING ONLY, assertions unchanged: the move half now
+            // re-reads its place before it moves (the press roads' gone table), so its version is one
+            // of its note's saved versions too, as a real show's is.
+            try await stageVersion(db, note: "n1", version: "v1")
             let rig = Rig(session, standing: .frontmostMainWindow)
             defer { rig.door.detach() }
             let target = MCPShowTarget.version(noteID: "n1", versionID: "v1")

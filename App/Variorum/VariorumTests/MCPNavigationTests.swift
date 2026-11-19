@@ -45,13 +45,40 @@ private func withSession<T>(_ body: @MainActor (AppSession, AppDatabase) async t
     }
 }
 
+// VX-705 (the VX-981 run, batch 2 — STAGING ONLY, assertions unchanged): a move at once now
+// re-reads its place before it moves (the press roads' gone table), as a real show's place always
+// stands when the wire's read found it — so a pin moving onto a literal id stages that row under
+// the SAME id. Rows only: no operation, no undo, no behaviour.
+private let vx705Stamp = DateFormatter.variorumISO8601.string(from: Date(timeIntervalSince1970: 1_782_864_000))
+
+private func vx705StageNotes(_ db: AppDatabase, _ ids: [String]) async throws {
+    try await db.write { db in
+        for id in ids {
+            try db.execute(
+                sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                arguments: [id, id, vx705Stamp, vx705Stamp])
+        }
+    }
+}
+
+private func vx705StageBooks(_ db: AppDatabase, _ ids: [String]) async throws {
+    try await db.write { db in
+        for id in ids {
+            try db.execute(
+                sql: "INSERT INTO reading (id, name, kind, created_at, updated_at) VALUES (?, ?, 'book', ?, ?)",
+                arguments: [id, id, vx705Stamp, vx705Stamp])
+        }
+    }
+}
+
 @MainActor
 @Suite("13n-b U4 — navigation: the move dial, the offer door, the keyboard road", .serialized)
 struct MCPNavigationTests {
     // MARK: - show_in_app's etiquette, at the decision seam
 
     @Test func showInAppMovesNothingUnlessVariorumIsFrontInAFullWindow() async throws {
-        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            try await vx705StageNotes(db, ["n1"])  // VX-705: STAGING ONLY
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }
@@ -81,7 +108,8 @@ struct MCPNavigationTests {
     }
 
     @Test func aBookTargetParksOutlinesChapterLandingAndOpensTheBook() async throws {
-        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            try await vx705StageBooks(db, ["r1", "r2"])  // VX-705: STAGING ONLY
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }
@@ -96,7 +124,8 @@ struct MCPNavigationTests {
     }
 
     @Test func takesAndLensTargetsRideHerOwnLandingsOnTheMountedNote() async throws {
-        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            try await vx705StageNotes(db, ["n1"])  // VX-705: STAGING ONLY
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }
@@ -122,7 +151,8 @@ struct MCPNavigationTests {
     /// app switch) still answered `.navigate`, so the client was told
     /// shown: true for a half-delivery.
     @Test func aShowThatCannotFinishRefusesInsteadOfClaimingShown() async throws {
-        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            try await vx705StageNotes(db, ["n1", "n2"])  // VX-705: STAGING ONLY
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }
@@ -144,9 +174,12 @@ struct MCPNavigationTests {
             let token = session.commandRouter.registerDetail(postID: "n2", mode: .write) { applied.append($0) }
             defer { session.commandRouter.unregisterDetail(token) }
             var standingCalls = 0
+            // VX-705 (STAGING ONLY, assertions unchanged): the move now reads where she stands
+            // twice before it moves (the look, and again after the place's re-read), so she
+            // leaves at the THIRD read — still mid-delivery, the wait's own re-check.
             door.standingProvider = {
                 standingCalls += 1
-                return (standingCalls == 1 ? .frontmostMainWindow : .notFrontmost, router)
+                return (standingCalls <= 2 ? .frontmostMainWindow : .notFrontmost, router)
             }
             // VX-676 (A JUSTIFIED EDIT — PROVISIONAL P-676-4, her amendment's
             // letter): she left mid-delivery, so the rest is the ASK — offered,

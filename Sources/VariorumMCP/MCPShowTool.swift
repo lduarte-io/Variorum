@@ -141,6 +141,18 @@ public enum MCPShowRule {
     /// is offered, never raced); a delivery she LEFT mid-way lands as the ask.
     public static let partialShowWords =
         "Variorum opened the note, but the rest of the show didn't land \u{2014} nothing more was moved."
+
+    /// **VX-705 (the VX-981 run, batch 2):** a move at once whose place died
+    /// between the wire's read and the move — the ONE not-shared shape for the
+    /// target's kind (hidden = missing: exactly what a call one moment later is
+    /// answered). PROVISIONAL P-981-B2-5.
+    public static func goneWords(_ target: MCPShowTarget) -> String {
+        switch target {
+        case .book: MCPRefusalCopy.words(.notShared, .book)
+        case .wing: MCPRefusalCopy.words(.notShared, .wing)
+        case .note, .takes, .lens, .compare, .version: MCPRefusalCopy.words(.notShared, .note)
+        }
+    }
 }
 
 /// **`show_in_app`** — the READ rung's one navigation tool (AF-11 F-3):

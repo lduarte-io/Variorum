@@ -1269,7 +1269,9 @@ final class MCPDoor {
     /// takes/lens/compare landing that never arrived refuses `partialShowWords`
     /// instead of claiming shown. VX-676: a delivery she LEFT mid-way (the
     /// `stillStanding` re-check after the wait's suspension) lands the rest as
-    /// the ask — her amendment's letter (PROVISIONAL P-676-4).
+    /// the ask — her amendment's letter (PROVISIONAL P-676-4). VX-705: a move
+    /// re-reads its place first (the press roads' gone table) and then where
+    /// she stands, so a place that died since the wire's read opens nothing.
     func agentShow(_ request: MCPShowRequest) async -> MCPShowRule.Verdict {
         let (standing, router) = currentStanding()
         let verdict = MCPShowRule.verdict(standing, dial: request.dial)
@@ -1279,9 +1281,28 @@ final class MCPDoor {
         case .offer:
             return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.unavailableWords)
         case .navigate:
-            guard let session, let router else { return .refuse(MCPShowRule.unavailableWords) }
+            guard let session, router != nil else { return .refuse(MCPShowRule.unavailableWords) }
+            // VX-705 (the VX-981 run, batch 2 — a rider): the PRESS roads' re-read
+            // (F-L2's one table, `showTargetStands`), before the move. The wire
+            // read the place readable, but a deletion can land between that read
+            // and this adopt (her Delete, a sync apply) — and the shell adopts any
+            // id. GONE ⇒ nothing opens and no trail row; her seam says the press
+            // roads' own gone words; the client hears the one not-shared shape, the
+            // answer a call one moment later gets (PROVISIONAL P-981-B2-5).
+            guard await placeStands(request.target) else {
+                session.status.refuse(MCPShowOfferCopy.gone(request))
+                return .refuse(MCPShowRule.goneWords(request.target))
+            }
+            // The re-read suspended this hop, so where she stands is read again —
+            // her etiquette's look and the move stay one hop; a move she left
+            // meanwhile is the ask (VX-676's amendment, as a delivery she leaves).
+            let (standingNow, routerNow) = currentStanding()
+            guard MCPShowRule.verdict(standingNow, dial: request.dial) == .navigate else {
+                return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.unavailableWords)
+            }
+            guard let routerNow else { return .refuse(MCPShowRule.unavailableWords) }
             let delivery = await MCPNavigator(session: session).deliver(
-                request.target, into: router,
+                request.target, into: routerNow,
                 stillStanding: { [weak self] in
                     guard let self else { return false }
                     return MCPShowRule.verdict(self.currentStanding().0, dial: request.dial) == .navigate
