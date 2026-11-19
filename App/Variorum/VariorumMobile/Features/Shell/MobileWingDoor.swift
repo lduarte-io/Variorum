@@ -22,7 +22,8 @@
 //  The phone owns only: where the list shows (a plain sheet of real buttons —
 //  a SwiftUI `Menu`'s rows are undrivable in process, `MobileSurfaceDriver`'s
 //  header), where a landing lands (the shell selects the Shelf page — the
-//  phone's Bookcase), and the 44 pt hit area on a line drawn at 11.5 pt.
+//  phone's Bookcase), and the door's 44 pt hit area on the roots' path line
+//  (since the VM-47 re-land, the phone layer's one 44 pt line — VM-50).
 //
 //  What a switch says: NOTHING (her ruling — a line only for removals and
 //  refusals; the Mac's ▾ list is silent too, `goTo(_, saying: false)`). The one
@@ -133,17 +134,20 @@ final class MobileWingDoor {
 /// target. Without either it is exactly the line batch 1 drew, so a harness
 /// that wires no door renders as before.
 ///
-/// **The target is at least 44 pt tall, and it is real** (the brief's one
-/// sanctioned change to the line's layout). The line is about 34 pt tall at
-/// 11.5 pt (its 14 pt top padding, the text, its 6 pt bottom padding — the
-/// roots' own, `MobileWingDoorMetrics`). A target hung invisibly beyond it
-/// would reach either up into the status bar's inset — the system answers
-/// touches there (tap to scroll to top), so it is no target the app can count
-/// on — or down into the search field, the books or the first row, which are
-/// drawn after the line and would win the touch. So the door's target spans
-/// the line's own paddings and the line grows by what is still missing: 10 pt
-/// at today's size (34 → 44), the name 5 pt lower, nothing else moved but by
-/// that. Measured on the real roots (`MobileWingDoorGeometryTests`).
+/// **The target is at least 44 pt tall, and it is real.** A target hung
+/// invisibly beyond its line would reach either up into the status bar's inset
+/// — the system answers touches there (tap to scroll to top), so it is no
+/// target the app can count on — or down into the search field, the books or
+/// the first row, which are drawn after the line and would win the touch. So
+/// the target is the line's own box: since the VM-47 run the roots' path line
+/// IS a 44 pt line (VM-50 — its doors are the phone's 44 pt controls, their
+/// hit areas touching), so the door takes the hit-area helper's 44 inside it
+/// and the line does not grow (at the VM-55 re-land the earlier hand-back of
+/// the roots' 14/6 pt paddings went with the paddings). The text is the
+/// phone's `meta` role in the corrected muted ink, ONE line: where the words
+/// cannot all fit beside the doors (Terminal at 402 pt — PROVISIONAL P-47-27)
+/// the path truncates at its tail, P-47-9's rule. Measured on the real roots
+/// (`MobileWingDoorGeometryTests`, `MobilePathLineGeometryTests`).
 struct MobileWingPath: View {
     let tokens: VoiceTokens
     let wing: String?
@@ -155,24 +159,17 @@ struct MobileWingPath: View {
 
     var body: some View {
         if let wing, let onDoor {
-            let metrics = MobileWingDoorMetrics.self
             Button(action: onDoor) {
                 Text(Self.title(
                     MobileWingTitle.doorParts(tokens, wing: wing, page: page, trailing: trailing),
                     tokens: tokens))
-                    .font(tokens.small)
-                    // The target spans the line's own top and bottom
-                    // paddings, then whatever 44 pt still needs…
-                    .padding(.top, metrics.lineTopPadding)
-                    .padding(.bottom, metrics.lineBottomPadding)
-                    .frame(minHeight: metrics.minimumSide)
-                    .contentShape(Rectangle())
+                    .phoneType(.meta, tokens)
+                    .lineLimit(1)
+                    // The line's own 44 (the hit-area helper), the words on
+                    // the line's leading edge.
+                    .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
-            // …while the line keeps laying its paddings out itself: the
-            // target overlaps them, so the line grows only by the remainder.
-            .padding(.top, -metrics.lineTopPadding)
-            .padding(.bottom, -metrics.lineBottomPadding)
             // The wing's NAME, never its voiced casing (the tab doors'
             // precedent).
             .accessibilityLabel(wing)
@@ -183,44 +180,43 @@ struct MobileWingPath: View {
             .accessibilityValue(page + trailing)
         } else {
             Text(tokens.path(MobileWingTitle.components(wing: wing, page: page)) + trailing)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
+                .lineLimit(1)
         }
     }
 
     /// The line's letters, the name in the accent and the rest in the line's
-    /// muted ink.
+    /// muted ink (the phone's corrected muted — VM-48).
     static func title(
         _ parts: (lead: String, door: String, rest: String), tokens: VoiceTokens
     ) -> AttributedString {
         var lead = AttributedString(parts.lead)
-        lead.foregroundColor = tokens.muted
+        lead.foregroundColor = tokens.phone.muted
         var door = AttributedString(parts.door)
         door.foregroundColor = tokens.accent
         var rest = AttributedString(parts.rest)
-        rest.foregroundColor = tokens.muted
+        rest.foregroundColor = tokens.phone.muted
         return lead + door + rest
     }
 }
 
 /// **The door's numbers.** 44 pt is the phone's touch minimum (the sizing
-/// sheet's, her accepted base); the two paddings are the roots' path lines'
-/// own (`MobileStarredView`, `MobileShelfView`, `MobileLibraryView` —
-/// `.padding(.top, 14)`, `.padding(.bottom, 6)`), which the door's target
-/// overlaps rather than adds to. If a root's paddings change, the geometry
-/// pins (which measure the real roots) say so.
+/// sheet's, her accepted base — `PhoneMetrics.touchMinimum`): the door's
+/// target, and each row of the list. (The two path-line paddings this enum
+/// once named, the roots' 14 above and 6 below, left with the line's rebuild
+/// as one 44 pt line — the VM-47 run's VM-50, met at the VM-55 re-land; the
+/// geometry pins measure the real roots.)
 enum MobileWingDoorMetrics {
-    static let minimumSide: CGFloat = 44
-    static let lineTopPadding: CGFloat = 14
-    static let lineBottomPadding: CGFloat = 6
+    static let minimumSide: CGFloat = PhoneMetrics.touchMinimum
 }
 
 // MARK: - The list
 
 /// **The plain list** — the wings in the switcher's order, Home first, the
 /// current one marked; each row a real button. The phone's sheet idiom (the
-/// title row with Done, the rows below, `MobileMembershipSheet`'s shape) in
-/// today's tokens. Its header is the Mac's own (`WingWords.switcherHeader` —
+/// shared sheet header with Done, the rows below, `MobileMembershipSheet`'s
+/// shape) on the phone layer. Its header is the Mac's own (`WingWords.switcherHeader` —
 /// the Mac's ▾ list says it). Nothing else is on it: no sizes, no ⋯, no
 /// management, no Snippets line — wave 2's.
 struct MobileWingListSheet: View {
@@ -229,18 +225,11 @@ struct MobileWingListSheet: View {
 
     var body: some View {
         let switcher = door.switcher
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(tokens.chromeLabel(WingWords.switcherHeader))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { door.close() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Done")
+        VStack(alignment: .leading, spacing: PhoneMetrics.Space.s12) {
+            // The phone's one sheet header (VM-50): the title at the gutter,
+            // Done the closing act with its 64 × 44 hit area.
+            PhoneSheetHeader(tokens.chromeLabel(WingWords.switcherHeader), tokens: tokens) {
+                door.close()
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -250,7 +239,7 @@ struct MobileWingListSheet: View {
                 }
             }
         }
-        .padding(20)
+        .padding(PhoneMetrics.gutter)
         .background(tokens.room.ignoresSafeArea())
         .task { await door.listOpened() }
     }
@@ -260,14 +249,16 @@ struct MobileWingListSheet: View {
             let door = door
             Task { await door.pick(row.id) }
         } label: {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: PhoneMetrics.Space.s8) {
                 // The mark's column is kept on every row, so the names align.
+                // (The ✓ in a picker is `meta`; a row's word is a menu row's
+                // label, `control` in her ink — sheet §E; PROVISIONAL P-47-8.)
                 Text("\u{2713}")
-                    .font(tokens.body)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.accent)
                     .opacity(current ? 1 : 0)
                 Text(tokens.chromeLabel(row.name))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 0)

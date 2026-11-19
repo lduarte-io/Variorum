@@ -196,7 +196,10 @@ struct MobileShellView: View {
                 await quickNote.fileOnLeaving()
             }))
         _messageLine = State(initialValue: MobileMessageLineModel(
-            status: session.status, voice: { [router] in router.voice }))
+            status: session.status, voice: { [router] in router.voice },
+            // VM-51 (the VM-47 run): the line wears the library's look —
+            // voice, palette and tint, the shell's own settings road.
+            look: { [router] dark in router.tokens(dark: dark) }))
         // The quick-note box's session (round 2, M5). Bound HERE and not
         // in a `.task` deliberately: `bind` is idempotent and writes only
         // `@ObservationIgnored` storage, so it cannot re-enter the view

@@ -175,14 +175,26 @@ struct PhoneInlineActStyle: ButtonStyle {
     var tone: PhoneActTone = .accent
     var role: PhoneTypeRole = .controlInline
     var alignment: Alignment = .center
+    /// A site's own weight for its word, the size and scaling staying the
+    /// role's — the receipt line's act is 15 SEMIBOLD (sheet §E; the one
+    /// message line, VM-61, at the VM-55 re-land). nil keeps the role's.
+    var weight: PhoneTypeSpec.Weight? = nil
 
     func makeBody(configuration: Configuration) -> some View {
         PhoneControlFeedback(
-            label: configuration.label
-                .phoneType(role, tokens)
+            label: word(configuration.label)
                 .foregroundStyle(tone.color(tokens))
                 .phoneHitArea(alignment: alignment),
             pressed: configuration.isPressed)
+    }
+
+    @ViewBuilder
+    private func word(_ label: Configuration.Label) -> some View {
+        if let weight {
+            label.phoneType(role, tokens, weight: weight)
+        } else {
+            label.phoneType(role, tokens)
+        }
     }
 }
 

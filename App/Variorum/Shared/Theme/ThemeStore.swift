@@ -15,8 +15,9 @@
 //  rewrite: the observation, the resolver road and every setter are the
 //  Mac's, byte for byte. The two adoptions that are the Mac's alone — the
 //  editor typography (`EditorTypography`, Mac-only) and the receipt style
-//  (`AppSession.status`, Mac-only) — stay where they were, behind the
-//  platform check.
+//  (the status seam is both platforms' since VM-61, but only the Mac's
+//  placement reads `receipt_style` — the phone never does, P-55-1) — stay
+//  where they were, behind the platform check.
 //
 
 import Foundation

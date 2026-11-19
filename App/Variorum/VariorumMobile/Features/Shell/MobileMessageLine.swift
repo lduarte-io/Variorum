@@ -27,11 +27,16 @@
 //  controls, never against SwiftUI's internal views (the iOS 18/26 hit-test
 //  reports on hosting-controller-root windows).
 //
-//  **Today's tokens, no restyle** (umbrella VM-47 owns sizes): the words in
-//  `tokens.small` — a refusal in the alarm ink every phone error slot wore, a
-//  removal in the muted ink every phone receipt wore, its Undo in the accent —
-//  on the room with the tab bar's hairline, because a line that floats over
-//  content needs a ground to be read on.
+//  **The receipt line's anatomy** (the VM-47 run's phone layer, put on at the
+//  VM-55 re-land — the sizing sheet §E, "Receipt line"; PROVISIONAL with its
+//  numbers, P-47-1): ONE line, 44 tall; the words SF 15 (`controlInline`,
+//  chrome — they follow the text size to xxxLarge and hold) — a refusal in the
+//  alarm ink every phone error slot wore, a removal in the corrected muted, an
+//  offer in ink; its act 15 semibold in the accent across a 44 pt hit area
+//  (`PhoneInlineActStyle`); at the gutter, on the room with the tab bar's
+//  hairline, because a line that floats over content needs a ground to be read
+//  on — in the library's look (voice, palette and tint: the shell hands its
+//  settings road, `look`). Its words, its classes and its timing are VM-61's.
 //
 
 import SwiftUI
@@ -47,6 +52,11 @@ final class MobileMessageLineModel {
     @ObservationIgnored let status: StatusCenter
     /// The library's voice, read live (the shell's own resolver input).
     @ObservationIgnored let voice: @MainActor () -> ThemeVoice
+    /// **The library's look, read live** — voice, palette and tint through the
+    /// shell's settings road (the VM-47 run's VM-51: every phone face wears the
+    /// library's palette, never the voice's bare colours). nil — a harness —
+    /// wears the voice's own (`voice`), as before.
+    @ObservationIgnored let look: (@MainActor (_ dark: Bool) -> VoiceTokens)?
 
     /// How far above the safe area's foot the line sits when the keyboard is
     /// down: the tab bar's height on a root (the line never covers the bar's
@@ -67,9 +77,13 @@ final class MobileMessageLineModel {
     /// that takes a touch. Not observed: hit-testing reads it, nothing draws it.
     @ObservationIgnored var doorFrame: CGRect?
 
-    init(status: StatusCenter, voice: @escaping @MainActor () -> ThemeVoice) {
+    init(
+        status: StatusCenter, voice: @escaping @MainActor () -> ThemeVoice,
+        look: (@MainActor (_ dark: Bool) -> VoiceTokens)? = nil
+    ) {
         self.status = status
         self.voice = voice
+        self.look = look
     }
 
     /// **How far above the WINDOW's foot the line's foot sits** — pure,
@@ -105,7 +119,8 @@ struct MobileMessageLineView: View {
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        let tokens = VoiceTokens.resolve(voice: model.voice(), dark: scheme == .dark)
+        let dark = scheme == .dark
+        let tokens = model.look?(dark) ?? VoiceTokens.resolve(voice: model.voice(), dark: dark)
         GeometryReader { _ in
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
@@ -136,13 +151,16 @@ struct MobileMessageLineView: View {
     }
 
     private func line(_ item: StatusCenter.Item, tokens: VoiceTokens) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
+        HStack(alignment: .firstTextBaseline, spacing: PhoneMetrics.Space.s12) {
             if !item.text.isEmpty {
                 Text(words(item, tokens: tokens))
-                    .font(tokens.small)
+                    .phoneType(.controlInline, tokens)
                     .foregroundStyle(ink(item, tokens: tokens))
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
+                    // The words' own air: one line of them is the line's 44,
+                    // and several keep clear of its edges.
+                    .padding(.vertical, PhoneMetrics.Space.s12)
                     .accessibilityLabel(item.text)
             }
             if let action = item.action {
@@ -153,9 +171,7 @@ struct MobileMessageLineView: View {
                 } label: {
                     Text(tokens.chromeLabel(action.label))
                 }
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, weight: .semibold))
                 .accessibilityLabel(action.label)
                 .onGeometryChange(for: CGRect.self) { geometry in
                     // The hosting view's root space IS the overlay window's
@@ -166,9 +182,8 @@ struct MobileMessageLineView: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, minHeight: PhoneMetrics.touchMinimum, alignment: .leading)
+        .padding(.horizontal, PhoneMetrics.gutter)
         .background(tokens.room)
         .overlay(alignment: .top) {
             Rectangle().fill(tokens.line).frame(height: 1)
@@ -186,7 +201,7 @@ struct MobileMessageLineView: View {
         switch item.kind {
         case .refusal: return tokens.alarm
         case .offer: return tokens.ink
-        case .receipt: return tokens.muted
+        case .receipt: return tokens.phone.muted
         }
     }
 }
