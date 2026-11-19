@@ -129,7 +129,9 @@ struct MobileBookView: View {
                 }
             }
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51 (R-47-1, "prose should not be on the tint"): her book's notes
+        // on the paper (the contents list IS the page here).
+        .background(tokens.surface.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

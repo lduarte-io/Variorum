@@ -179,10 +179,23 @@ struct MobileWriteScreen: View {
             ?? .resolve(settings: MobileEditorStyle.settings, dark: scheme == .dark)
     }
 
+    /// The ground under the note — the page's and the masthead's, so the title
+    /// and the prose share one ground with the editor below them: the VOICE's
+    /// own room under every palette (VM-51, PROVISIONAL P-47-16 — her R-47-1,
+    /// "prose should not be on the tint"). The Mac's road for exactly this
+    /// value (`ReadingPageTokens.room`, R-13u-10); it is what the editor's
+    /// own ground (`MobileEditorStyle.Face.room`) resolves to.
+    private var groundUnderHerWords: Color {
+        ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark)
+    }
+
     var body: some View {
         MobileWriteView(model: model)
             .ignoresSafeArea(.keyboard) // the container's keyboardLayoutGuide owns avoidance
-            .background(tokens.room.ignoresSafeArea())
+            // VM-51 (R-47-1; PROVISIONAL P-47-16): the page's ground is the
+            // editor's own — the voice's room, never the palette's tint
+            // (`MobileEditorStyle.Face.room`); the paper is VM-137's.
+            .background(groundUnderHerWords.ignoresSafeArea())
             .safeAreaInset(edge: .top) { masthead }
             .task {
                 // Wiring COMPLETES before the infinite observation loops
@@ -335,7 +348,7 @@ struct MobileWriteScreen: View {
         .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 8)
-        .background(tokens.room)
+        .background(groundUnderHerWords)  // VM-51: her title shares the page's ground
         .alert("Rename Note", isPresented: $renamePresented) {
             TextField("Title", text: $renameField)
             Button("Rename") {

@@ -71,6 +71,9 @@ struct MobileStarredView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
+            // VM-51 (R-47-1, "prose should not be on the tint"): her list on
+            // the paper; the path line and the tab bar stay on the room.
+            .background(tokens.surface)
             if let error = stars.error(on: .starred) {
                 // D2's rule: a refusal speaks at ITS OWN door's root. An
                 // un-star fired from this page reports here, and a homeless
@@ -117,7 +120,10 @@ struct MobileStarredView<TabBar: View>: View {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("★")
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.accent)
+                    // VM-51: the star's OWN token ("i like the blue star" —
+                    // blue in every voice, `VoiceTokens.star`), never the accent
+                    // (green in Terminal, the palette's hue under a palette).
+                    .foregroundStyle(tokens.star)
                 Text(tokens.chromeLabel(stars.displayName(item)))
                     .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)

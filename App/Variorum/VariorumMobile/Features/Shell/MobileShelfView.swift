@@ -114,6 +114,10 @@ struct MobileShelfView<TabBar: View>: View {
                 .frame(
                     width: proxy.size.width, height: proxy.size.height,
                     alignment: .top)
+                // VM-51 (R-47-1, "prose should not be on the tint"): her books
+                // and the box she writes into on the paper; the path line, the
+                // status lines and the tab bar stay on the room.
+                .background(tokens.surface)
                 // The two shapes are a state change she asked for, so it
                 // reads as one motion rather than a jump. Chrome-only:
                 // nothing here wakes the text layer (P3).

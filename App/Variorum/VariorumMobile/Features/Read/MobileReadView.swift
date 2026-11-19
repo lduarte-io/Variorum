@@ -112,7 +112,11 @@ struct MobileReadView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51: the room around the cream page is the VOICE's own, never the
+        // palette's — the Mac's rule (R-13u-10, her "leave that white so that
+        // the cream read page isn't on a colorful background"; R2: only the
+        // room follows the voice), now that the phone wears a palette.
+        .background(ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark).ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .task { await model.start() }
     }

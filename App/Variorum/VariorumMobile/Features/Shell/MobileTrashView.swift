@@ -94,7 +94,9 @@ struct MobileTrashView: View {
             }
             .padding(.horizontal, 8)
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51 (R-47-1, "prose should not be on the tint"): the Trash's rows
+        // on the paper; the report band below stays on the room.
+        .background(tokens.surface.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) { reportLine }
         // The filter and the sort are applied IN SQL, so a change restarts

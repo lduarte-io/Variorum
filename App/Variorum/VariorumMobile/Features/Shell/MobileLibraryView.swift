@@ -96,6 +96,10 @@ struct MobileLibraryView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
+            // VM-51 (R-47-1, "prose should not be on the tint"): her rows,
+            // previews and search passages on the paper; the path line, the
+            // field, the filter row and the tab bar stay on the room.
+            .background(tokens.surface)
             if let error = model.lastError {
                 Text(error)
                     .phoneType(.meta, tokens)
