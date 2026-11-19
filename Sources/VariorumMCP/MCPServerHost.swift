@@ -121,54 +121,18 @@ public final class MCPServerHost: @unchecked Sendable {
             #if DEBUG
             startStepProbe?(.swept)
             #endif
-            // VX-613 (the bind half — the vx-548 record's MB-13 (ii)): the sweep
-            // is the step that WAITS (a write, queued behind hers), so a stop can
-            // land during it — her switch's OFF → ON, the lock, the library
-            // closing. A start the host no longer owes binds nothing and writes
-            // no state: it used to bind the path and publish `.running` anyway —
-            // a host the door had let go, serving — and the fresh host's bind
-            // probe then met it ("another Variorum is already serving mcp.sock").
-            guard lock.withLock({ startStillOwed(since: begun) }) else { return }
-            let fd = try MCPSocketRoad.listen(directory: directory)
-            var pipeFDs: [Int32] = [-1, -1]
-            guard pipe(&pipeFDs) == 0 else {
-                close(fd)
-                MCPSocketRoad.unlink(directory: directory)
-                throw MCPSocketRoad.ListenError(kind: .failed(step: "pipe", errno: errno))
-            }
-            #if DEBUG
-            startStepProbe?(.bound)
-            #endif
-            let done = DispatchSemaphore(value: 0)
-            // VX-613: published only while the start is still owed. A stop that
-            // landed since the check above found no listener to end (none was
-            // published yet), so this start lets its own go — the socket removed
-            // while its listener still holds the path (the file is its own —
-            // `halt`'s rule), then the listener and the wake pipe closed.
-            let published: Bool = lock.withLock {
-                guard startStillOwed(since: begun) else { return false }
-                listenFD = fd
-                wakePipe = (pipeFDs[0], pipeFDs[1])
-                acceptDone = done
-                _state = .running
-                return true
-            }
-            guard published else {
-                MCPSocketRoad.unlink(directory: directory)
-                close(fd)
-                close(pipeFDs[0])
-                close(pipeFDs[1])
-                return
-            }
-            let wakeRead = pipeFDs[0]
+            // VX-959 (the VX-981 run, batch 4): from its owed check to its
+            // publish decision, a start walks THE BIND ROAD — one host at a time
+            // per socket path (`onTheBindRoad`); nil = it published nothing.
+            guard let listener = try onTheBindRoad({ try bindAndPublish(since: begun) }) else { return }
             let thread = Thread { [weak self] in
                 // VX-612: a loop that ends on a FATAL failure says so — the
                 // listener closed, the host flipped, the door signalled — where
                 // it used to return in silence with the pane saying "running".
-                if case .fatal(let reason)? = self?.acceptLoop(listenFD: fd, wakeFD: wakeRead) {
-                    self?.listenerDied(fd, reason: reason)
+                if case .fatal(let reason)? = self?.acceptLoop(listenFD: listener.fd, wakeFD: listener.wake) {
+                    self?.listenerDied(listener.fd, reason: reason)
                 }
-                done.signal()
+                listener.done.signal()
             }
             thread.name = "variorum.mcp.accept"
             thread.start()
@@ -199,6 +163,109 @@ public final class MCPServerHost: @unchecked Sendable {
     /// VX-613: how many stops this host has taken (`halt`) — a start's
     /// generation token.
     private var stopCount = 0
+
+    // MARK: - The bind road (VX-959 — the VX-981 run, batch 4)
+
+    /// A published listener: its descriptor, its wake pipe's read end, and the
+    /// accept loop's end signal.
+    private struct Listener {
+        let fd: Int32
+        let wake: Int32
+        let done: DispatchSemaphore
+    }
+
+    /// **The bind and the publish decision — always on the bind road.**
+    /// VX-613 (the bind half — the vx-548 record's MB-13 (ii)): the sweep is the
+    /// step that WAITS (a write, queued behind hers), so a stop can land during
+    /// it — her switch's OFF → ON, the lock, the library closing — and a start
+    /// the host no longer owes binds nothing and writes no state (it used to
+    /// bind the path and publish `.running` anyway — a host the door had let
+    /// go, serving). Then the bind (`MCPSocketRoad.listen`), and the listener is
+    /// published only while the start is STILL owed: a stop that landed since
+    /// found no listener to end (none was published yet), so this start lets
+    /// its own go — its socket removed while its listener still holds the path,
+    /// then the listener and the wake pipe closed. nil = nothing published.
+    private func bindAndPublish(since begun: Int) throws -> Listener? {
+        guard lock.withLock({ startStillOwed(since: begun) }) else { return nil }
+        let fd = try MCPSocketRoad.listen(directory: directory)
+        var pipeFDs: [Int32] = [-1, -1]
+        guard pipe(&pipeFDs) == 0 else {
+            close(fd)
+            MCPSocketRoad.unlink(directory: directory)
+            throw MCPSocketRoad.ListenError(kind: .failed(step: "pipe", errno: errno))
+        }
+        #if DEBUG
+        startStepProbe?(.bound)
+        #endif
+        let done = DispatchSemaphore(value: 0)
+        let published: Bool = lock.withLock {
+            guard startStillOwed(since: begun) else { return false }
+            listenFD = fd
+            wakePipe = (pipeFDs[0], pipeFDs[1])
+            acceptDone = done
+            _state = .running
+            return true
+        }
+        guard published else {
+            MCPSocketRoad.unlink(directory: directory)
+            close(fd)
+            close(pipeFDs[0])
+            close(pipeFDs[1])
+            return nil
+        }
+        return Listener(fd: fd, wake: pipeFDs[0], done: done)
+    }
+
+    /// **THE BIND ROAD — one host at a time per socket path** (VX-959; the vx-913
+    /// ladder's F2/F3 and the VX-613 residuals (e)/(f)). `MCPSocketRoad.listen` is
+    /// probe → unlink → bind → chmod → listen, and the publish re-check follows
+    /// it; two hosts on one path (the door's stale host and its fresh one) once
+    /// ran those steps INTERLEAVED: a probe refused in another host's bind →
+    /// listen gap called a live socket stale and stole the path, and the loser's
+    /// cleanup then unlinked the winner's socket by name; two probes could both
+    /// find nothing, and the later "stale-file" unlink removed the earlier host's
+    /// live socket; a probe meeting another host's listener before that host had
+    /// decided to publish it failed "another Variorum is already serving" — even
+    /// against its own host's second start. On this road the probe, the unlink,
+    /// the bind, the listen, the publish re-check and the start's own cleanup are
+    /// ONE step per path: no other host's probe can land inside it, and the
+    /// check-then-unlink of a start that is no longer owed cannot be raced by a
+    /// rebind (every bind of the path needs this lock). Every road is short and
+    /// never waits on a client — a start waits only while another start of the
+    /// same path binds. In-process only: a second PROCESS on the same container
+    /// is still met by the probe alone.
+    private func onTheBindRoad<T>(_ body: () throws -> T) rethrows -> T {
+        let road = Self.bindRoads.road(for: MCPSocketRoad.socketPath(directory: directory))
+        #if DEBUG
+        if !road.try() {
+            startStepProbe?(.waitsForTheDirectory)
+            road.lock()
+        }
+        #else
+        road.lock()
+        #endif
+        defer { road.unlock() }
+        return try body()
+    }
+
+    /// VX-959: the bind road's lock for each socket path, shared by every host in
+    /// this process (the door makes a fresh host per start; tests make many, each
+    /// in its own directory). Never pruned: one lock per path ever bound.
+    private static let bindRoads = BindRoads()
+
+    private final class BindRoads: @unchecked Sendable {
+        private let lock = NSLock()
+        private var roads: [String: NSLock] = [:]
+
+        func road(for path: String) -> NSLock {
+            lock.withLock {
+                if let road = roads[path] { return road }
+                let road = NSLock()
+                roads[path] = road
+                return road
+            }
+        }
+    }
 
     /// Stop: close the listener, unlink its socket, hang up every session (`halt`).
     /// **VX-394 (VX-348 U5): `reason` is why** — each connection this stop ends
@@ -256,8 +323,11 @@ public final class MCPServerHost: @unchecked Sendable {
     /// (`MCPStopRoadsServerTests`), both closed here:
     ///   - **The socket file is removed only by the host that bound it**, and
     ///     while its listener still holds the path — no other host can bind a
-    ///     live path (`MCPSocketRoad.listen`'s probe), so the file removed is
-    ///     always this host's own. A host that never served (the door's stale
+    ///     live path (`MCPSocketRoad.listen`'s probe, which since VX-959 runs on
+    ///     the bind road, one host at a time per path, so no probe can meet a
+    ///     listener half-built or undecided), so the file removed is always this
+    ///     host's own. This unlink needs no bind-road lock: a stop never waits
+    ///     on a start. A host that never served (the door's stale
     ///     start after a quick OFF → ON, which found the path served, or one
     ///     stopped before its start ran) used to unlink the SERVING host's file:
     ///     the pane said "running" while every client heard "Variorum must be
@@ -337,9 +407,9 @@ public final class MCPServerHost: @unchecked Sendable {
     /// thread; set before `start()`.
     ///
     /// VX-959 (the VX-981 run, batch 4): `.waitsForTheDirectory` — a start
-    /// about to WAIT for another host's bind road on the same socket path, told
-    /// before it waits, so a pin can let the other host go without a sleep.
-    /// (The scaffold declares it; the serialized bind road fires it.)
+    /// about to WAIT for another start's bind road on the same socket path
+    /// (`onTheBindRoad`), told before it waits, so a pin can let the other one
+    /// go without a sleep. `.bound` runs ON the road (the road is held there).
     var startStepProbe: ((StartStep) -> Void)?
     enum StartStep: Equatable, Sendable { case swept, bound, waitsForTheDirectory }
 

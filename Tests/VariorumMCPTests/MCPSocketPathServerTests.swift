@@ -69,7 +69,12 @@ private final class StartOnAThread: @unchecked Sendable {
             probe?(step)
         }
         let outcome = self.outcome
-        Thread { outcome.setValue(Result { try host.start() }) }.start()
+        Thread {
+            // The start runs OUTSIDE the outcome's lock (a `setValue` autoclosure
+            // would run it inside, and a reader would then wait out the start).
+            let ended = Result { try host.start() }
+            outcome.setValue(ended)
+        }.start()
     }
 
     var hasEnded: Bool { outcome.value != nil }
@@ -238,10 +243,16 @@ struct MCPSocketPathServerTests {
         let first = LockIsolated<Result<Void, Error>?>(nil)
         let second = LockIsolated<Result<Void, Error>?>(nil)
         let host = world.stale
-        Thread { first.setValue(Result { try host.start() }) }.start()
+        Thread {
+            let ended = Result { try host.start() }
+            first.setValue(ended)
+        }.start()
         #expect(try await until { hold.reached }, "the first start is held after its bind, before its publish")
 
-        Thread { second.setValue(Result { try host.start() }) }.start()
+        Thread {
+            let ended = Result { try host.start() }
+            second.setValue(ended)
+        }.start()
         #expect(try await until { second.value != nil || waited.value }, "the second start ended, or waits for the path")
         let stateBeforeTheFirstPublished = host.state
         hold.open()
