@@ -106,13 +106,14 @@ final class MobileBookDetailsModel {
 
     /// **VM-81 — the Finish confirm, whole** (W-105): the alert's only input,
     /// so nothing it says can be read from a stale second piece of state (the
-    /// Mac's `BookStateConfirm` lesson). `pendingArrivals` is the act's own
-    /// set, read by the dismissal's predicate.
+    /// Mac's `BookStateConfirm` lesson). The count lives in `line` alone (the
+    /// act's own set, read by the dismissal's predicate) — as on the Mac,
+    /// whose confirm carries no separate count (round 1, N3). `readingID` is
+    /// the act's subject (`confirmFinish`).
     nonisolated struct FinishConfirm: Equatable, Identifiable, Sendable {
         let readingID: String
         let title: String
         let line: String
-        let pendingArrivals: Int
         var id: String { readingID }
     }
 
@@ -149,7 +150,9 @@ final class MobileBookDetailsModel {
     /// still opens from Starred — and its Details was EMPTY, with no way back.
     /// Only when the shelf does not hold it: the live, archived reading, with
     /// the shelf row's counts read for this one book (`liveMemberNoteCount` —
-    /// the book's live member notes, the set the shelf's count counts).
+    /// the same members the shelf counts, read here with the note's liveness
+    /// joined; the shelf's held read counts live member ROWS without that join,
+    /// a P1 choice. Equal in a settled store — round 1, N8).
     nonisolated static func archivedBook(
         _ db: Database, id: String, absentFrom shelf: [Queries.ShelfBook]
     ) throws -> Queries.ShelfBook? {
@@ -218,24 +221,25 @@ final class MobileBookDetailsModel {
         lastError = nil
         pendingFinish = FinishConfirm(
             readingID: id, title: BookStateCopy.finishTitle(opening.name),
-            line: BookStateCopy.waitingLine(opening.waiting),
-            pendingArrivals: opening.waiting)
+            line: BookStateCopy.waitingLine(opening.waiting))
     }
 
     /// The confirm's Finish. The confirm is PASSED IN, never read back (the
     /// shelf's `confirmDeleteBook` rule — a binding setter clears
-    /// `pendingFinish` before an action's task runs).
+    /// `pendingFinish` before an action's task runs), and the act takes its
+    /// subject from it (round 1, N3 — the Mac's confirm acts on its own
+    /// `readingID` the same way).
     func confirmFinish(_ confirm: FinishConfirm) async {
         pendingFinish = nil
-        await setFinished(true)
-    }
-
-    func cancelFinish() {
-        pendingFinish = nil
+        let id = confirm.readingID
+        await run { try $0.lockReading(id) }
     }
 
     /// The alert host's binding (`confirmDeleteBook`'s rule: the setter only
-    /// ever clears; the act takes its subject as a parameter).
+    /// ever clears; the act takes its subject as a parameter). It is also the
+    /// alert's Cancel: the button acts nothing and SwiftUI's write-back
+    /// clears the confirm (round 1, F5 retired a `cancelFinish()` that no
+    /// face called).
     var finishConfirmPresented: Bool {
         get { pendingFinish != nil }
         set { if !newValue { pendingFinish = nil } }
@@ -352,11 +356,17 @@ final class MobileBookDetailsModel {
         // VM-81 (W-106): Reopen on a SEALED book (`unlockReading` refuses
         // `readingSealed`) fell to `DeletionRefusal.fallback` and reached her
         // as the raw enum. It speaks the shared table's sentence, the phone's
-        // roads (no Unseal door named — the phone has none yet). Only this
-        // arm: VM-62 sweeps the other raw-dump sites.
-        if case .readingSealed = error,
-           let words = OpsRefusalCopy.words(for: error, roads: .phone) {
-            return words
+        // roads (no Unseal door named — the phone has none yet). Round 1, F3:
+        // Unarchive's one foreseeable refusal joins it — a book unarchived
+        // elsewhere while this sheet is open, or a second press queued behind
+        // the first, meets `readingNotArchived` ("That book isn't archived any
+        // more — nothing changed."). Only these: VM-62 sweeps the other
+        // raw-dump sites.
+        switch error {
+        case .readingSealed, .readingNotArchived:
+            if let words = OpsRefusalCopy.words(for: error, roads: .phone) { return words }
+        default:
+            break
         }
         return DeletionRefusal.words(error)
     }
@@ -623,6 +633,10 @@ struct MobileBookDetailsSheet: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            // Round 1, F5: the row's verb as its label, like the archive,
+            // unarchive and delete rows beside it — so VoiceOver and the
+            // hosted pin name the door, not the caption.
+            .accessibilityLabel(act == .reopen ? BookStateCopy.reopenVerb : BookStateCopy.finishVerb)
         }
     }
 

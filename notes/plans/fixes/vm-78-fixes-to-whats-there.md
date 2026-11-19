@@ -695,17 +695,17 @@ in flight.** The pre-fix-pass tip ("old" for this window) is `0180727de`.*
 
 | Finding | State | Pin (TYPE / test) |
 |---|---|---|
-| F3 (VM-81) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` |
+| F3 (VM-81) | DONE — pin `72fa54dc8`, fix in the VM-81 fix commit after it; phone `build-for-testing` GREEN; red/green **PENDING** (the fix-pin window) | `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` |
 | F4 (VM-83) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileTutorialLibraryWalkTests/theShelfLessonDescribesTheShelfThatExists` |
-| F5 (VM-81) | IN-PROGRESS — the cancel pin re-pointed, the write-back assertion and the two hosted guards written; fix NOT-STARTED | `MobileFinishConfirmTests` |
+| F5 (VM-81) | DONE — tests `72fa54dc8` (the cancel pin re-pointed to the binding, the write-back assertion, two hosted guards), fix in the VM-81 fix commit (the row's label, `cancelFinish()` deleted); `build-for-testing` GREEN; the window's lines **PENDING** | `MobileFinishConfirmTests` |
 | F8 (VM-81) | no code — the question below, for the orchestrator to file at the merge | — |
 | N1 (VM-83) | IN-PROGRESS — guard written | `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` |
 | N2 (VM-83) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` |
-| N3 (VM-81) | IN-PROGRESS — the test's `pendingArrivals` assertion removed; fix NOT-STARTED | (the existing `MobileFinishConfirmTests`) |
+| N3 (VM-81) | DONE — the test's `pendingArrivals` assertion removed `72fa54dc8`; the field gone and `confirmFinish` acting on `confirm.readingID` in the VM-81 fix commit | (the existing `MobileFinishConfirmTests`) |
 | N4 (VM-83) | IN-PROGRESS — test renamed; the `BookcaseBoard` comment NOT-STARTED | `MobileShellTests/theShelfObservationDeliversBooksStarsAndTheDailyMark` |
 | N6 | WITHDRAWN — one line for VM-113's kickoff (below) | — |
 | N7 (VM-83) | IN-PROGRESS — the sweep test's doc says what it is | — |
-| N8 (VM-81) | NOT-STARTED — comment only | — |
+| N8 (VM-81) | DONE — comment only, in the VM-81 fix commit | — |
 | N9 | a walk row (below) | — |
 | N10 | a ticket line for the orchestrator (below) | — |
 | N11 | the window's two bundles (the recipe below); batch B's lost RED bundle recorded as lost | — |
