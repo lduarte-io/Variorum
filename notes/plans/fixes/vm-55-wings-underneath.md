@@ -308,8 +308,9 @@ rewording (batch 2's VM-61/VM-62 — every `String(describing: error)` this batc
 of the Mac's wing brains (batch 3's VM-63 — the phone's small wings holder below is the interim face-side holder);
 no restyle (the titles change WORDS in today's path lines only — VM-47 owns sizes); nothing under
 `Features/Protection/`, `Shared/Protection/`, `Sources/VariorumCore/Sync/`, custody or the editor seam; no Core
-change. The use-shaped simulator walk is the run's, after batch 3. **PENDING at this line: the stage-window runs
-(VM-59 red-on-old, then every suite green) — the LIVE STATUS below says which are in.**
+change. The use-shaped simulator walk is the run's, after batch 3. The evidence this batch closes on is the
+state-transition and view-model suites over a two-wing fixture, run in the stage window of 2026-11-19 03:50–04:02 —
+all green, VM-59's pins red on the old tree (below).
 
 Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch
 `vm-55-wings-underneath`. Reading list done in full before code (CLAUDE.md + loaded canon, MobileSoul §1–§5, the
@@ -322,14 +323,14 @@ DerivedData: one dir, `App/Variorum/DerivedData/vm55-b1` (gitignored), phone and
 | Piece | State |
 |---|---|
 | Record skeleton | DONE (b174f2754) |
-| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | DONE (219b4ac62) — tests `MobileWingStandTests` (6) + the Mac pin `VM56MacWingScopePinTests` (2), committed a0c54c57c; runs PENDING the stage window |
-| VM-57 — every listing reads the current wing | DONE (219b4ac62) — tests `MobileWingListingTests` (8), a0c54c57c; runs PENDING |
-| VM-58 — mints in the current wing | DONE (301388409; the new root tag rides 9462d3854) — tests `MobileWingMintTests` (4), a0c54c57c; runs PENDING |
-| VM-60 — the tag manager per wing | DONE (9462d3854) — tests `MobileWingTagManagerTests` (2), a0c54c57c; runs PENDING |
-| VM-59 — the wing-blind pickers | DONE in code — pins a690c8262 (THE RED-ON-OLD TREE), fix 171f514ad (the green tree); the red run and the green run PENDING the stage window |
+| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | DONE (219b4ac62) — `MobileWingStandTests` 6/6 green; the Mac pin `VM56MacWingScopePinTests` 2/2 green (tests a0c54c57c) |
+| VM-57 — every listing reads the current wing | DONE (219b4ac62) — `MobileWingListingTests` 8/8 green |
+| VM-58 — mints in the current wing | DONE (301388409; the new root tag rides 9462d3854) — `MobileWingMintTests` 4/4 green |
+| VM-60 — the tag manager per wing | DONE (9462d3854) — `MobileWingTagManagerTests` 2/2 green |
+| VM-59 — the wing-blind pickers | DONE — pins a690c8262: 3/3 RED on the old tree (7 issues), 3/3 GREEN on the fix 171f514ad |
 | Phone `build-for-testing` (`VariorumMobile`, the simulator's id) | DONE — green at 171f514ad |
 | Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 171f514ad (same DerivedData dir) |
-| Stage window | IN-PROGRESS — claim taken 03:50 (35 min). Leg 1 (phone, 32 suites) DONE: 251/251 passed (Swift Testing; XCTest "Executed 0"; no `skipped:` lines; the 2 known issues are `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`'s declared ones). xcodebuild hung after the run's last line and was stopped by hand at 04:00. Leg 2 (Mac) running. **Leg 3 — REVERT ABOUT TO BE IN FLIGHT:** the three VM-59 fix files go back to a690c8262 for the red-on-old run; if this line is the last word, restore with `git checkout HEAD -- App/Variorum/VariorumMobile/Features/Write/MobileNoteTags.swift App/Variorum/VariorumMobile/Features/Write/MobileMembership.swift App/Variorum/VariorumMobile/Features/Shell/MobileCreateBook.swift` and check `git diff` is empty. |
+| Stage window | DONE — claim 03:50, released 04:02:45 (`Tools/stage release --who vm-55`). Leg 1 phone (32 suites): 251/251 passed. Leg 2 Mac (3 suites): 13/13 passed. Leg 3 red-on-old: exactly 3 reds, restored, `git diff` empty, green products rebuilt after the release. Simulator shut down; no Variorum instance; no new `Variorum-*.ips`; no Problem Reporter. Results below. **No revert is in flight.** |
 
 #### VM-56 — the phone stands in one wing (W-015, W-019)
 
@@ -443,13 +444,19 @@ the tap minted "homeonly" in Work); `theAddToBookSheetListsTheNotesOwnWingsBooks
 the offers are Work's "Essays" and Work's gathering alone); `theGatheringPickerWritesTermsFromTheBooksOwnWing` (the
 sheet opened in Work offers Work's tags alone, and the gathering made from them names `[workTrip]` and no dead term).
 The two note pins stand the app in a DIFFERENT wing from the note, so a fix that read the current wing stays red.
-**Red-on-old: PENDING (stage window). Green: PENDING.**
+**Red-on-old — RAN (04:02, the tree at a690c8262's three files, the diff verified to be exactly 171f514ad
+reversed): 3 tests, 3 failed, 7 issues, every one a pin's own assert —** `aNotesTagSuggestionsReadTheNotesOwnWing` (L56
+the list held Home's tags; L58 "homeonly" was offered to a Work note; **L67 Work's vocabulary became
+`["homeonly", "trip"]` — the twin minted, observed**); `theAddToBookSheetListsTheNotesOwnWingsBooks` (L84 both
+"Essays" offered; L86 both gatherings); `theGatheringPickerWritesTermsFromTheBooksOwnWing` (L103 every wing's tags
+offered; **L112 the gathering's rule named a term that is not a live Work tag — the dead term, observed**). **Green on
+171f514ad: 3/3** (inside the phone leg). Restored with `git checkout HEAD --`; `git diff` empty.
 
 **Fix** (171f514ad): the note's sheets read `Queries.effectiveWing(db, ofPost:)` inside their one read and list that
 wing's tags / books and gatherings; the gathering picker reads the sheet's wing snapshot (the wing it mints in).
 `Shared/TypedTagPath.swift` needed no change (it already resolves in the note's wing).
 
-#### Tests (all written; every run PENDING the stage window)
+#### Tests and results (stage window 2026-11-19 03:50–04:02)
 
 Phone (`VariorumMobileTests`), new: `MobileWingStandTests` 6 · `MobileWingListingTests` 8 · `MobileWingMintTests` 4 ·
 `MobileWingTagManagerTests` 2 (file `MobileWingsTests.swift`, one two-wing fixture `TwoWingWorld`: a note "Field
@@ -464,7 +471,18 @@ batch touched — `MobileLibraryTests` `MobileLibrarySortTests` `MobileNavigatio
 `MobileShellTests` `MobileEmptyStoreTests` `MobileDailyJournalArchiveTests` `MobileStarterJournalTests`
 `MobileShelfLayoutBrainTests` `MobileShelfRenderedLayoutTests` (the two types file `MobileShelfLayoutTests.swift` declares — the coordinator caught the file name) `MobileWriteLatchTests` `MobileRefusalTableTests`.
 **MAC SUITES:** `VM56MacWingScopePinTests` `SettingsTagsWingFollowTests` `WingSwitcherTests`.
-Results: PENDING.
+
+**Results.**
+- **Phone leg** (`test-without-building` on the green tree, 171f514ad, the iPhone 17 Pro / iOS 26.2 simulator booted
+  fresh): Swift Testing "Test run with 251 tests in 32 suites passed after 178.097 seconds with 2 known issues";
+  XCTest "Executed 0 tests" (Swift Testing suites); no `skipped:` lines. The 2 known issues are the declared ones in
+  `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` (pre-existing,
+  `withKnownIssue`). Reds: none; no load re-runs. **Machinery note:** xcodebuild did not exit after the run's last
+  line (it sat ~5 minutes, its only output the `IDESchemeActionSDKRecord … invalidDigitCount` lines) and was stopped
+  by hand; the red-on-old run's xcodebuild did the same. The verdict lines had landed both times.
+- **Mac leg** (the dev-store Debug test host): "Test run with 13 tests in 3 suites passed after 0.893 seconds"; XCTest
+  "Executed 0"; no `skipped:` lines; xcodebuild exit 0. Reds: none. No What's New sheet; no instance left.
+- **Red-on-old** (VM-59): above, under the pins.
 
 #### PROVISIONAL calls (for QUESTIONS at the merge moment — the orchestrator carries them)
 
