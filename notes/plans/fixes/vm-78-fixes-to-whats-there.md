@@ -2279,8 +2279,8 @@ its own checkout.*
 | 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `211221f6b` (introduced), `75984c0e6` (its last edition, as run alone in batch D's window). The kickoff's wording for it is right as written |
 | 1e — the back-out's check | DONE (this commit) — output below |
 | 2a — the plan, written before the merge starts | DONE (this commit) — "The plan" below |
-| 2b — the merge commit (seven conflicts resolved, the re-land) | DONE (the merge commit — `origin/main` at `eb18888db`; its hash is the next record commit's) — per file in "The re-land, file by file" below; compile PENDING (row 3) |
-| 2c — the semantic merges git does not flag | IN-PROGRESS — in the merge commit: `MobileBookDetails.requestFinish`'s two refusals moved onto VM-62's road, Book Details' delete line names a gathering; the phone sources scanned by hand for VM-62's forbidden expressions (clean but main's three exempt/log lines). NEXT: the pins re-shaped to the one line (their own commit), then the compiler, then every test file read against the merged product |
+| 2b — the merge commit (seven conflicts resolved, the re-land) | DONE (`ed1266e2f`, merging `origin/main` at `eb18888db`) — per file in "The re-land, file by file" below; compile PENDING (row 3) |
+| 2c — the semantic merges git does not flag | IN-PROGRESS — the pins re-shaped to the one line (this commit; "The pins re-shaped" below); in the merge commit: `MobileBookDetails.requestFinish`'s two refusals moved onto VM-62's road, Book Details' delete line names a gathering; the phone sources scanned by hand for VM-62's forbidden expressions (clean but main's three exempt/log lines). NEXT: the compiler, then every test file read against the merged product |
 | 3 — phone + Mac `build-for-testing` on the merged tree | NOT-STARTED |
 | 4 — the window recipe (RED, GREEN, the Mac types) | NOT-STARTED |
 
@@ -2403,6 +2403,24 @@ this run's behavior on top.
   membership sheet's "(archived)"), the Delete bullet (two: Delete Gathering… on the phone's shelf row and Book
   Details, the phone's Trash first paint). None of main's lines already states those phone behaviors, so no clause
   was dropped.
+
+**The pins re-shaped (each still asserts this run's rule, now also where she reads it — `session.status.current`, the
+one line — beside the model's own record, which VM-61 keeps):**
+- `MobileUndoDoorTests` — `aQuietUndoSpeaksTheRefusalAndOffersNoRedo`, `aQuietRedoSpeaksTheRefusalAndOffersNoUndo`:
+  the quiet press's line exists, is `.refusal`, carries `undoFoundNothing` / `redoFoundNothing` and no action; the
+  landed undo between says nothing on the line. **RED against main's door as merged, by reading:** main's door
+  classes the quiet press `.ordinary`, so `session.status.current` is nil (the `#require` fails) and
+  `statusMessage` is "Undid: Delete Block" / "Redid: Delete Block" with `statusAction` `.redo` / `.undo` (three
+  expectations fail before it). `aLandedRedoStillOffersItsUndo`: + nothing on the line — GREEN on both sides by
+  design (main's landed press is ordinary too). `MobileUndoWarningWordsTests` needed no change (a pure words pin);
+  `theWarningsDetailSaysCommittedInTheMacsSentence` is RED against main's door by reading ("It is saved first").
+- `MobileBookFixesTests` — `reopenOnASealedBookSpeaksTheSharedSentence`, `aRacedUnarchiveSpeaksTheSharedSentence`:
+  + the table's own call equals the pinned sentence, + the line is that refusal. **GREEN against main's
+  `MobileBookDetails.swift` by reading** (VM-62's road reaches the same table sentences) — that half is main's fix
+  now; both stay as guards. `theDeleteDoorConfirmAndReceiptNameAGathering`: + the gathering's delete is a removal
+  line with its words. `MobileCollectReceiptTests`' five collects: + the line is a `.refusal` with the composer's
+  words (`expectOnTheLine`). RED against main's `MobileMembership.swift` by reading for the three that name the
+  star or the archive (main composes "Added by tagging …"); the tags-only and already-matched controls GREEN on both.
 
 ## The ladder
 

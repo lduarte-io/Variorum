@@ -262,7 +262,12 @@ struct MobileBookStateRowTests {
     /// RED ON OLD: Reopen on a sealed book reached her as the raw enum
     /// ("That couldn't be done — readingSealed(…)."). It speaks the shared
     /// table's sentence (`OpsRefusalTable`, the phone's roads — no Unseal door
-    /// named, because the phone has none yet).
+    /// named, because the phone has none yet). **At the merge-in (VM-78):**
+    /// main's VM-62 sweep already routes this refusal to the table
+    /// (`DeletionRefusal.sentence(_:roads:)`), so this pin is GREEN against
+    /// main's `MobileBookDetails.swift` too — that half is main's fix now, and
+    /// the pin stays as its guard; it also reads the one line (VM-61), where
+    /// she sees it.
     @Test func reopenOnASealedBookSpeaksTheSharedSentence() async throws {
         try await withEditorWorld { session, db in
             let bookID = try await session.runner.run { ops -> String in
@@ -274,7 +279,12 @@ struct MobileBookStateRowTests {
             await model.refresh()
             await model.setFinished(false)
             let sentence: String = "This book is sealed, so it can't be reopened here."
+            #expect(OpsRefusalCopy.words(for: OperationError.readingSealed(id: bookID), roads: .phone)
+                == sentence, "the shared table's own sentence")
             #expect(model.lastError == sentence)
+            let line = try #require(session.status.current, "the refusal speaks on the one line")
+            #expect(line.kind == .refusal)
+            #expect(line.text == sentence)
             #expect(try await isLocked(db, bookID), "the refusal changed nothing")
         }
     }
@@ -389,7 +399,10 @@ struct MobileArchivedStarredBookTests {
     /// after its own acts, so a book unarchived elsewhere while it is open — or
     /// a second press queued behind the first — meets `readingNotArchived`,
     /// which fell to `DeletionRefusal`'s fallback and reached her as the raw
-    /// enum. It speaks the shared table's sentence.
+    /// enum. It speaks the shared table's sentence. **At the merge-in
+    /// (VM-78):** GREEN against main's `MobileBookDetails.swift` too — VM-62's
+    /// road reaches the table for this case — so it stays as the guard, and
+    /// reads the one line as well.
     @Test func aRacedUnarchiveSpeaksTheSharedSentence() async throws {
         try await withEditorWorld { session, db in
             let bookID = try await session.runner.run { ops -> String in
@@ -405,7 +418,12 @@ struct MobileArchivedStarredBookTests {
             await model.unarchive()
 
             let sentence: String = "That book isn't archived any more \u{2014} nothing changed."
+            #expect(OpsRefusalCopy.words(for: OperationError.readingNotArchived(id: bookID), roads: .phone)
+                == sentence, "the shared table's own sentence")
             #expect(model.lastError == sentence)
+            let line = try #require(session.status.current, "the refusal speaks on the one line")
+            #expect(line.kind == .refusal)
+            #expect(line.text == sentence)
             let archived = try await db.read { db in try Queries.reading(db, id: bookID)?.archivedAt }
             #expect(archived == nil, "the book stays out of the archive")
         }
@@ -587,6 +605,10 @@ struct MobileGatheringWordTests {
             let gatheringReceipt: String =
                 "Gathering moved to the Trash \u{2014} \(TrashWindow.days) days to put it back."
             #expect(model.lastReport == gatheringReceipt)
+            // The one line (main's VM-61): a removal, with Put back as its Undo.
+            let line = try #require(session.status.current, "a delete speaks on the one line")
+            #expect(line.leavesPage)
+            #expect(line.text == gatheringReceipt)
 
             #expect(await model.confirmDeleteBook(book))
             let bookReceipt: String =
@@ -697,6 +719,16 @@ struct MobileCollectReceiptTests {
         return (model, gathering)
     }
 
+    /// **The one line says it too** (re-shaped at the merge-in, VM-78 — main's
+    /// VM-61 line): a collect's outcome speaks there in the REFUSAL class,
+    /// both arms — already matching did nothing, and a tagging (or a star) she
+    /// did not name is a direction (P-55-11) — in the shared composer's words.
+    private func expectOnTheLine(_ session: AppSession, _ receipt: String) throws {
+        let line = try #require(session.status.current, "the collect speaks on the one line")
+        #expect(line.kind == .refusal, "a direction, in P-55-7's class")
+        #expect(line.text == receipt)
+    }
+
     /// RED ON OLD ("Added by tagging  — “Starred notes” collects by filter."
     /// — no star named, and an empty tag list).
     @Test func aStarOnlyCollectNamesTheStar() async throws {
@@ -705,6 +737,7 @@ struct MobileCollectReceiptTests {
             await model.collect(into: gathering)
             let receipt: String = "Starred \u{2014} the gathering shows it now."
             #expect(model.status == receipt)
+            try expectOnTheLine(session, receipt)
         }
     }
 
@@ -717,6 +750,7 @@ struct MobileCollectReceiptTests {
             await model.collect(into: gathering)
             let receipt: String = "Tagged #drafts and starred \u{2014} the gathering shows it now."
             #expect(model.status == receipt)
+            try expectOnTheLine(session, receipt)
         }
     }
 
@@ -730,6 +764,7 @@ struct MobileCollectReceiptTests {
             await model.collect(into: gathering)
             let receipt: String = "Tagged #sea \u{2014} the gathering shows it once it's unarchived."
             #expect(model.status == receipt)
+            try expectOnTheLine(session, receipt)
         }
     }
 
@@ -744,10 +779,12 @@ struct MobileCollectReceiptTests {
             let receipt: String =
                 "Added by tagging #sea \u{2014} \u{201C}By the Water\u{201D} collects by filter."
             #expect(model.status == receipt)
+            try expectOnTheLine(session, receipt)
             await model.collect(into: gathering)
             let again: String =
                 "Already collected \u{2014} it matches \u{201C}By the Water\u{201D}'s filter."
             #expect(model.status == again)
+            try expectOnTheLine(session, again)
         }
     }
 

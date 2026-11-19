@@ -434,6 +434,14 @@ struct MobileUndoDoorTests {
     }
 
     // MARK: - VM-16: a QUIET press speaks a refusal and offers no way back
+    //
+    // **Re-shaped at the merge-in (VM-78, main's VM-61 line):** a press now
+    // speaks on the shell's ONE line, so each pin asserts the rule where she
+    // reads it — `session.status.current` — as well as on the model's own
+    // record (`statusMessage` / `statusAction`, which the line's doors still
+    // keep — VM-61's AD-14 precedent). A quiet press is a REFUSAL on the line
+    // with no action, and records no way back; a landed press is VM-61's
+    // ordinary act — nothing on the line — and records its way back.
 
     /// **The ticket's own pin (VM-16 — VX-276's rule, phone side).** Register
     /// X (her Delete Block) then Y (a divide); undo Y — Y now waits on the
@@ -444,7 +452,10 @@ struct MobileUndoDoorTests {
     ///
     /// **Red on old:** the door read `undo(with:)`'s label, so this press
     /// said "Undid: Delete Block" and offered a Redo whose press would
-    /// re-apply Y — the divide, an entry the sentence never named.
+    /// re-apply Y — the divide, an entry the sentence never named. **Red
+    /// against main's door as merged** (`MobileUndoDoor.swift` at VM-55's
+    /// merge): the same press is classed ordinary, so the one line says
+    /// NOTHING, while the model records "Undid: Delete Block" and `.redo`.
     @Test func aQuietUndoSpeaksTheRefusalAndOffersNoRedo() async throws {
         try await withEditorWorld { session, db in
             let postID = try await makePost(
@@ -465,6 +476,7 @@ struct MobileUndoDoorTests {
             #expect(try await storedBlockTexts(db, postID: postID) == ["One two three four."])
             #expect(model.statusMessage == StructuralUndoCopy.undone("Divide"))
             #expect(model.statusAction == .redo, "a landed undo still offers its redo")
+            #expect(session.status.current == nil, "a landed undo says nothing on the line")
             #expect(stack.topRedoLabel == "Divide")
 
             // X reversed through an undo-less door — her Put back.
@@ -483,6 +495,12 @@ struct MobileUndoDoorTests {
             #expect(model.statusMessage == StructuralUndoCopy.undoFoundNothing("Delete Block"))
             #expect(model.statusAction == nil,
                     "no Redo is offered — the redo stack's top is the divide, not this entry")
+            // Where she reads it: the one line, as a refusal, with no door.
+            let line = try #require(session.status.current,
+                                    "a quiet press speaks on the one line — it said nothing")
+            #expect(line.kind == .refusal, "a quiet press is a refusal, never an ordinary act")
+            #expect(line.text == StructuralUndoCopy.undoFoundNothing("Delete Block"))
+            #expect(line.action == nil, "the line offers no way back either")
             // The stack did what VX-246 U2 says, so the door's words are the
             // only thing this pin is about.
             #expect(stack.depth == 0, "the quiet entry is retired")
@@ -502,7 +520,9 @@ struct MobileUndoDoorTests {
     /// stack stays as it was.
     ///
     /// **Red on old:** the door said "Redid: Delete Block" and offered an Undo
-    /// whose press would take back W — the divide.
+    /// whose press would take back W — the divide. **Red against main's door
+    /// as merged:** the press is classed ordinary, so the one line says
+    /// nothing, while the model records "Redid: Delete Block" and `.undo`.
     @Test func aQuietRedoSpeaksTheRefusalAndOffersNoUndo() async throws {
         try await withEditorWorld { session, db in
             let postID = try await makePost(
@@ -540,6 +560,11 @@ struct MobileUndoDoorTests {
             #expect(model.statusMessage == StructuralUndoCopy.redoFoundNothing("Delete Block"))
             #expect(model.statusAction == nil,
                     "no Undo is offered — the undo stack's top is the divide, not this entry")
+            let line = try #require(session.status.current,
+                                    "a quiet press speaks on the one line — it said nothing")
+            #expect(line.kind == .refusal, "a quiet press is a refusal, never an ordinary act")
+            #expect(line.text == StructuralUndoCopy.redoFoundNothing("Delete Block"))
+            #expect(line.action == nil, "the line offers no way back either")
             #expect(stack.redoDepth == 0, "the quiet entry is retired")
             #expect(stack.topLabel == "Divide", "the undo history stands as it was")
         }
@@ -547,7 +572,9 @@ struct MobileUndoDoorTests {
 
     /// **The control: a press that CHANGED something keeps its way back**
     /// (green on both sides — the fix must not strip the ping-pong her R10
-    /// asked for). A landed redo offers Undo, exactly as before.
+    /// asked for). A landed redo records its Undo, exactly as before, and —
+    /// VM-61's class, main's door — says nothing on the one line (its Undo is
+    /// the ⋯ sheet's).
     @Test func aLandedRedoStillOffersItsUndo() async throws {
         try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: ["One two three four."])
@@ -558,6 +585,7 @@ struct MobileUndoDoorTests {
             #expect(try await storedBlockTexts(db, postID: postID) == ["One two", "three four."])
             #expect(model.statusMessage == StructuralUndoCopy.redone("Divide"))
             #expect(model.statusAction == .undo)
+            #expect(session.status.current == nil, "a landed redo is ordinary — nothing on the line")
         }
     }
 
