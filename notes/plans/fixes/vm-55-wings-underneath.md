@@ -1448,13 +1448,227 @@ section), SurfaceContracts' Messages bullet, the wing label and the wing switche
 
 | Piece | State |
 |---|---|
-| Record skeleton | DONE (this commit) |
-| The moves and splits (both targets' sources) | NOT-STARTED — the table below is the settled design |
-| Test-file edits (the moved face's source pin; the VM-61 Mac pin's scan extended to the hoisted files) | NOT-STARTED |
-| The phone compile-level pin (`MobileWingBrainsHoistTests`) | NOT-STARTED |
+| Record skeleton | DONE (635f351d6) |
+| The moves and splits (both targets' sources) | DONE (4fad0a2cf — committed NOT YET BUILT, said so in its message; a QUIET window held every full build) — the table below |
+| Test-file edits (the moved face's source pin; the VM-61 and VM-62 Mac pins' scans extended to the hoisted files) | DONE (4fad0a2cf; the VM-62 scan in the record commit after it) |
+| The phone compile-level pin (`MobileWingBrainsHoistTests`, 5 tests) | DONE (4fad0a2cf) — results PENDING (the shared window) |
 | Mac `build-for-testing` (`Variorum`, macOS, `vm55-b1`) | NOT-STARTED — held for the coordinator's QUIET all-clear |
 | Phone `build-for-testing` (`VariorumMobile`, the simulator, `vm55-b1`) | NOT-STARTED — held for the same all-clear |
 | The shared window's suites (run by batch 4's implementer) | PENDING — the TYPE lists below |
+
+#### The brain/face table (file by file — every `Wing*` file in `Core/Views/` and `Workspace/`, plus the one non-wing file a moved brain needed)
+
+**The line, as drawn:** a piece MOVES when it is wing logic a phone face would compose — platform-neutral state, reads,
+decisions, acts, and the words those acts speak; it STAYS when it is a face (a SwiftUI or AppKit view, an alert, a key
+monitor), a face's words, the grammar of a Mac-only surface (the keyboard chords, ⌘K's palette, the sidebar's Open list,
+the ⌘L sheet), or names a Mac-only type. Where a moved piece needed something Mac-only, the Mac-only part stays as an
+extension in a Mac file, or is handed in (the seams, below).
+
+| File (before) | What it is | Disposition | Why |
+|---|---|---|---|
+| `Variorum/Core/Views/WingsModel.swift` | the wings' brain (`WingsModel` — rows, names, destinations, the switch and the deliberate landing, mint / rename / delete, the note move/copy asks and acts, the wing-act signal, the MCP reach projection), the words the brain speaks, the open note's wing context (`NoteMenuWingContext`), the Mac's face words (`WingCopy`), and three faces | **SPLIT.** `git mv` to `Shared/WingsModel.swift` (the class, `NoteMenuWingContext`, the five sentences the class speaks — the larger half, so history follows the brain); the Mac's half of the class (its `init(session:)` with the Mac's refusal words, `watchSharing`, `answer(_:)`) and every face word of `WingCopy` to a new `Variorum/Core/Views/WingsModel+Mac.swift`; the faces (`WingNoteDoors`, `wingMoveConfirm`, `noteMenuWingDoors`) to a new `Variorum/Core/Views/WingNoteDoors.swift` | named by the brief; the three Mac-only facts are seams; the faces and their words stay the Mac's |
+| `Variorum/Core/Views/WingSwitcherBrain.swift` | the switcher's pure state machine and `next(after:in:)` | **MOVED whole** (`git mv`) to `Shared/WingSwitcherBrain.swift` — byte for byte but its header comment | named; Foundation and the picker's query rule only |
+| `Variorum/Core/Views/SearchPicker.swift` *(not a wing file)* | the one picker's brain and face | **SPLIT (one function).** `SearchPickerBrain.normalized` — the type's declaration — to a new `Shared/SearchPickerBrain.swift`, byte for byte; the Mac file's `nonisolated enum SearchPickerBrain {` became `nonisolated extension SearchPickerBrain {` holding the rest | `WingSwitcherBrain.visible` calls it ("the ONE picker brain's sameness"): moving the rule with its caller keeps one rule, never a copy |
+| `Variorum/Workspace/WingFollow.swift` | the cross-wing follow: the rule (`Decision`, `decision(current:subjectWing:)`, the "Now in …" words), the pane subject's wing (`SidebarSelection`), the follow act and its per-window wiring (`WorkspaceModel`), the Open rows' indicator reads and hover | **SPLIT.** The rule to a new `Shared/WingFollowRule.swift`, which declares `WingFollow`; the rest stays in place as `nonisolated extension WingFollow` (`indicatorHelp`, `subjectWing`, `crossWingNames`, `crossWingIDs`) and `@MainActor extension WingFollow` (`follow`, `wire`) | "WingFollow's rule" is named; the hoisted `WingsModel.goTo` speaks `nowIn`; the act names Mac-only types; the indicator serves the Mac's Open list and sidebar rows |
+| `Variorum/Core/Views/WingBookMoves.swift` | the book-move half: the door's drawing rule (`WingBookMoveDoor`), the two asks and acts (an extension of `WingsModel`), the verbs, the confirms' titles and messages, the words the acts speak, the two confirm alerts | **SPLIT.** The drawing rule, the asks, the acts, their facts (`BookMoveAsk`, `ContentsMoveAsk`) and the four sentences the acts speak to a new `Shared/WingBookMoveBrain.swift`; the verbs, the confirms' titles and messages and the two alerts stay | an extension of the named brain; the confirms are faces, and `bookMoveMessage` reads the Mac's `BookStateCopy.waitingLine` |
+| `Variorum/Core/Views/WingDestinationSheet.swift` | ⌘K's listing (`WingPaletteDoors`), the ⌥⌘L chords (`WingChords`), the selector's model (`WingDestinationModel`), its `open` resolution, the sheet, the DEBUG oracle, the selector's words | **SPLIT.** `WingDestinationModel` and its words (the prompt, the foot) to a new `Shared/WingDestinationModel.swift`; the rest stays, `open` as `extension WingDestinationModel` | named — "the move-or-copy confirm's brain (its facts and words)"; `open` reads `ShellRouter`, `CapabilityRegistry` and the Mac's grey-door words; the listing and chords are Mac grammar |
+| `Variorum/Core/Views/WingSwitcherMenu.swift` | the masthead ▾ menu | **STAYS** | a face (named by the brief) |
+| `Variorum/Core/Views/WingSwitcherSheet.swift` | ⌘L's sheet: its per-open model (`WingSwitcherModel`), the keys only a monitor sees (`WingSwitcherKeys`, NSEvent), the monitor, the sheet | **STAYS** | a face (named); its model is ⌘L's keyboard grammar (typing, held-⌘ L) over the hoisted brain, and its one act is the hoisted `switchSaying` |
+| `Variorum/Core/Views/WingToolbarLabel.swift` | the toolbar's "in ‹wing›" label: its layout rules (`WingLabelSpace`, `WingMarqueePlan`), the marquee, the slot, an AppKit edge probe | **STAYS** | a face (named); its pure rules are the Mac toolbar's geometry |
+| `Variorum/Core/Views/OneWingChord.swift` | the grey-chord monitor for ⌘L / ⌥⌘L / ⇧⌥⌘L (NSEvent) | **STAYS** | Mac keyboard |
+| `Variorum/Workspace/WingNumberKeys.swift` | ⌘1–⌘9: the pure decision, the NSEvent reading, the responder classification, the monitor | **STAYS** | Mac keyboard; its words name ⌘ chords (`WingCopy.noWingAtNumber`) |
+
+#### Every file this batch moved, split or added (exact — for the coordinator's trial merge)
+
+Paths under `App/Variorum/`.
+
+- **Moved (`git mv`, rename-detected):** `Variorum/Core/Views/WingsModel.swift` → `Shared/WingsModel.swift` (then split — see
+  above); `Variorum/Core/Views/WingSwitcherBrain.swift` → `Shared/WingSwitcherBrain.swift` (header comment only).
+- **Added:** `Shared/SearchPickerBrain.swift` · `Shared/WingFollowRule.swift` · `Shared/WingBookMoveBrain.swift` ·
+  `Shared/WingDestinationModel.swift` · `Variorum/Core/Views/WingsModel+Mac.swift` · `Variorum/Core/Views/WingNoteDoors.swift`
+  · `VariorumMobileTests/MobileWingBrainsHoistTests.swift`.
+- **Edited (the remaining half of a split):** `Variorum/Core/Views/SearchPicker.swift` (`normalized` out; `enum` →
+  `extension`) · `Variorum/Workspace/WingFollow.swift` (the rule out; the rest as extensions) ·
+  `Variorum/Core/Views/WingBookMoves.swift` (the rule, the acts and their words out) ·
+  `Variorum/Core/Views/WingDestinationSheet.swift` (the model and its words out).
+- **Edited tests:** `VariorumTests/WingPaletteDoorsTests.swift` (one source pin's path) ·
+  `VariorumTests/VM61MacStatusSeamPinTests.swift` (the scan reads the hoisted files) ·
+  `VariorumTests/VM62MacRefusalWordsPinTests.swift` (the same).
+- **Not touched:** `Shared/AppSession.swift`, every `VariorumMobile/` source, `Variorum.xcodeproj`, Core, Sync, Protection,
+  the editor seam.
+
+**The Xcode project:** `Variorum/`, `Shared/`, `VariorumMobile/` and the test folders are file-system-synchronized root
+groups, and `project.pbxproj` holds NO membership exceptions (`grep membershipExceptions` — none), so every move and
+addition joins its targets by folder with no project edit: `Shared/` compiles into both app targets. Checked too: no two
+Swift files share a basename within either app target or the phone test target (swiftc refuses a duplicate filename in
+one module — the reason the shared rule is `WingFollowRule.swift`, not a second `WingFollow.swift`). Both app targets build
+with `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, so a moved declaration keeps the isolation it had.
+
+#### The seams — each Mac-only thing a moved brain needed, and how it is passed in
+
+1. **The refusal words.** `WingsModel` spoke `OpsRefusalCopy.message(for:)` at eight sites (five in the class, three in the
+   book-move half); that one-argument form is the MAC's half of the table (`Variorum/Registry/OpsRefusalCopy.swift`: its own
+   arms, then the shared table on `OpsRefusalRoads.mac`), absent on the phone. Now the brain holds
+   `refusalWords: (Error) -> String`, set by its designated `init(session:refusalWords:)`, and every site speaks
+   `session.status.refuse(refusalWords(error))`. The Mac's `convenience init(session:)` (`WingsModel+Mac.swift`) passes
+   `{ OpsRefusalCopy.message(for: $0) }` — so all three Mac construction sites (`RootView`, `NoteWindowView`,
+   `QuickNoteView`) and every Mac pin, which all say `WingsModel(session:)`, compile unchanged and speak the same words. A
+   phone composition hands its own road (`OpsRefusalCopy.sentence(for:roads: .phone)` — what the phone pin passes).
+   Precedent: `MCPHostHooks.refusalWords` (`Features/MCP/MCPDoor.swift`), the Mac's table handed into a shared host the same
+   way.
+2. **The MCP reach on the switcher's rows.** `watchSharing()` holds `Queries.mcpWingReaches` through `MCPRowReach.hold` — a
+   Mac file (the MCP door is the Mac's). It moved to the Mac extension unchanged but for its landing: the closure that did
+   `guard let self, self.reach != value …; self.reach = value` now calls the brain's new `adoptReach(_:)`, which does exactly
+   that (the setter stays `private(set)`). The `reach` projection itself stays on the shared class (a Core type); on the
+   phone nothing fills it.
+3. **The ⌘digit chord's answer.** `answer(_ decision: WingNumberKeys.Decision)` moved verbatim to the Mac extension
+   (`WingNumberKeys` imports AppKit).
+4. **Where a deliberate switch lands** — `landInBookcase: () -> Void` was already a closure the owning window wires
+   (`RootView.wireWingLanding`); unchanged.
+5. **Resolving a ⌘K / ⌥⌘L request into a selector** — `WingDestinationModel.open(_:wings:session:)` stays a Mac extension
+   (`ShellRouter.WingDestinationRequest`, `CapabilityRegistry`, the Mac's grey-door words); the model's own init is shared.
+6. **The follow act** — `WingFollow.follow(_:session:stillShown:)`, `wire(workspace:session:)` and `subjectWing(_:_:)` stay
+   Mac extensions (`SidebarSelection`, `WorkspaceModel`); the shared rule is what they call.
+
+No `#if os(…)` was added anywhere; no moved file imports AppKit, UIKit or SwiftUI (the shared `WingsModel.swift` dropped the
+SwiftUI import its faces needed).
+
+#### The status seam on the hoisted brains (the batch-2 binding)
+
+Every `session.status` call in the moved code is the same call it was: `refuse` (thirteen sites, the eight refusal-words
+ones included) and `receipt` (seven: mint, delete, move, copy, book move, move everything, and the said switch's "Now in
+…").
+None says `removal`, `withdraw`s, or sets the placement. **What guards that now** that the files left `Variorum/`:
+`VM61MacStatusSeamPinTests.noMacDoorSaysRemovalWithdrawsOrSetsThePlacement` reads each hoisted file by name
+(`hoistedMacBrains` — the six `Shared/` files this batch made or moved) for the same four narrowed words, and requires each
+name to exist (a rename or a stale entry trips it instead of leaving a brain unscanned);
+`VM62MacRefusalWordsPinTests.noMacDoorTakesThePhonesRoad` reads the same list for the phone's refusal roads (a hoisted brain
+that named `OpsRefusalCopy.sentence(` itself, instead of speaking the words it is handed, would change the Mac's words). On
+the phone side, `MobileWingBrainsHoistTests.aRefusalSpeaksTheHandedInWordsAndALandedActSaysAReceipt` runs a refusal (it
+lands as `.refusal` in the handed-in words) and a landed mint (its receipt draws nothing on the phone's line — a `removal`
+would). *A throwaway mirror of both scans over the tree at the record commit found no hit.* (PENDING the real runs.)
+
+#### Byte-identical on the Mac — what would fail, per moved brain, had its behaviour changed
+
+VM-63 is Debt (a hoist): red-on-old does not bind. The pins are the Mac suites that already drive each brain, unedited but
+for one source pin's path:
+
+- **`WingsModel`** (rows, names, destinations, switch, mint, rename, delete, the note acts, the signal, the reach):
+  `WingSwitcherTests` — Home-first rows and destinations; the mint's receipt `WingCopy.minted` and the taken-name refusal
+  in the Mac's own words, "Home is the built-in wing's name — pick another." (THROUGH the refusal-words seam — a wrong seam
+  reds it); the non-empty delete's refusal naming what remains, the delete's receipt and the return Home; the note doors'
+  `moved` / `frozen` / `copied` sentences. `WingDeliberateLandingTests` — `goTo` saying, landing and the in-place cycle.
+  `WingDestinationsDeadWingTests` — the dead-wing heal in `destinations(from:)`. `WingPaletteDoorsTests` — the wing-act
+  signal across all four acts, a refusal signalling nothing, `NoteMenuWingContext`'s load key and gates. `MCPSharedRowsTests`
+  and `MCPSharedIconClickTests` — `watchSharing` filling `reach` (through `adoptReach`). `WingNumberKeysTests` — `answer`
+  going the deliberate road or refusing. `SidebarNoteRowMenuTests`, `MCPWingFacesTests`, `BookcaseCensusMenuTests`,
+  `MCPAsksWaitCaptureTests`, `VocabularySweepTests` — the faces over it.
+- **The book-move half** (`WingBookMoveDoor`, `bookMoveAsk`, `moveBook`, `contentsMoveAsk`, `moveContents`):
+  `WingBookMoveDoorTests` — the drawing rule, the ask counting and listing then acting, the frozen stay-behind refusing at
+  the door, the bulk ask, its receipts and the confirms' words; `BookDoorsEverywhereTests` — the drawing rule.
+- **`WingSwitcherBrain`:** `WingSwitcherChordTests` — opens on the current wing, held ⌘ + L cycles and a release commits, a
+  press-and-release stays open, typing filters and ⏎ commits the first match, a typed change ends the cycle, a row click
+  commits the current row, the masthead cycle wraps and one wing is no cycle door.
+- **`SearchPickerBrain.normalized`:** `SearchPickerBrainTests` (and the picker's hosts: `RuleEditorMakeTagTests`,
+  `AddToBookMintTests`, `MCPGrantSheetTests`, `SearchPickerPanelGeometryTests`).
+- **`WingFollow`'s rule:** `WingFollowDecisionTests.onlyAnotherWingIsFollowed`; `WingFollowTests` and
+  `JournalWingFollowTests` — the follow's switch and its "Now in …" receipt; `WingDeliberateLandingTests` — the same words
+  from a said switch.
+- **`WingDestinationModel`:** `WingPaletteDoorsTests` — the selector's rows (the act's own destinations), its choice running
+  the existing acts and confirms, the keyboard ask; `WingDestinationsDeadWingTests`.
+
+And the source walks whose result could move when code moves between `Variorum/` and `Shared/` (each walks both, or reads a
+named file): listed in the Mac TYPE list below.
+
+#### The tests this batch wrote or edited
+
+- **New, phone:** `VariorumMobileTests/MobileWingBrainsHoistTests.swift`, type `MobileWingBrainsHoistTests` (5):
+  `theWingsBrainReadsItsRowsOnThePhone` (a two-wing store — batch 1's `TwoWingWorld` — read by `load()`: Home alone before,
+  Home then Work after, the count on `WingState`, names with a dangling id read as Home's, destinations, the next wing
+  wrapping) · `theSwitcherBrainStepsAndFiltersOnThePhone` (`next(after:in:)` across three rows, wrapping, an unknown current,
+  one wing → nil; the brain's highlight, the `#`-dropping filter, ⏎) · `theFollowRuleAndItsWordsOnThePhone` ·
+  `theDestinationSelectorAndTheBookMoveAskBuildOnThePhone` (the selector over the wings' rows, its prompt and foot; the book
+  move's ask with its preview — the destination's twin named; an ask says nothing) ·
+  `aRefusalSpeaksTheHandedInWordsAndALandedActSaysAReceipt`. Results PENDING (the shared window).
+- **Edited, Mac:** `WingPaletteDoorsTests` (one `Self.source(...)` path, marked A JUSTIFIED EDIT — the bar's modifier is a
+  face and lives in `WingNoteDoors.swift` now, byte for byte); `VM61MacStatusSeamPinTests` and `VM62MacRefusalWordsPinTests`
+  (each scan also reads the hoisted files, above). No Mac assertion changed.
+- **Mac tests that reach a moved type through the Mac module** keep compiling: `Shared/` compiles into the `Variorum`
+  module, so `@testable import Variorum` still sees every moved type under its own name, and every Mac construction site
+  says `WingsModel(session:)`, which the Mac's convenience init answers. CONFIRMED by the Mac `build-for-testing` — PENDING
+  (the QUIET window).
+
+#### For the shared window (run by batch 4's implementer) — every run below is PENDING
+
+**Phone:** the whole phone target (the window's plan). Focused, for attribution: `MobileWingBrainsHoistTests` (new) ·
+`MobileWingStandTests` `MobileWingListingTests` `MobileWingMintTests` `MobileWingTagManagerTests`
+`MobileWingBlindPickerTests` (batch 1's wing suites — the fixture the new pin borrows) · `MobileNoRedirectSweepTests` (its
+`nothingUserFacingNamesTheMac` walks `Shared/`'s literals, which gained the moved words; a mirror finds no word-bounded
+"Mac" in them).
+
+**Mac:** the whole Mac target (the window's plan, its own QUIET claim). Focused, for attribution, by group:
+- (A) every type whose file names a moved type (`WingsModel` and its asks, `WingSwitcherBrain`, `WingFollow`, `WingCopy`,
+  `WingDestinationModel`, `NoteMenuWingContext`, `WingBookMoveDoor`, `SearchPickerBrain`): `AddToBookMintTests
+  BookDoorsEverywhereTests BookcaseCensusMenuTests LineageFaceModelTests MCPAsksWaitCaptureTests MCPGrantSheetTests
+  MCPSharedIconClickTests MCPSharedRowsTests MCPWingFacesTests SearchPickerPanelGeometryTests SearchPickerBrainTests
+  RuleEditorMakeTagTests SidebarNoteRowMenuTests TutorialBooksLessonTests TutorialBooksRitualTests VM61MacStatusSeamPinTests
+  VocabularySweepTests WingBookMoveDoorTests WingChordsAndLabelDoorTests WingDeliberateLandingTests
+  WingDestinationsDeadWingTests WingFollowDecisionTests WingFollowTests JournalWingFollowTests WingNumberKeysTests
+  WingPaletteDoorsTests WingSwitcherChordTests WingSwitcherTests` (28)
+- (B) every type whose file names a piece left in a split file: `AlertCancelSweepTests ShiftEntryDateDoorTests
+  VersionDoorsTests` (3)
+- (C) the source walks over `Variorum/` and `Shared/`: `BadgeFamilySplitTests ChromeLineLimitTests ChromeMenuRowSizeTests
+  CommitsPageLedgerTests DragTypeDeclarationTests DuplicateDoorsTests IndexTierMetricsTests PaneLineMetricsScopeTests
+  MCPAsksWaitTests MCPIconTwinsTests MarkdownPaletteWritersTests NoLiteralColourTests OneInputPathTests
+  OneRefreshAuthorityCompositionTests OneRefreshAuthorityRaceTests PaletteDerivationTests PaneFindFaceTests
+  Phase9cAuthWiringTests FollowDoneNoticeTests ProtectionFileLeavesTests WordsFieldsConcealTests SidebarLayoutTests
+  OneTimeCodeAutoFillTests ShellChromeTests StatusSeamVocabularyTests TourScriptTests TourSpotlightTests TourEngineTests
+  TourPoolTuckTests TourEntryTests TourEndCardTests TourClosingCardTests TourEndCardAsideGateTests UnfiledWordTests
+  VM62MacRefusalWordsPinTests VersionSchemeTests WhatsNewTests` (37)
+- (D) the wing neighbours (batch 1's Mac pins and the label): `VM56MacWingScopePinTests SettingsTagsWingFollowTests
+  QuickEntryWingLabelTests` (3)
+
+#### PROVISIONAL (for QUESTIONS at the merge moment — the orchestrator carries it)
+
+- **P-55-13 — sentences in the shared brain that name a Mac door or key.** Four sentences the moved acts speak name the
+  Mac's own doors: `WingCopy.frozen` and `bookFrozen` ("reopen it (or unseal it)" — the phone has no book Unseal door yet:
+  `OpsRefusalRoads.phone.bookSeal.verb` is nil), `nothingToMove` ("Delete Wing… can take it." — the Mac's menu verb), and the
+  selector's `destinationFoot` ("⏎ chooses · esc closes"). The OpsRefusalTable doctrine (MobileSoul §4 item 4, read from the
+  other side) keeps a platform's door words out of a shared home — as ROADS a platform fills. Options: (a) move them byte for
+  byte — the Mac's words cannot change, and no phone surface speaks them until a phone face composes the act, whose umbrella
+  then words the phone's half; (b) turn the door words into roads now (a `WingRoads` the Mac fills with today's words and the
+  phone with its own or nil) — a phone wording call made before any phone face, and with no face to read it against; (c)
+  keep the four sentences in the Mac's half and hand them in like the refusal words — a wider seam for words no phone face
+  says yet. **Built: (a)** — the batch-2 binding (byte-identical on the Mac) and the brief's "the phone gains no face"; batch
+  4's door composes the rows and the switch only, none of these four.
+
+#### Observations for the orchestrator and batch 4 (not fixed — outside this unit)
+
+1. **Folding `MobileWingModel` (batch 4):** the shared brain covers its `track` / `load` / `adopt` (the same three steps)
+   and `rows`, but NOT its "never a false Home": `WingsModel.currentName` answers `name(of:)`, which falls back to "Home" for
+   a wing it has not read yet, while batch 1's `MobileWingModel.currentName` answers nil until the held read has landed
+   (`loaded`). A fold that reads `WingsModel.currentName` for the roots' title would briefly say "Home" in a non-Home wing on
+   launch. A phone face's own "has it loaded" fact, or reading `rows` for the current id, keeps batch 1's behaviour — batch
+   4's call.
+2. **Constructing it on the phone:** `WingsModel(session:refusalWords: { OpsRefusalCopy.sentence(for: $0, roads: .phone) })`
+   (the phone pin's road); `goTo(_:saying:landing:)` lands through `landInBookcase`, which the phone's composition wires; a
+   said switch speaks a receipt, which the phone's line does not draw (her ruling: no line for a switch).
+3. **`WingCopy` now lives in four files:** declared in `Shared/WingsModel.swift` (the sentences the class speaks), extended in
+   `Shared/WingBookMoveBrain.swift` and `Shared/WingDestinationModel.swift` (the acts' and the selector's words) and, for the
+   Mac's faces, in `Variorum/Core/Views/WingsModel+Mac.swift` and `WingBookMoves.swift`. Each file's header says which.
+4. **Left with the Mac by the line above, one move away if a phone surface ever needs them:** `WingFollow.crossWingNames` /
+   `crossWingIDs` (pure reads for the sidebar's Open list and note rows — a phone list of another wing's notes, e.g. the
+   all-wings search switch of LS-2, would want them); `WingSwitcherModel` (the ⌘L sheet's typing and held-⌘ state).
+5. The shared brain's `reach` projection is filled only by the Mac's `watchSharing` (the MCP door is the Mac's); on the phone
+   it stays empty.
+
+#### Canon deltas believed owed (the orchestrator applies at the merge)
+
+- `notes/MobileSoul.md` §6 — the wings' parity row: the wing brains now live in `Shared/` (VM-63) — `WingsModel` with its
+  book-move half, `WingSwitcherBrain`, `WingFollow`'s rule, the destination selector's model, `NoteMenuWingContext` and the
+  book door's drawing rule; the phone composes them (batch 4's door; wave 2's switcher, management and moves).
+- `notes/SurfaceContracts.md`, AppSpec — none (no behaviour changed; AppSpec §2 already names `App/Variorum/Shared/` as the
+  cross-platform brains' home).
 
 ## Ladder
 

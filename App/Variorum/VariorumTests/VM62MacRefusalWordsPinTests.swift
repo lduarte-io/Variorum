@@ -94,11 +94,17 @@ struct VM62MacRefusalWordsPinTests {
 
     /// No Mac source speaks the phone's new roads — the Mac's faces keep their
     /// shipped last resorts until a deliberate change says otherwise.
+    ///
+    /// *Extended in VM-63 (VM-55 batch 3):* the Mac brains hoisted to `Shared/`
+    /// (`VM61MacStatusSeamPinTests.hoistedMacBrains`) speak on the Mac too, so
+    /// the walk also reads them — a hoisted brain that named one of these roads
+    /// itself, instead of speaking the words its platform hands it
+    /// (`WingsModel.refusalWords`), would change the Mac's words.
     @Test func noMacDoorTakesThePhonesRoad() throws {
-        let macRoot = URL(fileURLWithPath: #filePath)
+        let appRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumTests
             .deletingLastPathComponent()  // App/Variorum
-            .appendingPathComponent("Variorum", isDirectory: true)
+        let macRoot = appRoot.appendingPathComponent("Variorum", isDirectory: true)
         let walk = try #require(FileManager.default.enumerator(
             at: macRoot, includingPropertiesForKeys: nil))
         let phoneRoads = [
@@ -106,9 +112,16 @@ struct VM62MacRefusalWordsPinTests {
             "DeletionRefusal.sentence(", "DeletionRefusal.plainFallback(",
             "VersionActs.sentence(",
         ]
+        var urls = walk.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
+        let shared = appRoot.appendingPathComponent("Shared", isDirectory: true)
+        for name in VM61MacStatusSeamPinTests.hoistedMacBrains {
+            let url = shared.appendingPathComponent(name)
+            #expect(FileManager.default.fileExists(atPath: url.path), "the hoisted brain is here: \(name)")
+            urls.append(url)
+        }
         var walked = 0
         var offenders: [String] = []
-        for case let url as URL in walk where url.pathExtension == "swift" {
+        for url in urls {
             walked += 1
             let source = try String(contentsOf: url, encoding: .utf8)
             for road in phoneRoads where source.contains(road) {
