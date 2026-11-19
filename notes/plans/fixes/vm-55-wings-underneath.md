@@ -327,6 +327,60 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 > **Report back with** what shipped, how the hoisted brains were composed and what was folded, the PROVISIONAL
 > calls, test counts, commits, anything for the author.
 
+## THE WALK AND THE MERGE GATE (the closer)
+
+> You are the closer for the VM-55 run, in `~/dev/variorum-vm-55` on `vm-55-wings-underneath`. Every batch is
+> built and run, the ladder closed at round 1 with its three fixes green, and main is merged in (a192ca437).
+> Read this file whole — every batch record and the Ladder section are your map of what exists — and the reading
+> list. You write NO product code unless the walk finds a defect; if it does, stop, record the trace, and report
+> before fixing.
+>
+> **1. The walk — the run's use-shaped evidence, one stage claim (about 40 minutes).** On a DEDICATED simulator
+> device you create for this run (iPhone 17 Pro on the installed iOS runtime; never the window's standing
+> device) and delete at the end; the Debug phone build, signed out, no account, no Castle, nothing synced; the
+> Mac's dev store is never touched. Seed a small two-wing library — Home and one more wing, each with a
+> same-name book, a same-path tag, two or three notes (one starred), plus a gathering in the second wing — by a
+> throwaway hosted seeder; drive the app with a throwaway UI driver that navigates, holds each surface and
+> writes a screenshot. The precedent, to adapt rather than copy: `notes/plans/vm-44/atlas/instruments/`
+> (`VM44CaptureSeedTests.swift`, `VM44CaptureWalk.swift`, `phase-b-runbook.sh`). Instruments never enter the PR:
+> build them in a detached snapshot worktree of the tip with its own DerivedData, and remove both afterwards.
+> Screenshots stay local in a gitignored `vm-55-screens` folder beside this record; the record carries a table of
+> rows — what was done, what the screen showed, the capture's file name, PASS or what was wrong.
+> The rows, in Study and light, then the starred ones again in Terminal:
+> a. ★ Each root in Home names its wing in the path line and shows only Home's books, notes and stars.
+> b. ★ Tap the wing's name on the Library: the plain list (Home marked); pick the other wing: it lands on that
+>    wing's Bookcase; the Library and Starred now show only that wing's; no line was shown for the switch.
+> c. A new note made there is in that wing's Library and not in Home's; a quick note typed on the home screen
+>    lands in the current wing's Pool.
+> d. The tag manager's header names the wing and lists only its tags; a new top-level tag lands there.
+> e. In a note of the second wing while the app stands in Home (reach it through Today or a starred road if one
+>    exists, else say the row is unreachable by hand and name the pin that covers it): the tag suggestions and
+>    the add-to-book sheet offer only the note's own wing's.
+> f. ★ A refusal in words: Finish on the gathering (Book Details) — the sentence on the one line, in words, above
+>    the tab bar, not over its buttons; it fades by itself.
+> g. ★ A removal with Undo: delete a note from the Library — the line with Undo; tap Undo — the note is back.
+> h. An ordinary act says nothing: star a note — no line.
+> i. A direction speaks: put a take back that returns archived, if the seed can stage it cheaply; else name the
+>    pin that covers it.
+> j. With the keyboard up (the home screen's box), raise a refusal or a removal: the line sits above the keyboard.
+> k. Send the app to the background and bring it back; quit and relaunch: it still stands in the second wing.
+> l. VoiceOver's reading of the wing door, from the accessibility tree the driver can read: label and value.
+> Report READY for the walk claim when the instruments are built, with the dedicated device's id (in your READY
+> message only — never in this record or a commit) and your minutes.
+>
+> **2. The merge gate — two claims, tests only, on the frozen tip.** After the walk (and only if it found no
+> defect): both targets `build-for-testing` green on the tip into `vm55-b1`, the tree clean and still, then READY
+> for (i) the whole phone target and (ii) the whole Mac target (a QUIET claim, about 65–70 minutes). Main's
+> baseline tonight: on the phone, VM-24's caret test (2 of 3 cases) is the one standing red, with the declared
+> known issues in `MobileTrashTests` and `MobileTutorialWalkTests`; on the Mac, ZERO failing tests, 14 standing
+> known issues, and three known flaky names that get re-run alone before they count (`TakesFindBoardTests`'
+> esc-boundary test, `SpellingDoorTests`' write arm, `TakesExpansionMemoryTests`' marginGrid arm). Anything else
+> red is this run's: name it, trace it, and report before fixing — a code fix after the gate means the gate runs
+> again.
+>
+> **3. Records.** Your section is "### The walk and the gate" under "## Batch records", with a LIVE STATUS table;
+> flip the run-level rows. The orchestrator writes the closeout, the canon and the handoff.
+
 ## Review foci (written at plan time, before any implementation)
 
 1. `readScope` on iOS: every Shared caller, and every Shared door that takes "what the surface shows" — does
@@ -361,8 +415,11 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 3 — VM-63 | DONE — its suites ran in the shared window (batch 4's, 2026-11-19): every phone suite green (the hoist pin 5/5, whole phone target); a targeted Mac leg of its groups A–D + `CapabilityRegistryTests` + `StatusCenterTests` green but one test, the new `VM63MacWingBrainsHoistPinTests` pin's test-side dependency scope (fixed c75bdb9af; GREEN in round 1's fix window, 10:29). Records: "Batch 3 record", "Batch 4 record" |
 | Main merged in at the seam after batch 3 | DONE (871bde99a — main 359ae214d, VX-980's merge; clean, by the orchestrator; NOT yet built or tested on this branch — batch 4's builds and the shared window are the first on the merged tree) |
 | Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | DONE — the door (5c80d058b) green in the whole phone target but the shell pin's test-side premise (fixed 931c77f79); the shared window ran (the whole phone target; a targeted Mac leg in place of the whole Mac target, which runs once at the merge gate); both targets build for testing green at c75bdb9af. Round 1's three confirmed fixes (findings 2, 5, 7) applied pin-first and green in the fix window (10:29–10:32, products 923f14f30), their pins red on the snapshot as predicted; finding 1's two re-runs GREEN there. See "Batch 4 record" ▸ "Ladder round 1 fixes" |
+| Main merged in again before the walk and the gate | DONE (a192ca437 — main 9a78628ea; notes only since the first merge-in) |
 | Ladder round 1 (the FINAL round: 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT) | REVIEWED and adjudicated — the three confirmed fixes (findings 2, 5, 7) APPLIED pin-first (pins 35983f69a, 77f591154, 7af436366 + the pin compile fix 923f14f30; fixes 79e14816f, 725d58f6a, 2278790a5) and GREEN in the fix window (10:29–10:32, products 923f14f30), the pins red on the snapshot as predicted (6 of 8); finding 1's two re-runs GREEN there. REMAINING: the orchestrator's line-by-line check of the three fixes against their findings |
-| The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
+| The ladder | CLOSED at round 1 (her rule: a round with no new BLOCKER or MAJOR closes it) — the fix window green 2026-11-19 10:29–10:32, the orchestrator's line-by-line check recorded under Round 1 |
+| The simulator walk (the closer; the rows are in "THE WALK AND THE MERGE GATE") | IN-PROGRESS — a fresh closer, spawned at the commit that wrote this line |
+| The merge gate (whole phone, whole Mac) | NOT-STARTED — the closer's, after the walk |
 | Closeout | NOT-STARTED |
 
 Notes for the implementers:
