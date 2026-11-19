@@ -153,7 +153,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 1 · VM-65 | **CLOSED 2026-11-19** | `65d70fe9f` `feef85c7a` `f6389e3b5` `808f333a8` `914278cfa` | code state `808f333a8`; stage results in "Orchestrator's stage results" below |
 | 2 · VM-2 | **NOT GREEN at its first stage window** — back with its implementer | `2358f33cb` `76dbf89b2` `f83122794` `1f292b1ec` `5b40f1984` + closeout | see the batch 2 block below |
 | 3 · VM-66 | READY (stage) | `3cb346ebb` `fd9184011` `0bc11d9a9` `51440c726` `284e30c9e` `21fc776fb` `d2cef56be` + closeout | see the batch 3 block below; the BEFORE numbers fill from its stage window |
-| 4 · VM-67 | IN-PROGRESS (implementer, opus) | — | see the batch 4 block below |
+| 4 · VM-67 | READY (stage) | `2bdeafab9` `0e9948d03` `e6d16fca7` `62c810100` `de3111c4d` `8e4e73e01` `2b04e304c` `2033aa95b` + closeout | see the batch 4 block below; the simulator AFTER number fills from its stage window |
 | 5 · VM-68 | NOT-STARTED | — | — |
 | 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
 | 7 · VM-71 | NOT-STARTED | — | — |
@@ -429,7 +429,7 @@ owner-carrying table, through SQLCipher's page decrypt, holding the runner AND t
 | P4 — red-on-old (revert the two production files, run the pins, restore) | DONE — on the pre-fix tree `OwnerAdoptionTests` ran 8 tests, **5 failed with 7 issues**: `withNothingUnownedTheWriterRunsNoTransactionAndNoWrite` (BEGIN IMMEDIATE + eleven UPDATEs + COMMIT) · `everyStatementReachesAnOwnerTableOnlyThroughItsUnownedIndex` ×2 (adopting AND idle: `UPDATE container … → SCAN container`, `→ SCAN block`, … every owner table) · `signedOutRows…` (its idempotent second pass wrote) · `anAccountChange…` ×2 (both quiet passes wrote) · `aStoreFromBeforeTheIndex…` (scanned). GREEN on both trees, by design (they pin S4 behaviour that must not move): `everyOwnerTableHoldsARowFromTheSeed` (the seed's guard), `theMixedCaseAdoptsOnlyTheUnownedRows`, `aRowFromAWriteAlreadyQueuedIsAdoptedByThatPass`. Restored; green again |
 | P5 — the hosted assertion in `MobileHerPathsPerfTests` | DONE (this commit) — inside `ownerAdoptionWithNothingToAdoptIsMeasuredAtFixtureScale`, AFTER its measured series (which stays untraced and unchanged): one more pass traced on the store's writer asserts no write statement and every statement through its unowned-row index (the `OwnerAdoptionTrace` helper, nonisolated); no other series touched. Phone `build-for-testing` into `DerivedData/vm64-b4/` `** TEST BUILD SUCCEEDED **`, no warning in a touched file; its run PENDING the stage window |
 | P6 — `swift test` (touched suites + migrations / schema / sync-schema suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b4/` | DONE — `swift test --filter 'OwnerAdoptionTests\|OwnerIdentityTests\|MigrationTests\|BlockCommentTests\|SyncSchemaTests\|AuthRLSDDLTests\|StorePlaintextExportTests\|PlaintextExportImportTests\|LocalMachineryRecreationTests\|LibraryClassifier\|MultiTenantSyncTests\|StoreEncryption\|TriggerTests\|ArrivalsPinsSchemaEventTests\|AppDatabase'` **242 tests in 20 suites passed**; phone `build-for-testing` (generic iOS Simulator) and Mac `build-for-testing` into `DerivedData/vm64-b4/`, both `** TEST BUILD SUCCEEDED **`, no warning in a touched file. **The headless before/after** (`OwnerAdoptionMeasurementTests`, gated `VARIORUM_VM67_MEASURE=1`; Mac M3, Debug, an ENCRYPTED on-disk WAL store holding 61,700 owned rows in the owner tables; n = 5): BEFORE (pre-fix tree) warm **11.14 ms (10.98–11.18)**, cold (store reopened per pass) **11.10 ms (10.97–11.27)**; AFTER warm **0.79 ms (0.78–0.81)** / **0.83 (0.81–0.85)** on a second run, cold **0.86 ms (0.83–0.90)** / **0.85 (0.85–0.87)** — about 13× on a Mac; a Mac number, never a phone number. The simulator's before/after is `owner-adoption-nothing-to-adopt` in `MobileHerPathsPerfTests` (BEFORE: batch 3's window; AFTER: this batch's) |
-| P7 — closeout in §7 (the S4 road list, the three options with plans, the first-seconds report) + READY | NOT-STARTED |
+| P7 — closeout in §7 (the S4 road list, the three options with plans, the first-seconds report) + READY | DONE (this commit) — §7 batch 4; the plans read through this build's SQLite (3.53.4) by the gated measurement; the whole Core package green (4,119 tests in 566 suites, 5 standing known issues; 703 in 130; 32 in 4). READY — the stage commands are in §7 batch 4 ▸ "The stage window" |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b4/` (gitignored).
 
@@ -1081,3 +1081,307 @@ machinery note applies: poll for the Swift Testing verdict line, not `** TEST EX
 4. **P-66-1, P-66-3, P-66-6, P-66-7, P-66-8** — test-harness shapes (the suite runs alone; windows closed after the
    leaving's work; the private adoption body run verbatim; per-test encrypted copies; three test-clock durations),
    recorded for the cold review rather than her ruling.
+
+### Batch 4 · VM-67 — launch and unlock stop scanning every table (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** the stage runs are PENDING the orchestrator's window — the
+simulator AFTER number of `owner-adoption-nothing-to-adopt` and the green run of the new hosted assertion (both in
+`MobileHerPathsPerfTests`, group (i) below), and the hosted Mac and phone suites over the touched code (groups (ii) and
+(iii)). **No red-on-old PRODUCT was built for the hosted assertion** (its red-on-old is proven headless on the same op —
+below; the recipe for a hosted red build is given, optional). **No simulator walk, by the fence, not by choice:** owner
+adoption runs only for a SIGNED-IN session, and a Debug walk of the phone stays signed out and uses no test account
+(§4's stage facts), so no walk can reach it; its use-shaped evidence is the hosted suite driving the real op through
+the real runner on an encrypted on-disk copy of the 100k world, and her phone's readout ("Owner check at start") fills
+after the wave-1 install. No line in `Sources/VariorumCore/Sync/`, custody or keychain code; `Shared/AppServices.swift`
+NOT changed. The other first-seconds work (the round, the janitor's scans, the idle sweep) is REPORTED below, not fixed.
+
+**Base:** `96dfa82b5`. **Commits:** `2bdeafab9` (live status) · `0e9948d03` (the schema, its own commit) ·
+`e6d16fca7` (the op + the Core pins) · `62c810100` / `de3111c4d` (the red-on-old revert announced, its result) ·
+`8e4e73e01` (the hosted assertion) · `2b04e304c` / `2033aa95b` (the gated measurement; the before/after) · this closeout.
+
+#### The mechanism, as traced on this tree (audit F 3A/6A — TRACED as written; the lines moved, the shape did not)
+
+`AppServices.connectSyncIfAllowed` (`Shared/AppServices.swift:518-547`) runs `runOwnerAdoption` (:584-600) FIRST, then
+composes and triggers the round. `runOwnerAdoption` runs `Operations.adoptOwnerID` on the ONE serial runner. The op
+(`Operations/OwnerIdentity.swift:87-105` pre-fix) opened ONE write transaction (`database.write` = GRDB's
+`writeWithoutTransaction` + `BEGIN IMMEDIATE`) and ran `UPDATE <t> SET owner_id = ? WHERE owner_id IS NULL` for each of
+the eleven synced tables whose DDL carries `owner_id`. No index served `owner_id IS NULL` (none in `Migrations.swift`), so
+every statement planned as `SCAN <t>` — measured, not inferred: the pin's trace on the pre-fix tree read `UPDATE
+container … → SCAN container`, `→ SCAN block`, … for all eleven, and with NOTHING unowned the writer still ran `BEGIN
+IMMEDIATE TRANSACTION`, eleven UPDATEs and `COMMIT TRANSACTION`. So every launch with a session, every unlock and every
+sign-in read every row of every owner table through SQLCipher's page decrypt, holding the runner and the writer, to
+change nothing.
+
+#### What shipped, file by file
+
+- `Sources/VariorumCore/Persistence/Migrations.swift` — **`v1_38_owner_adoption_index`** (its own commit, `0e9948d03`,
+  ahead of the code): eleven partial indexes `idx_<t>_unowned ON <t>(owner_id) WHERE owner_id IS NULL` — container,
+  block, tag, wing, shelf, reading, reference, canvas_layout, lens, block_comment, purge_intent. Empty in her steady
+  state; holds exactly the rows adoption exists to find. The comment carries the §12 reasoning (below).
+- `Sources/VariorumCore/Operations/OwnerIdentity.swift` — **`adoptOwnerID`, probe-then-write inside ONE writer access**
+  (`database.writeWithoutTransaction` — the writer's own FIFO queue): the owner tables introspected as before; per table
+  `SELECT EXISTS (SELECT 1 FROM <t> WHERE owner_id IS NULL)` (an index seek, autocommit — no write lock, no WAL frame);
+  nothing unowned ⇒ the all-zero report (one entry per owner table, the shape unchanged) and NO transaction; otherwise
+  today's UPDATE set unchanged, over every owner table, in ONE IMMEDIATE transaction (`db.inTransaction()` — GRDB's
+  `write` shape). `restampOwner` (the adopt road) is untouched.
+- `Tests/VariorumCoreTests/OwnerAdoptionTests.swift` — **the pins and the state transitions** (8 tests): PIN 1
+  `withNothingUnownedTheWriterRunsNoTransactionAndNoWrite` (a GRDB statement trace on the writer connection: no BEGIN /
+  COMMIT / UPDATE / INSERT / DELETE / SAVEPOINT; outbox empty; the report's shape); PIN 2
+  `everyStatementReachesAnOwnerTableOnlyThroughItsUnownedIndex` (`EXPLAIN QUERY PLAN` of every traced statement, while
+  adopting AND with nothing to adopt: a plan line that reads an owner table must name its `idx_<t>_unowned`; every owner
+  table reached — never vacuous); `everyOwnerTableHoldsARowFromTheSeed` (the seed covers all eleven — a new owner table
+  is unproven until seeded); `signedOutRowsInEveryOwnerTableAreAdoptedLiveAndTombstoned` (road 1, below: counts per
+  table, every row owned, every adopted row in the outbox, `updated_at` and `sync_version` unmoved, the next pass writes
+  nothing); `theMixedCaseAdoptsOnlyTheUnownedRows` (mine / theirs / unowned side by side); `anAccountChange…`
+  (X's rows stay X's, NULLs → Y, then nothing written; after `restampOwner` nothing written);
+  `aRowFromAWriteAlreadyQueuedIsAdoptedByThatPass` (on-disk WAL pool: a write holding the writer while adoption is
+  called — the pass waits its turn and adopts the row; a reader-side probe fails this); `aStoreFromBeforeTheIndex…`
+  (a v1_37 store with unowned rows, migrated: the index builds over them, the first pass adopts all six, through the
+  index).
+- `Tests/VariorumCoreTests/OwnerAdoptionMeasurementTests.swift` — the gated headless before/after
+  (`VARIORUM_VM67_MEASURE=1`; skipped otherwise) on an ENCRYPTED on-disk store with 61,700 owned rows, warm and cold
+  (store reopened per pass, the unlock's shape), plus the options' query plans through this build's SQLite (3.53.4).
+- `Tests/VariorumCoreTests/MigrationTests.swift` — A JUSTIFIED EDIT (the ritual) ×3: `expectedIndexes` and the two
+  migration-chain subtractions gain v1_38's eleven (`ownerAdoptionIndexes`), the v1_36 test subtracts them to keep its
+  own claim; NEW `theOwnerAdoptionIndexesArriveForAnOlderStoreOnePerOwnerTable` (v1_37 → full: exactly one partial
+  index per owner-carrying table, the set DERIVED from the registry + live DDL).
+- `Tests/VariorumCoreTests/BlockCommentTests.swift` — A JUSTIFIED EDIT: the table's index set gains
+  `idx_block_comment_unowned`.
+- `App/Variorum/VariorumMobileTests/MobileHerPathsPerfTests.swift` — `OwnerAdoptionTrace` (nonisolated: the trace
+  closure GRDB calls on its writer queue carries no test-actor isolation) and, inside
+  `ownerAdoptionWithNothingToAdoptIsMeasuredAtFixtureScale`, AFTER its measured series (left untraced and unchanged),
+  one more pass called as `runOwnerAdoption` calls it, asserting PIN 1 and PIN 2 at fixture scale on the encrypted
+  on-disk store; the test's doc says so. No other series touched.
+
+#### S4 — every road by which a synced row with a NULL `owner_id` can exist on today's tree (the fix is judged against this)
+
+**The facts the list stands on.** Eleven synced tables carry `owner_id` (`SyncSchema.tables` ∩ live DDL). Every
+Operations construction of their records passes `ownerId: currentOwnerID()` — all 34 sites checked (`Operations+`
+Container, Versions, WingMove, Ownership, Pool, Structural, Quicknote, Tag, Wing, Shelf, ReadingFilter,
+StarredGathering, Reading, DocumentImport, MCPWrites, Reference, Lens, Canvas, Comments, Purge); the models default
+`ownerId` to nil. `currentOwnerID()` reads the installed closure, which reads the Keychain session PER CALL
+(`Shared/AppBootstrap.swift:490-493`) — nil while signed out. No raw-SQL insert into an owner table exists outside
+`SyncRow.apply` (`Sync/SyncSchema.swift:965`, the pull) and v1_18's `reading` rebuild (`Migrations.swift:671`, which
+copies `owner_id` as it was).
+
+1. **A mint while signed out** — every owner-table row is born NULL: notes and pools, blocks, tags, books and gatherings,
+   wings, shelves, references, canvas positions, lenses, comments, purge intents (the seeders and the first-write
+   furniture mint through the same ops).
+2. **A mint while signed in but the closure answers nil** (the Keychain item unreadable at that instant) — the same
+   mechanics as 1; possible in principle (a per-call Keychain read), not observed.
+3. **Rows inside a store that arrives whole** — a restore from a safety copy or backup, a library opened from its folder
+   pair, a plaintext export adopted (the `LocalMachineryRecreation` road): whatever NULL rows it carried (a library built
+   entirely signed out; pre-9c rows).
+4. **A schema migration** — mints none; v1_18's rebuild carries a NULL as a NULL (road 3's class).
+5. **The pull — never.** The mirror's `owner_id` is NOT NULL on these eleven tables (14c), and `sync_pull` keeps it in the
+   payload for exactly these eleven (`owner_tables`, `Server/supabase/maintenance/vx495-pull-keyset.sql:162-164,
+   244-255`; the same list in `13_phase13i_wings.sql:196-198, 310-312, 490-492`); `SyncRow.apply` writes it verbatim.
+   Sync repairs that mint rows mint through Operations (roads 1–2's stamping; a round runs only signed in).
+6. **And the push refuses one:** `sync_push` raises on any owner-table row whose `owner_id` `is distinct from` the
+   caller, NULL included (`13_phase13i_wings.sql:383-391`) — an exception, so ONE unowned row in the outbox fails the
+   whole push. That is why adoption must precede the first push of any row from roads 1–3, and why a skipped row would
+   show as a stuck round, not a silent loss.
+
+**When adoption runs (unchanged by this batch):** `connectSyncIfAllowed` → `runOwnerAdoption` at a launch with a
+persisted session (`start()`, `AppServices.swift:320-323`); every UNLOCK (each `.ready` composes and starts fresh
+services — the phone at `VariorumMobileApp.swift:150`, the Mac likewise); every sign-in (`variorumSignInChanged` :497 —
+an account change is a sign-out, then a sign-in); Resume (`resumeSync` :557); the first round after an account act
+(`runFirstRound` :572); the deletion door's refusal reconnects (:634, :654).
+
+**Why the fix adopts every such row no later than today's code:** (i) the predicate is unchanged — the probe and the
+UPDATE both select `owner_id IS NULL`, and when ANY owner table has one, the full UPDATE set runs over every owner
+table; (ii) a partial index holds exactly the rows satisfying its WHERE — SQLite maintains it inside every INSERT and
+UPDATE, trigger and pull-apply writes included, and builds it over existing rows at the migration (road 3's older
+stores: `aStoreFromBeforeTheIndex…`); (iii) the probe runs on the WRITER's queue, FIFO behind every write already
+queued, so it sees exactly what the one write transaction it replaced saw (`aRowFromAWriteAlreadyQueued…` — a reader
+probe fails it); (iv) the occasions and call sites are untouched. A row committed after the pass is the next pass's, as
+before.
+
+#### The three options, weighed — with the plans (through this build's SQLite 3.53.4, on the seeded encrypted store)
+
+| Option | The probe's plan | The update's plan | With nothing to adopt | Can it skip a row? | Verdict |
+|---|---|---|---|---|---|
+| (a) a partial index per owner table | `SEARCH block USING COVERING INDEX idx_block_unowned (owner_id=?)` | `SEARCH block USING COVERING INDEX idx_block_unowned (owner_id=?)` | O(1) per table — but ALONE it still opens `BEGIN IMMEDIATE` + eleven seeks + `COMMIT` every launch (the schema-only tree `0e9948d03`: the plan pins green, the write pins red) | No — SQLite keeps the index true, no fact to remember | built, with (b) |
+| (b) an existence probe before the write | `SCAN CONSTANT ROW ; SCALAR SUBQUERY 1 ; SCAN block` without the index | — | ALONE it is the same O(corpus) read: `EXISTS` with no unowned row must read the whole table to answer "none" — it only moves the scan off the write lock | No | built, on top of (a) |
+| (c) a recorded "adopted for owner X" fact | none | none | O(1) — skips the scan entirely | **Yes, silently**: the fact stays true only if EVERY road that can mint an unowned row clears it — roads 1–3 (34 op mint sites under a nil identity, every whole-store arrival, any future road); the only central hook would be a trigger, and triggers own exactly three things (OverallModel §9), so it would rest on op-side discipline, and one forgotten road leaves rows unowned and the next push refused | rejected — the brief's own preference: no remembered fact |
+
+Before the fix, the update read `SCAN block` (the same line through this build). The store's other `owner_id` reads keep
+their plans — `owner_id = ?` and the dormant foreign-owner read (`owner_id IS NOT NULL AND owner_id != ?`) both
+`SCAN block` before and after (a partial index on `owner_id IS NULL` is unusable for them): no plan churn.
+
+#### SyncSpec §12 — the index is NOT a lockstep event (verified against the code, not assumed)
+
+- The registry walk enumerates TABLES (`SyncSchemaTests.swift:14-19`, `sqlite_master WHERE type = 'table'`); the column
+  walk classifies COLUMNS (`SyncSchemaTests.swift:93`). An index is neither.
+- `SyncSchema.lockstepVersion` is a constant (`Sync/SyncSchema.swift:170`, 15), pinned equal to the newest mirror
+  artifact's marker (`AuthRLSDDLTests.swift:934-949`); no migration computes or moves it. Unchanged.
+- The mirrors carry no index beyond the PK by design (SyncSpec §2); no file under `Server/` changed. Precedents: v1_34
+  and v1_36, local index migrations recorded as not lockstep events (`Migrations.swift`).
+- A store or plaintext export that ran v1_38 reads `.newerSchema` on an older build (`LibraryClassifier.swift:179-185`:
+  applied minus known migrations) — VX-502's standing rule, as for v1_36. The plaintext export carries the index
+  (`sqlcipher_export` copies the whole schema, `StorePlaintextExport.swift:74`).
+- **The identifier:** `git fetch origin`; every remote branch's diff against `origin/main` touches no file under
+  `Sources/VariorumCore/Persistence` (vm-47-sizes-and-look, vm-55-wings-underneath, vm-78-fixes-to-whats-there,
+  vx-980-search-fixes, vx-981-mcp-door-followups, vm-44-mobile-catchup, vx-997-ambient-app); main's last is v1_37. No
+  two runs mint v1_38.
+- **The one-time cost:** building the eleven indexes reads each owner table once at the new build's first open — about
+  ONE of today's launches' adoption scans, once (her phone: the wave-1 install's first launch).
+
+#### The pins — red on the pre-fix tree, by revert
+
+| Test | Pre-fix (`96dfa82b5`'s schema + op) | Schema only (`0e9948d03`) | The fix |
+|---|---|---|---|
+| PIN 1 `withNothingUnownedTheWriterRunsNoTransactionAndNoWrite` | **RED** (BEGIN IMMEDIATE + 11 UPDATEs + COMMIT) | **RED** (same) | green |
+| PIN 2 `everyStatementReachesAnOwnerTableOnlyThroughItsUnownedIndex` | **RED** ×2 (`→ SCAN <t>`, adopting and idle) | green | green |
+| `signedOutRowsInEveryOwnerTableAreAdoptedLiveAndTombstoned` | **RED** (its idempotent second pass wrote) | **RED** | green |
+| `anAccountChangeAdoptsOnlyTheUnownedRowsAndThenWritesNothing` | **RED** ×2 (both quiet passes wrote) | **RED** ×2 | green |
+| `aStoreFromBeforeTheIndexAdoptsItsUnownedRowsThroughTheIndex` | **RED** (scanned) | green | green |
+| `theMixedCaseAdoptsOnlyTheUnownedRows` | green | green | green — **S4 guard, by design** |
+| `aRowFromAWriteAlreadyQueuedIsAdoptedByThatPass` | green | green | green — **S4 guard, by design** |
+| `everyOwnerTableHoldsARowFromTheSeed` | green | green | green — the seed's guard |
+
+Pre-fix: 8 tests, 5 failed, 7 issues. The revert ran on the committed fix and was restored (`git diff HEAD` empty).
+The hosted assertion is the same two pins on the same op at fixture scale; its red-on-old is optional (recipe below).
+
+#### The timing marks (batch 1's) — unchanged, and measuring the same thing
+
+`AppServices.runOwnerAdoption` is byte-untouched: "Owner check at start" still spans the op on the runner (its queue
+wait included), "rows stamped" is still the report's total. The work moved INSIDE the op, so no mark moved.
+
+#### Evidence
+
+- **Core, headless:** `OwnerAdoptionTests` 8/8 · `OwnerIdentityTests` 8/8 · the touched + store-constructing suites
+  (`OwnerAdoptionTests|OwnerIdentityTests|MigrationTests|BlockCommentTests|SyncSchemaTests|AuthRLSDDLTests|
+  StorePlaintextExportTests|PlaintextExportImportTests|LocalMachineryRecreationTests|LibraryClassifier|
+  MultiTenantSyncTests|StoreEncryption|TriggerTests|ArrivalsPinsSchemaEventTests|AppDatabase`) **242 tests in 20 suites
+  passed** · **the whole package, `swift test`: VariorumCoreTests 4,119 tests in 566 suites passed with 5 known issues
+  (the standing `withKnownIssue` marks in the VX-529 pair suites — not this batch's); 703 in 130 and 32 in 4 passed;
+  exit 0** (Swift Testing's counts include skipped tests — the gated measurement among them).
+- **Builds:** phone `build-for-testing` (generic iOS Simulator) and Mac `build-for-testing` into
+  `App/Variorum/DerivedData/vm64-b4/`, both `** TEST BUILD SUCCEEDED **`, no warning in a touched file.
+- **The headless before/after** (`OwnerAdoptionMeasurementTests`; Mac M3, Debug, encrypted on-disk WAL store, 61,700
+  owned rows; n = 5 per series; a MAC number, never a phone number; the machine shared with other sessions):
+
+| Series | BEFORE (pre-fix tree) | AFTER run 1 | AFTER run 2 | AFTER run 3 (loaded machine) |
+|---|---|---|---|---|
+| warm (one pool) | 11.14 ms (10.98–11.18) | 0.79 (0.78–0.81) | 0.83 (0.81–0.85) | 1.76 (1.51–3.70) |
+| cold (store reopened per pass) | 11.10 ms (10.97–11.27) | 0.86 (0.83–0.90) | 0.85 (0.85–0.87) | 2.38 (2.35–4.90) |
+
+  What remains after the fix is the per-table introspection (`PRAGMA table_info` over the registry) and eleven index
+  seeks; it no longer grows with the corpus. The BEFORE scales with her row count and her phone's flash and CPU.
+- **PENDING (stage):** the simulator AFTER of `owner-adoption-nothing-to-adopt` (median and range, n = 5) against
+  batch 3's BEFORE, the hosted assertion green, and groups (ii)–(iii).
+
+#### The Mac does not change in behaviour (review focus 8)
+
+The op is shared, so on the Mac too a launch with nothing unowned now writes nothing (before: an empty IMMEDIATE
+transaction after eleven scans) — the same rows adopted at the same occasions, nothing she can see. No `Shared/` file
+changed. The Mac's sign-in adoption pins (`Phase9cAuthWiringTests` and the first-round suites) are in group (iii).
+
+#### Reported, not fixed: what else the first seconds after launch and unlock scan or write
+
+In order, after `start()` (`AppServices.swift:298-335`) — runner (R), writer (W), reader (r), network (N):
+
+1. **Owner adoption** — fixed here (before: eleven full-table scans in one write transaction, R + W).
+2. **The first round**, triggered at once by `connectSyncIfAllowed` (`Sync/SyncScheduler.swift:212-320`):
+   `beforeRound` (a memory read unless a typed-unlock key load is pending; a flush only when typing is pending) →
+   **`janitor.reconcileLedger()` BEFORE the round** (`PurgeJanitor.swift:297-340`: preflight = custody key read + the
+   `schemaVersion` RPC; `sync_purge_ledger` behind a challenge — N ×2–3; a W transaction only if entries arrived) →
+   **pull** (the engine's own preflight and challenge; with nothing new, an empty page; N) → **push** (an outbox read;
+   with nothing to send, little or nothing on the wire) → **`janitor.sweep()` AFTER every clean round**
+   (`PurgeJanitor.swift:132-276`): the preflight AGAIN (`schemaVersion`), `reconcileLedger` AGAIN (challenge + ledger),
+   `sync_horizon` (challenge) — N ×5–6 more — then **`collectRoots` (:360-427): four reads with `deleted_at IS NOT
+   NULL` on `container`, `reading`, `block` and `variant` (variant joined to block). No index serves `deleted_at IS NOT
+   NULL` (the `deleted_at` indexes are partial on `IS NULL`; `idx_cblock_dead_block` is on `container_block`), so these
+   are FULL SCANS of four tables — `variant`, the largest, included — after EVERY clean round (r).** Then a family
+   verdict read per root, and, in Standard mode only, `prunableSavepoints` and a purge-intent mint (W). Wave 4's
+   (VM-176…VM-185, the janitor VM-182).
+3. **The idle-commit sweep** (`idleCommits.start()` → an immediate `sweepNow`, `Shared/IdleCommitScheduler.swift:75-
+   110`): candidates read from a low-water-mark window over `idx_container_touched` (bounded, r), then one
+   `idleAutoCommit` per candidate on the runner (R + W).
+4. **The local purge loop's first tick** (`AppServices.swift:328-334`): a no-op while sync is configured (it is, by then,
+   when signed in — `AppSession.sweepLocalPurge`'s guard); a signed-out install runs `LocalPurge`'s own tombstone scans.
+5. **The phone's first-write furniture `prime()`** (two reads) and **every held listing's first fetch** on a cold store
+   (the Library's two — the bookless one corpus × gatherings, batch 5's — Starred, the shelf; r).
+6. **Per MINT, not per launch:** the identity closure reads the Keychain on every top-level mint (`AppBootstrap.swift:
+   490-493`) — each quick-note mint and each crystallized block pays a Keychain read to stamp `owner_id`. Size
+   unmeasured; a candidate for lag 2's mint step (a later batch or wave 4 — not this unit).
+7. **Dormant:** `Queries.foreignOwnerExists` (`Queries/OwnerQueries.swift:31-40`) scans every owner table when the
+   library is NOT foreign (the common answer); no production caller today (tests only) — recorded for its first caller.
+   `restampOwner` (the adopt road) stays O(owner tables) by nature (it rewrites every row) — a rare, deliberate act.
+
+**Does owner adoption plausibly contribute to the minute-long round with nothing to send?** **No — not inside the
+round.** Adoption returns BEFORE `sync.configure` and `triggerSync`, so the readout's "Sync round" span (status syncing →
+stopped) begins after it; with nothing unowned its UPDATEs changed zero rows, so it enqueued nothing and added no push
+work. Its only effect on the round was to delay its START by the scan — 11 ms on this Mac at 61.7k owned rows; on her
+phone plausibly tens to a few hundred milliseconds on a cold encrypted store after an unlock — never a minute. The
+round's own candidates, by reading: about eight to ten challenge-signed network calls (each a nonce fetch plus the
+call) even with nothing to send; the pull (if the Mac had pushed anything); the sweep's four full tombstone scans on a
+cold store; per-family purge RPCs if families were eligible. Splitting the minute needs per-phase marks INSIDE the
+round — a `Sync/` line (P-65-7's road), wave 4's.
+
+#### Design calls (options weighed; for the cold review — none is a product decision, none is hers)
+
+- **P-67-1 — the probe runs on the writer's queue** (built: identical visibility to the transaction it replaced; the
+  queue is held for eleven index seeks) · on a READER (no writer contact at all, but a write queued at the call is
+  missed until the next launch — pinned out by `aRowFromAWriteAlreadyQueued…`) · no probe (the index alone: an empty
+  write transaction every launch).
+- **P-67-2 — the index shape: per owner table, on `(owner_id)`, partial on `owner_id IS NULL`** (built: the planner
+  seeks it as `owner_id=?`, and it stays empty in the steady state) · partial on `(id)` (the planner would scan the
+  partial index rather than seek it) · a full `owner_id` index (every owned row an entry, maintained at every mint, for
+  no read that needs it).
+- **P-67-3 — the report keeps one zero entry per owner table when nothing adopts** (built: its shape is unchanged for
+  every reader) · an empty dictionary.
+
+#### For QUESTIONS at the merge
+
+None. This batch decides no product behaviour and adds no user-facing copy.
+
+#### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+Products: `App/Variorum/DerivedData/vm64-b4/` (phone + Mac), built at `8e4e73e01` (later commits are records and the
+gated Core measurement — no app-target or shared-code change).
+
+**Group (i) — the AFTER number and the new assertion. Run it ALONE, in its own invocation** (batch 3's rule — the
+suite reads the process's one recorder). The BEFORE is batch 3's group (i) from `vm64-b3` (its own window). Lift with
+the `grep`; the batch's series is `owner-adoption-nothing-to-adopt` (and `owner-adoption-rows-nothing-to-adopt`, still 0).
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileHerPathsPerfTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b4 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-b4-i>
+grep '^VM64-PERF|owner-adoption' <log-b4-i>
+```
+Expected: Swift Testing all green; `ownerAdoptionWithNothingToAdoptIsMeasuredAtFixtureScale` green WITH its VM-67
+assertions (no write statement; every statement through its unowned-row index; every owner table reached). If it is
+red, its issue names the statement or the plan line.
+
+**Group (ii) — the phone suites that open on-disk stores through the migration set or compose the services:**
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileLaunchPathTests MobilePerfFixtureTests MobilePhoneStoreEncryptionTests MobileRoundOccasionTests
+  MobileTypedUnlockSyncKeysTests MobileRelockCoordinatorTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b4 \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+
+**Group (iii) — the Mac suites that construct `AppServices` or exercise adoption at sign-in and first round** (the Mac
+compiles the changed op and the migration set):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(Phase9cAuthWiringTests FirstRoundRoadTests FirstRoundAfterTheActTests FirstRoundAfterTheReopenTests
+  SyncBeforeRoundTests SyncReachabilityTriggerTests ProdTestRoadTests OneRefreshAuthorityCompositionTests
+  OneRefreshAuthorityRaceTests HostedSyncStatusReadTests SyncWalkFenceTests AuthSessionTests SignUpPresentationTests
+  HostedSyncTierFaceTests AppBootstrapOffMainTests TestHostInertTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
+  -derivedDataPath DerivedData/vm64-b4 ${tests/#/-only-testing:VariorumTests/}
+```
+Batch 1's machinery note applies: poll for the Swift Testing verdict line, not `** TEST EXECUTE **`.
+
+**Optional — a hosted red-on-old** (not built): `git checkout 96dfa82b5 --
+Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operations/OwnerIdentity.swift`, phone
+`build-for-testing` into `DerivedData/vm64-b4-red`, `git checkout HEAD --` the same two files (clean `git status`),
+then group (i) against `vm64-b4-red` — expect the owner test RED on its VM-67 assertions (BEGIN + eleven UPDATEs,
+`→ SCAN <t>`), every other test as in batch 3's BEFORE run.

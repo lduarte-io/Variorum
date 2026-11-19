@@ -121,5 +121,25 @@ struct OwnerAdoptionMeasurementTests {
         print(Self.line("owner-adoption-warm", warm))
         print(Self.line("owner-adoption-cold", cold))
         #expect(warm.count == Self.runs && cold.count == Self.runs)
+
+        // The options' query plans (the record's §7 batch 4 table), through
+        // THIS build's SQLite on this seeded store. `NOT INDEXED` shows what a
+        // statement costs without the v1_38 index (option (b) alone; the
+        // pre-fix update). The last two are the store's other `owner_id`
+        // reads — the partial index must not move their plans.
+        try warmDB.writeWithoutTransaction { db in
+            print("VM67-PLAN|sqlite_version|" + (try String.fetchOne(db, sql: "SELECT sqlite_version()") ?? "?"))
+            for (label, sql) in [
+                ("probe (a)+(b)", "SELECT EXISTS (SELECT 1 FROM block WHERE owner_id IS NULL)"),
+                ("update (a)", "UPDATE block SET owner_id = 'x' WHERE owner_id IS NULL"),
+                ("probe without the index — (b) alone", "SELECT EXISTS (SELECT 1 FROM block NOT INDEXED WHERE owner_id IS NULL)"),
+                ("update without the index — before", "UPDATE block NOT INDEXED SET owner_id = 'x' WHERE owner_id IS NULL"),
+                ("owner_id = ? (unchanged)", "SELECT 1 FROM block WHERE owner_id = 'x' LIMIT 1"),
+                ("foreign-owner read (unchanged)", "SELECT 1 FROM block WHERE owner_id IS NOT NULL AND owner_id != 'x' LIMIT 1"),
+            ] {
+                let details = try Row.fetchAll(db, sql: "EXPLAIN QUERY PLAN " + sql).map { $0["detail"] as String }
+                print("VM67-PLAN|\(label)|\(details.joined(separator: " ; "))")
+            }
+        }
     }
 }
