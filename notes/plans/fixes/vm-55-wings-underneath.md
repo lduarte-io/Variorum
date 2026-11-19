@@ -199,7 +199,8 @@ and says so." — the saying is wave 2's face).
 **Split at spawn into 2a (VM-61) and 2b (VM-62), a fresh implementer each, each with its own stage window** —
 batch 1's five small members took one implementer past the 500k guideline, and these two are each a unit of
 their own (the seam and its one line; the 69 sites and their pin). 2a builds the kickoff's VM-61 paragraph, its
-tests and its record, and stops; 2b reads 2a's record and builds the VM-62 paragraph. Everything else in the
+tests and its record, and stops; 2b reads 2a's record and builds the VM-62 paragraph, and first applies P-55-11 (the orchestrator's check of 2a,
+under Batch records: the directions among 2a's silenced lines keep their line). Everything else in the
 kickoff binds both.
 
 > You are the implementer for batch 2 of the VM-55 run, in `~/dev/variorum-vm-55` on `vm-55-wings-underneath`.
@@ -957,6 +958,41 @@ placement, an edit to the Mac branch, or a Mac door taking a phone road reds the
 - `notes/MobileSoul.md` §6 — PL-22's receipts face call: answered by her VM-44 ruling and built here.
 - AppSpec §12 "Messages carry a kind…" — at most one clause: the seam is both platforms'; the phone's placement is her
   ruled compromise (pointer to SurfaceContracts).
+
+### The orchestrator's check of batch 2a (before its stage window; she is away — ruled PROVISIONAL)
+
+Her leaving, as relayed by the coordinator `nov18` at 04:16 (her words to it, not to this session), verbatim: "ok
+i'm off the mac. variorum is closed. i'm leaving for overnight. good luck with everything, tell all my sessions
+that i'm off, rule provisionally in my absence, i'll check in in the morning (which is depressingly soon)."
+
+Read: 2a's record whole. Three things follow.
+
+1. **P-55-11 (PROVISIONAL, the orchestrator's) — a direction keeps its line.** Among the fourteen groups of
+   ordinary lines 2a silenced, a few do more than confirm: they tell her the act landed somewhere other than where
+   she would look, or did something beyond what she asked. Options: (a) all fourteen groups silent, as 2a built;
+   (b) the directions among them keep a line, in P-55-7's class — the same rule 2a already applied to "Already
+   collected" and the shelving notes; (c) every Put back and Unarchive keeps a line (the trash-archive-tags
+   mockup's reading; wave 2's VM-96 face). **Ruled: (b)**, applied by batch 2b. The directions: a take put back
+   that returns ARCHIVED rather than to the fan (the Block History, Trash and lens editions); a block put back at
+   the end of the note or unplaced because its place is gone (`putBackAtEnd`, `putBackUnplaced`); "Added by
+   tagging #‹tags› — “‹book›” collects by filter." (the add applied tags she did not ask for by name). Every other
+   line in 2a's list stays silent and stays on her call-back list.
+2. **The line's overlay window versus the lock.** P-55-10 hosts the line in its own window above everything the
+   shell presents, and a line can carry a note's or book's title. Asked of 2a before its window: can a standing
+   line sit over the lock screen after a relock, show in the app-switcher snapshot above the privacy cover, or
+   outlive the shell in a non-ready state? Its answer (its record's "The line and the lock"): the lock screen and every non-ready state, no — the shell and
+   its overlay are down before they draw; the app-switcher snapshot, YES — the privacy redaction rides the shell's
+   environment and never reached the separate window. Fixed in `Shell/MobileMessageLine.swift` alone (6699560ce:
+   the line hides as its scene resigns active and is withdrawn in the background), pinned by
+   `MobileMessageLineSceneTests`.
+3. **For umbrella VM-78 (told through the coordinator at this run's READY):** the phone's undo door no longer
+   draws "Undid: ‹label›" with its Redo button — the ⋯ sheet's Undo and Redo rows stay; VM-16's fix lands on the
+   one line's vocabulary (`Shell/MobileLine.swift`) when VM-78 merges this run's main in.
+
+Kept as 2a built, on her ratify list: P-55-3 (a refusal fades on the seam's clock, no ✕ — the mockup captions
+draw a refusal that stays until her ✕ or next act) · P-55-4 · P-55-5 · P-55-6 · P-55-8 · P-55-9 · P-55-10 · the
+commit's line silent in Block History (the note-write mockup keeps a commit line with "Name…" for the future
+quick row — that face is its own ticket's).
 
 ## Ladder
 
