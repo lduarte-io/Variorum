@@ -68,7 +68,17 @@ final class MobileShellRouter {
     /// every parent render, and a bind for the same session keeps its store.
     @ObservationIgnored private var themeSession: ObjectIdentifier?
 
-    init() {}
+    /// **This phone's light · dark · follow-the-system choice** (VM-53 — her
+    /// LK-2: light or dark stays each device's own). The DEVICE's half of the
+    /// look, beside the library's (`theme`): app-lived like the router, so the
+    /// lobby wears it before any library opens. A reader observes the
+    /// controller's own `choice`. Its owner rule and why it writes the windows
+    /// are `MobileAppearance.swift`'s.
+    @ObservationIgnored let appearance: MobileAppearanceController
+
+    init(appearance: MobileAppearanceController = MobileAppearanceController()) {
+        self.appearance = appearance
+    }
 
     /// **What the phone wears before a library has answered** — the lobby
     /// (no library open) and the shell's first frame before its store's

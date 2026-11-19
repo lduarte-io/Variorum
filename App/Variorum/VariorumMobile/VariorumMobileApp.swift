@@ -56,7 +56,11 @@ struct VariorumMobileApp: App {
     /// own placeholder (VM-51, PROVISIONAL P-47-15). The phone keeps no voice
     /// of its own (the device preference retired with VM-51).
     private var lockedTokens: VoiceTokens {
-        .resolve(settings: MobileShellRouter.placeholder, dark: scheme == .dark)
+        // VM-53: this phone's light/dark choice — resolved here at the app's
+        // root, where the windows' override is not seen (`isDark(system:)`).
+        .resolve(
+            settings: MobileShellRouter.placeholder,
+            dark: shellRouter.appearance.choice.isDark(system: scheme == .dark))
     }
 
     var body: some Scene {
