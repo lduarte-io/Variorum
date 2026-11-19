@@ -449,10 +449,13 @@ DerivedData: `App/Variorum/DerivedData/vm64-b4/` (gitignored).
 
 ### Batch 5 · VM-68 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**No revert is in flight.** The red-on-old proof for the hosted pins is a second phone build of the pins over the
-pre-fix production files (`git checkout <base> -- <files>` AFTER the fix is committed and pushed, build into
-`App/Variorum/DerivedData/vm64-b5-red/`, `git checkout HEAD -- <the same files>`, clean `git status`); this line names
-it before it starts. Base: `35a3bea7a`. A QUIET WINDOW was on at the start (no whole-package `swift test`, no cold or
+**A REVERT IS IN FLIGHT (the red-on-old build), from `dcea98cee`, committed and pushed.** The five phone Shell files
+(`MobileLibraryViewModel`, `MobileLibraryView`, `MobileShellView`, `MobileShellBand`, `MobileListingFilters`) are
+checked out at base `35a3bea7a`, and `VariorumMobileTests/MobileLibraryPagingRulesTests.swift` is moved to the gitignored
+`App/Variorum/DerivedData/vm64-b5-red-aside/` (it names VM-68's API); the build goes into
+`App/Variorum/DerivedData/vm64-b5-red/`. RESTORE: `git checkout HEAD -- <the five files>
+App/Variorum/VariorumMobileTests/MobileLibraryPagingRulesTests.swift`, then `git status` and `git diff HEAD` empty.
+(Merged with main at `d893fae63` before this — VX-980, at the orchestrator's word.) A QUIET WINDOW was on at the start (no whole-package `swift test`, no cold or
 full `build-for-testing` until the orchestrator says it ended).
 
 **Audit F re-verified on this tree:** `startAll` / `startBookless` (`MobileLibraryViewModel.swift:316-353`, VM-65's
