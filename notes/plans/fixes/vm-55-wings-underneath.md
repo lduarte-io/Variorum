@@ -329,7 +329,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-58 | DONE (301388409) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-60 | DONE (9462d3854) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
-| Batch 2a — VM-61 | IN-PROGRESS — the implementer's record is under "Batch 2a record" (its own LIVE STATUS) |
+| Batch 2a — VM-61 | IN-PROGRESS — built, pinned and pushed (both targets build-for-testing green); READY for its stage window, results PENDING — the record is under "Batch 2a record" |
 | Batch 2b — VM-62 | NOT-STARTED — a fresh implementer after 2a closes |
 | Batch 3 — VM-63 | NOT-STARTED |
 | Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
@@ -601,13 +601,325 @@ line notes, `wording-list-2.md`). DerivedData: `App/Variorum/DerivedData/vm55-b1
 | Piece | State |
 |---|---|
 | Record skeleton | DONE (f058dcea5) |
-| The inventory (every slot outside Protection: file · words · class · what became of it) | NOT-STARTED |
-| The seam shared (`StatusCenter` to `Shared/`, `session.status` on both platforms, the phone's placement rule) | DONE (88a124d84) — `git mv` to `Shared/StatusCenter.swift`; `Item.leavesPage` + `Item.owner`; `Placement` (.receiptStyle Mac / .phoneLine phone); `removal(_:undo:owner:)`; `withdraw(owner:)`; the pure `slot(kind:leavesPage:placement:receiptStyle:)`; `AppSession.status` out of the macOS fence. Phone build-for-testing green; Mac build PENDING (next piece) |
-| The phone's one line (the face, hosted once by the shell) | DONE (b6d5340f8) — `Shell/MobileMessageLine.swift` (the face, the overlay window, the shell's installer; keyboard from its notifications; touches only on the line's door) + `Shell/MobileLine.swift` (the doors' class vocabulary and the three existing Undo roads); the shell hosts it once. Phone build-for-testing green. No slot speaks through it yet (next piece) |
-| The slots moved onto the line (Shell, Write, Takes) | DONE (this commit) — every slot outside Protection speaks through `MobileLine` with its door's class; no screen draws its own slot (the properties stay for the pins — the Mac's AD-14 precedent). Phone build-for-testing green. The inventory below is IN-PROGRESS |
-| Tests (the seam's kinds, the phone's show rule, the Mac byte-identical pin, the moved slots) | NOT-STARTED |
-| Phone + Mac `build-for-testing` | NOT-STARTED |
-| Stage window | NOT-STARTED — READY handed to the orchestrator when the above are green |
+| The seam shared (`StatusCenter` to `Shared/`, `session.status` on both platforms, the phone's placement rule) | DONE (88a124d84) |
+| The phone's one line (the face, hosted once by the shell) | DONE (b6d5340f8) |
+| The slots moved onto the line (Shell, Write, Takes) | DONE (c579da398) |
+| The note's Undo never outlives its moment (any later word from the note takes its structural Undo line back) | DONE (96f79ccc2, in `MobileLine.say`) |
+| Tests (the seam's kinds, the phone's show rule, the host, each door, the rewritten placement pins, the Mac pin) | DONE (96f79ccc2, 64df336d8) — written; results PENDING (the stage window) |
+| The inventory, the dropped lines, the 2b carry-over, the PROVISIONALs | DONE (this commit) |
+| Phone `build-for-testing` (`VariorumMobile`, the window's simulator) | DONE — green at 64df336d8 |
+| Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 64df336d8 (same DerivedData dir) |
+| Stage window | PENDING — READY handed to the orchestrator at this commit; no revert is in flight |
+
+#### What shipped — the seam's shape, and why
+
+**One seam, one brain, two faces.** `StatusCenter` moved (`git mv`) from the Mac's `Variorum/Registry/` to
+`Shared/StatusCenter.swift`, and `AppSession.status` left the `#if os(macOS)` block: both platforms speak through ONE
+`session.status`, the kinds decided at the door (refusal · offer · receipt — the three are unchanged). What differs per
+platform is only WHERE a message shows — the placement — and that is one pure rule,
+`StatusCenter.slot(kind:leavesPage:placement:receiptStyle:)`:
+
+- the Mac's placement (`.receiptStyle`, the build's default there) is the shipped rule, unchanged: refusals and offers
+  toast; a receipt toasts, sits on the quiet line, or is dropped, as `receipt_style` says;
+- the phone's placement (`.phoneLine`, the build's default there) is her VM-44 ruling: refusals and offers always draw;
+  a receipt draws only when its door says it took something OFF THE PAGE; `receipt_style` is never read (P-55-1). The
+  phone has one slot (`current`); a dropped ordinary receipt leaves what is on screen alone (the Mac `.off` rule).
+
+Three additions to the shared seam, each defaulted so every Mac item and pin reads unchanged: `Item.leavesPage` (set only
+by the new `removal(_:undo:owner:)` door — a receipt in kind, so on the Mac it routes exactly as `receipt(_:)`; it may
+carry its Undo with no words, the one exception to the empty-text guard, for the merge's shipped bare Undo); `Item.owner`
+and `withdraw(owner:)` (a speaker takes back only its own line, only while it shows — the note screen's structural Undo
+dies with the note). `deliver` was split into `deliver` → `place` so `removal` shares the routing step; the Mac's order
+(route, replace, re-arm the 6 s clock) and its log line are unchanged. No Mac caller sets the placement, says `removal`
+or `withdraw`s (source-scanned by the Mac pin).
+
+**Why a shared brain and not a phone fork:** MobileSoul §3 and review focus 7 — a brain hoisted to `Shared/` (batch 3's
+`WingsModel`, later umbrellas') speaks `session.status.refuse/receipt/removal` with no platform `#if`; each platform's
+face decides where it shows from the class the door gave. The phone's show rule is a ruled compromise (her VM-44 words),
+recorded once, in the one routing rule — not a second copy of the kinds.
+
+**The phone's face — `VariorumMobile/Features/Shell/MobileMessageLine.swift`.** ONE line, hosted ONCE by the shell
+(`MobileShellView`'s background installs it), drawing `session.status.current`: the words in `tokens.small` (a refusal in
+the alarm ink every phone error slot wore; a removal in the muted ink and chrome casing every phone receipt wore; an offer
+in ink), its door in the accent, on `tokens.room` with the tab bar's hairline — today's tokens, no restyle (VM-47 owns
+sizes). It fades on the seam's own clock (`dismissAfter`, 6 s — the one auto-dismiss policy, refusals included:
+P-55-3), animates in and out with an opacity transition, and announces its words to VoiceOver (it lives in its own
+window). **It never pushes content: it floats in its own passthrough window** over the shell's scene
+(`MobileMessageLineHost` → `MobileMessageLineWindow`, level `.normal + 1`), because half the phone's slots lived inside
+SwiftUI sheets and a SwiftUI overlay on the shell draws UNDER a presented sheet (P-55-10). The window never becomes key
+(`canBecomeKey == false`, shown with `isHidden = false`), so the focused text keeps the keyboard; it takes a touch ONLY on
+the line's door (`takesTouch` against a frame the face reports — never SwiftUI's internal views, per the iOS 18/26
+hit-test reports on hosting-controller-root windows); it rides above the tab bar on a root (the bar's MEASURED height,
+via `onGeometryChange` on the shell's `tabBar`) and above the keyboard (the keyboard-frame notifications converted from
+screen coordinates — the overlay is never key, so it does not rely on a non-key window's keyboard safe area; iOS keeps the
+keyboard above every app window). It goes when the shell goes (the probe leaves its window, or is dismantled), so a line
+never outlives the library it spoke for. The external facts behind these choices came from ONE Sonnet lookup (UIKit
+window levels, keyboard frames, the iOS 18/26 passthrough reports); the unverified ones are pinned in the stage window by
+`MobileMessageLineHostTests`.
+
+**The doors' vocabulary — `VariorumMobile/Features/Shell/MobileLine.swift`.** A phone door says its class —
+`.refusal`, `.ordinary`, `.removal(Undo?)` — and a removal's Undo is only ever a road that already exists (scope call 7):
+`.structural` (the note's M20 door, `MobileUndoDoor.beginUndo(from: .receipt)`, so A12's warning still presents from
+the note's masthead host), `.putBackNote` / `.putBackBook` (the Trash's own Put back ops — `TrashPutBack`'s `.note` and
+`.book` arms, `restoreContainer` / `restoreReading`), `.unarchiveBook` (`unarchiveReading`). A landed Undo says nothing (a
+restoration is ordinary); a refused one speaks the deletion story's words. **M20's stale-Undo law, carried onto the
+line:** a structural Undo names the stack's top as it was, so ANY later word from the same note (a refusal, a removal, an
+ordinary act the line drops, a success clearing its slot, an undo pressed in the ⋯ sheet) first takes back that note's
+standing Undo line (`MobileLine.say` with the note's door) — the masthead's `statusMessage` `didSet` guarded exactly this
+("a stale Undo button left standing beside a NEW sentence would offer to reverse something the sentence does not name").
+
+**How the slots moved.** Every phone model keeps its slot property (`lastError`, `receipt`, `lastReport`,
+`doorRefusal`, `status`, `statusMessage`/`statusAction`) as its own record of what it last said — the existing pins read
+them; the Mac's AD-14 precedent ("view models keep their `statusMessage` properties … the app-level PRESENTATION is this
+center's") — and hands the words to the seam with its door's class: a slot that only ever holds a refusal speaks from its
+`didSet` (`MobileLine.refuse`); a mixed slot speaks through one explicit funnel per model (`say(_:as:)` /
+`report(_:…)`). No screen draws its own slot any more. The note's masthead lost its status row and the receipt's
+Undo/Redo buttons (`receiptAction`); the ⋯ sheet lost its `reportLine`; the note screen withdraws its own structural Undo
+line in `onDisappear`.
+
+**In the phone's editor-seam files, only the expressions that hand words to the seam changed** (no control flow, no seam
+behaviour — focus 10). `Write/MobileEditorViewModel.swift`: `report(_:action:)` gained `line:` (default `.refusal`, the
+class of all ~100 bare writers) and one forwarding line `MobileLine.say(message, as: line, session: session, door:
+undoDoor)`; five direct `statusMessage = …` writes became `report(…)` (the autosave `onError` closure; the three
+observation/delivery catches; `refuse(_:)`; `reportOperationError(_:)`) — the same assignment through the funnel; three
+receipts gained their class (`copyNote` binds its outcome to pass `copied.line`; `deleteNote` → `.removal(.putBackNote(
+postID))`; `saveVersion` → `.ordinary`). `Write/MobileStructural.swift`: nine `model.report(…)` receipts gained `line:` —
+divide, extract, Make Block, New Block Below `.ordinary`; merge, block delete, archive, whole-paragraph delete, the
+cross-block compound `.removal(.structural)`. `Shared/EditorBrain/` and `Write/MobileEditorTextView.swift` untouched.
+
+#### The inventory (every per-screen message slot outside `Features/Protection/`, at kickoff)
+
+Class: **refusal** (always draws) · **removal** (draws, with Undo where a road exists) · **ordinary** (draws nothing — her
+ruling). "raw" = the words are `String(describing: error)` today, carried unchanged for 2b.
+
+| File (slot) | The words | Class | What became of it |
+|---|---|---|---|
+| `Shell/MobileLibraryViewModel` + `MobileLibraryView` (`lastError`) | the listing, Pool, search and mint errors (raw) | refusal | the line (`didSet`); the Library's red slot removed |
+| same (`receipt`) | "Note moved to the Trash — 30 days to put it back." (`RecoveryCopy.movedToTrashReceipt(.note)`) | removal | the line, Undo = Put back (`restoreContainer`) |
+| `Shell/MobileStars` (`lastError` via `speak(_:at:)`/`speakHomeless`; drawn by the Library, Shelf and Starred roots through `error(on:)`) | "Refused: …" (raw `\(error)`) · store-read errors (raw) | refusal | the line; the three per-root slots removed (D2's per-root homes are moot with one line at the foot) |
+| `Shell/MobileShelfViewModel` + `MobileShelfView` (`lastError`) | read, pin, mint and Today errors (raw) · delete/archive refusals (`DeletionRefusal`, `OpsRefusalCopy`) | refusal | the line |
+| same (`lastReport`) | "Book moved to the Trash — 30 days to put it back." | removal | the line, Undo = Put back (`restoreReading`) |
+| same (`lastReport`) | "Archived “‹name›” — it comes back when a day arrives (Today’s Entry)." | removal | the line, Undo = unarchive (`unarchiveReading`) |
+| same (`lastReport`) | the Today door's shelving notes ("Entry saved. Your daily journal book is finished, so it wasn't added — …" and its four siblings, `MobileTodayDoor.shelvingNote`) | refusal (a direction: the entry was not filed — the Mac ⌘J door's own `status.refuse(note)`; P-55-7) | the line |
+| `Shell/MobileBookViewModel` + `MobileBookView` (`lastError`, the header) and `Read/MobileReadView` (`lastError`) | the book's read errors (raw) | refusal | the line |
+| same (`doorRefusal`, beneath + New Note / + New Chapter) | `MobileMembershipModel.refusal` words ("“X” is finished — reopen it…", "“X” is at its note cap.") | refusal | the line (at the screen's foot — never a screen away from the door) |
+| `Shell/MobileTrashModel` + `MobileTrashView` (`lastError`) | put back / purge / listing refusals | refusal | the line |
+| same (`receipt`) | Put back: `TrashPutBack.run`'s receipts ("Put back where it was." · "Put back where it came from." · the end-of-note and unplaced landings · "‹Kind› put back." · "“‹book›” is back with its N notes." · the take editions) | ordinary (a restoration — P-55-4) | dropped (listed below) |
+| same (`receipt`) | "The Trash is empty — nothing to delete." | refusal (a door that did nothing) | the line |
+| same (`receipt`) | Delete Now / Empty Trash: `TrashPurge.confirm`'s receipts (her 13j now/janitor sentences) | removal, no Undo (a purge has no road back) | the line |
+| `Shell/MobileArchiveModel` + `MobileArchiveView` (`lastError`) | unarchive / listing refusals | refusal | the line |
+| same (`receipt`) | "Unarchived — it's back in the library." | ordinary (P-55-4) | dropped |
+| `Shell/MobileScraps` (`lastError`) | observation, refresh and mint errors (raw) | refusal | the line |
+| `Shell/MobileTagManager` (`lastError`, in the tag sheet) | "Tag names can't be empty or contain “/”." · "A tag named “…” already exists." · "That tag no longer exists." · "Refused: …" (raw) · the empty typed-path hint · read errors (raw) | refusal | the line, above the sheet |
+| `Shell/MobileBookDetails` (`lastError`, in the sheet) | rename / Finish / designate / delete / archive refusals (raw in three arms) | refusal | the line, above the sheet |
+| same (no slot today) | delete and archive answered nothing here, while the shelf row's same acts spoke | removal | NEW here: the shelf row's own lines, with Put back / unarchive (P-55-8) |
+| `Shell/MobileCreateBook` (`lastError`, in the sheet) | `BookNameCopy.refusal` ("A book named …") · tag-load and mint errors (raw) | refusal | the line, above the sheet |
+| `Shell/MobileQuickNote` (`lastError`, under the box) | `MobileQuickNoteCopy.refusal` (the filing refusals) | refusal | the line; her words stay in the box |
+| same (`boundaryNote`) | "earlier paragraphs live in the note — tap open ↵ to edit them" · "this note is saved — tap open ↵ to keep writing in it" | not a message — the box's standing state caption | stays (the capture box is VM-72's) |
+| `Shell/MobileSettingsView` (`tutorialNote`, `perfNote` — `#if DEBUG`) | the DEBUG developer doors' readouts ("Seeding…", "Left as it was.", raw) | n/a — DEBUG instruments, not product surfaces | stays; its three raw sites are 2b's |
+| `Shell/MobileStarterJournal` (`Outcome.refused`) | raw | n/a — never surfaced | untouched |
+| `Write/MobileEditorViewModel` + `MobileWriteView`'s masthead status row (`statusMessage` + `statusAction`) | every editor gate, structural, takes, comments and block-menu refusal (the funnel's ~100 writers; raw in ten) | refusal (the funnel's default) | the line; the masthead row and its Undo/Redo removed |
+| same | "Copied this note to the clipboard." | ordinary | dropped |
+| same | "Copied this note to the clipboard — it has callout blocks, so the copy carries the takes saved in the note rather than the one on screen." | refusal class — a direction (P-55-7) | the line |
+| same | "This note has no text to copy." · "Copy failed: …" (raw detail) | refusal | the line |
+| same | "Note moved to the Trash — 30 days to put it back." (the ⋯ sheet's delete) | removal | the line, Undo = Put back; it survives the note's pop (owner nil) |
+| same | "Saved a version — the whole note as it is now, in Versions." | ordinary | dropped |
+| `Write/MobileStructural` (via `report`) | "Block deleted — ‹the tray's road›." (+ the stranded-originals note) | removal | the line, Undo = structural |
+| same | "Block archived — ‹archivedForever›, in ‹the tray's archived road›." | removal | the line, Undo = structural |
+| same | `blocksDeletedStatus(n)` (whole-paragraph delete) | removal | the line, Undo = structural |
+| same | merge: a bare Undo, no words | removal (P-55-5) | the line, its Undo alone |
+| same | the cross-block compound (select across paragraphs + ⌫/type): a bare Undo, no words | removal (it merges blocks — P-55-9) | the line, its Undo alone |
+| same | divide: a bare Undo | ordinary | dropped (the ⋯ sheet's "Undo Divide" stays) |
+| same | extract: "This block has 1 other take — it keeps this span." / "This block has N other takes — they keep this span." + a bare Undo | ordinary | dropped |
+| same | Make Block: a bare Undo | ordinary | dropped |
+| same | "New block added below — type away." | ordinary | dropped |
+| `Write/MobileUndoDoor` (via `report`) | "Undid: ‹label›" + Redo · "Redid: ‹label›" + Undo | ordinary (the Mac `ShellActions`' class) | dropped (Undo and Redo stay in the ⋯ sheet) |
+| same | "No structural change to undo." · "No structural change to redo." · "Undo cancelled — nothing changed." · the undo/redo-failed sentences · "Another structural change is still landing." | refusal | the line |
+| `Write/MobileNoteActions` (`reportLine`, the ⋯ sheet's copy of `statusMessage`) | everything the funnel said while the sheet was up | — | removed: the line draws above the sheet |
+| `Write/MobileNoteTags` (`status`, in the sheet) | the typed-path hint · `MobileTagsModel.refusal` words · read errors (raw) | refusal | the line (`didSet`) |
+| `Write/MobileMembership` (`status`, in the sheet) | "Added to “X”." | ordinary | dropped |
+| same | "Added by tagging #… — “X” collects by filter." | ordinary | dropped |
+| same | "Already collected — it matches “X”'s filter." | refusal (did nothing — P-55-7) | the line |
+| same | "“X” can't take this note: …" · the membership refusals · read and collect errors (raw) | refusal | the line |
+| same | "Removed from “X” — the note itself is untouched." | ordinary (a pointer leaves, the note stays — P-55-4) | dropped |
+| same | "Diverged — “X” holds the copy now, in the same place; the original is untouched elsewhere." | ordinary | dropped (the sheet's door to the copy stays) |
+| `Write/MobileReferences` (`status`, in the sheet) | "Not a loadable link: …" · read/add/remove errors (raw) | refusal | the line (`didSet`) |
+| `Write/MobileBlockList` (`status`, in the sheet) | read errors (raw) | refusal | the line (`didSet`) |
+| `Write/MobileNoteTray` (`status`, in the sheet) | Put back: `RecoveryCopy.landingReceipt`, `PreservedOriginPutBack`'s receipts, `takeRestoredReceipt` | ordinary (P-55-4) | dropped |
+| same | a take's Delete Now: `TrashPurge.confirm`'s receipt | removal, no Undo | the line |
+| same | put back / purge / read refusals | refusal | the line |
+| `Write/MobileVersions` (`status`, the pushed screen's foot) | "The note says this again — and where it was a moment ago is saved in Versions, so you can go back." · "This moment is a note of its own now, in the Library. It has left Versions." | ordinary | dropped |
+| same | "The moment moved to the Trash — 30 days to put it back." | removal | the line, Undo = Put back (`restoreContainer`) |
+| same | `VersionActs.words` refusals | refusal | the line |
+| `Write/MobileComments` (via `report`) | comment refusals · read errors (raw) | refusal | the line |
+| same (`restoredLabel` in the overlay) | the parked draft's caption | not a message — a draft-state caption | stays (comments are VM-192's) |
+| `Write/MobileBlockMenu` (via `report`) | "Another act is still landing." · the callout/name refusals · the delete confirm's direction | refusal | the line |
+| `Takes/MobileTakesBrowser` (via `report`) | "Take moved up." · "Take moved down." | ordinary | dropped |
+| same | "That take is now the block below — the original is archived on its block, in the archived list under its takes." + Undo | removal (an archive) | the line, Undo = structural |
+| same | `convertedNote` ("N takes are now their own blocks below — this block still shows the take it showed, and the originals are archived on it." + the blank-takes clause) + Undo | removal (archives) | the line, Undo = structural |
+| same | the browser's verb refusals (raw in two) | refusal | the line |
+| `Takes/MobileTakesController` (via `report`) | the choose ✓'s refusals (raw in two) | refusal | the line |
+| `Takes/MobileBlockHistory` + `MobileBlockHistorySheetView` (`status`, the overlay's label; `commitNow` via `report`) | "Committed — a saved moment of this take is kept." | ordinary | dropped |
+| same | "Saved moment restored into this take — the moments themselves are never overwritten, so nothing was lost." · "Take unarchived — it's back in this block's fan." · "Take put back — it's in this block's fan again." (and its archived edition) · the bring-back-an-original receipts | ordinary (P-55-4) | dropped |
+| same | the history's refusals (raw in three) | refusal | the line; the overlay's status label stood down |
+| `Takes/MobileLenses` (`status`, in the sheet) | "Adopted — the note now shows this view. The old arrangement is kept as the lens “‹name›”." · "Take unarchived — this lens is showing its pick again." · "Take put back — this lens is showing its pick again." (and its archived edition) | ordinary | dropped |
+| same | "That take isn't here to restore — pick another one for this block." · the lens refusals · read errors (raw) | refusal | the line |
+| `Write/MobileWriteView` (`canaryMessage`) | the TK2 canary's release diagnostic | not the seam's — a release-posture diagnostic | stays |
+| same (the sealed state line + Unlock) | "this note is locked" + its door | state, not a message | stays |
+| `Features/Protection/` (`MobileProtectionReceipts`) | Protection's receipts | — | untouched (scope call 6; its remainder is VM-103's at closeout) |
+
+**Removal acts that say nothing today and stay silent** (their lines and words belong to their umbrellas — named, not
+built): a comment's delete (VM-192; the drafted line "Comment deleted", `wording-list-2.md`, waits on her wording pass);
+a take's delete or archive in the takes browser (VM-186; draft "Take deleted"); a tag's delete in the tag manager (VM-96 —
+"Undo after deleting a tag"; the Mac has no line for a single tag); a lens's delete (no words exist anywhere).
+
+**No phone door raises an offer today** (the one `status.offer` in shared code, the multi-book note, sits in
+`AppSession`'s macOS block). The seam carries the kind and the face draws one always, with its door (P-55-6).
+
+#### Every ordinary-act line that stops showing on the phone, verbatim (so she can call any of them back)
+
+1. `Write/MobileNoteClipboard.swift` — "Copied this note to the clipboard."
+2. `Shared/VersionsCopy.swift` via `Write/MobileEditorViewModel.swift` (Save a Version) — "Saved a version — the whole
+   note as it is now, in Versions."
+3. `Write/MobileStructural.swift` (New Block Below) — "New block added below — type away."
+4. `Write/MobileStructural.swift` (Extract on a fanned block) — "This block has 1 other take — it keeps this span." /
+   "This block has ‹N› other takes — they keep this span."
+5. `Write/MobileStructural.swift` — the bare Undo button after a divide, an extract and Make Block (no words; the ⋯ sheet's
+   Undo row stays).
+6. `Shared/StructuralUndoCopy.swift` via `Write/MobileUndoDoor.swift` — "Undid: ‹label›" with its Redo button, and
+   "Redid: ‹label›" with its Undo button (R10's receipt ping-pong; the ⋯ sheet's rows stay).
+7. `Takes/MobileTakesBrowser.swift` — "Take moved up." · "Take moved down."
+8. `Takes/MobileBlockHistory.swift` — "Committed — a saved moment of this take is kept."
+9. `Shared/BlockHistoryFace.swift` via `Takes/MobileBlockHistory.swift` — "Saved moment restored into this take — the
+   moments themselves are never overwritten, so nothing was lost." · "Take unarchived — it's back in this block's fan." ·
+   "Take put back — it's in this block's fan again." · "Take put back — it was archived, so it's in this block's archived
+   takes, not the fan. Unarchive it there to bring it back." · the bring-back-an-original receipts (`PreservedOriginPutBack`).
+10. `Shared/RecoveryCopy.swift` via `Write/MobileNoteTray.swift` and `Shell/MobileTrashModel.swift` (Put back) — "Put back
+    where it was." · "Put back where it came from." · the end-of-note and unplaced landings (`putBackAtEnd`,
+    `putBackUnplaced`) · "‹Kind› put back." · "“‹book›” is back with its note." / "… with its ‹N› notes." · "Take put back
+    — it was archived when it was deleted, so it's among its block's archived takes, not the fan. Unarchive it there to
+    bring it back." (and the active-take edition).
+11. `Shell/MobileArchiveModel.swift` — "Unarchived — it's back in the library."
+12. `Shared/VersionsCopy.swift` via `Write/MobileVersions.swift` — "The note says this again — and where it was a moment
+    ago is saved in Versions, so you can go back." · "This moment is a note of its own now, in the Library. It has left
+    Versions."
+13. `Write/MobileMembership.swift` — "Added to “‹book›”." · "Added by tagging #‹tags› — “‹book›” collects by filter." ·
+    "Removed from “‹book›” — the note itself is untouched." · "Diverged — “‹book›” holds the copy now, in the same place;
+    the original is untouched elsewhere."
+14. `Takes/MobileLenses.swift` — "Adopted — the note now shows this view. The old arrangement is kept as the lens
+    “‹name›”." · "Take unarchived — this lens is showing its pick again." · "Take put back — this lens is showing its pick
+    again." (and its archived edition).
+
+The models still hold each sentence (the pins read them); calling one back is a one-word class change at its door.
+
+#### Raw-error sites carried over for batch 2b (VM-62)
+
+The count is unchanged: **69 `String(describing: error)` sites across the same 23 files** (the LIVE STATUS notes' table
+above). Every one now reaches a rendered string through the one line rather than a per-screen slot: through a slot's
+`didSet` (`MobileLine.refuse`), a model's funnel (`say(_:as:)`, `report(_:…)`), or the editor's `report`. Ten carried
+expressions changed SHAPE only (the raw text is byte-identical), so 2b's grep finds them at:
+`Write/MobileEditorViewModel.swift` — `self?.report(String(describing: error))` (the autosave `onError`),
+`report(String(describing: error))` ×3 (the observation and delivery catches), `report(OpsRefusalCopy.words(for: error,
+roads: .phone) ?? String(describing: error))` (`reportOperationError`); `Takes/MobileBlockHistory.swift` —
+`report(.refusal(String(describing: error)))` (the refresh catch); `Write/MobileMembership.swift` —
+`say(String(describing: error), as: .refusal)` ×2 (refresh, collect); `Takes/MobileLenses.swift` —
+`say(String(describing: error), as: .refusal)` ×2. Also for 2b's no-raw-error pin: the line renders `Item.text` in
+`Shell/MobileMessageLine.swift` — every raw site's words reach the screen THERE now.
+
+#### Tests (written; results PENDING — the stage window)
+
+Phone (`VariorumMobileTests`), new — file `MobileMessageLineTests.swift`, four types: `MobileLineShowRuleTests` (11: the
+phone's placement; the show-rule table over every kind × style; ordinary dropped AT the seam; refusal; removal with its
+Undo; the wordless-Undo exception; an ordinary act never sweeps a refusal; `receipt_style` not read; the fade; a
+speaker's withdrawal; the copy outcomes' classes) · `MobileMessageLineGeometryTests` (3: `lift`, `takesTouch`,
+`keyboardOverlap`) · `MobileMessageLineHostTests` (1: the host in a REAL scene window under a presented sheet — level,
+never key, a touch only on the door, above the tab bar's inset and then the keyboard, nothing after the line goes, the
+overlay goes with the probe) · `MobileLineDoorTests` (11: a deleted note's line + Undo = Put back, store read back; a
+deleted book from the row and from Book Details, same line, Undo = Put back; the Journal's archive + Undo = unarchive; a
+block delete with the note's own Undo, withdrawn as the note goes, pressed → the block back; the merge's wordless Undo,
+pressed → unmerged; a confirmed Delete Now with no Undo; ordinary acts silent (divide, New Block Below, a star, joining a
+book); a Put back silent; refusals always (the seal's gate, Empty Trash with nothing, a finished book); the note's Undo
+never outlives its moment (a later ordinary act, an undo from the ⋯ sheet); nothing to undo refuses).
+
+Phone, rewritten to the new placement (each pinned the per-screen slot this batch retires): `MobileUndoDoorTests` —
+`theReceiptsUndoButtonPutsDeletedBlocksBack` (now the LINE's real Undo button, activated through UIKit),
+`theReceiptsRedoButtonReAppliesWhatWasUndone` (a landed undo says nothing on the line; Redo through the ⋯ sheet's real
+row), `aSilentStructuralActStillWearsTheUndoDoor` (a divide says nothing on the line; Undo through the ⋯ sheet's real row),
+and the two A12 pins (they press the receipt surface's door — the one the line presses — since a divide draws no line;
+the alert host and the confirm→act edge are unchanged); `MobileDeletionTests.aRefusedDeleteIsSpokenOnTheSheetThatRaisedIt`
+(the refusal reaches the one line as a refusal while the sheet stays up, and the sheet keeps no slot);
+`MobileNavigationTests.aRefusedBookDoorSpeaksBesideTheDoorSheTapped` (the door's refusal reaches the one line; the page
+keeps no slot).
+
+Mac (`VariorumTests`), new: `VM61MacStatusSeamPinTests` (4: the Mac's placement is her receipt style; the routing table
+over every kind × style, a removal routing exactly as a receipt; the slots as shipped — quiet, toast, off, one message at
+a time, the 6 s clock, the standing offer; a source scan that no Mac door says `status.removal(`, `.withdraw(owner:` or
+`.placement =`). The existing Mac seam suites (`StatusCenterTests`, `StatusSeamVocabularyTests`,
+`ConfirmationsSettingTests` …) ride the move unchanged.
+
+**How each would fail on a regression** (VM-61 is a Feature; red-on-old does not bind): the file headers of
+`MobileMessageLineTests.swift` and `VM61MacStatusSeamPinTests.swift` say it per pin — a phone placement that drew
+ordinary receipts, dropped removals or read the style reds the table and the door pins; a wrong or missing Undo road reds
+the press-and-read-the-store pins; a stale structural Undo reds `theNotesUndoNeverOutlivesItsMoment`; a host that sat
+over the bar or the keyboard, took touches off its door or became key reds the host pin; a Mac build on the phone's
+placement, an edit to the Mac branch, or a Mac door taking a phone road reds the Mac pin.
+
+#### PROVISIONAL calls (for QUESTIONS at the merge moment — the orchestrator carries them)
+
+- **P-55-3 — a refusal's lifetime on the phone.** Options: (a) every line rides the seam's one clock and fades by itself
+  (the kickoff's "the line fades by itself"; the Mac's one auto-dismiss policy, which fades refusal toasts too); (b) a
+  refusal stays until her ✕ or her next act (the captions of the note-write mockup's D5 and the home-wings frames 12 and
+  28); (c) refusals hold a longer clock than removals. **Built: (a)**, no ✕ (the ✕ belongs to (b)).
+- **P-55-4 — what "leaves the page" covers.** Her list is "a delete, a merge, an archive, a deleted tag". Options: (a)
+  her list and its kin — note/book/block/paragraph/version deletes, merges (the cross-block join included), archives
+  (blocks, the Journal, the takes the take-to-block doors archive), and the Trash's confirmed purges (no Undo — her 13j
+  receipt sentences); restorations (Put back, unarchive, restore a commit, bring back) and pointer acts (leaving a book,
+  diverging) are ordinary; (b) the trash-archive-tags mockup's reading — Put back and Unarchive also keep a line, drawn
+  there with an "Open ›" door (wave 2's VM-96 face), while a confirmed Delete Now says nothing; (c) every row that leaves
+  any page. **Built: (a).**
+- **P-55-5 — the merge's and the cross-block join's words.** Options: (a) the shipped bare Undo, no words, now on the
+  line; (b) the drafted "Merged" (`wording-list-2.md` — waits on her wording pass); (c) silence, the Undo in the ⋯ sheet
+  only. **Built: (a)** — no new words, her "a line with Undo" for a merge.
+- **P-55-6 — an offer on the phone.** No phone door raises one today. Options: (a) the seam carries the kind and the line
+  draws an offer always, with its door (the Mac's "a question she cannot see is not asked"); (b) never drawn (her ruling
+  names only removals and refusals); (c) drawn only with its door, like a removal. **Built: (a)** — drawn in ink.
+- **P-55-7 — directions.** Sentences that report an outcome different from what she asked: the copy that could not
+  follow the screen, "Already collected — …", the Today door's shelving notes. Options: (a) the refusal class (the Mac's
+  `direct` — "a direction she must see"; the Mac ⌘J door speaks the shelving note as a refusal; "a door that did nothing
+  speaks a refusal"); (b) ordinary (silent). **Built: (a).**
+- **P-55-8 — Book Details' delete and archive now speak.** The shelf row's same acts had a line; the sheet's did not.
+  Options: (a) the same act says the same line, with the same Undo road; (b) leave the sheet's doors silent as shipped.
+  **Built: (a).**
+- **P-55-9 — the cross-block compound is a removal.** Options: (a) a removal — it merges the touched blocks, and its
+  bare Undo was R13's recorded replacement for the confirm she gave up; (b) typing, no line (the note-write mockup's
+  carve note "No line: it is typing" for ⌫ at a seam). **Built: (a).**
+- **P-55-10 — where the one line lives over a sheet.** Options: (a) ONE overlay at the screen's foot above everything the
+  shell presents (its own passthrough window); (b) a line per presentation (the comments mockup draws its delete line "at
+  the top of the sheet"); (c) a SwiftUI overlay on the shell only — a refusal raised in a sheet unseen until the sheet
+  closes. **Built: (a)** — the brief's "hosted once by the shell" and "a refusal always draws".
+
+#### Observations for the orchestrator (not fixed — outside this batch's unit)
+
+1. **Stale docs naming the old seam:** `Features/Protection/MobileProtectionDoors.swift:185` says "The phone has no
+   status seam (no toast, no `StatusCenter`)" — Protection is fenced (scope call 6), so it waits for VM-103 or the
+   closeout; `Shared/SyncStatusViews.swift:~737` gives "the session's StatusCenter is a Mac member" as one of two reasons
+   for its `#if os(macOS)` (the other — the restore hold is Mac-only — still holds), left untouched to keep this diff
+   narrow.
+2. **The Protection screen's receipts** (`MobileProtectionReceipts`) stay its own (scope call 6; audit row D-27 → VM-103).
+3. **The one line has no ✕** (P-55-3 (a)); with VM-47's sizes the door's 44 pt hit area arrives there, not here.
+4. **Batch 3's hoisted brains** can now say `session.status.removal(…, undo:)` from `Shared/`; on the Mac a removal is a
+   receipt with an action, so the Mac's toast/quiet line would draw that action — a Mac behaviour change a hoist would
+   own (the Mac pin's routing table holds the class; it does not hold an action's presence).
+
+#### Canon deltas believed owed (the orchestrator applies at the merge)
+
+- `notes/SurfaceContracts.md` "The app", the Messages bullet — the phone's half of the one seam: one line hosted by the
+  shell over everything it presents; refusals and offers always; a receipt only when something left the page, with Undo
+  over an existing road (structural undo, Put back, unarchive); ordinary acts draw nothing; `receipt_style` not read on
+  the phone (P-55-1); the line fades on the seam's clock. Pointer: this record.
+- `notes/MobileSoul.md` §6 — PL-22's receipts face call: answered by her VM-44 ruling and built here.
+- AppSpec §12 "Messages carry a kind…" — at most one clause: the seam is both platforms'; the phone's placement is her
+  ruled compromise (pointer to SurfaceContracts).
 
 ## Ladder
 
