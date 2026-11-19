@@ -216,6 +216,10 @@ struct MCPCloseReasonServerTests {
         #expect(!bytes.contains(MCPCloseLine.marker), "no close line before a name: \(bytes.count) bytes")
     }
 
+    // VX-773 (the VX-981 run, batch 4): DEBUG-only — it holds the write lock through the host's
+    // `hangUpProbe` and the session's `transportWriteLockForTesting`. The release-
+    // configuration test build compiles this target where that seam does not exist.
+    #if DEBUG
     /// **A-771-3 (2) — the try()-lock skip road:** a frame mid-write holds the
     /// transport's write lock as the server stops; the close line is SKIPPED,
     /// the stop never waits on it, and the connection still ends.
@@ -241,6 +245,7 @@ struct MCPCloseReasonServerTests {
         #expect(bytes != nil, "the connection still ends")
         #expect(!(bytes ?? Data()).contains(MCPCloseLine.marker), "the line was skipped, never written mid-frame")
     }
+    #endif
 
     /// **A-771-3 (3) — the Activity side is byte-untouched by this work:** the
     /// four ends' acts keep their shipped values; the quit still writes NO
@@ -380,6 +385,9 @@ struct MCPShimCloseReasonTests {
         #expect(out.stderr == MCPCloseWords.libraryClosed + "\n", "\(out.stderr.debugDescription)")
     }
 
+    // VX-773 (the VX-981 run, batch 4): DEBUG-only — the same seams as the skip road's server pin. The release-
+    // configuration test build compiles this target where that seam does not exist.
+    #if DEBUG
     /// A-771-3 (2): the contended lock's skip road, seen by the client — no line
     /// came, so the shim says its own generic sentence.
     @Test func aSkippedCloseLineLeavesTheGenericSentence() async throws {
@@ -397,4 +405,5 @@ struct MCPShimCloseReasonTests {
         #expect(held, "the lock was held as the server stopped")
         #expect(out.stderr == MCPShim.appClosedMessage + "\n", "\(out.stderr.debugDescription)")
     }
+    #endif
 }

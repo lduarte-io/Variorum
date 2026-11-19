@@ -378,8 +378,12 @@ struct MCPSetupKeyServerTests {
             defer { close(fds[0]) }
             return MCPHandshake.readOpening(fd: fds[0])
         }
+        // VX-952 (the VX-981 run, batch 4 — the justified edit): the opening is
+        // read in chunks, so the frame after it is the opening's LEFTOVER,
+        // handed to the transport byte for byte — no longer left on the fd.
         #expect(opening("variorum-mcp-key vmk1_a\n{\"id\":1}\n{\"id\":2}\n")
-                == .init(presentedKey: "vmk1_a", firstFrame: Data("{\"id\":1}".utf8)))
+                == .init(presentedKey: "vmk1_a", firstFrame: Data("{\"id\":1}".utf8),
+                         leftover: Data("{\"id\":2}\n".utf8)))
         #expect(opening("{\"id\":1}\n") == .init(presentedKey: nil, firstFrame: Data("{\"id\":1}".utf8)), "bare")
         // Ladder R1, F-3: a tag-only preamble (an empty key) is BARE — the
         // classify stays honest about the line (`.preamble(key: "")`, its own
@@ -392,13 +396,19 @@ struct MCPSetupKeyServerTests {
         #expect(opening("{\"id\":1}") == nil, "no newline before EOF")
         #expect(opening(String(repeating: "\n", count: MCPHandshake.blankLimit + 2) + "{}\n") == nil, "bounded blanks")
 
-        // Byte-exact: the frame after the opening is left for the transport.
+        // Byte-exact: the frame after the opening is the transport's — since
+        // VX-952 handed on as the opening's leftover (the justified edit: it
+        // was left unread on the fd), and nothing of it is lost: the leftover
+        // and what the fd still holds are exactly the bytes after the frame.
         var fds: [Int32] = [-1, -1]
         #expect(pipe(&fds) == 0)
         _ = MCPShim.writeAll(fds[1], Data("variorum-mcp-key k\n{\"id\":1}\n{\"id\":2}\n".utf8))
         close(fds[1])
-        _ = MCPHandshake.readOpening(fd: fds[0])
-        #expect(MCPShim.readFirstLine(fds[0], limit: 64) == Data("{\"id\":2}".utf8))
+        let handedOn = MCPHandshake.readOpening(fd: fds[0])?.leftover ?? Data()
+        var rest = Data()
+        var byte: UInt8 = 0
+        while read(fds[0], &byte, 1) == 1 { rest.append(byte) }
+        #expect(handedOn + rest == Data("{\"id\":2}\n".utf8))
         close(fds[0])
     }
 

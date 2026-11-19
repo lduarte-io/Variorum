@@ -246,8 +246,8 @@ struct MCPWriteServerTests {
                                                                       "block_b": .string(otherBlock.block.id)])])]))
             // VX-943 (the VX-915 run, batch 6 — justified edit, the ritual: the
             // proof's completeness grows with the catalog): unlink_versions, aimed
-            // at HER link — refusing at the rung (write new on both notes), her
-            // edge intact (the snapshot reads every edge).
+            // at HER link — refusing at the rung (edit on both notes since VX-977),
+            // her edge intact (the snapshot reads every edge).
             calls.append(("unlink_versions", ["edge_id": .string(hersLink.id)]))
             // The lens picks her NON-chosen take (mutation check 2 of the unit
             // record: picking only chosen takes could not see a lens that

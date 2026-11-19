@@ -303,10 +303,14 @@ final class MCPDoor {
 
     /// U2 — the receipt RUN: consecutive acts by one client on one target
     /// within the window speak as one coalesced line (her fact-check's
-    /// "added 2 takes and saved the lens …").
-    @ObservationIgnored private var receiptRun: [MCPWriteReceipt] = []
-    @ObservationIgnored private var receiptRunAt = Date.distantPast
-    nonisolated static let receiptWindow: TimeInterval = 120
+    /// "added 2 takes and saved the lens …"). VX-133 (the VX-981 run, batch
+    /// 2): the run is the pure `MCPReceiptRun`, and her line counts the acts
+    /// that STAND — an undo of one of them walks it out of the count, its redo
+    /// back in (the session's `UndoStack` walks, heard below).
+    @ObservationIgnored private var receiptRun = MCPReceiptRun()
+    /// VX-133: the session undo stack's walks this door hears (`attach`), and
+    /// the stack it subscribed to — let go with the session.
+    @ObservationIgnored private var walkSubscription: (stack: UndoStack, token: UUID)?
 
     init(
         serverAllowed: Bool = !KeychainTestTripwire.armed,
@@ -385,6 +389,13 @@ final class MCPDoor {
         self.session = session
         database = session.database
         runner = session.runner
+        // VX-133: her ⌥⌘Z and ⇧⌥⌘Z walk the session's stack on its runner; each
+        // completed walk hops here, so the receipt run's count stays true.
+        let stack = session.undoStack
+        let token = stack.addWalkObserver { [weak self] walk in
+            Task { @MainActor [weak self] in self?.heardWalk(walk) }
+        }
+        walkSubscription = (stack, token)
         // U4 (AF-11 F-2): the registry's fact for "Show the AI's Last Change" —
         // VX-676: a standing ask is what ⌥⌘O takes first.
         session.commandRouter.aiLastChangeAvailable = { [weak self] in
@@ -544,7 +555,10 @@ final class MCPDoor {
         // VX-676: and so does a standing ask to show her something.
         endShowOffer()
         answering = []
-        receiptRun = []
+        receiptRun = MCPReceiptRun()
+        // VX-133: the session's stack is let go with it.
+        if let walkSubscription { walkSubscription.stack.removeWalkObserver(walkSubscription.token) }
+        walkSubscription = nil
         lastChange = nil
         // VX-679: the trail is session-scoped — it goes with ⌥⌘O's last change.
         trail.update { $0.clear() }
@@ -1153,14 +1167,7 @@ final class MCPDoor {
     /// count, and a later single act never joins it.
     func landReceipt(_ receipt: MCPWriteReceipt, now: Date = Date()) {
         guard let session else { return }
-        if let last = receiptRun.last, last.clientName == receipt.clientName,
-           (last.runKey ?? last.targetID) == (receipt.runKey ?? receipt.targetID),
-           now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {
-            receiptRun.append(receipt)
-        } else {
-            receiptRun = [receipt]
-        }
-        receiptRunAt = now
+        receiptRun.land(receipt, now: now)
         // U4 (R-13nb-23 (a), AF-11 F-2): the line STAYS A RECEIPT (her
         // receipt_style governs it) and grows the one-press door — "Open ›"
         // to the act's landing; the same target is the session's last AI
@@ -1180,8 +1187,26 @@ final class MCPDoor {
         let door = change.map { change in
             StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(change) }
         }
-        session.status.deliver(MCPReceiptCopy.line(receiptRun), kind: .receipt, action: door)
+        session.status.deliver(MCPReceiptCopy.line(receiptRun.standing), kind: .receipt, action: door)
     }
+
+    /// **VX-133 — a structural undo or redo completed** (the session stack's
+    /// walk, on the main actor): the run takes it (`MCPReceiptRun.walked`), so
+    /// the client's next line counts only the acts that stand. Nothing is said
+    /// here — her undo door speaks its own receipt.
+    func heardWalk(_ walk: UndoStack.Walk) {
+        receiptRun.walked(walk)
+    }
+
+    #if DEBUG
+    /// VX-133: the line the run would speak now (nil with no run) — what the
+    /// count is, read by the pins (DEBUG only — round 1's N3: no shipped road
+    /// reads it).
+    var receiptRunLine: String? {
+        let standing = receiptRun.standing
+        return standing.isEmpty ? nil : MCPReceiptCopy.line(standing)
+    }
+    #endif
 
     /// **VX-775 — a client's call LANDED and its Activity line could not be
     /// written: its receipts, then the failure, in ONE synchronous turn** (the
@@ -1243,22 +1268,60 @@ final class MCPDoor {
     /// Never automatic: only a client's explicit call reaches here.
     ///
     /// Ladder round 1, F-4: the delivery's ANSWER is the delivery's TRUTH — a
-    /// takes/lens/compare landing that never arrived refuses `partialShowWords`
-    /// instead of claiming shown. VX-676: a delivery she LEFT mid-way (the
+    /// takes/lens/compare landing that never arrived answers `.partial` (the
+    /// wire speaks `partialShowWords`) instead of claiming shown; the VX-981
+    /// ladder's round 1, F2: its own verdict, so the tool gives it VX-961's split
+    /// (the note opened, so a failed Activity line is hers, never the client's
+    /// answer). VX-676: a delivery she LEFT mid-way (the
     /// `stillStanding` re-check after the wait's suspension) lands the rest as
-    /// the ask — her amendment's letter (PROVISIONAL P-676-4).
+    /// the ask — her amendment's letter (PROVISIONAL P-676-4). VX-705: a move
+    /// re-reads its place first (the press roads' gone table) and then where
+    /// she stands, so a place that died since the wire's read opens nothing —
+    /// and (round 1's F4, PROVISIONAL P-981-L1-1) its rows and a last change on
+    /// it go, as the press roads let them go.
     func agentShow(_ request: MCPShowRequest) async -> MCPShowRule.Verdict {
         let (standing, router) = currentStanding()
         let verdict = MCPShowRule.verdict(standing, dial: request.dial)
         switch verdict {
-        case .refuse:
+        case .refuse, .partial:
+            // Round 1's F2: the rule never answers `.partial` (a delivery's
+            // answer only) — returned as it is, `.refuse`'s road.
             return verdict
         case .offer:
             return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.unavailableWords)
         case .navigate:
-            guard let session, let router else { return .refuse(MCPShowRule.unavailableWords) }
+            guard let session, router != nil else { return .refuse(MCPShowRule.unavailableWords) }
+            // VX-705 (the VX-981 run, batch 2 — a rider): the PRESS roads' re-read
+            // (F-L2's one table, `showTargetStands`), before the move. The wire
+            // read the place readable, but a deletion can land between that read
+            // and this adopt (her Delete, a sync apply) — and the shell adopts any
+            // id. GONE ⇒ nothing opens and no trail row; her seam says the press
+            // roads' own gone words; the client hears the one not-shared shape, the
+            // answer a call one moment later gets (PROVISIONAL P-981-B2-5).
+            guard await placeStands(request.target) else {
+                // Round 1's F4 (the VX-981 ladder — PROVISIONAL P-981-L1-1, option (a)):
+                // the press roads' table on this re-read too. The place is proved gone,
+                // so its rows go (a dead door — P-2) and a last change on that PLACE
+                // stops lighting ⌥⌘O (P-FL2-1) — matched by place (`MCPTrail.placeKey`):
+                // a receipt's target and a move's differ in shape (`.note(…, blockID:)`
+                // against `.note(…, nil)`) while the re-read is place-level. A standing
+                // ASK on the same place is not ended here — no press road ends one for
+                // another request; her take of it says gone and lets it go.
+                trail.update { $0.forget(placeOf: request.target) }
+                retireLastChange(ifAt: request.target)
+                session.status.refuse(MCPShowOfferCopy.gone(request))
+                return .refuse(MCPShowRule.goneWords(request.target))
+            }
+            // The re-read suspended this hop, so where she stands is read again —
+            // her etiquette's look and the move stay one hop; a move she left
+            // meanwhile is the ask (VX-676's amendment, as a delivery she leaves).
+            let (standingNow, routerNow) = currentStanding()
+            guard MCPShowRule.verdict(standingNow, dial: request.dial) == .navigate else {
+                return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.unavailableWords)
+            }
+            guard let routerNow else { return .refuse(MCPShowRule.unavailableWords) }
             let delivery = await MCPNavigator(session: session).deliver(
-                request.target, into: router,
+                request.target, into: routerNow,
                 stillStanding: { [weak self] in
                     guard let self else { return false }
                     return MCPShowRule.verdict(self.currentStanding().0, dial: request.dial) == .navigate
@@ -1271,9 +1334,11 @@ final class MCPDoor {
             case .unfinished:
                 // VX-679: the note opened (the rest never landed) — `opened` too.
                 trail.update { $0.record(show: request, opened: true, at: Date()) }
-                return .refuse(MCPShowRule.partialShowWords)
+                return .partial
             case .interrupted:
-                return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.partialShowWords)
+                // The note had opened before she left (nothing MORE moved): with
+                // no ask to present, the partial show it is (round 1's F2).
+                return presentShowOffer(request) ? .offer : .partial
             }
         }
     }
@@ -1334,6 +1399,7 @@ final class MCPDoor {
             guard await self.placeStands(request.target) else {
                 // VX-679: a gone place's rows go with it (a dead door — P-2).
                 self.trail.update { $0.forget(placeOf: request.target) }
+                self.retireLastChange(ifAt: request.target)  // R2-F1 (VX-1025)
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return
             }
@@ -1367,6 +1433,7 @@ final class MCPDoor {
             guard let self else { return }
             guard await self.placeStands(request.target) else {
                 self.trail.update { $0.forget(placeOf: request.target) }
+                self.retireLastChange(ifAt: request.target)  // R2-F1 (VX-1025)
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return
             }
@@ -1400,6 +1467,18 @@ final class MCPDoor {
     private func placeStands(_ target: MCPShowTarget) async -> Bool {
         guard let stands = await read({ try MCPDoor.showTargetStands($0, target) }) else { return true }
         return stands
+    }
+
+    /// **A place the door's re-read proved GONE stops lighting ⌥⌘O** (round 2's R2-F1, the VX-981
+    /// ladder — VX-1025; PROVISIONAL P-981-L1-1): the ONE rule every gone road runs — her take of an
+    /// ask, an ask row's press (`landAsk`), a receipt's Open › / a write row / ⌥⌘O (`openShow`), and
+    /// the move at once. The last change goes when it names the SAME PLACE (`MCPTrail.placeKey`): a
+    /// receipt's target and a press's differ in shape (`.takes(n, b)`, `.note(n, b, nil)`,
+    /// `.note(n, nil, nil)`), and `showTargetStands` decides at the place's grain, so a change on a
+    /// gone place could only refuse (MCPSpec: "a gone last change no longer lighting ⌥⌘O"; P-FL2-1).
+    private func retireLastChange(ifAt target: MCPShowTarget) {
+        guard let change = lastChange, MCPTrail.placeKey(change.target) == MCPTrail.placeKey(target) else { return }
+        lastChange = nil
     }
 
     /// **F-L2 — her press's delivery**: the navigator's road, unchanged, and a
@@ -1476,7 +1555,7 @@ final class MCPDoor {
         Task { @MainActor [weak self] in
             guard let self else { return }
             guard await self.placeStands(change.target) else {
-                if self.lastChange?.target == change.target { self.lastChange = nil }
+                self.retireLastChange(ifAt: change.target)  // R2-F1 (VX-1025): by place, never the exact target
                 // VX-679: and the place's trail rows go with it (a dead door — P-2).
                 self.trail.update { $0.forget(placeOf: change.target) }
                 session.status.refuse(MCPReceiptCopy.gone(change.target, title: change.title, client: change.clientName))

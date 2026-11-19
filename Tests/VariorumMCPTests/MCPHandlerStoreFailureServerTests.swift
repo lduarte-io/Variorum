@@ -7,6 +7,11 @@ import Testing
 @testable import VariorumMCP
 @testable import VariorumMCPSocket
 
+// VX-773 (the VX-981 run, batch 4): DEBUG-only, the whole suite — every test drives
+// the host's DEBUG `handlerReadProbe`. The release-configuration test build compiles
+// this target where that seam does not exist.
+#if DEBUG
+
 // VX-776 (the VX-808 run, Unit B5 — the VX-369 sweep's row 19, deferred at the
 // VX-771 run because no headless store can fail a READ): a store read that fails
 // inside `MCPSession`'s SDK handlers — the standing read behind `tools/list`, the
@@ -93,3 +98,5 @@ struct MCPHandlerStoreFailureServerTests {
         }
     }
 }
+
+#endif

@@ -162,7 +162,7 @@ struct MCPAskAndReceiptTests {
             door.landReceipt(receipt(.take, target: "n2", title: "ch 2"), now: now.addingTimeInterval(7))
             #expect(session.status.spoken?.text == "claude-code added 2 takes · ⌥⌘Z undoes")
             door.landReceipt(receipt(.take, target: "n2", title: "ch 2"),
-                       now: now.addingTimeInterval(7 + MCPDoor.receiptWindow + 1))
+                       now: now.addingTimeInterval(7 + MCPReceiptRun.window + 1))
             #expect(session.status.spoken?.text == "claude-code added a take · ⌥⌘Z undoes",
                     "past the window a run starts afresh")
         }
