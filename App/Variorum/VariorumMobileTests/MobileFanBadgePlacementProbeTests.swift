@@ -58,7 +58,9 @@
 //  (1), (i), (i′) or (ii) red ⇒ VM-17 is real (stop and report before any
 //  product line — the record's arm). All green ⇒ hollow: this stays as the
 //  guard.
-//  The cost note prints only (VM-179's), and leaves with the instruments.
+//  The cost note that rode beside it (VM-179's numbers) left with the trace
+//  instruments; its numbers are in the record, its code in history
+//  (`a570d3960`).
 //
 
 import Dependencies
@@ -409,43 +411,5 @@ struct MobileFanBadgePlacementProbeTests {
                     "the probe did not reach: (i′) asked no badge on the jump road (a red here is the probe's, never VM-17's)")
             print("VM17|SUMMARY fans=\(fans.count) astray=\(astray.count) bare=\(bare.count) misses=\(misses.count) asked=\(walkAsked + jumpAsked) (walk \(walkAsked), jump \(jumpAsked)) skipped=\(skipped) walkReached=\(walkReached.count) jumpMissed=\(jumpMissed.count)")
         }
-    }
-
-    /// COST NOTE (prints only — VM-179 owns the cost, wave 4): the load of a
-    /// long note with and without fans over the SAME text, and a `.document`
-    /// chrome pass forced from a cold layout, which is where every fanned
-    /// block's `.ensuresLayout` is paid. Leaves the tree with the
-    /// instruments, once its numbers are in the record.
-    @Test(arguments: [150, 600])
-    func vm17CostNote_theDocumentPassOnALongFannedNote(_ count: Int) async throws {
-        var lines: [String] = []
-        for fanned in [false, true] {
-            try await withEditorWorld { session, _ in
-                let seed = try await Self.seedLongFannedNote(
-                    session, count: count, fanEvery: fanned ? 7 : nil)
-                let model = MobileEditorViewModel(
-                    session: session, postID: seed.postID,
-                    sleep: { _ in throw CancellationError() })
-                model.tailIdleSleep = { _ in throw CancellationError() }
-                let surface = MobileWriteSurfaceView()
-                surface.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
-                model.attach(textView: surface.textView)
-                let clock = ContinuousClock()
-                let load = await clock.measure { await model.loadOnce() }
-                let window = Self.host(surface)
-                defer { Self.unhost(window) }
-                let view = surface.textView
-                await Self.settle(view)
-                var cold: Duration = .zero
-                var warm: Duration = .zero
-                if let chrome = view.takesChrome, let tlm = view.textLayoutManager {
-                    tlm.invalidateLayout(for: tlm.documentRange)
-                    cold = clock.measure { chrome.refresh(scope: .document) }
-                    warm = clock.measure { chrome.refresh(scope: .document) }
-                }
-                lines.append("blocks=\(count) fanned=\(seed.fanned.count) loadOnce=\(load) documentPassCold=\(cold) documentPassWarm=\(warm) contentHeight=\(Int(view.contentSize.height))")
-            }
-        }
-        for line in lines { print("VM17|cost|\(line)") }
     }
 }

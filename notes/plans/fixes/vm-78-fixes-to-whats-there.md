@@ -1100,9 +1100,9 @@ first run, so its first half is reading and writing the probes headless; window 
 
 #### BATCH C — LIVE STATUS
 
-**WHAT IS NOT DONE (first, as the contract asks):** no fix of any kind; VM-24's arm and VM-17's next step are the
-orchestrator's (both STOP AND REPORT — below); the instruments are still in the tree (their removal commit waits for
-the orchestrator's arm decisions, F7). **Window (3) RAN AND CLOSED:** claim `vm-78` 08:39:53 → released 08:50:46, the
+**WHAT IS NOT DONE (first, as the contract asks):** no fix of any kind in this batch — VM-24's seam fix is HELD for
+the author (the orchestrator's decision, "The orchestrator's live state"), VM-17's fix is batch D's. The trace
+instruments LEFT the tree in their named commit (round 1's F7; restorable from `a570d3960` + `fec0e478b`). **Window (3) RAN AND CLOSED:** claim `vm-78` 08:39:53 → released 08:50:46, the
 whole matrix plus one M5 re-run, no run killed the host, no new `Variorum*.ips`, no Problem Reporter, the simulator
 shut down, no instance left. M9's red leg ran on `MobileLivenessTests.swift` at `615a12189`; the file is restored by
 `git checkout HEAD --` and `git status` is clean: **no revert is in flight.** No hand-break is in flight. No product
@@ -1113,9 +1113,9 @@ line changed.
 
 | Member | State | Pin / instrument (TYPE name for `-only-testing`) |
 |---|---|---|
-| VM-24 | TRACED in window (3) — **NO PRE-DECIDED ARM MAPS: the orchestrator decides** (H1 killed; the gate is never consulted on this road; the red follows attribute fixing's widening of the report; `realPosture` never reached its posture). No fix. The window's results below | the red itself: `MobileMarkdownCaretTests` · instruments: `MobileCaretReplaceTraceTests`, `MobileCaretReplaceTeethTraceTests` (DIAGNOSTIC) |
-| VM-19 | PIN VERIFIED — `615a12189` RED on the hide-only teardown (M9-red: exactly the VM-19 expectation, `:1087`), GREEN on the fix `5ec59922c` + N5 `839d86dd9` (M9-green, 18/18); the desync itself **not reproduced on this toolchain** (M4: no desync in any of the four cases) — the pin stands as test hygiene | pin: `MobileLivenessTests` (`arrivalRaisesFocusBeforeTheObservationLoops`'s VM-19 expectation) · instrument: `MobileStaleResponderTraceTests` (DIAGNOSTIC) |
-| VM-17 | IN-PROGRESS — probe written `a570d3960`, re-shaped to round 1's F2 final call `e3f406086`, (i′) added by round 2's R2-F3 `78179b765`; **REAL by the record's arm — STOP AND REPORT, no product line**: (i), (i′) and (ii) red on the stepped walk (35 · 35 · 9), seen twice alone (M5, M5b); the pile and reach green; the jump road clean | `MobileFanBadgePlacementProbeTests` (`noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote`) |
+| VM-24 | **OPEN — traced, HELD for the author.** Not test posture (arm A's wait refused); a product mechanism in the edit routing (the gate-less road meeting attribute fixing's widened report — the results below and "VM-24 — the mechanism, its reach, and the options"). The red test stays red and unwrapped as its pin. No fix | the pin: `MobileMarkdownCaretTests` (red) · the instruments `MobileCaretReplaceTraceTests` / `MobileCaretReplaceTeethTraceTests` left the tree (history: `a570d3960`, `fec0e478b`) |
+| VM-19 | **DONE.** PIN VERIFIED — `615a12189` RED on the hide-only teardown (M9-red: exactly the VM-19 expectation, `:1087`), GREEN on the fix `5ec59922c` + N5 `839d86dd9` (M9-green, 18/18); the desync itself **not reproduced on this toolchain** (M4: no desync in any of the four cases) — the pin stands as test hygiene | pin: `MobileLivenessTests` (`arrivalRaisesFocusBeforeTheObservationLoops`'s VM-19 expectation) · the instrument `MobileStaleResponderTraceTests` left the tree (history: `fec0e478b`) |
+| VM-17 | **REAL — its fix is batch D's** (a fresh implementer). Probe written `a570d3960`, re-shaped to round 1's F2 final call `e3f406086`, (i′) added by round 2's R2-F3 `78179b765`; **REAL by the record's arm — STOP AND REPORT, no product line**: (i), (i′) and (ii) red on the stepped walk (35 · 35 · 9), seen twice alone (M5, M5b); the pile and reach green; the jump road clean | the pin: `MobileFanBadgePlacementProbeTests` (`noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote`, red on the unfixed chrome — batch D turns it green) · its cost note left the tree (numbers above; history: `a570d3960`) |
 
 **WINDOW (3) — RESULTS (2026-11-19, claim `vm-78` 08:39:53–08:50:46, the standing iPhone 17 Pro / iOS 26.2
 simulator booted fresh by id; other sessions were building on this Mac throughout, so no machine was quiet).** Products:

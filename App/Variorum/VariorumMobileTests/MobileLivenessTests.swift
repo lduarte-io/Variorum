@@ -1084,7 +1084,9 @@ struct MobileLivenessTests {
             // responder in a hidden window keeps the keyboard's input
             // session, and a later suite's editor then desyncs on an
             // `insertText` of a run in that posture (VX-282 C-1's decider;
-            // the trace is `MobileCaretReplaceTraceTests`' VM-19 instrument).
+            // not reproduced on VM-78's toolchain by its trace instrument,
+            // `MobileStaleResponderTraceTests`, now in history at
+            // `fec0e478b` — the pin stands as test hygiene).
             Self.leave(window)
             #expect(!surface.textView.isFirstResponder,
                     "VM-19: the raised surface lets go of the keyboard before its window hides")
