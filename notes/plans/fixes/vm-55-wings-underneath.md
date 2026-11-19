@@ -2079,10 +2079,12 @@ out; the branch tree and the snapshot still throughout):
 ### The walk and the gate
 
 **What this closer has NOT done (first, by the protocol; kept current):** no walk row has run yet and no gate claim has
-run; no product code written (none is owed unless the walk finds a defect). The screens folder the brief names,
+run; no product code written (none is owed unless the walk finds a defect). The screens folder the brief first named,
 `notes/plans/fixes/vm-55-screens/`, is NOT ignored by this repo (`git check-ignore` exit 1 — `.gitignore` names each
-screens folder one by one; there is no `*-screens` rule), so nothing has been written there: held for the orchestrator's
-word.
+screens folder one by one; there is no `*-screens` rule), so nothing was ever written there. **The orchestrator's answer
+(option c):** the walk's captures and its log go to `App/Variorum/DerivedData/vm55-walk-screens/` in this worktree —
+ignored (`git check-ignore -v`: `.gitignore:7: DerivedData/`), nothing committed, no `.gitignore` or exclude line touched;
+deleted with the run's other evidence after the merge. The row table below names each capture by file name only.
 
 Closer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch `vm-55-wings-underneath`,
 tip e19403d86. Reading done in full before anything else: this file whole, CLAUDE.md + loaded canon, the resiliency
@@ -2103,7 +2105,7 @@ device is created for the walk and deleted at its end; its id is never written h
 | Record skeleton | DONE (this commit) |
 | The instruments: seeder + UI driver, written and built in the snapshot (one cold build) | DONE — `VariorumMobileTests/VM55WalkSeedTests.swift` (the hosted seeder) and `VariorumMobileUITests/VM55Walk.swift` (three classes: `VM55WalkFirstRun` — the first launch past the words card with NO capture; `VM55WalkStudy` — rows a–l; `VM55WalkTerminal` — a, b, f, g) exist only in the snapshot; built for testing GREEN there (the TK2SpikeUITests scheme, then the VariorumMobile scheme so the app keeps its test PlugIn — the VM-44 runbook's ordering trap), DerivedData `vm55-walk` inside the snapshot, 1.6 GB |
 | The dedicated device (created, never booted outside a claim) | DONE — an iPhone 17 Pro on the iOS 27.0 runtime (the newest installed: closest to her phone; the gate's standing device covers iOS 26.2), named "VM55 Walk"; its id is in the READY message only |
-| READY for the walk claim | DONE (the report ending this session's first turn) — the screens folder's ignore question rides it |
+| READY for the walk claim | DONE (the report ending this session's first turn) — the screens folder answered (option c, the ignored DerivedData folder above); waiting on the coordinator's GO with the claim line |
 | The walk (rows a–l, Study light; a, b, f, g again in Terminal) | NOT-STARTED |
 | The snapshot and its DerivedData removed; the device deleted | NOT-STARTED |
 | The gate's builds (both targets `build-for-testing` into `vm55-b1`, the tree clean and still) | NOT-STARTED — only at the orchestrator's word after the walk |
