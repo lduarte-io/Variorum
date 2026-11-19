@@ -200,15 +200,18 @@ struct MCPShowTool: Sendable {
                     activityKind: kind, activityID: id)
                 switch await show(request) {
                 case .navigate:
-                    try log(clientName, kind, id, title, allowed: true)
-                    return Outcome(text: try encode(["shown": true]), isError: false)
+                    // VX-961: her view MOVED — the act landed, so its line's
+                    // failure is hers, never this call's answer.
+                    let answer = try encode(["shown": true])
+                    recordShown(clientName, kind, id, title, act: MCPToolCatalog.showInApp.name)
+                    return Outcome(text: answer, isError: false)
                 case .offer:
                     // VX-676 (4): the ask is its own Activity row — the client's
                     // call, allowed, nothing moved — and the answer is at once.
-                    try log(clientName, kind, id, title, allowed: true, act: MCPShowActivity.offeredAct)
-                    return Outcome(
-                        text: try encode(["shown": false, "offered": true, "landed": MCPShowRule.offeredWords]),
-                        isError: false)
+                    // VX-961: the ask STANDS on her seam — landed, as the move.
+                    let answer = try encode(["shown": false, "offered": true, "landed": MCPShowRule.offeredWords])
+                    recordShown(clientName, kind, id, title, act: MCPShowActivity.offeredAct)
+                    return Outcome(text: answer, isError: false)
                 case .refuse(let words):
                     try log(clientName, kind, id, title, allowed: false)
                     return Outcome(text: words, isError: true)
@@ -467,6 +470,28 @@ struct MCPShowTool: Sendable {
     private func refusal(_ decision: MCPGrantRule.Decision, _ target: MCPRefusalCopy.Target) -> Outcome {
         let reason = MCPRefusalCopy.reason(of: decision) ?? .notShared
         return Outcome(text: MCPRefusalCopy.words(reason, target), isError: true)
+    }
+
+    /// **VX-961 — a LANDED show's Activity line** (the move, the ask — VX-775's
+    /// split for the write family, `MCPWriteTools.recordLanded`, on the read
+    /// rung's one acting tool): written as ever; a failure is caught here and
+    /// told to HER through the one tail hook (`MCPHostHooks.onActivityLogFailure`
+    /// — the store's words in VX-369's form, no receipts: a show is no write),
+    /// while the client is answered the act's own answer byte for byte (R-825 —
+    /// her app-side state never reaches the wire). One attempt, nothing
+    /// synthesized: `list_my_activity` simply lacks the row. The refusal arms
+    /// keep `log` — nothing landed there, so the store's failure stays the
+    /// call's own answer (the write family's refusal-line posture).
+    private func recordShown(_ clientName: String, _ kind: String, _ id: String, _ title: String?, act: String) {
+        do {
+            try log(clientName, kind, id, title, allowed: true, act: act)
+        } catch {
+            hooks.onActivityLogFailure?(
+                MCPActivityLogFailure(
+                    clientName: clientName, tool: MCPToolCatalog.showInApp.name, unrecorded: 1,
+                    storeWords: MCPStoreFailure(error)?.detail),
+                [])
+        }
     }
 
     /// `act`: the tool's own (a move, a refusal) — or, VX-676, the ask's.

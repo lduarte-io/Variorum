@@ -1646,12 +1646,26 @@ nonisolated enum MCPReceiptCopy {
     /// store's own words — VX-369's form, SQLite's code and message, never the
     /// SQL). PROVISIONAL — drafted for her trim (the B3 RECORD; the known edge: a
     /// no-op landing whose log fails also reads "change landed").
+    ///
+    /// **VX-961 (the VX-981 run, batch 2):** `show_in_app` rides the same road
+    /// when the app MOVED her view or POSTED the ask and the line failed — a
+    /// show is no "change", so it says its own subject, true of the move and
+    /// the ask alike (VX-775's recorded alternative "request went through";
+    /// PROVISIONAL P-981-B2-3, her trim).
     static func activityLogFailed(_ failure: MCPActivityLogFailure) -> String {
-        let landed = failure.unrecorded > 1
-            ? "\(failure.clientName)'s \(failure.unrecorded) changes landed, but the activity log couldn't record them"
-            : "\(failure.clientName)'s change landed, but the activity log couldn't record it"
+        let landed = if failure.tool == showTool {
+            "\(failure.clientName)'s request to show you something went through, but the activity log couldn't "
+                + "record it"
+        } else if failure.unrecorded > 1 {
+            "\(failure.clientName)'s \(failure.unrecorded) changes landed, but the activity log couldn't record them"
+        } else {
+            "\(failure.clientName)'s change landed, but the activity log couldn't record it"
+        }
         return landed + (failure.storeWords.map { " \u{2014} \($0)." } ?? ".")
     }
+
+    /// The navigation tool's wire name (`MCPToolFacts` — the catalog's own).
+    private static let showTool = "show_in_app"
 
     static func line(_ run: [MCPWriteReceipt]) -> String {
         guard let first = run.first else { return "" }
