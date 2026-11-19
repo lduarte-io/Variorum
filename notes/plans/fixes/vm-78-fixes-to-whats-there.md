@@ -10,6 +10,63 @@ LIVE STATUS below are current.*
 
 ---
 
+## The orchestrator's live state (kept current; a resuming session reads this first)
+
+*As of 2026-11-19 07:15, tip `ef1430142`. The author is away until morning; nothing is held for her hands yet.*
+
+**Done and proved (red on the old code, green on the fix, in a stage window):** batch B — VM-16 (+VM-20), VM-43,
+VM-3, VM-84, VM-33 (window 2); batch A — VM-81, VM-83, VM-21, with the Mac's 17 types over the hoisted words green
+(window 1); ladder round 1's fixes — F3, F5, N2 (window 5) and F4 (its follow-up). Ladder rounds 1 and 2 are
+closed with every finding dispositioned ("The ladder").
+
+**Queued on the stage (nov18 schedules; READY sent for both):**
+1. **Batch C's matrix, window (3), 25 minutes** — driven by the fresh batch C runner in this worktree (the
+   original implementer's context was spent; the runner has read everything and is waiting). Matrix only: no fix
+   is written, built or run inside the claim. Its GO is relayed with the claim line and the simulator's UDID.
+2. **R2-N1's pin, 6 minutes** — run by the orchestrator from the throwaway detached checkout
+   (`~/dev/variorum-vm-78-pins`, its own DerivedData; one pre-fix file staged, pre-built), as windows 1, 2 and 5
+   were. If the hosted driver cannot read a SwiftUI hint (the fixed tip reads nil), the modifiers and the pin come
+   out by a new commit (round 2's final call).
+
+**Then, in order:**
+3. Read window (3)'s trace with the runner's report and DECIDE THE ARM for VM-24 (the orchestrator's decision
+   where the arms do not map — BATCH C, "Combinations no arm maps"); VM-17 is hollow only if (1), (i), (i′), (ii)
+   are all green; VM-19's pin red-on-old and green.
+4. Any fix the arm calls for is written and built headless, then proved in a second short window. A product
+   mechanism in the editor is reported, never fixed in passing (editor seam).
+5. The instruments' removal commit (round 1's F7) BEFORE any whole-target run.
+6. **Ladder round 3** — a fresh `fable-reviewer`, owed by round 1's F1 whatever round 2 found: it reads window
+   (3)'s outcome and the removal, reading (i′) and its run, R2-N1's fix and its red/green, R2-F2's lines, and
+   VM-16 re-landed (step 7) if that has happened by then. Cap: five rounds tonight, each further one earned by a
+   new BLOCKER or MAJOR.
+7. **The merge behind vm-55** (nov18 serializes; ask it first): take `origin/main` into this branch with a merge
+   commit once vm-55 has merged; an implementer re-lands VM-16 on vm-55's message seam (Kickoff facts, "A known
+   merge conflict") and resolves the Shelf and refusal-site conflicts; its pins shown red and green again.
+8. **The gate, three claims** (nov18's split): the whole phone target · the Mac suites over the changed `Shared/`
+   files on the merged tree · the simulator walk through the changed faces (the walk rows are in batch A's and
+   batch B's LIVE STATUS, plus N9's medium-detent row).
+9. **Closeout** (CLAUDE.md's ritual): this file's FOR A LATER READER and Closeout; the canon deltas in the
+   two-file shape; `notes/MobileSoul.md`'s parity row; `notes/QUESTIONS.md` (the PROVISIONAL bundle and F8's
+   question) and the born tickets, on latest main at the merge moment; `Tools/canon-size`; the handoff
+   `notes/handoffs/vm-78-handoff.md`; the PR `VM-78: …` merged as a merge commit at nov18's GO; the in-flight
+   row retired; this worktree, the pins checkout and the branch removed.
+10. **If this run is the last of the four mobile runs to merge:** prepare the single wave-1 phone install — the
+    device build from merged main and a paste-ready install kickoff for a fresh session (her ruling, Kickoff
+    facts). The install itself is her hands, in the morning.
+
+**For her sitting (bundled; nothing here blocks the run):** the PROVISIONAL calls (an archived gathering's add
+row wearing "(archived)"; the phone drawing no Diverge on a gathering row — F8's question); the drafted words
+for her wording pass (VM-3's lesson, F4's shelf-lesson sentence, the create sheet's three gathering lines, the
+sealed book's Reopen sentence on the phone, whether the collect receipt line stays); the lines for other
+owners (VM-62's sweep, VM-113's kickoff, VM-212's guide rewrite, the phone's VoiceOver pass) and the tickets
+to file (N10's first-paint shapes in the Archive room and a book's contents; the core `Queries.bookshelf` doc
+line).
+
+**Machinery a resuming session needs:** the stage protocol and the simulator are in Kickoff facts; every
+window's log is under `App/Variorum/DerivedData/logs/` and its result bundle under
+`App/Variorum/DerivedData/vm78-bundles/` (both local, gitignored); the orchestrator's window scripts are
+throwaway instruments in its session scratchpad and are re-derivable from each batch's recipe.
+
 ## Kickoff message (handed to every implementer verbatim, with the batch named)
 
 > You are the implementer for ONE batch of the run **VM-78 — Fixes to what's there**, the fourth umbrella of the
