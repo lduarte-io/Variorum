@@ -32,8 +32,20 @@ final class ThemeStore {
     private(set) var settings = Queries.ThemeSettings()
     private(set) var lastError: String?
 
-    init(session: AppSession) {
+    /// **VM-51 — where a landed value goes on a host with no Mac adoptions**
+    /// (the phone). The Mac adopts its typography and receipt style inline
+    /// below; the phone hands the landed settings to its UIKit editor face and
+    /// its open editors through this, by the same rule (a settings value is
+    /// adopted where it LANDS, never noticed later by a view). Nil — the Mac,
+    /// and every host that sets nothing — changes nothing.
+    @ObservationIgnored var onLanded: (@MainActor (Queries.ThemeSettings) -> Void)?
+
+    /// `placeholder` is what the store holds before its first emission. The
+    /// Mac's hosts take the default (`Queries.ThemeSettings()`, R1's leading
+    /// voice); the phone hands its own (VM-51, PROVISIONAL P-47-15).
+    init(session: AppSession, placeholder: Queries.ThemeSettings = Queries.ThemeSettings()) {
         self.session = session
+        self.settings = placeholder
     }
 
     /// Runs for the app's lifetime; the setting table is tiny, so the held
@@ -68,6 +80,7 @@ final class ThemeStore {
                 // before the first emission behaves as the store says.
                 session.status.receiptStyle = value.receiptStyle
                 #endif
+                onLanded?(value)
             }
         } catch is CancellationError {
         } catch {

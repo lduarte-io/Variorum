@@ -4,8 +4,9 @@
 //
 //  Mobile Stage 3, batch 1 — the voice switch's real home (scope item 6:
 //  P11's placement lands; the S1 masthead door RETIRED — recorded). A
-//  minimal voiced sheet off the shelf: the two voices (LK2 — the
-//  phone-local preference, never synced), the sync status row (the Phase
+//  minimal voiced sheet off the shelf: the two voices (since VM-51 the
+//  LIBRARY's synced voice, R-47-2 — LK2's phone-local preference retired),
+//  the sync status row (the Phase
 //  8 shell that carries over), and the DEBUG spike door (the Stage 0
 //  KEPT deviation's manual entry).
 //
@@ -72,8 +73,9 @@ struct MobileSettingsView: View {
     @State private var perfNote: String?
     #endif
 
+    /// VM-51: the library's voice and palette, this device's appearance.
     private var tokens: VoiceTokens {
-        .resolve(voice: router.voice, dark: scheme == .dark)
+        router.tokens(dark: scheme == .dark)
     }
 
     /// VM-8 unit 1: the Protection screen's door where it can act — the shell gave the road, the app's services exist (the
@@ -495,6 +497,10 @@ struct MobileSettingsView: View {
 
     /// One voice's row: the terminal `›` marker carries the selection
     /// (the R1 idiom); study renders the plain selected ink.
+    /// VM-51 (R-47-2, her "voice only row - yeah, that's fine"): the row writes
+    /// the LIBRARY's voice — the Mac Settings' own write, through the router's
+    /// theme store — and its mark reads the library's voice as it landed, so a
+    /// voice chosen on the Mac shows here too.
     private func voiceRow(_ voice: ThemeVoice, _ label: String) -> some View {
         let selected = router.voice == voice
         return Button {

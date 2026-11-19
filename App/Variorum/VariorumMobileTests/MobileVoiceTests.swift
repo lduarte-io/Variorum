@@ -2,8 +2,8 @@
 //  MobileVoiceTests.swift
 //  VariorumMobileTests
 //
-//  Mobile Stage 1, batch 3 — the look canon's pins: LK2's phone-local
-//  voice preference, the shared VoiceTokens layer's UIKit derivation
+//  Mobile Stage 1, batch 3 — the look canon's pins (LK2's phone-local
+//  voice preference retired at VM-51), the shared VoiceTokens layer's UIKit derivation
 //  (fonts on iOS, R51's fully black dark rooms, the per-voice markdown
 //  palette), and the object-stability the attribute-equality tests ride.
 //
@@ -38,19 +38,9 @@ struct MobileVoiceTests {
         #expect(traits.contains(.traitMonoSpace))
     }
 
-    /// LK2: the preference round-trips in its own store and DEFAULTS to
-    /// the terminal voice (the leading voice, R1); an ephemeral suite so
-    /// the test never touches the real store.
-    @Test func voicePreferenceRoundTripsAndDefaultsTerminal() throws {
-        let suite = "MobileVoiceTests-\(UUID().uuidString)"
-        let defaults = try #require(UserDefaults(suiteName: suite))
-        defer { defaults.removePersistentDomain(forName: suite) }
-        #expect(MobileVoicePreference.current(defaults) == .terminal)
-        MobileVoicePreference.set(.study, defaults)
-        #expect(MobileVoicePreference.current(defaults) == .study)
-        MobileVoicePreference.set(.terminal, defaults)
-        #expect(MobileVoicePreference.current(defaults) == .terminal)
-    }
+    // (LK2's phone-local preference pin — `voicePreferenceRoundTripsAndDefaultsTerminal`
+    // — retired with the preference at VM-51: the phone wears the LIBRARY's voice
+    // and palette. Its successors are `MobileLibraryLookTests`.)
 
     /// R51 pinned at the UIKit derivation: BOTH voices' dark rooms resolve
     /// to fully black — and the light rooms don't, so the pin proves the
@@ -97,8 +87,11 @@ struct MobileVoiceTests {
     /// held the A3 spacing floor before: gap 1.0 × and line 0.4 × the
     /// point size, at 14 / 16.)
     @Test func surfaceWriteValuesFollowTheLiveVoice() {
-        MobileEditorStyle.voice = .terminal
-        defer { MobileEditorStyle.voice = .terminal }
+        // VM-51: the baseline is the whole look (voice AND palette — the face
+        // wears the library's palette now), so a landing another suite adopted
+        // cannot colour this pin's palette compare.
+        MobileEditorStyle.adopt(Queries.ThemeSettings())
+        defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
         let terminalFont = MobileEditorStyle.baseFont
         let terminalStyle = MobileEditorStyle.baseParagraphStyle
         #expect(terminalFont.pointSize == 15)

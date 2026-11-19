@@ -423,9 +423,8 @@ struct MobileProtectionCompositionTests {
                 return
             }
             #expect(bootstrap.roadStanding?.account != nil, "precondition: the account section stands")
-            let store = U2Faces.Defaults()
             let settings = MobileSettingsView(
-                session: session, router: MobileShellRouter(defaults: store.defaults), services: nil,
+                session: session, router: MobileShellRouter(), services: nil,
                 bootstrap: bootstrap, onOpenProtection: {})
             await withHostedSurface(settings) { surface in
                 await surface.settle(30)

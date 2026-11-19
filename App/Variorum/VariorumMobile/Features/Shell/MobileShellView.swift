@@ -173,10 +173,16 @@ struct MobileShellView: View {
         // update — and doing it synchronously leaves no window in which a
         // keystroke could find a box with no store to mint into.
         router.quickNote.bind(session: session)
+        // VM-51: the open library's theme (the hoisted store), bound here for
+        // the quick note's reason — idempotent per session, `@ObservationIgnored`
+        // storage only; started by this view's `.task`.
+        router.bindTheme(session: session)
     }
 
+    /// VM-51: the library's voice and palette (LK-1), in this device's
+    /// appearance (LK-2) — the ONE settings → tokens road, via the router.
     private var tokens: VoiceTokens {
-        .resolve(voice: router.voice, dark: scheme == .dark)
+        router.tokens(dark: scheme == .dark)
     }
 
     var body: some View {
@@ -275,6 +281,9 @@ struct MobileShellView: View {
         .onAppear { attachProtectionReceipts() }
         .onChange(of: bootstrap?.roadStanding.map { ObjectIdentifier($0) }) { _, _ in attachProtectionReceipts() }
         .task { await starsModel.start() }
+        // VM-51: the library's theme — held for the shell's life, so a voice
+        // or palette changed on either device lands here and in the editors.
+        .task { await router.theme?.start() }
         // R27b's starter Journal used to be seeded from HERE, concurrently
         // with the task that composes AppServices — which is what the
         // batch-5 cold review's MAJOR was about: the seed always won that

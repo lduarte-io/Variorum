@@ -107,8 +107,8 @@ struct MobileWriteScreen: View {
     /// leavings). Everything else here reaches the store through the models
     /// built from it at init.
     private let session: AppSession
-    /// The shell's voice authority; nil in harness/preview use, where the
-    /// stored preference read at init governs.
+    /// The shell's theme authority (VM-51); nil in harness/preview use, where
+    /// the editor face's own look governs.
     private let router: MobileShellRouter?
     private let beginEditing: Bool
     /// The OWNING tab stack (S3 ladder BLOCKER): liveness registration
@@ -130,7 +130,6 @@ struct MobileWriteScreen: View {
     /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note… +
     /// batch 6c's two time controls).
     @State private var noteActionsPresented = false
-    private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
 
     /// `editor` is a TEST SEAM and nothing else: production passes nothing
@@ -165,19 +164,19 @@ struct MobileWriteScreen: View {
         self.onOpenNote = onOpenNote
         self.onDeleted = onDeleted
         self.onOpenVersions = onOpenVersions
-        // The live phone voice governs from the first materialization —
-        // set BEFORE the surface exists (makeUIView runs later). With a
-        // router the value is already authoritative (idempotent).
-        let stored = router?.voice ?? MobileVoicePreference.current()
-        MobileEditorStyle.voice = stored
-        fallbackVoice = stored
+        // (VM-51: this initializer no longer writes the editor's voice — the
+        // library's look reaches `MobileEditorStyle` where it LANDS, through
+        // the router's theme seam, its one app writer; QUESTIONS #195 MINOR 3.)
     }
 
-    /// The SwiftUI chrome's tokens — dark rides the system scheme (R51's
-    /// black rooms come from the token layer's own dark values). Reading
-    /// `router.voice` keeps the masthead live under a Settings flip.
+    /// The SwiftUI chrome's tokens — the LIBRARY's voice and palette (VM-51,
+    /// LK-1) through the router's one settings → tokens road; dark rides the
+    /// system scheme (LK-2; R51's black rooms are the token layer's own).
+    /// Harness use (no router) wears the editor face's own look, so the
+    /// masthead and the page below it always agree.
     private var tokens: VoiceTokens {
-        .resolve(voice: router?.voice ?? fallbackVoice, dark: scheme == .dark)
+        router?.tokens(dark: scheme == .dark)
+            ?? .resolve(settings: MobileEditorStyle.settings, dark: scheme == .dark)
     }
 
     var body: some View {

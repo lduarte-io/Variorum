@@ -7,19 +7,26 @@
 //  `EditorDocument.baseAttributes` in Features/Editor/EditorDocument.swift).
 //
 //  **Since S1 batch 3 this is the LOOK CANON's editor half** (L13 ruled at
-//  the look sittings; LK2's both-voices switch): the VALUES resolve from
-//  the shared `VoiceTokens` layer — the ONE canon both platforms carry
-//  (Shared/Theme) — per the phone's OWN stored voice
-//  (`MobileVoicePreference`). Feature code still never holds a literal
-//  color (P-8): every UIColor here is a dynamic derivation of a token, and
-//  DARK is the token layer's own dark values riding the system scheme
+//  the look sittings): the VALUES resolve from the shared `VoiceTokens`
+//  layer — the ONE canon both platforms carry (Shared/Theme). **Since VM-51
+//  (the VM-47 run, batch 3 — her LK-1/LK-2) they are the LIBRARY's voice
+//  and palette**, the synced settings the shell's theme store lands
+//  (`MobileShellRouter`), no longer a phone-local preference (retired).
+//  Feature code still never holds a literal color (P-8): every UIColor here
+//  is a dynamic derivation of a token, and DARK is the token layer's own
+//  dark values riding the system scheme — light or dark stays the device's
 //  (R51's fully black rooms — pinned by `MobileVoiceTests`).
 //
-//  Concurrency: `voice` follows the Mac `MarkdownStyling.palette` pattern
-//  exactly — written ONLY on the main thread (screen init + the switch
-//  door; tests pin it explicitly), read by main-thread surface writes.
-//  The per-voice faces are cached `static let`s so every read returns the
-//  SAME color/font objects (attribute equality in tests, zero rebuild
+//  Concurrency (QUESTIONS #195 MINOR 3, closed at VM-51): the live look is
+//  MAIN-ACTOR state — the compiler now enforces what the old comment only
+//  claimed ("main-thread written, main-thread read") — and the app has ONE
+//  writer, `adopt(_:)`, called where the library's settings LAND (the shell
+//  router's theme seam). The two other writers (the Write screen's init and
+//  the router's init) are gone. `voice`'s setter survives as the harness
+//  door the suites drive one voice through. The per-voice faces are cached
+//  `static let`s, and a palette face is built once per landed palette and
+//  shares every voice-owned colour object with them, so every read returns
+//  the SAME color/font objects (attribute equality in tests, zero rebuild
 //  cost per keystroke).
 //
 //  Typography values are the phone layer's `noteBody` role (VM-48: study
@@ -41,14 +48,52 @@ import UIKit
 import VariorumCore
 
 nonisolated enum MobileEditorStyle {
-    // MARK: - The live voice
+    // MARK: - The live look (the library's — VM-51)
 
-    /// The phone's live voice — LK2's preference, applied. Main-thread
-    /// written (screen init, the switch door, tests), main-thread read.
-    nonisolated(unsafe) private static var storedVoice: ThemeVoice = .terminal
-    static var voice: ThemeVoice {
-        get { storedVoice }
-        set { storedVoice = newValue }
+    /// The library's look as the editor wears it — voice, palette and the
+    /// custom seeds — the last value `adopt(_:)` took (before any library has
+    /// landed: R1's placeholder, Terminal in the voice's own colours, which is
+    /// what the suites' editor worlds assume). MAIN-ACTOR state (MINOR 3).
+    @MainActor private static var stored = Queries.ThemeSettings()
+    /// The face `stored` names, rebuilt only when the look moves.
+    @MainActor private static var current: Face = terminalFace
+
+    /// The library's settings the editor wears now.
+    @MainActor static var settings: Queries.ThemeSettings { stored }
+
+    /// The live voice. Its SETTER is the harness door (the suites drive one
+    /// voice through it, the palette left as it stands); the app writes only
+    /// through `adopt(_:)`.
+    @MainActor static var voice: ThemeVoice {
+        get { stored.voice }
+        set {
+            stored.voice = newValue
+            current = makeFace(stored)
+        }
+    }
+
+    /// **THE ONE APP WRITER** (VM-51): the library's landed settings, adopted
+    /// where they land (`MobileShellRouter`'s theme seam). Answers whether the
+    /// FACE moved — the voice, the palette or the custom seeds — so the caller
+    /// restyles the open editors only when there is something to restyle.
+    @MainActor
+    @discardableResult
+    static func adopt(_ settings: Queries.ThemeSettings) -> Bool {
+        let moved = settings.voice != stored.voice
+            || settings.palette != stored.palette
+            || PaletteTint(settings) != PaletteTint(stored)
+        stored = settings
+        if moved { current = makeFace(settings) }
+        return moved
+    }
+
+    /// The voice's own face, with the palette laid over the slots a palette
+    /// replaces; a settings value that names no palette (`.default`, or a
+    /// `custom` with no valid seed) is the voice's static face itself.
+    @MainActor
+    private static func makeFace(_ settings: Queries.ThemeSettings) -> Face {
+        let voiceFace = settings.voice == .terminal ? terminalFace : studyFace
+        return voiceFace.applying(palette: settings.palette, tint: PaletteTint(settings))
     }
 
     // MARK: - One voice's resolved editor face
@@ -68,12 +113,23 @@ nonisolated enum MobileEditorStyle {
         let chrome: UIFont
         let ink: UIColor
         let muted: UIColor
+        /// **The editor's ground** — its one reader is the text view's own
+        /// background (`MobileEditorTextView.applyVoiceChrome`). It stays the
+        /// VOICE's room under every palette (VM-51, PROVISIONAL P-47-16 — her
+        /// R-47-1, "prose should not be on the tint"; the Mac's own precedent
+        /// is `ReadingPageTokens.room`, the room under her words kept off the
+        /// palette, R-13u-10): the palette's tinted room would put the note
+        /// she writes on the tint. The sheet's paper here is one line in the
+        /// editor's text view, which is VM-137's (the editor seam).
         let room: UIColor
-        let surface: UIColor
-        let line: UIColor
-        let accent: UIColor
+        // The SEVEN slots below are the ones a palette replaces
+        // (`applying(palette:tint:)`) — the `VoiceTokens.applying` rule:
+        // everything else in a face is the voice's.
+        private(set) var surface: UIColor
+        private(set) var line: UIColor
+        private(set) var accent: UIColor
         /// Elevated cards — the peek pill's ground (S2: the LK6 pill).
-        let card: UIColor
+        private(set) var card: UIColor
         /// The takes register's tint + line (R13's "takes read differently
         /// than prose") — the peek marker's wash and edge bar (S2). The
         /// ratified v1 mockup's `.peeked` values are exactly `takeTint`;
@@ -81,8 +137,8 @@ nonisolated enum MobileEditorStyle {
         /// shipped as takeLine in BOTH voices (one token, the closest
         /// reading; a look-round line to change if she wants the study
         /// seam).
-        let takeTint: UIColor
-        let takeLine: UIColor
+        private(set) var takeTint: UIColor
+        private(set) var takeLine: UIColor
         /// The chosen take's mark — the pill's ✓ (the Mac card grammar's
         /// "✓ chosen" color).
         let chosenMark: UIColor
@@ -95,9 +151,14 @@ nonisolated enum MobileEditorStyle {
         let alarm: UIColor
         /// The markdown face's palette — the Mac `Palette(tokens:)`
         /// mapping verbatim: marker = muted, link = accent, chip =
-        /// codeTint (13k K10's per-voice tint).
-        let palette: MarkdownFace.Palette
+        /// codeTint (13k K10's per-voice tint). Under a palette only its
+        /// `link` (the accent) changes.
+        private(set) var palette: MarkdownFace.Palette
 
+        /// The VOICE's own face — its shipped colours, the base a palette is
+        /// laid over (`applying(palette:tint:)`), exactly as the four-parameter
+        /// resolver lays a palette over the voice's static set. The palette-less
+        /// read below is that base, by definition.
         init(voice: ThemeVoice) {
             self.voice = voice
             func dynamic(_ key: KeyPath<VoiceTokens, Color>) -> UIColor {
@@ -167,18 +228,51 @@ nonisolated enum MobileEditorStyle {
         func font(_ role: PhoneTypeRole) -> UIFont {
             PhoneType.uiFont(role, voice: voice)
         }
+
+        /// **This voice's face under a palette** (VM-51): the seven palette
+        /// slots re-derived through the ONE palette-aware resolver
+        /// (`VoiceTokens.resolve(voice:palette:tint:dark:)` — the four-parameter
+        /// road the settings road calls), resolved for both appearances once,
+        /// here, so the colours stay dynamic (light or dark rides the device)
+        /// and are built once per landed palette, never per read. Every other
+        /// slot — the type, the inks, the chosen mark, the comment ink, the
+        /// alarm, the markdown marker, chip and prose ink, the editor's ground —
+        /// is THIS face's own object, carried through untouched. A palette that
+        /// names nothing returns this face itself (the byte-identical road).
+        @MainActor
+        func applying(palette: ThemePalette, tint: PaletteTint) -> Face {
+            guard PalettePreset.resolved(palette, tint: tint) != nil else { return self }
+            let light = VoiceTokens.resolve(voice: voice, palette: palette, tint: tint, dark: false)
+            let dark = VoiceTokens.resolve(voice: voice, palette: palette, tint: tint, dark: true)
+            func dynamic(_ key: KeyPath<VoiceTokens, Color>) -> UIColor {
+                let lightColor = UIColor(light[keyPath: key])
+                let darkColor = UIColor(dark[keyPath: key])
+                return UIColor { traits in
+                    traits.userInterfaceStyle == .dark ? darkColor : lightColor
+                }
+            }
+            var face = self
+            face.surface = dynamic(\.surface)
+            face.line = dynamic(\.line)
+            face.accent = dynamic(\.accent)
+            face.card = dynamic(\.card)
+            face.takeTint = dynamic(\.takeTint)
+            face.takeLine = dynamic(\.takeLine)
+            face.palette = MarkdownFace.Palette(
+                marker: self.palette.marker, link: face.accent,
+                codeTint: self.palette.codeTint, prose: self.palette.prose)
+            return face
+        }
     }
 
-    /// Cached once per voice — object-stable colors/fonts (see header).
+    /// Cached once per voice — object-stable colors/fonts (see header). The
+    /// voice's own colours (no palette): the faces a palette is laid over.
     static let terminalFace = Face(voice: .terminal)
     static let studyFace = Face(voice: .study)
 
-    static var face: Face {
-        switch voice {
-        case .terminal: terminalFace
-        case .study: studyFace
-        }
-    }
+    /// The face the editor wears now — the library's voice under its
+    /// palette (`adopt(_:)`).
+    @MainActor static var face: Face { current }
 
     /// P26/P43 (parity A3, her ruled flip — "the phone's menus
     /// VOICE-CASE … one register, hers"): every UIKit-rendered menu row
@@ -187,15 +281,16 @@ nonisolated enum MobileEditorStyle {
     /// `VoiceTokens.chromeLabel` applies on the SwiftUI surfaces, so the
     /// two halves of the app cannot fork registers. Accessibility labels
     /// stay plain (VoiceOver reads words, not chrome styling).
+    @MainActor
     static func chromeCase(_ text: String) -> String {
         voice == .terminal ? text.lowercased() : text
     }
 
     // MARK: - The surface-write values (the pre-batch-3 names, kept)
 
-    static var baseFont: UIFont { face.body }
+    @MainActor static var baseFont: UIFont { face.body }
 
-    static var markdownPalette: MarkdownFace.Palette { face.palette }
+    @MainActor static var markdownPalette: MarkdownFace.Palette { face.palette }
 
     /// The note body's paragraph gap at the default text size — the sizing
     /// sheet's 14 for Study, and Terminal's two under (VM-48).
@@ -203,7 +298,7 @@ nonisolated enum MobileEditorStyle {
         voice == .study ? 14 : 12
     }
 
-    static var baseParagraphStyle: NSParagraphStyle {
+    @MainActor static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
         let note = PhoneType.spec(.noteBody, voice: voice)
         // The body's scale against its default size (1 at Large): the gap
@@ -228,7 +323,7 @@ nonisolated enum MobileEditorStyle {
     /// The base attributes EVERY mobile surface write uses —
     /// materialization and programmatic replaces. One source so no path
     /// can drop the paragraph style (the Mac's exact doctrine).
-    static var baseAttributes: [NSAttributedString.Key: Any] {
+    @MainActor static var baseAttributes: [NSAttributedString.Key: Any] {
         [
             .font: baseFont,
             .foregroundColor: face.ink,

@@ -329,18 +329,14 @@ struct MobileShellTests {
 
     // MARK: - The router (voice + background flush)
 
-    /// The Settings flip is the shell router's ONE voice authority: it
-    /// reaches the stored preference, `MobileEditorStyle`, and the OPEN
-    /// surface (`applyVoiceChange`). The flip window is await-free
-    /// (MainActor-atomic — the S1 round-2 posture).
-    @Test func theVoiceFlipReachesPreferenceStyleAndTheOpenSurface() async throws {
+    /// The Settings voice door (VM-51, R-47-2) writes the LIBRARY's voice —
+    /// the synced `theme_voice` row, the Mac Settings' own write — and the
+    /// value reaches `MobileEditorStyle` and the OPEN surface where it LANDS
+    /// (the router's theme seam → `applyVoiceChange` through the liveness
+    /// authority). Before VM-51 this pinned LK2's phone-local preference.
+    @Test func theVoiceDoorWritesTheLibraryAndTheLandingReachesTheOpenSurface() async throws {
         try await withEditorWorld { session, _ in
-            let suite = "MobileShellTests-voice-\(UUID().uuidString)"
-            let defaults = try #require(UserDefaults(suiteName: suite))
-            defer {
-                defaults.removePersistentDomain(forName: suite)
-                MobileEditorStyle.voice = .terminal
-            }
+            defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
 
             let post = try await session.runner.run { ops in
                 try ops.createPost(title: "voiced", profile: .journal, entryDate: "2026-08-03")
@@ -351,23 +347,32 @@ struct MobileShellTests {
             let (model, storage) = makeEditor(session, postID: post.id)
             await model.loadOnce()
 
-            let router = MobileShellRouter(defaults: defaults)
-            #expect(router.voice == .terminal, "the preference's default leads")
+            let router = MobileShellRouter()
+            router.bindTheme(session: session)
             // S3 ladder (MINOR 2): the flip reaches editors through the
             // liveness authority's registration set, never a single slot.
             await router.editors.register(model, tab: .shelf)
+            let theme = try #require(router.theme)
+            let held = Task { await theme.start() }
+            defer { held.cancel() }
 
-            // The flip window: synchronous end to end.
-            router.setVoice(.study)
-            #expect(router.voice == .study)
-            #expect(MobileVoicePreference.current(defaults) == .study)
-            #expect(MobileEditorStyle.voice == .study)
+            // A fresh library carries no voice row: it reads Study (AppSpec §12).
+            try await untilLanded { router.voice == .study && MobileEditorStyle.voice == .study }
             let studyFont = storage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             #expect(studyFont == MobileEditorStyle.studyFace.body,
-                    "the open surface follows the flip")
+                    "the open surface wears the library's voice")
+
+            // The door: the library's row is written, then the landing restyles.
             router.setVoice(.terminal)
+            try await untilLanded { router.voice == .terminal }
+            let stored = try await session.database.read { db in
+                try String.fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'theme_voice'")
+            }
+            #expect(stored == ThemeVoice.terminal.rawValue, "the LIBRARY's voice was written")
+            #expect(MobileEditorStyle.voice == .terminal)
             let terminalFont = storage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
-            #expect(terminalFont == MobileEditorStyle.terminalFace.body)
+            #expect(terminalFont == MobileEditorStyle.terminalFace.body,
+                    "the open surface follows the landed voice")
         }
     }
 
