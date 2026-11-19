@@ -206,8 +206,11 @@ nonisolated enum MobileEditorStyle {
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
         let note = PhoneType.spec(.noteBody, voice: voice)
-        // The body's scale against its default size (1 at Large), so the
-        // gap and the line pitch grow with Dynamic Type as the body does.
+        // The body's scale against its default size (1 at Large): the gap
+        // and the line pitch take the body's size AT LAUNCH (the faces are
+        // resolved once per process). A mid-run text-size change re-scales
+        // the drawn body through the text view, not this gap — VM-137, the
+        // editor's text-size road (the VM-47 midway review's m-1).
         let scale = baseFont.pointSize / note.size
         // Uniform per-PARAGRAPH gap (the 2026-07-12 rule's letter —
         // intra-block newlines and seams alike, boundaries invisible at

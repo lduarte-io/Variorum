@@ -350,7 +350,7 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks. The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) is still queued |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
 | M.2 | M-1: the 13 pt floor in `PhoneType.uiFont` (`#if os(iOS)` arm, BOTH scaling classes: a resolved font under `floorSize` returns `baseUIFont(…, pointSize: floorSize)`); its pin, the UIKit twin of `nothingIsEverBelowThirteenPoints` in `MobilePhoneTypeTests` (every role × both voices × all twelve settings) | DONE (this commit) — `uiFont` = the class's scaled font (`scaledUIFont`, unchanged) then the floor; the pin `theUIKitFormIsNeverBelowThirteenPointsEither()`; build M.4, red-on-old M.5, run M.6 PENDING |
-| M.3 | m-1 + m-2 comments (`MobileEditorStyle.baseParagraphStyle`, `PhoneSegmentedChoice`'s contract); the two VM-137 lines in batch 1's "Recorded and left" (`Face.body` at xSmall in Terminal; the launch-cached paragraph scale) | NOT-STARTED |
+| M.3 | m-1 + m-2 comments (`MobileEditorStyle.baseParagraphStyle`, `PhoneSegmentedChoice`'s contract); the two VM-137 lines in batch 1's "Recorded and left" (`Face.body` at xSmall in Terminal; the launch-cached paragraph scale) | DONE (this commit) — comments only (no code, no rendered word); the two lines under batch 1's "Recorded and left" |
 | M.4 | Both schemes `build-for-testing` into `DerivedData/vm47-b2` (`vm47-walk` untouched) | NOT-STARTED |
 | M.5 | M-1's red-on-old, in a SNAPSHOT (this worktree never reverted): a detached `~/dev/variorum-vm-47-rol` at the fix commit, `App/Variorum/Shared/Theme/PhoneType.swift` ALONE checked out from the commit before the fix (the pin's test file stays the fixed tree's), phone `build-for-testing` into its own `App/Variorum/DerivedData/vm47-rol`; the orchestrator runs `MobilePhoneTypeTests` from it — the new pin expected RED; the snapshot removed after | NOT-STARTED — no snapshot exists now; this row names it before it starts |
 | M.6 | The window (the orchestrator's): (a) the snapshot run; (b) `rerun=(MobilePhoneTypeTests MobilePhoneControlsTests MobileTakesBrowserTests MobileTakesBrowserSurfaceTests MobileBlockHistoryTests MobileCommentDraftTests)` + the seven Mac theme types from `vm47-b2`; results recorded in §2's "What changed" | NOT-STARTED |
@@ -531,6 +531,15 @@ default, Terminal dark default, Study light largest. Not capturable: the filter 
 - The Bookcase path line in Terminal (13 pt path + two 17 pt mono doors ≈ 437 pt) is computed to wrap to two
   lines at 402 and 430 pt — VM-53 (batch 5: `Settings` moves into the roots' ⋯ menu); the walk confirms it.
 - Terminal at 320 pt cannot hold the five filter words at the floor (P-47-7) — VM-50.
+- `Face.body` (`MobileEditorStyle`) has no 13 pt floor: Terminal's note body in the editor draws ≈ 12.4 pt at the
+  xSmall text setting (`UIFontMetrics(.body)`, 15 × 14/17; Study clears at 14, and Small clears in both). A floor
+  there needs a fixed font, which the editor's text view (`adjustsFontForContentSizeCategory`, an untouched file)
+  could not re-scale when she raises the size mid-run — VM-137, the editor's text-size road (the midway review's
+  M-1, confirmed recorded, not fixed; the UIKit chrome's floor IS fixed, `8bea26402`).
+- `baseParagraphStyle`'s scale is the body's at launch (the faces are `static let`, resolved once per process): a
+  mid-run text-size change re-scales the drawn body through the text view while the paragraph gap and the line air
+  stay at the launch scale until relaunch — the staleness the pre-batch constants had (they never scaled); the
+  comment now says so. VM-137, the text view's trait-change road (the midway review's m-1).
 
 **Self-assessment (for the cold reviewer).** The layer is one table and two forms over it, so a number
 changes in one place; the inks are a rule whose output ships as constants with the rule pinned to them, so

@@ -532,8 +532,12 @@ nonisolated enum PhoneSegmentWidths {
 /// (re-applied on every update, so a change the site makes shows); a tap —
 /// or VoiceOver's activate — on another segment selects it and calls
 /// `select` with that value once; re-choosing the shown selection calls
-/// nothing. Each segment speaks its PLAIN word with the button trait, and
-/// `.isSelected` on the selected one.
+/// nothing. A site whose `select` can REFUSE a change must force an update:
+/// the system control has already moved its own selection to the tapped
+/// segment, and only an update re-applies `selection` (every site today
+/// assigns unconditionally — the VM-47 midway review's m-2). Each segment
+/// speaks its PLAIN word with the button trait, and `.isSelected` on the
+/// selected one.
 struct PhoneSegmentedChoice<Value: Hashable>: View {
     let options: [Value]
     let word: (Value) -> String
