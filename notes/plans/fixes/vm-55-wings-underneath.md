@@ -1,12 +1,66 @@
 # VM-55 — Run: Wings underneath (mobile catch-up, wave 1, umbrella 2)
 
-**STATUS: OPEN 2026-11-19** — overnight run under `/run-phase vm-55`; stage coordinator `nov18`.
+**STATUS: CLOSED 2026-11-19** — PR #13, merge `66337ff08`; QUESTIONS #277; the handoff `notes/handoffs/vm-55-handoff.md`.
 Ticket VM-55 (team VM, project "Mobile — the catch-up & launch") · branch `vm-55-wings-underneath` · worktree
 `~/dev/variorum-vm-55` · Pro · ONE PR titled `VM-55: Wings underneath`.
 
 ## FOR A LATER READER
 
-*Written at closeout. Until then this run is open and the sections below are its working record.*
+**What this run was.** Wave 1, umbrella 2 of the mobile catch-up: the phone learns wings underneath, gets one
+message line, stops rendering raw error text, and the Mac's wing brains move to shared code. Nine members —
+VM-56 · VM-57 · VM-58 · VM-59 · VM-60 · VM-61 · VM-62 · VM-63 and, minted mid-run at her word, VM-225 — built in
+four batches (batch 2 in two halves), each by a fresh `opus-implementer`, with one `fable-reviewer` round and a
+fresh closer for the walk and the gate. Zero `Sources/` lines, zero schema, nothing under `Sync/`, custody,
+Protection or the editor brain; the sync marker is untouched. Merged by PR #13, merge `66337ff08`.
+
+**As built, one pointer per piece** (paths under `App/Variorum/`):
+- *The phone stands in one wing (VM-56).* `Shared/WingState.swift` — `readScope` is the current wing on both
+  platforms; `Shared/AppBootstrap.swift` attaches the device memory and the dead-wing return to Home on the phone.
+  The roots' title is `VariorumMobile/Features/Shell/MobileWing.swift` (`MobileWingTitle`).
+- *Every listing reads it (VM-57).* `MobileWingScope.follow` in the same file runs a held listing once per wing;
+  each model passes `wingID:` to the Core read it already made. Snippets stay unscoped.
+- *Mints (VM-58) and the tag manager (VM-60).* Call sites only: `MobileNewNoteDoor`, `MobileQuickNoteModel`,
+  `MobileCreateBookModel` (one wing snapshot for the name guard, the mint and the tag vocabulary),
+  `MobileTodayDoor` (passes the standing wing; a living Journal's entry is still born beside it),
+  `MobileTagManager`.
+- *The wing-blind pickers (VM-59, the Bug).* `Write/MobileNoteTags.swift`, `Write/MobileMembership.swift` read
+  `Queries.effectiveWing(ofPost:)`; `Shell/MobileCreateBook.swift` reads the sheet's wing. Pins:
+  `MobileWingBlindPickerTests`, red on the old tree 3 of 3.
+- *The one message seam (VM-61).* `Shared/StatusCenter.swift` (moved from `Variorum/Registry/`); the routing is
+  the one pure rule `slot(kind:leavesPage:placement:receiptStyle:)`. The phone's vocabulary is
+  `VariorumMobile/Features/Shell/MobileLine.swift`, its face `Shell/MobileMessageLine.swift` (one passthrough
+  overlay window owned by the shell). The Mac's guard: `VM61MacStatusSeamPinTests`.
+- *Refusals in words (VM-62, the Bug).* `Shared/OpsRefusalTable.swift` — `OpsRefusalCopy.sentence(for:roads:)`,
+  the table's words else `unexpectedFailure`. Pins: `MobileNoRawErrorPinTests` (a source scan of
+  `VariorumMobile/`), `MobileRefusalSentencePinTests`; red on the old tree (97 lines, 5 of 5).
+- *The hoist (VM-63).* `Shared/WingsModel.swift`, `WingSwitcherBrain.swift`, `WingFollowRule.swift`,
+  `WingBookMoveBrain.swift`, `WingDestinationModel.swift`, `SearchPickerBrain.swift`; the Mac's halves stay in
+  `Variorum/Core/Views/WingsModel+Mac.swift` and `WingNoteDoors.swift`. Guards: `VM63MacWingBrainsHoistPinTests`,
+  `MobileWingBrainsHoistTests`, and the two Mac scans' `hoistedMacBrains` list — the next hoist adds its file.
+- *The interim wing door (VM-225).* `VariorumMobile/Features/Shell/MobileWingDoor.swift`; the shell holds the
+  shared `WingsModel`. Wave 2's VM-80 replaces it whole.
+
+**Her words that bind it** (verbatim under "Her words"): only removals and refusals show a line; the wing's name is
+the title on every root (SW-1); a quick note lands in the current wing's Pool (SW-5); the plain interim door
+("yeah - go ahead and add the plain interim door to this run."); the ladder ("up to 5 review rounds as long as a
+major is found"); the Protection remainder under VM-103 ("yeah that's fine."); the phone install ("ok i'll do the
+hands part in the morning.").
+
+**Evidence that matters.** The ladder closed at round 1 — 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT
+(`vm-55-ladder-round1.md`), three confirmed fixes pinned red-on-old. The walk: eleven rows PASS from their
+captures on a dedicated simulator in both voices; the direction row rests on `MobileLineDirectionTests`. The
+merge gate: the whole phone target 953 tests / 163 suites with main's one red (VM-24's caret test, 2 of 3 cases); the whole
+Mac target 6,409 tests / 1,111 suites in one launch — 1 failed, the standing flake `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` (VX-701), green when re-run alone; 13 standing known issues; 31 gated harnesses skipped.
+
+**Open, and where it lives.**
+- Nineteen PROVISIONAL calls, P-55-1 … P-55-19: QUESTIONS #277; her checklist is
+  `notes/handoffs/vm-55-handoff.md`.
+- The Protection screen's messages and two raw-error faces on the custody road: VM-229, VM-230 (under VM-103).
+- Phone words for the wing brains' four Mac-worded sentences and the empty-wing lines: VM-231 (under VM-72).
+- Found, not fixed: VX-1021 (a book whose wing died shows on no Bookcase), VX-1022 (the Mac's switcher can pick a
+  dead wing), VX-1023 (a ready-state test touches the host's remembered wing), VX-1024 (one public error log
+  line on main, the privacy pin's one exemption).
+- A direction draws in the refusal's alarm ink on the phone (P-55-19).
 
 ---
 
@@ -419,7 +473,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Ladder round 1 (the FINAL round: 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT) | REVIEWED and adjudicated — the three confirmed fixes (findings 2, 5, 7) APPLIED pin-first (pins 35983f69a, 77f591154, 7af436366 + the pin compile fix 923f14f30; fixes 79e14816f, 725d58f6a, 2278790a5) and GREEN in the fix window (10:29–10:32, products 923f14f30), the pins red on the snapshot as predicted (6 of 8); finding 1's two re-runs GREEN there. REMAINING: the orchestrator's line-by-line check of the three fixes against their findings |
 | The ladder | CLOSED at round 1 (her rule: a round with no new BLOCKER or MAJOR closes it) — the fix window green 2026-11-19 10:29–10:32, the orchestrator's line-by-line check recorded under Round 1 |
 | The simulator walk (the closer; the rows are in "THE WALK AND THE MERGE GATE") | DONE — claim 11:50:54–12:02:24 on a dedicated device (created, then deleted): rows a–h and j–l PASS from their captures (a, b, f, g PASS again in Terminal); row i NOT WALKED (the driver went through the Trash, which never lists takes by D1) and rests on its pin `MobileLineDirectionTests`, as the row allows; no defect found, no code touched. Record: "### The walk and the gate" ▸ "The walk" |
-| The merge gate (whole phone, whole Mac) | NOT-STARTED — the closer's, at the orchestrator's word |
+| The merge gate (whole phone, whole Mac) | DONE — on products of 923f14f30's code (nothing outside `notes/` differs at the tip): (i) the whole phone target 953 tests in 163 suites, 952 passed, the one red main's VM-24 baseline (2 of 3 cases), the declared known issues only; (ii) the whole Mac target 6,409 tests in 1,111 suites in ONE launch, the one red the known flaky `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` (VX-701), GREEN re-run alone; no branch red on either target. Record: "### The walk and the gate" ▸ its LIVE STATUS |
 | Closeout | NOT-STARTED |
 
 Notes for the implementers:
@@ -2080,8 +2134,9 @@ out; the branch tree and the snapshot still throughout):
 
 **What this closer has NOT done (first, by the protocol; kept current):** row i was NOT walked by hand — the driver
 went through the Trash, which never lists takes (D1, `TrashScope.listedKinds`); the take's road is its note's tray, and
-no build was allowed inside the claim to re-drive it, so row i rests on its pin as the row itself allows (below). No gate
-claim has run yet (the gate waits on the orchestrator's word). No product code written — the walk found no defect. The
+no build was allowed inside the claim to re-drive it, so row i rests on its pin as the row itself allows (below). Both
+gate legs ran (below); nothing was re-run but the one flaky Mac name. No product code written — the walk and the gate
+found no defect. The
 screens folder the brief first named,
 `notes/plans/fixes/vm-55-screens/`, is NOT ignored by this repo (`git check-ignore` exit 1 — `.gitignore` names each
 screens folder one by one; there is no `*-screens` rule), so nothing was ever written there. **The orchestrator's answer
@@ -2113,7 +2168,7 @@ device is created for the walk and deleted at its end; its id is never written h
 | The snapshot and its DerivedData removed; the device deleted | DONE — the device deleted (`simctl delete`; listed 0 after); the snapshot worktree removed with `--force` (it held only the untracked instrument files) — 1.7 GB in all, its DerivedData `vm55-walk` 1.6 GB of it; the folder is gone and `git worktree list` no longer names it. A copy of the two instrument files and the passes' logs sits in the ignored screens folder (`instruments-copy/`) until the post-merge cleanup |
 | The gate's builds (both targets `build-for-testing` into `vm55-b1`, the tree clean and still) | DONE (12:05–12:06, headless, at the tip 140b64054; the orchestrator's 99aa485d6 since is notes only) — `git diff --name-only 923f14f30 HEAD` outside `notes/`: 0 files, so the products' code is **923f14f30**'s. Phone (scheme VariorumMobile, the window's simulator as destination): "** TEST BUILD SUCCEEDED **", 0 errors, NO Swift compile and NO link — only Info.plist processing and CopySwiftLibs (log `DerivedData/vm55-gate-phone-build.log`). Mac (scheme Variorum, platform=macOS): "** TEST BUILD SUCCEEDED **", 0 errors, NO Swift compile and NO link — the "Stamp Build Number" phase ran (CFBundleVersion 12593, from the tip's history), so the Info.plist was processed again and the app and its two dylibs re-signed: a stamp, not code (log `DerivedData/vm55-gate-mac-build.log`). Both xctestruns refreshed 12:06 |
 | Gate claim (i) — the whole phone target | DONE — GREEN BUT MAIN'S BASELINE. Claim `vm-55` 12:10:53 → released 12:20:46 (the coordinator's exact line); the window's standing simulator booted fresh 12:11, settled 30 s; `test-without-building` on `vm55-b1`'s phone products (code **923f14f30**'s), `-only-testing:VariorumMobileTests` as one literal argument, tests selected and starting by 12:11:48; the tree still and nothing outside `notes/` moved through the leg (tip ad37fa4b8 before and after). Swift Testing: **"Test run with 953 tests in 163 suites failed after 515.840 seconds with 6 issues (including 4 known issues)"** — 952 passed (950 clean + 2 with their DECLARED known issues: `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` 2, `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape` 2), **1 failed**, 0 skipped; XCTest "Executed 0 tests, with 0 failures" (Swift Testing suites). **The one red is main's baseline:** `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`, 2 of 3 cases ("hi", "hello there" — `model.desyncRecoveryCount == 0`), VM-24's. No red of this branch's, so no re-run; no load re-run. One test run, no host relaunch. xcodebuild exited on its own (65). 953/163 = the shared window's 949/161 plus round 1's two new pin types (`MobileLineStandingOfferTests` 3, `MobileErrorLogPrivacyPinTests` 1). After: simulator shut down; no Variorum instance; no Problem Reporter; no `Variorum*-*.ips` stamped after 12:10. Log `DerivedData/vm55-gate-phone-test.log` |
-| Gate claim (ii) — the whole Mac target (QUIET) | PENDING — READY (scheme Variorum, platform=macOS, no filter, the dev-store Debug test host, ~65–70 min) |
+| Gate claim (ii) — the whole Mac target (QUIET) | DONE — GREEN BUT THE ONE KNOWN FLAKY NAME, GREEN ALONE. Claim `vm-55` 12:35:19 → released 13:32:17 (the coordinator's exact line, QUIET); launched 12:37:25 after the asked two-minute wait (load 57 then, falling — no other xcodebuild running; the system's `mediaanalysisd` was the busy process), on `vm55-b1`'s Mac products (code **923f14f30**'s), scheme Variorum's xctestrun, `-destination platform=macOS`, NO filter, the dev-store Debug test host; tests selected and starting by 12:37:41; ONE launch (one "Test run started", no host relaunch); no What's New sheet drawn (screen read at 12:38 and 12:50: the host's "Running tests — no library is open." and suites' own windows only); no Finder window touched. Swift Testing: **"Test run with 6409 tests in 1111 suites failed after 3112.379 seconds with 15 issues (including 13 known issues)"** — 1 failed, 31 skipped (gated harnesses by their traits — the capture harnesses, the singleton-window oracles, the synchronizable-key round trip), the rest passed (5 of them with their DECLARED known issues: `CommentPanelReleaseTests`' three — `aDismissedPopoverLetsGoOfItsPanelsModelAndItsObservation`, `aDismissedSheetLetsGoOfItsPanel`, `theTakePanelsNestedCommentsSheetLetsGoOfItsPanel` — 3 each (VX-229's guard), and `IndexTierMetricsTests`' `theBookIndexsLivePaneIsItsReadTierLineForLine` and `theReadEditLivePaneIsItsReadTierLineForLine` 2 each = 13); XCTest "Executed 0 tests, with 0 failures" (Swift Testing suites). Wall time: 12:37:25 → the verdict at about 13:29:37, about 52 minutes (51 m 52 s of test time). **The one red — `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary()` — the known flaky esc-boundary name (VX-701), not this branch's:** under the full run it failed at `TakesFindBoardTests.swift:400` (`model.find.fieldHoldsKeyboard`, 2 issues); **re-run ALONE in the claim (13:31:51): "Test run with 1 test in 1 suite passed after 2.804 seconds with 1 known issue"** — its own declared known issue at `:431`, which is also why the full run counted 13 known issues against the standing 14 (passing, this test adds its 1). The other two flaky names (`SpellingDoorTests`' write arm, `TakesExpansionMemoryTests`' marginGrid arm) were green in the full run. No red of this branch's on the Mac. xcodebuild lingered after the verdict and was stopped by hand about two minutes later (the log has no exit line for that reason); the re-run's exited 0. The tree still and no commit landed during the leg (tip 49e795bb6 before and after; nothing outside `notes/` differs from 923f14f30). After: no Variorum instance (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"` empty); no Problem Reporter; no `Variorum*-*.ips` stamped after 12:35. Logs `DerivedData/vm55-gate-mac-test.log`, `DerivedData/vm55-gate-mac-rerun-takesfind.log` |
 
 #### The walk (2026-11-19, claim 11:50:54 → 12:02:24)
 
@@ -2247,4 +2302,58 @@ detached snapshot worktree — never a revert in this worktree.
 
 ## Closeout
 
-*(results, the ratify list, tickets filed, the rulings reconciled, MOBILE PARITY, canon-size)*
+**Results.** Nine members built in four batches; every member's record is under "Batch records". The ladder closed
+at round 1 (0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT), three confirmed fixes pinned red-on-old. The walk passed
+eleven of twelve rows from their captures; the twelfth rests on its pin. The merge gate, on the tree that merges
+(code `923f14f30`, main `9a78628ea` merged in, nothing outside `notes/` after it):
+- the whole phone target — 953 tests / 163 suites; 1 failed, main's `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`
+  (VM-24, 2 of 3 cases); 4 declared known issues;
+- the whole Mac target — 6,409 tests / 1,111 suites in one launch — 1 failed, the standing flake `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` (VX-701), green when re-run alone; 13 standing known issues; 31 gated harnesses skipped.
+
+**The ratify list.** Nineteen PROVISIONAL calls, P-55-1 … P-55-19, each with its options where it was made (the
+batch records, "The orchestrator's check of batch 2a", the Ladder). They go to `notes/QUESTIONS.md` as one bundle
+at the merge moment; her checklist is `notes/handoffs/vm-55-handoff.md`. The lines that no longer show are listed
+verbatim in the batch 2a record and in the handoff. The closer made no PROVISIONAL call.
+
+**Tickets filed, each triaged at mint.** VM-225 (Feature · App shell · High — built here) · VM-229 (Improvement ·
+Confirmed · Castle & sync · Medium, under VM-103) · VM-230 (Bug · Confirmed · Castle & sync · Medium, under VM-103) ·
+VM-238 (Improvement · Confirmed · Takes & Lenses · Medium, under VM-186) · VM-231 (Improvement · Wording ·
+Confirmed · App shell · Low, under VM-72) · VX-1021 (Bug · Suspected · Books · Medium, parked) · VX-1022 (Bug ·
+Suspected · App shell · Low, parked) · VX-1023 (Debt · Test-only · Tests & tooling · Low, parked) · VX-1024 (Debt ·
+Confirmed · Settings & onboarding · Low, parked). Notes left on VM-80 (the interim door; four provisional calls),
+VM-72 (the capture box's keyboard across a page change; the follow's act is still the Mac's) and VM-216 (the wing
+door's VoiceOver hint).
+
+**The rulings reconciled** (each re-read against what shipped; "every" and "all" checked by name):
+- *"the wing's name is the title on every root" (SW-1).* The three roots name it, leading today's path line
+  (P-55-2); the title band itself is wave 2's (VM-80). No remainder beyond that ticket.
+- *"Every list shows only the current wing" (VM-57).* The Library's All and Notes, the Pool, books (the Shelf and
+  the Books filter), today's title search, Starred, Archived, the Trash and its Empty Trash, the tag manager, and
+  the three pickers (their own subject's wing). Unscoped by ruling: Snippets. Left store-wide on purpose: lookups
+  of one book by id, the starter Journal's virgin-store guard, the Debug seeders. No remainder.
+- *"New notes, books and tags are born in the current wing" (VM-58, SW-5).* New note, quick note, new book, a new
+  gathering, a new top-level tag; Today beside its Journal; a note minted inside a book in the book's wing. No
+  remainder.
+- *"Only removals and refusals" — "a short line with Undo when something leaves the page (a delete, a merge, an
+  archive, a deleted tag)".* Wired: note, book, block and paragraph deletes, merges and the cross-block join,
+  archives, the Trash's confirmed purges (no Undo). NOT wired, a remainder: a comment's delete, a take's delete or
+  archive, a lens's delete — **VM-238**; a deleted tag's Undo is VM-101's. The Protection screen's messages —
+  **VM-229**.
+- *"Every refusal speaks a plain sentence" (VM-62).* Every phone site under `VariorumMobile/`, pinned by the scan.
+  A remainder on the custody road: the library-open failure's reason and a failed account deletion — **VM-230**.
+- *The wing brains named for the hoist (VM-63): WingsModel, WingSwitcherBrain, WingFollow, the move or copy
+  confirm.* All four moved or lifted; the follow's ACT stays a Mac extension (it drives the Mac's sidebar and
+  workspace) — noted on VM-72 for VM-80's follow.
+- *The interim door (her mid-run word).* On all three roots, a plain list, a pick lands on that wing's Bookcase.
+  No remainder; VM-80 replaces it.
+
+**MOBILE PARITY.** `notes/MobileSoul.md` §6, PL-76.
+
+**Canon.** SurfaceContracts' Messages bullet and wing-switcher bullet each gained the phone's half in place; one
+clause in AppSpec §12; MobileSoul PL-76. No OverallModel, CoreDescription, SyncSpec, CastleRules, MCPSpec or
+CLAUDE.md line moved. `Tools/canon-size`: 143,078 of 150,000 (headroom 6,922) — no crossing.
+
+**Not done by this run.** No release; nothing installed on her phone or in `/Applications`; nothing published. The
+wave-1 phone build is the wave's last mobile merger's, and the install is hers ("ok i'll do the hands part in the
+morning."). No next-phase plan is owed: wave 2's umbrellas are planned in
+`notes/plans/vm-44-mobile-catch-up-plan.md` and start at her kickoff once wave 1 has merged.

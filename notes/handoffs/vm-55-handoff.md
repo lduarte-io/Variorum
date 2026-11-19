@@ -1,6 +1,6 @@
 # VM-55 — Wings underneath: your morning handoff
 
-**STATUS: DRAFT (2026-11-19) — built, reviewed and walked; the merge gate's two full runs and the merge itself are still to come. This line is replaced when the run merges.**
+**STATUS: FINAL (closed 2026-11-19 — PR #13, merge commit 66337ff08; the decisions are QUESTIONS #277; everything below is settled).**
 
 *How to read the ids in this file:* **VM-NNN** and **VX-NNN** are tickets on the board. **P-55-N** is a
 provisional call built while you were away, waiting for you; all of them are QUESTIONS #277. A **window** is a
@@ -78,7 +78,10 @@ change (it belongs with your keyboard report in the wave 2 capture umbrella, VM-
 line wraps its book count onto a second line (sizes are VM-47's); a gathering still reads "smart" (VM-78's);
 Book Details still offers Finish on a gathering, a door that can only refuse (the book-settings umbrella, VM-156).
 
-**The full suites, on the tree that merged.** PENDING — the whole phone test target and the whole Mac test target, run through nov18 on the tree that merges.
+**The full suites, on the tree that merged.** Green. The whole phone target: 953 tests in 163 suites; one failed, and it is the
+caret test that already fails on main (VM-24). The whole Mac target: 6,409 tests in 1,111 suites in one launch; one
+failed, the known flaky Takes find test (VX-701), which passed when re-run alone. So the Mac is unchanged by the
+shared message seam and the hoist, as far as the whole suite can show.
 
 ---
 
@@ -175,9 +178,14 @@ lists each with its file (`notes/plans/fixes/vm-55-wings-underneath.md`, batch 2
 ## Things a later reader would otherwise trip on
 
 - The record is `notes/plans/fixes/vm-55-wings-underneath.md`; read its FOR A LATER READER section first.
+- Your rule "a line with Undo when something leaves the page" is not wired everywhere yet: deleting a comment,
+  deleting or archiving a take, and deleting a lens still say nothing (VM-238); a deleted tag's Undo is VM-101.
 - The interim wing door is temporary. VM-80 replaces it whole, and a note on VM-80 says what exists.
 - The Protection screen was not touched: its messages still use their own lines (VM-229), and two failures there
   can still show raw error text (VM-230). Both sit under the lock umbrella, VM-103.
+- Who merges this in next (the coordinator's trial merges at the merge): VM-47 has already merged it in cleanly;
+  VM-64 meets it in two phone files; VM-78 in five phone files plus MobileSoul and SurfaceContracts; VX-981 in
+  SurfaceContracts only.
 - `Tools/canon-size`: 143,078 of 150,000 (headroom 6,922); no crossing.
 
 ## Tickets filed
@@ -185,6 +193,7 @@ Tickets filed:
 - [ ] VM-225 (High, Feature, In Progress): the interim wing door; built in this run and closes at the merge.
 - [ ] VM-229 (Medium, Improvement, Todo): the Protection screen's messages join the phone's one message line (under the lock umbrella, VM-103).
 - [ ] VM-230 (Medium, Bug, Todo): the library-open failure screen and a failed account deletion still show raw error text (under VM-103).
+- [ ] VM-238 (Medium, Improvement, Todo): a line with Undo after deleting a comment, a take or a lens on the phone (under VM-186); the part of "only removals and refusals" this run did not wire.
 - [ ] VX-1021 (Medium, Bug, Backlog): a book whose wing was deleted shows on no Bookcase, Mac or phone.
 - [ ] VM-231 (Low, Improvement, Todo): wing words for the phone — the empty-wing lines, and four sentences that name Mac doors (under VM-72).
 - [ ] VX-1022 (Low, Bug, Backlog): the Mac's wing switcher can switch into a wing deleted while its list stood open.
@@ -192,5 +201,5 @@ Tickets filed:
 - [ ] VX-1024 (Low, Debt, Backlog): the sample library's welcome arrangement logs a raw error as public text.
 
 Comments were left on VM-80 (the wave 2 switcher now replaces an existing door, and four provisional calls bear on
-it) and on VM-216 (the wing door has no VoiceOver hint yet). The four VX tickets are parked in Backlog, each with
+it), on VM-72 (the capture box's keyboard across a page change) and on VM-216 (the wing door has no VoiceOver hint yet). The four VX tickets are parked in Backlog, each with
 its reason, as riders for the next run in their areas.
