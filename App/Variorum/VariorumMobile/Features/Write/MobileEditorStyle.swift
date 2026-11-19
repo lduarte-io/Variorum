@@ -122,9 +122,10 @@ nonisolated enum MobileEditorStyle {
         /// she writes on the tint. The sheet's paper here is one line in the
         /// editor's text view, which is VM-137's (the editor seam).
         let room: UIColor
-        // The SEVEN slots below are the ones a palette replaces
-        // (`applying(palette:tint:)`) — the `VoiceTokens.applying` rule:
-        // everything else in a face is the voice's.
+        // The six colours below — with the markdown palette's `link` — are
+        // the ones a palette replaces (`applying(palette:tint:)`; in light the
+        // resolver keeps the voice's own paper and card, as
+        // `VoiceTokens.applying` does). Everything else in a face is the voice's.
         private(set) var surface: UIColor
         private(set) var line: UIColor
         private(set) var accent: UIColor
@@ -245,11 +246,7 @@ nonisolated enum MobileEditorStyle {
             let light = VoiceTokens.resolve(voice: voice, palette: palette, tint: tint, dark: false)
             let dark = VoiceTokens.resolve(voice: voice, palette: palette, tint: tint, dark: true)
             func dynamic(_ key: KeyPath<VoiceTokens, Color>) -> UIColor {
-                let lightColor = UIColor(light[keyPath: key])
-                let darkColor = UIColor(dark[keyPath: key])
-                return UIColor { traits in
-                    traits.userInterfaceStyle == .dark ? darkColor : lightColor
-                }
+                Face.pair(light: UIColor(light[keyPath: key]), dark: UIColor(dark[keyPath: key]))
             }
             var face = self
             face.surface = dynamic(\.surface)
@@ -262,6 +259,13 @@ nonisolated enum MobileEditorStyle {
                 marker: self.palette.marker, link: face.accent,
                 codeTint: self.palette.codeTint, prose: self.palette.prose)
             return face
+        }
+
+        /// A dynamic colour from its two resolved values, built OFF the main
+        /// actor's isolation so UIKit may resolve it from any thread (the
+        /// `PhoneInks.dynamic` shape — no actor-isolated call inside).
+        nonisolated private static func pair(light: UIColor, dark: UIColor) -> UIColor {
+            UIColor { traits in traits.userInterfaceStyle == .dark ? dark : light }
         }
     }
 
