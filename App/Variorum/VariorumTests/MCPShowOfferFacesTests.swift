@@ -703,6 +703,64 @@ struct MCPShowOfferFacesTests {
         }
     }
 
+    /// **Round 1's F4 (the VX-981 ladder) — RED ON OLD: a move at once that finds its place GONE
+    /// lets that place's dead doors go** (PROVISIONAL P-981-L1-1, option (a): the press roads' own
+    /// table, on the move's own re-read). A client's earlier write on the note left a trail row and
+    /// the session's last change — keyed `.note(…, blockID:)`, so they must match by PLACE
+    /// (`MCPTrail.placeKey`), never by the exact target; VX-705's deletion lands inside the standing
+    /// read; the move's re-read proves the place gone — and now the place's rows go and ⌥⌘O stops
+    /// offering that change (P-FL2-1: a door whose only press refuses is a dead door). Another
+    /// place's row stays (non-vacuity: the forgetting is the place's own). Old: the row and the lit
+    /// chord outlived the re-read that had just said the place is gone.
+    @Test func aMoveAtOnceThatFindsItsPlaceGoneLetsThatPlacesRowsAndLastChangeGo() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let other = try session.operations.createPost(title: "still here")
+            let otherID = other.id
+            let post = try session.operations.createPost(title: "gone with its doors")
+            let noteID = post.id
+            let block = try session.operations.newBlock(in: noteID, text: "words").block.id
+            let rig = Rig(session, standing: .frontmostMainWindow)
+            defer { rig.door.detach() }
+            // The client's earlier writes: one on another note, then one on this note's block —
+            // a row each, and this note's the session's last change.
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: otherID, targetTitle: "still here",
+                show: .note(noteID: otherID, blockID: nil, select: nil)))
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: noteID, targetTitle: "gone with its doors",
+                show: .note(noteID: noteID, blockID: block, select: nil)))
+            session.status.clear()
+            let place = "note:\(noteID)"
+            let staged = rig.door.trail.trail.entries.contains { $0.place == place }
+            let litBefore = session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(staged && litBefore, "premise: a row and a lit ⌥⌘O on the note")
+
+            let router = rig.router
+            let operations = session.operations
+            var deletedInTheWindow = false
+            rig.door.standingProvider = {
+                if !deletedInTheWindow {
+                    deletedInTheWindow = true
+                    try? operations.deleteContainer(noteID)  // lands between the wire's read and the adopt
+                }
+                return (.frontmostMainWindow, router)
+            }
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: noteID, blockID: nil, select: nil), clientName: "claude-code",
+                title: "gone with its doors", dial: .moveAtOnce, activityKind: "note", activityID: noteID))
+
+            let rowGone = !rig.door.trail.trail.entries.contains { $0.place == place }
+            let changeGone = rig.door.lastShow == nil
+            let greyed = !session.commandRouter.isEnabled(.showLastAIChange)
+            let otherKept = rig.door.trail.trail.entries.contains { $0.place == "note:\(otherID)" }
+            #expect(deletedInTheWindow, "the hook ran in the window")
+            #expect(rowGone, "RED ON OLD: the gone place's row outlived the move's re-read")
+            #expect(changeGone, "RED ON OLD: the gone place's change is still the last change")
+            #expect(greyed, "RED ON OLD: ⌥⌘O stays lit over a door that can only refuse")
+            #expect(otherKept, "another place's row stays — the forgetting is the gone place's own")
+        }
+    }
+
     // MARK: - VX-675: a saved version, full size
 
     /// A version target opens the VX-440 full-size page — its own destination
