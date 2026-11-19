@@ -394,10 +394,93 @@ flight.***
 |---|---|---|
 | The hoist (words) | DONE (`68f7e7eab`) — Mac `build` GREEN | the Mac's existing copy pins (Mac leg) |
 | VM-21's hoist (the collect receipt family) | DONE (`4118af9b3`) — Mac `build` GREEN | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
-| Seams + pins (all three members) | DONE (this commit) — phone `build-for-testing` GREEN (unsigned, generic sim); every pin compiles against this tree; red-on-old **PENDING** (stage window) | see the members' rows |
-| VM-81 | IN-PROGRESS — code DONE: the Finish confirm (`aa4a8670f`), the rest (this commit); phone `build-for-testing` + Mac `build` GREEN; red-on-old + green **PENDING** (stage window) | `MobileFinishConfirmTests`, `MobileBookStateRowTests`, `MobileArchivedStarredBookTests` (+ `MobileBookDetailsTests`) |
-| VM-83 | IN-PROGRESS — code DONE (this commit); phone + Mac `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileShelfOrderTests`, `MobileShelfRowActsTests`, `MobileGatheringWordTests` (+ `MobileShellTests`, `MobileBookDetailsTests`, `MobileWalkTests`, `MobileDeletionTests`) |
-| VM-21 | IN-PROGRESS — code DONE (this commit); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileCollectReceiptTests` |
+| Seams + pins (all three members) | DONE (`7c9fc0151` — the revert recipe's OLD) — phone `build-for-testing` GREEN; every pin compiles against this tree; red-on-old **PENDING** (stage window) | see the members' rows |
+| VM-81 | IN-PROGRESS — code DONE: the Finish confirm (`aa4a8670f`), the rest (`081af74b0`), face polish (`5681d8304`); phone + Mac `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window); walk **PENDING** | `MobileFinishConfirmTests`, `MobileBookStateRowTests`, `MobileArchivedStarredBookTests` (+ `MobileBookDetailsTests`) |
+| VM-83 | IN-PROGRESS — code DONE (`0abaf3938`), face polish (`5681d8304`); phone + Mac `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window); walk **PENDING** | `MobileShelfOrderTests`, `MobileShelfRowActsTests`, `MobileGatheringWordTests` (+ `MobileShellTests`, `MobileBookDetailsTests`, `MobileWalkTests`, `MobileDeletionTests`) |
+| VM-21 | IN-PROGRESS — code DONE (`ea3b965af`); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window); walk **PENDING** | `MobileCollectReceiptTests` |
+
+**Half 1 — DONE (2026-11-19):** the hoists, the seams + pins, and all three members' fixes committed and pushed. Phone
+`build-for-testing` **TEST BUILD SUCCEEDED** — unsigned for `generic/platform=iOS Simulator` and then SIGNED for
+`platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2` (no boot, no install) at the last commit, both into
+`DerivedData/vm78-ios`; Mac `build-for-testing` (`DerivedData/vm78-mac`) **TEST BUILD SUCCEEDED** at `0abaf3938` (no
+Mac file changed after it). No `xcodebuild test` run, no simulator booted, no walk. **Questions for her (the
+orchestrator files them):** (1) an archived GATHERING's add row — wear "(archived)" on both platforms? (VM-21, below;
+PROVISIONAL as built); (2) the wording pass: the create sheet's three gathering lines (VM-83's table), the sealed
+Reopen's "…so it can't be reopened here." (VM-81), whether the phone keeps a collect receipt at all (VM-21). **One
+platform difference to know (not this batch's surface):** the Mac chip still draws Diverge on gathering rows and
+refuses (VM-81 · W-110 below).
+
+**Half 2 — the stage window's recipe (a fresh session can run it from here):**
+1. Write "REVERT IN FLIGHT — product files at the seam commit `7c9fc0151`; restore = `git checkout -- <the eight
+   files>`" into this LIVE STATUS, commit + push, THEN revert (every fix is committed, so the restore is safe):
+   `git checkout 7c9fc0151 -- App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift
+   App/Variorum/VariorumMobile/Features/Write/MobileMembership.swift
+   App/Variorum/VariorumMobile/Features/Shell/MobileShelfFaces.swift
+   App/Variorum/VariorumMobile/Features/Shell/MobileShelfView.swift
+   App/Variorum/VariorumMobile/Features/Shell/MobileShelfViewModel.swift
+   App/Variorum/VariorumMobile/Features/Shell/MobileCreateBook.swift
+   App/Variorum/VariorumMobile/Features/Shell/MobileTrashView.swift App/Variorum/Shared/ShelfOrder.swift`. (At
+   `7c9fc0151` `MobileTrashView.swift` already carries batch B's VM-33 fix — only this batch's placeholder line reverts.
+   `ShelfOrder.swift` reverts because the seam's `MobileShelfFaces.ordered` calls `ShelfOrder.ordered`. The Shared
+   word files stay at HEAD — the seam files don't call the post-seam additions, `RecoveryCopy`'s overload and
+   `BookStateCopy.unarchiveVerb`. The tests stay at HEAD: every symbol they call exists at the seam.)
+2. RED run (the invocation below). **Expected RED, by name:** `finishWithArrivalsWaitingAsksWithTheCountAndDoesNotLock`,
+   `cancellingTheConfirmLeavesTheBookAsItWas` · `theFinishCaptionSaysWhatFinishedMeans`, `finishIsNotDrawnOnAGathering`,
+   `reopenOnASealedBookSpeaksTheSharedSentence`, `divergeIsNotDrawnOnAGatheringRow` ·
+   `anArchivedStarredBooksDetailsCarriesTheUnarchiveDoor` · `theShelfSortsAToZDigitAwareWithStarredFirst` ·
+   `theRowMenuOffersStarAndNoPin` · `theShelfRowCallsAGatheringAGathering`,
+   `theDeleteDoorConfirmAndReceiptNameAGathering`, `theMembershipAndCreateSheetsSayGathering`,
+   `theTrashNamesAnUntitledGatheringAGathering`, `noRenderedStringInTheseFacesSaysSmart` ·
+   `aStarOnlyCollectNamesTheStar`, `aTagAndStarCollectNamesBoth`, `anArchivedGatheringsReceiptSaysWhenItWillShow`,
+   `pickersMarkAnArchivedBook` · and the edited existing pins `MobileBookDetailsTests/theIdentityBlockDisplaysTagsForBothKinds`,
+   `MobileShellTests/lk5FacesLeadWithCountAndTags`, `MobileWalkTests/walk7_shelfTodayLibraryColdLaunch` (each on its
+   "gathering · #…" line). **Expected GREEN on both sides (controls/guards):** `finishWithNothingWaitingActsAtOnce`,
+   `aLiveTagsOnlyCollectKeepsTheChipsWords`, `MobileShellTests/theShelfObservationDeliversBooksPinsAndTheDailyMark`,
+   every `MobileDeletionTests` test (a book's delete words are unchanged), and every other pre-existing test in the
+   listed types. A member whose pins go green on the seam is HOLLOW — record it, revert its fix, keep the pin.
+3. `git checkout -- <the eight files>`; `git status` clean; record "no revert is in flight".
+4. GREEN run (same invocation). Every test in the listed types green. Name the standing phone red
+   (`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`, batch C's) if it shows —
+   it is not in this list.
+5. The WALK (the gate is use): the dev-store Debug phone build on the booted simulator, one capture per row into the
+   screens folder the orchestrator names — Book Details' Finish with notes waiting (the confirm, its count; Cancel
+   leaves the book; Finish dismisses), Finish absent on a gathering's Details, a sealed book's Reopen sentence, the
+   membership sheet on a note in a gathering (no diverge; the "gathering" mark; an archived book "(archived)" in the
+   add list; a ★-rule collect's receipt), the shelf in a–z with a starred book first and a long-press menu without
+   Pin, the create sheet's Gathering kind, a starred archived book opened from Starred → its Details with Unarchive →
+   back on the shelf. Both voices where the face has one.
+6. Release the stage (sim shut down, no Variorum instance left), flip this table, report.
+
+```zsh
+ONLY=(
+  -only-testing:VariorumMobileTests/MobileFinishConfirmTests
+  -only-testing:VariorumMobileTests/MobileBookStateRowTests
+  -only-testing:VariorumMobileTests/MobileArchivedStarredBookTests
+  -only-testing:VariorumMobileTests/MobileShelfOrderTests
+  -only-testing:VariorumMobileTests/MobileShelfRowActsTests
+  -only-testing:VariorumMobileTests/MobileGatheringWordTests
+  -only-testing:VariorumMobileTests/MobileCollectReceiptTests
+  -only-testing:VariorumMobileTests/MobileBookDetailsTests
+  -only-testing:VariorumMobileTests/MobileBookCreateTests
+  -only-testing:VariorumMobileTests/MobileBookNameGuardTests
+  -only-testing:VariorumMobileTests/MobileShellTests
+  -only-testing:VariorumMobileTests/MobileWalkTests
+  -only-testing:VariorumMobileTests/MobileDeletionTests
+  -only-testing:VariorumMobileTests/MobileMembershipTests
+  -only-testing:VariorumMobileTests/MobileFilterTests
+  -only-testing:VariorumMobileTests/MobileTutorialLibraryWalkTests
+)
+xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -derivedDataPath App/Variorum/DerivedData/vm78-ios "${ONLY[@]}"
+```
+**The Mac leg** (the merge gate's, over the changed Shared files and the Mac files that now extend them; DerivedData
+`vm78-mac`, already TEST BUILD SUCCEEDED): `BookStateDoorsTests`, `BookSettingsSheetTests`, `GatheringKindWordTests`,
+`ArrivalsDoorPlacementTests`, `BookArrivalsTests`, `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests`,
+`VocabularySweepTests`, `BookArchiveDoorActTests`, `BookSettingsArchiveRowTests`, `ArchivedBooksGroupTests`,
+`ShelfModelTests`, `TutorialBooksLessonTests`, `TutorialMCPChapterTests`, `GatheringRuleGateTests` — every Mac pin that
+reads a moved word (`BookStateCopy.*`, `ArrivalsCopy.word`, the collect receipt family, `CollectingCopy`'s two
+captions, `unarchiveVerb`).
 
 **The seam commit (the "old" of the revert recipe).** Each pin needs a testable surface the fix then changes, so the
 seam commit adds those surfaces with the SHIPPED behaviour, byte for byte, and wires the faces through them:
