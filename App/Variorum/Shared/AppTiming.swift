@@ -83,8 +83,9 @@ nonisolated enum AppTimingSeries: String, TimingSeriesKey {
     case ownerAdoptionRows
     /// One sync round, start to finish (duration).
     case syncRound
-    /// Rows the round's push took off the outbox (about — a write landing
-    /// during the round can hide one).
+    /// Rows the round's push took off the outbox (about — it is the outbox's
+    /// drop, so rows queued during the round are subtracted from it: a burst of
+    /// writes mid-round under-reads it, down to 0).
     case syncRoundSent
     /// Server changes the round's pull moved past (about — the cursor's
     /// advance, which counts this device's own pushed rows too).
@@ -383,7 +384,10 @@ nonisolated enum AppTiming {
     static func syncRoundStarted() -> Token? { recorder.start(.syncRound) }
 
     /// The round ended (clean or failed — either way it was a wait). `sent`:
-    /// the outbox rows it took (nil when the start's reading had not landed).
+    /// the outbox rows it took (nil when the start's reading had not landed) —
+    /// the outbox at the start less what is still owed, so it can under-read
+    /// under a mid-round burst; a burst bigger than the push would make it
+    /// negative, and that clamps to 0 here.
     static func syncRoundEnded(_ token: Token?, sent: Int?) {
         recorder.finish(token)
         if let sent { recorder.record(.syncRoundSent, value: Double(max(0, sent))) }
