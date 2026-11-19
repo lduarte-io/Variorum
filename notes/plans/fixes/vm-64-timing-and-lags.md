@@ -145,13 +145,55 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 
 | Batch | State | Commits | Notes |
 |---|---|---|---|
-| 1 · VM-65 | NOT-STARTED | — | — |
+| 1 · VM-65 | IN-PROGRESS | — | see the batch 1 block below |
 | 2 · VM-2 | NOT-STARTED | — | — |
 | 3 · VM-66 | NOT-STARTED | — | — |
 | 4 · VM-67 | NOT-STARTED | — | — |
 | 5 · VM-68 | NOT-STARTED | — | — |
 | 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
 | 7 · VM-71 | NOT-STARTED | — | — |
+
+### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** Batch 1 is a feature batch (no bug-class row; "not in this batch: any fix"), so there is no
+red-on-old pin to take; its evidence is the brain's headless tests, the builds, the phone suites and the walk.
+
+**The settled design** (verified against today's tree first — audit F's file:line claims for every mark site below still
+hold at this branch's base `21747b9de`: `MobileWriteView.swift` 143-226, `MobileEditorViewModel.swift` 549-597 / 667-678 /
+827-867, `MobileQuickNote.swift` 882-1110 / 1183-1203, `AppServices.swift` 518-595, `OwnerIdentity.swift` 87-104,
+`MobileLibraryViewModel.swift` 316-343, `AppSession.swift` 660-691):
+- **The brain** in `Sources/VariorumCore/Diagnostics/` (a new folder: the timing layer is neither a domain rule nor a
+  query, and Core is where headless `swift test` reaches it): a `Mutex`-guarded recorder generic over the catalog's two
+  key enums — keyed spans (begin here, end there; a re-begin restarts, a begin older than its stale limit is dropped as
+  abandoned, an end with nothing open is counted), token spans (re-entrant by construction), value samples, monotonic
+  counters, and COUNTING WINDOWS (events of named counters between an opening act and a closing act or deadline, recorded
+  as one sample — "reads per open", "savepoint tries per leaving", "Library re-reads per save"). Per series a fixed ring
+  (64): count, median, min, max, last. `os_signpost` intervals under `io.lduarte.Variorum` / `timing`. Durations and
+  counts only — the API has no string parameter at all.
+- **The catalog and the one recorder** in `App/Variorum/Shared/AppTiming.swift` (Shared code marks owner adoption, sync
+  rounds, savepoints and autosaves); the recorder is DISABLED unless the phone enables it at launch, so the Mac — which
+  compiles every Shared mark — records nothing and its behaviour is unchanged.
+- **The phone's face** in `VariorumMobile/Features/Perf/`: the launch hook (enable, restore, the launch spans begun at the
+  process's true start), the keyboard watch (`keyboardDidShow` ends "→ keyboard up" spans), the next-frame tick (a span
+  "on screen" ends at the display-link tick after the render), persistence at backgrounding, and the readout.
+- **The readout** (PROVISIONAL): Settings ▸ Diagnostics, a "Timing…" row beside "Edit trace…"; per span runs · median ·
+  range · last; Reset; Copy (plain text). Labels DRAFT.
+- **Survival**: the recorder is process-global (outlives the session, the shell and a Castle lock); it is also written to
+  `UserDefaults` (durations and counts only, outside the store) at every backgrounding and restored at launch, keyed to
+  the running binary's build fingerprint so a new install (the BEFORE build vs the tip) starts clean.
+
+| Piece | State |
+|---|---|
+| P1 — the brain + headless tests (Core `Diagnostics/`) | NOT-STARTED |
+| P2 — the catalog, the one recorder, persistence glue (`Shared/AppTiming.swift`) | NOT-STARTED |
+| P3 — the marks (phone + Shared sites) | NOT-STARTED |
+| P4 — the readout + the Settings row | NOT-STARTED |
+| P5 — builds: phone Debug `build-for-testing`, phone Release `build`, Mac `build-for-testing` | NOT-STARTED |
+| P6 — stage window (GO from the orchestrator): phone suites + the simulator walk + captures | NOT-STARTED |
+| P7 — closeout in §7; the BEFORE commit named here | NOT-STARTED |
+
+DerivedData: `App/Variorum/DerivedData/vm64-b1/` (gitignored). Screens: `notes/plans/vm64-screens/` (gitignored, added
+by this batch).
 
 **The BEFORE build (her phone's first install at her sitting):** PENDING — the commit that closes batch 1.
 
