@@ -67,6 +67,13 @@ struct MobileMessageLineFaceTests {
     /// tall** — the act's hit area IS the line's height, so the line's foot
     /// sits exactly where VM-55's placement puts it (above the bar and the
     /// inset), in both voices.
+    ///
+    /// The foot check is metrics-coupled: it holds while one line of the 15 pt
+    /// chrome face is at most about 21 pt tall (the act's 44 less the words' 12
+    /// above and below, plus the tolerance) — so a red after an iOS update, or
+    /// on a device left at a larger text size, means one line of words outgrew
+    /// the 44 pt line: look at the line, never loosen the bound (VM-47 ladder
+    /// round 2, R2-n2).
     @Test func theLinesActAnswersAcrossFortyFourOnAFortyFourLine() async throws {
         for voice in [ThemeVoice.terminal, .study] {
             try await withEditorWorld { session, _ in
