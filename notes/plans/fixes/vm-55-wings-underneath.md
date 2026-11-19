@@ -294,8 +294,8 @@ DerivedData: one dir, `App/Variorum/DerivedData/vm55-b1` (gitignored), phone and
 | VM-60 — the tag manager per wing | DONE (9462d3854) — tests `MobileWingTagManagerTests` (2), a0c54c57c; runs PENDING |
 | VM-59 — the wing-blind pickers | DONE in code — pins a690c8262 (THE RED-ON-OLD TREE), fix 171f514ad (the green tree); the red run and the green run PENDING the stage window |
 | Phone `build-for-testing` (`VariorumMobile`, the simulator's id) | DONE — green at 171f514ad |
-| Mac `build-for-testing` (`Variorum`, macOS) | IN-PROGRESS — PENDING |
-| Stage window | NOT-STARTED — PENDING the coordinator's claim line. Plan, in order: (1) boot the simulator fresh and let it settle; (2) the GREEN run of every suite below on the built tree (171f514ad); (3) the Mac leg; (4) VM-59's red-on-old cycle — announce here first, then `git checkout a690c8262 -- <the three fix files>`, `git diff` shows exactly the fix reverted, incremental build-for-testing, run `MobileWingBlindPickerTests` (expect 3 red), then `git checkout HEAD -- <the three files>` and `git diff` empty; (5) shut the simulator down, `Tools/stage release --who vm-55`. **No revert is in flight at this line.** |
+| Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 171f514ad (same DerivedData dir) |
+| Stage window | READY reported to the orchestrator — PENDING the coordinator's claim line. Plan, in order: (1) boot the simulator (iPhone 17 Pro, iOS 26.2 — the coordinator's simulator, addressed by its id) fresh and let it settle; (2) the GREEN phone run on the built tree (171f514ad) — the PHONE SUITES below; (3) the Mac leg — the MAC SUITES; (4) VM-59's red-on-old cycle — write "revert in flight" here first, then `git checkout a690c8262 -- App/Variorum/VariorumMobile/Features/Write/MobileNoteTags.swift App/Variorum/VariorumMobile/Features/Write/MobileMembership.swift App/Variorum/VariorumMobile/Features/Shell/MobileCreateBook.swift`, `git diff` shows exactly 171f514ad's fix reverted, incremental phone build-for-testing, run `MobileWingBlindPickerTests` alone (expect 3 red), then `git checkout HEAD -- <the same three files>` and `git diff` empty; (5) shut the simulator down, `Tools/stage release --who vm-55`. **No revert is in flight at this line.** |
 
 #### VM-56 — the phone stands in one wing (W-015, W-019)
 
@@ -420,8 +420,17 @@ wing's tags / books and gatherings; the gathering picker reads the sheet's wing 
 Phone (`VariorumMobileTests`), new: `MobileWingStandTests` 6 · `MobileWingListingTests` 8 · `MobileWingMintTests` 4 ·
 `MobileWingTagManagerTests` 2 (file `MobileWingsTests.swift`, one two-wing fixture `TwoWingWorld`: a note "Field
 notes", a book "Essays" and a tag "trip" in EACH wing, plus a Home-only tag) · `MobileWingBlindPickerTests` 3. Mac
-(`VariorumTests`), new: `VM56MacWingScopePinTests` 2. Regression leg (existing suites over every model and view this
-batch touched): PENDING — listed in the READY report.
+(`VariorumTests`), new: `VM56MacWingScopePinTests` 2.
+
+**PHONE SUITES (the green run; type names):** the five above, plus the regression leg over every model and view this
+batch touched — `MobileLibraryTests` `MobileLibrarySortTests` `MobileNavigationTests` `MobileShelfTodayDoorTests`
+`MobileStarsTests` `MobileTrashTests` `MobileTagManagerTests` `MobileNoteTagsTests` `MobileMembershipTests`
+`MobileBookCreateTests` `MobileBookNameGuardTests` `MobileBookPinTests` `MobileBookDetailsTests` `MobileQuickNoteTests`
+`MobileFilterTests` `MobileFilterRowGeometryTests` `MobileShelfPerfTests` `MobileScrapsTests` `MobileDeletionTests`
+`MobileShellTests` `MobileEmptyStoreTests` `MobileDailyJournalArchiveTests` `MobileStarterJournalTests`
+`MobileShelfLayoutTests` `MobileWriteLatchTests` `MobileRefusalTableTests`.
+**MAC SUITES:** `VM56MacWingScopePinTests` `SettingsTagsWingFollowTests` `WingSwitcherTests`.
+Results: PENDING.
 
 #### PROVISIONAL calls (for QUESTIONS at the merge moment — the orchestrator carries them)
 
