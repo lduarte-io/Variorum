@@ -1026,12 +1026,60 @@ only). DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental, both target
 | Piece | State |
 |---|---|
 | Record skeleton | DONE (this commit) |
-| P-55-11 — a direction keeps its line (Trash, tray, Block History, lenses, membership; the shared answer) | IN-PROGRESS — code + pins written, both targets build-for-testing green before commit; results PENDING (the stage window) |
-| VM-62 pin (red on this tree) | NOT-STARTED |
+| P-55-11 — a direction keeps its line (Trash, tray, Block History, lenses, membership; the shared answer) | DONE (be6f1d0c7) — both targets build-for-testing green at it; `MobileLineDirectionTests` results PENDING (the stage window) |
+| VM-62 pin (red on this tree) | DONE (this commit) — `MobileNoRawErrorPinTests` + `MobileRefusalSentencePinTests`, compiled green on the unfixed tree; the scan's throwaway mirror counts 96 offending lines there; red-on-old RUN PENDING (the stage window, AT this commit — see "Red-on-old, the method") |
 | VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | NOT-STARTED |
 | VM-62 fix | NOT-STARTED |
 | Phone + Mac `build-for-testing` at the batch's last code commit | NOT-STARTED |
 | Stage window (2a's suites + 2b's; red-on-old) | NOT-STARTED — READY at the end; no revert is in flight |
+
+#### P-55-11 — a direction keeps its line (the orchestrator's ruling, applied)
+
+Every door that speaks a restoration now says whether its answer is a DIRECTION — the act landed somewhere other than
+where she would look — and a direction speaks on the one line in P-55-7's class (`.refusal`, always drawn; the Mac's
+`direct`); the model's own record is unchanged (a receipt stays a receipt — the existing pins on `trash.receipt`,
+`tray.status`, `blockHistory.status` and `lenses.status` still hold). The fact lives beside the words it chooses
+between, in `Shared/`, so the class and the sentence can never disagree:
+
+- `Shared/RecoveryCopy.swift` — `isDirection(_ landing:)` (`.endOfNote`, `.unplaced` → true; `.itsOldPlace` → false) and
+  `isDirection(_ status:)` (`.archived` → true), beside `landingReceipt` / `takeRestoredReceipt`.
+- `Shared/RecoveryActs.swift` — `TrashPutBack.Outcome.isDirection`; `TrashPutBack.Answer` (receipt + flag);
+  `TrashPutBack.answer(session:item:)` and `PreservedOriginPutBack.answer(session:postID:blockID:)` (an original with no
+  successor left lands at the note's end — a direction; "Put back where it came from." is not). Both `run`s forward to
+  their `answer` and return `.receipt`, so every Mac caller (`RecoveryView`, `TrayPanel`, `LineageFaceModel`, the bulk
+  put back) reads byte-identical receipts.
+
+The doors (the one-word class change each, plus the flag it reads):
+
+| Door | The direction | Change |
+|---|---|---|
+| `Shell/MobileTrashModel.putBack` | an archived take; a block at the end / set aside; an original at the end | `TrashPutBack.answer` → `as: answer.isDirection ? .refusal : .ordinary` |
+| `Write/MobileNoteTray` `putBackArchived` / `putBackDeleted` / `putBackOriginal` / `putBackTake` | the same four, from the note's tray | `report(…, direction:)`; `report` classes `isRefusal || direction` as `.refusal` |
+| `Takes/MobileBlockHistory` `putBackTake` / `bringBack` | an archived take; an original at the end | `report(…, direction:)`, the same rule |
+| `Takes/MobileLenses.restoreDangling` | a deleted pick that comes back archived (the pick still dangles) | `line = .refusal` when `RecoveryCopy.isDirection(restored)` |
+| `Write/MobileMembership.collect` | "Added by tagging #‹tags› — “‹book›” collects by filter." | `.ordinary` → `.refusal` |
+
+Every other line in 2a's list stays silent (its "stops showing" list above is updated in place, the called-back lines
+struck with a pointer here). Pins — `VariorumMobileTests/MobileLineDirectionTests.swift`, type `MobileLineDirectionTests`
+(9): each direction speaks with its exact words as a refusal, each door's twin that lands where she would look says
+nothing (`session.status.current == nil`): the Trash's archived vs active take; the tray's archived vs active take; Block
+History's; a lens pick back archived vs back in the fan; a block at the end of its note (the core's divide-W-then-delete
+fallback fixture) and a block whose note is gone, through the Trash; the tray's end landing, an original beside its
+successor (silent) and the other original after the successor's delete (the end — speaks); collect-by-tagging speaks while
+joining a book stays silent; and the pure predicate table. Results PENDING (the stage window).
+
+#### VM-62 — red-on-old, the method (written before the fix)
+
+The pins are committed ALONE, on the tree with 2a + P-55-11 and none of the fix (this commit); they compile there (the
+per-case pins name their expected sentences through `OpsRefusalCopy.words(for:roads:)`, which exists on that tree). The
+red-on-old run is made **AT this commit**: in the stage window, after the green legs, the worktree is checked out DETACHED
+at this commit (`git checkout <pin-commit>`), the phone target is built for testing into `vm55-b1` (incremental), the two
+pin types run (`-only-testing` `MobileNoRawErrorPinTests` `MobileRefusalSentencePinTests`), and the branch is checked
+back out (`git checkout vm-55-wings-underneath`), `git status` clean, the green products rebuilt after the release. **A
+successor finding the worktree detached at this commit is mid-red-on-old: `git checkout vm-55-wings-underneath` restores
+it — nothing uncommitted is ever left across it.** Expected red: the scan names every offending line (96 on this tree, per
+the throwaway mirror of the scan in the session scratchpad), and each of the five per-case pins fails on its slot/line
+text (the old doors spoke the dump or "Refused: …").
 
 ## Ladder
 
