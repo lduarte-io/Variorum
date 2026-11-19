@@ -375,6 +375,13 @@ struct MobileNoteOpenOnceTests {
     /// savepoints the take, and the session's registry is back where it was.
     /// RED on the pre-fix tree on the release (the registry kept the entry);
     /// the text and the savepoint are the guard on both trees.
+    ///
+    /// **r1:** the give-back IS the leaving work's last act (`onDisappear`'s
+    /// task: teardown, the savepoint, `releaseAutosaveHold`), so the registry
+    /// coming back is the leaving's completion, and the wait's bound is a hang
+    /// guard — never a bet on when SwiftUI frees the closed screen. (r0 released
+    /// at the editor's death; this host stays up, and the first window showed
+    /// the editor outliving its leaving here on both builds — the trace, §5.)
     @Test func closingANoteLandsItsTextThenGivesItsCoordinatorBack() async throws {
         try await withEditorWorld { session, db in
             let note = try await seedNote(session)
@@ -408,11 +415,11 @@ struct MobileNoteOpenOnceTests {
     /// **The release waits for the leaving savepoint.** The store's writer is
     /// held as the note closes, so the leaving work (teardown's flush, then
     /// `savepointOnLeaving`) cannot land; while it waits the note's coordinator
-    /// stays in the registry — the leaving task holds the editor, and the
-    /// editor holds its acquisition. When the writer lets go, the flush and the
-    /// savepoint land and only then is the coordinator given back. RED on the
-    /// pre-fix tree on the give-back; a release that ran at the close itself
-    /// (before the savepoint) would be red on the hold.
+    /// stays in the registry — the give-back is the leaving's LAST act, after
+    /// both (r1). When the writer lets go, the flush and the savepoint land and
+    /// only then is the coordinator given back. RED on the pre-fix tree on the
+    /// give-back; a release that ran at the close itself (before the savepoint)
+    /// would be red on the hold.
     @Test func theReleaseWaitsForTheLeavingSavepoint() async throws {
         try await withEditorWorld { session, db in
             let note = try await seedNote(session)
@@ -506,6 +513,132 @@ struct MobileNoteOpenOnceTests {
             #expect(session.releaseAutosave(forPost: note.postID),
                     "the quick note's release is the last, and it lets the entry go")
             #expect(session.openAutosaveCount == start)
+        }
+    }
+
+    /// **An editor built and dropped without ever arriving gives its hold
+    /// back** — the twin a view re-init would build (audit F 2D / audit C
+    /// §2.16): it acquired in `init` and never sees a leaving, so the hold
+    /// goes back at its end (`deinit` releases only what no leaving gave back).
+    /// A plain model dropped on the main actor dies at once — no host is in the
+    /// way. RED on the pre-fix tree (nothing released).
+    @Test func anEditorThatNeverArrivedGivesItsHoldBack() async throws {
+        try await withEditorWorld { session, _ in
+            let note = try await seedNote(session)
+            let start = session.openAutosaveCount
+            do {
+                let twin = MobileEditorViewModel(
+                    session: session, postID: note.postID, sleep: { _ in throw CancellationError() })
+                #expect(session.autosaveHolderCount(forPost: note.postID) == 1, "the twin acquired")
+                _ = twin.postID
+            }
+            #expect(session.autosaveHolderCount(forPost: note.postID) == 0,
+                    "VM-70: the dropped twin gave its hold back")
+            #expect(session.openAutosaveCount == start)
+        }
+    }
+
+    // MARK: The probes (RECORDED, never asserted) — when is a closed screen's editor freed?
+
+    /// **RECORDED (r1's trace): at which point of a host's life a closed note
+    /// screen's editor is actually freed.** The first window showed the editor
+    /// still alive ten seconds after its leaving work ended, while the host
+    /// lived. This reads a WEAK reference to the editor after each step — the
+    /// close and its leaving work, a SwiftUI update in the live host, the
+    /// window's teardown, the host let go — and prints one line:
+    /// `VM70-PROBE|built-screen|…`. No assertion: it names the holder's
+    /// lifetime for the record; the product no longer depends on it (r1).
+    @Test func probeWhenAClosedScreensEditorIsFreed() async throws {
+        try await withEditorWorld { session, db in
+            let note = try await seedNote(session)
+            let router = MobileShellRouter()
+            weak var probe: MobileEditorViewModel?
+            var screen: BuiltScreen? = BuiltScreen {
+                MobileWriteScreen(session: session, postID: note.postID, router: router, tab: .library)
+            }
+            guard await eventually({ (editor(router, at: 0)?.fullRenderCount ?? 0) >= 1 }) else {
+                print("VM70-PROBE|built-screen|no-arrival")
+                screen?.tearDown()
+                return
+            }
+            probe = editor(router, at: 0)
+            screen?.close()
+            let leavingDone = await eventuallyAsync {
+                router.editors.registered.isEmpty
+                    && ((try? await autoCommits(db, variantID: note.variantID)) ?? 0) >= 1
+            }
+            try? await Task.sleep(for: .milliseconds(500))
+            let afterClose = probe != nil
+            screen?.surface.host.view.setNeedsLayout()
+            screen?.surface.host.view.layoutIfNeeded()
+            try? await Task.sleep(for: .milliseconds(500))
+            let afterUpdate = probe != nil
+            screen?.tearDown()
+            try? await Task.sleep(for: .milliseconds(500))
+            let afterTearDown = probe != nil
+            screen = nil
+            try? await Task.sleep(for: .milliseconds(500))
+            let afterHostGone = probe != nil
+            print("VM70-PROBE|built-screen|leaving-done=\(leavingDone)|alive-after-close=\(afterClose)"
+                + "|after-update=\(afterUpdate)|after-teardown=\(afterTearDown)"
+                + "|after-host-gone=\(afterHostGone)|holders=\(session.autosaveHolderCount(forPost: note.postID))")
+        }
+    }
+
+    /// **RECORDED (r1's trace): the same question on HER road** — the real
+    /// shell, a Library row's push onto the Library's NavigationStack, and the
+    /// navigation bar's Back (UIKit's own button, through its accessibility
+    /// activation). One line: `VM70-PROBE|shell-pop|…` — whether the pop was
+    /// drivable here, whether the leaving finished, the note's holders after
+    /// it, and whether the editor was freed while the shell's host lives. No
+    /// assertion.
+    @Test func probeAPoppedNotesEditorInTheShell() async throws {
+        try await withEditorWorld { session, db in
+            let note = try await seedNote(session, title: "Probe note")
+            let router = MobileShellRouter()
+            let shell = HostedSurface(MobileShellView(session: session, services: nil, router: router))
+            defer { shell.tearDown() }
+            await shell.settle(20)
+            guard shell.activate("Library") else {
+                print("VM70-PROBE|shell-pop|no-library-door")
+                return
+            }
+            await shell.settle(20)
+            let matches = shell.visibleElements.filter {
+                $0.accessibilityLabel?.hasPrefix("Probe note") == true
+            }
+            guard let row = matches.first(where: { $0.accessibilityTraits.contains(.button) }) ?? matches.first,
+                  row.accessibilityActivate()
+            else {
+                print("VM70-PROBE|shell-pop|no-row|labels=\(shell.visibleLabels.prefix(20).joined(separator: ","))")
+                return
+            }
+            guard await eventually({ (editor(router, at: 0)?.fullRenderCount ?? 0) >= 1 }) else {
+                print("VM70-PROBE|shell-pop|no-arrival")
+                return
+            }
+            weak var probe: MobileEditorViewModel?
+            probe = editor(router, at: 0)
+            await shell.settle(10)
+            let back = shell.visibleElements.first {
+                $0.accessibilityLabel == "Back" && $0.accessibilityTraits.contains(.button)
+            }
+            guard let back, back.accessibilityActivate() else {
+                print("VM70-PROBE|shell-pop|no-back-door|labels=\(shell.visibleLabels.prefix(30).joined(separator: ","))")
+                return
+            }
+            let leavingDone = await eventuallyAsync {
+                router.editors.registered.isEmpty
+                    && ((try? await autoCommits(db, variantID: note.variantID)) ?? 0) >= 1
+            }
+            try? await Task.sleep(for: .milliseconds(500))
+            let aliveSoon = probe != nil
+            try? await Task.sleep(for: .seconds(2))
+            await shell.settle(10)
+            let aliveLater = probe != nil
+            print("VM70-PROBE|shell-pop|popped=true|leaving-done=\(leavingDone)"
+                + "|holders=\(session.autosaveHolderCount(forPost: note.postID))"
+                + "|editor-alive-0.5s=\(aliveSoon)|editor-alive-2.5s=\(aliveLater)")
         }
     }
 
