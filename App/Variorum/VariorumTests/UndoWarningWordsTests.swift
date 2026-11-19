@@ -45,14 +45,16 @@ struct UndoWarningWordsTests {
     /// on both sides of the hoist by design — the exact bytes the Mac shipped.
     @Test func theMacsDetailIsByteIdenticalThroughTheHoist() {
         let one = UndoStack.PendingUndoWarning(label: "Divide", bufferCount: 1)
-        #expect(ShellActions.discardingUndoDetail(one)
-            == "One take has been edited since — undoing puts back the text as it was before the "
+        let oneDetail: String =
+            "One take has been edited since — undoing puts back the text as it was before the "
             + "divide, so that writing is set aside. It is committed first, so you can bring it "
-            + "back from the take's history (⌘S's list) at any time.")
+            + "back from the take's history (⌘S's list) at any time."
+        #expect(ShellActions.discardingUndoDetail(one) == oneDetail)
         let many = UndoStack.PendingUndoWarning(label: "Make Block", bufferCount: 3)
-        #expect(ShellActions.discardingUndoDetail(many)
-            == "3 takes have been edited since — undoing puts back the text as it was before the "
+        let manyDetail: String =
+            "3 takes have been edited since — undoing puts back the text as it was before the "
             + "make block, so that writing is set aside. It is committed first, so you can bring "
-            + "it back from the take's history (⌘S's list) at any time.")
+            + "it back from the take's history (⌘S's list) at any time."
+        #expect(ShellActions.discardingUndoDetail(many) == manyDetail)
     }
 }

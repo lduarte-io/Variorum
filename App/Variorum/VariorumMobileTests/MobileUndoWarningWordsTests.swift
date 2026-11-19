@@ -46,15 +46,17 @@ struct MobileUndoWarningWordsTests {
     /// Pinned exactly. **Red on old:** "It is saved first, …".
     @Test func theWarningsDetailSaysCommittedInTheMacsSentence() {
         let one = UndoStack.PendingUndoWarning(label: "Divide", bufferCount: 1)
-        #expect(MobileUndoDoor.discardingUndoDetail(one)
-            == "One take has been edited since — undoing puts back the text as it was before the "
+        let oneDetail: String =
+            "One take has been edited since — undoing puts back the text as it was before the "
             + "divide, so that writing is set aside. It is committed first, so you can bring it "
-            + "back from the block's Block History at any time.")
+            + "back from the block's Block History at any time."
+        #expect(MobileUndoDoor.discardingUndoDetail(one) == oneDetail)
         let many = UndoStack.PendingUndoWarning(label: "Make Block", bufferCount: 3)
-        #expect(MobileUndoDoor.discardingUndoDetail(many)
-            == "3 takes have been edited since — undoing puts back the text as it was before the "
+        let manyDetail: String =
+            "3 takes have been edited since — undoing puts back the text as it was before the "
             + "make block, so that writing is set aside. It is committed first, so you can bring "
-            + "it back from the block's Block History at any time.")
+            + "it back from the block's Block History at any time."
+        #expect(MobileUndoDoor.discardingUndoDetail(many) == manyDetail)
         #expect(!MobileUndoDoor.discardingUndoDetail(one).contains("saved"))
     }
 }

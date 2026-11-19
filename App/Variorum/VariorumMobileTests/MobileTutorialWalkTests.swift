@@ -970,14 +970,16 @@ struct MobileTutorialStructureWalkTests {
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "divide with takes") }
             let texts = try await storedBlockTexts(db, postID: lesson)
             #expect(texts.count == 4, "two prose blocks, the ferry, the try-it line: \(texts)")
-            #expect(texts.first
-                == "Dividing a block that has several takes follows one simple rule on the "
+            let ruleLine: String =
+                "Dividing a block that has several takes follows one simple rule on the "
                 + "phone: the take you're reading is cut in two, and every other take rides "
                 + "along whole onto the top block, so nothing needs a matching cut and "
-                + "nothing is lost.")
-            #expect(texts.dropFirst().first
-                == "The bottom block holds just the second half. The original block keeps "
-                + "everything, off-stage, in lineage.")
+                + "nothing is lost."
+            let whereLine: String =
+                "The bottom block holds just the second half. The original block keeps "
+                + "everything, off-stage, in lineage."
+            #expect(texts.first == ruleLine)
+            #expect(texts.dropFirst().first == whereLine)
             for text in texts {
                 #expect(!text.contains("both halves"), "the retired duplicate shape: \(text)")
                 #expect(!text.contains("copies"), "the retired duplicate shape: \(text)")
