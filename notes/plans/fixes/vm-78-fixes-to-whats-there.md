@@ -2738,10 +2738,10 @@ clash, the implementer STOPS and reports before any file under `App/` or `Source
 |---|---|
 | 0 — this section, its LIVE STATUS and the plan (written before the merge starts) | DONE (`d73f63067`) |
 | 1 — the merge commit (`git merge --no-ff origin/main` at `ad5053002`) | DONE (`d55d22db9`, parents `d73f63067` and `ad5053002`) — exactly the two expected conflicts, both in notes, resolved as planned ("The merge commit" below); nothing under `App/` or `Sources/` resolved by hand |
-| 2 — the reads git does not flag | DONE (this commit) — "The reads, each with what it showed" below: no clash; nothing under `App/` or `Sources/` changed |
-| 3 — the renumbering: this run's parity row PL-78; the next free QUESTIONS number #279 | NOT-STARTED |
+| 2 — the reads git does not flag | DONE (`1f0b23e20`) — "The reads, each with what it showed" below: no clash; nothing under `App/` or `Sources/` changed |
+| 3 — the renumbering: this run's parity row PL-78; the next free QUESTIONS number #279 | DONE (`3a347353a`) — PL-78 in `notes/MobileSoul.md` (in the merge commit) and wherever the record and the author handoff name the row (FOR A LATER READER's canon line, the Closeout's re-fit row 1, its canon deltas, "Sentences to revisit", MOBILE PARITY, the AppSpecRecord draft twice, "Not done"), each history sentence saying what the row was then; the QUESTIONS draft says #279 is next free as of this merge-in (VX-981 took #278), still re-checked at the merge. Left as written, by the brief: "The orchestrator's live state" (`:100`, `:142`), the first merge-in's section (`:2451`), the round files, and `notes/plans/vm-78-orchestrator-handoff.md` (the orchestrator's own map, `:36`, `:63`) |
 | 4 — both targets `build-for-testing` on the merged tree, headless | NOT-STARTED |
-| 5 — the red patch's `git apply --check` on the merged tree; the guards' window recipe corrected in place | NOT-STARTED |
+| 5 — the red patch's `git apply --check` on the merged tree; the guards' window recipe corrected in place | DONE (this commit) — `git apply --check App/Variorum/DerivedData/vm78-scripts/guards-red.patch` on the merged tree: exit 0, never applied (`git status --short` empty after); its five `@@` hunks hold nine change groups, the recipe's "nine hunks" said so; every site's line number re-read on the merged tree (unchanged — no phone file changed); `MobileUndoDoorTests` and `MobileUndoWarningWordsTests` added to the GREEN leg, expected all green; the expected reds, the five seam pins and the type list otherwise unchanged ("The guards' window recipe", its header says what changed) |
 | 6 — the sentences made true (FOR A LATER READER, the Closeout, the author handoff); the evidence row | NOT-STARTED |
 
 **The plan (piece 0), written before the merge starts.**
@@ -3091,7 +3091,11 @@ not merged). **No revert is in flight.***
 
 *Run from the orchestrator's own throwaway checkout, never this worktree, **on the tree AFTER the VX-981 merge-in**
 (the reviewer's condition 4; the plan's step (iii)), with that checkout's own DerivedData; bundles checked with
-`xcresulttool` and logs kept under `App/Variorum/DerivedData/logs/` (round 2's R2-F1 rule).*
+`xcresulttool` and logs kept under `App/Variorum/DerivedData/logs/` (round 2's R2-F1 rule). That tree exists now:
+the second merge-in's merge commit `d55d22db9` (main `ad5053002`; "THE SECOND MERGE-IN") — every commit the second merge-in added after it is documents
+only, so its tip runs the code of `d55d22db9` (`git diff d55d22db9 <tip> -- App/ Sources/` prints nothing). Corrected in place at
+the second merge-in (its piece 5): the hunk count's wording, the re-check on that tree, and the two undo types
+added to the green leg — nothing else in the recipe changed.*
 
 **What the red leg is** (condition 1, in one sentence): the red tree applies VM-47's reads and words in THIS
 branch's styling — which at every site is the pre-fix line (`e48ef2f30`'s own at the date chip, the create sheet
@@ -3102,9 +3106,14 @@ where VM-47's side names it through `kindWord`; the word scan reads the literal 
 
 **The red tree — an exact patch:** `App/Variorum/DerivedData/vm78-scripts/guards-red.patch` (local, gitignored,
 never in the PR; copy it into the throwaway checkout). Written from `git diff` at `2959d432c`: 93 lines, four
-files, nine hunks; `git apply --check` passes at HEAD. VX-981 touches none of the four files, none of the guard
+files, five `@@` hunks holding nine change groups (first written here as "nine hunks"); `git apply --check` passes
+at HEAD. VX-981 touches none of the four files, none of the guard
 files and none of the helpers they read (checked against its tip `1a283f390`), so the patch applies on the merged
-tree as written; if `git apply --check` refuses there, stop and ask — never resolve the patch by hand. Its sites:
+tree as written; if `git apply --check` refuses there, stop and ask — never resolve the patch by hand. **Re-checked
+on the merged tree at the second merge-in:** `git apply --check` passes there (exit 0; check only, never applied in
+the worktree); VX-981's merge changed no file under `VariorumMobile/`, `VariorumMobileTests/` or `Shared/` (`git
+diff d73f63067 d55d22db9` over those roots: 0 bytes), so every site and line number below and in the expected reds
+stands as written — each re-read on that tree. Its sites:
 - `VariorumMobile/Features/Write/MobileWriteView.swift:449`, `:451` — the chip's label reads
   `model.header?.entryDate` (G1).
 - `VariorumMobile/Features/Shell/MobileCreateBook.swift:321-323` — the kind row's three literal doors, "Smart
@@ -3128,7 +3137,7 @@ finds exactly `MobileWriteView.swift:449` and `:451`; G2's finds the three liter
 `MobileBookStateRowTests` (all `MobileBookFixesTests.swift`).
 
 ```zsh
-# RED — in the throwaway checkout, on the tree after the VX-981 merge-in
+# RED — in the throwaway checkout, on the tree after the VX-981 merge-in (the code of d55d22db9)
 git apply --check guards-red.patch && git apply guards-red.patch
 TYPES=(
   -only-testing:VariorumMobileTests/MobileNoteEntryDateTests
@@ -3148,11 +3157,16 @@ git checkout HEAD -- \
   App/Variorum/VariorumMobile/Features/Write/MobileMembership.swift \
   App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift
 git status --short
-# GREEN — the restored tip, the same types
+# GREEN — the restored tip, the same types, plus the phone undo door's two pin types (added at the second
+# merge-in: VX-981 changed the core undo stack under the door — additive walk observers; the phone registers none)
+UNDO=(
+  -only-testing:VariorumMobileTests/MobileUndoDoorTests
+  -only-testing:VariorumMobileTests/MobileUndoWarningWordsTests
+)
 xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
   -destination 'platform=iOS Simulator,id=<simulator-udid>' \
   -derivedDataPath <the checkout's own DerivedData> \
-  -resultBundlePath App/Variorum/DerivedData/vm78-bundles/r4-guards-green.xcresult "${TYPES[@]}"
+  -resultBundlePath App/Variorum/DerivedData/vm78-bundles/r4-guards-green.xcresult "${TYPES[@]}" "${UNDO[@]}"
 ```
 
 **Expected RED, by name, and no other** (condition 3):
@@ -3177,7 +3191,10 @@ other test of the five types. A seam pin red there is reported as it fell, never
 names the four reds and these five greens.
 
 **Expected GREEN leg:** every test of the five types green on the restored tree, with `git status --short`
-printing nothing between the legs.
+printing nothing between the legs — and every test of `MobileUndoDoorTests` and `MobileUndoWarningWordsTests`
+green too (added at the second merge-in, green leg only: the red patch touches no undo file; by reading nothing
+the door or its pins rely on changed — "THE SECOND MERGE-IN", the core read — and this leg is the run-time check).
+Any red among the seven types is a finding.
 
 **The window's result:** PENDING(round 4's guards' window: when, both verdict lines, every red by name, the five
 seam pins' outcome on the red tree, bundles and logs).
