@@ -699,8 +699,124 @@ product line changed. Every red/green below is **PENDING** the stage window. **N
 
 | Member | State | Pin / instrument (TYPE name for `-only-testing`) |
 |---|---|---|
-| VM-24 (+ VM-19) | IN-PROGRESS — half 1: trace + hypotheses written; instruments next | PENDING |
-| VM-17 | IN-PROGRESS — half 1: probe next | PENDING |
+| VM-24 | IN-PROGRESS — half 1 DONE (trace, hypotheses, instruments `a570d3960` + `fec0e478b`); half 2 = the window's matrix, then one arm | the red itself: `MobileMarkdownCaretTests` · instruments: `MobileCaretReplaceTraceTests`, `MobileCaretReplaceTeethTraceTests` (DIAGNOSTIC) |
+| VM-19 | IN-PROGRESS — pin `615a12189` (RED on the hide-only teardown: PENDING), fix `5ec59922c` (GREEN: PENDING); its reproduction is an instrument | pin: `MobileLivenessTests` (`arrivalRaisesFocusBeforeTheObservationLoops`'s VM-19 expectation) · instrument: `MobileStaleResponderTraceTests` (DIAGNOSTIC) |
+| VM-17 | IN-PROGRESS — probe written `a570d3960`; outcome PENDING (red ⇒ the fix takes it as its pin; green ⇒ hollow, kept as a guard) | `MobileFanBadgePlacementProbeTests` |
+
+**Half 1 — DONE (2026-11-19).** Phone `build-for-testing` signed for `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`
+into `DerivedData/vm78-ios` (no boot): **TEST BUILD SUCCEEDED** at the code of `fec0e478b` (its one later edit is a
+comment). No `xcodebuild test`, no simulator booted, no product file touched — this batch's commits
+(`b1a19db56..`) change only this record and three files under `VariorumMobileTests/`
+(`MobileCaretReplaceTraceTests.swift` and `MobileFanBadgePlacementProbeTests.swift` new; `MobileLivenessTests.swift`'s
+arrival test). The only warnings in the batch's files are the deliberate
+`UIWindow(init(frame:))` deprecations (the polluted postures are reproduced as they were).
+
+**The instruments (what each run prints — `grep -E 'VM(24|19|17)\|'` over the log):**
+- `MobileCaretReplaceTraceTests` (DIAGNOSTIC, asserts nothing): the red test's replace, three postures × the three
+  replacements × two fresh worlds — `vm24_suitePosture` (the red test's own host and timing: no turn between host and
+  act), `vm24_realPosture` (H2's decider: the same after a bounded wait until the window is key, the view first
+  responder and any keyboard presentation finished), `vm24_settleHeld` (H1's decider: the selection/change callbacks
+  are NOT forwarded to the model during the replace; one settle is replayed after it). Each case prints the posture
+  (app, every scene and window — key, hidden, level, who holds first responder — the keyboard notifications,
+  `GCKeyboard`, input modes, traits), every gate consult with the storage's edit mask, every `sel`/`chg` callback with
+  the mask before/after the model's handler and whether any `processEditing` ran between (`WROTE-INSIDE-TRANSACTION`
+  marks H1's signature), every `willProcess`/`didProcess` (mask, range, delta, the desync count, index vs storage
+  length), the model's own E1 trace (`MobileEditTrace`, bound task-locally to the act), UIKit call stacks on every
+  in-act event, and one `VERDICT` line. The model's gate is wrapped by a forwarding proxy for the act alone.
+- `MobileCaretReplaceTeethTraceTests` (DIAGNOSTIC): the assertion's teeth — the settle made to write inside an explicit
+  storage transaction that the replace then joins (the product rule "no face write joins an edit's transaction" broken
+  by hand, test side). Red by construction in any posture; its own type because it opens a transaction around UIKit's
+  replace (a host crash there costs only this run).
+- `MobileStaleResponderTraceTests` (DIAGNOSTIC, VM-19's reproduction on its own): `MobileLivenessTests`' exact leftover
+  (a text view raised in a frame window, then only hidden, its locals dropped) and then C-1's `leaving…` act
+  (`insertText("hello ")` at `*|*`), victim in the pre-keyfix frame window and in the keyfix scene window, with and
+  without the polluter — whether the polluter survives and still holds first responder, and the same trace.
+- `MobileFanBadgePlacementProbeTests` (VM-17's PROBE — a pin or a guard by its outcome): 150 blocks of irregular
+  length, every 7th fanned (22 fans, block 0 included), hosted in a scene window: (1) the pile — no two badges
+  coincide, no later badge at block 1; (2) every badge drawn at load for a block below the fold stands at its block's
+  first line, the truth taken from an independent bare TK2 stack over a copy of the attributed text laid out whole
+  from the start (or is not drawn); (3) scrolled to, each badge stands on its block's live line. Prints a `VM17|probe|`
+  table. Plus `vm17CostNote_theDocumentPassOnALongFannedNote` (prints only — VM-179's): load time fanned vs unfanned
+  over the same text and the cold/warm `.document` chrome pass at 150 and 600 blocks.
+
+**THE WINDOW (half 2) — ≈25 of a ~40-minute claim; the rest is for an arm's red/green.** From
+`~/dev/variorum-vm-78/App/Variorum`, the orchestrator's GO first (sim booted fresh by id, ~25 s settle, `pgrep -lx
+Variorum` empty). Every run below is `test-without-building` over the half-1 products except M8 (it rebuilds the
+reverted test file); each log to `DerivedData/logs/vm78-c-<run>.log`; poll for the Swift Testing verdict line ("Test
+run with N tests in M suites passed|failed"), never the exit, and stop a lingering `xcodebuild` once the verdict and
+counts are in. Every red is attributed by name; **every red is said with whether it was seen ALONE on a quiet
+machine.**
+```zsh
+T=(xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile
+   -destination 'platform=iOS Simulator,id=<simulator-udid>' -derivedDataPath DerivedData/vm78-ios
+   -collect-test-diagnostics never)
+"${T[@]}" -only-testing:VariorumMobileTests/MobileMarkdownCaretTests                 # M1 the red ALONE
+"${T[@]}" -only-testing:VariorumMobileTests/MobileCaretReplaceTraceTests             # M2 H1/H2/H3/H4 deciders
+"${T[@]}" -only-testing:VariorumMobileTests/MobileCaretReplaceTeethTraceTests        # M3 the teeth
+"${T[@]}" -only-testing:VariorumMobileTests/MobileStaleResponderTraceTests           # M4 VM-19's reproduction
+"${T[@]}" -only-testing:VariorumMobileTests/MobileFanBadgePlacementProbeTests        # M5 VM-17's probe
+"${T[@]}" -only-testing:VariorumMobileTests/MobileMarkdownCaretTests \
+          -only-testing:VariorumMobileTests/MobileCaretReplaceTraceTests             # M6 with its suite
+"${T[@]}" -only-testing:VariorumMobileTests/MobileLivenessTests \
+          -only-testing:VariorumMobileTests/MobileMarkdownCaretTests \
+          -only-testing:VariorumMobileTests/MobileCaretReplaceTraceTests             # M7 after MobileLivenessTests
+"${T[@]}" -test-iterations 3 -only-testing:VariorumMobileTests/MobileMarkdownCaretTests  # M8 repeated (if the
+                                         # flag is refused for Swift Testing: M1 twice more)
+```
+**M9 — VM-19's pin, red-on-old then green (the revert protocol):** write "REVERT IN FLIGHT — MobileLivenessTests.swift
+at `615a12189` (the pin on the hide-only teardown); restore = `git checkout HEAD -- App/Variorum/VariorumMobileTests/MobileLivenessTests.swift`"
+into this LIVE STATUS, commit + push, THEN `git checkout 615a12189 -- App/Variorum/VariorumMobileTests/MobileLivenessTests.swift`
+and run `xcodebuild test` (same destination and DerivedData, it rebuilds the one file)
+`-only-testing:VariorumMobileTests/MobileLivenessTests` — expected RED exactly at `arrivalRaisesFocusBeforeTheObservationLoops`'
+VM-19 expectation ("the raised surface lets go…"), every other liveness test green. Restore with `git checkout HEAD --
+…` (NOT `git checkout -- …`: the old version is staged by the revert), `git status` clean, record "no revert is in flight",
+re-run → GREEN. (If green on both sides, VM-19's posture fix is hollow: record it, revert `5ec59922c` by a new commit.)
+
+**What each outcome means, decided in advance (the arms):**
+- **M2 `suitePosture` red for "hi"/"hello there" with `WROTE-INSIDE-TRANSACTION` on an in-act `sel`, the character
+  report starting at 0, E1 "arming rejected"; `settleHeld` green** ⇒ H1 is the mechanism. Then:
+  - **`realPosture` GREEN, and the posture at the act shows `key=false` / `fr=false` / a keyboard mid-presentation in
+    `suitePosture`** ⇒ **TEST POSTURE (arm A).** Fix: `MobileMarkdownCaretTests.host(_:)` becomes `async` and waits for
+    the real posture exactly as `CaretTraceHost.waitForTheRealPosture` does (the four call sites `await` it); proof
+    that the assertion still has teeth = M3 (a face write joining the replace's transaction goes red in any posture).
+    PROVISIONAL (process, not product): the hand-broken proof is the test-side by-hand write, not a product-file edit;
+    if the orchestrator wants a product hand-break instead, the named one is `ArmedEdit.describes` made to reject a
+    report starting AT the approved location (`EditorEditRouting.swift:148`, uncommitted, restored by `git checkout
+    HEAD --`), which reddens the pin in the real posture.
+  - **`realPosture` RED as well (key, first responder, keyboard settled)** ⇒ **PRODUCT (arm B)**: the settle writes
+    inside the input road's transaction in the posture a phone is in — the autocorrect/spelling/dictation road
+    desyncs and the recovery re-renders from the store (the replaced words may not survive the heal). **STOP and
+    report** before touching `MobileEditorTextView` / the gate delegate / `Shared/` (the editor seam). Candidate
+    fixes for the orchestrator's ruling, none built: (i) the text view overrides `replace(_:withText:)`, holds the
+    selection-driven settle across `super` and settles once after (a few lines in the seam; whether the keyboard's
+    autocorrect reaches this override on device is unproven); (ii) the gate delegate defers a selection settle that
+    arrives with the storage's mask empty but INSIDE UIKit's input transaction — needs a transaction signal UIKit
+    does not publish; (iii) the binding learns the face's own attribute span (EditorBrain — the shared seam, both
+    platforms).
+- **M2 shows no in-transaction write and `settleHeld` still red** ⇒ H1 killed; read H4 (E1's consults) and the stacks
+  for the writer; a second window would run whatever that names.
+- **M1 green alone on a quiet machine** (state-dependence, as VM-8 L1 saw once) ⇒ record the posture snapshot of the
+  green run against the red ones (H3: the keyboard rows) — that difference IS the trace's answer.
+- **VM-19 (M4):** desync in `frameWindow|polluted` but not `sceneWindow|*` ⇒ C-1's reading stands (a test-posture gap:
+  the keyfix posture defends, the polluter is real) — the liveness fix (M9) closes the polluter the ticket names; the
+  trace's E1/gate lines say what the insert road did in that posture (the ticket's second owed item). A desync in
+  `frameWindow|clean` too ⇒ the frame window alone is the polluted posture (no leftover needed). A desync in
+  `sceneWindow|*` ⇒ the keyfix posture does not defend on this toolchain — the same arm question as VM-24.
+- **VM-17 (M5):** all three readings green ⇒ HOLLOW: no product line changes, the probe stays as a guard pin (its
+  cost-note test is removed in a named commit after its numbers are recorded here). (1) red ⇒ the pile is real: fix
+  in `MobileTakesChrome.refresh` with the probe as pin (the Mac's rule — a badge waits until its block is laid out).
+  (2) red alone (an off-screen badge at an estimated y, the visible one right) ⇒ red by the brief's own wording; the
+  fix is the same rule (read the fragment unforced; no badge until it is laid out) and lives in `MobileTakesChrome`
+  only — reported before it is built, since it changes what the `.document` pass forces (VM-179's cost area).
+
+**Environment facts read in half 1 (no device id written):** Simulator app `ConnectHardwareKeyboard = 0` (global and
+the one per-device entry; the prefs file last changed Aug 31). The device's `com.apple.keyboard.preferences`:
+`HardwareKeyboardLastSeen = true`, keyboards `en_US@sw=QWERTY;hw=Automatic`; its `com.apple.keyboard.plist` last moved
+2026-10-14 09:42 (C-1's K run), its `com.apple.Preferences.plist` 2026-10-25 06:16 (VM-8 unit 1's day), its keyboard
+preferences and text-replacement plists tonight 04:24–04:25. Toolchain: Xcode 27.1 (27A9275).
+
+**Questions for the orchestrator to file (none yet gating):** none. **PROVISIONAL:** only the process choice above (the
+teeth instrument as arm A's hand-broken proof).
 
 **Read in this session (myself):** CLAUDE.md + its loaded canon; MobileSoul §1–5; the resiliency protocol; the catch-up
 plan's inherited rules; sitting-1 rulings; this file's kickoff facts and batch C; TEXTKIT2_NOTES §3–4; the VM-8 record's
