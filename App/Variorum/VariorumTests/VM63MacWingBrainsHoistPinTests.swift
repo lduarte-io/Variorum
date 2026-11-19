@@ -39,9 +39,9 @@ struct VM63MacWingBrainsHoistPinTests {
     /// The Mac's `WingsModel(session:)` speaks the Mac's refusal words —
     /// `OpsRefusalCopy.message(for:)` — on the cases where the shared table's
     /// phone road would say something else.
-    @Test func theMacsWingsBrainSpeaksTheMacsRefusalWords() async throws {
+    @Test func theMacsWingsBrainSpeaksTheMacsRefusalWords() throws {
         let db = try AppDatabase.inMemory()
-        let wings = await withDependencies {
+        let wings = withDependencies {
             $0.database = db
         } operation: { @MainActor in
             WingsModel(session: AppSession(database: db))
