@@ -607,8 +607,8 @@ line notes, `wording-list-2.md`). DerivedData: `App/Variorum/DerivedData/vm55-b1
 | The note's Undo never outlives its moment (any later word from the note takes its structural Undo line back) | DONE (96f79ccc2, in `MobileLine.say`) |
 | Tests (the seam's kinds, the phone's show rule, the host, each door, the rewritten placement pins, the Mac pin) | DONE (96f79ccc2, 64df336d8) — written; results PENDING (the stage window) |
 | The inventory, the dropped lines, the 2b carry-over, the PROVISIONALs | DONE (this commit) |
-| Phone `build-for-testing` (`VariorumMobile`, the window's simulator) | DONE — green at 64df336d8 |
-| Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 64df336d8 (same DerivedData dir) |
+| Phone `build-for-testing` (`VariorumMobile`, the window's simulator) | DONE — green at the commit after 4df669dd7 (the face fills the window: the door's frame in window coordinates, the foot measured from the window's foot — found on re-reading before READY, never run red) |
+| Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 64df336d8 (same DerivedData dir; nothing compiled into the Mac changed after it) |
 | Stage window | PENDING — READY handed to the orchestrator at this commit; no revert is in flight |
 
 #### What shipped — the seam's shape, and why
@@ -831,7 +831,7 @@ roads: .phone) ?? String(describing: error))` (`reportOperationError`); `Takes/M
 Phone (`VariorumMobileTests`), new — file `MobileMessageLineTests.swift`, four types: `MobileLineShowRuleTests` (11: the
 phone's placement; the show-rule table over every kind × style; ordinary dropped AT the seam; refusal; removal with its
 Undo; the wordless-Undo exception; an ordinary act never sweeps a refusal; `receipt_style` not read; the fade; a
-speaker's withdrawal; the copy outcomes' classes) · `MobileMessageLineGeometryTests` (3: `lift`, `takesTouch`,
+speaker's withdrawal; the copy outcomes' classes) · `MobileMessageLineGeometryTests` (3: `footOffset`, `takesTouch`,
 `keyboardOverlap`) · `MobileMessageLineHostTests` (1: the host in a REAL scene window under a presented sheet — level,
 never key, a touch only on the door, above the tab bar's inset and then the keyboard, nothing after the line goes, the
 overlay goes with the probe) · `MobileLineDoorTests` (11: a deleted note's line + Undo = Put back, store read back; a

@@ -65,12 +65,12 @@ final class MobileMessageLineModel {
         self.voice = voice
     }
 
-    /// **Where the line's foot sits above the safe area's foot** — pure,
+    /// **How far above the WINDOW's foot the line's foot sits** — pure,
     /// pinned. Above the keyboard when it is up (its overlap is measured from
-    /// the window's foot, so the safe-area inset it already covers comes off);
-    /// above the tab bar on a root; never below the safe area.
-    static func lift(keyboardOverlap: CGFloat, safeBottom: CGFloat, chromeInset: CGFloat) -> CGFloat {
-        max(keyboardOverlap - safeBottom, chromeInset, 0)
+    /// the window's foot); otherwise above the safe area's foot, plus the tab
+    /// bar on a root. Never inside the home-indicator inset.
+    static func footOffset(keyboardOverlap: CGFloat, safeBottom: CGFloat, chromeInset: CGFloat) -> CGFloat {
+        max(keyboardOverlap, safeBottom + chromeInset, safeBottom)
     }
 
     /// **Does this point take a touch?** Only the shown line's own door does
@@ -93,10 +93,6 @@ final class MobileMessageLineModel {
 
 // MARK: - The face
 
-/// The coordinate space the line's door reports in — the overlay window's
-/// own (the hosting view fills it from the origin).
-private let messageLineSpace = "MobileMessageLine"
-
 struct MobileMessageLineView: View {
     let model: MobileMessageLineModel
     @Environment(\.colorScheme) private var scheme
@@ -111,16 +107,17 @@ struct MobileMessageLineView: View {
                         .transition(.opacity)
                 }
             }
-            .padding(.bottom, MobileMessageLineModel.lift(
+            .padding(.bottom, MobileMessageLineModel.footOffset(
                 keyboardOverlap: model.keyboardOverlap,
                 safeBottom: proxy.safeAreaInsets.bottom,
                 chromeInset: model.chromeInset))
         }
-        // The keyboard is tracked from its own notifications (the overlay is
-        // never the key window), so SwiftUI's avoidance must not add a second
-        // lift on top.
-        .ignoresSafeArea(.keyboard)
-        .coordinateSpace(.named(messageLineSpace))
+        // The face fills the WINDOW, so the door's frame below is in the
+        // window's own coordinates (the hosting view sits at its origin) and
+        // the foot is measured from the window's foot. The keyboard is tracked
+        // from its own notifications (the overlay is never the key window), so
+        // no safe-area region — the keyboard's included — lifts it twice.
+        .ignoresSafeArea()
         .animation(.easeOut(duration: 0.18), value: model.status.current?.id)
         .onChange(of: model.status.current?.id) { _, _ in
             // The line lives in its own window, so an assistive reader is
@@ -154,7 +151,9 @@ struct MobileMessageLineView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(action.label)
                 .onGeometryChange(for: CGRect.self) { geometry in
-                    geometry.frame(in: .named(messageLineSpace))
+                    // The hosting view's root space IS the overlay window's
+                    // (it fills the window from the origin).
+                    geometry.frame(in: .global)
                 } action: { frame in
                     model.doorFrame = frame
                 }

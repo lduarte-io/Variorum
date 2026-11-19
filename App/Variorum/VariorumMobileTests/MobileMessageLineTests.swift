@@ -196,16 +196,16 @@ struct MobileLineShowRuleTests {
 @MainActor
 @Suite("VM-61 — the one line's geometry rules")
 struct MobileMessageLineGeometryTests {
+    /// Measured from the WINDOW's foot (the face fills the window).
     @Test func theLineSitsAboveTheBarTheKeyboardAndTheSafeArea() {
-        // On a root, keyboard down: above the tab bar.
-        #expect(MobileMessageLineModel.lift(keyboardOverlap: 0, safeBottom: 34, chromeInset: 44) == 44)
+        // On a root, keyboard down: above the home indicator and the tab bar.
+        #expect(MobileMessageLineModel.footOffset(keyboardOverlap: 0, safeBottom: 34, chromeInset: 44) == 78)
         // Inside a pushed screen, keyboard down: at the safe area's foot.
-        #expect(MobileMessageLineModel.lift(keyboardOverlap: 0, safeBottom: 34, chromeInset: 0) == 0)
-        // Keyboard up (its overlap counts from the window's foot, so the
-        // safe-area inset it already covers comes off): above the keyboard.
-        #expect(MobileMessageLineModel.lift(keyboardOverlap: 336, safeBottom: 34, chromeInset: 44) == 302)
-        // Never below the safe area.
-        #expect(MobileMessageLineModel.lift(keyboardOverlap: 10, safeBottom: 34, chromeInset: 0) == 0)
+        #expect(MobileMessageLineModel.footOffset(keyboardOverlap: 0, safeBottom: 34, chromeInset: 0) == 34)
+        // Keyboard up (its overlap counts from the window's foot): above it.
+        #expect(MobileMessageLineModel.footOffset(keyboardOverlap: 336, safeBottom: 34, chromeInset: 44) == 336)
+        // Never inside the home-indicator inset.
+        #expect(MobileMessageLineModel.footOffset(keyboardOverlap: 10, safeBottom: 34, chromeInset: 0) == 34)
     }
 
     @Test func onlyTheShownLinesDoorTakesATouch() {
