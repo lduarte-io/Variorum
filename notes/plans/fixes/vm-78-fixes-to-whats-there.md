@@ -1075,8 +1075,10 @@ first run, so its first half is reading and writing the probes headless; window 
 
 #### BATCH C — LIVE STATUS
 
-**NOT DONE YET (first, as the contract asks):** no `xcodebuild test` has run for this batch, no simulator booted, no
-product line changed. Every red/green below is **PENDING** window (3). **No revert and no hand-break is in flight.**
+**WINDOW (3) IS OPEN (claim `vm-78`, 08:39:53).** M1–M7 and an M5 re-run are done (results PENDING into this record
+after release). **REVERT IN FLIGHT — `MobileLivenessTests.swift` at `615a12189` (the pin on the hide-only teardown);
+restore = `git checkout HEAD -- App/Variorum/VariorumMobileTests/MobileLivenessTests.swift`.** No hand-break is in
+flight. No product line changed.
 
 *Implementer: `opus-implementer`, session of 2026-11-19. Half 1 = read, trace, instruments, a green `build-for-testing`
 (no stage); half 2 = the orchestrator's GO window.*
