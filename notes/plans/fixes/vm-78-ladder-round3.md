@@ -287,3 +287,232 @@ walk, the whole phone target, the Mac leg on the merged tree, the closeout.
   shared ledgers are untouched on the branch, as the rule asks.
 - **Commits since round 2.** One piece each, the revert in flight announced and closed in LIVE STATUS around
   M9, no trailer, no home path, no device id, no test wrapped as a known issue, public wording.
+
+## Final calls
+
+*Made by the round-3 reviewer after the answers came back (the orchestrator's on R3-F1, R3-F5, R3-F6 and R3-N2;
+the batch D implementer's on every finding, with its proposed fix shape). Nobody disputed a finding; the
+implementer corrected my reading of the 74-pt class in two places and both corrections are taken. No finding is
+FINDER-FIXES: the shape below is written to be built from, and none of it is a `Sync/` line. The implementer
+applies it.*
+
+**What changed since the review, read by me in `App/Variorum/DerivedData/logs/vm78-d-measure.log`:** the
+measuring window had already run on the instrument as built, so R3-F3's and R3-F4's "before its window" did not
+happen. My own tally of its 118 mount-1 rows agrees with the answers:
+- At the first subview laid out after the text view's own layout (`pass`, fired 61 of 61), the UNFORCED
+  first-line read already equals the after-settle read in all 118 rows. For the 28 rows whose line was on
+  screen it equals the idealized layout in all 28.
+- The chrome's badge is off in 49 rows at `pass`, `afterPass` and `hop` (9 of them on screen, each 74.00 pt)
+  and right in all 118 from `relayout` on — that is, once the chrome reads again after TextKit's pass.
+- The band printed at `pass` is fresh: at walk#10 it works back to a viewport of `@7846..@9497`, the stop's
+  own visible text. So TextKit lays out the viewport after the chrome's tick and before that first subview.
+- 28 of the 90 off-screen rows are still estimates after the settle, all below the screen (74 or 264 pt
+  short). The implementer's Correction 1 is right: "settled" is only true of what is on screen.
+- Correction 2 is right too: at walk#10 the chrome did not read ahead of unlaid text; it read back the frame an
+  earlier forced read had left (6133, laid out but not yet placed) before TextKit moved it to 6207.
+- Mount 2's rows are void (every row `b:-`: the model was released, so no chrome pass ran). Option (c) is
+  unmeasured and is not needed. `linkFired=51/61` is R3-F3's stale fallback.
+
+### The findings
+
+**R3-F1 — CONFIRMED, and the orchestrator's disposition is taken.** Batch D stays the badge's, with its peek
+markers and pill. The decor goes to a ticket (to mint on VM at the merge; no id invented here) that carries a
+MEASURED reading as its pin. The count keeps it as this round's MAJOR. For that reading to be a fair pin:
+1. Its own type file; a test with expectations, not prints; run ALONE by type, in the fix's green window, on
+   the tree WITH batch D's fix in.
+2. The probe's note byte for byte, plus a callout with a glyph where `i % 5 == 2` and a comment where
+   `i % 3 == 1` (the implementer's spread). Non-vacuity asserted: how many of each overlay, and the note
+   dwarfs the viewport.
+3. Truth is TextKit's, never the decor's own helpers: unforced fragment reads (`options: []`,
+   `.layoutAvailable`) and `textLayoutFragment(for:)` at points; 1 pt; visible rect `view.bounds`; after the
+   probe's settle; on the stepped walk and on the jump road to decorated blocks.
+4. The wash. (i) For every drawn wash meeting the visible rect, three points down its on-screen extent (its
+   top + 5, its middle, its bottom − 5, each clamped into the visible rect, at the container's mid-width):
+   the fragment TextKit reports at each begins inside that wash's own block. Where the wash's top edge is on
+   screen, top + 4 is within 1 pt of the block's first fragment. (ii) Every callout block with a laid-out
+   fragment on screen is covered there by its drawn wash.
+5. The glyph. (i) A drawn glyph meeting the visible rect stands within 1 pt of its block's laid-out first
+   fragment. (ii) Every glyph-carrying block whose first line is laid out on screen has its glyph drawn there.
+6. The comment mark. (i) A drawn mark meeting the visible rect stands within 1 pt of its block's LAST line's
+   top (the last fragment read unforced, laid out), and the fragment 1 pt under its top begins inside the
+   block. (ii) Every commented block whose last line is laid out on screen has its mark drawn there.
+7. Reach, with the probe's own-red wording: across the walk every decorated block met (ii)'s premise at least
+   once, and every jump target was on screen.
+8. Separately, with their own messages: the probe's badge readings (i) and (ii) on THIS note. The decor's
+   forced reads run first in the same refresh door, so this is the one place the badge fix meets them. A red
+   there is batch D's — stop and report — not the ticket's.
+9. Decor red ⇒ the ticket starts with that red on file (the log, the bundle, the commit that added the file).
+   Green ⇒ R3-F1 closes hollow for the decor and the record says so. Either way the file leaves in a named
+   commit before any whole-target run.
+One comment line in `MobileBlockDecor.swift` at the band comment (`:82-85`) says the takes chrome no longer
+shares this law and points at the run record. No decor code changes in this run.
+
+**R3-F2 — CONFIRMED, all three points, with the two corrections taken.** Point 1 is now measured and becomes
+the same-pass re-read (S5, S6). Point 2 becomes "a nil viewport resolves nothing" (S5). Point 3 needs no
+amendment to the pin, because no view exists that was never placed (S4, S9).
+
+**R3-F3 — CONFIRMED as a bug; NO ACTION.** The instrument leaves the tree and nothing was decided on `link`:
+the badge and the unforced read both agree 118 of 118 at `relayout` and `flush`, the two moments before it.
+One line in the record says `linkFired=51/61` is the stale fallback, not the host.
+
+**R3-F4 — WITHDRAWN, both readings.** (1) The branch a `passEnd` moment was to split never occurred: the first
+subview already reads settled frames. Its point survives in S6 — the re-read is inside the layout pass, never
+on a hop. (2) Under S5 every layout pass ends with a re-read, whatever its stride, so no tick can leave the
+74-pt class behind; the probe's stride stays the pin.
+
+**R3-F5 — CONFIRMED as answered.** The sentences I stand behind:
+- *The table row.* "Keyboard typing (a character key) — **asked, but not thereby armed when it lands.** UIKit
+  consults the delegate for a typed character, and the arming is spent at the first storage report that
+  follows, whether or not that report is the keystroke (`MobileEditorViewModel.swift:1855-1856`). When the
+  keyboard lands a transaction of its own first, the typed character is routed unarmed by `fallbackVerdict`:
+  her iPhone recorded exactly that in ordinary use (E1 #50–#52 — armed at 178, a different edit at 177
+  rejected the arming, the insert at 178 'after 0 gates')."
+- *The live-state sentence.* "Return, Tab and the markdown acts arm at the call; a typed character is asked
+  about but can land unarmed behind a keyboard transaction (E1 #50–#52); autocorrect, predictive replacement,
+  dictation and marked-text commits reach `storageDidEdit` without the gate."
+- The autocorrect row stops citing `#52` (it is the typed insert); its own evidence is the model's header and
+  the device walk's legend.
+
+**R3-F6 — CONFIRMED as answered.** Step 5 names `MobileFanBadgeSettleMeasureTests`. If batch D's fix does not
+land in this run, the probe file leaves the branch in a named commit that VM-17's ticket cites.
+
+**R3-N1 — CONFIRMED;** the implementer's check matches mine. **R3-N2 — CONFIRMED as answered.**
+**R3-N3 — CONFIRMED in part.** The probe's header comment may be brought up to date: a comment compiles to
+nothing, so no second red leg is owed. The `fanEvery` tidy is WITHDRAWN: the fixture builder is the pin's own
+compiled code, and "the bytes M5 ran" is a cleaner claim than "behaves the same". Leave the optional.
+
+### VM-17's fix — the shape, as called
+
+The implementer's shape is taken with four changes of mine, each marked **(changed)**. The law in one line: a
+takes overlay is drawn only from text TextKit has laid out in its own viewport; outside it nothing is read,
+nothing is forced and nothing stands.
+
+**S1 · The viewport.** New in `MobileEditorTextView.swift`'s chrome-geometry section:
+`viewportCharacterRange() -> NSRange?` — `textViewportLayoutController.viewportRange` as characters, unpadded,
+nil when unavailable (`nearViewportBand()`'s guards). `nearViewportBand()` may be re-expressed over it; its
+results must be identical, because the decor still reads it. A block start `loc` is INSIDE a viewport `v` when
+`v.location ≤ loc < v.upperBound`, or when `loc == v.upperBound` and that offset is the end of the text
+**(changed — the empty last block; a strict bound would never badge it)**.
+
+**S2 · The reads.**
+- *Badge:* the existing `firstLineGeometry(atOffset:)`, called only for a block start that is inside. It
+  stays `.ensuresLayout`: begun inside the viewport it is a lookup, or the in-place re-layout of a paragraph an
+  edit has just invalidated. That keeps today's immediacy on the keystroke and flip roads.
+- *Peek marker and pill* **(changed)**: a new helper beside the old one, `blockRectsUnion(range:within:)` — the
+  union of the block's fragments from `max(block start, viewport start)`, stopping at the first fragment that
+  starts at or after `min(block end, viewport end)`; `.ensuresLayout` allowed on the same ground; nil when the
+  block has nothing inside (S1's end rule; the old helper's zero-length rule kept). The takes chrome stops
+  calling the unclipped `blockRectsUnion(range:)`; that function and the decor's calls to it are untouched.
+- No read begins outside the viewport or runs past its end. Two things in the proposal are therefore NOT
+  built: the forced whole-block union for a block that starts inside (its cost and its layout run with the
+  block, past the viewport), and the unforced union over `.layoutAvailable` fragments above the viewport
+  (Correction 2's own lesson: laid out is not placed — the decor still forces such fragments).
+
+**S3 · The views.**
+- *Badge:* created at the moment it is first placed, never before. Placed means the frame written
+  (equality-gated), the styling applied, `isHidden = false`. A fan that has a view and whose start is not
+  inside: `isHidden = true`, frame kept, not read. A dead fan's view is removed, as today.
+- *Marker:* the same three rules — placed from the clipped union, hidden when its block has nothing inside,
+  removed when the peek ends.
+- *Pill* **(changed)**: while it is alive for a block (`pillBlockID` set, content non-nil, the fan seen), it
+  is placed at the clipped union's `maxY + 6` with `isHidden = false` when its block has a part inside, and
+  `isHidden = true` when it has none — NOT `hidePill()`: its timer and `pillBlockID` are kept, and it returns
+  with its block. `hidePill()` keeps its two causes (no content; the fan gone). This is one step past today's
+  "untouched off the band": the pill carries the only choosing act, so it does not stand where its block is
+  not.
+
+**S4 · The scopes.** `.document`, `.nearViewport` and `.edit` share one geometry walk (S1–S3). What a scope
+still decides is the reservation walk's `healContinuations` and the `.edit` residue heal, both unchanged; the
+reservation walk still visits every fan on every pass. `lastFullPassWidth` and its escalation leave this
+controller: a width change is a layout pass, the re-read places what is on screen, and a hidden view is
+re-placed before it is shown.
+
+**S5 · The two walks.**
+- `refresh(scope:ranges:)`: the reservation walk as today; ONE geometry walk over the viewport as TextKit last
+  reported it; then it arms the re-read — `setNeedsLayout()` on the anchor — and keeps this refresh's `ranges`
+  for it.
+- The re-read (the anchor's `layoutSubviews`): the geometry walk once more, on the fresh viewport, with the
+  kept ranges, which it then drops. It writes no reservation, does not arm itself, and never calls
+  `blockRangesByID()` **(changed — FIX-B2's one index walk per event stands; with no kept ranges it does
+  nothing)**.
+- A nil viewport: the geometry walk does nothing — creates nothing, shows nothing, hides nothing. The re-read
+  decides. The "everything-near" comment is rewritten: that fallback is the decor's now, not this
+  controller's.
+- `lastGeometryResolvedBlockIDs` is the blocks the latest geometry walk read, whichever walk; its comment says
+  so.
+
+**S6 · The anchor.** A private zero-size `UIView` subclass in `MobileTakesChrome.swift`, made in the
+controller's `init` and added with `addSubview`, so it sits after TextKit's own subviews (markers and washes
+still go in at index 0 beneath the text; `MobileTakesChromeTests.swift:406` and `MobileBlockMenuTests.swift:891`
+keep holding). Not hidden, no interaction, not an accessibility element, a weak reference to the controller;
+`layoutSubviews` is `super`, then the re-read. It is the instrument's sentinel made product: zero-size and not
+hidden is the configuration that fired 61 of 61.
+- *Why trailing, for round 4.* The log does not say what runs TextKit's viewport layout between the chrome's
+  tick and the first subview. A subview placed after TextKit's own reads settled frames whether TextKit lays
+  out before every subview or in its own subview's turn; index 0 is right only in the first case, and would
+  read early on a pass whose offset did not move.
+- *The pre-decided arm.* If the probe's window still shows the 74-pt class — and only that: every red line a
+  badge one earlier estimate short of its line — the anchor moves to `insertSubview(_:at: 0)`, the position
+  the window measured, rebuilt headless and run again in a short window. The record says which position was
+  seen red. Any other red: stop and report.
+
+**S7 · What follows without code of its own.**
+- *Load and every full pass:* nothing is forced outside the viewport; the first layout pass's re-read places
+  what is on screen.
+- *The edit road:* the residue heal as today; an off-screen edit's overlays stay hidden until it scrolls in.
+- *The jump road:* `MobileEditorViewModel.swift` is not touched and `jumpToBlock` keeps its own forced read.
+  Expected: the tick passes over the target (its viewport is the old one), TextKit lays out, the re-read
+  places it. If the probe's jump road shows (ii) red, stop and report — no forced read is added to buy it.
+
+**S8 · Files.**
+- `Takes/MobileTakesChrome.swift`: all of the above, and the header's "Geometry discipline / SCOPES" paragraph
+  and `RefreshScope`'s comment rewritten to the new law (the file must not go on teaching that off-band chrome
+  keeps its last resolved geometry).
+- `Write/MobileEditorTextView.swift`: the "Chrome geometry" section only — `viewportCharacterRange()`,
+  `blockRectsUnion(range:within:)`, and `nearViewportBand()` re-expressed if the implementer chooses. Nothing
+  in `layoutSubviews`, `refreshChrome`, `installTakes`, or any input, selection or storage road.
+- `Write/MobileBlockDecor.swift`: the one comment line (R3-F1).
+- No line in `MobileEditorViewModel.swift` (its comment at `:1955-1957` stays true of the decor; the decor's
+  ticket inherits it), `Shared/EditorBrain`, or any edit routing.
+
+**S9 · The pins.**
+- *The probe* (`noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote`): the member's pin, red on file
+  (M5, M5b). Expected green: reading 1, (i), (i′), (ii) and (iii) on both roads. Reading 2 will print
+  `offscreenDrawn=0`; the record says that is the fix's claim, not an empty measurement. Reading 1 is NOT
+  amended.
+- *`MobileTakesChromeTests`, re-pinned, each red on old by inversion:* `:513`, `:529`, `:617` become
+  `badgeView(for: seed.far) == nil`. The `.document` half (`:536-538`) becomes
+  `!lastGeometryResolvedBlockIDs.contains(seed.far)` AND the far block's first fragment, read unforced, is not
+  `.layoutAvailable` after the full pass. The far block's reservation expectations stay as they are: storage
+  truth with no view.
+- *New in `MobileTakesChromeTests`, red on old — the marker and the pill:* flip a fanned block far below the
+  fold: no marker view, `pillIsShowing == false`, its first fragment not `.layoutAvailable`. Then scroll it in
+  with a layout pass: its marker stands on its own block (its top within 1 pt of the unforced first fragment's
+  top less the marker's 2-pt outset) and the pill shows under it.
+- *New guard, green on both sides and said so:* a fanned last block that displays an empty take wears its
+  badge when the end of the note is on screen (S1's end rule). If it is red on the OLD chrome too, that case
+  never drew a badge: record it, drop the guard, keep the rule.
+- *The other chrome suites* (the nine types the record lists) green by type. A test that asserted straight
+  after a refresh and now needs the layout pass that carries the re-read may gain that pass; each such edit is
+  named in LIVE STATUS. No product line is bent to keep a test green.
+
+**S10 · The window.** RED leg: the two product files at their pre-fix versions, tests at the tip,
+`MobileTakesChromeTests` only — expected red exactly `perTickRefreshResolvesOnlyNearViewportGeometry`,
+`aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved` and the new marker-and-pill pin; everything
+else in the type green. The probe needs no red leg (S9, R3-N3). GREEN leg: the probe and the nine types. Then
+the decor reading, ALONE by type. Bundles and logs by R2-F1's rule. If the probe is not green, S6's arm
+applies or the run stops; the probe is not edited.
+
+**S11 · For the record, not code.** VM-179: what the takes chrome forces per pass before and after, by
+reading — before, every fan on a full pass; after, the fans inside the viewport, twice — and what is left
+(the reservation walk on every pass; the decor's forced reads). VM-218: a fan outside the viewport exposes no
+badge to VoiceOver (today it exposes a misplaced one). The settle instrument leaves in its named commit now,
+with the two lines above about mount 2 and `linkFired`.
+
+### The ladder after this round
+
+One MAJOR, so round 4 is earned; it is owed in any case. A fresh `fable-reviewer` reads, as new work: batch
+D's fix against S1–S11, its windows (the red leg, the green leg, the decor reading's outcome, and S6's arm if
+it was used), and VM-16 re-landed on main's message seam. One round for both, as the orchestrator intends.
+The probe is in the whole phone target, so the gate re-runs it on the merged tree; that matters here, because
+the measured moment depends on the order of the layout pass, and another wave-1 run works in the same file.
