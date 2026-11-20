@@ -599,8 +599,8 @@ lands, its red build is remade by the revert protocol and this line says so firs
 | Piece | State |
 |---|---|
 | Reading (CLAUDE.md + canon, TEXTKIT2_NOTES, MobileSoul §1–5, the protocol, this record §1–§7 + batch B + batch A's closeout, VM-78 BATCH C's two sections, VM-64 §7 batch 2's r1→r2 and r2, the fence suite whole, `MobileEditTrace.swift` whole, `MarkdownFaceCore.swift` whole, `MobileMarkdownCaretTests.swift`, `MobileMarkdownTests.swift`); §4.4–§4.5's file:line pointers re-verified on `d63c1e2cd` — all hold but the programmatic replace, which batch A moved (`:2487-2518` → `MobileEditorViewModel.swift:2552-2583`) | DONE |
-| The pin (`MobileTypedTextFaceTests`, readings (a)–(e), base API only) | NOT STARTED |
-| Pin build `DerivedData/vm24-b-pin` (`build-for-testing`) | NOT STARTED |
+| The pin (`MobileTypedTextFaceTests`, readings (a)–(e), base API only) | DONE (the commit naming this line) — compile PENDING the build below; red/green PENDING the stage window |
+| Pin build `DerivedData/vm24-b-pin` (`build-for-testing`) | IN-PROGRESS — a cold build of the tree at the pin's commit |
 | Half 1's closeout in §12 (expected result per reading, by expectation line) + the READY report | NOT STARTED |
 | The stage window (the pin alone; the orchestrator's) | PENDING — the orchestrator's, from these products |
 | Half 2 (D-243-1, the fix and its pins) | NOT STARTED — waits on the orchestrator's word after the window |
