@@ -3,10 +3,11 @@
 **STATUS: OPEN — re-fitted on 2026-11-19, after the badge fix was taken out and main was merged into the branch;
 brought up to date after the fourth review round, and again after the MCP run (VX-981) was taken in — main was
 merged into the branch a second time (merge commit `d55d22db9`), with no change to any code line — and the short
-test window for the fourth review's three new safety tests has run on that code.** Still ahead: the fifth and last
-review round, and the final gate (the whole phone test suite, the Mac tests over the shared code this run changed,
-and a walk through the changed screens on the simulator), then the merge. Every **PENDING(…)** slot below is filled
-as it happens; nothing marked PENDING has happened yet.
+test window for the fourth review's three new safety tests has run on that code. The fifth and last review round is
+done (it found nothing major), and so is the walk through the changed screens on the simulator.** Still ahead: the
+rest of the final gate — the whole phone test suite and the whole Mac test suite (the Mac's tests over the shared
+code this run changed are inside it) — then the merge. Every **PENDING(…)** slot below is filled as it happens;
+nothing marked PENDING has happened yet.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. A **test window** is a test run on the
 shared Mac, granted by the stage coordinator. The **review** is the cold code review, one fresh reviewer per
@@ -223,12 +224,13 @@ ruled. None is this run's line, so all three are left as they are; a ticket for 
   underneath — they still pass.
 - PENDING(gate 1: the whole phone test suite on the merged code — its result, with the caret test as the one
   expected failure).
-- PENDING(gate 2: the Mac tests over the shared code this run changed — its result).
+- PENDING(gate 2: the whole Mac test suite — the Mac's tests over the shared code this run changed are inside it,
+  and so is its check that no shipped word uses the retired vocabulary, `DeadVocabularyTests` — its result).
 - **The simulator walk (done 2026-11-19, 17:54–18:18, on a test iPhone made for it and deleted after): every changed screen worked as intended, in Study and the five book-and-sheet screens again in Terminal.** Finish asks first, naming the 3 notes waiting at Arrivals; Cancel leaves the book open; after Finish, reopening and finishing again asks nothing, because nothing is waiting any more. A gathering's Details has no Finish. A sealed book's Reopen says why on the message line at the bottom, readable, with Book Details still open. The books sheet marks an archived book "(archived)", shows a gathering as "gathering" with no diverge, and starring a note through a ★ gathering says "Starred — the gathering shows it now." The shelf sorts a–z with starred books first and "Book 2" before "Book 10", and a long press offers Star and Delete, no Pin. Deleting a gathering, from the shelf or from Details, says "Gathering moved to the Trash". The new-book sheet says Gathering, with its caption and its no-tags line. An archived starred book opens from Starred and Unarchive puts it back on the shelf. An Undo whose change was already put back says "Nothing to undo — …" and offers no Redo. A restore keeps the words it replaced as a quiet saved moment. The date chip on a titled note shows the new date at once. The Trash never flashed "Nothing in the Trash." (checked frame by frame on a screen recording). Both guide lessons read as drafted. The tallest Book Details, at half height and at full height, keeps the message line clear of its last row. Three small things it showed that belong to other work: the books sheet's add list still puts "Book 10" before "Book 2" (book order is wave 3's); in Terminal the message line keeps its capitals while the rest is lowercase (the message line's own look); and Terminal wraps the shelf's top line (VM-47's sizes). The screenshots are on the Pro in `~/dev/variorum-vm-78/App/Variorum/DerivedData/vm78-walk-screens/`; the record's "THE GATE — leg 3" table names each one.
 
 ## The review, in plain words
 
-A fresh reviewer read the run three times. The first round found two major points — the run could not be called
+A fresh reviewer read the run five times, a new reviewer each round. The first round found two major points — the run could not be called
 reviewed until the editor work was read, and the badge test as first written could not see the problem it was
 meant to catch — plus small fixes, all applied and proved. The second round found nothing major. The third round
 read the editor findings and found one major point: the callout colours and comment marks share the badges' old
@@ -242,8 +244,11 @@ sheet, and a note's list of books without "(archived)" and with Diverge on a gat
 tests noticing. So three new tests now watch those faces directly, and a line-by-line map of what must survive
 goes to the stage coordinator for the other runs. Its five small points are applied: one more test is shown
 failing on the old code in the same test window (it did), sentences are brought up to date, three canon lines wait for your
-call (the section below), the walk's steps are re-worded, and a VoiceOver note goes to VM-218. A fifth round is
-owed, the last under your cap of five. PENDING(ladder round 5: its outcome).
+call (the section above), the walk's steps are re-worded, and a VoiceOver note goes to VM-218. The fifth round,
+the last under your cap of five, found nothing major — nine small points, nearly all wording: sentences in the
+record, in this handoff and in the parity row brought up to date, three old code comments added to a ticket, a note
+for the Bookcase run about the order of the books sheet, and one tidy-up inside a test file left for the next run
+that opens it. They are dealt with, and the review is closed.
 
 ## What a later reader would otherwise trip on
 
@@ -296,6 +301,6 @@ Tickets filed:
 - [ ] PENDING(id) (Low, Bug, Todo): a book's contents may show "No notes in this book yet." before its list loads.
 - [ ] PENDING(id, or a line on VM-218) (Low, Bug, Todo): Book Details' name row and the note's date chip hide what they show from VoiceOver (the book's name; the note's day).
 - [ ] PENDING(id, or a line on VM-156) (Low, Bug, Todo): pressing Unarchive twice quickly in Book Details shows a refusal under the book the first press unarchived.
-- [ ] PENDING(id) (Low, Debt, Backlog): a core comment still describes the shelf's retired pin order.
+- [ ] PENDING(id) (Low, Debt, Backlog): a core comment still describes the shelf's retired pin order; and three code comments (and one Mac test file's opening comment) still call the insured restore provisional, though you ratified it.
 - [ ] PENDING(id, only if your answer to call 2 is that neither platform offers it) (Low, Bug, Backlog): the Mac's book chip offers Diverge on a gathering's row, then refuses.
 - [ ] PENDING(id) (Low, Debt, Backlog): three lines in `notes/SurfaceContracts.md` that no longer match — the Finish confirm quoted "at the door", and two marks you ratified still saying PROVISIONAL (P-849-4, P-849-5); they sit on three different screens, so this may become more than one ticket.
