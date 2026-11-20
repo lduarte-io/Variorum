@@ -190,7 +190,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | Ladder r2 · fix pass | **DONE 2026-11-19** — part B built and the whole Core package green (`74d91c666`); settled by its stage window: the seven meant reds on `vm64-gate2-red` and no other, green alone and in company, the gated suite alone 13 passed ("Orchestrator's stage results" ▸ "Ladder round 2's fixes — THE STAGE WINDOW") | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, the no-choice fixes with their pins, the final calls in the second turn, part B's builds. *(Was: IN-PROGRESS, part B waiting on the QUIET window — flipped at ladder round 3, finding 2(c).)* |
 | Ladder r3 · fix pass | **DONE (both turns)** — the final calls applied (`6aa357bff`): (i′) confirmed with its guard; `merged` bounded, pin first; the migration comment. Owed with the gate tree after VM-78's merge-in: finding 1's red build and the hosted runs of its suite | see "Ladder round 3 — fix pass · LIVE STATUS" below | the last round (no major found). *(Was: FIRST TURN DONE, the arms waiting.)* |
 | The merge of main (VM-78) and the gate tree | **DONE 2026-11-19** — merge `a18fae31f` (clean; no collision); `vm64-gate3` phone + Mac built at `5a4045303`, no compile fix; the whole Core package 4,975 in 721 green; `vm64-gate3-red` built and restored. Stage runs owed (the orchestrator's) | see "The merge of main (VM-78) and the gate tree · LIVE STATUS" below | merge exactly `f909d6714` (VM-78's PR #15); the five shared files read; builds into `vm64-gate3` / `vm64-gate3-red`; the whole Core package |
-| The merge gate's Mac red — the readout's two rows say commit | **IN-PROGRESS** — see its block below | see "The merge gate's Mac red · LIVE STATUS" below | `DeadVocabularyTests.noLabelOrHeaderSaysSavepoint` red on three readout labels; wording only (Part of VM-65); builds into `vm64-gate4` |
+| The merge gate's Mac red — the readout's two rows say commit | **DONE 2026-11-19** — `63ccbadd9` (wording only); the scan mirrored, 0 offenders; `vm64-gate4` phone + Mac built, the code of `63ccbadd9`. The gate's re-run owed (the orchestrator's) | see "The merge gate's Mac red · LIVE STATUS" below | `DeadVocabularyTests.noLabelOrHeaderSaysSavepoint` red on three readout labels; wording only (Part of VM-65); builds into `vm64-gate4` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -889,8 +889,8 @@ readout's two rows say commit".
 | H2 — the scan mirrored headlessly (an exact copy of its extractor and rule, its roots and allow-lists) — zero offenders on the tree | DONE — on `09a33071b`'s tree: 936 files, 3 offenders, exactly the gate's three; on this commit's tree: 936 files, **0 offenders**, the 3 allow-list entries seen, none stale; this run's 36 product files hold no string literal with the word at all |
 | H3 — the handoff's readout steps and wording-pass item; the closeout drafts | DONE (this commit) — the handoff: the readout step's row name, and one sentence in the wording-pass item saying the two rows were renamed to follow her commit rule and stay DRAFT; the closeout drafts quote neither label (the SurfaceContracts readout line names no row), nothing changed there |
 | H4 — the Mac target's suites that read the phone's or `Shared/`'s source, by TYPE (the coordinator's question) | DONE (this commit) — 19 walkers (12 over `Shared/`, 7 over `Shared/` and `VariorumMobile/` or the whole app) and 8 named-file readers, each attributed to its enclosing type; the handoff's "The next runs" gains the sentence; the list is in §7's section |
-| H5 — phone and Mac `build-for-testing` into `vm64-gate4`; the diff touches nothing under `Sources/` or `Tests/` | NOT-STARTED |
-| H6 — §7's section, the hosted commands, the report | NOT-STARTED |
+| H5 — phone and Mac `build-for-testing` into `vm64-gate4`; the diff touches nothing under `Sources/` or `Tests/` | DONE — phone (at `5017e198e`) and Mac (at `0bbb663a0`), both the code of `63ccbadd9`: `** TEST BUILD SUCCEEDED **`, 0 errors each; no warning in a touched file; nothing under `Sources/` or `Tests/` changed, so no `swift test` owed |
+| H6 — §7's section, the hosted commands, the report | DONE (this commit) — §7 ▸ "The merge gate's Mac red — the readout's two rows say commit": the red as logged, the change, the mirror, the source-reading Mac suites, the builds, the three hosted commands |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -4943,6 +4943,50 @@ attributed to its enclosing TYPE):
 - Not in the list: `MCPAsksWaitTests` and `MCPIconTwinsTests` match "Shared" only in copy ("Shared with …"; they walk
   the Mac app). The handoff's "The next runs" says this in plain words with the two walking groups named (`5017e198e`).
 
-**Builds:** PENDING(phone and Mac `build-for-testing` into `vm64-gate4`).
+**Builds — both GREEN, into `App/Variorum/DerivedData/vm64-gate4/`** (gitignored; no other `vm64-*` folder written):
+phone (`generic/platform=iOS Simulator`) built at `5017e198e` and Mac (`platform=macOS`) at `0bbb663a0` — both trees
+hold the code of `63ccbadd9`, the pass's one code commit (`git diff --stat 63ccbadd9 HEAD -- App Sources Tests` is
+empty; every later commit is notes alone). Phone `** TEST BUILD SUCCEEDED **`, 0 errors; Mac `** TEST BUILD SUCCEEDED
+**`, 0 errors; no warning in the three files the pass touched. Products: `vm64-gate4/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
+`vm64-gate4/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`, and the Debug phone app
+`vm64-gate4/Build/Products/Debug-iphonesimulator/VariorumMobile.app`. Logs and stamps (local):
+`vm64-gate4-phone-build.log` / `-phone.sha`, `vm64-gate4-mac-build.log` / `-mac.sha`. No `swift test` is owed: nothing
+under `Sources/` or `Tests/` changed (`git diff --stat 09a33071b HEAD -- Sources Tests` is empty).
 
-**The hosted commands for the gate's re-run:** PENDING(written once the products exist).
+**The hosted commands for the gate's re-run** (the orchestrator's stage; the GO's claim line and UDID fill
+`<simulator-udid>`; boot fresh, settle, run, shut down; poll for the Swift Testing verdict line):
+
+(1) **The whole phone target** from `vm64-gate4`:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate4 \
+  -only-testing:VariorumMobileTests 2>&1 | tee <log-gate4-phone-whole>
+```
+Expected exactly as the gate's own run on `vm64-gate3`: "Test run with 1071 tests in 181 suites failed … with 4 issues
+(including 2 known issues)" — the one red VM-24's
+`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` (2 of 3 cases, 2 issues), the
+2 known issues main's, `MobileHerPathsPerfTests`' 13 SKIPPED (said so). No test count moves (the pass changed one MARK
+comment in a test file and no test).
+
+(2) **The gated speed suite ALONE** from `vm64-gate4`:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+TEST_RUNNER_VM66_PERF=1 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate4 \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-gate4-perf>
+```
+Expected: 13 tests in 1 suite passed, none skipped, every asserted count as before (the labels are read by no assertion).
+
+(3) **The whole Mac target** from `vm64-gate4` (a QUIET window, the coordinator's):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum \
+  -destination 'platform=macOS' -derivedDataPath DerivedData/vm64-gate4 \
+  -only-testing:VariorumTests 2>&1 | tee <log-gate4-mac-whole>
+```
+Expected: 6,435 tests in 1,114 suites with 13 known issues recorded (main's counts, as the gate read them);
+**`DeadVocabularyTests` GREEN** — `noLabelOrHeaderSaysSavepoint` with no offender and no stale allow-list entry (the
+mirror above), `noShippedWordSpeaksTheRetiredVocabulary` and the two matcher controls green as at the gate; the only
+possible red main's flake VX-701, `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` (re-run alone
+before it is leaned on). Any other red is real until traced.
