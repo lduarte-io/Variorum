@@ -2,9 +2,9 @@
 
 The Pro's stage coordinator for the overnight window you set up on 2026-11-19: wave 1 of the mobile catch-up
 (VM-47, VM-55, VM-64, VM-78) and two Mac runs (VX-980 search, VX-981 the MCP door). All six runs merged and
-closed. One run is still open under me: VM-24, launched at your standing word once the four mobile runs had
-merged, with VM-243 riding it. This file is written at 04:00 on 11-20 so it is on main when you start from the
-handoffs; its last section is filled in when the VM-24 run ends.
+closed. So did the seventh: VM-24, launched at your standing word once the four mobile runs had merged, with
+VM-243 riding it. It merged at 07:11 on 11-20. Most of this file was written at 04:00 that night; the last section
+and a few lines above were completed at the close, 07:30. Nothing is running. The stage is free.
 
 **How to read this file:** a **claim** is one turn on the shared screen, simulator or dev store. A **gate** is the
 last test run before a merge: the whole phone target, the whole Mac target, and a walk. **Baseline** is what
@@ -17,7 +17,7 @@ already fails on main. A **walk** is a session that drives the app and photograp
    or has expired" (HTTP 403). Nothing was archived, signed or written. Sign the current agreement on Apple's
    developer site, then follow the five steps in `notes/handoffs/vx-981-handoff.md`. Your word that night: you will
    take care of it later. Two things to know before you build:
-   - The first-run check passed on main at `ad5053002`. Main has since gained all four mobile runs, so that check
+   - The first-run check passed on main at `ad5053002`. Main has since gained the mobile runs, so that check
      is owed again on the tip you build from. The handoff has the one-line way to tell.
    - The label 1.5 and `ReleaseNotes-1.5.md` are on main as PROVISIONAL. They are yours to confirm or change
      before anything is published. `/Applications/Variorum.app` is untouched: the published 1.4 (build 12299).
@@ -28,15 +28,17 @@ already fails on main. A **walk** is a session that drives the app and photograp
    - The app: `~/Library/Developer/Xcode/DerivedData/vm47-wave1-device/Build/Products/Release-iphoneos/VariorumMobile.app`,
      built from main's final wave-1 merge commit `226edf626`. I checked its signature twice.
    - **Install THAT app. Do not rebuild main for the install.** VM-24's "before" count must be taken on wave 1 as
-     it stands; a fresh build of main could carry VM-24's fix.
+     it stands, and main now carries VM-24's fix. A second app, the "after", waits in its own folder
+     (`vm24-after-device`, same path shape); it goes on only once the "before" counts are copied out.
+     `notes/handoffs/vm-24-handoff.md` opens with which app is which.
    - It is an in-place install: safety copy first, the app quit, never an uninstall. One local migration runs on
      first open (VM-64's `v1_38`); treat it as one-way, with the safety copy as the way back.
 3. **One phone sitting serves two measurements.**
    - VM-64's timing readout: Settings ▸ Diagnostics ▸ Timing…, then Copy. Its handoff lists what to do a few times
      each (`notes/handoffs/vm-64-handoff.md`, "The phone sitting").
    - VM-24's "before" count: Settings ▸ Diagnostics ▸ Record edit trace. The VM-24 session read the wave-1 build
-     and found its trace is enough. Its script for you is `notes/handoffs/vm-24-morning-phone-session.md` on the
-     branch `vm-24-unwarned-edit-routing` (worktree `~/dev/variorum-vm-24`).
+     and found its trace is enough. Its script for you is `notes/handoffs/vm-24-morning-phone-session.md`, on main
+     since its merge.
    - While you are there: VM-64's five-second check that a quick tap on the takes button opens the takes sheet,
      and the two screens no capture saw (the Account sheet; the readout behind its door).
 4. **Confirm or overturn my gate calls.** I ruled provisionally while you were away, as you asked.
@@ -55,9 +57,9 @@ already fails on main. A **walk** is a session that drives the app and photograp
      (`notes/plans/vm-47-screens/` in the main checkout, 136 MB, ignored by git; "delete the screens" removes it).
    - VX-980: VX-1013, the first Debug launch of a night can sit blank for about nine minutes while it walks the
      backup folder. I recommended High; its priority is unchanged without your word.
-6. **Two follow-up runs. One is running, one is yours to start.**
-   - **VM-24 + VM-243 is running** (tmux session `variorum`, window `vm-24`). You added VM-243, the faint text
-     after a dash, as a rider at 02:17. It holds its questions for you.
+6. **Two follow-up runs. One is merged, one is yours to start.**
+   - **VM-24 + VM-243 is merged** (PR #19, `fe1493c16`; `notes/handoffs/vm-24-handoff.md`; QUESTIONS #282). You
+     added VM-243, the faint text after a dash, as a rider at 02:17. Its last section is at the foot of this file.
    - **VM-17 + VM-239 + VM-179 (fan badges and decor placement) is yours to launch**:
      `/architect-phase vm-17 vm-239 vm-179`, kickoff `notes/plans/vm-17-chrome-geometry.md`. You took the unproven
      fan-badge fix out of VM-78 and made it this run.
@@ -74,18 +76,19 @@ already fails on main. A **walk** is a session that drives the app and photograp
 | 4 | VM-78 — fixes to what's there | #15 | `f909d6714` | `vm-78-handoff.md` |
 | 5 | VM-64 — timing and the two lags | #16 | `982405967` | `vm-64-handoff.md` |
 | 6 | VM-47 — sizes and look | #17 | `226edf626` | `vm-47-handoff.md` |
+| 7 | VM-24 — the snap-back, with VM-243 | #19 | `fe1493c16` | `vm-24-handoff.md` |
 
 Every merge is a merge commit whose tree I compared with the tree its gate tested; each on-main ledger commit is
-notes only. Main at this writing: `8fb172e6e`. The wave's one Sync/-custody slot was VM-64's; it wrote no line
+notes only. Main at the close: `708fc8054`. The wave's one Sync/-custody slot was VM-64's; it wrote no line
 under `Sync/`, `Server/` or custody code and released the slot at its close. Its merge carries the local-only
 migration `v1_38`.
 
 VX-1007 (your daily Journal not showing as Private) is fixed on the Mac and was walked by sight: the Journal and
 each entry wear the Private eye, and the Journal's Private row is ticked and locked with a line saying why.
 
-**Baselines on main after wave 1.** Whole phone target: 1,194 tests in 209 suites, ONE failing test, VM-24's
-caret test (two of its three cases), and 13 skipped (VM-64's speed suite runs only alone, with
-`TEST_RUNNER_VM66_PERF=1`). Whole Mac target: 6,435 tests in 1,114 suites, none failing, 13 declared known
+**Baselines on main at the close.** Whole phone target: 1,226 tests in 215 suites, NO failing test (after wave 1
+it was 1,194 in 209 with one failing, VM-24's caret test, which VM-24's run then fixed), and 13 skipped (VM-64's
+speed suite runs only alone, with `TEST_RUNNER_VM66_PERF=1`). Whole Mac target: 6,435 tests in 1,114 suites, none failing, 13 declared known
 issues, and two flaky names (VX-701, VX-953).
 
 ## The stage, in numbers
@@ -173,10 +176,44 @@ just after I had taken the stage for VM-55's walk.
 
 Every closed run removed its own worktrees, branches, build folders and simulator devices, and I checked each
 one. Nothing of the six runs remains but what is kept on purpose: the wave-1 phone build (checklist item 2) and
-VM-47's screens folder (item 5). Disk: 155 GiB free at 04:00, up from 71 GiB when the window opened. No install
-ran, so no safety copy of your real store was taken or pruned. Still to do at my close: sweep this window's
-leftover test-result folders under `~/Library/Developer/Xcode/DerivedData/`, keeping `vm47-wave1-device`.
+VM-47's screens folder (item 5). No install ran, so no safety copy of your real store was taken or pruned. At
+the close I removed this window's 78 leftover test-result folders under `~/Library/Developer/Xcode/DerivedData/`
+(about 9 GiB; none held a build, and nothing was building). Disk: 164 GiB free at the close, up from 71 GiB when
+the window opened.
 
-## Still open: the VM-24 run
+## The VM-24 run (with VM-243)
 
-Launched 2026-11-20 03:42. I remain its stage coordinator. This section is completed when it ends.
+Launched 2026-11-20 03:42 in a new tmux window, as you asked; merged 07:11 as PR #19, merge commit `fe1493c16`.
+Main at the close: `708fc8054`.
+
+- **What it fixed, both phone-only.** VM-24: an edit the editor was not asked about is routed by the characters
+  that changed, so a typed or corrected word no longer snaps back. VM-243: a newly typed character is reset to
+  the normal font and ink, so text after a dash is not left faint and a line after a heading is not left bold.
+  The dash bug was confirmed by its test on the unfixed code before any fix was written; it also showed at the
+  end of a note and after a heading.
+- **Main's whole phone target now has no failing test:** 1,226 tests in 215 suites at its gate, 13 skipped (the
+  speed suite). The one test that had failed since 2026-10-25 was VM-24's own. I passed the gate provisionally;
+  it is yours to confirm with the others.
+- **No whole Mac run was owed:** the run changed nothing the Mac compiles. It ran the 22 Mac suites that read the
+  phone's source instead. Its first list had seven; I searched its tree and found more, one of them naming the
+  very file it changed.
+- **What the simulator could not show.** Its walk shows the dash bug before and the fix after. It could not
+  produce an edit the editor was not asked about: the simulator's keyboard asks before every key. The snap-back's
+  before and after are your phone's to show, with its script.
+- **Kept for you:** the "after" app at
+  `~/Library/Developer/Xcode/DerivedData/vm24-after-device/Build/Products/Release-iphoneos/VariorumMobile.app`
+  (signature checked by me), and its walk's captures in `App/Variorum/DerivedData/vm24-walk-screens/` in the main
+  checkout (5 MB, ignored by git).
+- **Tickets:** VM-24 and VM-243 Done. VX-68 closed provisionally, yours to reopen. VX-1031 filed for the Mac's
+  twin of the mechanism.
+
+## Two last things
+
+- **GitHub's link sets you as assignee when a PR merges.** It did so on the six umbrella tickets (VM-47, VM-55,
+  VM-64, VM-78, VX-980, VX-981) and on VM-24 and VM-243. All eight are cleared, by your no-assignee rule. Eleven
+  older tickets also carry you as assignee and were updated in the last two days; I left those alone: VM-19,
+  VX-93, VX-133, VX-163, VX-443, VX-612, VX-808, VX-831, VX-849, VX-934, VX-997. The setting that does this is in
+  Linear's GitHub integration.
+- **Where everything stands at the close:** no claim on the stage, no simulator booted, no app instance, no
+  build. Worktrees: `~/dev/variorum` on main and clean, your `variorum-vm-44`, and `variorum-vx-997` (PR #8).
+  The tmux windows of the seven runs are idle and can be closed.
