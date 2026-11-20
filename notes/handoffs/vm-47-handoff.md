@@ -1,8 +1,8 @@
 # VM-47 — Sizes and look: your handoff
 
-**Final but for the merge.** Brought up to date 2026-11-20, after the last screenshots were read. Three things are
-still written `‹PENDING: …›` below and are filled when the run merges: the merge gate's results (the whole phone and
-whole Mac test suites) · the PR and its merge commit · the wave-1 phone build this run prepares for you.
+**Final but for the merge.** Brought up to date 2026-11-20, after the merge gate's test runs. Three things are still
+written `‹PENDING: …›` below and are filled as the run merges: the merge gate's last run (the whole phone suite once
+more, on the exact code that merges) · the PR and its merge commit · the wave-1 phone build this run prepares for you.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. **P-47-N** is a provisional call — built
 the most defensible way while you were away, waiting for your word. **R-47-N** is one of your rulings from this run. A
@@ -468,9 +468,28 @@ the redo closely and found them sound.
   nits; round 3 was taken because the walk's fixes and main's merge came in after round 2, and found one minor (the
   walk's questions for you were not yet in the list for your sitting — they are now, P-47-31 to P-47-41) and two nits;
   round 4 was taken because the redo and the timing run's merge came in after round 3, and found one nit (the record's
-  status line was out of date — fixed). Nothing major is open.
-- **The merge gate:** ‹PENDING: the whole phone suite, with the timing run's speed tests as their own run · the whole
-  Mac suite›.
+  status line was out of date — fixed). Nothing major is open. The gate's two test fixes (below) came after the fourth
+  round had closed, so no reviewer round read them: the orchestrator read them line by line, and the stage coordinator
+  read the second as well.
+- **The merge gate** — the full test suites, run on the code that merges, before the merge. The whole phone suite:
+  1,193 tests in 209 groups, in one run. The timing run's 13 speed tests, in their own run: all passed. The whole Mac
+  suite: 6,435 tests in 1,114 groups, the same count as main. Red in the phone suite: main's one known red, VM-24's
+  caret test, which fails on main too and is that ticket's; and one timing test (below). Red in the Mac suite: one test
+  this run had made untrue (below), and a Mac test known to fail now and then (VX-701), which passed when run alone
+  straight after. Neither VM-24's red nor VX-701's is yours to worry about. This run's two reds were both in tests;
+  both were fixed and proven in a last test window. The whole phone suite and the speed tests were then run once more
+  on the exact code that merges: ‹PENDING: closing leg (c)›.
+- **What the gate found** — two things, both in tests; no app code changed.
+  (1) A timing test from the last merged run (the timing run, VM-64) checks that opening a note from the new-note box
+  is timed. In the whole suite it failed once. An earlier test — one of this run's, which now runs just before it —
+  left behind a mark that fires one screen refresh later, and that late mark ended the timing early. The test passed
+  every time it ran on its own or beside that earlier test, so a new test was written to make it happen on purpose.
+  That new test failed on the old code both times it ran and passes on the fix. The fix is in that one test file: it
+  lets every such late mark fire before the timing starts.
+  (2) A Mac test that reads the phone's source expected the lock screen's "Use your twelve words instead" door to use
+  one particular button style. This run had deliberately moved that door onto the phone's 44-point control. The door
+  still answers across its whole label, which is what the test exists to protect, so the test's sentence was brought
+  true: it now accepts either style. It passes.
 
 ## Your rulings, read again against what shipped
 
