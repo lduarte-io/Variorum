@@ -867,8 +867,8 @@ orchestrator's). The record of what was checked: §7 ▸ "The merge of main (VM-
 | Piece | State |
 |---|---|
 | G0 — this live status, before any tree change | DONE (this commit) |
-| G1 — `git merge --no-ff f909d6714` (a merge commit); stop on any code conflict | NOT-STARTED |
-| G2 — the blob check of the five shared files; each read whole against the map's VM-64 bullet and this run's intents; the composition traced; the other meeting points; the guards mirrored | NOT-STARTED |
+| G1 — `git merge --no-ff f909d6714` (a merge commit); stop on any code conflict | DONE (`a18fae31f`) — trial and merge clean, no conflict in any file; `git merge-base --is-ancestor f909d6714 HEAD` holds |
+| G2 — the blob check of the five shared files; each read whole against the map's VM-64 bullet and this run's intents; the composition traced; the other meeting points; the guards mirrored | DONE (this commit) — all five blobs MATCH; both runs hold in each file; the quiet-undo composition ends on the fence's sentence, no state wrong (one note for her bundle with P-2-2); the union, the fence's sentence, the Put back line and the timing marks unchanged in meaning; both source scans green by reading. NO collision; no line written. §7 ▸ "The merge of main (VM-78) and the gate tree" |
 | G3 — phone and Mac `build-for-testing` into `vm64-gate3`; compile fixes (if any) listed | NOT-STARTED |
 | G4 — the whole Core package, `swift test`, once, on the final tree | NOT-STARTED |
 | G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
@@ -4482,3 +4482,223 @@ invocation as above in "The hosted command for finding 1's pins"):
   different count, is explained in the record before the gate counts as open; a finding-1 pin green there is hollow at
   that pin and said so.
 - **On the fix build:** the whole suite green, alone and in company with round 2's (ii) list.
+
+### The merge of main (VM-78) and the gate tree (merge-in implementer and gate-tree builder; a FRESH session)
+
+**Not done here (first, by the record's rule):** no hosted run of any kind — every `xcodebuild test`, simulator boot and
+walk is the orchestrator's stage window; the commands are at the end of this section. **Main's own phone count from
+VM-78's gate could not be quoted:** on main at `f909d6714` (origin/main had not moved past it when this section was
+written) VM-78's record still holds its gate as a slot — "Gate 1, the whole phone target: PENDING(gate 1: its verdict;
+VM-24's caret pin the one red by decision)" (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`, FOR A LATER READER), its
+gate table's row "PENDING(gate 1: every red by name — the one standing red by decision is VM-24's caret pin,
+`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`)", and its handoff
+"PENDING(gate 1: the whole phone test suite on the merged code …)"; the count presumably rides main's notes-only ledger
+commit, which this branch does not take (the orchestrator merges it). No shared ledger touched (`notes/QUESTIONS.md`,
+`notes/TICKETS.md`, the master plan, `notes/AppSpecRecord.md`, `notes/MobileSoul.md`, `notes/SurfaceContracts.md`,
+`notes/AppSpec.md` arrive from main exactly as main has them). Nothing in `Sources/VariorumCore/Sync/`, `Server/`,
+custody or keychain code, or `VariorumMobile/Features/Protection/`; no schema change. `storageDidEdit`'s routing,
+`fallbackVerdict` and `EditorEditRouting` not opened. `MobileLine.swift` untouched (VM-78 never touched it either). The
+FOR A LATER READER and every `PENDING(…)` slot about the gate, the walk and the merge stay the orchestrator's.
+
+**The merge:** `a18fae31f` — "Merge main (VM-78) into vm-64-timing-and-lags", a merge commit (`git merge --no-ff
+f909d6714`; never a rebase or squash), parents `48a94ea43` (this branch: the live status on `dd7da4f4c`, final code
+`8be3a1f30`) and `f909d6714` (VM-78's merge, PR #15 — a true merge on `a4634b288`, which the branch already held, so it
+brought the VM-78 branch alone). `git merge-tree` trial first: clean; the merge: no conflict in any file, code or notes.
+`git merge-base --is-ancestor f909d6714 HEAD` holds. **What it brought** (56 files, +10,277 −505): seven `Shared/` files
+(`ArrivalsCopy`, `BookStateCopy`, `CollectReceiptCopy` new; `BookcaseBoard`, `RecoveryCopy`, `ShelfOrder`,
+`StructuralUndoCopy` changed); six Mac files (`MembershipChoice`, `BookArrivals`, `BookSettingsSheet`, `BookStateDoors`,
+`ShelfViewModel`, `ShellActions`); fourteen phone product files and twelve phone test files (one new,
+`MobileBookFixesTests`); two Mac test files (`ShelfAndPaletteTests`, `UndoWarningWordsTests`); fifteen notes files.
+**Nothing under `Sources/`, `Tests/`, `Server/` or the package manifest** — so the whole Core package's count cannot move
+by the merge.
+
+**Files changed by both runs since `a4634b288`:** the five code files below and `notes/TEXTKIT2_NOTES.md` (both sides'
+blocks kept — VM-78's 4 lines, this run's 3). For each of the six, the merge's diff from our parent equals VM-78's own
+diff from `a4634b288`, and the merge's diff from VM-78's parent equals this run's own diff — checked by hashing each
+diff's changed lines: identical in all six, so neither side's lines were altered by the join.
+
+#### The blob check — all five MATCH VM-78's last reviewer's pre-read
+
+| File (`App/Variorum/VariorumMobile/Features/…`) | `git rev-parse --short HEAD:<path>` | Pre-read | |
+|---|---|---|---|
+| `Write/MobileEditorViewModel.swift` | `1b4149904` | `1b4149904` | MATCH |
+| `Write/MobileWriteView.swift` | `d63f7af29` | `d63f7af29` | MATCH |
+| `Write/MobileUndoDoor.swift` | `645612238` | `645612238` | MATCH |
+| `Write/MobileMembership.swift` | `3e48ae264` | `3e48ae264` | MATCH |
+| `Shell/MobileLibraryView.swift` | `00b5c086c` | `00b5c086c` | MATCH |
+
+So the join read below is the join `notes/plans/fixes/vm-78-ladder-round4.md` ▸ "The map, final" read.
+
+#### The five files — what each run changed, and that both hold
+
+1. **`Write/MobileEditorViewModel.swift`.** *This run* (+380 −10 across batches 1, 2, 6 and 7 and the ladder): the
+   keystroke fence (`flightFence`, `structuralFlightChanged`, `settleFlightSurface`, `drainFlightFence`, the gate and
+   storage belts, the settle's hooks in `applyProjection`); `loadLive` and the live iterators handed to `start()`; the
+   hold (`holdsAutosave`, `arrivalCount`, `takeAutosaveHold`, `releaseAutosaveHold(ifNotShownSince:)`); the counted
+   chrome pass; VM-65's marks. *VM-78* (VM-84, +10 −0): the OBSERVED `private(set) var entryDate: String?` with its doc
+   (:114–122) and `entryDate = value?.entryDate` inside `adoptHeader(_:)`. **Both hold.** The property `header` is
+   assigned in exactly ONE place — `header = value`, the first line of `adoptHeader(_:)` (:912), with `entryDate =
+   value?.entryDate` two lines under it (:914); `header` stays `@ObservationIgnored` (:141) and `entryDate` is a plain
+   observed stored property (never `@ObservationIgnored`). Every other `header` in the file is a local — `loadLive`'s
+   iterator (:754) and three `let header = try await …read` (:1549, :1666, :1698), each handed to `adoptHeader`. **No
+   road of this run sets the header without `adoptHeader`:** `loadLive` (:760), `loadOnce` (:782), `observeHeader`
+   (:856) and `confirmNoteStillLive` (:522) all go through it. **The observed `entryDate` cannot add a chrome pass to an
+   open:** `MobileNoteOpenOnceTests` counts `projectionChromePasses`, which only `layOutChrome()` (:1154) increments, and
+   that is reached only from `renderFull` (:1105), `applyDifferential` (:1149) and `ingest`'s own (:817); `adoptHeader`
+   calls none of them, and the new line writes one observed property. On an open it is set once, inside the same
+   synchronous `adoptHeader` call that already sets the observed `isSealed` and `displayTitle`, which the masthead reads
+   already — the masthead's one invalidation per header adoption, not a second. This run's entries, read on the merged
+   tree, are byte-for-byte this run's: `takeAutosaveHold` :320, `releaseAutosaveHold(ifNotShownSince:)` :351, `loadLive`
+   :753, the settle hooks :1058 and :1284, `structuralFlightChanged` :1320, `settleFlightSurface` :1350,
+   `drainFlightFence` :1373, the gate belt :1946, the storage belt :2277.
+2. **`Write/MobileWriteView.swift`.** *This run* (+22 −2): `AppTiming.noteRequested()` in `init`; `noteArrived()` and
+   `takeAutosaveHold()` at the head of the arrival task; the leaving's `noteLeaving()`, `shown = model.arrivalCount`,
+   `releaseAutosaveHold(ifNotShownSince: shown)` and `noteLeft(leaving)`; the two chips' `refreshChip()`. *VM-78*
+   (VM-84): the date chip reads `Self.dateChipDay(model)` for its words, its ink and the alert's seed; `static func
+   dateChipDay(_:)` returns `model.entryDate`. **Both hold.** `dateChip` (:459–472): `let day = Self.dateChipDay(model)`,
+   the seed `dateField = Self.dateChipDay(model) ?? ""`, `Text(day ?? …)`, the ink on `day != nil`; no
+   `.header?.entryDate` anywhere in the file (its one other `header` read is the rename door's tap-time seed
+   `model.header?.title`, :260 — main's, and legitimate by the guard's own doc). **The leaving task's order,
+   untouched:** in `.onDisappear`, VM-55's `MobileLine.withdrawNoteLine(of:session:)` (:219) and
+   `router?.editors.deregister(model)` (:220) first, synchronous; then `noteLeaving()` and `shown`; then the ONE `Task`:
+   `teardown()` (:238, the flush) → `session.savepointOnLeaving` (:239) → `releaseAutosaveHold(ifNotShownSince: shown)`
+   (:242) → `AppTiming.noteLeft(leaving)` (:243). The arrival task's order too: `noteArrived` → `takeAutosaveHold` →
+   `register` → `placeMemory` → `arrive` → `start`.
+3. **`Write/MobileUndoDoor.swift`.** *This run* (+12 −1): the `inFlight` latch's `didSet`, which tells the model on each
+   real flip (`guard inFlight != oldValue`, then `model?.structuralFlightChanged()`). *VM-78* (VM-16, VM-20):
+   `runUndo` reads `undoReporting(with:)` and `redo()` reads `redoReporting(with:)`, three arms each — landed (`outcome.changed`)
+   → `undone`/`redone`, ordinary, the other direction recorded; quiet (an outcome, unchanged) → `undoFoundNothing` /
+   `redoFoundNothing`, a refusal, nothing recorded; nil → `nothingToUndo`/`nothingToRedo`, a refusal — and
+   `discardingUndoDetail` composes the shared sentence. **Both hold:** the arms at :230–246 and :285–296; the latch at
+   :131–136, raised by `beginUndo` / `confirmPendingUndo` / `redo()` before the awaited runner call and lowered in their
+   `defer` — AFTER `runUndo`'s or `redo()`'s report — so every one of VM-78's six arms speaks inside the flight, and
+   the latch's lowering (the fence's landing) is the last thing either door does. The composition is traced below.
+4. **`Write/MobileMembership.swift`.** *This run* (+23): `refreshChip()` beside `refresh()` — the chip's read is
+   `Queries.readingsContaining` alone, ordered by the same `ordered`, a failure falling back to `refresh()`. *VM-78*
+   (VM-81, VM-83, VM-21): the pure brains `rowCarriesDiverge`, `kindMark(for:)`, `memberRowName(for:)`,
+   `addRowLabel(for:)`; the membership row draws `memberRowName`, the `kindMark` and Diverge inside `if
+   rowCarriesDiverge`; both add lists read `addRowLabel`; `collect(into:)` speaks `AddToBookCopy.collected(…)`. **Both
+   hold, and `refreshChip` carries every fact the new faces read:** the row faces read `kind` (`kindMark`,
+   `rowCarriesDiverge`, `rowCarriesRemove`), `archivedAt` (`memberRowName`) and the finished state (`MobileShelfFaces.name`)
+   off `model.books`, and `books` is assigned from the SAME call on both roads — `Self.ordered(Queries.readingsContaining(db,
+   postID:))` in `refresh()` (:149, :152) and in `refreshChip()` (:178, :180). That read returns whole rows: `SELECT r.*
+   FROM reading r …` for the book leg (an ARCHIVED book kept — membership is a fact) and whole `Reading` values from
+   `readings(db)` for the gathering leg (an archived gathering skipped — it shows nothing) (`ShelfQueries.swift:709`). So
+   the chip's rows and the sheet's rows wear the same marks whichever read filled them. The add lists (`addableBooks`,
+   `addableSmartBooks`) are `refresh()`'s alone, as this run left them (the sheet reads them on appear).
+5. **`Shell/MobileLibraryView.swift`.** *This run* (+37 −12): `isOnScreen` (:71) and the hold key read from it (:79–80),
+   the row's `rowAppeared` (:498), the star's `rowStarLanded()` (:512), the paged listing's comments. *VM-78*: three
+   COMMENT hunks only (:28, :252–253, :310 — the Shelf's order now named `MobileShelfViewModel.orderedBooks`, VM-83).
+   **Both hold;** no statement of either run's changed.
+
+#### The composition, traced — a QUIET undo whose flight refused a key
+
+1. `beginUndo` raises `inFlight` → `didSet` → `structuralFlightChanged()` → `flightFence.flightBegan()` (phase `.flying`).
+2. The flush, `pendingUndoWarning` (none), then `runUndo` suspends on `runner.run { stack.undoReporting(with:) }`.
+3. A key typed now: her keyboard asks the gate → `flightFence.refusesPolicedEdit()` (the fence is up: `owesSentence =
+   true`) → `refuse(StructuralUndoCopy.anotherIsLanding)` → `report` → the line says "Another structural change is still
+   landing."; the key never reaches the page.
+4. The inverse finds the act's result already gone: an outcome with `changed == false`; the entry RETIRED by the
+   stack's own rule, the redo stack left as it was.
+5. `refreshTakesFromStore()` settles the page (nothing was written to it: the refused key never landed).
+6. VM-78's quiet arm: `report(undoFoundNothing(label), line: .refusal)` → `statusMessage` = "Nothing to undo — ‹label›
+   was already undone or changed since.", `statusAction = nil`, the line replaced by it (`StatusCenter.deliver` sets
+   `current` outright).
+7. `beginUndo`'s `defer` lowers `inFlight` → `didSet` → `structuralFlightChanged()`: no fencing latch is up and the
+   phase is `.flying` → `flightLanded(surfaceSettled:)` — the page holds the store after (5) (no forced render owed, no
+   deferred projection) → `.drain` → `drainFlightFence()` → `drain()` returns true (the owed sentence) →
+   `report(StructuralUndoCopy.anotherIsLanding, action: statusAction)`, with `statusAction` nil (set by (6)) and the
+   default class `.refusal`.
+
+**The line ends on the FENCE's sentence, "Another structural change is still landing."** — P-2-2 as built: the
+after-flight sentence replaces the door's own words and keeps the door's action, which for a quiet press is none.
+**No state is left wrong:** the fence is `.open` with nothing owed; `inFlight` is false; `statusAction` is nil, so no
+Redo is recorded — VM-16's "a quiet press records no way back" survives the drain, which only re-states the action it
+finds; the stack's entry is retired by the op, not by the door. (Had the page not held the store at (7) — a deferred
+projection — the fence would settle first, at most three re-reads, and drain with the same sentence; the same end state.)
+**What the composition costs her** (carried to "For QUESTIONS at the merge" below, with P-2-2): (6) and (7) run back to
+back in one turn of the main actor — `runUndo` returns into `beginUndo`'s `defer` with no awaited work between — so the
+quiet undo's "Nothing to undo — …" is replaced before it can be read; she learns a key was refused, not that the undo
+did nothing. The redo door's quiet arm composes the same way ("Nothing to redo — …" replaced by the fence's sentence).
+VM-78's three new undo-door tests (`aQuietUndoSpeaksTheRefusalAndOffersNoRedo`,
+`aQuietRedoSpeaksTheRefusalAndOffersNoUndo`, `aLandedRedoStillOffersItsUndo`) type nothing during a flight, so the fence
+owes no sentence there and the drain says nothing: by trace they hold on the joined tree.
+
+#### The other meeting points
+
+- **The paged Library's union of books.** `MobileLibraryView` hands the Shelf model's `books.orderedBooks` to
+  `model.windowedBooks(_:)` under the Books filter (:320, :391) and under `.all`'s union (:424). VM-78 (VM-83) changed
+  only what `orderedBooks` RETURNS — `BookcaseBoard.ordered(books, mode: .alphabetical, lastEdited: [:])` (starred first,
+  then a–z, digit-aware) in place of the retired `ShelfOrder.ordered(books:pins:)` — keeping its type
+  (`[Queries.ShelfBook]`) and its role; the Shelf's `pins` and `setPinned` left with it. This run's code reads no order:
+  `windowedBooks` windows whatever it is handed (`TrashListing.windowed`), and the union's VM-68 change is the stamp
+  FLOOR (a book whose stamp is not newer than the last listed note is withheld while notes remain), a filter on stamps;
+  the book order reaches the union only as its tie-break among books of equal stamp ("for books is the Shelf's order").
+  So the Library's book rows take the new order exactly as VM-78 intends ("The Library's book rows read this order
+  too"). No line anywhere in the phone tree calls a retired API (a grep for `ShelfOrder.ordered`,
+  `MobileShelfFaces.ordered(`, `.setPinned(`, `.pins` finds two comments only).
+- **The fence's sentence.** `StructuralUndoCopy.anotherIsLanding` is byte-unchanged ("Another structural change is
+  still landing.", `Shared/StructuralUndoCopy.swift:70`); VM-78's change in that file is the hoisted
+  `discardingUndoDetail(_:readBackFrom:)` and its header comment. The quiet-arm sentences the composition meets
+  (`undoFoundNothing`, `redoFoundNothing`, :54–60) are main's from before VM-78.
+- **The message line's Put back.** `MobileLine.putBack` still carries this run's ONE added line — `NotificationCenter.default
+  .post(name: .variorumPutBackLanded, object: session)`, inside its `do`, after `try await session.runner.run(body)`, so
+  on the success path only (a refused Put back reaches the `catch` and posts nothing); `unarchive` posts nothing. VM-78
+  did not touch `MobileLine.swift`; this run's diff in it against `a4634b288` is that one line.
+- **The timing marks.** `Shared/AppTiming.swift` is untouched by VM-78. Its 37 catalog cases (23 series, 14 counters)
+  are each referenced by a mark function, and each of its 36 mark functions has its app call site (a grep of
+  `AppTiming.<fn>(` over `Shared/`, `VariorumMobile/`, `Variorum/`, `Sources/`): `MobileQuickNote` (the box's five),
+  `MobileWriteView` (`noteRequested`, `noteArrived`, `noteLeaving`, `noteLeft`), `MobileEditorViewModel`
+  (`editorBuilt`, `noteProjectionLoaded`, `noteProjectionFetched`, `noteProjectionDelivered` ×2,
+  `noteProjectionRefreshed`), `MobileLibraryViewModel` (`libraryFetched`, `libraryDelivered`), `AppSession`
+  (`savepointAttempted` ×2), `AppBootstrap` (`libraryOpened`, `unlockAccepted`), `AppServices` (owner adoption ×3),
+  `SyncSession` (the round's four), `AutosaveCoordinator` (three), `MobileTiming` (the rest). None dropped, none moved.
+
+#### VM-78's guards, mirrored over this run's phone lines
+
+- **`noPhoneFaceReadsTheEditorsUnobservedHeaderDate`** (`MobileMembershipTests.swift:396` — the member access
+  `/\.header[?!]?\.entryDate\b/` on comment-stripped lines under `VariorumMobile/`, the model's file exempt): a grep of
+  the same pattern over the whole merged phone tree finds NO line at all (comment or code), and none among this run's
+  added lines under `VariorumMobile/` and `Shared/` (`git diff a4634b288 HEAD^1`). Green by reading.
+- **`noPhoneStringLiteralSaysSmart`** (`MobileBookFixesTests.swift:749` — "smart" as a whole word, any case, in any string
+  literal under `VariorumMobile/` and `Shared/`, two exemptions by file and exact literal): the whole-word grep over the
+  merged tree's non-comment lines holding a quote finds exactly the two exempt literals, both main's —
+  `MobileTodayDoor.swift:76` and `MobileTutorialSeeder.swift:295`. This run's added lines say "smart" once, inside a
+  `//` comment (`MobileLibraryViewModel.swift:14`, "derived smart membership counts"), which the scan cannot see (it reads
+  string literals only). Green by reading; no exemption touched.
+- **`MobileMembershipSheetFaceTests`** (hosted, the real sheet): it calls `refresh()` itself; and by (4) above the sheet's
+  rows wear the same marks whether `refresh()` or this run's `refreshChip()` filled `books`. Nothing of this run's can
+  turn it red. No guard was edited; no line of this run needed restyling.
+
+#### Compile fixes
+
+PENDING(the first compile of the joined tree — phone and Mac `build-for-testing` into `vm64-gate3`).
+
+#### The whole Core package
+
+PENDING(`swift test`, once, on the final tree). Expected by reading: VM-78 changed no Core file or test, so +0 from the
+merge; against the 4,971 in 721 baseline (`74d91c666`, round 2 part B) this run's round 3 added four
+`TimingRecorderTests` (32 → 36: three in `2543a81f3`, one in `adc466230`) and no suite — 4,975 in 721, the five declared
+known issues the baseline's.
+
+#### The products
+
+PENDING(the builds and the commit each was built at).
+
+#### The stage commands — FINAL (the orchestrator's stage; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+PENDING(written once the products exist).
+
+#### For QUESTIONS at the merge
+
+1. **P-2-2 meets VM-16's quiet arms (an addendum to the VM-55 merge-in's question 1, "P-2-2 meets VM-61").** When a
+   QUIET undo or redo (VM-16 — the inverse found the act's result already gone) refused or withheld a key during its
+   flight, the drain's sentence ("Another structural change is still landing.") replaces the door's refusal ("Nothing to
+   undo — ‹label› was already undone or changed since." / its redo mirror) in the same main-actor turn, so the line ends
+   on the fence's words and she is not told the undo did nothing. No state is wrong (the composition above). Options:
+   (a) **as merged** — no line written; P-2-2's rule (the after-flight sentence is the line's last word) holds for every
+   door, quiet undo included; (b) the drain stays silent when the door's own report in the same flight was a refusal
+   (the door's refusal already says nothing landed; but then the refused key goes unsaid — P-2-1's "said once, as the
+   fence drops" broken for that case); (c) the drain speaks first and the door's refusal second — reordering the door's
+   last two acts, a change to VM-2's and VM-16's lines both. **Left at (a), PROVISIONAL**; hers with P-2-2, P-55-3 and
+   P-55-5. No other product question from this merge.
