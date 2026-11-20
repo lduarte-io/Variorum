@@ -15,10 +15,13 @@ the simulator ids) are in the orchestrator's private run-state memory, `vm-47-ru
   (G.2) and VX-701's flake, green alone. Both reds test-only: G.1's pin `07190ee14` and fix `bb0e2285d`, G.2's
   `e8c986cac` — after round 4 closed (no fifth round earned), all three read line by line by the orchestrator, the Mac
   guard's by the coordinator too. The closing window (from 03:12:38): (a) the short Mac leg 172 / 33 green — G.2 GREEN;
-  (b) the pin red on old twice, green on the fix three times and beside the borders suite — G.1 RED ON OLD, GREEN ON NEW.
-- **Left, in order:** (1) (c), the phone legs again whole on the tree that merges: ‹PENDING: closing leg (c)›; (2) the
-  PR and its merge, then its slots; (3) the ledgers on latest main from the drafts (c)–(e), then delete the drafts;
-  (4) the cleanup, the captures KEPT until her sitting; (5) the wave-1 phone build's preparation, the install hers.
+  (b) the pin red on old twice, green on the fix three times and beside the borders suite — G.1 RED ON OLD, GREEN ON NEW;
+  (c) the phone legs again whole on the tree that merges (03:17–03:30) — 1194 / 209 at main's baseline (the only red
+  VM-24's; G.1's pin and VM-64's two tests green inside it), the speed suite alone 13 green; the stage released 03:33:10.
+  **The gate is PASSED** on the orchestrator's reading; no app code changed after the legs' tree.
+- **Left, in order:** (1) the merge ask to the stage coordinator, the PR and its merge, then its slots; (2) the ledgers
+  on latest main from the drafts (c)–(e), then delete the drafts; (3) the cleanup, the captures KEPT until her sitting;
+  (4) the wave-1 phone build's preparation, the install hers.
 
 ## UPDATE 2026-11-20, the final record pass
 
