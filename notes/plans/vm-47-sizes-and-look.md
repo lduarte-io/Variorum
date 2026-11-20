@@ -637,8 +637,8 @@ hold it, and re-captured), a defect another ticket owns (named), or a question f
 | W.7n | Piece 7 — W-C2: a hidden page's search field takes the keyboard back after the tab road's pop; trace the restoring agent, fix at the cause; a mounted pin through the shell | DONE (this commit) — traced: the Library's search is a plain `TextField` with NO focus binding; a push over the root covers it (the keyboard goes); the tab road's unanimated pop (`tabSelected` → `popToRoot`) uncovers the root while its page slides away and the framework restores the uncovered screen's first responder (UIKit's navigation restoration or SwiftUI's own — not distinguishable from source, and the fix does not depend on which); fix: the shell's `page(_:)` sets `mobilePageShowing` (tab == owner) and the Library's search (`@FocusState`) gives the keyboard back whenever it holds it while hidden, and on leaving the screen — a Back on screen keeps its restoration; what the search holds, VM-55's landing and the band untouched; pin `MobileHiddenPageKeyboardTests.theTabRoadLeavesNoKeyboardOnAHiddenPage` (search focused → the Trash pushed → "Bookcase" in its bar → no first responder in the window, the bar at its foot); phone build GREEN; runs PENDING (W.7q) — if the snapshot shows it green on old, the harness does not reproduce the restoration and the walk's re-capture carries the evidence |
 | W.7o | Piece 9 — W-C4: the segmented choice's unchosen words under 4.5:1 on the system's track; trace what the control allows per instance; fix narrowly or write up a PROVISIONAL | DONE (record only, no code) — the track is the system's own translucent drawing; per instance only `backgroundColor` (composited under the control's own grey layer — not the colour set) or `setBackgroundImage` (replaces the system's drawing; on iOS 26 reported to break the glass selection) — a hand-built control in effect; no other public road (the lookup's facts, §6); not built — PROVISIONAL P-47-30 for her (§5): as built · the unchosen words in ink · a token track by a hand-built control |
 | W.7p | Piece 10 — W-C7: the Lenses sheet's bare `Divider()`; the sweep of bare dividers; a source rule | DONE (this commit) — `MobileLenses` (the divider above the save doors) → `Divider().overlay(tokens.line)`; swept: 13 `Divider()`s in the phone tree — 11 already wear the line (Settings' row dividers carry it on the next line), the tag manager's long-press menu divider is the system menu's own separator (exempt), the Lenses one fixed; Shared's `PageDivider` wears `style.tokens.line` on its phone arm (the Mac's nil arm stays `Divider()`); pin `MobileLookSourceTests.everyPhoneDividerWearsTheLine` (exempts a divider inside `.contextMenu`/`Menu` — system-drawn; measured by a port: 1 offender at `fb649d6a8`, 0 after); build and runs PENDING (W.7q) |
-| W.7q | Builds (phone into `vm47-fix`; the Mac into `vm47-fix` once QUIET is over — `Shared/` changes) and the snapshot `~/dev/variorum-vm-47-rolw` re-made at this batch's head with both fix batches' app/Shared files reverted, built into `vm47-rolw` | NOT-STARTED |
-| W.7r | The record: §6 "The walk's fixes (batch 2)", §5's PROVISIONAL rows, one line under each finding in `vm-47-walk.md` §6 | NOT-STARTED |
+| W.7q | Builds (phone into `vm47-fix`; the Mac into `vm47-fix` once QUIET is over — `Shared/` changes) and the snapshot `~/dev/variorum-vm-47-rolw` re-made at this batch's head with both fix batches' app/Shared files reverted, built into `vm47-rolw` | IN-PROGRESS — the phone build GREEN at `c64f23782` (incremental, after each piece); REMAINING, held by the QUIET window: the Mac build, the snapshot's re-make (23 files from `273bcec51`, staged) and its build |
+| W.7r | The record: §6 "The walk's fixes (batch 2)", §5's PROVISIONAL rows, one line under each finding in `vm-47-walk.md` §6 | DONE (`e67e8f13c`, `5a4bce5b6`, this commit; the walk file's lines `b25ca04a7` — the set-3 reader's commit carried four of them — and `1526bb0fb`) |
 | W.8 | The record: the findings file closed; §5 for any new question; this row flipped | NOT-STARTED |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks — each step since DONE (rows M.1–M.6), and round 1 found the fix pass APPLIED AS CONFIRMED (`vm-47-ladder-round1.md` §1). The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) was then still queued — since SUPERSEDED (row 2.9; the run's one walk, §3) |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
@@ -2308,3 +2308,32 @@ color fill"; no other public per-instance track API (the rest are private-subvie
 hand-built control or a global appearance — neither built, by the brief. The one per-instance road that IS sure — the
 unchosen words in ink (one attribute) — changes the chosen/unchosen ink grammar the run built, a look call: hers.
 Written up as P-47-30 (§5); the code is as it was.
+
+**The builds** (§4 row W.7q): the phone `build-for-testing` into `DerivedData/vm47-fix`, incremental, after each code
+piece — the last at `c64f23782`: `** TEST BUILD SUCCEEDED **` (no warning in a changed file; every commit since is
+records only). HELD by the QUIET window, PENDING: the Mac scheme into `vm47-fix` (`Shared/AuthViews.swift` changed);
+the snapshot `~/dev/variorum-vm-47-rolw` re-made at this batch's head with all 23 app/Shared files the two fix batches
+changed checked out from `273bcec51` and staged (never committed; the tests the fixed tree's), built into its own
+`DerivedData/vm47-rolw`.
+
+**The windows — PENDING (the orchestrator's).** The fixed tree, from `vm47-fix`: the new and moved pins
+(`MobileShelfMarkerColumnTests MobileFaintCarriesNoWordsSourceTests MobileFaintOnDoorsRenderedTests MobileLookSourceTests
+MobileNoteActionsAlarmTests MobileNoteActionsHairlineTests MobilePhoneTypeSourceTests MobileFieldPlaceholderSourceTests
+MobileHiddenPageKeyboardTests`), the first batch's six, and every suite these changes could move (the faint sweep's
+screens, the note's sheet, Lenses, the shell and the Library's search, the Account sheet's seam, the controls) — the
+exact array is in the batch's hand-back and the orchestrator's window record. The snapshot, from `vm47-rolw`, the pins —
+expected RED: the marker column's origin ≈ 28 pt further right at AX5; both faint source rules (the first batch's 13
+door sites; the sibling's sites); every rendered faint case, the Trash's promise's four included; the literal-colour
+rule (`: .red`) and the divider rule (Lenses); Delete Note's four alarm cases; the hairline case with the stack empty
+(the undo-row case GREEN — a guard); the shared-arm type rule (2); both field source rules; the first batch's grounds
+and placeholder cases; the hidden-page keyboard case (if the harness reproduces the restoration). GREEN on both, by
+design: the grounds' sideways guard, `MobileLookSourceTests`' grounds/Read/star tests, `MobilePhoneTypeSourceTests`'
+other three tests.
+
+**Re-capture** (the walk's own ids): s4b, b1, r14, r14b, b12, r15 (the promises); r06, r06b, r07b, b8 / r10, b9 (W-C3);
+both `s12-note-actions-settings-row` and r09 (W-B3, W-B4); r08 (W-C7); b8–b11 in both combinations (W-C2 — and look for
+a one-frame keyboard flicker at b10); the Account sheet has no capture (the walk never opens it — Settings ▸ Sync ▸
+Account in both voices would be its evidence). W-A3's list stands (no code changed). W-C4: none (no code).
+
+**PROVISIONAL:** P-47-30 (§5, piece 9). No other new call: every fixed site's ink is the sheet's own (§A/§D), and
+piece 5's two type choices are the sheet's tab grammar and the layer's closing control.
