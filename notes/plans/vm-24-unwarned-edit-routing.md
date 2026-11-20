@@ -585,6 +585,26 @@ ever edited after the fix lands, the red build is remade by the revert protocol 
 | Closeout in §12 + the READY report | DONE (the commit after `75606a263`, whose message named it too early) |
 | The stage window (§12, "The stage window") | PENDING — the orchestrator's, from these products |
 
+### Batch B · VM-243 — LIVE STATUS (implementer, opus; started 2026-11-20 ~05:00, base `d63c1e2cd`)
+
+**This turn is HALF 1 ONLY** (the pin as the confirm, built over the tree as it stands — no VM-243 fix exists in it —
+then a STOP and a READY report). No fix line is written until the orchestrator says how to proceed.
+
+**Revert state: NO REVERT IS IN FLIGHT, and none is needed for half 1.** The tree at `d63c1e2cd` carries no VM-243
+fix, so the pin's build over it IS the build over the base files: the pin lands in its own commit, using only API
+that exists on this tree, and `DerivedData/vm24-b-pin` is built from the tree at that commit (its production files
+byte-identical to `d63c1e2cd`'s, shown by `git diff --stat d63c1e2cd`). If half 2 ever edits the pin after the fix
+lands, its red build is remade by the revert protocol and this line says so first.
+
+| Piece | State |
+|---|---|
+| Reading (CLAUDE.md + canon, TEXTKIT2_NOTES, MobileSoul §1–5, the protocol, this record §1–§7 + batch B + batch A's closeout, VM-78 BATCH C's two sections, VM-64 §7 batch 2's r1→r2 and r2, the fence suite whole, `MobileEditTrace.swift` whole, `MarkdownFaceCore.swift` whole, `MobileMarkdownCaretTests.swift`, `MobileMarkdownTests.swift`); §4.4–§4.5's file:line pointers re-verified on `d63c1e2cd` — all hold but the programmatic replace, which batch A moved (`:2487-2518` → `MobileEditorViewModel.swift:2552-2583`) | DONE |
+| The pin (`MobileTypedTextFaceTests`, readings (a)–(e), base API only) | NOT STARTED |
+| Pin build `DerivedData/vm24-b-pin` (`build-for-testing`) | NOT STARTED |
+| Half 1's closeout in §12 (expected result per reading, by expectation line) + the READY report | NOT STARTED |
+| The stage window (the pin alone; the orchestrator's) | PENDING — the orchestrator's, from these products |
+| Half 2 (D-243-1, the fix and its pins) | NOT STARTED — waits on the orchestrator's word after the window |
+
 ## 12. Batch closeouts, findings and dispositions
 
 *(Each implementer's closeout; the orchestrator's stage results; the ladder's dispositions.)*
