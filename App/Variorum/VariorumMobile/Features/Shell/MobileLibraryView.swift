@@ -25,7 +25,7 @@ struct MobileLibraryView<TabBar: View>: View {
     /// themselves as openable rows"*).
     ///
     /// It is the SAME instance the Shelf holds, deliberately: `bookshelf` +
-    /// `shelfPins` + the daily designation ride one held observation there
+    /// the daily designation ride one held observation there
     /// and both tab stacks stay alive by design (`MobileLivenessAuthority` —
     /// *"nothing about visibility ever fires `onDisappear`"*), so a second
     /// model would be a second observation over rows the app is already
@@ -249,8 +249,8 @@ struct MobileLibraryView<TabBar: View>: View {
     /// The sort rides the trailing slot as a GLYPH (#92(b) — *"the width
     /// budget gives at the SORT"*), and its **availability rule is
     /// unchanged**: `.all` only. Bookless keeps the core query's own order,
-    /// scraps are pointer-ordered, books order as the SHELF orders (pins
-    /// first, then journals, then names — `MobileShelfFaces.ordered`), and
+    /// scraps are pointer-ordered, books order as the SHELF orders (starred
+    /// first, then a–z — `MobileShelfViewModel.orderedBooks`, VM-83), and
     /// `.notes` shows the note HALF of `.all`'s union in `.all`'s own order,
     /// so a sort door on any of them could not mean what it says.
     /// *(PROVISIONAL, logged: `.notes` is ordered by the sort `.all` is set
@@ -307,7 +307,7 @@ struct MobileLibraryView<TabBar: View>: View {
     /// second row-rendering rule: `rowName` is `MobileShelfFaces.name` (the
     /// stored name plus the finished " ✓" state) and `rowMeta` is
     /// `MobileShelfFaces.meta` (LK5's order — count · tags · daily). The order
-    /// is `MobileShelfFaces.ordered`, so a book sits where the Shelf puts it.
+    /// is `MobileShelfViewModel.orderedBooks`, so a book sits where the Shelf puts it.
     /// A row opens the book's CONTENTS, which is exactly what the Shelf's row
     /// does (P35's ruled inversion).
     ///

@@ -51,6 +51,16 @@ final class MobileTrashModel {
 
     private(set) var trash: [Queries.TrashItem] = []
     private(set) var trashTruncated = false
+    /// **HAS THE LISTING ANSWERED YET?** (VM-33 — the Mac's VX-678 rule,
+    /// VX-670's honesty bar: `RecoveryViewModel.trashListingLoaded`.) `trash`
+    /// starts as `[]`, and an empty array cannot say "not yet" and "nothing"
+    /// at once — the view drew "Nothing in the Trash." on the first paint of
+    /// a Trash holding things, until the first value landed. Lowered whenever
+    /// the listing's query restarts (a filter, a sort, a new wing — VM-57's
+    /// per-wing run), raised by the value that answers it; a failed listing
+    /// never raises it (the one line speaks the refusal instead, and the
+    /// empty line stays unsaid rather than guess).
+    private(set) var trashListingLoaded = false
     /// VM-61: every value this slot holds is a refusal, so it speaks on the
     /// phone's one line as it is set (nil says nothing); no screen draws it.
     private(set) var lastError: String? {
@@ -100,12 +110,18 @@ final class MobileTrashModel {
     func startTrash() async {
         let kinds = TrashScope.kinds(filter: kindFilter)
         await MobileWingScope.follow(session.wing) { [self] wing in
+            // VM-33: a new query has not answered yet — on the first run AND
+            // on each wing's re-run (VM-57) — so whatever rows the last one
+            // left stay drawn, but no empty sentence speaks for it (the Mac's
+            // rule).
+            trashListingLoaded = false
             do {
                 for try await value in session.database.observeTrash(
                     now: session.now, kinds: kinds, oldestFirst: oldestFirst,
                     limit: window + 1, wingID: wing
                 ) {
                     (trash, trashTruncated) = TrashListing.windowed(value, window: window)
+                    trashListingLoaded = true
                 }
             } catch is CancellationError {
             } catch {

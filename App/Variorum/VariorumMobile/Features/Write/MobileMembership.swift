@@ -20,9 +20,10 @@
 //    remove, and a door that can never act isn't rendered (P-2).
 //  · DIVERGE FOR THIS BOOK (W23) through the SHARED flush-first entry
 //    (`AppSession.divergeForBook` — the R1-4 class: the copy carries
-//    what she just typed). A smart row's diverge refuses honestly and
-//    names the tag road (her ruled shape — silence where the row looks
-//    actionable is the confusion).
+//    what she just typed). VM-81 (W-110, the catch-up plan): a gathering's
+//    row no longer draws it — the op refuses a gathering, and P-2 says a
+//    door that can never act is not drawn. (The Mac's chip still draws it
+//    and refuses, the older 13f W23 shape; the model keeps that refusal.)
 //
 //  Phone wording deltas from the Mac, deliberate and recorded: no
 //  "⌥⌘Z undoes it" tail (the phone has no structural undo — the
@@ -95,6 +96,44 @@ final class MobileMembershipModel {
         reading.kind == .book
     }
 
+    /// **Whether a row carries Diverge** (VM-81, W-110): a BOOK row only. A
+    /// gathering has no membership row to swap — `divergePostForReading`
+    /// refuses it (`wrongReadingKind`) — and P-2 says a door that can never
+    /// act is not drawn. (`divergeRefusal`'s gathering arm stays as the
+    /// model's honest answer should anything else reach it.)
+    nonisolated static func rowCarriesDiverge(_ reading: Reading) -> Bool {
+        reading.kind == .book
+    }
+
+    /// The small kind word a membership row wears after its name (VM-83,
+    /// W-073 — "gathering", never "smart"; the shelf row's word), or nil for
+    /// a book.
+    nonisolated static func kindMark(for reading: Reading) -> String? {
+        reading.kind == .gathering ? MobileShelfFaces.gatheringWord : nil
+    }
+
+    /// A membership row's name (VM-21, F5): the name with the finished state,
+    /// and an ARCHIVED book marked in the shared words — "Name (archived)",
+    /// `BookArchiveCopy` (SurfaceContracts: "The pickers, chips and Book Panel
+    /// mark '(archived)'"; the Mac chip's own membership rows).
+    nonisolated static func memberRowName(for reading: Reading) -> String {
+        BookArchiveCopy.name(
+            MobileShelfFaces.name(for: reading), archived: reading.archivedAt != nil)
+    }
+
+    /// An "Add to a book" row's label, before the face's "+ " (VM-21, F5): the
+    /// list is `Queries.readings` (the note's own wing's — VM-59), archived
+    /// books included (explicit adds stay
+    /// open — 13i-e), and an archived one was listed bare. A book by its name,
+    /// marked "(archived)" when it is; a gathering by its name and the R98
+    /// road ("by tagging", the Mac's word), marked too when archived —
+    /// PROVISIONAL (the Mac chip's picker marks only books; the run record
+    /// lists the options).
+    nonisolated static func addRowLabel(for reading: Reading) -> String {
+        let name = BookArchiveCopy.name(reading)
+        return reading.kind == .gathering ? "\(name) (\(AddToBookCopy.byTagging))" : name
+    }
+
     // MARK: - Reads
 
     ///
@@ -160,20 +199,28 @@ final class MobileMembershipModel {
         await refresh()
     }
 
-    /// R98 — a smart book accepts by TAGGING (apply-and-report).
+    /// R98 — a gathering accepts by TAGGING (apply-and-report).
+    ///
+    /// VM-21 (F4): the receipt is the Mac chip's own composer
+    /// (`AddToBookCopy.collected`, hoisted to `Shared/`), so it is TRUE —
+    /// a collect that set the star names it ("Starred — the gathering shows
+    /// it now." / "Tagged #x and starred — …"), and an ARCHIVED gathering,
+    /// which shows nothing anywhere, says when it will ("…the gathering shows
+    /// it once it's unarchived."). The op's in-transaction facts decide
+    /// (`SmartCollectResult.starred` / `.gatheringArchived`). Kept and made
+    /// true by her ruling (2026-11-19); whether the phone keeps this line at
+    /// all is on her wording-pass list.
     func collect(into book: Reading) async {
         do {
             let result = try await session.runner.run { [postID] ops in
                 try ops.collectPostIntoSmartReading(postID, into: book.id)
             }
-            // Already matching did nothing — a refusal (a door that did
-            // nothing says so). A tagging that seats it applied tags she did
-            // not ask for by name — a direction (P-55-11), in P-55-7's class.
-            if result.alreadyMatched {
-                say("Already collected — it matches “\(book.name)”'s filter.", as: .refusal)
-            } else {
-                say("Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter.", as: .refusal)
-            }
+            // VM-61 / P-55-11: both of the collect's outcomes speak as a
+            // REFUSAL-class line — already matching did nothing (a door that
+            // did nothing says so); a tagging that seats it applied tags (or
+            // the star) she did not ask for by name — a direction, in P-55-7's
+            // class. VM-21: the words are the shared composer's, whichever arm.
+            say(AddToBookCopy.collected(result, gatheringName: book.name), as: .refusal)
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
                 say("“\(book.name)” can't take this note: \(reason)", as: .refusal)
@@ -320,22 +367,24 @@ struct MobileMembershipSheet: View {
         } else {
             ForEach(model.books, id: \.id) { book in
                 HStack(spacing: 10) {
-                    Text(tokens.chromeLabel(MobileShelfFaces.name(for: book)))
+                    Text(tokens.chromeLabel(MobileMembershipModel.memberRowName(for: book)))
                         .font(tokens.body)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
-                    if book.kind == .gathering {
-                        Text(tokens.chromeLabel("smart"))
+                    if let mark = MobileMembershipModel.kindMark(for: book) {
+                        Text(tokens.chromeLabel(mark))
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)
                     }
                     Spacer()
-                    Button(tokens.chromeLabel("diverge")) {
-                        Task { await model.diverge(for: book) }
+                    if MobileMembershipModel.rowCarriesDiverge(book) {
+                        Button(tokens.chromeLabel("diverge")) {
+                            Task { await model.diverge(for: book) }
+                        }
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .buttonStyle(.plain)
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .buttonStyle(.plain)
                     if MobileMembershipModel.rowCarriesRemove(book) {
                         Button(tokens.chromeLabel("remove")) {
                             Task { await model.remove(from: book) }
@@ -359,12 +408,16 @@ struct MobileMembershipSheet: View {
                     .foregroundStyle(tokens.faint)
                     .padding(.top, 6)
                 ForEach(model.addableBooks, id: \.id) { book in
-                    addRow(book.name) { await model.add(to: book) }
+                    addRow(MobileMembershipModel.addRowLabel(for: book)) {
+                        await model.add(to: book)
+                    }
                 }
                 // R98: smart books collect by filter — adding IS tagging,
                 // and the door says so.
                 ForEach(model.addableSmartBooks, id: \.id) { book in
-                    addRow("\(book.name) (by tagging)") { await model.collect(into: book) }
+                    addRow(MobileMembershipModel.addRowLabel(for: book)) {
+                        await model.collect(into: book)
+                    }
                 }
             }
         }

@@ -1060,7 +1060,9 @@ struct MobileLivenessTests {
             let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
             window.addSubview(surface)
             window.makeKeyAndVisible()
-            defer { window.isHidden = true }
+            // VM-19 (round 1 N5): the teardown is certain on every exit; the
+            // explicit call below is where its expectation reads it.
+            defer { Self.leave(window) }
             model.attach(textView: surface.textView)
 
             // The screen's exact wiring order: arrive first, loops after.
@@ -1076,7 +1078,27 @@ struct MobileLivenessTests {
             }
             arrival.cancel()
             #expect(rose, "arrival raises the keyboard — two taps to typing")
+
+            // VM-19 (PIN — red on the teardown that only hides the window):
+            // no first responder outlives this test. A text view left first
+            // responder in a hidden window keeps the keyboard's input
+            // session, and a later suite's editor then desyncs on an
+            // `insertText` of a run in that posture (VX-282 C-1's decider;
+            // not reproduced on VM-78's toolchain by its trace instrument,
+            // `MobileStaleResponderTraceTests`, now in history at
+            // `fec0e478b` — the pin stands as test hygiene).
+            Self.leave(window)
+            #expect(!surface.textView.isFirstResponder,
+                    "VM-19: the raised surface lets go of the keyboard before its window hides")
         }
+    }
+
+    /// The window-hosted tests' teardown (VM-19): whatever holds the
+    /// keyboard inside the window lets go BEFORE the window hides — hiding
+    /// alone never resigns a first responder.
+    private static func leave(_ window: UIWindow) {
+        window.endEditing(true)
+        window.isHidden = true
     }
 
     // MARK: MINOR 2 — the voice flip reaches every registered editor
