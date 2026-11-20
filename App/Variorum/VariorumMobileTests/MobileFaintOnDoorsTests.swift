@@ -123,11 +123,15 @@ struct MobileFaintOnDoorsSourceTests {
 
     /// The door words in the faint, as `file:line` — the rule itself.
     static func offenders() throws -> (sites: [String], scanned: Int) {
-        let walker = try #require(FileManager.default.enumerator(
-            at: appRoot, includingPropertiesForKeys: nil))
+        var files: [URL] = []
+        for folder in ["VariorumMobile", "Shared"] {
+            let walker = try #require(FileManager.default.enumerator(
+                at: appRoot.appendingPathComponent(folder), includingPropertiesForKeys: nil))
+            for case let file as URL in walker where file.pathExtension == "swift" { files.append(file) }
+        }
         var sites: [String] = []
         var scanned = 0
-        for case let file as URL in walker where file.pathExtension == "swift" {
+        for file in files {
             let relative = file.path.replacingOccurrences(of: appRoot.path + "/", with: "")
             let phone = relative.hasPrefix("VariorumMobile/")
             guard phone || relative.hasPrefix("Shared/") else { continue }
