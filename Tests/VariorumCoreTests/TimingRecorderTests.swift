@@ -375,6 +375,68 @@ struct TimingRecorderTests {
         #expect(stats.last == 5)
     }
 
+    // MARK: - A damaged record (VM-64 ladder round 3, finding 5(b))
+    //
+    // The timing file is read at every launch (`absorb`, on its own queue) and
+    // a build's table is drawn by the readout as decoded, so a damaged
+    // `timing.json` must be held to the ring's bound by the decode and must not
+    // trap the report. BUG pins: red on the code before the round-3 fix.
+
+    /// **A decoded capacity is held to the ring's own bound** — the newest
+    /// `defaultCapacity` samples kept, the all-time count kept. Read in-process:
+    /// neither size traps the old code (a probe showed `reserveCapacity(Int.max)`
+    /// is a silent no-op), so its wrong answer is read here.
+    /// RED ON OLD: the capacity was taken as written (100,000; `Int.max`), so
+    /// every sample the file held was kept, and the first sample reserved that
+    /// many slots up front (8 TB of address space at 2⁴⁰ in the same probe).
+    @Test func aDecodedCapacityIsHeldToTheRingsBound() throws {
+        let samples = (0..<70).map { String($0) }.joined(separator: ",")
+        let json = #"{"capacity":100000,"count":70,"samples":["# + samples + "]}"
+        let stats = try JSONDecoder().decode(TimingStats.self, from: Data(json.utf8))
+        #expect(stats.capacity == TimingStats.defaultCapacity)
+        #expect(stats.retained == (6..<70).map(Double.init), "the newest 64 kept, oldest first")
+        #expect(stats.count == 70)
+        #expect(stats.last == 69)
+
+        let huge = #"{"capacity":9223372036854775807,"count":1,"samples":[5]}"#
+        let damaged = try JSONDecoder().decode(TimingStats.self, from: Data(huge.utf8))
+        #expect(damaged.capacity == TimingStats.defaultCapacity)
+        #expect(damaged.retained == [5])
+    }
+
+    /// **A value outside `Int`'s range is reported without trapping.** A trap
+    /// cannot be caught in-process, so the body runs in a child process (Swift
+    /// Testing's exit test) and is expected to exit cleanly; on the old code
+    /// the child dies and the parent records one issue — the suite survives.
+    /// RED ON OLD: `TimingReport.number` converted with `Int(_:)` on both of its
+    /// roads, which traps past `Int`'s range (and on a non-finite value) —
+    /// observed `.signal(SIGTRAP)`.
+    @Test func aSampleOutsideIntsRangeIsReportedWithoutTrapping() async {
+        await #expect(processExitsWith: .success) {
+            let json = #"{"capacity":4,"count":3,"samples":[1e300,-1e300,5]}"#
+            let stats = try JSONDecoder().decode(TimingStats.self, from: Data(json.utf8))
+            _ = TimingReport.summary(stats, unit: .milliseconds)
+            _ = TimingReport.summary(stats, unit: .count)
+            for value in [Double.infinity, -.infinity, .nan, 1e19, -1e19] {
+                _ = TimingReport.number(value, .milliseconds)
+                _ = TimingReport.number(value, .count)
+            }
+        }
+    }
+
+    /// **…and what it draws is bounded** (on the fixed code only — the old code
+    /// traps here, which is the pin above): a value past ±10¹⁵ is drawn at the
+    /// bound, a NaN (∞'s median) as 0, and an ordinary value as before.
+    @Test func aValueOutsideTheDrawnBoundIsDrawnAtTheBound() async {
+        await #expect(processExitsWith: .success) {
+            precondition(TimingReport.number(1e300, .milliseconds) == "1000000000000000")
+            precondition(TimingReport.number(-1e300, .milliseconds) == "-1000000000000000.0")
+            precondition(TimingReport.number(.infinity, .count) == "1000000000000000")
+            precondition(TimingReport.number(.nan, .count) == "0")
+            precondition(TimingReport.number(312.4, .milliseconds) == "312")
+        }
+    }
+
     // MARK: - The author's sharpening: per-build tables that survive a quit
 
     /// A wall clock the test sets by hand.
