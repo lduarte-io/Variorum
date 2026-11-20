@@ -709,9 +709,29 @@ final class MobileLibraryViewModel {
     }
 
     /// The rows REPLACED by `page` (a first page, a held delivery, a re-ask).
+    ///
+    /// **A listing that was complete stays complete** (VM-64 ladder round 3,
+    /// finding 1): when the rows replaced answered this same question with
+    /// nothing after them, and this page — reaching no deeper than they did —
+    /// now carries a cursor, the store's change pushed a note past the listed
+    /// depth (a Put back re-asked at that depth, a note arriving at the top,
+    /// a return after notes arrived), and its page is asked for at once.
+    /// Otherwise nothing would ask: `wantsMore` is raised only by a row coming
+    /// on screen while a cursor stands, and the listing's tail is already on
+    /// screen. One page, once — this landing sets the cursor, so no later
+    /// landing raises it again until a page has appended and the listing is
+    /// complete once more (`append` clears it); a re-ask inside the follow asks
+    /// at the follow's exit. A SHORT complete listing that a page reaches past
+    /// (a first sync onto an empty Library) is not chased: its new rows reach
+    /// below what was listed, so their own `onAppear` asks as she scrolls, and
+    /// the held listing stays one page deep.
     private func land(_ page: ListingPage, _ question: Question) {
         let state = paging(question.listing)
-        if state.question != question { state.wantsMore = false }  // a new question starts at the top
+        if state.question != question {
+            state.wantsMore = false  // a new question starts at the top
+        } else if state.next == nil, page.next != nil, page.items.count <= rows(question.listing).count {
+            state.wantsMore = true
+        }
         state.generation += 1
         state.question = question
         if landedWing[question.listing] != .some(question.wing) {

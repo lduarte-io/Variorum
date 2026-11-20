@@ -268,7 +268,7 @@ whole, `MobileLibraryViewModel.swift` whole, the view's row `onAppear`, `MobileL
 `structuralFlightChanged` and its two `autosave.observe` sites. Written and pushed before any code. Every finding is
 AGREED; the arms that wait for your final call are named in each entry.*
 
-### 1 · [MINOR] a fully listed listing comes back one row short after a delete and the line's Undo — AGREE; build shape (i); applied this pass with three pins
+### 1 · [MINOR] a fully listed listing comes back one row short after a delete and the line's Undo — AGREE; shape (i), built one clause narrower as (i′) (the added note below); applied this pass with three pins
 
 **My trace, in the pin world (`listingLimit: 4`, held on screen, 6 notes, the edited sort):** the hold's first
 delivery lands 4 and a cursor; `loadMore` appends 2 → 6, `next == nil`, `allHasMore == false`. The delete of `all[5]`
@@ -321,8 +321,23 @@ read and then return — a one-read blink at the listing's end, where today they
 `allHasMore` false over the chase would draw books the union cannot yet place (P-68-4's own rule), so I left `place`
 alone.
 
+**[ADDED by this implementer while building, after the responses were pushed — one over-read the paragraph above
+missed, and the arm it makes for your final call.]** Read again against the direct arm of `holdFirstPage`: a SHORT
+complete listing whose first page a single landing reaches PAST — the plainest case is a first sync onto an empty
+Library held on screen (0 rows, `next == nil`; the first delivery lands a full page and a cursor) — meets your
+condition, so (i) as specified reads a second page she did not come near, and from then on the held listing is two
+pages deep: every later delivery of that sync goes through the follow and re-reads two pages where it landed one.
+Bounded and ∝ what is listed (P1 holds), but an over-read on the heaviest road the Library has. Nothing is stuck
+there to begin with: the new rows reach below what was listed, so the ones near the new end fire their own `onAppear`
+as she scrolls. **Built, therefore, (i′):** the same condition plus "this page reaches no deeper than the rows it
+replaced" (`page.items.count <= rows(listing).count`) — exactly the re-ask at the listed depth (`reread`, depth =
+the rows) and a one-page listing that was exactly full; every shape you named, and the arrival, meet it (the three
+pins below are red on old and green under either arm). **Arms for your final call:** (i′) as built — recommended;
+(i) exactly as you wrote it — the extra clause deleted, the pins unchanged; the over-read above recorded.
+
 **What lands (Part of VM-68):** in `land`, the existing `if state.question != question { state.wantsMore = false }`
-gains `else if state.next == nil, page.next != nil { state.wantsMore = true }`, with its comment. No other line moves.
+gains `else if state.next == nil, page.next != nil, page.items.count <= rows(question.listing).count { state.wantsMore
+= true }`, with its comment. No other line moves.
 **Pins** (`MobileLibraryPagingRulesTests`, hosted, model level; the expected red is on the pre-fix code — round 2's
 tree with this one hunk reversed):
 - `aPutBackOfTheLastRowOfAFullyListedListingReturnsIt` — your pin as specified (6 notes, limit 4, held, listed to the
