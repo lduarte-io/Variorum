@@ -4451,9 +4451,10 @@ invocation as above in "The hosted command for finding 1's pins"):
 - **On the hunk-reversed build:** EXACTLY the three finding-1 pins red, at 3 · 2 · 2 issues (7) and at the expectations
   their docs name — `aPutBackOfTheLastRowOfAFullyListedListingReturnsIt` (listed again; the store's whole listing;
   `!allHasMore`) · `aPutBackOfARowAboveTheEndOfAFullyListedListingKeepsItsLastRow` (the whole listing; `!allHasMore`) ·
-  `aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow` (the whole listing; `!allHasMore`); round 2's four
-  8-of-12 pins (`aRowDeletedPastTheFirstPageLeavesTheListing`, `aPutBackThroughTheLinesUndoReturnsARowPastTheFirstPage`,
-  `aPutBackAfterTheLibraryCameBackReturnsARowPastTheFirstPage`, `aDeeperListingFollowsItsFirstPage`) and the new guard
+  `aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow` (the whole listing; `!allHasMore`); round 2's 8-of-12 pins
+  in this suite (`aRowDeletedPastTheFirstPageLeavesTheListing`, `aPutBackThroughTheLinesUndoReturnsARowPastTheFirstPage`,
+  `aPutBackAfterTheLibraryCameBackReturnsARowPastTheFirstPage` — its fourth, the ★ pin, is
+  `MobileLibraryRowActsTests`', run in company), batch 5's `aDeeperListingFollowsItsFirstPage` (8 of 12 too) and the new guard
   `aShortCompleteListingThatAPageReachesPastIsNotChased` GREEN; every other test of the suite green. Any other red, or a
   different count, is explained in the record before the gate counts as open; a finding-1 pin green there is hollow at
   that pin and said so.
