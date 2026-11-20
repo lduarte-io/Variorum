@@ -588,11 +588,14 @@ enum MembershipChoiceProbe {
 
 /// The add-to-book doors' words (17y (o) — the chip's picker and the Pool's;
 /// 13s re-voices).
-nonisolated enum AddToBookCopy {
+///
+/// VM-78 batch A (VM-21): `byTagging` and the collect receipt (`collected`)
+/// live in `Shared/CollectReceiptCopy.swift` — the phone's membership sheet
+/// speaks them too. This extension keeps the Mac's.
+nonisolated extension AddToBookCopy {
     static let verb = "Add to Book"
     static let prompt = "Find or make a book"
     static let empty = "No other books here \u{2014} type a name to make one."
-    static let byTagging = "by tagging"
     /// The create row — names exactly what it will make.
     static func newBook(_ typed: String) -> String { "New book \u{201C}\(typed)\u{201D}" }
     /// The quiet receipt.
@@ -602,29 +605,4 @@ nonisolated enum AddToBookCopy {
     /// A book's identity for "already exists": its name, as the E13 guard
     /// reads it (case-folded, trimmed).
     static func key(_ text: String) -> String { BookNaming.key(text) }
-
-    /// R98's collect receipt on the chip (a gathering picked "by tagging").
-    /// A live gathering keeps the chip's shipped words; an ARCHIVED one —
-    /// which the picker offers (13i-e: explicit adds stay open) but which
-    /// assembles empty — says the honest thing (VX-241, PROVISIONAL wording:
-    /// the Bookcase's own sentence). The op's in-transaction fact decides.
-    ///
-    /// VX-249 (R-VX381-A5, PROVISIONAL): a collect that SET the star speaks
-    /// the mint's family verbatim ("Starred — the gathering shows it now." /
-    /// "Tagged #x and starred — …") — the chip's tags-only words stay as
-    /// shipped until VX-216 unifies its voice.
-    static func collected(_ result: Operations.SmartCollectResult, gatheringName name: String) -> String {
-        if result.gatheringArchived {
-            return result.alreadyMatched
-                ? BookcaseCopy.alreadyMatchesWhileArchived
-                : BookcaseCopy.taggedWhileArchived(result.appliedTagPaths, starred: result.starred)
-        }
-        if result.starred {
-            return BookcaseCopy.shownByMint(result.appliedTagPaths, starred: true)
-        }
-        return result.alreadyMatched
-            ? "Already collected \u{2014} it matches \u{201C}\(name)\u{201D}'s filter."
-            : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) "
-                + "\u{2014} \u{201C}\(name)\u{201D} collects by filter."
-    }
 }

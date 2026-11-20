@@ -194,14 +194,14 @@ nonisolated enum CollectingCopy {
         }
     }
 
-    // The STATE section's sentences.
-    static let finishedCaption =
-        "Finished means the table of contents is done \u{2014} the writing inside can still "
-        + "change. A finished book opens as pure text."
+    // The STATE section's sentences. VM-78 batch A: the first sentence of the
+    // Finished caption and the whole Sealed caption are the phone's too, so
+    // they live in `Shared/BookStateCopy.swift` (bytes unchanged here).
+    static let finishedCaption = BookStateCopy.finishedMeans + " A finished book opens as pure text."
     static let finishedWhileSealed =
         "A sealed book stays finished \u{2014} Unseal reopens it."
     static let sealOpenCaption = "Sealed means the book is done."
-    static let sealedCaption = "Sealed \u{2014} the book is done; no note in it can change."
+    static let sealedCaption = BookStateCopy.sealedMeans
     static let ownCaption = "An owned book is the only place its notes live."
     static let ownedCaption = "This book owns its notes \u{2014} each one lives only here."
     static let finishedToggle = "Finished"

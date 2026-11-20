@@ -208,9 +208,10 @@ enum MobileTutorialSeeder {
 
         let book = try ops.createReading(
             name: bookName, kind: .book, profile: "collection")
-        // The shelf's pin face, taught by wearing it (pinned books sit
-        // first — the guide leads the shelf so it is findable on a fresh
-        // dev store; "getting around" says so). (13i-d F-U2-1 seeded the
+        // The shelf's star, taught by wearing it (`setShelfPinned` IS the
+        // star since 13i-d; starred books sit first — the guide leads the
+        // shelf so it is findable on a fresh dev store; "getting around"
+        // says so). (13i-d F-U2-1 seeded the
         // guide UNSTARRED when the star cap was full; VX-643 retired the
         // cap, so the star always lands and every refusal aborts the seed.)
         try ops.setShelfPinned(book.id, pinned: true)
@@ -277,9 +278,14 @@ enum MobileTutorialSeeder {
             // batch 5 had already replaced — Today's Entry as a full-width
             // door, and no mention at all of the quick-note box, which is
             // now half the screen. Rewritten to the shelf that exists.
-            "The SHELF is home: your books at the top, with this one pinned "
-            + "first — pinned books always sit first, and a long press on a "
-            + "book row pins or unpins it. The daily journal's row wears a "
+            // VM-78 round 1, F4: VM-83 retired the row's Pin door (it wrote
+            // the same star), so the first sentence says the shelf's order and
+            // star as they are — "starred books first", since starred books
+            // sort a–z among themselves and a starred Journal can lead. The
+            // later "also" went with the clause it leaned on. A DRAFT for her
+            // wording pass; the rest of the guide is VM-212's (wave 6).
+            "The SHELF is home: your books at the top, starred books first "
+            + "— this one is starred. The daily journal's row wears a "
             + "small \(MobileShelfFaces.todayDoorTitle) badge: tap it and "
             + "today's entry opens, made if the day hasn't started yet. "
             + "(With no journal on the shelf the same door stands as its own "
@@ -287,7 +293,7 @@ enum MobileTutorialSeeder {
             + "starts a bookless note and drops you straight into writing; "
             + "+ new book, at the list's end, starts a fresh book — "
             + "hand-picked, a dated journal, or a smart book collecting by "
-            + "tags. A long press also STARS a note or a book — "
+            + "tags. A long press STARS a note or a book — "
             + "starred things sit above everything at the shelf's very top, "
             + "and the same press takes the star back off.",
 
@@ -590,15 +596,20 @@ enum MobileTutorialSeeder {
             + "divide's cut.",
         ])
 
+        // VM-3: these two blocks taught the retired duplicate divide
+        // ("copied onto both halves"); the phone divides KEEP-ON-TOP (her
+        // U-2, `MobileStructural.divide` → `KeepOnTopDivide`): the read take
+        // is cut, every other take rides whole onto the TOP block. A DRAFT
+        // for her wording pass (the old and new text side by side in
+        // `notes/plans/fixes/vm-78-fixes-to-whats-there.md`, BATCH B).
         let fannedDivide = try lesson(structure, "divide with takes", [
             "Dividing a block that has several takes follows one simple "
-            + "rule on the phone: the take you're READING is cut in two, "
-            + "and every other take rides along whole — copied onto both "
-            + "halves, so nothing needs a matching cut and nothing is lost.",
+            + "rule on the phone: the take you're reading is cut in two, "
+            + "and every other take rides along whole onto the top block, "
+            + "so nothing needs a matching cut and nothing is lost.",
 
-            "The extra copies are quick to delete where you don't want "
-            + "them — quicker than hunting for a lost take ever was. The "
-            + "original block keeps everything, off-stage, in lineage.",
+            "The bottom block holds just the second half. The original "
+            + "block keeps everything, off-stage, in lineage.",
 
             "The ferry crossed at dawn. Nobody on board spoke about the "
             + "storm.",
