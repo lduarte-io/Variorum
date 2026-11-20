@@ -1,9 +1,14 @@
 # VM-47 — the run's one walk: what the captures show
 
-**Run:** VM-47, "Sizes and look" (branch `vm-47-sizes-and-look`, worktree `~/dev/variorum-vm-47`). **Tree walked:** code
-`b20b04fad` (batches 1–5, the ladder's fixes, VM-55's re-land) plus R-47-3's one word (`50635a674` — the Bookcase root's
-line says "Bookcase"; the walk app and driver rebuilt on it into `DerivedData/vm47-walk`). **Record:** `notes/plans/vm-47-sizes-and-look.md` — §3 "One
-walk for the whole run" (the brief), §4 rows W.0–W.8 (LIVE STATUS), §5 (the PROVISIONAL calls), §6 (each batch's results).
+**Run:** VM-47, "Sizes and look" (branch `vm-47-sizes-and-look`, worktree `~/dev/variorum-vm-47`). **Trees walked —
+four capture sets, each with its tree** (all on the walk device `vm47-walk`, into the gitignored
+`notes/plans/vm-47-screens/`): `final/` (parts A and B) — code `b20b04fad` (batches 1–5, the ladder's fixes, VM-55's
+re-land) plus R-47-3's one word (`50635a674` — the Bookcase root's line says "Bookcase"; the walk app and driver rebuilt
+on it into `DerivedData/vm47-walk`); `recapture/` (part C) — the walk app on `4866c7fb8`'s app code (the walk's two fix
+batches, W-A1's first fix among them, and main's first merge); `e4-before/` — the orchestrator's settling capture of
+W-E4 on the first fix's app, before the redo; `final-tree/` (part D) — the final tree's app, code `d78853d8e` (W-A1
+redone, both merges of main in). **Record:** `notes/plans/vm-47-sizes-and-look.md` — §3 "One walk for the whole run"
+(the brief), §4 rows W.0–W.11 (LIVE STATUS), §5 (the PROVISIONAL calls), §6 (each batch's results).
 
 **Who does what.** The walker DRIVES the walk (builds the driver, runs both parts, keeps them honest, records each part's
 result block in §5 below). A FRESH READER, briefed from this file alone, reads every capture against the sizing sheet and
@@ -12,8 +17,39 @@ capture's file name, what it shows, and what to check (§3).
 
 ## FOR A LATER READER
 
-PENDING — written when both parts are read (what was seen, what was this run's and was fixed, what is another ticket's,
-what is hers).
+*Written at the final record pass (2026-11-20), after all four capture sets were read. Everything below this section
+is the walk's working record.*
+
+**What was seen.** Four capture sets: the walk's parts A and B on the re-landed tree (283 of 285, `final/` — §4–§4d);
+the re-capture after the walk's fixes and main's first merge (164 of 166, `recapture/` — §4e–§4f); the settling capture
+of W-E4 on the first edge fix (`e4-before/`); the final tree, after W-A1 was redone and main merged again (119 of 119,
+`final-tree/` — §4g–§4h). Every set was read by fresh readers against the sizing sheet, at full size, grounds and inks
+by pixel. What matched from the first set on: the second palette, the voice flip both ways (R-47-2), the appearance
+choice in the editor and the overlays, Settings from every root and from a note, Protection's road, VM-54's flip, the
+bar on pushed lists and its tab roads, no bar where none belongs, the wing list, the message line above the bar, her
+words growing at AX5 while the chrome holds, and "Bookcase" on the root's line (R-47-3). On the final tree every fix
+shows, the keyboard reveal is main's again (146 pt in Study, 118 in Terminal), nothing of her prose sits behind the
+keyboard bar or under the status bar, and there is no regression and no new finding.
+
+**This run's, and fixed** (a FIXED line under each in §6; the record's §6 blocks hold the mechanisms): part A's W-A1,
+W-A3, W-A9, W-A10; part B's W-B1 with W-C3, W-B3, W-B4, W-C2, W-C7, and the Account sheet's header and placeholders.
+**W-A1 was fixed twice:** the first fix let each page's content out with its ground, which the re-capture caught as
+W-E4 (with the keyboard up, a tap low in a note no longer scrolled it, so the caret and a typed letter sat under the
+keyboard bar), W-E3 (her prose behind the bar) and W-F1 (her prose under the status bar on a scrolled page); the redo
+put main's clip back and has the shell paint the strips beyond the band, removing all three — held by the UI test
+`MobileKeyboardRevealUITests`. W-C4 (the segmented choice's grey words on iOS's own track) is this run's but put to her
+(P-47-30).
+
+**Another ticket's:** W-A4, W-D1, W-D2 (VM-218) · W-A11 (VM-93) · W-A12 (VM-89) · W-A13 (VM-188, VM-195) · W-B5
+(VM-152) · W-E1, the takes pill over the next block's first line (VM-188).
+
+**Hers** (each a row in the record's §5): W-A2 (P-47-27) · W-A5 (P-47-31) · W-A6 (P-47-32) · W-A7 (P-47-33) · W-A8
+(P-47-34) · W-B2 (P-47-35) · W-C1 (P-47-36) · W-C5 (P-47-37) · W-C6 (P-47-38) · W-C8 (P-47-39) · W-D3 (P-47-40) · W-E2
+(P-47-42); and the redo's two give-backs — the Read page's last line cut at the band's foot as on main (§4h H3,
+P-47-43) and the strips switching at once in a push or a pop (never caught mid-slide, P-47-44).
+
+**Never captured:** the Account sheet, the timing readout's sheet, the doored sync states, the lobby, the 320 pt width,
+a push or a pop caught mid-slide, a cancelled swipe-back.
 
 ## 1. Where the captures are and how to read them
 
@@ -536,9 +572,19 @@ The driver's build: GREEN — `App/Variorum/DerivedData/vm47-walk`, cold, 14:11�
 **`; the bundle carries `VM47FinalWalk/test01_seed · test10_core · test20_rest · test30_flip · test40_shell ·
 test50_settings`; the temporary copy removed, the tree clean).
 
-PENDING — part A's and part B's: captures written against expected (99 / 182), every MISSING / NOT CAPTURED with its step,
-the device's state, instances, new crash reports (the baseline before the walk: the newest is
-`VariorumMobile-2026-11-19-120544.ips`).
+The four sets' results are the record's §4 rows, each in a line (the baseline before the walk: the newest crash report
+`VariorumMobile-2026-11-19-120544.ips`):
+- **Part A** — row W.3: driven by the orchestrator with the runbook's own calls (the walker stood down), 99 of 99, all
+  eight combinations, nothing skipped for time; the seed's misses its own (the first-use keyboard card on a fresh
+  simulator), fed to part B's re-seed.
+- **Part B** — row W.5: 184 of 186; the two missing `m3-after-undo` the driver's timing (the line lives six seconds);
+  the re-seed's one real gap the app's own (the comment draft under the keyboard, VM-14).
+- **The re-capture (part C)** — row W.9: 164 of 166; the two missing `r05b-create-book-smart` the driver's stale label
+  ("Smart Book" where the merged tree says "Gathering"); the Account-sheet steps skipped (a dev store's sync row has no
+  Account door).
+- **The final tree (part D, `walk_part_d`)** — row W.11 (9): 119 of 119, no miss; `r05b` shot under "Gathering".
+- In every set: the app's container listed `Variorum-dev` only (on the final tree also `Timing`, VM-64's readout's own
+  folder), no Problem Reporter, no new crash report; the device shut down and kept.
 
 ## 6. Findings
 
