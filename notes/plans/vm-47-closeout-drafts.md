@@ -8,13 +8,13 @@ final tree), so they merge with the PR; (c)–(e) are the ledgers, applied on la
 session.
 
 **The slots** — every one left is spelled `‹PENDING: …›`, so one search finds them all: the PR number · the merge
-commit · the merge gate's closing leg (c), the phone legs again whole on the tree that merges · the wave-1 phone build.
+commit · the wave-1 phone build.
 Filled at this pass: QUESTIONS #281 · PL-80 · VM-64's merge-in (four files, `3d55b51f6`) and its narrow read (ladder
 round 4) · the timing door's place · the targeted window and the post-merge window · the re-capture and the final-tree
 captures · `Tools/canon-size` · the screenshots, KEPT until her sitting. **Filled at the gate record pass
-(2026-11-20):** the merge gate's legs 1–3 and the closing window's (a) and (b), with its two test-only findings G.1 and
-G.2 (the record's rows G.0–G.2). The two applied canon files carry their own merge slots (PL-80's gate — now filled but
-its closing leg — and PR) for the merging session to fill there.
+(2026-11-20):** the whole merge gate — legs 1–3 and the closing window's (a), (b) and (c), PASSED on the orchestrator's
+reading — with its two test-only findings G.1 and G.2 (the record's rows G.0–G.2). The two applied canon files carry
+their own merge slots (PL-80's PR — its gate now filled) for the merging session to fill there.
 
 ---
 
@@ -142,7 +142,7 @@ VM-64's timing readout on the same layer; the keyboard bar's own ground among VM
 VM-249; the forty-one calls as QUESTIONS #281; a peeked take's dark tint beside the callout's wash for the Mac, P-47-42;
 "Verified by" the post-merge window and the four capture sets). The row is in `notes/MobileSoul.md` itself; its two
 merge slots — the merge gate and the PR with its merge commit — are filled there by the merging session (the gate's
-clause written on the branch at the gate record pass, all but its closing leg (c)).
+clause written on the branch at the gate record pass, its closing leg (c) included).
 
 ---
 
@@ -335,7 +335,12 @@ file; the phone's face unchanged); green in the closing window's short Mac leg, 
 passed after 51.390 seconds", with the source-reading Mac types and `BadgeFamilySplitTests` (the whole Mac target ran
 once, before the edit). Both edits came after round 4 had closed with no MAJOR, so no fifth round was earned; the
 orchestrator read all three diffs line by line and the stage coordinator read the Mac guard's. The phone legs again,
-whole, on the tree that merges: ‹PENDING: closing leg (c)›.
+whole, on the tree that merges (code `d78853d8e` plus the two test files): "Test run with 1194 tests in 209 suites
+failed after 758.299 seconds with 8 issues (including 6 known issues)", one launch, the only red main's own, VM-24's
+caret pin (2 of 3 cases) — G.1's pin and VM-64's two tests green inside the whole run; the speed suite alone, "Test run
+with 13 tests in 1 suite passed after 129.292 seconds". The gate PASSED on the orchestrator's reading: the whole phone
+target at main's baseline, the speed suite 13 of 13, the whole Mac target at main's counts with one branch red fixed in
+its test, two test-only findings fixed and proven, no app code changed after the legs' tree.
 
 **Born, triaged at mint:** VM-247 (Feature · Settings & onboarding · Mobile · Medium · Backlog — the palette row the lock
 mockup draws, which no ticket owned) · VM-248 (Debt · Confirmed · Tests & tooling · Mobile · Medium · Backlog — an
@@ -559,7 +564,8 @@ alone, the snapshots red as meant, the keyboard UI test both ways, Mac 118 / 21 
 phone target 1,193 / 209 (main's VM-24 red, and G.1: VM-64's box-Open timing guard ended early by a frame-later mark
 an earlier test left — a deterministic pin red on old, the fix test-only), the speed suite 13 alone, the whole Mac
 target 6,435 / 1,114 at main's counts (G.2: a source guard's idiom line met the phone's control, fixed test-only;
-VX-701's flake green alone); the phone legs again on the tree that merges ‹PENDING: closing leg (c)›. Canon: SurfaceContracts ×7 (the
+VX-701's flake green alone); the phone legs again on the tree that merges 1,194 / 209 at main's baseline and the speed
+suite 13 alone — PASSED. Canon: SurfaceContracts ×7 (the
 phone's look, sizes, inks and grounds with the painted edges, bar and Settings; the Bookcase's top line; the one
 Protection door); QUESTIONS #199 and #195 MINOR 3 marked; `Tools/canon-size` 143606 (headroom 6394). QUESTIONS #281
 (forty-one PROVISIONAL calls and the wording pass). Born, triaged: VM-247 · VM-248 · VM-249. MOBILE PARITY: PL-80 — the
@@ -593,5 +599,6 @@ install.**
   tree, Mac 118/21; the final-tree captures 119 of 119, no regression; the merge gate phone 1193/209 (VM-24's red + G.1,
   a frame-later mark ending VM-64's box-Open span: pin `07190ee14` red on old ×2, fix `bb0e2285d` test-only), the speed
   suite 13/1 alone, Mac 6435/1114 at main's counts (G.2, a source guard's idiom line, `e8c986cac`, green 172/33;
-  VX-701's flake green alone), the phone legs again ‹PENDING: closing leg (c)›; born VM-247/248/249; bundle QUESTIONS #281; PL-80;
+  VX-701's flake green alone), the phone legs again 1194/209 at main's baseline (G.1's pin green inside) + 13/1 —
+  PASSED; born VM-247/248/249; bundle QUESTIONS #281; PL-80;
   canon-size 143606 (headroom 6394); the wave-1 phone build ‹PENDING›.
