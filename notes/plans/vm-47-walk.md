@@ -347,8 +347,8 @@ hers: P-47-27, R-47-3).
   gives way. Nothing to fix before she rules.
 
 **W-A3 — Terminal's invisible marker column grows with her words and eats the book names at AX5.** THIS RUN'S DEFECT.
-- Captures: `seaglass-terminal-light-ax5--c1-bookcase-rest`, `seaglass-terminal-dark-ax5--c1-bookcase-rest`, and their
-  k0 and (AX5) c2-adjacent frames; at default `seaglass-terminal-*-default--c1-bookcase-rest`.
+- Captures: `seaglass-terminal-light-ax5--c1-bookcase-rest`, `seaglass-terminal-dark-ax5--c1-bookcase-rest` and the two
+  Terminal AX5 `k0` frames; at default `seaglass-terminal-*-default--c1-bookcase-rest`.
 - Seen: Terminal book names start at 47.5 pt at default (Study's at 20) and at **83 pt at AX5**, leaving "jo…", "the…",
   "the…" for "journal", "the pocket guide", "the prince"; the reserved column is ≈18 pt at default and ≈55 pt at AX5.
 - The standard: the role map (record §6, batch 1) puts markers (the ★, the ✓, the pick mark, ⑂) on `meta`, which holds
