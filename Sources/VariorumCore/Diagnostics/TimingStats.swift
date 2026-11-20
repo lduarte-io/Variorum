@@ -116,12 +116,16 @@ extension TimingStats: Codable {
     }
 
     /// A decoded record is held to the ring's own invariants rather than
-    /// trusted: a non-positive capacity takes the default, extra samples keep
-    /// only the newest `capacity`, and the count is never below what is held.
+    /// trusted: a capacity outside `1…defaultCapacity` takes the default (the
+    /// ring's own bound — a capacity above it, read as written, kept every
+    /// sample the file held and reserved that many slots at the first sample;
+    /// VM-64 ladder round 3, finding 5(b)), extra samples keep only the newest
+    /// `capacity`, and the count is never below what is held.
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let stored = try c.decode(Int.self, forKey: .capacity)
-        self.init(capacity: stored > 0 ? stored : TimingStats.defaultCapacity)
+        self.init(capacity: (1...TimingStats.defaultCapacity).contains(stored)
+            ? stored : TimingStats.defaultCapacity)
         let samples = try c.decode([Double].self, forKey: .samples)
         for value in samples.suffix(capacity) { record(value) }
         count = max(try c.decode(Int.self, forKey: .count), ring.count)

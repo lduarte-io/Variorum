@@ -112,7 +112,13 @@ public enum TimingReport {
     /// Milliseconds under 10 keep one decimal (a frame is 8–16 ms, and 4.2
     /// against 6.8 matters); everything else is whole. Counts are whole unless
     /// a median of an even run lands on a half.
+    ///
+    /// **Bounded before it is converted** (VM-64 ladder round 3, finding 5(b)):
+    /// `Int(_:)` traps past `Int`'s range, and a value that large can come only
+    /// from a damaged timing file, so a value past ±`drawnBound` is drawn at the
+    /// bound, and a NaN (an infinite run's median) as 0.
     public static func number(_ value: Double, _ unit: Unit) -> String {
+        let value = value.isNaN ? 0 : min(max(value, -drawnBound), drawnBound)
         switch unit {
         case .milliseconds:
             return value < 10 ? oneDecimal(value) : String(Int(value.rounded()))
@@ -120,6 +126,10 @@ public enum TimingReport {
             return value == value.rounded() ? String(Int(value)) : oneDecimal(value)
         }
     }
+
+    /// The largest magnitude `number` draws — 10¹⁵ (about 31,700 years in
+    /// milliseconds), far inside `Int`'s range even as tenths.
+    static let drawnBound: Double = 1e15
 
     private static func oneDecimal(_ value: Double) -> String {
         let tenths = Int((value * 10).rounded())

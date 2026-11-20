@@ -377,19 +377,25 @@ undocumented variable untested on a device. Neither is a NIT's work; the caveats
 
 - **(a)** the clause "— ladder round 2, finding 1" removed from the drafts' SurfaceContracts line; the record pointer at
   the line's end stays.
-- **(b) — applied with headless pins (VM-65).** Traced worse than "reachable at the readout": the decode itself traps.
-  A positive decoded `capacity` is taken as written, and the first `record` calls `ring.reserveCapacity(capacity)` —
-  a capacity near `Int.max` traps INSIDE `init(from:)`, which `absorb` runs at every launch on the timing file's queue,
-  so a damaged file would end every launch the same way. And `TimingReport.number` converts with `Int(_:)` (both
-  branches, `oneDecimal` too): a sample past `Int`'s range traps at the readout. The fix: the decode clamps a positive
-  capacity to `TimingStats.defaultCapacity` (the ring's own bound — the app's one recorder is built at the default; a
-  re-ring at `merged` takes the recorder's own capacity anyway); `number` bounds its value to ±10¹⁵ before converting
-  (a NaN, reachable only as ±∞'s median, reads 0). Pins in `TimingRecorderTests`: an EXIT TEST (Swift Testing's
-  `#expect(processExitsWith: .success)`, so the trap is asserted in a child process and the suite survives it) —
-  a damaged record decoded and reported, RED on today's code; and a plain value pin that a capacity of 100,000 decodes
-  as 64 keeping the newest samples (RED on old by value, no trap at that size). The Mac: both types are Core, compiled
-  by the Mac, called by nothing of the Mac's (the only caller in the app tree is the phone's readout and the inert
-  `AppTiming` recorder) — checked by grep, said in the record.
+- **(b) — applied with headless pins (VM-65).** *[CORRECTED by this implementer before the fix landed, after a probe —
+  the first text said "the decode itself traps … a capacity near `Int.max` traps INSIDE `init(from:)` … so a damaged
+  file would end every launch the same way". FALSE: `Array.reserveCapacity(Int.max)` is a silent no-op (a probe
+  binary: capacity 0 after it, exit 0), and the old code decoded that record without trapping. What IS true of the
+  capacity: taken as written, the decoded series keeps every sample the file holds (contrary to the comment) and its
+  first sample reserves that many slots up front (the same probe reserved 2⁴⁰ slots — 8 TB of address space — and
+  carried on, on the Mac; on the phone it is unmeasured). The trap is the readout's alone, as you wrote it.]* A
+  positive decoded `capacity` is taken as written; and `TimingReport.number` converts with `Int(_:)` (both branches,
+  `oneDecimal` too): a sample past `Int`'s range traps at the readout (observed: `.signal(SIGTRAP)`). The fix: the
+  decode takes `defaultCapacity` for any capacity outside `1…defaultCapacity` (the ring's own bound — the app's one
+  recorder is built at the default; a re-ring at `merged` takes the recorder's own capacity anyway); `number` bounds
+  its value to ±10¹⁵ before converting (a NaN, reachable only as ±∞'s median, reads 0). Pins in `TimingRecorderTests`:
+  a plain value pin that a decoded capacity of 100,000 (and of `Int.max`) is held to 64, keeping the newest samples
+  (RED on old by value — neither size traps there); and two EXIT TESTS (Swift Testing's
+  `#expect(processExitsWith: .success)`, so a trap is asserted in a child process and the suite survives it) — a
+  damaged record's report, and the bounded values drawn, both RED on today's code by the trap. The Mac: both types
+  are Core, compiled by the Mac, called by nothing of the Mac's (the decode's one caller is the phone's
+  `MobileTiming`, the report's the phone's readout; `Shared/AppTiming` uses only the recorder's marks) — checked by
+  grep, said in the record.
   **One more, found while tracing, NOT applied — your call:** `TimingRecorder.merged` (the launch's `absorb`) ADDS a
   decoded `count` and the decoded counters to the live ones (`stats.count + current.count`; `counters[key] += value`;
   `restarts`/`abandoned`/`unmatchedEnds`), and a damaged count near `Int.max` overflows there — the same trap at
