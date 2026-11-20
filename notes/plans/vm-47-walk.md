@@ -449,6 +449,7 @@ hers: P-47-27, R-47-3).
 - FIXED — `d974162f4` (the column takes `meta`, the role map's marker role; at the default size it narrows ≈ 2 pt); pin
   `MobileShelfMarkerColumnTests`; re-capture: `seaglass-terminal-{light,dark}-ax5--c1-bookcase-rest`, the two Terminal AX5
   `k0` frames, and `seaglass-terminal-{light,dark}-default--c1-bookcase-rest` (names start ≈ 45 pt, not 47.5).
+- UPDATED (the walk's fixes, batch 2, piece 1 — `c72e65201`): the fixed tree's red (51.3 → 53.3 pt) was the PIN, not the column: the name is her words (full range) and its first glyph's side bearing (SF Mono Semibold "l", 0.089 em) grows ≈ 2.0 pt between xxxLarge and AX5 with the column level; the pin now compares the name's layout origin (`MobileShelfMarkerColumnTests`, red on old by ≈ 28 pt); no code changed, so the re-capture list above stands.
 
 **W-A4 — At AX5 one-line rows cut her words: book names, Library titles and search hits.** ANOTHER TICKET'S — VM-218
 ("Every screen works with VoiceOver and at the largest text size"); the Library row's anatomy is VM-89's.
@@ -617,6 +618,7 @@ f-series' notes).
 - Narrowest fix proposed (not made): `tokens.phone.muted` on those sentence lines (the Trash's and the Archive's promise;
   the empty shelf's sign-in line), no word changed; a source pin in `MobileFaintOnDoorsSourceTests`' style naming the
   sentence sites. Evidence after: re-capture s4b / b1 / r14 / b12 / r15 and read the line's hex.
+- FIXED — `a21110f9d` (with W-C3, one sweep: 19 sites → the corrected muted); pins `MobileFaintCarriesNoWordsSourceTests`, `MobileFaintOnDoorsRenderedTests.theTrashsPromiseClearsTheFloor`; re-capture: s4b, b1, r14, r14b, b12, r15 (read the promise line's hex: #6A6359 light, #948C7C dark).
 
 **W-B2 — On teal & rust's dark paper the callout's blue wash is 1.05:1 — it reads by hue alone.** A QUESTION FOR HER.
 - Captures: `teal_rust-study-dark-default--c7-callout-comment` (and c8, c9, where the callout's top shows).
@@ -649,6 +651,7 @@ f-series' notes).
   `.red` rendering as the label colour in `layer.render` captures (306–318) is moot either way — the walk shows it red.
   A pin in the run's rendered-ink style: the delete row's title resolves to `tokens.alarm` in both voices and
   appearances (red-on-old: the system red).
+- FIXED — `71ccdd4fc` (`tint: tokens.alarm`); pins `MobileNoteActionsAlarmTests`, `MobileLookSourceTests.noPhoneViewPaintsALiteralColour` (extended to a hue passed as an argument); re-capture: both `s12-note-actions-settings-row`, r09 (the title #9B3B2F / #A33A2E light, #D98A78 / #E08A7C dark).
 
 **W-B4 — A doubled hairline in the note's ⋯ sheet above "Settings".** THIS RUN'S DEFECT.
 - Captures: both `s12-note-actions-settings-row` (Study light, Terminal dark); set 2's `r09-note-actions` likely too.
@@ -663,6 +666,7 @@ f-series' notes).
 - Narrowest fix proposed (not made): draw `settingsRow`'s leading divider only when an undo or redo row renders above it
   (`door.undoLabel != nil || door.redoLabel != nil`); the 108 divider then separates Versions from Settings on its own.
   A pin: the sheet with an empty undo stack draws exactly two dividers (red-on-old: three).
+- FIXED — `fb649d6a8` (Settings' own divider only under an undo/redo row); pin `MobileNoteActionsHairlineTests`; re-capture: both `s12-note-actions-settings-row`, r09 (one hairline between Versions… and Settings).
 
 **W-B5 — The three UIKit overlays' scrim is the ink at 25%, so in dark it lightens the note.** ANOTHER TICKET'S — VM-152
 (the takes, comments and block history become native sheets; their hand-built dim view goes with them).
@@ -916,3 +920,129 @@ meta role is 13 for explainer sentences).
   `popToRoot(leaving, animated: false)` and again a run-loop turn later).
 - **The other two wider-pass combinations** (`seaglass-terminal-dark-default--r*`, `seaglass-study-light-ax5--r*`): the
   other reader's; my rows carry sizes and hexes to compare against.
+
+### Part B, set 3 — findings
+
+Read 2026-11-19 (§4d rows D1–D13): the wider pass in Terminal dark and in Study light at AX5, on the tree before the
+walk's fixes; code traced at HEAD `05afd4b34`. Not one capture is missing; nothing in either combination is drawn under
+13 pt but the ⑂ glyph (W-A13) — Terminal's smallest words, the overlay's "take 2" and "+ new take", measure the meta
+role's 13 (their ascenders 9.7 pt, as Starred's 13 pt "book").
+
+| Combination | Verdict in one line |
+|---|---|
+| `seaglass-terminal-dark-default` — the wider pass (24) | All SF Mono but the system's own (the status bar, the Read page's serif by design); chrome lowercased; the dark inks exactly the table's — muted #8B9088 (5.46:1 on the paper, 6.44:1 on black), faint #6B7168 (3.55 / 4.19:1), ink #D6DAD2 (12.56 / 14.82:1), accent #90C1AF (8.84 / 10.43:1), the ★ #5B93DE, the alarm #E08A7C on Delete Book… and Empty Trash…; grounds the room #000000 under sheets and Protection, the paper #0F1A16 under every list, the cream #171511 on Read; no light line or light ground left on black. **No new finding.** Shown as recorded: W-A1, W-A9, W-A10, W-A13, W-B1, W-B3 (#FF4245), W-B4, W-B5 (#414A45), W-C3, W-C4 (Settings only), W-C5, W-C6, W-C7 (#323235), W-C8. |
+| `seaglass-study-light-ax5` — the wider pass (24) | Her words grow ≈2.8× (row titles and prose ≈48 pt, screen titles ≈50, the Read title ≈58) and the chrome holds (paths 17.3, meta 17.6, Done, doors and the bar ≈23, chips and segment words ≈20, the ★ ×1.3); fields 44.7, segmented choices 45, chips 32.7, Settings' menu rows 44; **new: W-D1** (Book Details squeezed), **W-D2** (Create Book's tag list), **W-D3** (Protection's state lines — a question); W-A4's cuts on seven more screens; VM-152's overlays overlap their own text; W-A1, W-A9, W-A10, W-B1, W-B3, W-B4, W-C3, W-C4 (4.44:1), W-C5 as recorded. |
+
+**Earlier findings that show in this set, and what is new about them** (not re-filed):
+- **W-A1** (fixed since, `67525b499`) — Terminal dark: #000000 0–62 above the paper on every pushed screen (r02, r10, r14,
+  r15); the overlays' paper stops at 840 over black (r11–r13); Read's card ends FLAT at 840 and clips its line mid-glyph
+  (r04 / r04b, 12 of a 16.7 pt line). AX5: #FFFFFF 0–62 / 840–874 on Starred, the contents, Versions, Trash, Archived,
+  Read (round #FAF8F3, the line clipped) and Protection (round the room).
+- **W-A4** (VM-218) — seven more AX5 screens: Starred "the pocke…", the contents "blocks & typ…", Book Details "the pocket
+  gu…" (inside W-D1), Tags "#pocket…", Books "the po…", Versions "Nov 19, 2026…" (the date and time that tell moments
+  apart), Blocks (every preview cut at two lines, a one-sentence block included). Where a row wraps instead — the Trash's
+  titles, the contents' book name, the sheet titles — her words stay whole.
+- **W-A9** (fixed since, `36987c78e`) — Terminal dark: Starred's "book"/"note" 3.55:1, Book Details' and Note Actions'
+  details 4.19:1 on the black sheets, Create Book's tag paths 4.19:1, Archived's "notes" 3.55:1. AX5: the same #8B7F6A at
+  17.6 pt.
+- **W-A10** (fixed since, `7734f0f05`) — Terminal dark #515858 2.45:1 on the dark paper ("name", the tag hint); AX5
+  #C5C5C7 1.72:1 at ≈22.6 pt.
+- **W-A13** — the Blocks sheet's ⑂: Terminal dark 5.3 × 7.0 pt #898E86; AX5 7.3 × 9.3 (held ×1.33 — still a 9 pt glyph
+  beside 45 pt words).
+- **W-B1** (fixed since, `a21110f9d`) — Terminal dark: the Trash's promise 3.55:1 (lowercased, two lines) and Archived's
+  "kept — no clock" 3.55:1; AX5 3.93:1 at 17.6 pt, two lines.
+- **W-B3** (fixed since, `71ccdd4fc`) — Terminal dark #FF4245, 6.12:1: readable, but iOS's red where Delete Book… (r03) and
+  Empty Trash… (r14) wear the dark alarm #E08A7C; AX5 #F23032 3.43:1 at ≈23 pt.
+- **W-B4** (fixed since, `fb649d6a8`) — both, at 646.7 and 660.3; at AX5 at the very same heights (the medium sheet's rows
+  do not move).
+- **W-B5** (VM-152) — Terminal dark #414A45 over the paper #0F1A16 on all three overlays; AX5 #C9C8C6 from 359.7 pt.
+- **W-C3** (fixed since, `a21110f9d`) — the dark contrasts: #6B7168 on the black room 4.19:1 ("apply a tag", "add to a book",
+  "editing here…", the tray's explainer), on the dark paper 3.55:1 (Versions' explainer). At AX5 #8B7F6A 3.37:1 / 3.93:1
+  at 17.6 pt — the semibold headers then fall in the sheet's 3:1 tier for 17 pt semibold words; the regular sentences do
+  not.
+- **W-C4** (open at HEAD — `Shared/Theme/PhoneControls.swift:664–668` unchanged) — Terminal dark Settings (r16) 4.15:1 on
+  #273030, confirmed. **New:** on the sheets that sit on the black room (Create Book r05 / r05b, Blocks r07 / r07b) the
+  system's track resolves to **#1C1C1F** and the same #8B9088 reads **5.22:1 — clear**; in dark the defect is Settings'
+  alone, whose controls sit on the paper rows (and Study dark's, part A's 4.06). AX5: 4.44:1 on #D7E1DE, 5.11:1 on #EEEEEF,
+  the words ≈20 pt and whole.
+- **W-C5** — Terminal dark: the disabled "create book" #364942 on its #050908 fill, **2.09:1**; AX5 1.65:1 at ≈23 pt.
+- **W-C6** — Terminal dark: cut earlier, at "(“/”…" (mono 17). **AX5: NOT cut** — the hint is whole at ≈16.5 pt (its t
+  11.0 pt tall against 11.3 at default): the system field shrinks its placeholder to fit, BELOW the field's own AX5 size
+  (≈23 — P-47-14). Whether HEAD's prompt road (`TextField(phonePlaceholder:…)`, `7734f0f05`) still shrinks is not seen.
+- **W-C7** (fixed since, `c7b6f0459`) — Terminal dark #323235 (the system separator over black; the palette's dark line is
+  #1C332A); AX5 #B4BCBB, 1 pt.
+- **W-C8** (a question) — where Terminal lowercases HER words in this set: Starred's names (r01, "walk note") and Versions'
+  excerpt (r10). Where it does NOT: the Trash's rows keep her capitals ("A note for the message line" — `MobileTrashView`
+  draws the title without `chromeLabel`, `MobileStarredView.swift:127` runs it through), the Blocks previews, the take
+  cards, Block History's commit row and the Read page. **New:** her names read two ways inside one voice, screen by
+  screen. (The store's book names are lowercase already, so their casing cannot be judged here. The app's sentences are
+  lowercased on Book Details, Note Actions, the Trash, More Info, Lenses and Create Book while Protection's keep their
+  capitals — set 1's grammar note.)
+- **Not shown in this set:** W-A2, W-A3, W-A5, W-A6, W-A7, W-A8, W-A11, W-A12, W-B2, W-C1, W-C2 (no root path line but
+  Starred's, which fits whole — "~/home/starred", "Home · Starred" at AX5 — no focused field, no message line, no callout).
+
+**W-D1 — At AX5 Book Details stays squeezed in its medium detent: its title and her book's name are cut.** ANOTHER
+TICKET'S — VM-218 ("Every screen works with VoiceOver and at the largest text size").
+- Captures: `seaglass-study-light-ax5--r03-book-details` (twin `seaglass-study-light-default--r03-book-details`).
+- Seen: the sheet's top at 415 pt as at the default size; the header reads **"Book De…"** (Iowan ≈52 pt on ONE line beside
+  Done ≈23) and the identity block **"the pocket gu…"** (≈48); meta, Finish (detail two lines) and Delete Book… fit below.
+  At the default size both read whole.
+- The standard: sheet §A — the screen title and the row title "Scales: yes, full range"; `PhoneSheetHeader` gives the
+  title two lines (`.lineLimit(2)`, `Shared/Theme/PhoneControls.swift`), and Create Book's header takes them at AX5 ("New
+  / Book", r05) — here there is no room to take them.
+- Where it comes from (HEAD): `App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift:262–285` — a plain
+  `VStack` with no `ScrollView`, presented `.presentationDetents([.medium, .large])` at `Features/Shell/MobileBookView.swift:149`
+  (both `d5a0c12c9`, 2026-08-09): at AX5 the stack is offered the medium detent's height and SwiftUI truncates its texts
+  instead of overflowing. The large detent is a drag away (not captured).
+- Class: ANOTHER TICKET'S (VM-218 — a sheet that needs to scroll, or to open large, at the accessibility sizes). This run's
+  roles and the header's two lines behave where the sheet has the room.
+
+**W-D2 — At AX5 Create Book's smart-book tag list breaks her tag's name mid-word, inside a 220 pt window.** ANOTHER
+TICKET'S — VM-218.
+- Captures: `seaglass-study-light-ax5--r05b-create-book-smart` (twin `seaglass-study-light-default--r05b-create-book-smart`;
+  Terminal dark's r05b reads whole).
+- Seen: the first row reads **"#machiav" / "elli"** — her tag's name (rowTitle ≈48 pt) wrapped between characters because
+  its path "machiavelli" (17.6, one line) keeps its width on the same line; the list window shows a row and a half — the
+  second row's "#pocket" with its path "pocket guide" **clipped by the window's foot** (≈633 pt), its "guide" off-window.
+  The list scrolls, so nothing is lost, but a word broken inside itself is not "works at the largest size".
+- The standard: sheet §A (her words grow — they do); VM-218.
+- Where it comes from (HEAD): `Features/Shell/MobileCreateBook.swift:289–296` — `ScrollView { LazyVStack … }.frame(maxHeight:
+  220)` (`c0b3c3da2`, 2026-08-09); the row `:316–329` — `HStack { the ✓ column; Text("#leaf").phoneType(.rowTitle);
+  Text(path).phoneType(.meta).lineLimit(1); Spacer() }`.
+- Class: ANOTHER TICKET'S (VM-218 — the row's anatomy and the window's height at the accessibility sizes; the path under the
+  name, as the sheet's book row draws its meta, is the kind of rebuild that settles it).
+
+**W-D3 — At AX5 Protection's state lines grow as her words: "You're in Standard." ≈47 pt and "This library doesn't
+sync." ≈43 pt, beside doors held at ≈23.** A QUESTION FOR HER (P-47-8's role map).
+- Captures: `seaglass-study-light-ax5--r17-protection`, `seaglass-study-light-ax5--r17b-protection-scrolled` (twins
+  `seaglass-study-light-default--r17-protection` / `--r17b-protection-scrolled`).
+- Seen: each wraps to two lines in Iowan (×2.75 and ×2.9 their default 17 and 15), while on the same page the explainers
+  hold at 17.6 (meta), the doors at ≈23 (control) — and "Sign in to turn on sync.", the very next line of the sync
+  section, at 17.6. At the default size the page reads as built (17 · 15 · 13), and Terminal dark's as built.
+- The standard: sheet §A's two classes — "Her words (note body, titles, row titles, previews, comment and take text, the
+  twelve words) scale across the whole range … Chrome (meta, controls, chips, headers, tabs, markers) scales up to
+  xxxLarge and holds there". These two lines are the app's, not hers; P-47-8's role map (record §6, batch 1) put "the
+  posture line … `rowTitle`" and the ruled sentences on the lock, Protection, library-missing and shared-account pages
+  `rowPreview` — full-range roles — as a PROVISIONAL judgment.
+- Where it comes from (HEAD): `App/Variorum/VariorumMobile/Features/Protection/MobileProtectionDoors.swift:570–572`
+  (`ProtectionWords.postureLine` at `.rowTitle`); `Features/Protection/MobileProtectionScreen.swift:236–241`
+  (`line(_:ink:)` at `.rowPreview`, which draws `ProtectionWords.accountLocalOnly`). The same rows of the role map cover the
+  lock, library-missing and shared-account pages' sentences (not in this walk).
+- Options for her: (a) as built — at the largest sizes her library's state reads loudest on the page; (b) the app's own
+  state lines and ruled sentences hold at xxxLarge like chrome, their faces and default sizes unchanged (a hold at the
+  sites, `.dynamicTypeSize(...DynamicTypeSize.xxxLarge)`, or a chrome-class twin of the two roles); (c) the posture line
+  keeps its full range (it names her library's state) and the sync sentence takes `meta` like the line under it.
+
+**What I could not judge, and why**
+- **Tap areas** (44 pt targets, Done's 64 × 44, the chips' 44): drawn shapes only. Drawn heights that ARE measurable hold at
+  AX5 — Settings' menu rows 44, the fields 44.7, the segmented choices 45, the chips' capsules 32.7.
+- **The OR / AND choice (r05b) and a book's "+ New Note" / "+ New Chapter" (r02):** not on screen in either combination (no
+  tag picked; below the fold).
+- **Book Details at the large detent (W-D1)** and **the other take cards at AX5 (r11)**: the walk did not drag the sheet or
+  scroll the overlay; still frames only.
+- **W-C6 at HEAD:** the placeholder's road changed after these captures (`7734f0f05`); whether the AX5 shrink survives it
+  needs a re-capture.
+- **Whether her words reach their anchors' own AX5 sizes:** measured ×2.8 against the default twin (≈48 pt for a 17 pt row
+  title); not compared against iOS's own table for the accessibility sizes.
+- **Terminal at AX5, Study dark, teal & rust on these screens:** not in this set (part A and set 1 read the core screens in
+  them; the wider pass ran in three combinations only).
