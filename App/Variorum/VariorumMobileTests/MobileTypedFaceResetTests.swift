@@ -34,22 +34,26 @@ import VariorumCore
 /// whether the pass changed characters.
 @MainActor
 private final class PassCount {
+    private weak var storage: NSTextStorage?
     private var observer: NSObjectProtocol?
     private(set) var attributeOnly = 0
     private(set) var withCharacters = 0
 
     init(_ storage: NSTextStorage) {
+        self.storage = storage
         observer = NotificationCenter.default.addObserver(
             forName: NSTextStorage.didProcessEditingNotification, object: storage, queue: nil
-        ) { [weak self, weak storage] _ in
-            MainActor.assumeIsolated {
-                guard let self, let storage else { return }
-                if storage.editedMask.contains(.editedCharacters) {
-                    self.withCharacters += 1
-                } else {
-                    self.attributeOnly += 1
-                }
-            }
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.note() }
+        }
+    }
+
+    private func note() {
+        guard let storage else { return }
+        if storage.editedMask.contains(.editedCharacters) {
+            withCharacters += 1
+        } else {
+            attributeOnly += 1
         }
     }
 
