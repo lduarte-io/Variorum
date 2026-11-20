@@ -282,4 +282,190 @@ the device's state, instances, new crash reports (the baseline before the walk: 
 
 ## 6. Findings
 
-PENDING — the reader's, each with its capture file names and its class.
+### Part A, the eight combinations
+
+Read 2026-11-19 by a fresh reader: every one of the 99 captures looked at full size (the k2/k3 pairs pixel-diffed — they
+differ only by the scroll indicator, or not at all — and the c6 captures found pixel-identical to their c5), sizes from
+pixels, every ground and ink by `walk_pixel` / column runs. Not one message line in any part A capture. In dark no light
+line or light ground is left on black (the hairline #1C332A, the field edge #254137, the strips #000000).
+
+| Combination | Verdict in one line |
+|---|---|
+| `seaglass-study-light-default` (17, with the seed) | W-A1 (white strips under the bar and above the path line), W-A5, W-A7, W-A9, W-A10, W-A12, W-A13; c6 and c8 not judged; the seed's s0 not judged. The path line whole. |
+| `seaglass-study-dark-default` (14) | Roots' edges match (black is the room); W-A1 in the note (black bands above and below the paper, and under the keyboard bar), W-A5, W-A7, W-A9, W-A10, W-A12, W-A13; c6 and c8 not judged. |
+| `seaglass-terminal-light-default` (14) | W-A1, W-A2 (the count cut: "~/home/bookcase  ·…"), W-A5, W-A7, W-A9, W-A10, W-A12, W-A13; c6 and c8 not judged. |
+| `seaglass-terminal-dark-default` (14) | W-A1 (note), W-A2, W-A5, W-A7, W-A9, W-A10, W-A12, W-A13; c6 and c8 not judged. |
+| `seaglass-study-light-ax5` (10) | W-A1, W-A2 (the count cut: "Home · Bookcase..."), W-A4, W-A5, W-A6, W-A7, W-A9, W-A10, W-A12, W-A13. |
+| `seaglass-study-dark-ax5` (10) | W-A1 (note), W-A2, W-A4, W-A5, W-A6, W-A7, W-A9, W-A10, W-A12, W-A13. |
+| `seaglass-terminal-light-ax5` (10) | The most findings: W-A1, W-A2 ("~/home/book…", "~/home/libr…"), W-A3, W-A4, W-A5, W-A6, W-A7, W-A8, W-A9, W-A10, W-A11, W-A12, W-A13. |
+| `seaglass-terminal-dark-ax5` (10) | As Terminal light AX5, with W-A1 in the note only. |
+
+### Part A's findings
+
+**W-A1 — The grounds stop at the safe area: no screen's room or paper reaches the status bar or the home indicator.**
+THIS RUN'S DEFECT.
+- Captures: every root (`*--c1-bookcase-rest`, `*--c2-…`, `*--c3-library-rows`, `*--c4-…`, `*--k0-…`) and every note
+  (`*--c5-note-write`, `*--c6…c9-*`, `s1`), all eight combinations; s2.
+- Seen: column runs at x = 3 and 395 pt. Light roots, both voices: 0–62 pt is #FFFFFF above the path line's room
+  (#E5F0EC from 62), and 840–874 pt is #FFFFFF under the bar's room (785–840) — the bar's room does not run down to the
+  home indicator, and in Terminal #FFFFFF is neither the room nor the voice's paper #FBFBF7. Dark roots: both strips
+  #000000 = the dark room, so they match by coincidence. Notes: the paper runs 62–840 only — Terminal light #FFFFFF
+  strips around the paper #FBFBF7; DARK **#000000 bands (62 pt above, 34 pt below) around the paper #0F1A16**, and the
+  last prose line is cut at 840 (`seaglass-terminal-dark-default--c5-note-write`); with the keyboard up the band behind
+  the keyboard bar (≈487–553 pt) is #000000 in dark / #FFFFFF in light (`*--c8-caret`, `*--c9-selection`); on c2 the
+  corners where the keyboard's rounded top meets the bar (539–548) are the same bare window.
+- The standard: §2 "the room down to the home indicator" and the sheet §E tab bar "Bar 49 + the 34 pt home-indicator
+  inset, both painted in the room" (P-47-21); R-47-1's grounds (the sheet's phone frames are the room edge to edge);
+  P-47-16/17 (the note on the paper). `MobileTabBar.swift:124` itself says "the room, down past the home indicator".
+- Where it comes from: `App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift` — the band is
+  `GeometryReader { proxy in ZStack { … } .frame(width: proxy.size.width, height: proxy.size.height) … .clipped() … }`
+  (lines 233, 287, **291**). The GeometryReader's frame is the safe area (and shrinks above the keyboard), and
+  `.clipped()` cuts every page's own `ignoresSafeArea()` ground at that frame: the bar's
+  `tokens.room.ignoresSafeArea(.container, edges: .bottom)` (`MobileTabBar.swift:124`), the roots'
+  `tokens.room.ignoresSafeArea()` (`MobileShelfView.swift:135`, `MobileLibraryView.swift:113`) and the note's
+  `tokens.surface.ignoresSafeArea()` (`MobileWriteView.swift:188`). What shows outside the clip is the window's own
+  system background (white / black). The clip predates this run (batch 10, 2026-08-31) but only became visible when this
+  run put the palette's room and the hued dark paper on the phone.
+- Narrowest fix proposed (not made): bound the band's clip horizontally only — replace `.clipped()` with
+  `.mask(Rectangle().ignoresSafeArea(edges: .vertical))` (or a clip shape whose path extends past the top and bottom
+  edges), so the neighbours one width away stay hidden while each page's ground reaches the status bar, the home
+  indicator and the keyboard. Painting the room behind the band instead would fix the roots but put sea-glass bands
+  around her paper in a note — not that. Evidence after: re-capture c1, c3, c5 and c8 in light and dark and read
+  (3, 30), (200, 860) and, with the keyboard up, (110, 500). If the keyboard-bar band stays bare after the fix, the bar's
+  own ground is the rest (VM-137 owns the bar).
+
+**W-A2 — The Bookcase path line, as built under P-47-27 (a): what gives way, measured.** A QUESTION FOR HER (already
+hers: P-47-27, R-47-3).
+- Captures: `*--c1-bookcase-rest` ×8 (and `*--c3-library-rows` at Terminal AX5).
+- Seen: Study default "Home · Bookcase  ·  3 books" whole (13.2 pt), ending at 191.3 pt against the 🗑's 44 pt frame
+  at ≈212.8 — ≈5.5 pt of slack beyond the 16 pt spacer, so a two-digit count (≈7–8 pt more at 13 pt) would cut the
+  tail; this store holds 3 books, so the two-digit case was NOT exercised. Study AX5 (17.6 pt) "Home · Bookcase..." —
+  the whole count gone. Terminal default "~/home/bookcase  ·…" — the count gone, a lone "·" left before the ellipsis.
+  Terminal AX5 "~/home/book…" — the page word itself cut; the Library's line at Terminal AX5 likewise "~/home/libr…".
+  No "Shelf" anywhere (R-47-3 holds). Every target stays on one 48 pt line.
+- The standard: P-47-27 (a) as built — tail truncation, the count first and the wing's name last; her call which part
+  gives way. Nothing to fix before she rules.
+
+**W-A3 — Terminal's invisible marker column grows with her words and eats the book names at AX5.** THIS RUN'S DEFECT.
+- Captures: `seaglass-terminal-light-ax5--c1-bookcase-rest`, `seaglass-terminal-dark-ax5--c1-bookcase-rest`, and their
+  k0 and (AX5) c2-adjacent frames; at default `seaglass-terminal-*-default--c1-bookcase-rest`.
+- Seen: Terminal book names start at 47.5 pt at default (Study's at 20) and at **83 pt at AX5**, leaving "jo…", "the…",
+  "the…" for "journal", "the pocket guide", "the prince"; the reserved column is ≈18 pt at default and ≈55 pt at AX5.
+- The standard: the role map (record §6, batch 1) puts markers (the ★, the ✓, the pick mark, ⑂) on `meta`, which holds
+  at xxxLarge; a column reserved for a marker that marks nothing should not grow past the chrome's hold. §2: chrome holds
+  at xxxLarge; her words keep growing — the marker is not her words.
+- Where it comes from: `App/Variorum/VariorumMobile/Features/Shell/MobileShelfView.swift:269–274` — the Terminal
+  `tokens.selectionMarker` ("› ") drawn at `.phoneType(.rowTitle, tokens)` with `.opacity(0)` (batch 1, `6b02c806c`,
+  moved it to `rowTitle`).
+- Narrowest fix proposed: hold the reserved marker at the chrome's cap — `.dynamicTypeSize(...DynamicTypeSize.xxxLarge)`
+  on that one `Text` (the default layout byte-for-byte unchanged) or give it the `meta` role. This alone leaves Terminal
+  AX5 names still cut by the trailing meta (W-A4).
+
+**W-A4 — At AX5 one-line rows cut her words: book names, Library titles and search hits.** ANOTHER TICKET'S — VM-218
+("Every screen works with VoiceOver and at the largest text size"); the Library row's anatomy is VM-89's.
+- Captures: `seaglass-*-ax5--c1-bookcase-rest` (Study "the p…" twice — the two books read the same; Terminal "jo…",
+  "the…", "the…"), `seaglass-*-ax5--c3-library-rows` ("What's true…", "the voice sw…", "comments & c…"),
+  `seaglass-*-ax5--c4-library-search*` ("swipe & c…", "swipe & ch…"), and the AX5 note titles "swi…" / "swip…"
+  (`*-ax5--c5-note-write`, the masthead's layout — VM-148, recorded).
+- Seen: names and titles keep growing (her words' class, as the sheet says) inside `lineLimit(1)` rows whose meta sits
+  on the same line (the sheet's book row draws the meta UNDER the name, row 64).
+- Not this run's to fix: the rows' anatomy at the accessibility sizes.
+
+**W-A5 — The trash door is a colour emoji.** A QUESTION FOR HER.
+- Captures: every root's path line (`*--c1-…`, `*--c3-…`, `*--c4-…`, `*--k0-…`) ×8.
+- Seen: 🗑 is Apple's colour emoji U+1F5D1 (`MobileRecoveryDoors.trashGlyph`), its own grey-blue metal, 22.7 pt tall at
+  default and 28.7 at AX5, beside the accent "+ New Note" and ⋯; `PhoneIconButtonStyle(tone: .muted)` cannot tint it.
+- The standard: the sheet §B icon button "22 pt glyph in ink"; P-47-9 (a) built "🗑 an icon button"; AppSpec §12 keeps
+  colour in the token layer. Options for her: (a) keep the emoji; (b) a monochrome glyph (an SF Symbol trash) taking the
+  muted tone or ink, its spoken label unchanged.
+
+**W-A6 — With the box focused at AX5, no book is left on screen.** A QUESTION FOR HER.
+- Captures: `seaglass-*-ax5--c2-bookcase-box-focused` ×4.
+- Seen: the box fills the region from the path line (110 pt) to ≈433 pt; not one book row, not "+ New Book", is visible
+  (at default the three rows and "+ New Book" stay).
+- The standard: §3's check ("the books region yielding but visible"); R27 (the writing floor outranks the books) as
+  built by W-024 — the six-line floor in lines of the box's text at the CURRENT size, so at AX5 it takes everything.
+  Options: (a) as built; (b) cap the floor's line height at xxxLarge, as chrome holds, so books keep at least a row;
+  (c) the floor yields one book row at the accessibility sizes.
+
+**W-A7 — The fields' caret is the system blue.** A QUESTION FOR HER (the sheet names no caret colour).
+- Captures: `*--c2-bookcase-box-focused` (#0088FF light, #0091FF dark), `*--c4-library-search` (#0088FF / #7FC3FF
+  mid-blink), s2.
+- Seen: the quick-entry box's and the Library search's caret is iOS's default tint, while the editor's selection
+  handles (c9) are the accent (#3B6A59 / #90C1AF) and the run tints the system switch with the accent.
+- Options: (a) tint the fields with the accent (`.tint(tokens.accent)` in `phoneField`, `Shared/Theme/PhoneControls.swift:299`,
+  and on the box's field); (b) leave the system blue.
+
+**W-A8 — Terminal's Settings title breaks after "~/" at AX5.** A QUESTION FOR HER (P-47-13).
+- Captures: `seaglass-terminal-{light,dark}-ax5--k1/k2/k3-settings-*` (6).
+- Seen: "~/" alone on the first line, "settings" (≈46 pt mono) on the second; the header ≈140 pt tall; "done" 23 pt
+  centred beside it; nothing cut. Study AX5's "Settings" (≈50 pt) holds one line.
+- The standard: the sheet puts `screenTitle` in her words' class (no cap); P-47-13 keeps the path title muted. Options:
+  (a) as built; (b) a path-shaped sheet title holds at xxxLarge like chrome; (c) one line with tail truncation.
+
+**W-A9 — The corrected FAINT carries doors' words under 17 pt.** THIS RUN'S DEFECT.
+- Captures: every `*--c3-library-rows` and `*--c4-*` (the Library filter row's unchosen words: #8B7F6A 3.37:1 on the
+  room, #7E8376 3.34:1, dark #766F5F / #6B7168 ≈4.2:1 on black, at 13 pt); every `*--c5…c9-*` (the masthead's empty
+  chips "no date", "more info", "lens" at 15 pt: #8B7F6A 3.93:1 on the paper, dark #766F5F 3.57:1).
+- The standard: sheet §D — "Words under 17 pt need 4.5:1 … Faint never carries a sentence she has to read"; the phone
+  layer's faint is "glyphs, placeholders, disabled words only". These are live doors, not disabled words. The sheet's
+  §A/§B chip draws the empty chip in the corrected muted (`.chip.empty`) and the set chip in ink; the tab bar's and the
+  Trash chips' unchosen words are already the corrected muted.
+- Where it comes from: `App/Variorum/VariorumMobile/Features/Shell/MobileListingFilters.swift:194`
+  (`selection == door ? tokens.ink : tokens.phone.faint`); `App/Variorum/VariorumMobile/Features/Write/MobileWriteView.swift:458,
+  477, 496, 573` (the date, tags, more-info and lens chips' empty state in `tokens.phone.faint`) — batch 1's mechanical
+  `tokens.faint` → `tokens.phone.faint`.
+- Narrowest fix proposed: the filter row's unchosen words to `tokens.phone.muted` (one line; it serves the Archive's
+  row too); the masthead's empty chips to `tokens.phone.muted` and, so set and empty stay apart, the set chips to
+  `tokens.ink` (the sheet's two chip inks) — the chips' capsule rebuild stays VM-148's.
+
+**W-A10 — The search field's placeholder is the system's grey, under the sheet's floor.** THIS RUN'S DEFECT.
+- Captures: every `*--c3-library-rows` (and s2 under the iOS card).
+- Seen: "Search notes, books…" in #C5C5C7 on white (1.72:1), #C2C2C1 on Terminal's paper (1.72:1), #515858 on the dark
+  paper (2.45:1) — while the box's hint, a placeholder too, wears the corrected faint (#8B7F6A 3.93:1 / #766F5F 3.57:1).
+- The standard: sheet §D — placeholders take the corrected faint and need 3:1; `phoneField` (this run's one field) sets
+  the typed text's ink but not the prompt's.
+- Where it comes from: `App/Variorum/VariorumMobile/Features/Shell/MobileLibraryView.swift:217`
+  (`TextField(tokens.chromeLabel("Search notes, books…"), text: $query)` — the title becomes iOS's placeholder);
+  `Shared/Theme/PhoneControls.swift:299` (`phoneField`).
+- Narrowest fix proposed: pass the words as a `prompt:` `Text` in `tokens.phone.faint` (no rendered word changes); the
+  other `phoneField` sites (the tag field, the book name, the protection fields — part B's captures) likely share it.
+
+**W-A11 — At Terminal AX5 the filter row shrinks "bookless".** ANOTHER TICKET'S — VM-93 (the row's rebuild, owner of
+P-47-7's known issue).
+- Captures: `seaglass-terminal-{light,dark}-ax5--c3-library-rows`, `…--c4-library-search*`.
+- Seen: "bookless" at ≈13.6 pt (x-height 7.33 pt) between siblings at ≈17.6 (9.67 pt); no word cut; Study AX5 unshrunk.
+- The standard: §3 c3 "no word shrunk or cut"; P-47-7 claims one unshrunk row at 375 and 402 pt and names only Terminal
+  at 320 pt as the known issue. `MobileFilterRowGeometryTests.noFilterDoorIsShrunkToFitEvenAtDisplayZoom` measures at the
+  default size only, so it cannot see this. For the record: P-47-7's known issue should also name Terminal at 402 pt at
+  the accessibility sizes (the `shrinkingToFloor: true` at `MobileListingFilters.swift:193` is what keeps it on one row).
+
+**W-A12 — No Library row shows a date.** ANOTHER TICKET'S — VM-89 ("Library rows show the title, the time and a line of
+the note, and where it lives").
+- Captures: every `*--c3-library-rows`, s2.
+- Seen: titles only; §3's check expected "dates 13 corrected muted". The search hit's detail ("note") is the corrected
+  muted.
+
+**W-A13 — The ⑂ mark beside a fanned block is 7 pt tall.** ANOTHER TICKET'S — VM-188 (the visible badge) / VM-195 (the
+marks' cluster), the record's T51/T52.
+- Captures: every `*--c5-note-write` and `*--c6-*`, s1.
+- Seen: at x 371–376 pt, 7.0 × 5.3 pt, a hairline grey (#6E675D light, #918979 dark) — on the `meta` role, but the
+  glyph draws far under a 13 pt word. The comment mark ●1 (c7) reads at 13.7 pt in the comment ink, clear.
+
+### Part A — not judged, and why
+
+- **s0's lifted bar** (`seaglass-study-light-default--s0-pocket-guide-contents`): the bar drawn at 484–539 pt — the
+  keyboard-up position c2 shows — with no keyboard on screen and the rows running on beneath it. The seed had typed into
+  the Bookcase box just before; a seed capture, so not counted. Part B's b4 (the same contents) will show whether a
+  pushed list can keep the bar lifted after the keyboard has gone.
+- **c6, the take tint**: all four c6 captures are pixel-identical to c5 — no peek was captured, so the take tint and
+  the pill have no evidence here (part B's f5/f6 show the pill).
+- **c8, the caret on the paper**: no caret is visible in any c8 (blink phase or not placed); c9's accent handles are the
+  only evidence of the editor's tint.
+- **Tap areas** (44 pt targets, the 64 × 44 Done, the tools' touching 44s): drawn shapes only can be measured in a
+  capture; the hit areas are the geometry pins' evidence, not this read's.
+- **Interleaving in the Library**: only notes are in the first screen of "All".
+
+### Part B
+
+PENDING — part B's reader.
