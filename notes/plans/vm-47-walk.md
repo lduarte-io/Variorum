@@ -237,28 +237,28 @@ The simulator is switched light → dark WHILE each surface is on screen; the bo
 | 7 | Library search | c4 (both files) | (16 captures.) "swipe" typed: at default ≈17 (s x-height 9.7 pt incl. overshoot), at AX5 ≈23 (12.3–12.7 pt) — the control role held at xxxLarge; the field stays 44.7–45.0 pt tall at both sizes. The caret is the system blue (#0088FF; #7FC3FF mid-blink). One hit, "swipe & choose", title in ink (Iowan semibold / mono), detail "note" 13 in the corrected muted (#6A6359, #948C7C, #61655F, #8B9088 — not the faint it looks like at a glance), on the paper; at AX5 the hit title is cut ("swipe & c…", "swipe & ch…"). Keyboard up in `c4` (the bar above it — VM-73), down in `-results`. The filter row and its faint words and Terminal-AX5 "bookless" as row 6. Edges as row 6. | MATCHES P-47-14 (a) as built (a PROVISIONAL — hers: which class a field's text is) and the hit row's sizes and inks. Carried: W-A7 (blue caret), W-A4 (AX5 hit title cut), W-A9/W-A11 (the filter row), W-A1 (edges). |
 | 8 | A note in Write | c5, s08, s14, b6 | **part A** (c5 ×8). The masthead and her prose on the PAPER (P-47-16, P-47-17), but the paper STOPS at 62 pt and at 840 pt: above and below it the strips are #FFFFFF in light (Terminal's paper is #FBFBF7) and **#000000 in dark against the paper #0F1A16** — black bands top and bottom; the last prose line is cut at 840 by the band (Terminal default c5). Title Iowan ≈24 semibold in ink (x-height 12.3 pt) / mono ≈22, one line beside four tools, cut "swipe & cho…" at default, "swi…" / "swip…" at AX5 (the masthead's layout: VM-148, recorded). Tools copy · find · lock · ⋯ in INK (#29241C / #23272B; light ink in dark), glyphs 21–27 pt tall. Membership "in the pocket guide" / "~/the pocket guide" in the corrected muted. The five chips at ≈15 (n x-height 8.3 pt) as bare words in a wrapping flow (Terminal wraps "lens" to a second row; AX5 two rows): SET chips (#pocket guide, blocks) in the corrected muted, EMPTY chips (no date, more info, lens) in the corrected **FAINT** (#8B7F6A 3.93:1 on white, #7E8376 on Terminal's paper, #766F5F 3.57:1 on the dark paper). Body Study Iowan 17 on a 27.3 pt pitch at the 20 pt margin; Terminal ≈15 on ≈25. The ⑂ mark beside block 3 at x 371–376 pt is 7.0 × 5.3 pt in a hairline muted grey (#6E675D) — visible but tiny. NO bottom bar. The system back button (glass circle) above the masthead (P-47-20). **No message line in any of the eight** — none lifted, none at the foot (R2-n1's rider). | The page's own ground MATCHES P-47-16/17. **DOES NOT MATCH** at the edges (W-A1: the paper does not reach the status bar or the home indicator; dark shows black bands and cuts the last line). The empty chips in the faint (W-A9). ANOTHER TICKET'S: the masthead's layout and the cut title (VM-148, recorded); the ⑂ mark's size (W-A13, VM-188 / VM-195). R2-n1: MATCHES (no lifted line). |
 | 9 | The paper checks | c6 c7 c8 c9 (A ×4 default; B teal ×2) | **part A** (16 captures, default size). **c6** is PIXEL-IDENTICAL to c5 in all four combinations (difference bounding box: none) — no peek, no take tint and no pill were captured. **c7** "comments & callouts": the callout's blue wash behind block 2 (#E8F1F8 light, #14202B dark) with 💡 small at the frame's top-left; the ●1 in the comment ink (#6D5F3E / #B3A25F), its digit 13.7 pt — both clear on the paper in light and dark. **c8**: the keyboard and the keyboard bar's three resting glass cells (Aa · ⑂ · ⋯; Aa at 14, VM-137); NO caret is visible in any of the four (in dark the region above the keyboard is pixel-identical to c7). The band behind the keyboard bar (≈487–553 pt) is the bare window — #000000 in dark under the paper #0F1A16, #FFFFFF in light (Terminal's paper #FBFBF7). **c9**: a word selected ("is" / "a"); the selection wash readable over the words (#CFD8D5 behind ink in Study light, #3A5149 behind light ink in Study dark), handles in the accent (#3B6A59 / #90C1AF), the system edit menu over the chip row. | c7 MATCHES; c9 MATCHES. **NOT JUDGED** (no evidence captured): c6's take tint and pill; c8's caret. The black/white band under the keyboard bar is W-A1's mechanism (or the bar's own ground — see W-A1). |
-| 10 | The core under teal & rust | part B's `teal_rust-…` k0–c9 | PENDING | PENDING |
-| 11 | Settings: the voice flipped | s04 s05 | PENDING | PENDING |
-| 12 | Settings: the appearance | s06–s11 | PENDING | PENDING |
-| 13 | A note's door to Settings | s12 s13 s14 | PENDING | PENDING |
-| 14 | Protection | s03b s03c, b13, r17 r17b | PENDING | PENDING |
-| 15 | The bar on pushed lists | b1, b4, b8, b12, r02, r14, r15 | PENDING | PENDING |
-| 16 | A tab tapped from a pushed list | b2 b3 b7 b10 b11 | PENDING | PENDING |
-| 17 | No bar | b5, b6, b9, b13 | PENDING | PENDING |
-| 18 | The wing door's list | w1 w2 w3 | PENDING | PENDING |
-| 19 | The one message line | m1 m2 m3 | PENDING | PENDING |
-| 20 | VM-54's flip | f1–f6 (×2 voices) | PENDING | PENDING |
-| 21 | Starred | r01 (×3) | PENDING | PENDING |
-| 22 | A book's contents | r02, b4, s0 | PENDING | PENDING |
-| 23 | Book Details | r03 | PENDING | PENDING |
-| 24 | A book's Read page | r04 r04b, b5 | PENDING | PENDING |
-| 25 | Create Book | r05 r05b | PENDING | PENDING |
-| 26 | The note's sheets | r06 r06b r06c r07 r07b r08 | PENDING | PENDING |
-| 27 | Note Actions | r09, s12 | PENDING | PENDING |
-| 28 | Versions | r10, b8, b9 | PENDING | PENDING |
-| 29 | The three UIKit overlays | r11 r12 r13 | PENDING | PENDING |
-| 30 | Trash | r14 r14b, b1, m2 | PENDING | PENDING |
-| 31 | Archived | r15, b12 | PENDING | PENDING |
+| 10 | The core under teal & rust | part B's `teal_rust-…` k0–c9 | read by part B's readers — §4b | the Verdict column there; findings in §6 |
+| 11 | Settings: the voice flipped | s04 s05 | read by part B's readers — §4b | the Verdict column there; findings in §6 |
+| 12 | Settings: the appearance | s06–s11 | read by part B's readers — §4b | the Verdict column there; findings in §6 |
+| 13 | A note's door to Settings | s12 s13 s14 | read by part B's readers — §4b | the Verdict column there; findings in §6 |
+| 14 | Protection | s03b s03c, b13, r17 r17b | read by part B's readers — §4b (from the Library), §4c and §4d (from Settings, the wider pass) | the Verdict column there; findings in §6 |
+| 15 | The bar on pushed lists | b1, b4, b8, b12, r02, r14, r15 | read by part B's readers — §4c | the Verdict column there; findings in §6 |
+| 16 | A tab tapped from a pushed list | b2 b3 b7 b10 b11 | read by part B's readers — §4c | the Verdict column there; findings in §6 |
+| 17 | No bar | b5, b6, b9, b13 | read by part B's readers — §4c | the Verdict column there; findings in §6 |
+| 18 | The wing door's list | w1 w2 w3 | read by part B's readers — §4c | the Verdict column there; findings in §6 |
+| 19 | The one message line | m1 m2 m3 | read by part B's readers — §4c (m3 absent — the driver's timing, §6 set 2 (a)) | the Verdict column there; findings in §6 |
+| 20 | VM-54's flip | f1–f6 (×2 voices) | read by part B's readers — §4b | the Verdict column there; findings in §6 |
+| 21 | Starred | r01 (×3) | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 22 | A book's contents | r02, b4, s0 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 23 | Book Details | r03 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 24 | A book's Read page | r04 r04b, b5 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 25 | Create Book | r05 r05b | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 26 | The note's sheets | r06 r06b r06c r07 r07b r08 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 27 | Note Actions | r09, s12 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 28 | Versions | r10, b8, b9 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 29 | The three UIKit overlays | r11 r12 r13 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 30 | Trash | r14 r14b, b1, m2 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
+| 31 | Archived | r15, b12 | read by part B's readers — §4c (Study light, default size) and §4d (Terminal dark; Study light at AX5) | the Verdict column there; findings in §6 |
 
 **Which PROVISIONAL calls each part shows.** Part A: P-47-1 (the sheet's numbers as a set), P-47-4, P-47-5 (dark), P-47-6,
 P-47-7, P-47-8 (batch 1's role map), P-47-9, P-47-10, P-47-12, P-47-13 (Settings' header), P-47-14, P-47-16, P-47-17,
@@ -269,6 +269,8 @@ under a second palette, P-47-18, P-47-19, P-47-20, P-47-21 (on pushed lists), P-
 320 pt case (Display Zoom — simctl cannot set it; the geometry pins are its evidence), VM-27's doored sync states (the store
 never syncs; `MobileSettingsProtectionDoorTests` is that evidence), a second wing (the phone has no wing management — the
 wing list shows Home alone).
+
+**Part B is read in three sets** (one fresh reader each — a single reader's context cannot hold 184 captures): §4b, the second palette, Settings' flows and the border flip (76 captures); §4c, the bar's roads, VM-55's faces and the wider pass in Study light (60); §4d, the wider pass in Terminal dark and at AX5 (48). Rows 2–9 above carry part A's reading; where part B shot the same screen again its half is in §4b. Findings: part A's W-A1 … W-A13, set 1's W-B1 … W-B5, set 2's W-C1 … W-C8, set 3's W-D1 … W-D3 (§6).
 
 ## 4b. Part B, set 1 — the second palette, Settings' flows, the border flip
 
