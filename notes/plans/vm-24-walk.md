@@ -65,4 +65,19 @@ for it).
 
 ## The record (filled when the walk runs)
 
-*PENDING.*
+### The closer's instruments — LIVE STATUS
+
+Closer: `opus-implementer` (Opus, xhigh), one session, started 2026-11-20. It writes and builds the instruments
+headless and ends with a READY report; it does not boot a simulator, run a test, launch the app or judge a capture.
+Reading done first, in full: this brief; CLAUDE.md and its loaded canon; `notes/SessionResiliencyProtocol.md`; the run
+record's §1, §4, §7 and §10; `MobileKeyboardRevealUITests.swift` whole; the Settings sheet's Diagnostics group and the
+edit trace's readout; the VM-55 record's walk-instrument section; the VM-44 runbook (the scheme-order trap).
+
+| Piece | State |
+|---|---|
+| Record skeleton | IN-PROGRESS (this commit) |
+| The two snapshots (AFTER at `562f815bd`, BEFORE at `8ff1d08af`), detached, nothing committed in either | NOT-STARTED |
+| The driver `VM24Walk.swift` (rows a–h), in both snapshots' `VariorumMobileUITests/` only, untracked | NOT-STARTED |
+| `build-for-testing`, AFTER (`vm24-walk-after`) and BEFORE (`vm24-walk-before`) | NOT-STARTED |
+| `walk.sh` (untracked, in the AFTER snapshot) | NOT-STARTED |
+| READY report | NOT-STARTED |
