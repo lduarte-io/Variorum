@@ -376,6 +376,39 @@ struct MobileLibraryPagingRulesTests {
         }
     }
 
+    /// **GUARD — a SHORT complete listing that one landing reaches past is not
+    /// chased** (the round-3 reviewer's final call: the clause that makes the
+    /// built shape differ from the one first proposed — "this page reaches no
+    /// deeper than the rows it replaced"). A page of four; three notes, read
+    /// hidden (three rows, complete); three more minted while hidden; then held
+    /// on screen: the first delivery lands a full page and a cursor, deeper than
+    /// the three it replaces, so no second page is read — it stays one page
+    /// deep, and the rest is still reachable by `loadMore`.
+    ///
+    /// GREEN on the fix AND on the build with round 3's `land` hunk reversed
+    /// (nothing raises there); RED only if the clause is deleted (then the
+    /// landing asks for the next page and the listing reads six, no more).
+    @Test func aShortCompleteListingThatAPageReachesPastIsNotChased() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await seed(session, 3)
+            let model = MobileLibraryViewModel(session: session, listingLimit: 4)
+            await model.hold(model.hold(onScreen: false))  // the hidden read: three rows, complete
+            #expect(model.all.count == 3 && !model.allHasMore, "the premise: a short listing, complete")
+            _ = try await seed(session, 3, prefix: "later")
+
+            let held = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { held.cancel() }
+            await settle { model.all.count == 4 }
+            try? await Task.sleep(for: .milliseconds(150))
+            #expect(model.all.count == 4 && model.allHasMore,
+                    "a short listing a page reaches past is not chased — it read \(model.all.count) rows")
+
+            await listToTheEnd(model)
+            let whole = try await db.read { try Queries.library($0, sort: .lastTouched, direction: .desc) }
+            #expect(model.all.map(\.postID) == whole.map(\.postID), "still reachable: the store's whole six")
+        }
+    }
+
     /// **A listing's rows are drawn only while they answer the current wing**
     /// (VM-64 ladder round 2, finding 3). Bookless held on screen in Home lists
     /// Home's loose note; the hold ends; the wing switches while the Library is
