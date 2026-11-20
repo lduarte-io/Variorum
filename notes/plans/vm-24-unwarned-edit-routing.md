@@ -16,7 +16,9 @@ whole at its end.
 
 **As of 2026-11-20 04:55.** Batch A (VM-24's fix) is BUILT AND PROVED in its window (§12, "the orchestrator's
 stage results": red as tabled on the old code, green on the fix alone and in company, the standing pin green 3 of
-3). Batch B (VM-243) is with a fresh implementer, half 1 first (the pin as the confirm, then a stop).
+3). Batch B (VM-243): half 1's pin ran red as predicted (05:08–05:10) and the mechanism is
+confirmed; the same implementer builds half 2 (D-243-1, with an added open-tail reading) — §12, the architect's
+ruling.
 
 - **Batch A, checked by the orchestrator against the implementer's report (never trusted):** tip `cd72732ec`;
   the fix is `a8662b81e` — `MobileEditorViewModel.swift` and `MobileEditTrace.swift` only, read line by line against
@@ -532,7 +534,7 @@ ink).
 | L4 | The design: VM-24's options against the fence; VM-243's trace | architect | DONE (§4) |
 | L5 | Batch A — VM-24's fix and pins | implementer | DONE (`a8662b81e`; §12) |
 | L6 | Batch A's red/green window, the Mac's seven source-reading types | orchestrator, nov18's GO | DONE 04:47–04:51 — red as tabled on the old code, 371 tests in 52 suites green on the fix, the standing pin green 3 of 3, the Mac's 46 in 7 green (§12, "the orchestrator's stage results") |
-| L7 | Batch B — VM-243: the pin as the confirm, then the fix | implementer | NOT STARTED |
+| L7 | Batch B — VM-243: the pin as the confirm, then the fix | implementer | HALF 1 DONE — the pin (`b437305db`) red as §4.4 predicted in its window 05:08–05:10, the mechanism CONFIRMED (§12, the architect's ruling); half 2 (D-243-1) IN PROGRESS |
 | L8 | Batch B's window | orchestrator, nov18's GO | NOT STARTED |
 | L9 | The simulator walk (typing mid-note, paste, the readout's new lines; a dash line and the paragraph after it) | orchestrator | NOT STARTED |
 | L10 | The ladder (`fable-reviewer`, fresh per round, up to five) | orchestrator | NOT STARTED |
@@ -1021,6 +1023,39 @@ since batch A; the fence suite 10 of 10; the markdown suites green); the `VM243|
 #### For QUESTIONS at the merge
 
 None from this half.
+
+#### Batch B, half 1 — the orchestrator's stage results, and the architect's ruling on what the pin showed
+
+**Claim `vm-24`, 2026-11-20 05:08:45 → released 05:10:19, nov18's GO.** Products `DerivedData/vm24-b-pin` (the tree
+at `b437305db`: batch A's fix, no VM-243 fix). The standing simulator, one fresh boot, a 30 s settle, two launches,
+`Restarting after unexpected exit` = 0 in both. Logs `DerivedData/logs/vm24-b-pin-run.log` and
+`vm24-b-pin-company.log`; the printed readings `vm24-b-pin-readings.txt`.
+
+| Launch | Verdict line | The five readings |
+|---|---|---|
+| (B1) the pin alone | "Test run with 5 tests in 1 suite failed after 1.673 seconds with 5 issues." | (a) `aDashLinesWordsAreTypedInFullInk()` RED at `:376` (ink; font green) · (b) `theParagraphAfterADashLineIsTypedInFullInk()` RED at `:410` (ink) · (c) `wordsTypedAfterAClosingMarkerAreInFullInk()` RED at `:442` (ink) · (d) `theLineTypedAfterAHeadingWearsTheProseFace()` RED at `:476` (ink) and `:478` (font) · (e) `aReopenedNoteDrawsWhatWasTypedInFullInk()` GREEN. Every PREMISE line green |
+| (B2) in company, six types, one invocation | "Test run with 49 tests in 6 suites failed after 4.608 seconds with 5 issues." | the same five issues at the same five lines; the caret suite, the fence suite and the three markdown suites passed |
+
+What the pin printed (Study, light): the lead `"- "` in the marker's ink `#8D8578` WITH the face's mark; `"one"`, and
+then `"one⏎two"`, in the same marker ink WITHOUT the mark; `" b"` after a closing star the same; after a heading,
+`"⏎word"` in the marker's ink AND the heading's font (`IowanOldStyle-Bold 27.0`), unmarked; after the re-open,
+everything typed in full ink `#29241C`. The readings are the same alone and in company (one line differs only by a
+system log line the simulator interleaved into it).
+
+**The architect's ruling (2026-11-20 05:12).** §4.4's mechanism is CONFIRMED as traced: red where it predicted
+red, green where it predicted green, and the printed runs show the inherited ink without the mark. Reading (d),
+which §4.4 left to be read, shows the FONT leaks as well as the ink — text typed on the line after a heading keeps
+the heading's font. That is inside D-243-1 as ruled (the reset covers font and ink), so **half 2 proceeds, D-243-1
+unchanged**, with two precisions:
+
+1. **One added reading, (f): the open tail.** The pin types inside a settled block; she mostly types at the end of
+   a note. A reading types the dash line and the paragraph after it at the note's very end and reads the runs before
+   any re-open — so the `.tail` arm's reset is pinned too ("every routed arm"). It is added to the pin FIRST and
+   shown on a build without the fix (`DerivedData/vm24-b-red`), whatever it shows there (red is expected; if the
+   tail's own writes already lay the base back it is green on both and recorded as such, not forced red).
+2. **The reset's range for an ordinary typed key is D-24-1's kept value** — batch A hands the changed characters to
+   `storageDidEdit` for every character report, bound or not — so the keyboard's road and the unarmed roads take the
+   same reset.
 
 ---
 
