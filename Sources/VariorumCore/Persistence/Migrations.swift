@@ -1230,8 +1230,10 @@ extension AppDatabase {
         // `notes/plans/vm-44/audit/F-performance-trace.md`).
         //
         // One PARTIAL index per owner-carrying table, on the rows still
-        // lacking an owner: empty in the steady state (a signed-in mint is
-        // stamped at birth), holding exactly the rows adoption exists to
+        // lacking an owner: empty in the signed-in steady state (a signed-in
+        // mint is stamped at birth) — in a library never signed in, each index
+        // holds every row of its table, one small entry per row written — and
+        // holding exactly the rows adoption exists to
         // find — so the probe and the update are `SEARCH t USING INDEX
         // idx_t_unowned (owner_id=?)`, ∝ the rows to adopt, never the corpus
         // (P1). A query on `owner_id = ?` or `owner_id IS NOT NULL` cannot
