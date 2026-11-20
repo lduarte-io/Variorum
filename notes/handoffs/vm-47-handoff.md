@@ -1,7 +1,7 @@
 # VM-47 — Sizes and look: your handoff
 
-**Final — merged 2026-11-20** (PR #17, merge commit `226edf626`). One thing is still written `‹PENDING: …›` below:
-the wave-1 phone build's block at checklist item 2, which this run is preparing for you now from the merged code.
+**Final — merged 2026-11-20** (PR #17, merge commit `226edf626`). Nothing is pending: the wave-1 phone build is ready,
+and its steps are the first section below.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. **P-47-N** is a provisional call — built
 the most defensible way while you were away, waiting for your word. **R-47-N** is one of your rulings from this run. A
@@ -15,6 +15,81 @@ folders hold the same names where a screen was shot again. The record behind eve
 
 ---
 
+## This morning: the one phone install for wave 1
+
+This is the single phone install you asked for once all four wave-1 phone runs had merged (your words are in checklist
+item 2). The build is ready on the Pro; **nothing has been installed and no phone was contacted.** It was built at
+03:40 on 2026-11-20 from main's merge commit `226edf626` (PR #17, the last of the four), so it holds the wings run
+(VM-55), the fixes run (VM-78), the timing run (VM-64), this run, and the two Mac runs merged the same night (VX-980,
+VX-981). It is `~/Library/Developer/Xcode/DerivedData/vm47-wave1-device/Build/Products/Release-iphoneos/VariorumMobile.app`.
+The road is the one used twice on 2026-11-15, `notes/plans/vm-44/plans/vm-45-install-runbook.md`: the steps below point
+at its sections for the commands and say only what is different this time.
+
+| | |
+|---|---|
+| The build | Release, a generic iOS device build from a clean checkout at exactly `226edf626`; BUILD SUCCEEDED; `codesign --verify --deep --strict` OK; about 52 MB (main has gained notes only since) |
+| Bundle id · version · build | `io.lduarte.VariorumMobile` · 1.0 · 1 — the same as on your phone, so the version cannot tell old from new |
+| Signing | Apple Development, automatic, the wildcard team profile (expires 2027-07-09, your phone listed), `get-task-allow` true; nothing minted, refreshed or prompted |
+| Entitlements | the app's own identifier and its two keychain groups (its own first, then the shared one); no app group, no iCloud; unchanged since your phone's build |
+| Your phone now | main `beb638033` (VM-46's build, installed in place 2026-11-15) |
+| Sync version | 15 on your phone's build · 15 at the merge commit · 15 on the server (read 2026-11-20): nothing pauses, syncing carries on before and after |
+| The first open | ONE migration, the timing run's `v1_38_owner_adoption_index`: eleven small indexes over rows with no owner; additive, on the phone only, not a sync event; no row of your writing is rewritten. Treat it as one-way (step g) |
+| Unchanged | the package versions (the same SQLCipher), the entitlements, the protection and keychain code |
+
+**Before the cable — your two answers.** (1) **The safety copy:** recommended yes — treat the migration as one-way, so the
+copy is the sure way back; about 280 MB on the Pro (the last two were 279 and 280 MB). (2) **Anything written on the
+phone that has not synced?** On today's build, the gear on the Bookcase ▸ the Sync row: "Synced ‹time›" means it is all
+on the server; anything else, read it out and let one more round finish first.
+
+**The steps** (the commands are the runbook's; the one line that changes is the build's path, in step a):
+
+0. **The stage first.** The session helping you requests the stage from whoever coordinates this morning, before any
+   act on the phone, and holds it to the end. (The runbook says no stage is needed; that is no longer the rule.)
+1. **a — find the phone** (runbook a). **[YOUR HANDS]** On the cable, unlocked, screen on, Developer Mode still on. In
+   place of the runbook's `APP=` line:
+   `APP="$HOME/Library/Developer/Xcode/DerivedData/vm47-wave1-device/Build/Products/Release-iphoneos/VariorumMobile.app"`
+2. **b — what is installed** (runbook b): expect 1.0 (1). **[YOUR HANDS]** Read the Sync row aloud: expect the ordinary
+   "Synced ‹time›". The runbook's "Sync paused — Variorum needs an update" was the old marker's and no longer applies;
+   anything unusual, stop.
+3. **c — the safety copy** (runbook c). **[YOUR HANDS]** Variorum fully quit (swiped away — twice in November an
+   install was skipped because it was still open), the phone unlocked with the screen on throughout. The copy is done
+   only when its `Variorum/` folder holds BOTH `variorum.sqlite` and `variorum-library-keys.json`. It lands in
+   `~/.variorum/phone-safety-copies/` beside the two earlier ones (yours to keep or prune).
+4. **d — install in place** (runbook d). **Never uninstall**, never delete the app on the phone: that deletes the
+   library, its key file and its keychain items — and a fresh install also records no launch times in the timing
+   readout (VM-234; the timing run's handoff: "Your in-place install is not a fresh install."). **[YOUR HANDS]**
+   Unlocked at the install moment, Variorum still quit. November's gate stands: no rebuild, and the build's team must
+   equal the installed app's.
+5. **e — the first launch** (runbook e). **[YOUR HANDS]** You open it: the lock screen and Face ID (or your
+   passphrase) as every day; the one migration runs inside that open, unseen. Healthy: the Bookcase's top line says
+   "Bookcase"; the bar at the bottom is three words, the current one on a chip; Settings (now in the ⋯ at the end of
+   any home page's top line) is one scrolling list with Diagnostics ▸ "Timing…"; its sync row, under Library, goes on
+   saying "Synced ‹time›" after a round. The runbook's two-way proof (e4) stands, and its
+   not-healthy list: stop, press nothing.
+6. **f — confirm from the Mac** (runbook f), read-only, as before.
+7. **g — if something goes wrong** (runbook g). One thing differs, going back: treat the migration as one-way. Whether
+   the build on your phone today would still open the library once the migration has run was not tested (the runbook's
+   g5 guessed it would; this migration's own note says an older build refuses a copy of such a library, and that check
+   is the one for a library copy you pick, not proven for the phone's own library), so the sure way back is the safety copy, at your
+   word only.
+
+**What to look at first, in this order.**
+
+1. **Typing low in a note with the keyboard up** — this run's ("The phone, first look", item 0).
+2. **The timing readout** — the timing run's handoff (`notes/handoffs/vm-64-handoff.md`, checklist item 2): "**Then
+   the readout, at Settings ▸ Diagnostics ▸ Timing….** It is always recording, keeps its numbers when you quit the app,
+   and keeps this build's table apart from the next build's." Do its list of moments a few times each; then
+   "**Copy** puts the whole readout on the clipboard as plain text (this build's table, then the previous build's), to
+   paste to a session."
+3. **The five-second takes-button check** — the same handoff, item 4: "in a note, with the keyboard up, give the takes
+   button on the bar above the keyboard (the middle one) a quick, light tap — the takes sheet should open." … "If a
+   light tap does not open it on your phone, that is a bug to file."
+4. **The two screens no screenshot has shown:** the Account sheet (Settings ▸ the sync row ▸ Account) and the timing
+   readout itself, on this run's look ("Held for your hands").
+5. Then "The phone, first look" and your questions (#281).
+
+---
+
 ## Your checklist
 
 - [ ] **1. The walk's screenshots are kept for you.** The closeout normally deletes a merged run's walk screenshots
@@ -24,9 +99,8 @@ folders hold the same names where a screen was shot again. The record behind eve
   edge fix — "What shipped" tells it) and `final-tree/` (the code that merges). Say "delete the screens" when you are
   done with them.
 - [ ] **2. The one phone install for wave 1** — yours, from merged main, after all four mobile runs have merged. This
-  run merges last of the four, so it prepares it: ‹PENDING: the Release device build of merged main, its signing
-  check, main's sync version against production's, and the paste-ready block for the session that helps you install
-  (`notes/plans/vm-44/plans/vm-45-install-runbook.md`)›. Your words (2026-11-19): "the phone step is the single wave-1
+  run merges last of the four, so it prepared it — see "This morning: the one phone install for wave 1" at the top.
+  Your words (2026-11-19): "the phone step is the single wave-1
   install after all four runs have merged. whoever is last can probably do it overnight over wifi." and "agreed, i'll
   do the hands part in the morning." The runbook needs you at the phone: unlocked and awake for the safety copy and the
   install, Variorum fully quit first. **What to try first** — typing low in a note with the keyboard up — is the top
@@ -44,6 +118,9 @@ folders hold the same names where a screen was shot again. The record behind eve
   phone-wide type pass, the controls, the palette). You approved the composition as a run ("22 is fine, composition is
   fine.", 2026-11-15), so it ran as five batches in a row, one builder each, with one review over the whole — raised
   here as the sizing guidance asks, not split.
+- [ ] **9. The gate's call is yours to confirm.** The stage coordinator read every test run's log and called the merge
+  gate passed while you slept; nothing was red beyond main's own known test. Say 'gate confirmed', or what you want
+  looked at again.
 
 ## The phone, first look
 
