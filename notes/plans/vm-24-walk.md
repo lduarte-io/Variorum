@@ -77,7 +77,95 @@ edit trace's readout; the VM-55 record's walk-instrument section; the VM-44 runb
 |---|---|
 | Record skeleton | DONE (`830d8d2d5`) |
 | The two snapshots (AFTER at `562f815bd`, BEFORE at `8ff1d08af`), detached, nothing committed in either | DONE — `~/dev/variorum-vm-24-walk` and `~/dev/variorum-vm-24-walk-before`; `git status` in each shows only the untracked driver |
-| The driver `VM24Walk.swift` (rows a–h), in both snapshots' `VariorumMobileUITests/` only, untracked | IN-PROGRESS — written; the same bytes in both snapshots; compiling next. The UI test folder is a synchronized group, so the file joins the target by being there (no project edit) |
-| `build-for-testing`, AFTER (`vm24-walk-after`) and BEFORE (`vm24-walk-before`) | NOT-STARTED |
-| `walk.sh` (untracked, in the AFTER snapshot) | NOT-STARTED |
-| READY report | NOT-STARTED |
+| The driver `VM24Walk.swift` (rows a–h), in both snapshots' `VariorumMobileUITests/` only, untracked | DONE — the same bytes in both snapshots (one checksum); 0 warnings and 0 errors from it in either build. The UI test folder is a synchronized group, so the file joins the target by being there (no project edit) |
+| `build-for-testing`, AFTER (`vm24-walk-after`) and BEFORE (`vm24-walk-before`) | DONE — "** TEST BUILD SUCCEEDED **" in both, headless, no boot. Checked: the AFTER app carries the readout's new VM-24 line and the BEFORE app does not; each bundle holds both test selectors; each snapshot's tree is its commit plus the untracked driver only |
+| `walk.sh` (untracked, in the AFTER snapshot) | DONE — syntax-checked; its pure pieces (the id shape test, the scrub, the runtime parse, the holder check, the prefs compare and restore road, the no-capture xctestrun copies) tested alone; its refusal path dry-run (a holder that cannot match: refused at the stage check, no device made, the closing line printed). Never run past the stage check |
+| READY report | DONE (the session's final message) — the walk itself has NOT run |
+
+### What the closer built (nothing of it enters the PR)
+
+**The snapshots.** `~/dev/variorum-vm-24-walk` (detached at `562f815bd`, the run's tip — the AFTER code) and
+`~/dev/variorum-vm-24-walk-before` (detached at `8ff1d08af`, main as the run found it — the BEFORE code). Each holds one
+untracked file, `App/Variorum/VariorumMobileUITests/VM24Walk.swift`; the AFTER snapshot also holds `walk.sh` at its
+root. Their products: `App/Variorum/DerivedData/vm24-walk-after` and `…/vm24-walk-before`, built for
+`platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`.
+
+**The scheme (a deviation from the brief's words, stated):** the `VariorumMobile` scheme's test action holds only
+`VariorumMobileTests`, so its `build-for-testing` cannot carry the UI tests without a scheme edit. The products are
+the `TK2SpikeUITests` scheme's — its build action is the same `VariorumMobile` app target, its test action is
+`VariorumMobileUITests` (the committed model's own road and VM-55's). No scheme or project file is touched. The app
+it builds lacks the hosted unit-test PlugIn (the VM-44 ordering trap), which this walk never uses.
+
+**The driver — two classes, one argument each:** `VariorumMobileUITests/VM24WalkFirstRun` (the fresh install's first
+launch, past the once-shown words card with no capture and no label read; the app terminated) and
+`VariorumMobileUITests/VM24Walk` (the rows). The pass name and the screens folder arrive as `TEST_RUNNER_VM24_PASS`
+and `TEST_RUNNER_VM24_SCREENS`. Every capture is a PNG written straight to
+`~/dev/variorum-vm-24/App/Variorum/DerivedData/vm24-walk-screens/<before|after>/<row>-<what>.png` (ignored), with
+`walk-log.txt` beside them: numbers and yes/no, and the note's text only when every word in it is the walk's own fixture.
+A row that cannot be driven writes "NOT WALKED" with its reason, the on-screen chrome labels from one read of the
+accessibility tree (never a key, never a text view's value, never while the words card is up) and a capture named
+`<row>-NOT-WALKED-diagnostic.png`; the walk goes on, and the test never fails on a soft miss. The model it copies, never
+edits: `MobileKeyboardRevealUITests.swift` (the launch, the lobby, the GraphicsServices hardware-keyboard setter, the
+keyboard card, the on-screen finders, the keyboard-down drag).
+
+**How each row is driven** (one launch for the whole walk, so the edit trace's in-memory counters run from b to e):
+
+| Row | How | Captures |
+|---|---|---|
+| a | Library ▸ "+ New Note" (opens focused); the four paragraphs "Walk one alpha" … "Walk four delta" by `typeText`, a Return between each with a 1.2 s pause (the open tail crystallizes before the next words); keyboard down by a drag; Back; the note re-opened from its Library row (an untitled note's row title is its creation day) | `a-note-typed`, `a-note-reopened` |
+| b | Library ▸ ⋯ (More) ▸ Settings; reads the Study and Follow system choices' selected state; "Record edit trace" switched on at its trailing edge (read back from its value); "Edit trace…" ▸ "Clear" | `b-switch-on`, `b-readout-empty` |
+| c | The note re-opened; the text's drawn lines found from the screen's pixels inside the editor (XCUITest gives no line geometry), required to equal the paragraph count; a tap past the end of the second line puts the caret at the end of paragraph two; " ok teh recieve it" by the software keyboard's own keys (18 keys; a character with no key on screen falls back to `typeText` and is counted); then a tap mid-line on the third paragraph and " mid" by keys (4) | `c-note-after-typing` |
+| d | Still in the note: the pasteboard set to " kilo"; the caret to the end of paragraph two, a second tap raises the system edit menu (a press if not), its Paste pressed; the pasteboard set to "lima"; a double-tap on paragraph three's last word ("charlie") selects it, the menu's Paste pressed. An "Allow Paste" ask is answered if the system raises one (it should not for her own Paste) | `d-note-after-paste` |
+| e | Back to the Library ▸ ⋯ ▸ Settings ▸ "Edit trace…"; the headline read from the readout's text: every count by name, the three VM-24 lines read when drawn and never required | `e-readout` |
+| f | The note re-opened; the caret to the end of its last drawn line; Return, "- one", Return, Return, "two" by `typeText` | `f-note-end` (keyboard up) |
+| g | Return, "# Head", Return, "word", Return, "*a* b" by `typeText`; then the keyboard down | `g-note-end`, `g-note-end-keyboard-down` |
+| h | Back; the note re-opened; its text compared with the text before leaving | `h-note-reopened` |
+| z | EXTRA, not a table row: the readout again after rows c–h (the numbers for f–h) | `z-readout-after-all` |
+
+Rows a, f and g type by `typeText` (the same keyboard input road; the brief asks for the keyboard's own keys in row c
+only). Every Return is followed by a pause, so no typed character can meet a crystallization's flight in a way her
+typing would not.
+
+**`walk.sh`, in order:** prints the stage line and refuses on a free stage (or, with `VM24_WALK_WHO` set, on any other
+holder) and warns under 35 minutes left; refuses unless both products are in place and each matches its tree (the
+readout's new line present in the AFTER app, absent from the BEFORE one); writes, beside each built xctestrun, a copy
+with XCTest's automatic capture off (`SystemAttachmentLifetime` keepNever, screenshots not screen recordings — the
+built one asks for screen recordings, which in the first-run class would hold the words card); reads the host's
+Simulator preferences; creates `vm24-walk` (iPhone 17 Pro, the iOS 26.2 runtime it resolves), boots it, sets light
+appearance and the keyboard's auto-correction and predictions on (iOS's own defaults, written so no pass depends on
+them), settles 30 s; the BEFORE pass (the first-run class, its result bundle and raw log deleted at once; then the walk
+class); shuts the device down and ERASES it (a clean install: no app, no store, no keychain, no learned words, no
+pasteboard), boots and settles again; the AFTER pass; then, on every exit road, stops only its own xcodebuild, shuts the
+device down and deletes it, compares the host's Simulator preferences with what it found and restores them if anything
+changed (naming the top-level keys, never their values), prints the host's after-state (no Mac Variorum instance, no
+phone process, no Problem Reporter, new `Variorum*.ips` count), deletes its temp folder and prints "VM24 WALK END".
+Each test run is polled for its verdict line (at most 7 minutes for the first-run class, 20 for the walk class), then
+given at most 90 s to exit before its own PID alone is stopped. The device's id lives only in the script's variables;
+every simctl and xcodebuild line it prints or keeps is scrubbed of it, and the raw logs and result bundles that name it
+are deleted.
+
+**What each pass leaves.** *On the device:* the Debug phone app on a fresh dev store, signed out, holding the walk's
+one note (fixture words only), the starter Journal and the sample library its first write minted, the edit trace armed,
+the keyboard's learned words, the pasteboard's "lima" — all of it gone at the erase between the passes and at the
+deletion after. *On the host:* the captures, each pass's `walk-log.txt` and its two xcodebuild logs (scrubbed) under
+`…/vm24-walk-screens/before/` and `…/after/`, and the script's own run log `…/vm24-walk-screens/walk-run.txt`; the two
+`VM24Walk-noautocapture.xctestrun` copies inside the snapshots' products (removed with the snapshots). Nothing in git.
+A re-run moves an earlier pass folder aside (`<pass>-earlier-<time>`) rather than over-writing it.
+
+**The command** (inside a held stage claim, nothing else running on the stage):
+
+    zsh ~/dev/variorum-vm-24-walk/walk.sh
+
+About 25 minutes in the ordinary case (a ceiling near an hour if every run met its limit). It tees everything to
+`~/dev/variorum-vm-24/App/Variorum/DerivedData/vm24-walk-screens/walk-run.txt`, whose last line is "VM24 WALK END": a
+caller limited to short waits starts it in the background and polls that file for that line. By hand, for one class
+(the device's id from `xcrun simctl list devices`, never written down):
+`TEST_RUNNER_VM24_PASS=after TEST_RUNNER_VM24_SCREENS=~/dev/variorum-vm-24/App/Variorum/DerivedData/vm24-walk-screens
+xcodebuild test-without-building -xctestrun <products>/VM24Walk-noautocapture.xctestrun -destination "id=<device>"
+-only-testing:VariorumMobileUITests/VM24Walk`.
+
+**Rows that may come back NOT WALKED on the first stage run** (the driver was never run; each is said, never faked):
+row c's and d's placement if the drawn lines do not equal the paragraphs (a decoration or an extra drawn line inside
+the editor); row d's Paste if the edit menu's Paste is not exposed as a menu item, button or text; rows b, e and z if the
+readout's headline is not readable from its text element; every row from c on if the note's Library row is not
+titled by its day.
