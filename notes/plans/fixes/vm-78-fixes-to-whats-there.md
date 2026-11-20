@@ -4360,18 +4360,16 @@ closes, not the row. Its slots are filled from FOR A LATER READER as the last of
 > door is gone and a gathering is called one in every face the brief named (VM-83); the collect line names the star
 > and is honest on an archived gathering, and pickers mark "(archived)" (VM-21); the words hoisted into `Shared/`,
 > every Mac string byte-identical; VM-19's test teardown fixed (its desync did not reproduce). Traced and handed on
-> by her rulings: VM-24 — the phone editor's unarmed edits are routed from a report TextKit's attribute fixing can
-> widen past the block's terminator, so the word just entered snaps back (stored text never at risk) — its own run
-> after wave 1 (`/architect-phase vm-24`, the coordinator's launch, a measuring session on her phone first), its caret
-> pin red on main by decision; VM-17 — stray fan badges on a long note's stepped scroll, two mechanisms; a first fix
-> went clean on the scroll, failed its window on the jump road and was backed out — one run with VM-239 (the block
-> decor, measured astray) and VM-179 (`/architect-phase vm-17 vm-239 vm-179`, hers to launch). The ladder closed at
+> by her rulings: VM-24 — an unarmed edit routed from a report TextKit's attribute fixing widens past the block's
+> end snaps back (stored text never at risk) — its own run after wave 1 (`/architect-phase vm-24`, the coordinator's
+> launch, measured on her phone first), its caret pin red on main by decision; VM-17 — stray fan badges on a long
+> note's stepped scroll; a first fix failed its window on the jump road and was backed out — one run with VM-239
+> (the block decor, measured astray) and VM-179 (`/architect-phase vm-17 vm-239 vm-179`, hers to launch). The ladder closed at
 > ROUND 5, the cap (all Fable: r1 0B/2M/6m/11n · r2 0/0/3/5 · r3 0/1/5/3 — the decor, VM-239 · r4 0/1/0/5 — the next
 > wave-1 merge's three unpinned faces, answered by three guards and a hunk map handed to the coordinator · r5
 > 0/0/0/9, wording). Windows: (2) 68/6, (1) 84/16 with the Mac's 110/17 over the hoists, (5) 75/10, F4 4/1, R2-N1
-> 11/2, each after its reds; window (3)'s matrix (the caret pin red as traced, VM-17's probe red, VM-19's pin red then
-> green); batch D's window red (the fix not proved, the decor red); five bundles lost or unreadable, their logs kept;
-> the re-land's window 44/4 red on exactly its six pins then 283/41 green; the guards' window 26/5 red on exactly its
+> 11/2, each after its reds; window (3)'s traces; batch D's window red (the fix not proved, the decor red); the
+> re-land's window 44/4 red on exactly its six pins then 283/41 green; the guards' window 26/5 red on exactly its
 > four tests then 42/7 green; the simulator walk every row PASS in both voices; the merge gate PENDING(gate 1, the
 > whole phone target — VM-24's caret pin the one red by decision; gate 2, the whole Mac target). Canon:
 > SurfaceContracts ×5 (The Bookcase and books, the phone named), AppSpec §9 ×2 and OverallModel §3 ×1 (the insured
