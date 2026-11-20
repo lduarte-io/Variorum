@@ -632,12 +632,15 @@ answers say why). Headless only: no `xcodebuild test`, no simulator boot.
 | Piece | State |
 |---|---|
 | Reading (CLAUDE.md + canon, the protocol, the round-1 report whole, this record §1, §4.3, §5's common rules, §6, §7, the walk's verdicts, `MobileEditTrace.swift` whole, the two test files at the cited lines, `fallbackVerdict` and the capture) | DONE |
-| The answers to F1, F2, F3 in the round-1 file, committed before any fix | DONE (this commit) — all three AGREE; F1 takes "(snap-backs avoided)", no optional pin; two observations left for the reviewer and her (Terminal wraps its other parenthetical lines; "rescued" during a flight) |
-| F1 (the "rescued" line's parenthetical) + F3 (one clause in the trace header), one commit | DONE (this commit) — `MobileEditTrace.swift` only; the capture of the fixed readout is the orchestrator's (PENDING) |
-| F2 (the routing suite's doc sentence) | DONE (this commit) — `MobileEditRoutingTests.swift` doc comment only |
-| The phone `build-for-testing` of the final tree into `DerivedData/vm24-gate` | DONE — of the tree at `b3fa281f9`: `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-gate-bft.log`, 0 errors, no warning in a touched file; the dylib carries the new words, not the old. No Mac build owed (the Mac-compiled roots are unchanged since `6b5dfb41d`). Nothing under App or Sources changes after `b3fa281f9` |
-| "What was applied" + the build's result in the round-1 file | DONE (this commit) |
-| Owed elsewhere, not this pass's | the capture of the fixed readout (the orchestrator's); the reviewer's final call on the three answers and the two observations under F1 |
+| The answers to F1, F2, F3 in the round-1 file, committed before any fix | DONE (`f40e9af0c`) — all three AGREE; F1 takes "(snap-backs avoided)", no optional pin; two observations left for the reviewer and her (Terminal wraps its other parenthetical lines; "rescued" during a flight) |
+| F1 (the "rescued" line's parenthetical) + F3 (one clause in the trace header), one commit | DONE (`9675f8888`) — `MobileEditTrace.swift` only; CONFIRMED by the reviewer's final calls (`359baa52b`), the missing pin accepted |
+| F2 (the routing suite's doc sentence) | DONE (`b3fa281f9`) — `MobileEditRoutingTests.swift` doc comment only; CONFIRMED |
+| The phone `build-for-testing` into `DerivedData/vm24-gate` (first build) | DONE — of the tree at `b3fa281f9`: `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-gate-bft.log`, 0 errors, no warning in a touched file. SUPERSEDED by the rebuild below (final call 2 changed one string after it) |
+| "What was applied" + the first build's result in the round-1 file | DONE (`afc808024`) |
+| **Final call 2** (the reviewer's "## Final calls", relayed by the orchestrator): the "widened" headline's DRAFT parenthetical becomes "(past the change)", exactly as specified; measured BEFORE committing with the same CoreText method — Terminal 361.6 pt at a five-digit count against the 362 pt measure, Study 256.9 pt | DONE (this commit) — `MobileEditTrace.swift`'s headline only; no pin asserted the old words (the trace suite checks the prefix `"  widened           1"`, still true); the per-event mark untouched. Observation 2 is record-only, by the call |
+| The gate's phone product rebuilt into `DerivedData/vm24-gate` from the tree at this commit | IN-PROGRESS |
+| Final call 2 in the round file's "What was applied" + the rebuild's result | NOT-STARTED |
+| Owed elsewhere, not this pass's | a capture of the fixed readout (recommended by the reviewer, not owed; the orchestrator's) |
 
 ## 12. Batch closeouts, findings and dispositions
 

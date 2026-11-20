@@ -553,7 +553,7 @@ enum MobileEditTrace {
         out += "  gate-less         \(s.gatelessReports)   (autocorrect/dictation — expected)\n"
         out += "  arming rejected   \(s.armingsRejected)\n"
         // VM-24 — DRAFT words, hers to word (the record §10 item 6).
-        out += "  widened           \(s.widenedReports)   (ran past the characters that changed)\n"
+        out += "  widened           \(s.widenedReports)   (past the change)\n"
         out += "  rescued           \(s.rescuedReports)   (snap-backs avoided)\n"
         out += "  no capture        \(s.reportsWithoutCapture)   (expected 0)\n"
         out += "  most gate calls before one edit: \(s.maxConsultsBeforeAReport)\n"
