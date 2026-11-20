@@ -1082,7 +1082,7 @@ struct MobileHerPathsPerfTests {
         }
     }
 
-    // MARK: 6 · Savepoints per leaving: a note, and the app
+    // MARK: 6 · Commits per leaving (the readout's row): a note, and the app
 
     /// **A note left (popped) after an edit** — the layer's window
     /// (`savepointsPerLeaving`) from the screen's `onDisappear` over the

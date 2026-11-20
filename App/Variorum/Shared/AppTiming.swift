@@ -131,7 +131,7 @@ nonisolated enum AppTimingSeries: String, TimingSeriesKey {
         case .noteRereadsPerSave: return "Note re-reads per save"
         case .libraryRereadsPerSave: return "Library re-reads per save"
         case .libraryRedrawsPerSave: return "Library redraws per save"
-        case .savepointsPerLeaving: return "Savepoints per leaving"
+        case .savepointsPerLeaving: return "Commits per leaving"
         }
     }
 }

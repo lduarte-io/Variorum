@@ -885,8 +885,8 @@ readout's two rows say commit".
 | Piece | State |
 |---|---|
 | H0 — this live status | DONE (this commit) |
-| H1 — the three literals say commit ("Commits per leaving" ×2, "Commit tries"); the tests and comments that quote them follow (Part of VM-65) | NOT-STARTED |
-| H2 — the scan mirrored headlessly (an exact copy of its extractor and rule, its roots and allow-lists) — zero offenders on the tree | NOT-STARTED |
+| H1 — the three literals say commit ("Commits per leaving" ×2, "Commit tries"); the tests and comments that quote them follow (Part of VM-65) | DONE (this commit) — `Shared/AppTiming.swift:134` (the series' signpost name), `MobileTimingView.swift:67` and `:85`; `MobileHerPathsPerfTests.swift:1085`'s MARK comment. Code names, series keys and prose comments unchanged |
+| H2 — the scan mirrored headlessly (an exact copy of its extractor and rule, its roots and allow-lists) — zero offenders on the tree | DONE — on `09a33071b`'s tree: 936 files, 3 offenders, exactly the gate's three; on this commit's tree: 936 files, **0 offenders**, the 3 allow-list entries seen, none stale; this run's 36 product files hold no string literal with the word at all |
 | H3 — the handoff's readout steps and wording-pass item; the closeout drafts | NOT-STARTED |
 | H4 — the Mac target's suites that read the phone's or `Shared/`'s source, by TYPE (the coordinator's question) | NOT-STARTED |
 | H5 — phone and Mac `build-for-testing` into `vm64-gate4`; the diff touches nothing under `Sources/` or `Tests/` | NOT-STARTED |

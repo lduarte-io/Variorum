@@ -64,7 +64,7 @@ enum MobileTimingCopy {
         (.noteRereadsPerSave, "Note re-reads per save"),
         (.libraryRereadsPerSave, "Library re-reads per save"),
         (.libraryRedrawsPerSave, "Library redraws per save"),
-        (.savepointsPerLeaving, "Savepoints per leaving"),
+        (.savepointsPerLeaving, "Commits per leaving"),
         (.ownerAdoptionRows, "Owner check: rows stamped"),
         (.syncRoundSent, "Sync round: rows sent (about)"),
         (.syncRoundReceived, "Sync round: changes received (about)"),
@@ -82,7 +82,7 @@ enum MobileTimingCopy {
         (.booklessFetch, "Bookless reads"),
         (.booklessDelivery, "Bookless redraws"),
         (.autosaveWrite, "Saves"),
-        (.savepointAttempt, "Savepoint tries"),
+        (.savepointAttempt, "Commit tries"),
         (.noteLeaving, "Notes left"),
         (.appLeaving, "App left"),
     ]
