@@ -136,10 +136,12 @@ struct MobileEditRoutingBindingTests {
     /// The landing is a DELETION deliberately: iOS's attribute fixing
     /// widens an insertion's `didProcessEditing` report (measured here —
     /// a one-character insert mid-paragraph reported `{8, 9}`), while a
-    /// deletion's report is exact. A widened gate-less report can already
-    /// overflow its entry and take the honest recovery road, which is
-    /// correct but is a different story from this one; the deletion keeps
-    /// the pin on the binding alone.
+    /// deletion's report is exact. A widened gate-less report routed from
+    /// the report alone — the pre-VM-24 road, now only the no-capture case
+    /// (since VM-24 it routes from the changed characters) — can overflow
+    /// its entry and take the honest recovery road, which is correct but is
+    /// a different story from this one; the deletion keeps the pin on the
+    /// binding alone.
     @Test func aStaleVerdictIsNotAppliedToTheNextEdit() async throws {
         try await withEditorWorld { session, _ in
             try await withEditorAssertionsMuted {

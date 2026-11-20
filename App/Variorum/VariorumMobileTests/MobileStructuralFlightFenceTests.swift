@@ -357,8 +357,10 @@ struct MobileStructuralFlightFenceTests {
     /// withholding is said. ONE block, so the write lands in the last block,
     /// where its widened report routes to `.block(0)` — the edit the storage
     /// belt exists to withhold (in a block with a separator after it the same
-    /// write is round 2's M12 on either tree: unroutable, healed by a re-read,
-    /// never a stale write).
+    /// write was round 2's M12 on either tree: unroutable, healed by a re-read,
+    /// never a stale write — until VM-24 routed an unarmed report from the
+    /// characters that changed; that shape is now withheld by the same belt,
+    /// pinned in `MobileUnarmedEditRoutingTests`).
     ///
     /// RED ON OLD: routed to `.block(0)` and written whole after the divide —
     /// `["Alpha beta. Gamma delta.X", "Gamma delta."]` plus a conflict take.
