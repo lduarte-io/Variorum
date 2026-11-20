@@ -869,7 +869,7 @@ orchestrator's). The record of what was checked: §7 ▸ "The merge of main (VM-
 | G0 — this live status, before any tree change | DONE (this commit) |
 | G1 — `git merge --no-ff f909d6714` (a merge commit); stop on any code conflict | DONE (`a18fae31f`) — trial and merge clean, no conflict in any file; `git merge-base --is-ancestor f909d6714 HEAD` holds |
 | G2 — the blob check of the five shared files; each read whole against the map's VM-64 bullet and this run's intents; the composition traced; the other meeting points; the guards mirrored | DONE (this commit) — all five blobs MATCH; both runs hold in each file; the quiet-undo composition ends on the fence's sentence, no state wrong (one note for her bundle with P-2-2); the union, the fence's sentence, the Put back line and the timing marks unchanged in meaning; both source scans green by reading. NO collision; no line written. §7 ▸ "The merge of main (VM-78) and the gate tree" |
-| G3 — phone and Mac `build-for-testing` into `vm64-gate3`; compile fixes (if any) listed | NOT-STARTED |
+| G3 — phone and Mac `build-for-testing` into `vm64-gate3`; compile fixes (if any) listed | DONE — both built at `5a4045303` (code = the merge `a18fae31f`'s; every later commit is this record alone): phone `** TEST BUILD SUCCEEDED **`, 0 errors; Mac `** TEST BUILD SUCCEEDED **`, 0 errors; NO compile fix; no warning in a line this run wrote |
 | G4 — the whole Core package, `swift test`, once, on the final tree | NOT-STARTED |
 | G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
 | G6 — §7's section, the final stage commands, the report | NOT-STARTED |
@@ -4672,7 +4672,16 @@ owes no sentence there and the drain says nothing: by trace they hold on the joi
 
 #### Compile fixes
 
-PENDING(the first compile of the joined tree — phone and Mac `build-for-testing` into `vm64-gate3`).
+**NONE.** The joined tree's first compile — phone (`generic/platform=iOS Simulator`) and Mac (`platform=macOS`)
+`build-for-testing` into `App/Variorum/DerivedData/vm64-gate3/`, cold — built with 0 errors on both, first try; no line
+of either run was edited to make it build. **Warnings:** in the 51 Swift files this run changed (`git diff --name-only
+a4634b288 48a94ea43`), the phone build warns on ONE line, and it is older than this run — `MobileStructural.swift:122`'s
+unused `intra` (2026-08, `d21962098`, the one the VM-55 merge-in named) — and the Mac build on none; so no warning sits
+in a line this run wrote (each warned line blamed and its commit tested against this run's range). Of VM-78's lines one
+warns, named only: `MobileTrashTests.swift:217`, "no calls to throwing functions occur within 'try' expression"
+(`e1d709b1b`, VM-33's). The cold phone build's 119 distinct warnings and the Mac's 94 are otherwise in files this run did
+not touch. Logs (local, gitignored): `App/Variorum/DerivedData/vm64-gate3-phone-build.log`, `vm64-gate3-mac-build.log`;
+stamps `vm64-gate3-phone.sha`, `vm64-gate3-mac.sha`.
 
 #### The whole Core package
 
