@@ -3509,3 +3509,47 @@ then finds nothing open). Left as it is; it could adopt the same drain if a dura
 - At `bb0e2285d`: `MobileBorderTraitTests` and `MobileBoxOpenTimingTests` in one launch — expect green. ‹PENDING›
 - At `bb0e2285d` (or the branch's head): the whole phone target, `-only-testing:VariorumMobileTests` — expect main's one
   known red only. ‹PENDING›
+
+### The gate's second red — a Mac source pin's idiom line met the phone's control style (implementer: Opus, 2026-11-20)
+
+**Not done here, first:** nothing was built or run by the implementer; the suite's green on the changed line is OWED
+(row G.2). Only `App/Variorum/VariorumTests/Protection/LobbyWordsDoorPressTargetTests.swift` changed — the phone's
+face, `Shared/` and Core are untouched.
+
+**The red as seen** (the orchestrator, from the whole Mac target's leg): `thePhonesWordsDoorKeepsItsWholeLabelButton`
+failed at `:95`, `arm.contains(".buttonStyle(.plain)")`; its mechanism check (`:94`, `whyNotAPressTarget`) and its
+unfolding check (`:96`, `if showsWords { wordsField }`) did not report. No earlier Mac list in this run held the suite —
+the whole target was the first to run it.
+
+**The trace (read):** the suite is VX-510 D-B9's SOURCE pin (VX-527, her hand: the Mac lobby's "Use your twelve words
+instead" opened only from its chevron). Its guard reads the phone's `VariorumMobile/Features/Protection/
+MobileRoadFaces.swift` disclosure arm, which D-B9 described as "a whole-label `.plain` Button" with no bug
+(`notes/plans/fixes/vx-510-first-run-sync.md`, D-B9). On main that arm's Button ends `.buttonStyle(.plain)` with the
+label's `.font(tokens.small)` / `.foregroundStyle(tokens.accent)`; this run's batch 2 (`a77374d8a`, VM-50 — the phone's
+one set of controls) replaced both with `.buttonStyle(PhoneInlineActStyle(tokens: tokens, alignment: .leading))`. The
+Button, its `showsWords.toggle()` action and `Text(tokens.chromeLabel(ProtectionWords.wordsDoor))` inside its label
+closure are unchanged, so the mechanism check passes. `PhoneInlineActStyle.makeBody` (`Shared/Theme/PhoneControls.swift:
+183–189`) is `PhoneControlFeedback` — an opacity only (`:118–126`) — over `word(configuration.label)` with
+`.phoneHitArea(alignment:)`, which is a frame of at least 44 × 44 plus `.contentShape(Rectangle())`
+(`Shared/Theme/PhoneMetrics.swift:107–112`). Nothing in the style narrows the target below the label, disables hit
+testing, or moves the label outside the Button: the whole label still presses, and now across at least 44 × 44 (the
+phone's own rendered pin, `MobilePhoneControlsTests.theInlineActAnswersAcrossFortyFourWithoutMovingItsWord`, holds that
+frame).
+
+**Why the test's sentence moved and not the phone's face:** D-B9's charter says the pin "binds the MECHANISM (the label
+inside a press target), never the idiom", and the suite's header says the same; `.plain` was the idiom the phone wore
+when the guard was written, and nothing the guard protects — a Button over the whole label toggling the words road,
+never a `DisclosureGroup` label — was lost by the restyle. So the style line now reads `arm.contains(".buttonStyle(.plain)")
+|| arm.contains(".buttonStyle(PhoneInlineActStyle(")` with the message "the phone's door is a whole-label Button: plain,
+or the phone's inline act"; the header's "a whole-label `.plain` Button" sentence and the guard's doc comment say why.
+The mechanism check and the unfolding check are untouched; the suite stays self-contained (file reads only, no app
+import) (`e8c986cac`).
+
+**Not added: a pin on what makes the new idiom safe.** Saying "the style's body puts the hit area on the configuration's
+label" in this suite's comment-stripped source style would take the style's declaration, a cut to the next type, and a
+match on its internals (`word(configuration.label)`, `.phoneHitArea(`) — more than a line or two, and a pin on the style's
+idiom, which this suite's own rule forbids. The style's 44 × 44 whole-label target is the phone's controls suite's to
+hold, and its rendered pin holds it.
+
+**The window (OWED — the orchestrator's):** the Mac suite `-only-testing:VariorumTests/LobbyWordsDoorPressTargetTests`
+(or the whole Mac target's re-run) on the tree with `e8c986cac` — expect both tests green. ‹PENDING›
