@@ -545,6 +545,25 @@ ink).
 
 *(Each implementer writes its batch's block here at its start and flips it per commit.)*
 
+### Batch A · VM-24 — LIVE STATUS (implementer, opus; started 2026-11-20 ~04:40, base `4b0eaaacb`)
+
+**Revert state: NO REVERT IS IN FLIGHT.** The red build is made WITHOUT a revert: the pins land in their own commit
+(pins 1–4 use only API that exists on the base tree), and `DerivedData/vm24-a-red` is built from the tree at that
+commit, whose production files are byte-identical to the base's (verified by `git diff --stat 4b0eaaacb`). If a pin is
+ever edited after the fix lands, the red build is remade by the revert protocol and this line says so first.
+
+| Piece | State |
+|---|---|
+| Reading (CLAUDE.md + canon, TEXTKIT2_NOTES, MobileSoul §1–5, the protocol, this record §1–§7 + batch A, VM-78 BATCH C's two sections, VM-64 §7 batch 2's r1→r2 and r2, the fence suite whole, `MobileEditTrace.swift` whole); every file:line in §4.1 re-verified on `4b0eaaacb` — all hold | DONE |
+| A macOS probe (a scratch script, not a test host): `NSTextStorageDelegate.willProcessEditing` fires for a programmatic `replaceCharacters`, with the exact change; `didProcessEditing` widens a font-only insert through the paragraph's terminator. macOS evidence for UIFoundation's shared storage, NOT an iOS measurement | DONE |
+| Pins 1–4 (`MobileUnarmedEditRoutingTests`, base API only) | NOT-STARTED |
+| Red build `DerivedData/vm24-a-red` (the tree at the pins commit) | NOT-STARTED |
+| The fix (D-24-1): the capture in `MobileStorageObserver`, `storageDidEdit(_:changeInLength:changedCharacters:)`, `fallbackVerdict`, the unbound churn cost | NOT-STARTED |
+| The trace (D-24-4): widened · rescued · no capture | NOT-STARTED |
+| Pins 5 (capture belts) and 6 (trace) | NOT-STARTED |
+| Fix build `DerivedData/vm24-a` + Mac `DerivedData/vm24-a-mac` | NOT-STARTED |
+| Closeout in §12 + the READY report | NOT-STARTED |
+
 ## 12. Batch closeouts, findings and dispositions
 
 *(Each implementer's closeout; the orchestrator's stage results; the ladder's dispositions.)*
