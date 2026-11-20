@@ -181,9 +181,10 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | **CLOSED 2026-11-19** (r1) | see the batch 6 block; r1 code `36cddcf60` `9821ffef3` `ce3c4e75b` | first window NOT green (the release lived in `deinit`); r1 green on the final tree — "Orchestrator's stage results" below; residual VM-227 |
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
-| Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 — the merge, the rebuilds, the red build, the whole Core package — is the merge block's below) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the stage |
+| Ladder r1 · fix pass | **DONE 2026-11-19** — settled by the merged tree's stage window (finding 2 red on its hunk-reversed build, green alone and in company; "Orchestrator's stage results" ▸ "The merged tree (main's VM-55 in)") | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); part 2 ran as the merge block below. *(Was: IN-PROGRESS, "owed: the stage" — flipped at ladder round 3, finding 2(c).)* |
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
-| Ladder r2 · fix pass | **IN-PROGRESS** (first turn DONE; the final calls are in; the second turn's part A — edits — in progress, its part B — the first compile, the whole Core package, the red build — waits for the QUIET window's end) | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, then the agreed no-choice fixes with their pins; the reviewer's final calls, the whole Core package and the final builds in the second turn |
+| Ladder r2 · fix pass | **DONE 2026-11-19** — part B built and the whole Core package green (`74d91c666`); settled by its stage window: the seven meant reds on `vm64-gate2-red` and no other, green alone and in company, the gated suite alone 13 passed ("Orchestrator's stage results" ▸ "Ladder round 2's fixes — THE STAGE WINDOW") | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, the no-choice fixes with their pins, the final calls in the second turn, part B's builds. *(Was: IN-PROGRESS, part B waiting on the QUIET window — flipped at ladder round 3, finding 2(c).)* |
+| Ladder r3 · fix pass | **IN-PROGRESS** — see "Ladder round 3 — fix pass · LIVE STATUS" below | see that block | the last round (no major found); the responses first, the agreed fixes with their pins, the arms for the final call |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -442,7 +443,10 @@ owner-carrying table, through SQLCipher's page decrypt, holding the runner AND t
 **The settled design:**
 - **Schema (its own commit, first):** `v1_38_owner_adoption_index` — eleven partial indexes
   `idx_<table>_unowned ON <table>(owner_id) WHERE owner_id IS NULL`, one per owner-carrying synced table. Empty in
-  steady state; holds exactly the rows adoption exists to find. LOCAL ONLY — not a SyncSpec §12 lockstep event
+  steady state; holds exactly the rows adoption exists to find. *[Ladder round 3, finding 5(c): the SIGNED-IN steady
+  state. In a library that has never signed in (a local-only Mac library, the dev store) every row of the eleven
+  tables is unowned, so each index holds every row of its table — one small index entry per row written, for an
+  adoption that never runs there.]* LOCAL ONLY — not a SyncSpec §12 lockstep event
   (v1_34 / v1_36's class: no table, no column, no classification; the marker stays 15). Verified: no in-flight branch
   adds a migration (`git fetch`; every remote branch's diff against main touches no `Persistence/` file), so `v1_38` is
   free. Query plans (sqlite 3.54 CLI, to be re-read through the real SQLCipher build by the pin): the probe and the
@@ -2190,7 +2194,9 @@ round — a `Sync/` line (P-65-7's road), wave 4's.
   missed until the next launch — pinned out by `aRowFromAWriteAlreadyQueued…`) · no probe (the index alone: an empty
   write transaction every launch).
 - **P-67-2 — the index shape: per owner table, on `(owner_id)`, partial on `owner_id IS NULL`** (built: the planner
-  seeks it as `owner_id=?`, and it stays empty in the steady state) · partial on `(id)` (the planner would scan the
+  seeks it as `owner_id=?`, and it stays empty in the steady state *[ladder round 3, finding 5(c): the signed-in
+  steady state; in a library never signed in it holds every row of its table — one small entry per row written, the
+  cost the full-index option is rejected for, paid there only]*) · partial on `(id)` (the planner would scan the
   partial index rather than seek it) · a full `owner_id` index (every owned row an entry, maintained at every mint, for
   no read that needs it).
 - **P-67-3 — the report keeps one zero entry per owner table when nothing adopts** (built: its shape is unchanged for
