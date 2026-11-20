@@ -14,6 +14,24 @@ whole at its end.
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
+**As of 2026-11-20 04:50.** Batch A (VM-24's fix) is BUILT and READY was sent to nov18 for its red/green window;
+nothing of it has run yet. Batch B is not started.
+
+- **Batch A, checked by the orchestrator against the implementer's report (never trusted):** tip `cd72732ec`;
+  the fix is `a8662b81e` — `MobileEditorViewModel.swift` and `MobileEditTrace.swift` only, read line by line against
+  D-24-1 and D-24-4 and matching both; `git diff --stat 4b0eaaacb HEAD -- App/Variorum/Shared Sources
+  App/Variorum/Variorum` is empty; the three builds (`DerivedData/vm24-a-red` at `ea5a7a635`, `vm24-a` at
+  `d4085103c`, `vm24-a-mac` at `d98d12517`) each succeeded and each matches the tree where it matters; every
+  `-only-testing` name is a type with one definition. Its closeout and the window's commands are in §12. The
+  window script is the orchestrator's throwaway (the session scratchpad's `window-a.sh`), a copy of §12's commands
+  with a verdict poll.
+- **nov18 wants in every READY:** the tree's commit and that the builds are of it; each `-only-testing` list one
+  argument per TYPE; the new pins' expected reds by test name. No QUIET window is coming (this is the only run on
+  the machine). **Main moved by notes only** since the branch (vm-47's last handoff commits, nov18's handoff
+  `508a2bae0`): merge main in before the gate, no rebuild.
+
+*The block below is the state before batch A, kept as written.*
+
 **As of 2026-11-20 04:20.** Preflight done; the run is seated; the design is ruled (§4); nothing is built yet.
 
 - **Done:** the reading (the kickoff's order, whole); the in-flight row on main (`8ff1d08af`); VM-24 and VM-243 In
@@ -511,8 +529,8 @@ ink).
 | L2 | Is the wave-1 build's trace enough for the "before"? | orchestrator | DONE — yes (§4.6) |
 | L3 | The standing pin re-run alone on main's code | orchestrator | DONE — red, main's shape (the live state) |
 | L4 | The design: VM-24's options against the fence; VM-243's trace | architect | DONE (§4) |
-| L5 | Batch A — VM-24's fix and pins | implementer | NOT STARTED |
-| L6 | Batch A's red/green window, the Mac's seven source-reading types | orchestrator, nov18's GO | NOT STARTED |
+| L5 | Batch A — VM-24's fix and pins | implementer | BUILT (`a8662b81e`, tip `cd72732ec`; §12) — every red and green PENDING the window |
+| L6 | Batch A's red/green window, the Mac's seven source-reading types | orchestrator, nov18's GO | READY sent 04:48; PENDING the GO |
 | L7 | Batch B — VM-243: the pin as the confirm, then the fix | implementer | NOT STARTED |
 | L8 | Batch B's window | orchestrator, nov18's GO | NOT STARTED |
 | L9 | The simulator walk (typing mid-note, paste, the readout's new lines; a dash line and the paragraph after it) | orchestrator | NOT STARTED |
