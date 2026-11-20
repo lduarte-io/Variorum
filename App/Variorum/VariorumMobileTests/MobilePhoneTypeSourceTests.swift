@@ -95,6 +95,38 @@ struct MobilePhoneTypeSourceTests {
             """)
     }
 
+    /// **The shared pages' phone arms read the roles too** (VM-47, the walk's
+    /// fixes batch 2): the Account sheet's styled header drew its tab words in
+    /// `tokens.heading` and its Close in `tokens.small` (11.5 pt on the phone),
+    /// because this guard walked `VariorumMobile/` only. A phone arm in
+    /// `Shared/` is told from the Mac's by the styling seam it reads through —
+    /// `SharedPageStyle` (`style.tokens` / `pageStyle?.tokens`), which is nil
+    /// on the Mac by construction (`SharedPageStyle.swift`), so a type slot
+    /// read through it is a phone read. Red on old: the header's two reads.
+    @Test func noSharedPhoneArmReadsTheMacsTypeSlots() throws {
+        let shared = Self.phoneRoot.deletingLastPathComponent().appendingPathComponent("Shared", isDirectory: true)
+        let walker = try #require(FileManager.default.enumerator(at: shared, includingPropertiesForKeys: nil))
+        let slot = try Regex(#"(?:\bstyle|\bpageStyle[?!]?)\.tokens\.(small|body|title|heading|mono|navigation)\b"#)
+        var files = 0
+        var offenders: [String] = []
+        for case let file as URL in walker where file.pathExtension == "swift" {
+            let relative = file.path.replacingOccurrences(of: shared.path + "/", with: "")
+            files += 1
+            let source = try String(contentsOf: file, encoding: .utf8)
+            for (index, line) in source.split(separator: "\n", omittingEmptySubsequences: false).enumerated()
+            where isCode(String(line)) && String(line).contains(slot) {
+                offenders.append("Shared/\(relative):\(index + 1) — \(line.trimmingCharacters(in: .whitespaces))")
+            }
+        }
+        #expect(files > 20, "the walk must reach the shared pages (\(files) files)")
+        #expect(offenders.isEmpty, """
+            A shared page's PHONE arm reads the Mac's type slot (through \
+            `SharedPageStyle`) — read a role (`.phoneType(_:_:)`) or the layer's \
+            control instead:
+            \(offenders.joined(separator: "\n"))
+            """)
+    }
+
     /// **Nothing on the phone is set below 13 pt.**
     @Test func noPhoneViewSetsASizeUnderTheFloor() throws {
         let literal = try Regex(#"(?:\bofSize|\bsize|withSize\()\s*:?\s*([0-9]+(?:\.[0-9]+)?)"#)

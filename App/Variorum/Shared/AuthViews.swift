@@ -183,8 +183,12 @@ struct AccountView: View {
                     Button {
                         tab = target
                     } label: {
+                        // VM-47 (the walk's fixes, batch 2): the phone's type
+                        // roles, not the Mac's slots — the tab words on `tab`
+                        // (the current one semibold, the tab bar's grammar),
+                        // where `tokens.heading` read the Mac's size.
                         Text(style.chrome(target.rawValue))
-                            .font(style.tokens.heading)
+                            .phoneType(.tab, style.tokens, weight: tab == target ? .semibold : .regular)
                             .foregroundStyle(
                                 tab == target ? style.tokens.ink : style.tokens.phone.muted)
                     }
@@ -193,14 +197,13 @@ struct AccountView: View {
                     .accessibilityAddTraits(tab == target ? [.isSelected] : [])
                 }
                 Spacer()
-                Button {
+                // The closing act is the sheet header's own (Done's control:
+                // 17 semibold in the accent, a 64 × 44 target) — its word
+                // stays Close; `tokens.small` drew it at 11.5 pt.
+                Button(style.chrome("Close")) {
                     dismiss()
-                } label: {
-                    Text(style.chrome("Close"))
-                        .font(style.tokens.small)
-                        .foregroundStyle(style.tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneTextButtonStyle(tokens: style.tokens, closing: true))
                 .accessibilityLabel("Close")
             }
             .padding(.bottom, 2)
