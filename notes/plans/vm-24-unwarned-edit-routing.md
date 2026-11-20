@@ -635,8 +635,9 @@ answers say why). Headless only: no `xcodebuild test`, no simulator boot.
 | The answers to F1, F2, F3 in the round-1 file, committed before any fix | DONE (this commit) — all three AGREE; F1 takes "(snap-backs avoided)", no optional pin; two observations left for the reviewer and her (Terminal wraps its other parenthetical lines; "rescued" during a flight) |
 | F1 (the "rescued" line's parenthetical) + F3 (one clause in the trace header), one commit | DONE (this commit) — `MobileEditTrace.swift` only; the capture of the fixed readout is the orchestrator's (PENDING) |
 | F2 (the routing suite's doc sentence) | DONE (this commit) — `MobileEditRoutingTests.swift` doc comment only |
-| The phone `build-for-testing` of the final tree into `DerivedData/vm24-gate` | IN-PROGRESS — of the tree at this commit |
-| "What was applied" + the build's result in the round-1 file | NOT-STARTED |
+| The phone `build-for-testing` of the final tree into `DerivedData/vm24-gate` | DONE — of the tree at `b3fa281f9`: `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-gate-bft.log`, 0 errors, no warning in a touched file; the dylib carries the new words, not the old. No Mac build owed (the Mac-compiled roots are unchanged since `6b5dfb41d`). Nothing under App or Sources changes after `b3fa281f9` |
+| "What was applied" + the build's result in the round-1 file | DONE (this commit) |
+| Owed elsewhere, not this pass's | the capture of the fixed readout (the orchestrator's); the reviewer's final call on the three answers and the two observations under F1 |
 
 ## 12. Batch closeouts, findings and dispositions
 

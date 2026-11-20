@@ -290,3 +290,39 @@ pushed before any fix.*
   attribute write reads as not widened, and its "changed … len" overstates the change. The routing reads the same
   wider range only toward refusal, so it is unaffected.
 - **Taken** as one clause in the header's "widened" bullet, riding F1's commit. Comment only.
+
+### What was applied
+
+**Not done in this pass:** no optional length pin (F1's answer says why); no capture of the fixed readout (no
+simulator is booted here, so that is the orchestrator's to take); no change to the two observations under F1 (they
+need choices the findings do not make, so they are left for the reviewer's final call and her wording pass); batch A's
+closeout in the run record (§12, "Words", `vm-24-unwarned-edit-routing.md:791`) still quotes the old words, as the
+record of what shipped then. The morning script never quoted them.
+
+| Finding | Commit | Where | Old | New |
+|---|---|---|---|---|
+| F1 | `9675f8888` | `MobileEditTrace.swift:553` → `:557`, `headline()` | `"  rescued           \(s.rescuedReports)   (each one a snap-back that did not happen)\n"` | `"  rescued           \(s.rescuedReports)   (snap-backs avoided)\n"` — DRAFT, the marker comment above it unchanged |
+| F3 | `9675f8888` | `MobileEditTrace.swift:95-97` → `:95-101`, the header's "widened" bullet (comment text; the `//` prefixes dropped) | "the report ran past the characters that changed (the widening this file's carve-out below reasons about, now MEASURED, not inferred from `length - delta`);" | "the report ran past the characters that changed (the widening this file's carve-out below reasons about, now MEASURED, not inferred from `length - delta` — measured against the storage's accumulated pre-fixing range, which also holds any attribute write made in the same transaction, so a transaction that bundles a wider attribute write reads as not widened and its changed length overstates the change: the instrument under-counts, the routing is unaffected);" |
+| F2 | `b3fa281f9` | `MobileEditRoutingTests.swift:139-142` → `:139-144`, `aStaleVerdictIsNotAppliedToTheNextEdit`'s doc (comment text; the `///` prefixes dropped) | "A widened gate-less report can already overflow its entry and take the honest recovery road, which is correct but is a different story from this one; the deletion keeps the pin on the binding alone." | "A widened gate-less report routed from the report alone — the pre-VM-24 road, now only the no-capture case (since VM-24 it routes from the changed characters) — can overflow its entry and take the honest recovery road, which is correct but is a different story from this one; the deletion keeps the pin on the binding alone." |
+
+No test expectation moved: no pin asserted the old parenthetical (the headline checks stop at the count).
+
+**The width evidence** (CoreText, the readout's own faces at the default text size, 13 pt; the measure is 362 pt on the
+walk's iPhone 17 Pro; calibrated against the capture within about 2 pt):
+
+| Line (count 0) | Characters | Study, SF Pro | Terminal, SF Mono |
+|---|---|---|---|
+| gate-less (fits in the capture) | 58 | 326.9 pt | 466.1 pt |
+| widened (fits in the capture, the longest that does) | 62 | 350.5 pt | 498.2 pt |
+| rescued, OLD (wraps in the capture) | 66 | 380.0 pt | 530.4 pt |
+| **rescued, NEW** | **44** | **245.9 pt** | **353.6 pt** (361.6 pt at a two-digit count) |
+
+**The build.** A phone `build-for-testing` of the tree at **`b3fa281f9`** (the working tree clean), scheme
+`VariorumMobile`, destination `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no simulator booted, into
+`App/Variorum/DerivedData/vm24-gate`: **`** TEST BUILD SUCCEEDED **`** (started 06:41:40, done by 06:42:53), log
+`App/Variorum/DerivedData/logs/vm24-gate-bft.log`, 0 errors, no warning in either touched file, both touched files
+compiled. The products hold `VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64.xctestrun`; the app's
+`VariorumMobile.debug.dylib` carries "snap-backs avoided" once and "each one a snap-back" zero times (the unchanged
+"widened" words once, as a control). **No Mac build is owed:** `git diff --stat 6b5dfb41d b3fa281f9 --
+App/Variorum/Shared Sources App/Variorum/Variorum` is empty. **Nothing under App or Sources changes after
+`b3fa281f9`**; the commits after it are records only.
