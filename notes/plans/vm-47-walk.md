@@ -1232,6 +1232,38 @@ ANOTHER TICKET'S — VM-137 (Umbrella: Writing — the keyboard bar), and a look
   keyboard road by an implementer (the editor seam), with a red-on-old pin; if it is visible: no finding (the twin's
   146 pt was the old clip's or the old driver's).
 
+**TRACE — (c), this run's W-A1 clip; PENDING the one capture that shows the caret** (2026-11-19, by reading and pixels;
+nothing built or run). *The tap is the same in both walks:* f1 differs from its twin only in the chip row's inks, so the
+editor's frame before the tap is the twin's — 283.0–840 pt (the comments dim starts at 283.0, the sheet's top at 283 +
+`MobileCommentsSheetView.sheetTop` 160 = 443.0; the re-capture's own swipe, `TextView[0.70, 0.47]` at the ⑂'s line, puts
+its foot at ≈ 840) — and both XCTest logs show the same `element.tap()` on that TextView with no swipe before f3: the
+centre, ≈ (201, 561.5), block 3's first line (≈ 536.7–564) in both. Not the store (the lesson is the same, f1 / c5); not
+main (no line of `MobileEditorTextView`, `MobileKeyboardBar`, the comments sheet or `Shared/EditorBrain` moved; VM-78's
+Write lines are the date chip's; W-C2's focus binding is the covered Library field's). *The 146 pt* is the text view's
+`contentOffset` — every prose line moved by exactly 146.0 in Study (f3, r13) and by **118.0** in Terminal (twin f3 light,
+r13 dark: 473.0 → 355.0), the masthead fixed — the old tree's caret reveal as the keyboard rose: in Terminal it lands
+block 3's first line (≈ 580.3–605.3) at ≈ 462–487, its foot on the keyboard bar's top (485.7), which was also the old
+`.clipped()` band's foot (the band shrinks to the keyboard; twin c8's prose stops at 487). *What W-A1 removed:* the
+re-capture's c8 (Study light, Study dark, Terminal dark) shows her prose running on BEHIND the keyboard — a ripple through
+its glass at the text's own line pitch (27.3 / 25 pt) down to the note's last line (≈ 694 / 756 pt), where every twin is
+flat — so the text view does not end at the keyboard (the `keyboardLayoutGuide` pin, `MobileEditorTextView.swift:1123`,
+is not shortening it in the hosted screen; why is untraced). The old clip was the only edge at the keyboard and the reveal
+stopped at it; `MobileBandClip` reaches two band-heights below, nothing marks the covered page, no reveal runs (0 pt on f3,
+Study r13, Terminal dark r13). Inferred, not traced: the road from the clip into UIKit's reveal; and Study's 146
+over-reaches that edge by ≈ 68 pt (unexplained). *Where the caret can end:* on the re-landed tree, software keyboard up,
+any caret on a line below the bar's top (≈ 486 pt here) — a tap in the lower half of a note — stays under the bar or the
+keyboard, and typing does not lift it (it sits inside the view's bounds); W-E3 is the same root seen from above. The one
+alternative the captures do not exclude: a hardware-keyboard posture in those two runs (the 52 pt bar alone at the foot,
+nothing to reveal). *Settling evidence:* no in-process pin holds it (the phone suites never flip the process keyboard and
+raise no reliable software keyboard — VM-78's posture trace), so the fix's red-on-old is an XCUITest step like this one,
+Study light default, the fanned lesson: log `editor.frame`; `tap(editor, "editor")` as `openCommentsOverlay` does;
+`pause(1.4)`, `passKeyboardCard()`; log `editor.frame`, `app.keyboards.firstMatch.frame` and `kbar.block`'s frame; shoot
+`e4a-mid-tap-1/-2/-3` (0.4 / 0.15 / 0.15 s, no overlay); tap one letter key (`app.keyboards.keys["x"]`), shoot
+`e4b-typed-1/-2/-3`, delete it, drag the keyboard down. PASS: the accent caret (#3B6A59, 1.7 × ≈ 26 pt) and its line
+above the bar's cells (≤ ≈ 485 pt), block 3 moved up, the "x" seen in e4b. FAIL — THIS RUN'S DEFECT (the editor seam,
+Fable's class): block 3 still at 541.7, no caret and no "x" above the bar; `editor.frame.maxY` past the keyboard's top is
+then the root to trace.
+
 **What I could not judge, and why**
 - **W-E4's caret:** under the comments overlay in f3 / f4, and the keyboard gone in f5; no capture of this set shows the
   editor focused low on the page without an overlay.
