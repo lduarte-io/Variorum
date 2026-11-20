@@ -623,6 +623,21 @@ IN FLIGHT and none is needed** — reading (f) lands in the pin file FIRST, in i
 | Half 2's closeout in §12 + the READY report | DONE (the commit after `106a0d2a4`) |
 | Half 2's stage window | PENDING — the orchestrator's, from these products (§12, "Batch B · VM-243 — half 2: the fix", its last section) |
 
+### Ladder round 1 · the fix pass — LIVE STATUS (implementer, opus; started 2026-11-20, base `6b5dfb41d`)
+
+Three findings from `notes/plans/fixes/vm-24-ladder-round1.md` (F1, F2, F3): words and comments only, no behaviour.
+**Revert state: NO REVERT IS IN FLIGHT, and none is planned** — no pin is being added that would need a red build (the
+answers say why). Headless only: no `xcodebuild test`, no simulator boot.
+
+| Piece | State |
+|---|---|
+| Reading (CLAUDE.md + canon, the protocol, the round-1 report whole, this record §1, §4.3, §5's common rules, §6, §7, the walk's verdicts, `MobileEditTrace.swift` whole, the two test files at the cited lines, `fallbackVerdict` and the capture) | DONE |
+| The answers to F1, F2, F3 in the round-1 file, committed before any fix | IN-PROGRESS |
+| F1 (the "rescued" line's parenthetical) + F3 (one clause in the trace header), one commit | NOT-STARTED |
+| F2 (the routing suite's doc sentence) | NOT-STARTED |
+| The phone `build-for-testing` of the final tree into `DerivedData/vm24-gate` | NOT-STARTED |
+| "What was applied" + the build's result in the round-1 file | NOT-STARTED |
+
 ## 12. Batch closeouts, findings and dispositions
 
 *(Each implementer's closeout; the orchestrator's stage results; the ladder's dispositions.)*
