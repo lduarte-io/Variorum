@@ -80,7 +80,12 @@ struct MobileSettingsListTests {
                 .environment(\.dynamicTypeSize, size)
             try await withHostedSurface(sheet, size: CGSize(width: 402, height: 852)) { surface in
                 await surface.settle(30)
-                for door in [MobileTagManagerSheet.doorTitle, "Acknowledgments", "Open the edit trace"] {
+                // VM-47's re-land of main: VM-64's Timing… door (Diagnostics, beside the
+                // edit trace's) joined the list in the join and is held here too.
+                for door in [
+                    MobileTagManagerSheet.doorTitle, "Acknowledgments", "Open the edit trace",
+                    "Open the timing readout",
+                ] {
                     let frame = try #require(surface.element(labeled: door)?.accessibilityFrame,
                                              "\(door) — labels were \(surface.visibleLabels)")
                     #expect(frame.height >= 43.5, "\(door) answers across 44 tall at \(size): \(frame)")

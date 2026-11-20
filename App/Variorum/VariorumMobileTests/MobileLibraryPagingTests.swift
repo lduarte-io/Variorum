@@ -240,7 +240,10 @@ struct MobileLibraryPagingTests {
                 #expect(!labels.contains { $0.hasPrefix("A note in Work") }, "Home's Library lists Work's note")
 
                 // Away on the Shelf: the wing is switched by the name on ITS root.
-                #expect(surface.activate("Shelf"), "the Shelf's tab door")
+                // The tab's word is "Bookcase" (her LK-5, SW-1 — the VM-47 run's
+                // bar, VM-52): MOVED from "Shelf" at VM-47's re-land of main, the
+                // fact unchanged (the Shelf page's tab door is chosen).
+                #expect(surface.activate("Bookcase"), "the Shelf's tab door")
                 await surface.settle(40)
                 #expect(surface.activate("Home"), "the name is a door — labels were \(surface.visibleLabels)")
                 await surface.settle(30)
