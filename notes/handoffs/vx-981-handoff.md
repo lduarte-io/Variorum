@@ -1,6 +1,6 @@
 # VX-981 — the MCP door fixes: your morning handoff
 
-**STATUS: MERGED 2026-11-19 — PR #14, merge commit `7629cf049`; the decisions are QUESTIONS #278. The release: PENDING(release).**
+**STATUS: MERGED 2026-11-19 — PR #14, merge commit `7629cf049`; the decisions are QUESTIONS #278. THE RELEASE WAS NOT BUILT: Apple's notary service refuses until you sign your developer account's current agreement (VX-1028). Main is release-ready; one command builds it.**
 
 ---
 
@@ -10,7 +10,7 @@ You asked for the MCP door's follow-up tickets to run overnight beside the searc
 
 The headline is the bug you reported. Your daily Journal, and every entry in it, now wears the Private eye wherever the eye appears, and the Journal's Book Settings shows Private ticked and locked, with a line saying it is always Private. Nothing was written into your library to do it: the app now reads the same rule the AI door already used, so the two can't disagree. The rest makes the door more honest and more solid. An AI can remove a version link only when it can edit both notes, as you ruled. The status line keeps saying what an AI did even when the titles are long, and its count drops the changes you've undone. A note deleted at the very moment an AI shows it to you opens nothing and says so. One AI client that stops responding can no longer hold up the others or your unlock. And the server is steadier when it's switched off and on quickly. One more piece has no code: an audit listing everything you can do at the keyboard against what an AI can do, with proposals that are yours to rule.
 
-The release: by your word, the last of tonight's two Mac runs builds it and does not publish it — that is this run. PENDING(release). **The label 1.5 and the notes in `ReleaseNotes-1.5.md` are provisional:** I put both to you in chat and built with them unanswered. They are yours to confirm or change before any publish; a change is the version line on the Mac app's two configurations plus the notes file, then a rebuild.
+The release: by your word, the last of tonight's two Mac runs builds it and does not publish it — that is this run. **It could not be built tonight.** The release script stopped at its own first checks, because Apple's notary service answered: "HTTP status code: 403. A required agreement is missing or has expired." Your signing credential is fine and nothing is wrong on this Mac; Apple wants the developer account's current agreement signed, and that signature is yours. Nothing was built, signed or uploaded, and I ran none of the script's steps by hand. Everything before the build is done and on main, so once you have signed it is one command (below). **The label 1.5 and the notes in `ReleaseNotes-1.5.md` are provisional:** I put both to you in chat and built with them unanswered. They are yours to confirm or change before any publish; a change is the version line on the Mac app's two configurations plus the notes file, then a rebuild.
 
 ## Your checklist
 
@@ -19,7 +19,7 @@ The release: by your word, the last of tonight's two Mac runs builds it and does
 - [ ] The wording pass — every new sentence, listed by where it appears, in #278.
 - [ ] Re-seed the field guide in your real store: lesson 3 changed (unlinking moved from the Write-new card to the Edit card). Behind the A1 safety copy, Help ▸ Restore Field Guide….
 - [ ] VX-370: install and sign in to a second MCP client on the Pro (Codex or Gemini) when you want the output-cap measurement run — the recipe is ready.
-- [ ] The release: confirm or rename the version label, then publish — yours alone. PENDING(release).
+- [ ] **First, because the release waits on it (VX-1028):** sign the current agreement on Apple's developer site (Account ▸ Agreements). Then confirm or change the label 1.5 and the notes (`App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-1.5.md`), and build: from `~/dev/variorum` on main, with no Variorum running, `Tools/Release/release.sh --version 1.5 --stop-before-appcast` (drop the flag to make the appcast in the same run — that step reads your Keychain). Publishing after that is yours alone, by the site's runbook.
 - [ ] The filed tickets pass (the list at the bottom), and VX-368 moving to Needs Lillian with the audit as its pointer.
 
 ## What changed for you in the app
@@ -74,11 +74,18 @@ PL-77: the Journal's Private facts ride to the phone in shared code, unused unti
 
 ## The release
 
-PENDING(release) — what was built, its version label (yours to confirm or rename), where it stopped (before the appcast, the site upload and any `/Applications` install), and what remains: your word.
+**Not built.** What happened, in order:
+
+- **Release prep, done and merged:** the Mac app's version line reads 1.5 on both configurations and `ReleaseNotes-1.5.md` is in place (the version guard and the notes guard both pass). Both are provisional — the label and the wording were put to you in chat and went in unanswered.
+- **The first-run gate, passed** on main at `ad5053002`: the headless drill ran green inside the merge gate, and the scripted first-run walk passed both arms (a new user turning sync on, then a second device joining) on the Debug build of main, against a test account that the walk found at rest and left at rest. The dev store was set aside whole and put back with every file's checksum unchanged.
+- **The build, refused by its own preflight:** `Tools/Release/release.sh --version 1.5 --stop-before-appcast` checked the version, the commit (`ad5053002`, build number 12722), zero running instances and the Sparkle tools, then stopped on "the notary credential 'VariorumNotary' did not answer". Apple's own answer to that check: "HTTP status code: 403. A required agreement is missing or has expired." Nothing was archived, signed, notarized or uploaded; there is no 1.5 folder under `~/Library/Developer/Variorum/Releases`; `/Applications` still holds the published 1.4 (12299).
+- **What it needs:** your signature on Apple's agreement, then the one command in your checklist. I stopped before the appcast on purpose: that step reads your Keychain and is yours to run attended.
+- **One caution:** the first-run walk is recorded for main at `ad5053002`. Later commits on main that change only notes do not disturb it, but if a mobile run merges code before you build, the release checklist's walk is owed again on the new tip (`Tools/WalkKit/first-run-walk.sh std`, under a stage claim).
 
 ## Tickets filed
 
 Tickets filed:
+- [ ] VX-1028 (High, Task, Needs Lillian): sign Apple's developer agreement, then build 1.5 with one command and publish when ready.
 - [ ] VX-1026 (Medium, Bug, Todo): `list_notes` on a book lists the hand order, not the book's own order — its sort, pinned notes and chapters.
 - [ ] VX-1012 (Low, Bug, Backlog): unticking a note's own Private mark from its menu says "No longer Private." while a Private book still holds the note.
 - [ ] VX-1027 (Low, Bug, Todo): the daily Journal's own row menu still offers "Use as Daily Journal" — filed at your word during the walk.
