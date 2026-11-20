@@ -613,9 +613,9 @@ IN FLIGHT and none is needed** — reading (f) lands in the pin file FIRST, in i
 
 | Half 2 piece | State |
 |---|---|
-| Reading (f), the open tail, added to `MobileTypedTextFaceTests` (base API only) | DONE (the commit naming this line) — compile PENDING the red build; red/green PENDING the window |
-| Red build `DerivedData/vm24-b-red` (the pin with (f), no fix) | IN-PROGRESS |
-| The fix (D-243-1): the changed characters' face reset to the base before the line's restyle, every routed arm, equality-gated | NOT STARTED — the range: the kept value (`changedCharacters`), else a bound arming's `(location, replacementLength)`, else none |
+| Reading (f), the open tail, added to `MobileTypedTextFaceTests` (base API only) | DONE (`03b06f417`) — compiles; red/green PENDING the window |
+| Red build `DerivedData/vm24-b-red` (the pin with (f), no fix) | DONE at the tree of `03b06f417` (no production file differs from `d63c1e2cd`) — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-b-red-bft.log`, the binary carries (f). FROZEN |
+| The fix (D-243-1): the changed characters' face reset to the base before the line's restyle, every routed arm, equality-gated | DONE (the commit naming this line) — `MobileTypedFace.swift` (new, the pure rule) + its one call in `storageDidEdit` + the model's `typedFaceResets` count; green PENDING the window |
 | The gate's pins (plain prose typed in plain prose writes nothing; the reset's own pass count) | NOT STARTED |
 | Fix build `DerivedData/vm24-b`; the Mac — no Mac-compiled file is to change, so batch A's `vm24-a-mac` serves | NOT STARTED |
 | Half 2's closeout in §12 + the READY report | NOT STARTED |

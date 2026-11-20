@@ -182,6 +182,11 @@ final class MobileEditorViewModel {
     @ObservationIgnored private var loaded = false
     /// Times `desyncRecovery` fired — soaks and the walk assert ZERO.
     @ObservationIgnored private(set) var desyncRecoveryCount = 0
+    /// **VM-243:** times a routed edit's typed face was reset to the base
+    /// (`MobileTypedFace.reset` WROTE). A counter for the pins — plain prose
+    /// typed in plain prose keeps it at zero (the equality gate); nothing in
+    /// the app decides anything from it.
+    @ObservationIgnored private(set) var typedFaceResets = 0
     /// Full surface renders performed — the echo pin's oracle (an autosave
     /// echo must not rewrite the surface).
     @ObservationIgnored private(set) var fullRenderCount = 0
@@ -2206,7 +2211,9 @@ final class MobileEditorViewModel {
     /// (`MobileChangedCharactersCapture`, kept by the storage observer), or
     /// nil when none was kept. An edit no arming describes routes from it, and
     /// its churn cost is counted from it; with nil, everything below is
-    /// exactly what it was before. The re-stamp, the face restyle, the caret
+    /// exactly what it was before. **VM-243 (D-243-1):** the typed face's reset
+    /// covers exactly these characters on every routed arm (with none, a bound
+    /// arming's own landing; with neither, no reset). The re-stamp, the face restyle, the caret
     /// claim and the chrome keep the REPORTED range — each needs the extent
     /// and each is extent-safe by its own rule.
     func storageDidEdit(
@@ -2357,6 +2364,24 @@ final class MobileEditorViewModel {
         // the observer's `.editedCharacters` guard means these attribute
         // writes cannot re-enter here.
         if let storage {
+            // **VM-243 (D-243-1) — the face is derived where the text lands.**
+            // iOS gives a typed character the font and ink of the character
+            // before the caret and never the face's mark, so prose typed after
+            // a marker (`"- "`, a closing `*`, a heading's line) wore the
+            // marker's ink — and the heading's font — where no restyle could
+            // clear it. Every routed arm resets exactly the characters that
+            // changed to the base face first (equality-gated: base on base
+            // writes nothing), and the restyle below derives what those lines
+            // truly wear. Never the widened report, never the paragraph style,
+            // never the block identity (`MobileTypedFace`).
+            if let landed = changedCharacters
+                ?? bound.map({ NSRange(location: $0.range.location, length: $0.replacementLength) }),
+               MobileTypedFace.reset(
+                   storage, range: landed,
+                   font: MobileEditorStyle.baseFont, ink: MobileEditorStyle.face.ink,
+                   baseInks: [MobileEditorStyle.face.ink, MobileEditorStyle.markdownPalette.prose]) {
+                typedFaceResets += 1
+            }
             MarkdownFace.restyle(
                 storage, range: editedRange, base: MobileEditorStyle.baseFont,
                 palette: MobileEditorStyle.markdownPalette)
