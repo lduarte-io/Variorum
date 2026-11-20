@@ -296,10 +296,18 @@ extension View {
     /// "field and card edges use the palette's existing takeLine"), radius
     /// 12, 12 inside, at least 44 tall; the typed text is a control's
     /// (`control` 17) unless the site holds her prose.
+    ///
+    /// **Its placeholder is the corrected faint** (VM-47, the walk's W-A10 —
+    /// sheet §D: placeholders take the corrected faint and need 3:1; iOS's own
+    /// placeholder grey reads 1.72:1 on the paper). A field the site builds
+    /// takes the words as `TextField(phonePlaceholder:text:tokens:)`; a field
+    /// a shared view builds inside itself (`PeekableSecretField`) reads the
+    /// ink this modifier hands down, `phoneFieldPrompt`.
     func phoneField(_ tokens: VoiceTokens, role: PhoneTypeRole = .control) -> some View {
         self
             .phoneType(role, tokens)
             .foregroundStyle(tokens.ink)
+            .environment(\.phoneFieldPrompt, tokens.phone.faint)
             .padding(.horizontal, PhoneControlMetrics.insidePadding)
             .padding(.vertical, PhoneMetrics.Space.s8)
             .frame(minHeight: PhoneMetrics.touchMinimum)
@@ -309,6 +317,24 @@ extension View {
                     .overlay(
                         RoundedRectangle(cornerRadius: PhoneMetrics.Radius.standard)
                             .stroke(tokens.takeLine, lineWidth: 1)))
+    }
+}
+
+extension EnvironmentValues {
+    /// The placeholder ink of the phone field around a view (`phoneField`):
+    /// the corrected faint. nil outside one — the Mac's fields, and any field
+    /// not in a phone field, keep the system's own placeholder.
+    @Entry var phoneFieldPrompt: Color? = nil
+}
+
+extension TextField where Label == Text {
+    /// **The phone's field, its placeholder in the corrected faint** (VM-47,
+    /// the walk's W-A10). The words are both the field's label — what
+    /// VoiceOver reads, exactly as `TextField(_:text:)` — and its prompt, the
+    /// placeholder iOS draws while it is empty, which a bare title leaves in
+    /// the system's grey. Chain `.phoneField(tokens)` as ever.
+    init(phonePlaceholder words: String, text: Binding<String>, tokens: VoiceTokens) {
+        self.init(words, text: text, prompt: Text(words).foregroundStyle(tokens.phone.faint))
     }
 }
 

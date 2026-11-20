@@ -24,6 +24,13 @@ struct PeekableSecretField: View {
     var onSubmit: (() -> Void)? = nil
 
     @State private var revealed = false
+    #if os(iOS)
+    /// VM-47 (the walk's W-A10): inside the phone's field (`phoneField`) the
+    /// placeholder is the phone layer's corrected faint, never iOS's own grey;
+    /// outside one it is nil and each field is built exactly as before. The
+    /// Mac never reads it — its two fields are the same constructors as ever.
+    @Environment(\.phoneFieldPrompt) private var promptInk
+    #endif
 
     var body: some View {
         HStack(spacing: 6) {
@@ -31,7 +38,7 @@ struct PeekableSecretField: View {
                 if revealed {
                     plainField
                 } else {
-                    SecureField(label, text: $text)
+                    secureField
                 }
             }
             .onSubmit { onSubmit?() }
@@ -54,13 +61,38 @@ struct PeekableSecretField: View {
         }
     }
 
-    private var plainField: some View {
-        let field = TextField(label, text: $text)
-            .autocorrectionDisabled()
+    @ViewBuilder
+    private var secureField: some View {
         #if os(iOS)
-        return field.textInputAutocapitalization(.never)
+        if let promptInk {
+            SecureField(label, text: $text, prompt: Text(label).foregroundStyle(promptInk))
+        } else {
+            SecureField(label, text: $text)
+        }
         #else
-        return field
+        SecureField(label, text: $text)
         #endif
     }
+
+    private var plainField: some View {
+        #if os(iOS)
+        return phonePlainField
+            .autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
+        #else
+        return TextField(label, text: $text)
+            .autocorrectionDisabled()
+        #endif
+    }
+
+    #if os(iOS)
+    @ViewBuilder
+    private var phonePlainField: some View {
+        if let promptInk {
+            TextField(label, text: $text, prompt: Text(label).foregroundStyle(promptInk))
+        } else {
+            TextField(label, text: $text)
+        }
+    }
+    #endif
 }

@@ -214,7 +214,7 @@ struct MobileLibraryView<TabBar: View>: View {
     }
 
     private var searchField: some View {
-        TextField(tokens.chromeLabel("Search notes, books…"), text: $query)
+        TextField(phonePlaceholder: tokens.chromeLabel("Search notes, books…"), text: $query, tokens: tokens)
             .textFieldStyle(.plain)
             .phoneField(tokens)
             .autocorrectionDisabled()

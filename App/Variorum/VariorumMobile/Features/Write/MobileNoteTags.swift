@@ -177,8 +177,8 @@ struct MobileNoteTagsSheet: View {
 
     private var typeField: some View {
         TextField(
-            tokens.chromeLabel("type a tag — ⏎ applies it (“/” nests: life/goals)"),
-            text: $typed
+            phonePlaceholder: tokens.chromeLabel("type a tag — ⏎ applies it (“/” nests: life/goals)"),
+            text: $typed, tokens: tokens
         )
         .textFieldStyle(.plain)
         .phoneField(tokens)

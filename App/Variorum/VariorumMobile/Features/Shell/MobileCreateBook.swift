@@ -219,7 +219,7 @@ struct MobileCreateBookSheet: View {
             PhoneSheetHeader(
                 tokens.chromeLabel("New Book"), tokens: tokens, doneWord: "Cancel"
             ) { dismiss() }
-            TextField(tokens.chromeLabel("Name"), text: $model.name)
+            TextField(phonePlaceholder: tokens.chromeLabel("Name"), text: $model.name, tokens: tokens)
                 .textFieldStyle(.plain)
                 .phoneField(tokens)
             kindRow
