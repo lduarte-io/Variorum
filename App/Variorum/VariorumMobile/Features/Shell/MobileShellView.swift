@@ -288,7 +288,13 @@ struct MobileShellView: View {
             // Neighbours sit exactly one screen away, so nothing but the
             // current page can draw — and the clip says so rather than
             // relying on the window's own edge to hide them.
-            .clipped()
+            // VM-47 (the walk's W-A1): SIDEWAYS ONLY. A `.clipped()` here also
+            // cut the band at the safe area's top and bottom, so every page's
+            // own `ignoresSafeArea()` ground — the roots' room, the bar's room
+            // to the home indicator, the note's paper — stopped short of the
+            // status bar, the home indicator and the keyboard, and the window
+            // showed beneath. Nothing is laid out there; only grounds reach it.
+            .clipShape(MobileBandClip())
             .contentShape(Rectangle())
             .coordinateSpace(name: MobileShellBand.coordinateSpace)
             // `.simultaneousGesture`, because the roots underneath are
@@ -726,5 +732,20 @@ struct MobileShellView: View {
             case .library: if !libraryPath.isEmpty { libraryPath = NavigationPath() }
             }
         }
+    }
+}
+
+/// **The band's clip — sideways only** (VM-47, the walk's W-A1). Its sides
+/// are the band's own, so a neighbour one width away never shows through; its
+/// top and bottom reach two band-heights past the band's own — more than the
+/// status bar, the home indicator, or a keyboard and its bar ever take from a
+/// portrait phone (the only orientation the phone ships; with a keyboard up
+/// the keyboard takes less than twice what the band keeps) — so each page's
+/// ground runs to the screen's edges, behind the keyboard's bar and rounded
+/// corners too, while everything laid out stays in the safe area. A
+/// rectangle, like the `.clipped()` it replaces.
+nonisolated struct MobileBandClip: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path(rect.insetBy(dx: 0, dy: -2 * rect.height))
     }
 }
