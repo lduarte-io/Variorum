@@ -149,6 +149,11 @@ struct MobileFaintOnDoorsSourceTests {
             let lines = try code(file)
             for (index, line) in lines.enumerated() where faint.contains(where: { line.contains($0) }) {
                 if line.contains(".stroke(") || line.contains(".fill(") { continue }  // edges and fills
+                // A field's placeholder (`prompt:`, `phoneFieldPrompt`) is the faint's own
+                // use (sheet §D), never a door's word — the sibling rule's exemption.
+                // (The walk's fixes, batch 2: the Account sheet's `pagePlainField` was read
+                // as a door because its signature `_ label: String` holds "label:".)
+                if line.lowercased().contains("prompt") { continue }
                 if let found = role(lines, at: index), fullSizeRoles.contains(found) { continue }
                 if (max(index - 4, 0)...index).contains(where: { isGlyph(lines[$0]) }) { continue }
                 if insideADoor(lines, at: index) { sites.append("\(relative):\(index + 1)") }
