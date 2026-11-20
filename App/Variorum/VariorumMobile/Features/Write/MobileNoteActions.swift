@@ -331,7 +331,7 @@ struct MobileNoteActionsSheet: View {
                 if let detail {
                     Text(tokens.chromeLabel(detail))
                         .phoneType(.meta, tokens)
-                        .foregroundStyle(tokens.phone.faint)
+                        .foregroundStyle(tokens.phone.muted)
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }

@@ -186,7 +186,7 @@ struct AccountView: View {
                         Text(style.chrome(target.rawValue))
                             .font(style.tokens.heading)
                             .foregroundStyle(
-                                tab == target ? style.tokens.ink : style.tokens.faint)
+                                tab == target ? style.tokens.ink : style.tokens.phone.muted)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(target.rawValue)

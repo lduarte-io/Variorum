@@ -455,7 +455,7 @@ struct MobileWriteScreen: View {
         } label: {
             Text(model.header?.entryDate ?? tokens.chromeLabel("no date"))
                 .phoneType(.chip, tokens)
-                .foregroundStyle(model.header?.entryDate != nil ? tokens.phone.muted : tokens.phone.faint)
+                .foregroundStyle(model.header?.entryDate != nil ? tokens.ink : tokens.phone.muted)
                 .lineLimit(1)
                 .mastheadChipHitArea()
         }
@@ -474,7 +474,7 @@ struct MobileWriteScreen: View {
         } label: {
             Text(tokens.chromeLabel(noteTags.chipLine ?? "tags"))
                 .phoneType(.chip, tokens)
-                .foregroundStyle(noteTags.chipLine != nil ? tokens.phone.muted : tokens.phone.faint)
+                .foregroundStyle(noteTags.chipLine != nil ? tokens.ink : tokens.phone.muted)
                 .lineLimit(1)
                 .mastheadChipHitArea()
         }
@@ -493,7 +493,7 @@ struct MobileWriteScreen: View {
             Text(tokens.chromeLabel(
                 MobileReferencesModel.chipLabel(count: references.references.count)))
                 .phoneType(.chip, tokens)
-                .foregroundStyle(references.references.isEmpty ? tokens.phone.faint : tokens.phone.muted)
+                .foregroundStyle(references.references.isEmpty ? tokens.phone.muted : tokens.ink)
                 .lineLimit(1)
                 .mastheadChipHitArea()
         }
@@ -570,7 +570,7 @@ struct MobileWriteScreen: View {
                 .foregroundStyle(
                     lenses.activeLensHasFallback
                         ? tokens.alarm
-                        : (lenses.activeLensID != nil ? tokens.accent : tokens.phone.faint))
+                        : (lenses.activeLensID != nil ? tokens.accent : tokens.phone.muted))
                 .lineLimit(1)
                 .mastheadChipHitArea()
         }

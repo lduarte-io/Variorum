@@ -131,7 +131,7 @@ struct MobileStarredView<TabBar: View>: View {
                 Spacer(minLength: 12)
                 Text(tokens.chromeLabel(item.target.kind == .reading ? "book" : "note"))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)

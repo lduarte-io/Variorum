@@ -324,7 +324,7 @@ struct MobileCreateBookSheet: View {
                     .foregroundStyle(tokens.ink)
                 Text(tag.path)
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(1)
                 Spacer()
             }

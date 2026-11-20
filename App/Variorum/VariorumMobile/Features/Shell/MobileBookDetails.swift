@@ -337,7 +337,7 @@ struct MobileBookDetailsSheet: View {
                 Spacer()
                 Text(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDetail))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
             }
             .contentShape(Rectangle())
@@ -359,7 +359,7 @@ struct MobileBookDetailsSheet: View {
                 Spacer()
                 Text(tokens.chromeLabel(RecoveryCopy.deleteBookKeepsItsNotes))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(2)
             }
             .contentShape(Rectangle())
@@ -409,7 +409,7 @@ struct MobileBookDetailsSheet: View {
                     ? "finished — its notes and order are frozen"
                     : "a finished book reads ✓ and freezes its notes"))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(2)
             }
             .contentShape(Rectangle())

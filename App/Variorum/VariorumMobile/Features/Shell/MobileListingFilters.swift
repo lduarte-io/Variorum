@@ -191,7 +191,7 @@ struct MobileFilterRow<Trailing: View>: View {
                         // The floor size, not the sheet's chip 15: five words
                         // must hold one row at 375 pt (#92(b)) — P-47-7.
                         .phoneType(.meta, tokens, shrinkingToFloor: true)
-                        .foregroundStyle(selection == door ? tokens.ink : tokens.phone.faint)
+                        .foregroundStyle(selection == door ? tokens.ink : tokens.phone.muted)
                         .lineLimit(1)
                         .fixedSize(horizontal: false, vertical: true)
                         // VM-49: each door answers 44 tall; its width stays

@@ -245,7 +245,7 @@ struct MobileReferencesSheet: View {
                             .lineLimit(1)
                         Text(tokens.chromeLabel("opens"))
                             .phoneType(.meta, tokens)
-                            .foregroundStyle(tokens.phone.faint)
+                            .foregroundStyle(tokens.phone.muted)
                         Spacer()
                     }
                     .padding(.vertical, 6)
