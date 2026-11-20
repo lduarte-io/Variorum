@@ -282,11 +282,11 @@ struct MobileEditTraceTests {
                 try await withEditorAssertionsMuted {
                     let world = try await editRoutingFixture(session)
                     // The system-path shape: storage moves with no consult.
-                    // A DELETION deliberately — `fallbackVerdict` routes it
-                    // cleanly to its own block, so this pin measures the
-                    // gate-less accounting and nothing else (a gate-less
-                    // INSERTION is M12's separate, already-recorded story:
-                    // iOS widens its report and the honest re-render fires).
+                    // A DELETION deliberately — its report is exact, so this
+                    // pin measures the gate-less accounting and nothing else
+                    // (a gate-less INSERTION's report is widened by iOS — M12;
+                    // since VM-24 it routes from the changed characters, and
+                    // the widened/rescued pins below measure that road).
                     systemPathEdit(
                         world.storage, range: NSRange(location: 8, length: 1),
                         replacement: "")
@@ -335,6 +335,191 @@ struct MobileEditTraceTests {
         #expect(armed.recoveries == disarmed.recoveries)
         #expect(armed.length == disarmed.length)
         #expect(armed.entries == disarmed.entries)
+    }
+
+    // MARK: - VM-24: widened · rescued · no capture (the "after" session's count)
+
+    /// A two-block note on the bare storage seam, loaded — the place where a
+    /// font-only insert at block 0's end is widened through the separator
+    /// (the iOS fixing finding, TEXTKIT2 §3: the new run carries no paragraph
+    /// style, so fixing writes the paragraph's over it through the
+    /// terminator).
+    private func twoBlockNote(
+        _ session: AppSession
+    ) async throws -> (model: MobileEditorViewModel, storage: NSTextStorage) {
+        let postID = try await makePost(session, blocks: ["Alpha beta.", "Gamma delta."])
+        let (model, storage) = makeEditor(session, postID: postID)
+        await model.loadOnce()
+        return (model, storage)
+    }
+
+    /// **VM-24, D-24-4 — the road the fix exists for, counted and drawn.** A
+    /// gate-less insert at block 0's end: its report runs past the one
+    /// character that changed (WIDENED), and alone it would have refused while
+    /// the changed characters route it (RESCUED — one snap-back that did not
+    /// happen). Both are counted, marked on the event and drawn in the
+    /// readout; the first callback kept the characters, so no capture is
+    /// missing.
+    @Test func aWidenedUnarmedReportIsMarkedAndItsRescueCounted() async throws {
+        try await withTraceArmed {
+            try await withEditorWorld { session, _ in
+                try await withEditorAssertionsMuted {
+                    let world = try await twoBlockNote(session)
+                    systemPathEdit(
+                        world.storage, range: NSRange(location: 11, length: 0), replacement: "X")
+                    #expect(world.model.desyncRecoveryCount == 0, "routed from the changed characters")
+                    #expect(world.model.index.entries.map(\.length) == [12, 12])
+                }
+            }
+
+            let s = MobileEditTrace.summary
+            #expect(s.reports == 1)
+            #expect(s.widenedReports == 1, "the report ran past the one character that changed")
+            #expect(s.rescuedReports == 1,
+                    "alone it would have refused, and the changed characters routed it")
+            #expect(s.reportsWithoutCapture == 0, "the first callback kept the changed characters")
+            #expect(s.desyncRecoveries == 0)
+
+            let report = try #require(
+                MobileEditTrace.events.last(where: { $0.kind == .report }))
+            #expect(report.flags.contains(.gateless))
+            #expect(report.flags.contains(.widened))
+            #expect(report.flags.contains(.rescued))
+            #expect(!report.flags.contains(.noCapture))
+            #expect(report.flags.isDisjoint(with: MobileEditTrace.Flags.mismatch),
+                    "a rescue is not a suspect signature")
+            #expect(report.changedLocation == 11)
+            #expect(report.changedLength == 1)
+            #expect(report.length > report.changedLength, "measured, not inferred")
+
+            let line = MobileEditTrace.line(for: report)
+            #expect(line.contains("widened — changed at 11 len 1"))
+            #expect(line.contains("rescued"))
+            let headline = MobileEditTrace.headline()
+            #expect(headline.contains("  widened           1"))
+            #expect(headline.contains("  rescued           1"))
+            #expect(headline.contains("  no capture        0"))
+        }
+    }
+
+    /// A BOUND report is widened just the same — and never rescued: its
+    /// arming routed it, and no second verdict is asked for it.
+    @Test func aBoundWidenedReportIsWidenedButNeverRescued() async throws {
+        try await withTraceArmed {
+            try await withEditorWorld { session, _ in
+                let world = try await twoBlockNote(session)
+                #expect(typeEdit(
+                    world.model, world.storage,
+                    range: NSRange(location: 11, length: 0), replacement: "X"))
+                #expect(world.model.desyncRecoveryCount == 0)
+            }
+
+            let s = MobileEditTrace.summary
+            #expect(s.widenedReports == 1)
+            #expect(s.rescuedReports == 0, "an armed edit is routed by its arming")
+            #expect(s.gatelessReports == 0)
+        }
+    }
+
+    /// **The disarmed trace does no extra work, and the armed one asks the
+    /// second verdict only where it can mean something** (D-24-4): disarmed,
+    /// never; armed, only for an UNBOUND report that was WIDENED — not for a
+    /// bound one, an exact one, or one with no changed characters.
+    @Test func theRescueVerdictIsAskedOnlyArmedAndOnlyForAnUnboundWidenedReport() async throws {
+        var asked = 0
+        let reported = NSRange(location: 11, length: 2)
+        let oneCharacter = NSRange(location: 11, length: 1)
+        func report(bound: Bool, changed: NSRange?) {
+            MobileEditTrace.report(
+                editedRange: reported, delta: 1, hadArming: bound, bound: bound,
+                changedCharacters: changed,
+                rescued: {
+                    asked += 1
+                    return true
+                })
+        }
+
+        await withTraceDisarmed {
+            report(bound: false, changed: oneCharacter)
+        }
+        #expect(asked == 0, "disarmed: nothing computed")
+        #expect(MobileEditTrace.summary == MobileEditTrace.Summary())
+
+        await withTraceArmed {
+            report(bound: true, changed: oneCharacter)    // widened, but bound
+            report(bound: false, changed: reported)       // unbound, not widened
+            report(bound: false, changed: nil)            // unbound, nothing kept
+            #expect(asked == 0, "the second verdict is never asked where it cannot mean a rescue")
+            report(bound: false, changed: oneCharacter)   // unbound and widened
+            #expect(asked == 1)
+
+            let s = MobileEditTrace.summary
+            #expect(s.reports == 4)
+            #expect(s.widenedReports == 2)
+            #expect(s.rescuedReports == 1)
+            #expect(s.reportsWithoutCapture == 1)
+        }
+    }
+
+    /// **No capture, counted** — a storage edit whose report arrived with no
+    /// changed characters kept (here: the observer's second callback with no
+    /// first one, driven by hand around an exact deletion). It routes from the
+    /// report as before, and the readout says so.
+    @Test func aReportWithNoKeptValueIsCountedAndMarked() async throws {
+        try await withTraceArmed {
+            try await withEditorWorld { session, _ in
+                let world = try await twoBlockNote(session)
+                let observer = try #require(world.storage.delegate as? MobileStorageObserver)
+                world.storage.delegate = nil
+                world.storage.replaceCharacters(in: NSRange(location: 8, length: 1), with: "")
+                world.storage.delegate = observer
+                observer.textStorage(
+                    world.storage, didProcessEditing: .editedCharacters,
+                    range: NSRange(location: 8, length: 0), changeInLength: -1)
+                #expect(world.model.desyncRecoveryCount == 0, "an exact report routes as before")
+                #expect(world.model.index.entries.map(\.length) == [10, 12])
+            }
+
+            let s = MobileEditTrace.summary
+            #expect(s.reportsWithoutCapture == 1)
+            #expect(s.widenedReports == 0, "with nothing kept, widening is not measured")
+            let report = try #require(
+                MobileEditTrace.events.last(where: { $0.kind == .report }))
+            #expect(report.flags.contains(.noCapture))
+            #expect(report.changedLocation == -1)
+            #expect(MobileEditTrace.line(for: report).contains("no capture"))
+            #expect(MobileEditTrace.headline().contains("  no capture        1"))
+        }
+    }
+
+    /// Zero behaviour change on the rescued road too: the widened gate-less
+    /// insert, run armed and disarmed, lands identically.
+    @Test func armingTheTraceChangesNothingOnTheRescuedRoad() async throws {
+        func run() async throws -> (recoveries: Int, entries: [Int], stored: [String]) {
+            var out = (recoveries: 0, entries: [Int](), stored: [String]())
+            try await withEditorWorld { session, db in
+                try await withEditorAssertionsMuted {
+                    let postID = try await makePost(session, blocks: ["Alpha beta.", "Gamma delta."])
+                    let (model, storage) = makeEditor(session, postID: postID)
+                    await model.loadOnce()
+                    systemPathEdit(storage, range: NSRange(location: 11, length: 0), replacement: "X")
+                    await model.autosave.flushNow()
+                    out = (
+                        model.desyncRecoveryCount,
+                        model.index.entries.map(\.length),
+                        try await storedBlockTexts(db, postID: postID))
+                }
+            }
+            return out
+        }
+
+        let disarmed = try await withTraceDisarmed { try await run() }
+        let armed = try await withTraceArmed { try await run() }
+
+        #expect(armed.recoveries == disarmed.recoveries)
+        #expect(armed.entries == disarmed.entries)
+        #expect(armed.stored == disarmed.stored)
+        #expect(armed.stored == ["Alpha beta.X", "Gamma delta."], "and both routed it")
     }
 
     // MARK: - Bounded memory (MobileSoul §2)

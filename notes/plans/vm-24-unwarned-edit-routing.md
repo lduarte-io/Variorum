@@ -560,8 +560,8 @@ ever edited after the fix lands, the red build is remade by the revert protocol 
 | Red build `DerivedData/vm24-a-red` (the tree at `ea5a7a635`: `git diff --stat 4b0eaaacb ea5a7a635` = the new test file + this record, no production file) | DONE — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-red-bft.log`; the test binary carries the new suite. FROZEN: never rebuilt into |
 | The fix (D-24-1): the capture in `MobileStorageObserver`, `storageDidEdit(_:changeInLength:changedCharacters:)`, `fallbackVerdict`, the unbound churn cost | DONE (this commit) — green PENDING the stage window |
 | The trace (D-24-4): widened · rescued · no capture | DONE (this commit) — DRAFT words; green PENDING |
-| Pins 5 (capture belts) and 6 (trace) | NOT-STARTED |
-| Fix build `DerivedData/vm24-a` + Mac `DerivedData/vm24-a-mac` | NOT-STARTED |
+| Pins 5 (capture belts: `MobileChangedCharactersCaptureTests` + `MobileChangedCharactersObserverTests`) and 6 (trace: five new tests in `MobileEditTraceTests`) | DONE (this commit) — green PENDING the stage window |
+| Fix build `DerivedData/vm24-a` (phone, `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-bft2.log`, no new warning in a touched file) + Mac `DerivedData/vm24-a-mac` | phone DONE at the code of this commit; Mac NOT-STARTED |
 | Closeout in §12 + the READY report | NOT-STARTED |
 
 ## 12. Batch closeouts, findings and dispositions
