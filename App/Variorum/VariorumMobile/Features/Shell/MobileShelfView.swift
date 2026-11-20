@@ -192,7 +192,7 @@ struct MobileShelfView<TabBar: View>: View {
                     VStack(spacing: 6) {
                         Text(tokens.chromeLabel(MobileEmptyStoreCopy.noBooks))
                         Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
-                            .foregroundStyle(tokens.phone.faint)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                     .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.phone.muted)

@@ -30,6 +30,11 @@
 //  · the RENDERED INK of the two surfaces the walk measured: each unchosen
 //    filter word, and each empty masthead chip, clears 4.5:1 against its own
 //    ground, read off the real surface's pixels — red on old (3.3–4.2:1).
+//  · (the walk's fixes, batch 2 — W-B1, W-C3) the SIBLING RULE: the faint
+//    carries no word under 17 pt anywhere — sentences, section headers, paths,
+//    meta lines, status words — only its own uses (edges, glyphs, placeholders,
+//    a 17 pt disabled door); red on old by its patterns (19 sites), none now;
+//    and the rendered ink of the Trash's promise sentence ≥ 4.5:1.
 //
 
 import Foundation
@@ -164,6 +169,87 @@ struct MobileFaintOnDoorsSourceTests {
     }
 }
 
+// MARK: - The sibling rule: the faint carries no words under 17 pt (W-B1, W-C3)
+
+extension MobileFaintOnDoorsSourceTests {
+    /// The role named nearest a faint read — above it first (the modifier
+    /// chain of the same `Text`), else just below it (a group's role applied
+    /// after its children's inks, as the empty states draw it).
+    private static func nearestRole(_ lines: [String], at index: Int) -> String? {
+        if let above = role(lines, at: index) { return above }
+        for k in index ..< min(index + 5, lines.count) {
+            let line = lines[k]
+            if let match = roleRead.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
+               let range = Range(match.range(at: 1), in: line) {
+                return String(line[range])
+            }
+        }
+        return nil
+    }
+
+    /// **Every faint read that is not one of the faint's own uses** — sheet
+    /// §D: the corrected faint is for "glyphs, placeholders, disabled words
+    /// only; never a sentence", and "words under 17 pt need 4.5:1". What may
+    /// keep the faint, each by its own pattern: an edge or a fill (`.stroke(`
+    /// / `.fill(` — the box's dashed edge), a glyph-only mark (a `Text` whose
+    /// literals hold no letter — the block list's ○), a field's placeholder
+    /// (`prompt` — `phoneFieldPrompt`, a `prompt:` argument), and a word at
+    /// 17 pt or more (the box's 17 pt hint; the disabled "Use as Daily
+    /// Journal"). Anything else — a sentence, a section header, a path, a
+    /// row's meta line, a status word, a door's word — is the class. A read
+    /// whose role cannot be found counts (the conservative side).
+    static func wordOffenders() throws -> (sites: [String], scanned: Int) {
+        var files: [URL] = []
+        for folder in ["VariorumMobile", "Shared"] {
+            let walker = try #require(FileManager.default.enumerator(
+                at: appRoot.appendingPathComponent(folder), includingPropertiesForKeys: nil))
+            for case let file as URL in walker where file.pathExtension == "swift" { files.append(file) }
+        }
+        var sites: [String] = []
+        var scanned = 0
+        for file in files {
+            let relative = file.path.replacingOccurrences(of: appRoot.path + "/", with: "")
+            let phone = relative.hasPrefix("VariorumMobile/")
+            guard phone || relative.hasPrefix("Shared/") else { continue }
+            if relative.contains("/Spike/") || relative.contains("/Features/Perf/") { continue }
+            let faint = phone ? ["phone.faint", "tokens.faint"] : ["phone.faint", "style.tokens.faint"]
+            if relative.hasSuffix("Theme/PhoneInks.swift") { continue }
+            scanned += 1
+            let lines = try code(file)
+            for (index, line) in lines.enumerated() where faint.contains(where: { line.contains($0) }) {
+                if line.contains(".stroke(") || line.contains(".fill(") { continue }  // edges and fills
+                if line.lowercased().contains("prompt") { continue }  // a field's placeholder
+                if (max(index - 4, 0)...index).contains(where: { isGlyph(lines[$0]) }) { continue }
+                if let found = nearestRole(lines, at: index), fullSizeRoles.contains(found) { continue }
+                sites.append("\(relative):\(index + 1)")
+            }
+        }
+        return (sites, scanned)
+    }
+}
+
+@MainActor
+@Suite("VM-47 W-B1/W-C3 — the faint carries no sentence, header or label under 17 pt (source rule)")
+struct MobileFaintCarriesNoWordsSourceTests {
+    /// **The faint is the faint's own uses, nowhere else** (the walk's W-B1:
+    /// the Trash's promise at 3.93:1; W-C3: "Apply a tag", "Add to a book",
+    /// the tray's and Versions' explainers, the reader's meta). Red on old by
+    /// its own patterns: the nineteen sites on the tree before the sweep
+    /// (`c72e65201`), none after.
+    @Test func theFaintCarriesNoWordsUnderSeventeenPoints() throws {
+        let found = try MobileFaintOnDoorsSourceTests.wordOffenders()
+        #expect(found.scanned > 60, "the walk must reach the phone's views and the shared pages (\(found.scanned) files)")
+        #expect(found.sites.isEmpty, """
+            Words under 17 pt wear the corrected FAINT (sheet §D: "faint never carries a \
+            sentence she has to read"; it is for glyphs, placeholders and disabled words only, \
+            and words under 17 pt need 4.5:1). Give them the corrected muted \
+            (`tokens.phone.muted`) — sheet §A draws meta lines, explainers and section \
+            headers in it:
+            \(found.sites.joined(separator: "\n"))
+            """)
+    }
+}
+
 // MARK: - The rendered ink
 
 @MainActor
@@ -209,6 +295,35 @@ struct MobileFaintOnDoorsRenderedTests {
                             "\(voice) dark \(dark): the unchosen \(door.word) reads \(String(format: "%.2f", ratio)):1 (\(read.ink) on \(read.ground))")
                 }
                 print("PERF[sim] VM-47 W-A9 filter row \(voice) dark \(dark): \(measured)")
+            }
+        }
+    }
+
+    /// **The Trash's promise** (the walk's W-B1): "Deleted things wait here
+    /// for 30 days, then they're gone." is a sentence she has to read, at
+    /// 13 pt, so it clears 4.5:1 on the Trash's paper in both voices, light
+    /// and dark — red on old (the faint: 3.93:1 Study light, ≈ 3.6:1 dark).
+    @Test(arguments: [ThemeVoice.study, .terminal], [false, true])
+    func theTrashsPromiseClearsTheFloor(voice: ThemeVoice, dark: Bool) async throws {
+        try await withEditorWorld { session, _ in
+            let trash = MobileTrashView(
+                model: MobileTrashModel(session: session), tokens: tokens(voice, dark: dark),
+                onOpen: { _ in })
+            try await withSceneSurface(trash, dark: dark) { surface in
+                await surface.settle(30)
+                let promise = try #require(
+                    surface.elements.first {
+                        ($0.accessibilityLabel ?? "").range(of: "wait here", options: .caseInsensitive) != nil
+                            && !$0.accessibilityFrame.isEmpty
+                    },
+                    "the Trash's promise line: \(surface.labels)")
+                let pixels = try surface.render()
+                let read = try #require(pixels.inkAndGround(in: promise.accessibilityFrame),
+                                        "no words drawn in the promise line")
+                let ratio = read.ink.contrast(with: read.ground)
+                print("PERF[sim] VM-47 W-B1 Trash promise \(voice) dark \(dark): \(read.ink) on \(read.ground) = \(ratio)")
+                #expect(ratio >= Self.floor,
+                        "\(voice) dark \(dark): the Trash's promise reads \(String(format: "%.2f", ratio)):1 (\(read.ink) on \(read.ground))")
             }
         }
     }

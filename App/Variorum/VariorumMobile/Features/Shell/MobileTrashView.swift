@@ -152,7 +152,7 @@ struct MobileTrashView: View {
             }
             Text(tokens.chromeLabel(RecoveryCopy.windowNote))
                 .phoneType(.meta, tokens)
-                .foregroundStyle(tokens.phone.faint)
+                .foregroundStyle(tokens.phone.muted)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)

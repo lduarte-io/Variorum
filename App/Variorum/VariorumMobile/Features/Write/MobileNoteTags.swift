@@ -217,7 +217,7 @@ struct MobileNoteTagsSheet: View {
                     if tag.path.contains("/") {
                         Text(tag.path)
                             .phoneType(.meta, tokens)
-                            .foregroundStyle(tokens.phone.faint)
+                            .foregroundStyle(tokens.phone.muted)
                             .lineLimit(1)
                     }
                     Spacer()
@@ -241,7 +241,7 @@ struct MobileNoteTagsSheet: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel("Apply a tag"))
                     .phoneType(.sectionHeader, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.top, 6)
                 ForEach(suggestions, id: \.id) { tag in
                     Button {

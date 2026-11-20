@@ -257,7 +257,7 @@ struct MobileSettingsView: View {
             } else {
                 Text(tokens.chromeLabel("Starting…"))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .frame(
                         maxWidth: .infinity, minHeight: PhoneMetrics.RowHeight.menu,
                         alignment: .leading)

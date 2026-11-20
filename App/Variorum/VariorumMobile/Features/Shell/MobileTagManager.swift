@@ -408,7 +408,7 @@ struct MobileTagManagerSheet: View {
             if depth > 0 {
                 Text(tag.path)
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(1)
             }
             Spacer()

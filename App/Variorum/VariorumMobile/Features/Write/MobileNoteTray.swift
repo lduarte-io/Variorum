@@ -610,7 +610,7 @@ struct MobileNoteTraySection: View {
             if let explainer {
                 Text(tokens.chromeLabel(explainer))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityLabel(explainer)
             }
@@ -671,7 +671,7 @@ struct MobileNoteTraySection: View {
             HStack(spacing: 18) {
                 Text(tokens.chromeLabel(MobileTrayRowFace.line(meta)))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(2)
                 Spacer(minLength: 8)
                 Button {
@@ -698,7 +698,7 @@ struct MobileNoteTraySection: View {
                 MobileTrayRowFace.takeMeta(
                     take, daysLeft: model.daysLeft(take.deletedAt)))))
                 .phoneType(.meta, tokens)
-                .foregroundStyle(tokens.phone.faint)
+                .foregroundStyle(tokens.phone.muted)
                 .lineLimit(2)
             HStack(spacing: 18) {
                 Button {

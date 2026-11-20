@@ -261,7 +261,7 @@ struct MobileReferencesSheet: View {
                         .lineLimit(1)
                     Text(tokens.chromeLabel(MobileReferencesModel.fileRowNote))
                         .phoneType(.meta, tokens)
-                        .foregroundStyle(tokens.phone.faint)
+                        .foregroundStyle(tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.vertical, 6)

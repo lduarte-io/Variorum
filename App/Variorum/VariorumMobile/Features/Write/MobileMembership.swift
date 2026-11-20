@@ -249,7 +249,7 @@ struct MobileMembershipSheet: View {
                         Text(tokens.chromeLabel(
                             "Editing here edits the note everywhere it appears."))
                             .phoneType(.meta, tokens)
-                            .foregroundStyle(tokens.phone.faint)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
@@ -293,7 +293,7 @@ struct MobileMembershipSheet: View {
                     if book.kind == .gathering {
                         Text(tokens.chromeLabel("smart"))
                             .phoneType(.meta, tokens)
-                            .foregroundStyle(tokens.phone.faint)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                     Spacer()
                     Button(tokens.chromeLabel("diverge")) {
@@ -318,7 +318,7 @@ struct MobileMembershipSheet: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel("Add to a book"))
                     .phoneType(.sectionHeader, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.top, 6)
                 ForEach(model.addableBooks, id: \.id) { book in
                     addRow(book.name) { await model.add(to: book) }

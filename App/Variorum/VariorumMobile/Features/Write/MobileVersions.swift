@@ -413,7 +413,7 @@ struct MobileVersionsView: View {
                 .foregroundStyle(tokens.phone.muted)
             Text(tokens.chromeLabel(VersionsPath.explainer))
                 .phoneType(.meta, tokens)
-                .foregroundStyle(tokens.phone.faint)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 12)
@@ -476,7 +476,7 @@ struct MobileVersionsView: View {
                         .foregroundStyle(tokens.phone.muted)
                     Text(tokens.chromeLabel(MobileVersionsModel.rowMeta(item)))
                         .phoneType(.meta, tokens)
-                        .foregroundStyle(tokens.phone.faint)
+                        .foregroundStyle(tokens.phone.muted)
                         .lineLimit(2)
                 }
                 .padding(.horizontal, 20)

@@ -429,7 +429,7 @@ struct MobileLibraryView<TabBar: View>: View {
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotes))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
             }
             .phoneType(.meta, tokens)
             .foregroundStyle(tokens.phone.muted)

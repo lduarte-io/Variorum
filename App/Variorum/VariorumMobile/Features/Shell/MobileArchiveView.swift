@@ -104,7 +104,7 @@ struct MobileArchiveView: View {
                 .foregroundStyle(tokens.phone.muted)
             Text(tokens.chromeLabel(RecoveryCopy.archivedForever))
                 .phoneType(.meta, tokens)
-                .foregroundStyle(tokens.phone.faint)
+                .foregroundStyle(tokens.phone.muted)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)

@@ -1188,7 +1188,7 @@ struct MobileQuickNoteBox: View {
                 // cannot restructure a real note.
                 Text(tokens.chromeLabel(note))
                     .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.faint)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
                     .accessibilityLabel(note)
             }
@@ -1319,7 +1319,7 @@ struct MobileQuickNoteBox: View {
         HStack(spacing: 12) {
             Text(tokens.chromeLabel(indicator))
                 .phoneType(.meta, tokens)
-                .foregroundStyle(model.visibleState == .saved ? tokens.accent : tokens.phone.faint)
+                .foregroundStyle(model.visibleState == .saved ? tokens.accent : tokens.phone.muted)
                 .accessibilityLabel(
                     MobileQuickNoteCopy.spokenIndicator(model.visibleState) ?? "")
             Spacer()
