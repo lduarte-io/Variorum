@@ -140,7 +140,7 @@ struct MobileFaintOnDoorsSourceTests {
             let lines = try code(file)
             for (index, line) in lines.enumerated() where faint.contains(where: { line.contains($0) }) {
                 if line.contains(".stroke(") || line.contains(".fill(") { continue }  // edges and fills
-                if let role = role(lines, at: index), fullSizeRoles.contains(role) { continue }
+                if let found = role(lines, at: index), fullSizeRoles.contains(found) { continue }
                 if (max(index - 4, 0)...index).contains(where: { isGlyph(lines[$0]) }) { continue }
                 if insideADoor(lines, at: index) { sites.append("\(relative):\(index + 1)") }
             }

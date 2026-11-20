@@ -45,7 +45,8 @@ struct PixelColor: Equatable, CustomStringConvertible {
         if parts.count >= 3 {
             r = Double(parts[0]); g = Double(parts[1]); b = Double(parts[2])
         } else {
-            r = Double(parts[0]); g = r; b = r
+            let grey = Double(parts.first ?? 0)
+            r = grey; g = grey; b = grey
         }
     }
 
@@ -161,10 +162,12 @@ final class SceneHostedSurface<Content: View> {
         let scene = try #require(
             UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
             "the test host has a window scene")
-        window = UIWindow(windowScene: scene)
+        let window = UIWindow(windowScene: scene)
+        let host = UIHostingController(rootView: view)
+        self.window = window
+        self.host = host
         window.overrideUserInterfaceStyle = dark ? .dark : .light
         window.backgroundColor = Self.sentinel
-        host = UIHostingController(rootView: view)
         host.view.backgroundColor = Self.sentinel
         host.additionalSafeAreaInsets = additionalInsets
         window.rootViewController = host

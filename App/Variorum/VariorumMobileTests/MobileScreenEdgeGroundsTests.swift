@@ -46,7 +46,7 @@ struct MobileScreenEdgeGroundsTests {
 
     /// The strips the pins read: the middle of the status bar's inset and of
     /// the home indicator's, at the left edge, the middle and the right edge.
-    private func edgePoints(_ surface: SceneHostedSurface<some View>) throws
+    private func edgePoints<V: View>(_ surface: SceneHostedSurface<V>) throws
         -> (top: [CGPoint], bottom: [CGPoint])
     {
         let insets = surface.host.view.safeAreaInsets
