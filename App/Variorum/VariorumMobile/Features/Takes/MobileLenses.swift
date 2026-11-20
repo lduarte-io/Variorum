@@ -603,7 +603,7 @@ struct MobileLensSheet: View {
                             }
                         }
                     }
-                    Divider()
+                    Divider().overlay(tokens.line)  // VM-47 (the walk's W-C7): the palette's hairline, not the system's grey
                     saveDoors
                     // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                 }

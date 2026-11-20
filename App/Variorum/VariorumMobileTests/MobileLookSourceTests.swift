@@ -229,4 +229,58 @@ struct MobileLookSourceTests {
             \(offenders.joined(separator: "\n"))
             """)
     }
+
+    // MARK: - 4. The hairline
+
+    /// Whether the block that encloses `index` is opened by a menu — a
+    /// `.contextMenu {` or a `Menu {` / `Menu(` — whose separator the system
+    /// draws in its own material.
+    private static func insideAMenu(_ lines: [String], at index: Int) -> Bool {
+        var depth = 0
+        for j in stride(from: index - 1, through: 0, by: -1) {
+            for character in lines[j].reversed() {
+                if character == "}" { depth += 1 }
+                if character == "{" {
+                    depth -= 1
+                    if depth < 0 {
+                        let line = lines[j]
+                        return line.contains(".contextMenu") || line.contains("Menu {") || line.contains("Menu(")
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    /// **Every hairline is the palette's line** (VM-47, the walk's W-C7 — the
+    /// Lenses sheet's bare `Divider()` drew the system separator, #B4BCBB on
+    /// the room, where every other sheet's divider wears the line; sheet §D:
+    /// "the hairline 1.17:1"). A phone `Divider()` wears `.overlay(tokens.line)`
+    /// (or a shared page's `style.tokens.line`) in its own chain — EXEMPT: a
+    /// divider inside a menu (`.contextMenu` / `Menu`), which the system draws
+    /// as its own separator. Red on old: the Lenses sheet's (`fb649d6a8`).
+    @Test func everyPhoneDividerWearsTheLine() throws {
+        let walker = try #require(FileManager.default.enumerator(
+            at: Self.phoneRoot, includingPropertiesForKeys: nil))
+        var dividers = 0
+        var offenders: [String] = []
+        for case let file as URL in walker where file.pathExtension == "swift" {
+            let relative = file.path.replacingOccurrences(of: Self.phoneRoot.path + "/", with: "")
+            if relative.hasPrefix("Spike/") || relative.hasPrefix("Features/Perf/") { continue }
+            let lines = try code(relative)
+            for (index, line) in lines.enumerated() where line.contains("Divider()") {
+                dividers += 1
+                let chain = lines[index ..< min(index + 3, lines.count)].joined(separator: "\n")
+                if chain.contains(".overlay(tokens.line)") || chain.contains(".overlay(style.tokens.line)") { continue }
+                if Self.insideAMenu(lines, at: index) { continue }
+                offenders.append("\(relative) (code line \(index + 1))")
+            }
+        }
+        #expect(dividers >= 8, "the walk must find the phone's dividers (\(dividers))")
+        #expect(offenders.isEmpty, """
+            A bare Divider() draws the system's separator grey, not the palette's line \
+            (sheet §D). Chain `.overlay(tokens.line)`:
+            \(offenders.joined(separator: "\n"))
+            """)
+    }
 }
