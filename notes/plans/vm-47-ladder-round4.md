@@ -42,11 +42,34 @@ VM-47 cold review — ladder ROUND 4 (the whole run's diff vs main `64fde83b0`; 
 
 | Id | Finding | The implementer (§2a) | The reviewer's final call (§2b) | What changed |
 |---|---|---|---|---|
-| R4-n1 | NIT — the record's STATUS banner still lists the last mobile run's merge-in and its narrow read as owed | PENDING | PENDING | PENDING |
+| R4-n1 | NIT — the record's STATUS banner still lists the last mobile run's merge-in and its narrow read as owed | **AGREE** — and the banner was staler than the finding names: against §4's rows five of its clauses had been answered (main's merge, VM-64's merge-in — four files, not three —, its narrow read = this round, the targeted window = row W.11, the re-capture = rows W.9 and W.11 (9)); fixed now as record work this pass owes anyway (§2a) | PENDING | the run record's STATUS banner rewritten to what stands and what is owed as of the final record pass, "its narrow read" pointed at this round (the commit that carries this answer); no code, no pin — record work |
 
 ### 2a. The implementer's answers
 
-PENDING.
+The finding reached the implementer of the final record pass (Opus, 2026-11-20) verbatim. Nothing was built or run, and
+no code or test file changed. The fix is record work this pass owes whatever the call, so it landed with this answer
+(the commit is in §2's table); the reviewer's final call follows in §2b.
+
+**R4-n1 (NIT) — AGREE. The banner was staler than the finding says; it is rewritten.**
+- *The facts, read against §4's rows.* The banner (the run record's lines 6–10) was written at the closeout-writing pass,
+  before batch 7b and before the W-A1 redo's windows. Against §4 it was stale in five clauses, not one:
+  1. "main is merged in through `a09d6a025`" — batch 7b merged main through `64fde83b0` (`3d55b51f6`; rows 7b–7b.7
+     DONE).
+  2. "the last mobile run's (VM-64's) three-file merge-in" — done, and it was FOUR conflicted files, not three:
+     `.gitignore`, `VariorumMobileApp.swift`, `MobileSettingsView.swift` and `MobileLibraryView.swift` (row 7b.1; the
+     closeout drafts' slot 1 named the first three only).
+  3. "and its narrow read" — this round (its header: "the narrow read round 3's §3 left owed for that join").
+  4. "the targeted test window" — the post-merge window on the final tree (row W.11 (1)–(8): the phone's 98 types,
+     the speed suite alone, the three snapshots, the keyboard UI test red on the first fix and green on the final
+     tree, the Mac's 21 types).
+  5. "the re-capture" — row W.9 (164 of 166, read in the walk file's §4e–§4f) and the final-tree captures (row W.11
+     (9), 119 of 119, read in §4g–§4h).
+  Its first sentence also left out the W-A1 redo and this round ("ladder rounds 1–3 are closed").
+- *What stays owed, as of this pass:* the merge gate (the whole phone target with VM-64's speed suite as its own leg,
+  the whole Mac target), the PR and its merge; after the merge, the ledgers on main, the cleanup and the wave-1 phone
+  build's preparation.
+- *What changed:* the banner rewritten to say what stands and what is owed now, with "its narrow read" pointed at this
+  round. No pin is possible (record work), and none is owed.
 
 ### 2b. The reviewer's final calls
 

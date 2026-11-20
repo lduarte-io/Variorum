@@ -3,11 +3,16 @@
 **Ticket: VM-47 (team VM) · Project: Mobile — the catch-up & launch · Branch: `vm-47-sizes-and-look` ·
 Worktree: `~/dev/variorum-vm-47` (Pro)**
 
-**STATUS: OPEN 2026-11-19** (overnight; `/run-phase vm-47`; the stage coordinator is the session `nov18`). All
-code is in; the midway review and ladder rounds 1–3 are closed with no MAJOR open; the walk is driven, read and its
-fixes are in; main is merged in through `a09d6a025`. **Owed before the merge:** the last mobile run's (VM-64's)
-three-file merge-in and its narrow read, the targeted test window, the re-capture, the merge gate (the whole phone
-and whole Mac targets), the PR and its merge. The closeout's drafts wait in `notes/plans/vm-47-closeout-drafts.md`.
+**STATUS: OPEN** — begun 2026-11-19 overnight (`/run-phase vm-47`; the stage coordinator is the session `nov18`);
+this banner as of 2026-11-20, the final record pass. All code is in: five batches, VM-55's re-land, the walk's two fix
+batches, W-A1 redone, and main merged in twice — through `64fde83b0` at batch 7b (`3d55b51f6`). The midway review and
+ladder rounds 1–4 are in with no MAJOR open (round 4: one NIT, this banner — answered, the reviewer's final call
+PENDING; round 4 is also the narrow read of the W-A1 redo and of batch 7b that round 3 left owed). The walk is driven
+and read in four capture sets, its fixes are in, and the post-merge window on the final tree ran green (row W.11).
+**Owed before the merge:** the merge gate — the whole phone target with VM-64's speed suite as its own leg, and the
+whole Mac target —, then the PR and its merge. **After it:** the ledgers on main (from
+`notes/plans/vm-47-closeout-drafts.md`), the cleanup, and the wave-1 phone build's preparation (this run merges last of
+the four; the install itself is hers).
 
 ## FOR A LATER READER
 
