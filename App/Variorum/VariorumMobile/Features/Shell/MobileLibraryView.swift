@@ -65,6 +65,12 @@ struct MobileLibraryView<TabBar: View>: View {
     var onOpenArchive: (() -> Void)?
 
     @State private var query = ""
+    /// VM-47 (the walk's W-C2): whether the search field holds the keyboard —
+    /// so a page she is not on can give it back (`pageShowing`).
+    @FocusState private var searchFocused: Bool
+    /// Whether this root's page is the one on screen (the shell's band; true
+    /// outside a shell).
+    @Environment(\.mobilePageShowing) private var pageShowing
 
     var body: some View {
         VStack(spacing: 0) {
@@ -219,6 +225,19 @@ struct MobileLibraryView<TabBar: View>: View {
             .phoneField(tokens)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
+            // VM-47 (the walk's W-C2): a page that is not on screen never holds
+            // the keyboard. When the tab road pops this stack back to its root
+            // while the page slides away (P-47-19), the framework hands the
+            // field it covered back its first responder; the field gives it up
+            // at once while hidden, and on leaving the screen. On the screen —
+            // a Back from her hit — that restoration stands, as before.
+            .focused($searchFocused)
+            .onChange(of: searchFocused) { _, focused in
+                if focused && !pageShowing { searchFocused = false }
+            }
+            .onChange(of: pageShowing) { _, showing in
+                if !showing { searchFocused = false }
+            }
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
     }

@@ -410,6 +410,9 @@ struct MobileShellView: View {
                     for: owner, current: tab, drag: bandDrag, width: width))
             .allowsHitTesting(tab == owner)
             .accessibilityHidden(tab != owner)
+            // VM-47 (the walk's W-C2): what a page's fields read so a page that
+            // is not on screen never holds the keyboard.
+            .environment(\.mobilePageShowing, tab == owner)
     }
 
     /// **THE ROOT-SURFACES-ONLY RULE.** The band pages only while the
@@ -733,6 +736,14 @@ struct MobileShellView: View {
             }
         }
     }
+}
+
+extension EnvironmentValues {
+    /// **Whether the page a view is on is the band's current page** (VM-47,
+    /// the walk's W-C2). The shell sets it per page; outside a shell every view
+    /// is on screen (true). A field reads it so a page she is not on never
+    /// holds the keyboard (`MobileLibraryView`'s search).
+    @Entry var mobilePageShowing: Bool = true
 }
 
 /// **The band's clip — sideways only** (VM-47, the walk's W-A1). Its sides
