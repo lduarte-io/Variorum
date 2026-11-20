@@ -33,10 +33,10 @@ everything here is `notes/plans/vm-47-sizes-and-look.md`; its FOR A LATER READER
 - [ ] **3. The wording pass** — every new line this run put on the phone, in "The wording pass" below.
 - [ ] **4. Held for your hands** — the Account sheet's first sight, your glance at which Protection door stayed, and
   the palette row when you want it ("Held for your hands" below).
-- [ ] **5. One remainder that no ticket owns** — Settings opens from the three home pages and from a note, but not from a
-  pushed list, a book's Read page or Protection. Say whether that is fine as built (the ticket's own text says "from
-  every root and from a note") or wants a ticket.
-- [ ] **6. The tickets filed** — two, at the bottom.
+- [ ] **5. One remainder, now on its own ticket (VM-249, waiting on you)** — Settings opens from the three home pages and
+  from a note, but not from a pushed list, a book's Read page or Protection. Say whether that is fine as built (VM-53's
+  own text says "from every root and from a note") or wants a door on those screens.
+- [ ] **6. The tickets filed** — three, at the bottom.
 - [ ] **7. The run's size, for your awareness:** the umbrella held more than two phase-sized pieces of work (the
   phone-wide type pass, the controls, the palette). You approved the composition as a run ("22 is fine, composition is
   fine.", 2026-11-15), so it ran as five batches in a row, one builder each, with one review over the whole — raised
@@ -422,7 +422,7 @@ read›.
   named with its owner below. Batch 1's "Nothing on the phone is set below 13 pt" (VM-48): held everywhere except the note's own
   body in Terminal at the very smallest text setting, about 12.4 points (VM-137, the editor's run). "reachable from
   every screen" (VM-53's title; its text says "from every root and from a note", which shipped): pushed lists, Read
-  and Protection have no Settings door of their own — no ticket owns that (checklist item 5).
+  and Protection have no Settings door of their own — VM-249 holds that question for you (checklist item 5).
 
 ## Tickets
 
@@ -431,6 +431,7 @@ The eight members — VM-48, VM-49, VM-50, VM-51, VM-52, VM-53, VM-54, VM-27 —
 Tickets filed:
 - [ ] VM-247 (Medium, Feature, Backlog): choose the library's palette on the phone — a Palette row in Settings ▸ Look, which the lock mockup draws and no ticket owned.
 - [ ] VM-248 (Medium, Debt, Backlog): a phone test that reads the database dependency unscoped opens the simulator app's own store instead of failing.
+- [ ] VM-249 (Low, Improvement, Needs Lillian): Settings from a pushed list, a book's Read page and Protection — your call whether "every root and a note" is enough.
 
 **Remainders on other tickets** (one comment on each at the ticket pass; nothing here is re-owned to VM-61, which is
 done):
@@ -519,3 +520,4 @@ run's handoff says how).
 Tickets filed:
 - [ ] VM-247 (Medium, Feature, Backlog): choose the library's palette on the phone — a Palette row in Settings ▸ Look, which the lock mockup draws and no ticket owned.
 - [ ] VM-248 (Medium, Debt, Backlog): a phone test that reads the database dependency unscoped opens the simulator app's own store instead of failing.
+- [ ] VM-249 (Low, Improvement, Needs Lillian): Settings from a pushed list, a book's Read page and Protection — your call whether "every root and a note" is enough.
