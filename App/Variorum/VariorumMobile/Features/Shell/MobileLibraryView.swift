@@ -63,6 +63,12 @@ struct MobileLibraryView<TabBar: View>: View {
     /// in harness/preview use.
     var onOpenTrash: (() -> Void)?
     var onOpenArchive: (() -> Void)?
+    /// **VM-68 — the Library is ON SCREEN** (the shell's fact: drawn at all —
+    /// the current page, or revealed by a band drag — with its stack at its
+    /// root). Its listings are HELD only while this is true; hidden, nothing
+    /// is read on a write, and becoming true re-asks. True by default, so a
+    /// harness that mounts this view alone gets the shown Library it mounted.
+    var isOnScreen: Bool = true
 
     @State private var query = ""
     /// VM-47 (the walk's W-C2): whether the search field holds the keyboard —
@@ -73,6 +79,11 @@ struct MobileLibraryView<TabBar: View>: View {
     @Environment(\.mobilePageShowing) private var pageShowing
 
     var body: some View {
+        // VM-68: the listings' one task key (the shown question, and whether
+        // the Library is on screen) and the scraps' — both stand down while
+        // the Library is hidden.
+        let hold = model.hold(onScreen: isOnScreen)
+        let holdsScraps = isOnScreen && model.filter == .scraps
         VStack(spacing: 0) {
             pathLine
             searchField
@@ -120,17 +131,20 @@ struct MobileLibraryView<TabBar: View>: View {
         // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
         // the path line's room above, the bar's room below.
         .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
-        // The listing observation restarts when the sort flips (parity
-        // C3 — a way of looking; nothing is written).
-        .task(id: model.sort) { await model.startAll() }
-        .task { await model.startBookless() }
+        // VM-68: ONE task holds the listing the filter shows, and only while
+        // the Library is on screen; it restarts when the question changes —
+        // the sort (parity C3 — a way of looking; nothing is written), the
+        // filter, the wing — or the Library comes back on screen, whose first
+        // fetch is the return's re-ask (`MobileLibraryViewModel.hold(_:)`).
+        .task(id: hold) { await model.hold(hold) }
         // The scraps observation's lifecycle lives HERE (FIX-C3c): the
         // section's body is flat lazy-row content now, so its task
         // moved to stable chrome — it runs while the Scraps filter
         // shows and cancels when the filter leaves, exactly the old
-        // section-task lifecycle.
-        .task(id: model.filter) {
-            if model.filter == .scraps { await scraps.start() }
+        // section-task lifecycle. VM-68: and while the Library is on
+        // screen — hidden, it stands down with the note listings.
+        .task(id: holdsScraps) {
+            if holdsScraps { await scraps.start() }
         }
         // VM-57: a standing query re-asks when the wing changes.
         .task(id: [model.wingID, query]) { await model.search(query) }
@@ -420,10 +434,11 @@ struct MobileLibraryView<TabBar: View>: View {
     /// truncation sentence rides the union too — a book that is not loaded is
     /// not loaded under either door.
     ///
-    /// *(The NOTE half carries no marker at all, and that is PRE-EXISTING
-    /// rather than this batch's: `observeLibrary`'s `limit:` cuts silently.
-    /// Its home is the standing "Bounded view windows show markers, not more"
-    /// row in `KnownIssuesAndTechDebt.md`, owner 12.)*
+    /// **VM-68 — the NOTE half is a page, never a cap** (it used to cut
+    /// silently at 200): a note row coming on screen near the end of what is
+    /// listed asks for the next page (`rowAppeared`), so every note is
+    /// reachable by scrolling. No marker and no button — the rows simply
+    /// continue, the Mac Library's own precedent.
     @ViewBuilder
     private var listingRows: some View {
         let shelved: (rows: [Queries.ShelfBook], truncated: Bool) =
@@ -500,6 +515,10 @@ struct MobileLibraryView<TabBar: View>: View {
             .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
+        // VM-68: near the end of what is listed, the next page is asked for.
+        .onAppear {
+            if let listing = model.shownListing { model.rowAppeared(item.postID, in: listing) }
+        }
         // Star (parity C3, her ruling 10): the note row's long-press
         // — the Mac's own row-menu placement, the phone's grammar.
         .contextMenu {
@@ -507,7 +526,13 @@ struct MobileLibraryView<TabBar: View>: View {
             Button(tokens.chromeLabel(
                 MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
                 let stars = stars
-                Task { await stars.toggle(target, from: .library) }
+                let model = model
+                Task {
+                    await stars.toggle(target, from: .library)
+                    // VM-64 ladder round 2, finding 1: a ★ can move a Bookless
+                    // row past the first page out of (or into) the loose class.
+                    model.rowStarLanded()
+                }
             }
             // Delete the note (round 2 batch 4 — PR1): the row's
             // long-press, beside Star, the phone's established

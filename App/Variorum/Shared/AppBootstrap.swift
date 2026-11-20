@@ -506,6 +506,8 @@ final class AppBootstrap {
             // pre-13x 2a: the idle clock starts at ready (decision 18 —
             // time since Variorum was last used).
             protection.noteActivity()
+            // VM-65: the timing layer's "library open" (inert on the Mac — `AppTiming`).
+            AppTiming.libraryOpened()
         case .libraryMissing(let storeURL):
             state = .libraryMissing(makeMissingLobby(storeURL: storeURL))
         case .failed(let error):
@@ -594,7 +596,11 @@ final class AppBootstrap {
             refreshRoad: {
                 await Task.detached(priority: .userInitiated) { ProtectionOpenRoad.lobbyFacts(ctx) }.value
             },
-            opened: { [weak self] session in self?.beginOpening(roadOpened: session) },
+            opened: { [weak self] session in
+                // VM-65: Face ID or the passphrase was accepted (inert on the Mac — `AppTiming`).
+                AppTiming.unlockAccepted()
+                self?.beginOpening(roadOpened: session)
+            },
             recordMissing: { [weak self] in
                 guard let self else { return }
                 self.state = .libraryMissing(self.makeMissingLobby(storeURL: self.liveStoreURL))

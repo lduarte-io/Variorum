@@ -148,6 +148,9 @@ struct MobileWriteScreen: View {
         onOpenVersions: (() -> Void)? = nil,
         editor injected: MobileEditorViewModel? = nil
     ) {
+        // VM-65: the timing layer's "a note screen requested" (a rebuild of the
+        // same screen restarts the span — `AppTiming.noteRequested`).
+        AppTiming.noteRequested()
         let editor = injected ?? MobileEditorViewModel(session: session, postID: postID)
         _model = State(initialValue: editor)
         _membership = State(initialValue: MobileMembershipModel(session: session, postID: postID))
@@ -201,6 +204,11 @@ struct MobileWriteScreen: View {
                 // focus raise — a sealed note's gate still refuses and
                 // speaks; raising focus never bypasses the police), then
                 // the loops, last, forever.
+                AppTiming.noteArrived() // VM-65: this open's reads are counted from here
+                // VM-70: the arrival counts itself and, for a screen shown again
+                // whose leaving gave its coordinator back, takes it again —
+                // before the liveness grant flushes it.
+                await model.takeAutosaveHold()
                 if let router {
                     await router.editors.register(model, tab: tab)
                 }
@@ -228,9 +236,17 @@ struct MobileWriteScreen: View {
                 // `savepointOnLeaving` never throws (a leaving is not a
                 // moment to refuse at) and its own flush is a no-op on the
                 // coordinator teardown just drained.
+                let leaving = AppTiming.noteLeaving() // VM-65: timed, its savepoint tries counted
+                // VM-70: which arrival this leaving belongs to — a screen shown
+                // again before the work below ends keeps its coordinator.
+                let shown = model.arrivalCount
                 Task {
                     await model.teardown()
                     await session.savepointOnLeaving(model.postID)
+                    // VM-70: the leaving's LAST act — the flush and the
+                    // savepoint have landed; the coordinator goes back.
+                    model.releaseAutosaveHold(ifNotShownSince: shown)
+                    AppTiming.noteLeft(leaving)
                 }
             }
     }
@@ -494,7 +510,9 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Tags")
-        .task(id: model.postID) { await noteTags.refresh() }
+        // VM-69: the chip's own read — this note's tags, never the vocabulary
+        // (the sheet reads that on appear).
+        .task(id: model.postID) { await noteTags.refreshChip() }
     }
 
     /// The "more info" chip (parity C3 — her own name for the surface):
@@ -531,7 +549,9 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Books holding this note")
-        .task(id: model.postID) { await membership.refresh() }
+        // VM-69: the chip's own read — the books holding this note, never
+        // every book (the sheet reads those on appear).
+        .task(id: model.postID) { await membership.refreshChip() }
     }
 
     private var chipLabel: String {

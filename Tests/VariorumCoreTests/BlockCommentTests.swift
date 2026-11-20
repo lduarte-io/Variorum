@@ -32,7 +32,10 @@ struct BlockCommentTests {
                 SELECT name FROM sqlite_master
                 WHERE type = 'index' AND tbl_name = 'block_comment' AND name NOT LIKE 'sqlite_%'
                 """)
-            #expect(indexes == ["idx_block_comment_block"])
+            // VM-67 (A JUSTIFIED EDIT, the ritual — the VM-64 run, batch 4):
+            // v1_38's partial index on the unowned comments (owner adoption's
+            // seek; LOCAL, no §12 event) joins the lookup index.
+            #expect(Set(indexes) == ["idx_block_comment_block", "idx_block_comment_unowned"])
         }
     }
 

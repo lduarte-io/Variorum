@@ -84,6 +84,8 @@ struct MobileRoadLockView: View {
             Button(ProtectionWords.accountCancel, role: .cancel) {}
         }
         .task { await lobby.autoAskIfDue(appIsActive: scenePhase == .active) }
+        // VM-65: the timing layer's "lock screen showing".
+        .onAppear { MobileTiming.lockScreenAppeared() }
         .onChange(of: scenePhase) { _, phase in
             // VX-310's second bug, the phone's twin: the roads are re-read when she comes back to the app.
             guard phase == .active else { return }

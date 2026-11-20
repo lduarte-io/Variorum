@@ -94,6 +94,27 @@ final class MobileNoteTagsModel {
         }
     }
 
+    /// **The masthead chip's read** (VM-69 — the open's chips read only what
+    /// they show). The chip shows this note's own tags, so it reads exactly
+    /// those — `Queries.postTags`, `refresh()`'s own read of them, so the
+    /// chip's line is `refresh()`'s line. The vocabulary behind the sheet's
+    /// suggestions is the SHEET's to read, and it does on appear
+    /// (`MobileNoteTagsSheet`'s `.task`). A failure falls back to the full
+    /// read, which speaks as it always has (a cancellation — the screen gone —
+    /// says nothing).
+    func refreshChip() async {
+        do {
+            let postID = postID
+            applied = try await session.database.read { db in
+                try Queries.postTags(db, postID: postID)
+            }
+        } catch is CancellationError {
+            // The screen left before the chip answered: nothing to show.
+        } catch {
+            await refresh()
+        }
+    }
+
     var chipLine: String? {
         Self.chipLine(paths: applied.map(\.path))
     }

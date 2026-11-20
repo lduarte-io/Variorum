@@ -108,3 +108,5 @@ notes/plans/vm-44/design/renders/
 notes/plans/vm-44/audit/traces/
 # VM-47 — the walks' simulator captures stay local (the screens convention)
 notes/plans/vm-47-screens/
+# VM-64: the run's simulator captures (the readout walk) — machine output, never committed
+notes/plans/vm64-screens/

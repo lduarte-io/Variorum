@@ -53,6 +53,11 @@ struct MobileWingDoorTests {
     /// wing, lands on the Bookcase once, closes the list and says nothing —
     /// and every root's held listing re-reads in Work (batch 1's follow), and
     /// the roots' title names it.
+    ///
+    /// *(The VM-64 merge: the Library re-reads in Work through its paged hold,
+    /// keyed by the wing as its view keys it — `holdLibraryAsItsViewDoes`; the
+    /// Shelf and Starred still follow through batch 1's `MobileWingScope.follow`.
+    /// The expectations are VM-55's, unchanged.)*
     @Test func aPickSwitchesLandsOnTheBookcaseAndEveryRootRescopes() async throws {
         try await withEditorWorld { session, _ in
             let world = try TwoWingWorld.make(session)
@@ -65,7 +70,7 @@ struct MobileWingDoorTests {
             let stars = MobileStarsModel(session: session)
             let held = [
                 Task { await shelf.start() },
-                Task { await library.startAll() },
+                holdLibraryAsItsViewDoes(library),
                 Task { await stars.start() },
             ]
             defer { held.forEach { $0.cancel() } }

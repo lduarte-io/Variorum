@@ -16,6 +16,7 @@
 import Dependencies
 import Foundation
 import GRDB
+import Observation
 import Testing
 import VariorumCore
 @testable import VariorumMobile
@@ -70,6 +71,37 @@ func tombstoneWingAsSyncWould(_ db: AppDatabase, _ wingID: String) async throws 
             sql: "UPDATE wing SET deleted_at = ?, updated_at = ? WHERE id = ?",
             arguments: [stamp, stamp, wingID])
         try db.execute(sql: "DELETE FROM _sync_applying")
+    }
+}
+
+/// **The Library's listing, held the way its VIEW holds it** (the merge of
+/// main — VM-55 — into the VM-64 run). Since VM-68 (VM-64 batch 5) the Library
+/// model no longer follows the wing by itself: `MobileLibraryView` runs ONE
+/// `.task(id: model.hold(onScreen:)) { await model.hold($0) }`, whose key is the
+/// question the shown filter asks — the sort, the filter and the WING
+/// (`Question.wing` is `WingState.readScope`, the current wing on the phone since
+/// VM-56) — so SwiftUI restarts the hold whenever the wing changes, and the
+/// restarted hold's first fetch is the new wing's page. This drives exactly that:
+/// the key read under observation tracking, as the view's body reads it, and the
+/// hold restarted on every change of it (cancelling the one before, as
+/// `.task(id:)` does). VM-55's Library pins drove `startAll()` / `startBookless()`
+/// when those were the view's road and followed the wing themselves
+/// (`MobileWingScope.follow`); they drive this now, their expectations unchanged.
+/// A key that stopped carrying the wing — or a wing state the key could not
+/// observe — leaves the old wing's rows standing, and those pins go red.
+@MainActor
+func holdLibraryAsItsViewDoes(
+    _ model: MobileLibraryViewModel, onScreen: Bool = true
+) -> Task<Void, Never> {
+    Task { @MainActor in
+        var running: Task<Void, Never>?
+        var last: MobileLibraryViewModel.Hold?
+        defer { running?.cancel() }
+        for await key in Observations({ model.hold(onScreen: onScreen) }) where key != last {
+            last = key
+            running?.cancel()
+            running = Task { @MainActor in await model.hold(key) }
+        }
     }
 }
 
@@ -136,6 +168,9 @@ struct MobileWingStandTests {
     /// dangling rule exists for) returns the phone to Home, and the held
     /// listings follow: no listing stays scoped to the dead id, and the dead
     /// wing's note now reads as Home's.
+    ///
+    /// *(The VM-64 merge: the Library is held as its view holds it —
+    /// `holdLibraryAsItsViewDoes`; the expectations are VM-55's, unchanged.)*
     @Test func aWingArrivingDeletedBySyncReturnsThePhoneHomeAndTheListingsFollow() async throws {
         try await withEditorWorld { session, db in
             let world = try TwoWingWorld.make(session)
@@ -143,7 +178,7 @@ struct MobileWingStandTests {
             let wings = MobileWingDoor.phoneWings(session)
             let library = MobileLibraryViewModel(session: session)
             let heldWings = Task { await wings.track() }
-            let heldLibrary = Task { await library.startAll() }
+            let heldLibrary = holdLibraryAsItsViewDoes(library)
             defer {
                 heldWings.cancel()
                 heldLibrary.cancel()
@@ -198,12 +233,15 @@ struct MobileWingStandTests {
 @MainActor
 @Suite("VM-57 — every phone listing shows only the current wing", .serialized)
 struct MobileWingListingTests {
+    /// *(The VM-64 merge — this pin and the next: the Library's listings are
+    /// held as its view holds them, `holdLibraryAsItsViewDoes` — the paged
+    /// model's road since VM-68; the expectations are VM-55's, unchanged.)*
     @Test func theLibraryListsOnlyTheCurrentWingAndFollowsIt() async throws {
         try await withEditorWorld { session, _ in
             let world = try TwoWingWorld.make(session)
             session.wing.switchTo(world.work)
             let model = MobileLibraryViewModel(session: session)
-            let held = Task { await model.startAll() }
+            let held = holdLibraryAsItsViewDoes(model)
             defer { held.cancel() }
             #expect(await eventually { model.all.map(\.postID) == [world.workNote] },
                     "Work's Library holds Work's note alone")
@@ -218,7 +256,9 @@ struct MobileWingListingTests {
             let world = try TwoWingWorld.make(session)
             session.wing.switchTo(world.work)
             let model = MobileLibraryViewModel(session: session)
-            let held = Task { await model.startBookless() }
+            // The Bookless listing is held while its filter is the one shown.
+            model.filter = .bookless
+            let held = holdLibraryAsItsViewDoes(model)
             defer { held.cancel() }
             #expect(await eventually { model.bookless.map(\.postID) == [world.workNote] })
             session.wing.switchTo("")

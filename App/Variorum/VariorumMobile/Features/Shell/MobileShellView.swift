@@ -283,7 +283,8 @@ struct MobileShellView: View {
                             tabBar: { tabBar },
                             onOpen: { libraryPath.append($0) },
                             onOpenTrash: { libraryPath.append(MobileRoute.trash) },
-                            onOpenArchive: { libraryPath.append(MobileRoute.archive) })
+                            onOpenArchive: { libraryPath.append(MobileRoute.archive) },
+                            isOnScreen: libraryOnScreen(width: width))
                     }
                 }
             }
@@ -366,6 +367,8 @@ struct MobileShellView: View {
             await router.theme?.start()
         }
         .task { await wings.track() }
+        // VM-65: the timing layer's "home on screen" (launch and unlock).
+        .onAppear { MobileTiming.homeAppeared() }
         // R27b's starter Journal used to be seeded from HERE, concurrently
         // with the task that composes AppServices — which is what the
         // batch-5 cold review's MAJOR was about: the seed always won that
@@ -427,6 +430,18 @@ struct MobileShellView: View {
             // declare their edge grounds, and which stack they stand on.
             .environment(\.mobileEdgeGroundsBoard, edgeGrounds)
             .environment(\.mobileEdgeGroundsStack, owner)
+    }
+
+    /// **VM-68 — THE LIBRARY IS ON SCREEN**: its page is drawn at all (the
+    /// current page, or revealed by a band drag — `MobileShellBand.isDrawn`)
+    /// AND its stack is at its root (a note pushed on it covers the listing).
+    /// Its listings are held only while this is true: off screen in the band
+    /// it is alive but idle, so typing in the box or in a note sets off no
+    /// Library read and no redraw; the moment any of it is drawn again, its
+    /// held page's first fetch re-asks it.
+    private func libraryOnScreen(width: CGFloat) -> Bool {
+        libraryPath.isEmpty
+            && MobileShellBand.isDrawn(.library, current: tab, drag: bandDrag, width: width)
     }
 
     /// **THE ROOT-SURFACES-ONLY RULE.** The band pages only while the
