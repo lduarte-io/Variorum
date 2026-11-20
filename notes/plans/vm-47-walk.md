@@ -506,3 +506,133 @@ marks' cluster), the record's T51/T52.
 ### Part B
 
 PENDING — part B's reader.
+
+### Part B, set 1 — findings
+
+Read 2026-11-19 (§4b rows B1–B9): the 76 captures of the second palette, Settings' flows, VM-54's flip and the re-seed,
+on the tree before part A's fixes. Not one message line in any note capture of the set (teal c5–c9, s08, s14, and the
+f-series' notes).
+
+| Combination and test | Verdict in one line |
+|---|---|
+| `teal_rust-study-light-default` — the core (14) | The second palette's relations hold (paper #FFFFFF vs room #E1F4F2 1.14:1, accent #AE4028 ≥ 4.55:1 on its wash, every phone ink readable); part A's W-A1 (#FFFFFF strips), W-A5, W-A7, W-A9, W-A10, W-A12, W-A13 show identically; c8 CAUGHT the editor's caret (the accent, mid-blink); c6 not judged. |
+| `teal_rust-study-dark-default` — the core (14) | Holds (dark faint #766F5F 3.49:1 on the hued paper #0C1D1B, the hardest case, clears 3:1); W-A1 (#000000 bands round the note and behind the keyboard bar), W-A5, W-A7, W-A9, W-A10 (#4E5A5C, 2.44:1), W-A12, W-A13; **W-B2** (the blue callout at 1.05:1 on the dark paper); c6 not judged. |
+| `seaglass-study-light-default` — Settings' flows (16) + the re-seed (4) | R-47-2, the appearance choice (every surface, and back), Settings from the Library and a note, Protection on the Library's stack all MATCH; **W-B1** (the Trash's promise in the faint, s4b), **W-B3** (Delete Note… in the system red), **W-B4** (a doubled hairline), **W-B5** (the overlay scrim lightens in the dark override); W-A1 on Protection and in the dark override, W-A9 on the sheet's detail lines. |
+| `seaglass-terminal-dark-default` — Settings' flows (16) | As Study light: everything MATCHES but W-B3 and W-B4 (both voices), W-B5 in dark; W-A1 shows as #FFFFFF strips once the app's choice is Light (s07, s08); W-A2 in s05's Terminal path ("~/home/bookcase  ·…", the Study-light run's). |
+| `seaglass-study-light-default` — VM-54's flip (6) | MATCHES: every card edge, the chosen edge and the draft field's edge measured in their dark colours one second after the flip; no light token left anywhere; the pill: NO EVIDENCE (none caught; f6 a transition frame). |
+| `seaglass-terminal-light-default` — VM-54's flip (6) | MATCHES as Study (chosen #2F7D5F → #6FBF94, edges #CBE2D9 → #1C332A); W-A1's #FFFFFF strip under the overlay's #FBFBF7 (f3); the pill: NO EVIDENCE. |
+
+**Part A's findings that show in this set, and what is new about them** (not re-filed):
+- **W-A1** — under teal & rust exactly as under sea-glass: light #FFFFFF 0–62 and 840–874 around the room #E1F4F2 (every
+  teal root); dark #000000 bands 0–62 and 840–874 around the note's paper #0C1D1B and 487–553 behind the keyboard bar
+  (teal c5, c7, c8, c9). NEW: it shows on Protection (s03b, #FFFFFF around the room) and under the takes and comments
+  overlays (f3 Terminal: #FFFFFF 840–874 under the overlay's #FBFBF7); and the bands follow the app's CHOSEN appearance,
+  not the simulator's (s07/s08: #FFFFFF in the Terminal-dark run set to Light, #000000 in the Study-light run set to
+  Dark) — the window's own ground resolves in the override, so the clip is the whole mechanism there too.
+- **W-A7** — NEW evidence: the editor's caret IS the accent (teal c8: #EBCFC9 = #AE4028 at 25% over white, #76554B =
+  #E08D7B at 50% over the dark paper), while the box's and the search's caret stay the system blue (teal c2, c4) — under
+  a rust accent the mismatch is starker than under sea-glass.
+- **W-A9** — the same words in the faint under teal & rust (filter row 3.45:1 on #E1F4F2; chips 3.93 / 3.49:1); also
+  Starred's "book"/"note" (s3b, s01) and Note Actions' detail lines (s12) — all in W-A9's swept list, fixed since.
+- **W-A10** — teal & rust's dark placeholder #4E5A5C on #0C1D1B, 2.44:1 (a hex part A did not have); fixed since.
+- **W-A2** — s05 (Study-light run, flipped to Terminal) shows "~/home/bookcase  ·…" exactly as part A's Terminal c1.
+- **W-A5, W-A12, W-A13** — identical under teal & rust (the 🗑's grey-blue beside a rust accent; no dates; ⑂ 5.3 × 7.0 pt).
+
+**W-B1 — The Trash's promise sentence is drawn in the corrected FAINT.** THIS RUN'S DEFECT.
+- Captures: `seaglass-study-light-default--s4b-reseeded-trash` (set 2's `b1-trash-bar-top-edge`, `r14-trash`,
+  `r14b-trash-notes-chip` will show it in all their combinations).
+- Seen: "Deleted things wait here for 30 days, then they're gone." at 13 pt (`meta`) in #8B7F6A on the paper #FFFFFF —
+  3.93:1 — under the Trash's title, while the row's own meta ("note  ·  30 days left") wears the corrected muted #6A6359.
+- The standard: sheet §D — "Words under 17 pt need 4.5:1 … Faint never carries a sentence she has to read"; the phone's
+  faint is "glyphs, placeholders, disabled words only; never a sentence"; sheet §A's meta role names "explainer
+  sentences" in the corrected muted and draws this very sentence's kind ("Everything this note has on the 30-day
+  clock.") in it. `RecoveryCopy.windowNote`'s own comment calls it "the promise stated where she can read it".
+- Where it comes from: `App/Variorum/VariorumMobile/Features/Shell/MobileTrashView.swift:153–155`
+  (`Text(tokens.chromeLabel(RecoveryCopy.windowNote)).phoneType(.meta, tokens).foregroundStyle(tokens.phone.faint)`) —
+  batch 1 (`ccd481162`) carried the old `tokens.faint` across as `tokens.phone.faint`. The same construct holds the
+  Archived room's promise, `MobileArchiveView.swift:105–107` (`RecoveryCopy.archivedForever`, set 2's b12/r15), and the
+  empty Bookcase's sign-in sentence, `MobileShelfView.swift:194–195` (not captured). W-A9's fix swept doors' words, not
+  sentences, so none of these moved (HEAD still reads `phone.faint` at all three).
+- Narrowest fix proposed (not made): `tokens.phone.muted` on those sentence lines (the Trash's and the Archive's promise;
+  the empty shelf's sign-in line), no word changed; a source pin in `MobileFaintOnDoorsSourceTests`' style naming the
+  sentence sites. Evidence after: re-capture s4b / b1 / r14 / b12 / r15 and read the line's hex.
+
+**W-B2 — On teal & rust's dark paper the callout's blue wash is 1.05:1 — it reads by hue alone.** A QUESTION FOR HER.
+- Captures: `teal_rust-study-dark-default--c7-callout-comment` (and c8, c9, where the callout's top shows).
+- Seen: the wash #14202B behind block 2 on the paper #0C1D1B: 1.05:1. The same wash is 1.08:1 on sea-glass's dark
+  paper #0F1A16, was 1.27:1 on the black room the note sat on before R-47-1, and is 1.14:1 on white in light. In the
+  capture the frame is findable by its blue against the teal and by its 💡, not by its lightness; the text over it
+  stays readable (12.91:1).
+- The standard: §3b c7 — "the callout's wash … clear on the paper in light and dark"; sheet §D — "Fills and hairlines
+  stay quiet on purpose. Paper on the room is 1.17:1" (the quietest fill the sheet draws). The wash is not this run's
+  token: `MobileCallout.color` (`Features/Write/MobileCallout.swift:107–127`) is "the Mac palette's exact hexes",
+  voice- and palette-independent; this run moved her prose onto the hued paper (P-47-16), which is what brought the
+  paper's hue up to the wash. The Mac's editor sits on the same paper, so the Mac should read the same (not checked).
+- Options for her: (a) as built — the Mac's exact washes, quiet by design; (b) the dark washes stepped away from the
+  paper until they clear a floor against every shipped palette's dark paper (the phone inks' rule, applied to the five
+  washes), Mac and phone alike; (c) a hairline edge on a callout frame in dark only.
+
+**W-B3 — "Delete Note…" in the note's ⋯ sheet is the system red, not the alarm.** THIS RUN'S DEFECT.
+- Captures: `seaglass-study-light-default--s12-note-actions-settings-row`,
+  `seaglass-terminal-dark-default--s12-note-actions-settings-row` (set 2's `r09-note-actions` will show it too).
+- Seen: "Delete Note…" / "delete note…" in #F23032 on the sheet's room #E5F0EC (3.43:1) and #FF4245 on black — iOS's
+  red — where the Trash's "Delete Now" (s4b) wears the alarm #9B3B2F (5.88:1 on the same room). Terminal's alarm is
+  #A33A2E / #E08A7C (`VoiceTokens`).
+- The standard: sheet §D, the alarm row — "#9B3B2F / #D98A78 · unchanged; **replaces the literal red on Delete
+  note…**"; sheet §E menu row — "A removing act wears the alarm ink, last"; the run's own component table (record §6) —
+  "label `control` 17 in ink (alarm when removing)"; §3c s12 — "Delete Note… last in the alarm". Batch 2 adopted this
+  sheet's rows onto `PhoneMenuRowStyle` (record §4 row 2.2, "Note Actions' rows the menu row") and kept the tint.
+- Where it comes from: `App/Variorum/VariorumMobile/Features/Write/MobileNoteActions.swift:292–299` — `deleteRow`'s
+  `actRow(…, tint: .red, role: .destructive)`.
+- Narrowest fix proposed (not made): `tint: tokens.alarm` there (keep `role: .destructive`); the file's long note about
+  `.red` rendering as the label colour in `layer.render` captures (306–318) is moot either way — the walk shows it red.
+  A pin in the run's rendered-ink style: the delete row's title resolves to `tokens.alarm` in both voices and
+  appearances (red-on-old: the system red).
+
+**W-B4 — A doubled hairline in the note's ⋯ sheet above "Settings".** THIS RUN'S DEFECT.
+- Captures: both `s12-note-actions-settings-row` (Study light, Terminal dark); set 2's `r09-note-actions` likely too.
+- Seen: two hairlines 13.3 pt apart with nothing between them — 646.7–647.3 and 660.3–661.0 pt, both voices — between
+  "Versions…" and "Settings".
+- The standard: sheet §C/§E — one hairline between rows (or a group's gap); nothing in the sheet or the record draws an
+  empty band between two rules.
+- Where it comes from: `MobileNoteActions.swift` — the body's `VStack(spacing: 14)` (:102) draws `Divider()` after
+  `versionsRow` (:108), then `undoRow` and `redoRow`, which render NOTHING with an empty structural-undo stack, then
+  `settingsRow`, which opens with its OWN `Divider()` (:251) — two dividers one stack-spacing apart. `settingsRow` is
+  this run's (VM-53 piece 5.4, `e622cbbb9`).
+- Narrowest fix proposed (not made): draw `settingsRow`'s leading divider only when an undo or redo row renders above it
+  (`door.undoLabel != nil || door.redoLabel != nil`); the 108 divider then separates Versions from Settings on its own.
+  A pin: the sheet with an empty undo stack draws exactly two dividers (red-on-old: three).
+
+**W-B5 — The three UIKit overlays' scrim is the ink at 25%, so in dark it lightens the note.** ANOTHER TICKET'S — VM-152
+(the takes, comments and block history become native sheets; their hand-built dim view goes with them).
+- Captures: `seaglass-study-light-default--s09-appearance-dark-takes-overlay`, `…--f2-takes-cards-dark`,
+  `…--f4-comment-draft-dark`, and the Terminal f2/f4.
+- Seen: over the note behind the overlay, #454C47 on the dark paper #0F1A16 (a light veil, 2.02:1 brighter than the
+  page) and #C5C6C4 over #FBFBF7 in light; the veil covers only the editor's region (from 283 / 326 pt down) — the
+  masthead above it stays undimmed. It follows the appearance (the ink is dynamic), so it is NOT a colour left behind by
+  the flip (VM-54 holds).
+- Where it comes from: `dimView.backgroundColor = face.ink.withAlphaComponent(0.25)` —
+  `Features/Takes/MobileTakesBrowserView.swift:295`, `Features/Write/MobileCommentsSheetView.swift:191`,
+  `Features/Takes/MobileBlockHistorySheetView.swift:168` (all `0470aeedb`, 2026-08-03, before this run).
+
+**Noted, not filed** (another reader's screen, or no rule to judge it by): Starred in Terminal lowercases her names
+("walk note" where the Library says "Walk note" — `MobileStarredView.swift:127` runs the name through `chromeLabel`, as
+the Mac sidebar's `rowTitle` does; set 2's r01); Protection's explainer sentences are 13 on an 18 pitch where §3f's r17b
+expects 15 (set 2's); in Terminal the note's ⋯ sheet lowercases whole detail SENTENCES ("… for 30 days. you can put it
+back …") while Protection keeps its sentences' capitals — a voice-grammar question, and no rendered word may change in
+this run; the note's ⋯ sheet keeps its rows on the room while Settings' rows sit on the paper (the record's grounds
+table built it so — her look); the overlays' "+ New take" and "✓ Chosen" draw ≈ 14 pt (VM-152's overlays; above 13).
+
+**What I could not judge, and why**
+- **The take tint and the pill on teal & rust's paper (c6) and the pill's edge across the flip (f5, f6):** no peek was
+  caught — both teal c6 frames are pixel-identical to their c5, and f5 shows the chosen take with no pill; f6 is the
+  system's light → dark cross-fade frame (paper #A8ACAB Study / #8A8F8B Terminal), shot the same second as the flip.
+- **The comment mark under teal & rust on the fanned lesson / the seeded comment:** none was ever filed (the comment's
+  Add sits under the keyboard, NOT-HITTABLE — VM-14); c7's own lesson mark ●1 was judged instead.
+- **Tap areas** (44 pt targets, Done's 64 × 44, the menu rows' 64): only drawn shapes are measurable; the geometry pins
+  are their evidence. The comment draft field DRAWS 40 pt tall (784–824) — VM-14 / VM-152's.
+- **Settings opened from Starred:** s01 shows Starred's ⋯ menu open; the walk does not open Settings from there.
+- **Teal & rust under Terminal or at AX5:** not in the set (Study, default size only).
+- **Teal & rust's token values against `PaletteDerivation`:** measured from pixels, not computed from the rule (no code
+  run here); they agree with the relations §2 asks for.
+- **Whether the Mac shows W-B2 the same way:** inferred from the shared hexes and the Mac editor's paper, not seen.
