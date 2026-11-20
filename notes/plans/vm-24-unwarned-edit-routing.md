@@ -14,11 +14,13 @@ whole at its end.
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
-**As of 2026-11-20 04:55.** Batch A (VM-24's fix) is BUILT AND PROVED in its window (§12, "the orchestrator's
-stage results": red as tabled on the old code, green on the fix alone and in company, the standing pin green 3 of
-3). Batch B (VM-243): half 1's pin ran red as predicted (05:08–05:10) and the mechanism is
-confirmed; the same implementer builds half 2 (D-243-1, with an added open-tail reading) — §12, the architect's
-ruling.
+**As of 2026-11-20 05:35.** BOTH BATCHES ARE BUILT AND PROVED IN THEIR WINDOWS (§12, the three "orchestrator's
+stage results" sections). The code the walk and the ladder read is `a43b5fe70`'s (nothing under App or Sources after
+`106a0d2a4`). Next: the simulator walk (`notes/plans/vm-24-walk.md`; a fresh implementer builds the throwaway UI
+driver in a snapshot worktree, then one claim of about 25 minutes on a dedicated device), then the ladder
+(`fable-reviewer`, fresh per round), then main merged in (notes only so far), the gate, the closeout. The window
+scripts are the orchestrator's throwaways in the session scratchpad (`window-a2.sh`, `window-b.sh`, `window-b2.sh`;
+each is §12's commands with a verdict poll).
 
 - **Batch A, checked by the orchestrator against the implementer's report (never trusted):** tip `cd72732ec`;
   the fix is `a8662b81e` — `MobileEditorViewModel.swift` and `MobileEditTrace.swift` only, read line by line against
@@ -534,8 +536,8 @@ ink).
 | L4 | The design: VM-24's options against the fence; VM-243's trace | architect | DONE (§4) |
 | L5 | Batch A — VM-24's fix and pins | implementer | DONE (`a8662b81e`; §12) |
 | L6 | Batch A's red/green window, the Mac's seven source-reading types | orchestrator, nov18's GO | DONE 04:47–04:51 — red as tabled on the old code, 371 tests in 52 suites green on the fix, the standing pin green 3 of 3, the Mac's 46 in 7 green (§12, "the orchestrator's stage results") |
-| L7 | Batch B — VM-243: the pin as the confirm, then the fix | implementer | HALF 1 DONE — the pin (`b437305db`) red as §4.4 predicted in its window 05:08–05:10, the mechanism CONFIRMED (§12, the architect's ruling); half 2 (D-243-1) IN PROGRESS |
-| L8 | Batch B's window | orchestrator, nov18's GO | NOT STARTED |
+| L7 | Batch B — VM-243: the pin as the confirm, then the fix | implementer | DONE — the pin `b437305db` (+ reading (f) `03b06f417`), the fix `efc66ee57`, the reset's pins `151d98a87` (§12) |
+| L8 | Batch B's window | orchestrator, nov18's GO | DONE — the confirm 05:08–05:10 (red as predicted); the red/green 05:27–05:31 (7 issues at the tabled lines on the build without the fix; 385 tests in 55 suites green on the fix; the Mac's 46 in 7 green) |
 | L9 | The simulator walk (typing mid-note, paste, the readout's new lines; a dash line and the paragraph after it) | orchestrator | NOT STARTED |
 | L10 | The ladder (`fable-reviewer`, fresh per round, up to five) | orchestrator | NOT STARTED |
 | L11 | The gate: the whole phone target, the gated speed suite alone; a Mac leg only if a shared file changed | orchestrator, nov18 | NOT STARTED |
@@ -1252,6 +1254,32 @@ Expected (Swift Testing counts test functions; read the `skipped` lines):
   `Restarting after unexpected exit` = 0; the caret suite 4 of 4 with the standing pin 3 of 3 cases; the fence suite
   10 of 10. Any red is named and is a finding.
 - **(3)** "Test run with 46 tests in 7 suites passed" (as batch A's).
+
+#### Batch B, half 2 — the orchestrator's stage results (the window; every PENDING in the half's closeout is settled here)
+
+**Claim `vm-24`, 2026-11-20 05:27:39 → released 05:31:02, nov18's GO.** The tree at `a43b5fe70` (the red build
+`vm24-b-red` at `03b06f417` — the pin with reading (f) and no production change against batch A; the fix `vm24-b` at
+the code of `106a0d2a4`; the Mac leg from batch A's `vm24-a-mac`, no Mac-compiled file having changed). The standing
+simulator, one fresh boot, a 30 s settle (05:28:15), one launch per leg, `Restarting after unexpected exit` = 0 in
+every log, every `xcodebuild` exited by itself. Logs `DerivedData/logs/vm24-b-red-run.log`, `-alone.log`,
+`-company.log`, `-mac-run.log`; the summary `vm24-b-window-summary.txt`; the printed readings
+`vm24-b-red-readings.txt` and `vm24-b-alone-readings.txt`.
+
+| Leg | Verdict line | By name |
+|---|---|---|
+| (1) the red build: the pin alone | "Test run with 6 tests in 1 suite failed after 1.868 seconds with 7 issues." | RED: (a) `aDashLinesWordsAreTypedInFullInk()` `:378` · (b) `theParagraphAfterADashLineIsTypedInFullInk()` `:412` · (c) `wordsTypedAfterAClosingMarkerAreInFullInk()` `:444` · (d) `theLineTypedAfterAHeadingWearsTheProseFace()` `:478` (ink) and `:480` (font) · (f) `aDashLineTypedAtTheNotesEndAndTheParagraphAfterItAreInFullInk()` `:539` ("one") and `:541` ("two"). GREEN: (e) `aReopenedNoteDrawsWhatWasTypedInFullInk()`; every PREMISE line. Exactly as tabled — the open tail has the bug too |
+| (2a) the fix build: the pin and the reset's two types alone | "Test run with 14 tests in 3 suites passed after 1.753 seconds." | none red |
+| (2b) the fix build: those three, then batch A's 52, ONE invocation | "Test run with 385 tests in 55 suites passed after 59.030 seconds." — 55 passed-suite lines, 0 failed, 0 skipped | none red. The standing caret pin "with 3 test cases passed"; the caret suite and the fence suite passed |
+| (3) the Mac's seven source-reading types | "Test run with 46 tests in 7 suites passed after 13.449 seconds." | none red |
+
+What the pin printed on the fix (Study, light): the lead `"- "` still in the marker's ink with the face's mark;
+`"one"`, `"one⏎two"` (in a block and in the open tail), `" b"` after a closing star and `"⏎word"` after a heading all
+in the full ink `#29241C` and the base font; the heading's own words bold 27 pt and an italic's letter italic, both
+marked. After the window: the simulator shut down (0 booted); its app container lists `Variorum-dev` only; no
+instance; no Problem Reporter; no new crash report; the Debug defaults 1,356 keys, unchanged.
+
+**Both batches' code is now built and proved in windows. The commit the walk's AFTER pass and the ladder read is
+`a43b5fe70`'s code** (no App or Sources line after `106a0d2a4`).
 
 ---
 
