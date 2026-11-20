@@ -189,7 +189,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
 | Ladder r2 · fix pass | **DONE 2026-11-19** — part B built and the whole Core package green (`74d91c666`); settled by its stage window: the seven meant reds on `vm64-gate2-red` and no other, green alone and in company, the gated suite alone 13 passed ("Orchestrator's stage results" ▸ "Ladder round 2's fixes — THE STAGE WINDOW") | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, the no-choice fixes with their pins, the final calls in the second turn, part B's builds. *(Was: IN-PROGRESS, part B waiting on the QUIET window — flipped at ladder round 3, finding 2(c).)* |
 | Ladder r3 · fix pass | **DONE (both turns)** — the final calls applied (`6aa357bff`): (i′) confirmed with its guard; `merged` bounded, pin first; the migration comment. Owed with the gate tree after VM-78's merge-in: finding 1's red build and the hosted runs of its suite | see "Ladder round 3 — fix pass · LIVE STATUS" below | the last round (no major found). *(Was: FIRST TURN DONE, the arms waiting.)* |
-| The merge of main (VM-78) and the gate tree | **IN-PROGRESS** — see its block below | see "The merge of main (VM-78) and the gate tree · LIVE STATUS" below | merge exactly `f909d6714` (VM-78's PR #15); the five shared files read; builds into `vm64-gate3` / `vm64-gate3-red`; the whole Core package |
+| The merge of main (VM-78) and the gate tree | **DONE 2026-11-19** — merge `a18fae31f` (clean; no collision); `vm64-gate3` phone + Mac built at `5a4045303`, no compile fix; the whole Core package 4,975 in 721 green; `vm64-gate3-red` built and restored. Stage runs owed (the orchestrator's) | see "The merge of main (VM-78) and the gate tree · LIVE STATUS" below | merge exactly `f909d6714` (VM-78's PR #15); the five shared files read; builds into `vm64-gate3` / `vm64-gate3-red`; the whole Core package |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -871,8 +871,8 @@ orchestrator's). The record of what was checked: §7 ▸ "The merge of main (VM-
 | G2 — the blob check of the five shared files; each read whole against the map's VM-64 bullet and this run's intents; the composition traced; the other meeting points; the guards mirrored | DONE (this commit) — all five blobs MATCH; both runs hold in each file; the quiet-undo composition ends on the fence's sentence, no state wrong (one note for her bundle with P-2-2); the union, the fence's sentence, the Put back line and the timing marks unchanged in meaning; both source scans green by reading. NO collision; no line written. §7 ▸ "The merge of main (VM-78) and the gate tree" |
 | G3 — phone and Mac `build-for-testing` into `vm64-gate3`; compile fixes (if any) listed | DONE — both built at `5a4045303` (code = the merge `a18fae31f`'s; every later commit is this record alone): phone `** TEST BUILD SUCCEEDED **`, 0 errors; Mac `** TEST BUILD SUCCEEDED **`, 0 errors; NO compile fix; no warning in a line this run wrote |
 | G4 — the whole Core package, `swift test`, once, on the final tree | DONE at `d1bae169b` (code = `a18fae31f`'s) — 4,975 tests in 721 suites, no red: MCP 746/139 · Core 4,197/578 with the 5 declared known issues · StringsWorkbook 32/4; +4 against the 4,971 baseline, all round 3's `TimingRecorderTests`; VM-78 +0 |
-| G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | **IN-PROGRESS — THE REVERT STARTS AFTER THIS COMMIT.** Exactly: `git show 848b98b66 -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift \| git apply -R` (its `--check` passes on this tree; no commit since `848b98b66` touches the file), the phone `build-for-testing` into `vm64-gate3-red`, then `git checkout HEAD --` that one file; every test file stays in. **If this session dies mid-revert:** `git diff HEAD` shows the one reversed hunk in `MobileLibraryViewModel.swift`, and `git checkout HEAD -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift` is the SAFE restore (the file is committed; nothing else is reverted) |
-| G6 — §7's section, the final stage commands, the report | NOT-STARTED |
+| G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | DONE — **no revert is in flight; the tree is restored.** Announced at `ac3d8165c` and built there with the one hunk reversed (`git apply -R` clean; every test file in): `** TEST BUILD SUCCEEDED **`, 0 errors; restored by `git checkout HEAD --` the one file; `git status --short` and `git diff HEAD --stat` both EMPTY, the file's blob HEAD's (`d88239219`). *(The cell's text while it ran: "IN-PROGRESS — THE REVERT STARTS AFTER THIS COMMIT", with the restore command.)* |
+| G6 — §7's section, the final stage commands, the report | DONE (this commit) — §7 ▸ "The merge of main (VM-78) and the gate tree": the merge, the blob check, the five files, the composition, the meeting points, the guards, compile fixes NONE, the whole-package counts, the products, the FINAL stage commands (i)–(iv), "For QUESTIONS at the merge". The FOR A LATER READER and the gate/walk/merge `PENDING(…)` slots stay the orchestrator's |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -4708,11 +4708,113 @@ in N by Swift Testing): the same 15 gated harness tests and 8 gated suites as th
 
 #### The products
 
-PENDING(the builds and the commit each was built at).
+| Folder (`App/Variorum/DerivedData/…`, gitignored) | What | Built at | Product |
+|---|---|---|---|
+| `vm64-gate3/` | phone, the joined tree | `5a4045303` | `Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun` (test target `VariorumMobileTests`) — and the Debug app the gate's simulator walk installs, `Build/Products/Debug-iphonesimulator/VariorumMobile.app` (it exists) |
+| `vm64-gate3/` | Mac, the joined tree | `5a4045303` | `Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun` (test target `VariorumTests`) |
+| `vm64-gate3-red/` | phone, `848b98b66`'s one hunk reversed in `MobileLibraryViewModel.swift`; every test file in | `ac3d8165c` + the reversal | `Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun` |
+
+**Every commit after the merge `a18fae31f` is this record alone** (`git diff --stat a18fae31f HEAD` names only
+`notes/plans/fixes/vm-64-timing-and-lags.md`), so `vm64-gate3` is the tip's code. **The red build** (announced and
+committed at `ac3d8165c` before the revert started): `git show 848b98b66 -- …/MobileLibraryViewModel.swift | git apply
+-R` applied cleanly on the joined tree (its `--check` passed first; no commit since `848b98b66` touches that file), so it
+reversed exactly the one hunk — `land`'s `else if state.next == nil, page.next != nil, page.items.count <=
+rows(question.listing).count { state.wantsMore = true }` back to `if state.question != question { state.wantsMore =
+false }` alone, plus the hunk's doc lines (+1 −21) — and nothing else; `** TEST BUILD SUCCEEDED **`, 0 errors, with
+`MobileLibraryPagingRulesTests` (the three pins and the new guard among its 18) compiled in. **Restored** by `git
+checkout HEAD -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift`: `git status --short` and
+`git diff HEAD --stat` both EMPTY afterwards, the file's blob equal to HEAD's (`d88239219`). Logs and stamps beside the
+folders: `vm64-gate3-phone-build.log` / `-phone.sha`, `vm64-gate3-mac-build.log` / `-mac.sha`,
+`vm64-gate3-red-build.log` / `-red.sha`, `vm64-gate3-swifttest.log` / `.sha`. The orchestrator's earlier folders
+(`vm64-gate`, `vm64-gate-red`, `vm64-gate2`, `vm64-gate2-red`) were not written.
 
 #### The stage commands — FINAL (the orchestrator's stage; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
 
-PENDING(written once the products exist).
+TYPE names, zsh arrays; poll for the Swift Testing verdict line, never `** TEST EXECUTE **`. Swift Testing counts a
+parameterized test once and counts SKIPPED tests inside "N tests … passed" — read the skipped lines.
+
+(i) **Round 3 finding 1's pins — red on old, then green.** ONE invocation from the red build:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileLibraryPagingRulesTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate3-red \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-gate3-red>
+```
+Expected: **18 tests in 1 suite, FAILED with 7 issues in exactly three tests** —
+`aPutBackOfTheLastRowOfAFullyListedListingReturnsIt` 3 ("the note Put back is listed again"; "the store's whole
+listing, in its order"; `!allHasMore`) · `aPutBackOfARowAboveTheEndOfAFullyListedListingKeepsItsLastRow` 2 ("the store's
+whole listing — the last row kept"; `!allHasMore`) · `aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow` 2 ("the
+store's whole listing — the oldest kept"; `!allHasMore`). The other 15 GREEN, among them round 2's 8-of-12 pins in this
+suite (`aRowDeletedPastTheFirstPageLeavesTheListing`, `aPutBackThroughTheLinesUndoReturnsARowPastTheFirstPage`,
+`aPutBackAfterTheLibraryCameBackReturnsARowPastTheFirstPage`), batch 5's `aDeeperListingFollowsItsFirstPage` and the
+round-3 guard `aShortCompleteListingThatAPageReachesPastIsNotChased` (green on both builds by design). Any other red or a
+different count is explained in the record before the gate counts as open; a finding-1 pin green here is hollow at that
+pin and said so. Then the fix, the same `tests` from `DerivedData/vm64-gate3`: **18 tests in 1 suite passed.** Then in
+company, ONE invocation from `vm64-gate3`, round 2's (ii) list unchanged:
+```
+tests=(MobileLibraryPagingRulesTests MobileLibraryRowActsTests MobileBoxOpenTimingTests MobileTimingTests
+  MobileNoteOpenOnceTests MobileNoteHoldTests MobileLibraryPagingTests MobileLibraryTests MobileLibrarySortTests
+  MobileFilterTests MobileEmptyStoreTests MobileDeletionTests MobileTrashTests MobileVersionsTests
+  MobileWingListingTests MobileWingStandTests MobileWingDoorTests MobileWingDoorShellTests MobileWingDoorGeometryTests
+  MobileLineDoorTests MobileLineShowRuleTests MobileLineDirectionTests MobileStarsTests MobileQuickNoteTests
+  MobileNoRawErrorPinTests MobileErrorLogPrivacyPinTests MobileHerPathsPerfTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate3 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-gate3-company>
+```
+Expected: all green — by arithmetic **243 tests in 27 suites passed with 2 known issues** (round 2's window read 237;
++4 this suite's round-3 tests, +2 VM-78's in `MobileTrashTests`, `theFirstPaintSaysNothingBeforeTheListingAnswers` and
+`anEmptyTrashSaysSoOnceTheListingAnswers`); the 2 known issues `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`'s
+declared ones (main's); **13 SKIPPED — the gated speed suite**, said so in words.
+
+(ii) **The merge gate's phone leg — the whole phone target** from `vm64-gate3`, ONE invocation:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate3 \
+  -only-testing:VariorumMobileTests 2>&1 | tee <log-gate3-phone-whole>
+```
+Expected: **`MobileHerPathsPerfTests`' 13 shown SKIPPED** ("13 skipped — the gated speed suite", never folded into
+"passed"); **the reds from main only — VM-24's caret pin,
+`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`** (2 of 3 cases, 2 issues, as
+this record's earlier gate commands expected it), red by decision on main. **What main's own records say:** VM-78's record
+at `f909d6714` leaves its whole-phone verdict as a slot — "Gate 1, the whole phone target: PENDING(gate 1: its verdict;
+VM-24's caret pin the one red by decision)"; its gate table names "the one standing red by decision is VM-24's caret
+pin"; it records NO count on main as this section is written (its ledger commit, not on this branch, is where the
+orchestrator will find it). The last whole-phone count on main's records is older (VX-849's closeout in
+`notes/PhaseCloseoutArchive.md`: "whole phone 857/141 at baseline", 2026-11-09). VM-78's merge adds, by its test diff
+(counting `@Test` and `@Suite` lines), net +39 tests and +8 suites — `MobileBookFixesTests` new, 30 tests in 8 suites;
++9 net across eight other files (`MobileBlockHistoryTests` +2, `MobileBooksTests` −1, `MobileMembershipTests` +2,
+`MobileShellTests` −1, `MobileTrashTests` +2, `MobileTutorialWalkTests` +1, `MobileUndoDoorTests` +3,
+`MobileUndoWarningWordsTests` +1).
+Anything red beyond the caret pin is real until traced.
+
+(iii) **The gated speed suite ALONE**, from `vm64-gate3`:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+TEST_RUNNER_VM66_PERF=1 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate3 \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-gate3-perf>
+```
+Expected: **13 tests in 1 suite passed, NONE skipped**; every asserted count as on the round-2 tree (reads per open 1,
+editor builds per open 1, the hidden Library's re-reads and redraws 0, savepoint attempts 1 on all four roads,
+owner-adoption rows 0). VM-78's Shelf order change reaches no asserted count (a count, never an order).
+
+(iv) **The merge gate's Mac leg — the whole Mac target** from `vm64-gate3` (a QUIET window, the coordinator's):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum \
+  -destination 'platform=macOS' -derivedDataPath DerivedData/vm64-gate3 \
+  -only-testing:VariorumTests 2>&1 | tee <log-gate3-mac-whole>
+```
+Expected: main's known flake by name, if it appears — **VX-701, `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary`**
+(its keyboard-focus precondition under whole-target load; two issues, "Expectation failed: model.find.fieldHoldsKeyboard"
+and "Known issue was not recorded") — re-run alone before it is leaned on. By arithmetic about **6,435 tests in 1,114
+suites** with 14 known issues on a green run (VX-981's gate read 6,434 in 1,114 on its merged tree `9007f4686`, 13 known
+issues recorded plus VX-701's own — and no Mac test file changed between that tree and `a4634b288`; VM-78 adds one Mac test, `theMacsDetailIsByteIdenticalThroughTheHoist`; this run changed no
+Mac test file). VM-78's gate names `DeadVocabularyTests.noShippedWordSpeaksTheRetiredVocabulary` among what this target
+runs (it walks `Shared/`); expected green — this run's `Shared/` lines say "smart" nowhere (the scan above).
 
 #### For QUESTIONS at the merge
 
