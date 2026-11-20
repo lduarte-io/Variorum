@@ -2174,3 +2174,122 @@ further right at AX5); `MobileFaintOnDoorsSourceTests` (the 13 sites); `MobileFa
 (the four unchosen filter words at 3.3–4.2:1 in each voice and appearance; the three empty chips at ≈ 3.6–3.9:1 — the set
 chip's ordering check holds there too); `MobileFieldPlaceholderRenderedTests`, all six cases (1.7–2.5:1);
 `MobileFieldPlaceholderSourceTests` (the 3 sites). Any other red there is a finding to read, not noise.
+
+### The walk's fixes (batch 2) — results (implementer: Opus, 2026-11-19)
+
+**Not done, first:** no test was run and no simulator booted (every window is the orchestrator's); the Mac
+`build-for-testing` and the snapshot's re-make and build were HELD by the QUIET window (another run's whole Mac target
+on the stage) — PENDING, row W.7q; no rendered floor case for the Account sheet (no phone harness mounts it — it needs
+`AppServices`); piece 9 (W-C4) changed NO code — it is a call for her (P-47-30). Ten pieces: the brief's six, then four
+more by message (W-C2, W-C3 — landed with piece 2 —, W-C4, W-C7). Every pattern-pin's red-on-old was measured by a
+verbatim port of its rule over the tree before the piece; every rendered pin's red and green is PENDING the windows.
+
+**Piece 1 — W-A3's pin still red on the fixed tree (51.3 → 53.3 pt).** *Traced:* between xxxLarge and AX5 the marker
+column (`meta`, chrome, held), the row's 8 + 12 pt insets and the 8 pt spacing are identical; the NAME is her words
+(`rowTitle`, full range) and keeps growing, and its first glyph's left side bearing grows with it — SF Mono Semibold's
+"l" sits 0.0894 em right of its origin (CoreText on the Mac's SF Mono; 0.618 em advance). The pre-fix tree's own
+readings (54.0 → 84.3 pt, marker and name both `rowTitle`) fix the two drawn sizes (≈ 19.4 and ≈ 42.3 pt): 0.0894 em ×
+22.9 pt = 2.04 pt, the whole 2.0; the five readings (large, xxxLarge, AX5 × both trees) fit one model to 0.05 pt. So the
+residue is NOT the column: the pin measured the name's INK where it meant the column's edge. *The pin moved, not
+loosened:* `MobileShelfMarkerColumnTests.atAX5TheNameStartsWhereItDoesAtXXXLarge` now subtracts the first glyph's
+bearing in the role's own face at the size the row resolves (`PhoneType.resolved` / `baseUIFont`, CoreText glyph
+bounds) and compares the name's LAYOUT ORIGIN — AX5 no further right than xxxLarge + 1 pt (the pixel grid). Red on old
+by ≈ 28 pt (the column's own growth), level on new. No production line changed (`c72e65201`, compile fix `084f9e066`).
+
+**Pieces 2 + 8 — W-B1 and W-C3: the faint on sentences, headers and labels, ONE sweep (`a21110f9d`).** *Mechanism:*
+batch 1's one-for-one `tokens.faint` → `tokens.phone.faint`; W-A9 moved the DOORS' words up, the rest kept the faint.
+*Every faint read in the phone tree and `Shared/`'s phone arms, decided by the sheet (§D: "Words under 17 pt need
+4.5:1 … Faint never carries a sentence she has to read"; the faint is "glyphs, placeholders, disabled words only"; §A
+draws meta lines, explainers and section headers in the corrected muted):* FIXED → `tokens.phone.muted` (19): the
+Trash's promise (`MobileTrashView`), the Archive's promise (`MobileArchiveView`), the empty Bookcase's sign-in line
+(`MobileShelfView`), the empty Library's sign-in line (`MobileLibraryView`), "Apply a tag" and an applied tag's path
+(`MobileNoteTags`), "Add to a book", "Editing here edits the note everywhere it appears." and "smart" (`MobileMembership`
+— three named lines of another branch's file), the tray's explainer and its two rows' meta lines (`MobileNoteTray`),
+Versions' explainer and the reader's meta line (`MobileVersions`), the file row's note (`MobileReferences`), the box's
+hold note and its status word "typing…/saving…" (`MobileQuickNote`), a nested tag's path (`MobileTagManager`),
+Settings' "Starting…" (`MobileSettingsView` — one named line). The two status words are words she reads, not a field's
+placeholder (the sheet's placeholders are a field's prompt — §D's swatch is the box's "New note", §E's "Hint"), not
+disabled and not glyphs. LEFT, by the sheet: the block list's ○ (a glyph, 3:1), the box's hint (a placeholder, 17 pt)
+and its dashed edge (an edge), the disabled 17 pt "Use as Daily Journal" (`MobileBookDetails`), the fields' two
+placeholder inks (`PhoneControls`). *Pins:* `MobileFaintCarriesNoWordsSourceTests.theFaintCarriesNoWordsUnderSeventeenPoints`
+— every faint read that is not an edge/fill, a glyph-only `Text`, a placeholder (`prompt`) or a role at 17 pt or more
+(the role found above the read, else just below — a group's role) is the class; measured: 19 sites at `c72e65201`, 0
+after (the first batch's door rule is kept beside it); `MobileFaintOnDoorsRenderedTests.theTrashsPromiseClearsTheFloor`
+— the promise line's rendered ink ≥ 4.5:1 on the Trash's paper, both voices × light/dark (red on old: the faint,
+3.93:1 Study light).
+
+**Piece 3 — W-B3: "Delete Note…" in the system red (`71ccdd4fc`).** *Mechanism:* `MobileNoteActionsSheet.deleteRow`
+handed `actRow` a literal `tint: .red`; the phone's no-literal-colour pin looks for `.tint(.red)` and the other modifier
+forms, not a hue passed to a parameter. *Fix:* `tint: tokens.alarm` (role `.destructive` kept). *The sweep — every
+system colour in the phone tree and `Shared/`'s phone arms:* none other stands where a plain token belongs. Left, each
+with its reason: the TK2 fallback canary (`MobileWriteView`, deliberate); the store's opening frame
+`Color(.systemBackground)` (`MobileStoreFailureView` — drawn before any library is open, so no library's tokens exist;
+the failure face beside it is the deliberately unstyled recovery surface); the callout swatch's `UIColor.separator`
+edge (`MobileCallout` — an image in the SYSTEM's menu, edged against that menu's own ground); the shared pages' warning
+`Color.orange` on the styled arm (`SharedPageStyle.pageWarning` / `pageCaptionWarning` — no warning token exists, the
+seam's own comment records the choice; system orange at 13–15 pt is ≈ 2.2:1 on the paper, under §D's floor — **a
+question for her**, not a plain token: the alarm is the error's ink, and a warning ink is a new token); the secret
+field's eye glyph `.foregroundStyle(.secondary)` (`PeekableSecretField` — hierarchical: inside `phoneField` it is the
+field's ink at the secondary level, not the system's grey; the Mac's arm must stay `.secondary`); system alerts' and
+long-press menus' destructive buttons (system-drawn). *Pins:* `MobileLookSourceTests.noPhoneViewPaintsALiteralColour`
+extended — a hue passed to a parameter (`: .red`, `? .red`, `= .red`, at an identifier edge) and the UIKit/semantic
+system colours (`UIColor.system…`, `Color(.system…`, `UIColor.label`/`secondaryLabel`/…, `separator`, `link`,
+`Color.accentColor`), two forms allowed with their decisions (the opening frame, the swatch edge); measured: 1 offender
+at `a21110f9d`, 0 after; `MobileNoteActionsAlarmTests.deleteNoteIsDrawnInTheAlarm` — the mounted sheet's Delete Note
+row holds a pixel within 0.06 of `tokens.alarm`, both voices × light/dark (red on old: the title is the system red and
+the detail line the corrected muted, neither near the alarm).
+
+**Piece 4 — W-B4: two hairlines above Settings (`fb649d6a8`).** *Mechanism:* the body's `VStack(spacing: 14)` draws a
+divider after `versionsRow`, then `undoRow`/`redoRow` (nothing while the stack is empty), then `settingsRow`, which
+opened with its own divider (VM-53, this run). *Fix:* `settingsRow`'s divider draws only when an undo or redo row
+renders above it. Left, never on screen: with no settings door (outside a shell — harness and preview only) the
+Versions divider and Delete's still meet. *Pin:* `MobileNoteActionsHairlineTests.betweenTwoRowsThereIsOneHairline` — the
+mounted sheet rendered; in each gap between consecutive rows exactly one hairline (runs of non-room pixels in one
+column), with the stack empty and with an "Undo Delete Block" row; red on old in the empty state (two between Versions…
+and Settings).
+
+**Piece 5 — the Account sheet's styled header on the Mac's type slots (`2345a713a`).** *Mechanism:* `AccountView.header`'s
+styled arm set the tab words in `style.tokens.heading` and Close in `style.tokens.small` (11.5 pt on the phone); batch
+1's guard walks `VariorumMobile/` only. *Fix (the styled arm only; the Mac's arm byte-identical):* the tab words on the
+`tab` role, the current one semibold (the sheet's tab grammar), ink/muted unchanged; Close takes the sheet header's own
+closing control (`PhoneTextButtonStyle(closing: true)`: 17 semibold in the accent, a 64 × 44 target), its word kept.
+`PhoneSheetHeader` itself does not fit: its title is a header `Text`, while these tabs are doors carrying the selection
+trait (CF-14's mechanism kept). *Swept:* no other read of a Mac type slot in any phone arm of `Shared/` (none anywhere
+in `Shared/` outside the token layer). *Pin:* `MobilePhoneTypeSourceTests.noSharedPhoneArmReadsTheMacsTypeSlots` — a type
+slot read through `SharedPageStyle` (`style.tokens` / `pageStyle?.tokens`; nil on the Mac by construction, so such a
+read IS a phone read); measured: 2 at `05afd4b34`, 0 after.
+
+**Piece 6 — the Account sheet's seven placeholders (`c64f23782`).** It CAN be done without changing what the Mac
+constructs: two private helpers in `AccountView` — `pagePlainField(_:text:)` and `pageSecureField(_:text:)` — build the
+field with `prompt: Text(words).foregroundStyle(style.tokens.phone.faint)` on the styled arm only (`#if os(iOS)` and a
+style present); every other arm is the call site's former construction exactly (`TextField(label, text:)`;
+`SecureField(titleKey, text:)` with the title as the `LocalizedStringKey` the call site's literal resolved to — no
+`prompt:` is ever passed on the Mac, which was the first batch's concern). All seven route through them (`emailField`
+through `pagePlainField`). *Pin:* `MobileFieldPlaceholderSourceTests.theAccountSheetsFieldsGiveTheirPlaceholderOnThePhone`
+— every Account field under `.pageFieldChrome` is built by a prompting helper and `emailField` builds through
+`pagePlainField`; measured: five raw constructors plus `emailField`'s at `2345a713a`, none after.
+
+**Piece 7 — W-C2: a hidden page's search takes the keyboard back (`05afd4b34`).** *Traced:* the Library's search is a
+plain `TextField` with NO focus binding of its own; a push over the root (her hit, the Trash) covers it and the keyboard
+goes; the tab road (`MobileShellView.tabSelected` → `popToRoot(leaving, animated: false)`, P-47-19) uncovers the root
+while its page slides away, and the framework restores the uncovered screen's first responder — the search — so the
+hidden Library holds the keyboard over the Bookcase (the bar lifts with it), and its caret is back on return. Which
+layer restores (UIKit's navigation or SwiftUI's focus) is not visible from source; the fix does not depend on it. A
+plain Back to the Library restores the same way ON screen — a road she sees, kept. *Fix:* the shell's `page(_:)` sets
+`EnvironmentValues.mobilePageShowing` (tab == owner; true outside a shell), and the search (`@FocusState`) gives the
+keyboard back whenever it holds it while its page is hidden, and when its page leaves the screen. What the search
+holds, VM-55's landing and the band are untouched. A possible cost to look for in the re-capture: the hidden field may
+take the keyboard for one update before giving it back (a keyboard flicker rather than a keyboard left up). *Pin:*
+`MobileHiddenPageKeyboardTests.theTabRoadLeavesNoKeyboardOnAHiddenPage` — the mounted shell in a scene window: the
+Library's search focused, the Trash pushed over it, "Bookcase" in that list's bar; then nothing in the window is first
+responder and the Bookcase's bar sits at its foot. Red on old IF the harness reproduces the restoration (the walk did);
+a green-on-old result would mean the harness does not, and the re-capture carries the evidence.
+
+**Piece 10 — W-C7: the Lenses sheet's bare divider (`c7b6f0459`).** `MobileLenses`' divider above the save doors →
+`Divider().overlay(tokens.line)`. *Swept:* 13 `Divider()`s in the phone tree — 11 already wear the line (Settings' row
+dividers on their next line), the tag manager's long-press menu divider is the system menu's own separator (exempt),
+this one fixed; `Shared/`'s `PageDivider` wears `style.tokens.line` on its phone arm. *Pin:*
+`MobileLookSourceTests.everyPhoneDividerWearsTheLine` (exempt: a divider inside `.contextMenu`/`Menu`); measured: 1 at
+`fb649d6a8`, 0 after.
+
+PIECE-9-PENDING
