@@ -1,13 +1,9 @@
 # VM-78 — Fixes to what's there: your handoff
 
-**STATUS: OPEN — re-fitted on 2026-11-19, after the badge fix was taken out and main was merged into the branch;
-brought up to date after the fourth review round, and again after the MCP run (VX-981) was taken in — main was
-merged into the branch a second time (merge commit `d55d22db9`), with no change to any code line — and the short
-test window for the fourth review's three new safety tests has run on that code. The fifth and last review round is
-done (it found nothing major), and so is the walk through the changed screens on the simulator.** Still ahead: the
-rest of the final gate — the whole phone test suite and the whole Mac test suite (the Mac's tests over the shared
-code this run changed are inside it) — then the merge. Every **PENDING(…)** slot below is filled as it happens;
-nothing marked PENDING has happened yet.
+**STATUS: CLOSED on 2026-11-19 — merged into main as pull request #15, merge commit `f909d6714`.** The whole
+final gate passed first: the whole phone test suite, the whole Mac test suite and the walk through the changed
+screens on the simulator (the evidence section says each result). Your two provisional calls and the wording pass
+are QUESTIONS #279. Everything below is settled.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. A **test window** is a test run on the
 shared Mac, granted by the stage coordinator. The **review** is the cold code review, one fresh reviewer per
@@ -26,7 +22,7 @@ READER section is the short version, and its Closeout section has the detail.
   it did not hold up in its test window, so it was backed out of this run. It becomes one run with the callout
   and comment-mark finding (VM-239) and the takes marks' cost (VM-179). **That run is yours to launch, after
   wave 1:** `/architect-phase vm-17 vm-239 vm-179` — its kickoff is `notes/plans/vm-17-chrome-geometry.md`.
-- [ ] **Two provisional calls** (QUESTIONS PENDING(the QUESTIONS number, at the merge)), each built the way the
+- [ ] **Two provisional calls** (QUESTIONS #279), each built the way the
   spec leans and waiting for your word:
   1. **An archived gathering in the phone's "add to a book" list.** Archived books there now say "(archived)". As
      built, an archived gathering says it too ("Quotes (archived) (by tagging)"). The Mac's chip leaves gatherings
@@ -43,9 +39,10 @@ READER section is the short version, and its Closeout section has the detail.
 - [ ] **Two canon lines I changed, for your eyes** — the section of that name below.
 - [ ] **Three canon lines I did not change, for your call** — the section of that name below.
 - [ ] **The tickets filed** — the list at the bottom.
-- [ ] PENDING(the single wave-1 phone install — only if this run is the last of the four mobile runs to merge: the
-  device build from merged main, and a paste-ready kickoff a fresh session can run with you, per
-  `notes/plans/vm-44/plans/vm-45-install-runbook.md`).
+- [ ] **The wave-1 phone install is not this run's to prepare.** When this run merged, the timing run (VM-64) and
+  the sizes-and-look run (VM-47) were still to merge, and by the stage coordinator's order VM-47 merges last. So,
+  as you ruled, the last of the four mobile runs to merge prepares the single install. Nothing is needed from you
+  for it here (the section "The phone install" below).
 
 ## The first decision: the snap-back in the phone editor (VM-24)
 
@@ -222,10 +219,18 @@ ruled. None is this run's line, so all three are left as they are; a ticket for 
   is why the new ones were needed. With the real faces back, all 42 tests passed — the three new tests, the others
   over the same screens, and the phone's undo tests, run again because the MCP run had changed the undo machinery
   underneath — they still pass.
-- PENDING(gate 1: the whole phone test suite on the merged code — its result, with the caret test as the one
-  expected failure).
-- PENDING(gate 2: the whole Mac test suite — the Mac's tests over the shared code this run changed are inside it,
-  and so is its check that no shipped word uses the retired vocabulary, `DeadVocabularyTests` — its result).
+- **The final gate, the whole phone test suite** (the evening of November 19, on the code that merged — main's code
+  is exactly the code that was tested): 992 tests ran in one go and 991 passed. The one failure is the caret test
+  that stays failing on main by your decision (VM-24) — two of its three cases, as expected — and nothing else
+  failed. The two "known issues" it reports are both in one Trash test that declares them on purpose. The fourth
+  review's three new tests and the undo tests passed inside it. Its result file could not be opened (the test tool
+  carried on after its verdict and was stopped), so its log is the evidence.
+- **The final gate, the whole Mac test suite** (a quiet window straight after): 6,435 tests ran in one go; 6,400
+  passed, 31 were skipped (the test harnesses that run only when asked for) and 3 are failures the tests expect.
+  The one failure is the Mac's known flaky keyboard-focus test (VX-701), which passed when run again on its own
+  straight after. That is the same as main's own Mac result. The Mac's tests over the shared code this run changed
+  ran inside it and passed, and so did its check that no shipped word uses the retired vocabulary
+  (`DeadVocabularyTests`).
 - **The simulator walk (done 2026-11-19, 17:54–18:18, on a test iPhone made for it and deleted after): every changed screen worked as intended, in Study and the five book-and-sheet screens again in Terminal.** Finish asks first, naming the 3 notes waiting at Arrivals; Cancel leaves the book open; after Finish, reopening and finishing again asks nothing, because nothing is waiting any more. A gathering's Details has no Finish. A sealed book's Reopen says why on the message line at the bottom, readable, with Book Details still open. The books sheet marks an archived book "(archived)", shows a gathering as "gathering" with no diverge, and starring a note through a ★ gathering says "Starred — the gathering shows it now." The shelf sorts a–z with starred books first and "Book 2" before "Book 10", and a long press offers Star and Delete, no Pin. Deleting a gathering, from the shelf or from Details, says "Gathering moved to the Trash". The new-book sheet says Gathering, with its caption and its no-tags line. An archived starred book opens from Starred and Unarchive puts it back on the shelf. An Undo whose change was already put back says "Nothing to undo — …" and offers no Redo. A restore keeps the words it replaced as a quiet saved moment. The date chip on a titled note shows the new date at once. The Trash never flashed "Nothing in the Trash." (checked frame by frame on a screen recording). Both guide lessons read as drafted. The tallest Book Details, at half height and at full height, keeps the message line clear of its last row. Three small things it showed that belong to other work: the books sheet's add list still puts "Book 10" before "Book 2" (book order is wave 3's); in Terminal the message line keeps its capitals while the rest is lowercase (the message line's own look); and Terminal wraps the shelf's top line (VM-47's sizes). The screenshots are on the Pro in `~/dev/variorum-vm-78/App/Variorum/DerivedData/vm78-walk-screens/`; the record's "THE GATE — leg 3" table names each one.
 
 ## The review, in plain words
@@ -266,9 +271,9 @@ that opens it. They are dealt with, and the review is closed.
 - **The verification checkout.** The orchestrator ran most test windows from a separate throwaway copy of the
   branch (`~/dev/variorum-vm-78-pins`, with its own build folder) so an implementer could keep the worktree. It is
   removed at closeout with the worktree.
-- **Some test result files are missing or cannot be opened.** Batch B's failing run kept no result file; the
-  failing runs of the first review's fixes and of the VoiceOver-hint fix, and both runs of the badge fix's window,
-  could not be opened. The kept logs, under `App/Variorum/DerivedData/logs/` in the worktree, are the evidence,
+- **Some test result files are missing or cannot be opened — six in all.** Batch B's failing run kept no result
+  file; the failing runs of the first review's fixes and of the VoiceOver-hint fix, both runs of the badge fix's
+  window, and the final gate's whole phone run could not be opened. The kept logs, under `App/Variorum/DerivedData/logs/` in the worktree, are the evidence,
   and they agree with the record.
 - **This run's parity row is PL-78** in `notes/MobileSoul.md` (it was drafted as 75; the search run and the wings
   run took 75 and 76 first, so it was 77 after the first merge with main; the MCP run, VX-981, then merged with its
@@ -281,26 +286,29 @@ that opens it. They are dealt with, and the review is closed.
 
 ## The phone install
 
-PENDING(the single wave-1 phone install — only if this run is the last of the four mobile runs to merge: the
-device build from merged main is prepared, and a paste-ready kickoff for a fresh session to help you install it is
-at the path written here). Your ruling, from the night: "the phone step is the single wave-1 install after all four
+Not this run's. When this run merged, the timing run (VM-64) and the sizes-and-look run (VM-47) were still to
+merge, and by the stage coordinator's order VM-47 merges last, so the last mobile run to merge prepares the phone
+build from merged main and the paste-ready kickoff for a fresh session to help you install it (per
+`notes/plans/vm-44/plans/vm-45-install-runbook.md`). Your ruling, from the night: "the phone step is the single wave-1 install after all four
 runs have merged. I'll do the hands part hands on in the morning."
 
 ## Canon size
 
-PENDING(the canon-size line: `Tools/canon-size`'s report at the merge).
+`Tools/canon-size` at the merge: the four always-loaded instruction files total 143,220 characters against the
+limit of 150,000, so 6,780 to spare. Nothing crossed.
 
 ## Tickets
 
-VM-24 and VM-17 stay open as the tickets for their own runs; VM-179 joins VM-17's run. For the tickets still to
-be filed at the merge, the state shown is the one proposed; the merging session sets it.
+VM-24 and VM-17 stay open as the tickets for their own runs; VM-179 joins VM-17's run. VM-239 was filed during
+the run; the other five were filed at the merge.
 
 Tickets filed:
 - [ ] VM-239 (High, Bug, Todo): callout colours, their glyphs and comment marks stand away from their own blocks on a long note; joins VM-17's run.
-- [ ] PENDING(id) (Low, Bug, Todo): the Archive room may show "Nothing archived." before its list loads (the Trash's old flash).
-- [ ] PENDING(id) (Low, Bug, Todo): a book's contents may show "No notes in this book yet." before its list loads.
-- [ ] PENDING(id, or a line on VM-218) (Low, Bug, Todo): Book Details' name row and the note's date chip hide what they show from VoiceOver (the book's name; the note's day).
-- [ ] PENDING(id, or a line on VM-156) (Low, Bug, Todo): pressing Unarchive twice quickly in Book Details shows a refusal under the book the first press unarchived.
-- [ ] PENDING(id) (Low, Debt, Backlog): a core comment still describes the shelf's retired pin order; and three code comments and two test files' opening comments still call the insured restore provisional, though you ratified it.
-- [ ] PENDING(id, only if your answer to call 2 is that neither platform offers it) (Low, Bug, Backlog): the Mac's book chip offers Diverge on a gathering's row, then refuses.
-- [ ] PENDING(id) (Low, Debt, Backlog): three lines in `notes/SurfaceContracts.md` that no longer match — the Finish confirm quoted "at the door", and two marks you ratified still saying PROVISIONAL (P-849-4, P-849-5); they sit on three different screens, so this may become more than one ticket.
+- [ ] VM-244 (Low, Bug, Todo): the Archive room may show "Nothing archived." before its list loads (the Trash's old flash).
+- [ ] VM-245 (Low, Bug, Todo): a book's contents may show "No notes in this book yet." before its list loads.
+- [ ] VM-246 (Low, Bug, Todo): pressing Unarchive twice quickly in Book Details shows a refusal under the book the first press unarchived.
+- [ ] VX-1029 (Low, Debt, Backlog): a core comment still describes the shelf's retired pin order, and five comments still call the insured restore provisional, though you ratified it.
+- [ ] VX-1030 (Low, Debt, Backlog): the three lines in `notes/SurfaceContracts.md` that no longer match — the Finish confirm quoted "at the door", and the two marks you ratified still saying provisional (P-849-4, P-849-5).
+
+The VoiceOver item (Book Details' name row and the note's date chip hiding the book's name and the note's day) became a comment on VM-218, the VoiceOver ticket, rather than a ticket of its own.
+The Mac's book chip offering Diverge on a gathering's row and then refusing is not filed: it is filed only if your answer to provisional call 2 is that neither platform offers it.
