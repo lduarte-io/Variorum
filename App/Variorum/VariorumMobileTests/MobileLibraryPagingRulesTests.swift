@@ -20,6 +20,11 @@
 //  (`vm64-gate2-red`, which reverses only the round's own hunks, VM-68 kept);
 //  each pin's doc says what it shows there.)*
 //
+//  *(Round 3 adds three more that name only API older than it — a fully
+//  listed listing kept complete through a Put back and an arrival — so they are
+//  in that round's red-on-old build, which reverses only round 3's one hunk in
+//  `land`.)*
+//
 
 import Dependencies
 import Foundation
@@ -250,6 +255,124 @@ struct MobileLibraryPagingRulesTests {
             }
             #expect(model.all.map(\.postID) == expected.map(\.postID),
                     "in its place, the listed depth kept, in the listing's order")
+        }
+    }
+
+    // MARK: - A fully listed listing stays complete (VM-64 ladder round 3, finding 1)
+
+    /// Lists the note listing to its end (`loadMore` until no cursor is left).
+    private func listToTheEnd(_ model: MobileLibraryViewModel) async {
+        var guardLoops = 0
+        while model.allHasMore, guardLoops < 20 {
+            await model.loadMore(.notes)
+            guardLoops += 1
+        }
+    }
+
+    /// **The line's Undo of the LAST row of a fully listed listing returns it**
+    /// (the round-3 reviewer's pin). Six notes, a page of four, held on screen
+    /// and listed to the end; the last (oldest) row deleted through its own
+    /// door; the message line's own Undo pressed. The Put back's re-ask reads
+    /// the LISTED depth — five — which over six notes is the first five and a
+    /// cursor, so the note Put back needs one more page; `land` asks for it
+    /// because the rows it replaced were complete for the same question.
+    ///
+    /// RED ON OLD (round 2's tree with round 3's `land` hunk reversed): nothing
+    /// asked for that page — `wantsMore` is raised only by a row coming on screen
+    /// while a cursor stands, and the listing's tail was already on screen — so
+    /// the note Put back is not listed and the listing reads as having more
+    /// (3 issues: listed again; the store's whole listing; `!allHasMore`).
+    @Test func aPutBackOfTheLastRowOfAFullyListedListingReturnsIt() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await seed(session, 6)
+            let model = MobileLibraryViewModel(session: session, listingLimit: 4)
+            let held = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { held.cancel() }
+            await settle { model.all.count == 4 }
+            await listToTheEnd(model)
+            #expect(model.all.count == 6 && !model.allHasMore, "the premise: listed to the end")
+            let doomed = model.all[5]
+            #expect(await model.confirmDeleteNote(doomed))
+            let undo = try #require(session.status.current?.action, "the line offers its Undo (Put back)")
+            await settle { model.all.count == 5 }
+            #expect(!model.all.contains { $0.postID == doomed.postID },
+                    "the premise: the deleted note left the listing")
+
+            undo.perform()
+            await settle { model.all.contains { $0.postID == doomed.postID } && !model.allHasMore }
+            #expect(model.all.contains { $0.postID == doomed.postID }, "the note Put back is listed again")
+            let whole = try await db.read { try Queries.library($0, sort: .lastTouched, direction: .desc) }
+            #expect(model.all.map(\.postID) == whole.map(\.postID), "the store's whole listing, in its order")
+            #expect(Set(model.all.map(\.postID)).count == model.all.count, "no note twice")
+            #expect(!model.allHasMore, "a listing that was complete stays complete")
+        }
+    }
+
+    /// **…and a row ABOVE the end comes back without the last row dropping off**
+    /// (finding 1's shapes (b) and (c), at the model level). Twelve notes, three
+    /// pages, listed to the end; the seventh row deleted and the line's Undo
+    /// pressed: the re-ask at the listed depth — eleven — returns the restored
+    /// note in its place and pushes the oldest off; one page more brings it back.
+    /// In the app the two shapes differ only by a view's `onAppear` (a row
+    /// within the last 30 asks for the page itself once it comes on screen; one
+    /// further up does not), and a model world has no view, so this arm stands
+    /// for both; a view-level arm for the 30-row margin needs a hosted list
+    /// deeper than 30 rows past a page, which this world does not reach.
+    ///
+    /// RED ON OLD: the listing ends one row short of the store and reads as
+    /// having more (2 issues: the store's whole listing; `!allHasMore`); the
+    /// restored row itself is listed on both trees.
+    @Test func aPutBackOfARowAboveTheEndOfAFullyListedListingKeepsItsLastRow() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await seed(session, 12)
+            let model = MobileLibraryViewModel(session: session, listingLimit: 4)
+            let held = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { held.cancel() }
+            await settle { model.all.count == 4 }
+            await listToTheEnd(model)
+            #expect(model.all.count == 12 && !model.allHasMore, "the premise: listed to the end")
+            let doomed = model.all[6]
+            #expect(await model.confirmDeleteNote(doomed))
+            let undo = try #require(session.status.current?.action, "the line offers its Undo (Put back)")
+            await settle { model.all.count == 11 }
+            #expect(!model.all.contains { $0.postID == doomed.postID },
+                    "the premise: the deleted note left the listing")
+
+            undo.perform()
+            await settle { model.all.count == 12 && !model.allHasMore }
+            #expect(model.all.contains { $0.postID == doomed.postID }, "the note Put back is listed again")
+            let whole = try await db.read { try Queries.library($0, sort: .lastTouched, direction: .desc) }
+            #expect(model.all.map(\.postID) == whole.map(\.postID),
+                    "the store's whole listing — the last row kept")
+            #expect(!model.allHasMore, "a listing that was complete stays complete")
+        }
+    }
+
+    /// **A note arriving at the top of a fully listed listing keeps its last row**
+    /// (finding 1's arrival case — VM-242's neighbour, with no Undo: the same
+    /// landing). Six notes listed to the end; a seventh minted: the held first
+    /// page moves, the follow re-asks the listed depth (six) over seven notes,
+    /// and the oldest — on screen at the listing's end — would drop off and wait
+    /// for a scroll.
+    ///
+    /// RED ON OLD: 2 issues (the store's whole listing; `!allHasMore`).
+    @Test func aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await seed(session, 6)
+            let model = MobileLibraryViewModel(session: session, listingLimit: 4)
+            let held = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { held.cancel() }
+            await settle { model.all.count == 4 }
+            await listToTheEnd(model)
+            #expect(model.all.count == 6 && !model.allHasMore, "the premise: listed to the end")
+
+            let arrived = try await seed(session, 1, prefix: "arrived")[0]
+            await settle { model.all.first?.postID == arrived && !model.allHasMore }
+            #expect(model.all.first?.postID == arrived, "the arrival leads")
+            let whole = try await db.read { try Queries.library($0, sort: .lastTouched, direction: .desc) }
+            #expect(model.all.map(\.postID) == whole.map(\.postID),
+                    "the store's whole listing — the oldest kept")
+            #expect(!model.allHasMore, "a listing that was complete stays complete")
         }
     }
 
