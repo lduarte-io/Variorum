@@ -84,6 +84,18 @@ PL-77: the Journal's Private facts ride to the phone in shared code, unused unti
 - **What it needs:** your signature on Apple's agreement, then the one command in your checklist. I stopped before the appcast on purpose: that step reads your Keychain and is yours to run attended.
 - **One caution:** the first-run walk is recorded for main at `ad5053002`. Later commits on main that change only notes do not disturb it, but if a mobile run merges code before you build, the release checklist's walk is owed again on the new tip (`Tools/WalkKit/first-run-walk.sh std`, under a stage claim).
 
+### Building 1.5 when you're ready (the whole procedure)
+
+1. **Sign Apple's agreement.** On Apple's developer site, Account ▸ Agreements (App Store Connect shows the same under Business). To check it took, run `xcrun notarytool history --keychain-profile VariorumNotary` — it should list past submissions where tonight it answered 403.
+2. **Confirm the label and the notes.** The notes are `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-1.5.md` (public copy: the What's New sheet and the update alert show the file as it is). To keep 1.5 and the wording, do nothing. To change the wording, edit the file and commit. To change the label, change `MARKETING_VERSION` on the Mac app's two configurations in `App/Variorum/Variorum.xcodeproj/project.pbxproj` (the two lines reading 1.5), rename the notes file to match, and commit — a test pins the two together, and the script refuses a mismatch.
+3. **Check whether the first-run gate still stands.** It passed on main at `ad5053002`. Run `git diff --stat ad5053002 HEAD -- . ':!notes'` in `~/dev/variorum`: if it prints nothing, only notes have changed and the gate stands. If it lists files, the gate is owed again on the new tip — the headless drill (`FirstRunDrillTests`) and the scripted walk (`Tools/WalkKit/first-run-walk.sh std`, under a stage claim, the dev slot set aside whole — `Tools/WalkKit/README.md`, "Step-0 environment traps").
+4. **Build.** Quit every running Variorum (the script refuses otherwise, and it never quits one for you). From `~/dev/variorum` on main, with a clean tree and no commits landing while it runs (the build number is the commit count):
+   `Tools/Release/release.sh --version 1.5 --stop-before-appcast`
+   It archives, notarizes and staples the app, builds and signs the DMG, notarizes that, and checks the shipped bytes; it prints where the DMG is, and files the records under `~/Library/Developer/Variorum/Releases/1.5/`. It launches nothing and does not touch `/Applications`. Drop `--stop-before-appcast` to have the same run make the appcast too — that step reads your Keychain, so run it attended — and it ends by printing the publish order.
+5. **Publish, when you want it out** — yours alone: the site's runbook, the DMG first and verified reachable, then the appcast (`Tools/Release/verify-published.sh` checks each leg). Installing it in `/Applications` is its own step, behind the A1 safety copy, with no Variorum running.
+
+Any session can run steps 3 and 4 at your word once step 1 is done; the ticket is VX-1028.
+
 ## Tickets filed
 
 Tickets filed:
