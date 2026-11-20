@@ -618,7 +618,8 @@ IN FLIGHT and none is needed** — reading (f) lands in the pin file FIRST, in i
 | The fix (D-243-1): the changed characters' face reset to the base before the line's restyle, every routed arm, equality-gated | DONE (`efc66ee57`) — `MobileTypedFace.swift` (new, the pure rule) + its one call in `storageDidEdit` + the model's `typedFaceResets` count; green PENDING the window |
 | The gate's pins (plain prose typed in plain prose writes nothing; the reset's own pass count) | DONE (`151d98a87`, its pass counter made sendable-clean in the commit after it) — `MobileTypedFaceResetTests.swift` (new): `MobileTypedFaceRuleTests` (6, bare storage, pass-counted) + `MobileTypedFaceGateTests` (2, her road); green PENDING the window |
 | Fix build `DerivedData/vm24-b`; the Mac — no Mac-compiled file is to change, so batch A's `vm24-a-mac` serves | DONE at the code of the commit after `151d98a87` — `** TEST BUILD SUCCEEDED **` (log `DerivedData/logs/vm24-b-bft2.log`; the first attempt, `vm24-b-bft.log`, failed on one Swift 6 sending error in the gate file's pass counter, fixed); no warning in a touched file. Mac: `git diff --stat d63c1e2cd HEAD -- App/Variorum/Shared Sources App/Variorum/Variorum` is empty, so no Mac build was made; `vm24-a-mac` serves the seven source-reading types (they read the phone's files from disk at run time) |
-| Half 2's closeout in §12 + the READY report | NOT STARTED |
+| Half 2's closeout in §12 + the READY report | DONE (the commit after `106a0d2a4`) |
+| Half 2's stage window | PENDING — the orchestrator's, from these products (§12, "Batch B · VM-243 — half 2: the fix", its last section) |
 
 ## 12. Batch closeouts, findings and dispositions
 
@@ -1069,6 +1070,188 @@ unchanged**, with two precisions:
 2. **The reset's range for an ordinary typed key is D-24-1's kept value** — batch A hands the changed characters to
    `storageDidEdit` for every character report, bound or not — so the keyboard's road and the unarmed roads take the
    same reset.
+
+### Batch B · VM-243 — half 2: the fix (implementer closeout)
+
+**Not done in this half (first, by the record's rule):** NO test was run — every red and green below is EXPECTED,
+PENDING the orchestrator's stage window. No simulator walk (L9), no device, no Debug launch. No Mac build: no
+Mac-compiled file changed (`git diff --stat d63c1e2cd HEAD -- App/Variorum/Shared Sources App/Variorum/Variorum` is
+empty), so batch A's `vm24-a-mac` serves the seven source-reading types. Not touched: `Shared/`, `Sources/`, `Sync/`,
+custody, schema, the Mac, the caret suite (unedited), every shared ledger. The gated speed suite is the gate's.
+
+**Commits (half 2):** `03b06f417` (reading (f), base API only — the red build's tree) · `efc66ee57` (the fix) ·
+`151d98a87` (the reset's own pins) · `106a0d2a4` (the pins' pass counter made Swift-6 clean; the fix build) · the next
+commit (this closeout).
+
+#### What shipped, file by file
+
+- `App/Variorum/VariorumMobile/Features/Write/MobileTypedFace.swift` (new, phone-only) — the pure rule
+  `MobileTypedFace.reset(_:range:font:ink:baseInks:) -> Bool`: clamps the range to the storage; READS the runs first
+  (`enumerateAttributes`, no write while enumerating); a run wears the base when its font is the base font (`===` or
+  `isEqual`), its ink is one of `baseInks` (`===` or `isEqual`), and it has no strikethrough and no background; only
+  the runs that differ are written, inside ONE `beginEditing`/`endEditing` (one attribute pass): the base font, the
+  base ink, `.strikethroughStyle` and `.backgroundColor` removed. Nothing else — never `.paragraphStyle`, never the
+  block-ID attribute, never `MarkdownFace.faceAttribute`. Returns whether it wrote.
+- `App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift` — in `storageDidEdit`, inside the existing
+  `if let storage` and immediately BEFORE the line's `MarkdownFace.restyle`, i.e. after the routing `switch` (whose
+  refusing and recovering arms `return` first) — so every ROUTED arm takes it (`.block`, `.tail`, `.openTail`,
+  `.closeTail`) and no refused edit does. The range: `changedCharacters` (D-24-1's kept value), else a bound arming's
+  `(range.location, replacementLength)`, else none (the reset is skipped). The values: `MobileEditorStyle.baseFont`
+  and `MobileEditorStyle.face.ink` (`baseAttributes`' own); `baseInks` = `[face.ink, markdownPalette.prose]`. A write
+  counts `typedFaceResets` (new, `@ObservationIgnored private(set)`, beside `desyncRecoveryCount`). The doc comment of
+  `storageDidEdit` says the rule.
+- `App/Variorum/VariorumMobileTests/MobileTypedTextFaceTests.swift` — reading (f) added
+  (`aDashLineTypedAtTheNotesEndAndTheParagraphAfterItAreInFullInk`), the header updated. Readings (a)–(e) unchanged.
+- `App/Variorum/VariorumMobileTests/MobileTypedFaceResetTests.swift` (new) — `MobileTypedFaceRuleTests` (6, the pure
+  rule on a bare `NSTextStorage`, counting its own processing passes from `didProcessEditingNotification`) and
+  `MobileTypedFaceGateTests` (2, her keyboard's road, hosted, Study).
+
+#### Against §4.5 and the architect's two precisions, ruling by ruling
+
+| Ruling | Built |
+|---|---|
+| D-243-1 · phone-only, in `storageDidEdit`, for every routed arm, BEFORE the line's restyle | yes — the one call sits right before `MarkdownFace.restyle`, after the arms; refusals and recoveries `return` before it |
+| · the changed characters reset to the base font and ink, strikethrough and chip background removed; the restyle then derives the face | yes (`MobileTypedFace.reset`) |
+| · the range is the changed characters and nothing wider: the kept value; else a bound arming's `(location, replacementLength)`; else no reset; never the widened report | yes — precision 2 exactly; the reported `editedRange` is never read by the reset |
+| · equality-gated: base on base writes nothing | yes — read first, write only differing runs; pinned twice (below) |
+| · never the paragraph style, never the block identity | yes — neither key is written; pinned (`aFaintRunIsResetInOnePassAndNothingElseMoves`) |
+| · beside `restampProjection`, the same doctrine | the call sits in `storageDidEdit` beside the re-stamp's arms; the rule lives in its own small file so its pins run on a bare storage (design call 1) |
+| Precision 1 · reading (f), the open tail, added FIRST and built without the fix (`vm24-b-red`) | yes — `03b06f417`, built before any fix line was written |
+| Not in this batch · the shared face; the Mac; faint ink already on a page | none touched; text already faint is NOT healed by this fix (only characters that change are reset — a re-open clears the rest, reading (e)) |
+
+#### The pins — every column EXPECTED, PENDING the window
+
+| Pin | Kind | Red build `vm24-b-red` (no fix) | Fix build `vm24-b` |
+|---|---|---|---|
+| `MobileTypedTextFaceTests.aDashLinesWordsAreTypedInFullInk()` (a) | the reading pin | RED at `:378` (ink) only — as half 1's window | green |
+| `…theParagraphAfterADashLineIsTypedInFullInk()` (b) | reading pin | RED at `:412` (ink) | green |
+| `…wordsTypedAfterAClosingMarkerAreInFullInk()` (c) | reading pin | RED at `:444` (ink) | green |
+| `…theLineTypedAfterAHeadingWearsTheProseFace()` (d) | reading pin | RED at `:478` (ink) and `:480` (font) | green |
+| `…aDashLineTypedAtTheNotesEndAndTheParagraphAfterItAreInFullInk()` (f) — NEW | reading pin, the `.tail` arm | **RED at `:539` ("one" ink) and `:541` ("two" ink), `:543` (font) green — EXPECTED**, by reading: the tail's only text write, `finishMint`'s `replaceTailRegion`, runs only when the reconciled text differs from the tail's (`TailCrystallizer.swift:482`), and a list line's crystallization leaves it unchanged, so nothing lays the base back before the reading. **If (f) is green here, the tail's writes do lay it back: record it as green on both, never forced red** (the architect's ruling) | green |
+| `…aReopenedNoteDrawsWhatWasTypedInFullInk()` (e) | control | green | green |
+| every PREMISE line of the six | — | green ((f)'s include: the Return at the note's end opens the tail; "two" stands in the open tail, length 3; the store holds `["Intro.", "- one"]`) | green |
+| `MobileTypedFaceRuleTests` (6): `baseOnBaseWritesNothingAndTheStorageSeesNoEdit` (zero passes) · `aListedBaseInkCountsAsTheBase` · `aFaintRunIsResetInOnePassAndNothingElseMoves` (ONE attribute-only pass; the lead outside the range keeps its ink and mark; the paragraph-style object and the block ID untouched everywhere) · `aHeadingsFontAStrikethroughAndTheChipAreCleared` · `aRunWithNoInkTakesTheBaseInk` · `anEmptyOrOutOfBoundsRangeWritesOnlyInsideTheStorage` | the rule; the gate counted as the storage's own passes | not in the red build (new API) | green |
+| `MobileTypedFaceGateTests.plainProseTypedInPlainProseMakesNoFaceWrite()` | THE EQUALITY GATE on her road (mid-block and a fresh line, Study) — `typedFaceResets == 0` | not in the red build | green |
+| `MobileTypedFaceGateTests.proseTypedAfterADashLineIsReset()` | the gate's non-vacuity twin — `typedFaceResets > 0`, "one" in full ink | not in the red build | green |
+| The caret suite's VX-296 pins (`MobileMarkdownCaretTests`, 4, file UNEDITED) | the caret's honour at a rescue point survives the reset | — | green 4 of 4, the standing pin 3 of 3 cases (in the 52) |
+
+**Why the gate holds in production, and the one place a harness road differs.** Half 1's printed readings show
+every key typed in plain prose landing with the IDENTICAL ink and font objects the base carries ("ink" by identity,
+not "≈ink"), so the gate's identity check passes on her road and the reset writes nothing. The house helper
+`typeEdit` (`MobileEditorTestSupport.swift:93-106`) inserts runs carrying a font and NO ink — a road no keyboard
+takes — and the reset now writes the base ink over each such run (a run with no ink is not the base: design call 3).
+So suites that type through `typeEdit` (the gated `MobileHerPathsPerfTests` among them) now pay one attribute pass
+per keystroke that her typed keys do not. Recorded for the gate's speed leg; not a production cost.
+
+**Why every pin here is deterministic in any company:** the readings as half 1 says (every edit armed; the attribute
+values come only from the note's own storage); the rule's pins use their own fonts and colours on a bare storage; the
+gate's pins read a counter the model alone writes.
+
+#### Design calls (options weighed; the built one first — none is a product decision)
+
+1. **The rule in its own file** (`MobileTypedFace.swift`, pure over the values it is handed) rather than a private
+   method in the 2,960-line model (P-9) — so its pins count a bare storage's own passes with nothing else writing.
+2. **The prose ink counts as the base** (`baseInks = [face.ink, markdownPalette.prose]`): a cleared face run wears
+   the face's own `prose` object, which draws exactly as `face.ink`; without it, every key typed after a cleared run
+   (the end of a heading, a bold run) would write an ink that changes nothing. Alternative: `face.ink` alone — still
+   correct, one wasted write per such key.
+3. **A run with NO ink is reset** (it is not the base: the base attributes carry an ink, and an inkless run draws in
+   the system's default colour, not the voice's). Alternative: treat nil as base — it would leave inkless text
+   inkless, and spare only harness roads (`typeEdit`), which production's keys never take.
+4. **The gate pinned two ways** — the storage's own pass count at the rule's level (zero for base on base, exactly
+   one for a reset), and the model's own count of the reset's writes on her road (`typedFaceResets`, a counter for
+   the pins like `desyncRecoveryCount`). Counting the hosted storage's attribute-only passes would not isolate the
+   reset: the re-stamp and the restyle write there too, and whether a write made inside `didProcessEditing` makes a
+   pass of its own is a platform behaviour (the macOS probe saw it join the pass), so a raw count could be hollow.
+5. **The reset sits after the routing switch** (one call before the restyle) rather than inside each arm — every arm
+   that reaches the restyle is a routed arm, and the refusing and recovering arms already `return`.
+
+#### Self-assessment against §8's review foci
+
+5. *The face reset:* writes only font, ink, strikethrough and background — never paragraph style, block identity or
+   the face's mark (pinned); gated (pinned twice); ∝ the changed characters (one enumeration over them, P1); the
+   caret's honour at a rescue point runs after it, unchanged (the caret suite unedited, in the window).
+6. *TextKit:* no TK1 API, no layout forced; the reset is an attribute-only write inside `storageDidEdit` exactly where
+   the restyle and the re-stamp already write (the same posture, not a new one); the canary checkpoint still follows.
+8. *The Mac:* no `Shared/` or `Sources/` line; the Mac never had the bug (AppKit carries the mark).
+9. *The pins:* (f) shown on the red build before the fix existed; (a)–(d) red there as in half 1's window; (e) and the
+   gate's pins are controls; nothing is wrapped.
+
+#### Residuals (traced, not fixed here)
+
+- **Marked text (CJK input, the candidate bar):** if UIKit ever draws a composition's highlight through a storage
+  `.backgroundColor`, the reset would remove it on a routed composition update. Not observable by these pins on the
+  simulator; MobileSoul §5 item 2's device test owns it (her phone, the "after" session).
+- Text ALREADY faint on a page (typed before this fix, never re-opened) is not healed until it is re-opened or edited
+  — out of this batch by its own "Not in this batch" line.
+
+#### For QUESTIONS at the merge
+
+None new. (The marked-text residual is a device check, not a product question.)
+
+#### The stage window (the orchestrator's; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle 30 s, run, shut down)
+
+Products: `DerivedData/vm24-b-red` (the tree at `03b06f417`: the pin with (f), no fix — FROZEN) · `DerivedData/vm24-b`
+(the code of `106a0d2a4`: the fix and every pin) · batch A's `DerivedData/vm24-a-mac` (no Mac-compiled file changed;
+the seven types read the phone's files from disk at run time, so they read THIS tree). Poll for the Swift Testing
+verdict line, never the exit.
+
+```zsh
+cd ~/dev/variorum-vm-24/App/Variorum
+T=(xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile
+   -destination 'platform=iOS Simulator,id=<simulator-udid>' -collect-test-diagnostics never)
+
+# (1) the red build: the reading pin alone, (f) included
+red=(MobileTypedTextFaceTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-b-red -resultBundlePath DerivedData/vm24-bundles/b-red.xcresult \
+  ${red/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-b-red-run.log 2>&1
+grep 'VM243|' DerivedData/logs/vm24-b-red-run.log > DerivedData/logs/vm24-b-red-readings.txt
+
+# (2a) the fix build: the pin and the reset's two types ALONE
+alone=(MobileTypedTextFaceTests MobileTypedFaceRuleTests MobileTypedFaceGateTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-b -resultBundlePath DerivedData/vm24-bundles/b-alone.xcresult \
+  ${alone/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-b-alone.log 2>&1
+grep 'VM243|' DerivedData/logs/vm24-b-alone.log > DerivedData/logs/vm24-b-readings.txt
+
+# (2b) the fix build, ONE invocation: the three VM-243 types, then batch A's 52 (the three VM-24 types + VM-64's 49)
+tests=(MobileTypedTextFaceTests MobileTypedFaceRuleTests MobileTypedFaceGateTests
+  MobileUnarmedEditRoutingTests MobileChangedCharactersCaptureTests MobileChangedCharactersObserverTests
+  MobileStructuralFlightFenceTests MobileStructuralTests MobileSelectionActsTests
+  MobileEditorMaterializationTests MobileCanaryTests MobileEditorRoutingTests MobileEditorCrystallizationTests
+  MobileEditorProjectionTests MobileTypewriterRoomTests MobileNoteSealTests MobileFindInNoteTests
+  MobileEditRoutingBindingTests MobileIdentityAuditSeparatorTests MobileBulkArmingTests MobileCanaryTeardownTests
+  MobileEditRoutingCrashTests MobileEditRouteArmsTests MobileWholeBlockDeleteBrainTests MobileWholeBlockDeleteTests
+  MobileCrossBlockEditBrainTests MobileCrossBlockEditTests MobileMarkdownRenderTests MobileMarkdownReturnTests
+  MobileMarkdownActsTests MobileCheckboxTapTests MobileMarkdownCaretTests MobileTakesTests MobileTakesBrowserTests
+  MobileTakesBrowserSurfaceTests MobileTakesChromeTests MobileTakeReorderTests MobileTakeToBlockTests
+  MobileTakeLockTests MobileUndoDoorTests MobileBlockMenuTests MobileCommentsTests MobileBlockDecorTests
+  MobileWalkTests MobileTrailingNewlinesTests MobileSpaceEaterTests MobileCRLFCaptureTests
+  MobileWriteScrollAuthorityTests MobileScrollAuthorityBrainTests MobileLivenessTests
+  MobileDeferredProjectionRetryTests MobileTypedOverRescueTests MobileEditTraceTests MobileKeyDoorPostureTests
+  MobileSavepointOnLeavingTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-b -resultBundlePath DerivedData/vm24-bundles/b-company.xcresult \
+  ${tests/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-b-company.log 2>&1
+
+# (3) the Mac's seven types that read every phone file (no simulator), from batch A's products
+mac=(DeadVocabularyTests DataSafetySearchIndexTests PaneLineMetricsScopeTests OneRefreshAuthorityCompositionTests
+  OneInputPathTests PaletteDerivationTests GlyphRainTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
+  -derivedDataPath DerivedData/vm24-a-mac -collect-test-diagnostics never \
+  -resultBundlePath DerivedData/vm24-bundles/b-mac.xcresult \
+  ${mac/#/-only-testing:VariorumTests/} > DerivedData/logs/vm24-b-mac-run.log 2>&1
+```
+
+Expected (Swift Testing counts test functions; read the `skipped` lines):
+- **(1)** "Test run with 6 tests in 1 suite failed … with 7 issues": (a) `:378` · (b) `:412` · (c) `:444` · (d) `:478`,
+  `:480` · (f) `:539`, `:541`; (e) green; every PREMISE green. If (f) is green: "… 5 issues", recorded as green on
+  both (the ruling), not a finding against the fix. Any other red — a premise, a font line in (a)–(c) or (f) — is the
+  architect's.
+- **(2a)** "Test run with 14 tests in 3 suites passed"; the `VM243|` readings show every typed word `ink=ink` in the
+  base font, the leads and stars still `marker … faced`, "Head" in the heading font.
+- **(2b)** "Test run with 385 tests in 55 suites passed" (batch A's 371 in 52, plus 14 in 3), one host process,
+  `Restarting after unexpected exit` = 0; the caret suite 4 of 4 with the standing pin 3 of 3 cases; the fence suite
+  10 of 10. Any red is named and is a finding.
+- **(3)** "Test run with 46 tests in 7 suites passed" (as batch A's).
 
 ---
 
