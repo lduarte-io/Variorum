@@ -437,6 +437,51 @@ struct TimingRecorderTests {
         }
     }
 
+    /// **A damaged archive's counts are bounded as they are folded in, and the
+    /// marks after it keep counting** (the round-3 reviewer's final call on
+    /// 5(b), arm (B)). A live sample and a live count; an archive whose same
+    /// series, same counter and three footer counts all decode as `Int.max`;
+    /// `absorb` (the launch's road; `restore` shares `merged`); then one more
+    /// sample, one more count, a restarted begin and an unmatched end; a
+    /// snapshot and the series' summary. An exit test, as 5(b)'s are: on the old
+    /// code the child traps and the parent records one issue.
+    /// RED ON OLD: `merged` adds decoded counts with checked arithmetic, so
+    /// `Int.max + 1` trapped the absorb — at every launch, before the file could
+    /// ever be rewritten. And a saturating add alone would only move the trap to
+    /// the next mark's `+= 1`.
+    @Test func aDamagedArchivesCountsAreBoundedWhenAbsorbed() async {
+        await #expect(processExitsWith: .success) {
+            let timing = TimingRecorder<TimingRecorderTests.Series, TimingRecorderTests.Counter>(
+                capacity: 4, enabled: true)
+            timing.record(.rows, value: 1)
+            timing.count(.save)
+
+            let damaged = #"{"capacity":4,"count":9223372036854775807,"samples":[7]}"#
+            var archive = TimingArchive(build: "damaged")
+            archive.series[TimingRecorderTests.Series.rows.rawValue] =
+                try JSONDecoder().decode(TimingStats.self, from: Data(damaged.utf8))
+            archive.counters[TimingRecorderTests.Counter.save.rawValue] = .max
+            archive.restarts = .max
+            archive.abandoned = .max
+            archive.unmatchedEnds = .max
+            precondition(timing.absorb(archive))
+
+            timing.record(.rows, value: 2)
+            timing.count(.save)
+            timing.begin(.openToNote, staleAfter: .seconds(30))
+            timing.begin(.openToNote, staleAfter: .seconds(30))      // restarted
+            _ = timing.end(.filing)                                   // unmatched
+
+            let snap = timing.snapshot()
+            _ = TimingReport.summary(snap.stats(.rows), unit: .count)
+            let bound = 1_000_000_000_000_000
+            precondition(snap.stats(.rows)?.count == bound + 2, "the bound plus the two live samples")
+            precondition(snap.counter(.save) == bound + 2, "the bound plus its two counts")
+            precondition(snap.restarts == bound + 1 && snap.unmatchedEnds == bound + 1)
+            precondition(snap.abandoned == bound)
+        }
+    }
+
     // MARK: - The author's sharpening: per-build tables that survive a quit
 
     /// A wall clock the test sets by hand.
