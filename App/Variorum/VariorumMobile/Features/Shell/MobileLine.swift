@@ -144,6 +144,7 @@ enum MobileLine {
     ) async {
         do {
             try await session.runner.run(body)
+            NotificationCenter.default.post(name: .variorumPutBackLanded, object: session) // VM-64: the Library re-asks
         } catch {
             say(DeletionRefusal.sentence(error, act: act, roads: .phone), as: .refusal, session: session)
         }

@@ -104,8 +104,9 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
     ///   only because the phone's archived-BOOKS face is OWED, not impossible —
     ///   MobileSoul's 13i-e row (F-U1-4; her 2026-10-04 walk mistook the hidden
     ///   state for a sync bug) and the board's VM-6 (4d) own it.
-    /// - **bookless** — the bookless read is `Queries.poolPosts`, whose own
-    ///   WHERE clause excludes archived posts. No archived-and-bookless core
+    /// - **bookless** — the bookless read is the Pool's loose class
+    ///   (`Queries.poolPosts`' rows; paged through `catalogNotesPage(poolLoose:)`
+    ///   since VM-68), whose WHERE clause excludes archived posts. No archived-and-bookless core
     ///   read exists, and adding one is a fenced change.
     /// - **scraps** — the only archived-block read in core is
     ///   `Queries.archivedBlocks(_:postID:)`, which is per-NOTE by signature
@@ -125,7 +126,8 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
     static let noBooksLine = "No books yet."
 
     /// **The Bookless door's empty line, when the store HAS notes** (VM-5
-    /// whole-round pass, MINOR 2). The door lists `Queries.poolPosts` — notes
+    /// whole-round pass, MINOR 2). The door lists the Pool's loose class
+    /// (`Queries.poolPosts`' rows, paged since VM-68) — notes
     /// no book holds, a note a smart book collects counting as held (the
     /// door's own documented rule) — so an empty listing here is an ordinary
     /// state, not an empty store: the journal-first default books every day's

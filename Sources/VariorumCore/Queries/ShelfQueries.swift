@@ -603,8 +603,50 @@ extension Queries {
     }
 
     /// The statement behind `notePoolListing`. The LAST placeholder is the window.
+    ///
+    /// VM-68: its two predicates — the gatherings' `shown` and the live-book
+    /// HOME — are read from their one home (`poolShownByGathering`,
+    /// `poolHomeExistsSQL`), which the phone's paged Bookless listing reads too
+    /// (`poolLooseFilter` → `catalogNotesPage(poolLoose:)`). This statement is
+    /// byte-identical to what it was (pinned against a frozen copy of the
+    /// pre-VM-68 builder: `LibraryPoolPagingTests`).
     static func notePoolListingSQL(
         _ db: Database, wingID: String? = nil
+    ) throws -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
+        let gathered = try poolShownByGathering(db, wingID: wingID)
+        let shown = gathered.sql
+        var arguments = gathered.arguments
+        let scope = wingID.map { wingScope(column: "c.wing_id", wingID: $0) }
+        let wingFence = scope.map { "\n                  AND \($0.sql)" } ?? ""
+        arguments += scope?.arguments ?? []
+        return ("""
+            SELECT id, title, entry_date, created_at, profile, stamp, shown, n FROM (
+              SELECT id, title, entry_date, created_at, profile, stamp, shown,
+                     ROW_NUMBER() OVER (PARTITION BY shown ORDER BY stamp DESC, id DESC) AS rn,
+                     COUNT(*) OVER (PARTITION BY shown) AS n
+              FROM (
+                SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
+                       c.created_at AS created_at, c.profile AS profile,
+                       COALESCE(c.last_touched_at, c.created_at) AS stamp,
+                       CASE WHEN \(shown) THEN 1 ELSE 0 END AS shown
+                FROM container c
+                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL\(wingFence)
+                  AND NOT \(poolHomeExistsSQL)
+              )
+            )
+            WHERE rn <= ?
+            ORDER BY shown, stamp DESC, id DESC
+            """, arguments)
+    }
+
+    /// **THE POOL'S "SHOWN BY A GATHERING"** over a `container c` scope (VM-68:
+    /// lifted unchanged out of `notePoolListingSQL`, so the Mac's Pool and the
+    /// phone's paged Bookless listing read ONE rule): the OR of every live,
+    /// unarchived gathering's rule, each COALESCEd to 0 so the OR is never
+    /// NULL — `"0"` when no gathering can show anything. Its arguments, in
+    /// order.
+    static func poolShownByGathering(
+        _ db: Database, wingID: String?
     ) throws -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
         var shownTerms: [String] = []
         var arguments: [(any DatabaseValueConvertible)?] = []
@@ -625,33 +667,36 @@ extension Queries {
             arguments += match.arguments
         }
         let shown = shownTerms.isEmpty ? "0" : "(" + shownTerms.joined(separator: " OR ") + ")"
-        let scope = wingID.map { wingScope(column: "c.wing_id", wingID: $0) }
-        let wingFence = scope.map { "\n                  AND \($0.sql)" } ?? ""
-        arguments += scope?.arguments ?? []
-        return ("""
-            SELECT id, title, entry_date, created_at, profile, stamp, shown, n FROM (
-              SELECT id, title, entry_date, created_at, profile, stamp, shown,
-                     ROW_NUMBER() OVER (PARTITION BY shown ORDER BY stamp DESC, id DESC) AS rn,
-                     COUNT(*) OVER (PARTITION BY shown) AS n
-              FROM (
-                SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
-                       c.created_at AS created_at, c.profile AS profile,
-                       COALESCE(c.last_touched_at, c.created_at) AS stamp,
-                       CASE WHEN \(shown) THEN 1 ELSE 0 END AS shown
-                FROM container c
-                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL\(wingFence)
-                  AND NOT EXISTS (SELECT 1 FROM reading_post rp
-                                   WHERE rp.post_id = c.id AND rp.deleted_at IS NULL
-                                     AND rp.status = 'member'
-                                     AND EXISTS (SELECT 1 FROM reading r
-                                                  WHERE r.id = rp.reading_id
-                                                    AND r.deleted_at IS NULL
-                                                    AND r.kind = 'book'))
-              )
-            )
-            WHERE rn <= ?
-            ORDER BY shown, stamp DESC, id DESC
-            """, arguments)
+        return (shown, arguments)
+    }
+
+    /// **THE POOL'S HOME** over a `container c` scope (VM-68: lifted unchanged
+    /// out of `notePoolListingSQL` — its continuation lines carry that
+    /// statement's own indentation, so the Mac's text is byte-identical): the
+    /// note has a live MEMBER row of a LIVE BOOK (13i-c U2; an arrival, a stray
+    /// row on a gathering and a tombstoned book's row are no home). No
+    /// arguments.
+    static let poolHomeExistsSQL = """
+        EXISTS (SELECT 1 FROM reading_post rp
+                               WHERE rp.post_id = c.id AND rp.deleted_at IS NULL
+                                 AND rp.status = 'member'
+                                 AND EXISTS (SELECT 1 FROM reading r
+                                              WHERE r.id = rp.reading_id
+                                                AND r.deleted_at IS NULL
+                                                AND r.kind = 'book'))
+        """
+
+    /// **THE POOL'S LOOSE CLASS as one predicate** over a `container c` scope
+    /// (VM-68 — the phone's Bookless door, paged through
+    /// `catalogNotesPage(poolLoose:)`): no home, and shown by no gathering —
+    /// exactly `poolPosts`' rows. A `CASE`, so the home probe (one indexed seek,
+    /// `idx_reading_post_post`) runs first and a note with a home never pays
+    /// the gatherings' rule probes. Its arguments are the rule's, in order.
+    static func poolLooseFilter(
+        _ db: Database, wingID: String?
+    ) throws -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
+        let shown = try poolShownByGathering(db, wingID: wingID)
+        return ("CASE WHEN \(poolHomeExistsSQL) THEN 0 ELSE NOT \(shown.sql) END", shown.arguments)
     }
 
     /// The books holding a post — the R35 membership chip's feed ("this

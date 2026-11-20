@@ -47,10 +47,19 @@ extension Queries {
     public struct CatalogNotesPage: Equatable, Sendable {
         public let hits: [CatalogHit]
         public let next: CatalogCursor?
+        /// **Each hit's sort key**, in the hits' order (VM-68, additive): the
+        /// value the page's sort ordered it by — `LibrarySort.keyExpression`
+        /// over its row, which the statement already selects for the cursor
+        /// (the edited sort's two arms give `last_touched_at` or, never
+        /// touched, `created_at` — the COALESCE, exactly). The phone's All
+        /// interleaves its books by it (`Queries.library`'s `stamp`, the same
+        /// value — pinned); `CatalogHit` carries no `last_major_revision_at`.
+        public let keys: [String]
 
-        public init(hits: [CatalogHit], next: CatalogCursor?) {
+        public init(hits: [CatalogHit], next: CatalogCursor?, keys: [String] = []) {
             self.hits = hits
             self.next = next
+            self.keys = keys
         }
     }
 
@@ -75,11 +84,22 @@ extension Queries {
     /// statement, byte for byte; a narrowing the road cannot serve (words, or
     /// no typed tag) FAILS CLOSED — an empty page, never the whole Library
     /// under a question it did not answer.
+    ///
+    /// **`poolLoose` — the Pool's LOOSE class only** (VM-68, the phone's
+    /// Bookless door; false is the shipped statement, byte for byte — pinned
+    /// against the frozen pre-VM-68 builder): each arm keeps the notes with no
+    /// live-book home that no gathering shows (`poolLooseFilter`, the Mac's
+    /// Pool's own two predicates from their one home), so the pages, walked,
+    /// ARE `poolPosts`' rows in `poolPosts`' order under the edited sort
+    /// (pinned). The page still walks the touched index from the cursor and
+    /// stops when it fills: a re-read tests the notes it walks, never every
+    /// note against every gathering (the floor: a wing holding fewer loose
+    /// notes than a page is walked to its end).
     public static func catalogNotesPage(
         _ db: Database, query: String,
         sort: LibrarySort = .lastTouched, direction: SortDirection = .desc,
         after cursor: CatalogCursor? = nil, limit: Int, wingID: String? = nil,
-        narrowing: SearchQuery? = nil
+        narrowing: SearchQuery? = nil, poolLoose: Bool = false
     ) throws -> CatalogNotesPage {
         precondition(limit > 0, "a page holds at least one note")
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -91,18 +111,21 @@ extension Queries {
                 environment: try searchEnvironment(db))
         }
         if narrowing != nil, narrowed == nil { return CatalogNotesPage(hits: [], next: nil) }
+        let pool = poolLoose ? try poolLooseFilter(db, wingID: wingID) : nil
         let sql = catalogNotesPageSQL(
             sort: sort, direction: direction, hasCursor: cursor != nil,
-            wingScope: scope?.sql, narrowing: narrowed)
+            wingScope: scope?.sql, narrowing: narrowed, poolLoose: pool?.sql)
         // Each arm binds: the narrowing's driver and conditions (when one
-        // narrows), the query (3×), the wing's arguments, the cursor (key,
-        // id), its own limit; the merged page binds the outer limit.
+        // narrows), the Pool's rule arguments (when it is the loose class),
+        // the query (3×), the wing's arguments, the cursor (key, id), its own
+        // limit; the merged page binds the outer limit.
         func armArguments() -> [(any DatabaseValueConvertible)?] {
             var arguments: [(any DatabaseValueConvertible)?] = []
             if let narrowed {
                 arguments += (narrowed.driverArguments + narrowed.conditionArguments)
                     .map { databaseValue($0) as (any DatabaseValueConvertible)? }
             }
+            arguments += pool?.arguments ?? []
             arguments += [trimmed, like, like]
             arguments += scope?.arguments ?? []
             if let cursor { arguments += [cursor.key, cursor.id] }
@@ -133,20 +156,28 @@ extension Queries {
         let next: CatalogCursor? = rows.count > limit
             ? CatalogCursor(key: rows[limit - 1]["sort_key"], id: rows[limit - 1]["id"])
             : nil
-        return CatalogNotesPage(hits: Array(hits), next: next)
+        return CatalogNotesPage(
+            hits: Array(hits), next: next,
+            keys: rows.prefix(limit).map { $0["sort_key"] as String })
     }
 
     /// The page's statement — built in ONE place so the pins'
     /// `EXPLAIN QUERY PLAN` and step counts read the shipped text.
+    ///
+    /// `poolLoose` (VM-68): the Pool's loose predicate over `c`
+    /// (`poolLooseFilter`), added to each arm's WHERE — the plain arm then
+    /// names its table `c`. nil builds the shipped text, byte for byte.
     static func catalogNotesPageSQL(
         sort: LibrarySort, direction: SortDirection, hasCursor: Bool, wingScope: String?,
-        narrowing: SearchComposer.ListingNarrowing? = nil
+        narrowing: SearchComposer.ListingNarrowing? = nil, poolLoose: String? = nil
     ) -> String {
         let dir = direction == .desc ? "DESC" : "ASC"
         let comparison = direction == .desc ? "<" : ">"
         func arm(
-            key: String, collation: String, extraWhere: String, index: String? = nil
+            key: String, collation: String, extraWhere bare: String, index: String? = nil
         ) -> String {
+            let extraWhere = bare + (poolLoose.map { "\n  AND \($0)" } ?? "")
+            let alias = poolLoose == nil ? "" : " AS c"
             let cursor = hasCursor
                 ? "\n  AND (\(key)\(collation), id) \(comparison) (?, ?)" : ""
             let wing = wingScope.map { "\n  AND \($0)" } ?? ""
@@ -174,7 +205,7 @@ extension Queries {
                 SELECT id, title, entry_date, created_at, profile,
                        COALESCE(last_touched_at, created_at) AS touched_at,
                        \(key) AS sort_key
-                FROM container\(index.map { " INDEXED BY \($0)" } ?? "")
+                FROM container\(alias)\(index.map { " INDEXED BY \($0)" } ?? "")
                 WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL\(extraWhere)
                   AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')\(wing)\(cursor)
                 ORDER BY \(key)\(collation) \(dir), id \(dir)

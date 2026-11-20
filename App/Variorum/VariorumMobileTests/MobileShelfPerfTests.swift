@@ -27,6 +27,14 @@
 //    shelf model's own observation ticks across a mint, which is a fact
 //    about what the store notifies, not a timing.
 //
+//  **What this suite does NOT count, and where it is counted (VM-66):** the
+//  box's real churn goes to the LIBRARY, not the shelf — every box autosave
+//  re-runs the off-screen Library's two held listings (audit F 1E/§7). That
+//  leg is `MobileHerPathsPerfTests.typingInTheBoxWakesTheOffScreenLibrary`,
+//  on the mounted shell, read from VM-65's timing layer. It lives there, not
+//  here, because the layer's recorder is process-wide and that suite runs
+//  ALONE; this suite stays runnable beside the others.
+//
 //  Absolutes print as `PERF[sim]` lines and are SIMULATOR numbers —
 //  harvested into the batch record, never mistaken for device numbers.
 //  The two worlds are `PerfWorlds`' own (the ~100k mega post + 300 notes

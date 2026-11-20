@@ -70,8 +70,22 @@ enum PerfWorlds {
     /// books, 1/25 the corpus, no mega post — the corpus-flatness
     /// pins' other side.
     static let small = Result { try build(corpusNotes: 12, includeMega: false) }
+    /// The NINE-WING world (VM-66 — the VM-64 run, batch 3): her library's
+    /// wing count. 450 corpus notes dealt over nine wings (50 each), each
+    /// wing with its own tags, two books, a gathering and bookless notes
+    /// (`MobilePerfFixtureSeeder.WingShape`), plus the same control post; no
+    /// mega post (the 100k note is `big`'s axis). 450 is over the phone
+    /// Library's 200-note listing cut, so that cut is live in this world.
+    /// PROVISIONAL P-66-2: her real note count is unmeasured.
+    static let nineWings = Result {
+        try build(corpusNotes: nineWingNotes, includeMega: false, wings: .nineWings)
+    }
+    static let nineWingNotes = 450
 
-    private static func build(corpusNotes: Int, includeMega: Bool) throws -> World {
+    private static func build(
+        corpusNotes: Int, includeMega: Bool,
+        wings: MobilePerfFixtureSeeder.WingShape = .oneWing
+    ) throws -> World {
         MobileEditorStyle.voice = .terminal
         let db = try AppDatabase.inMemory()
         let start = Date(timeIntervalSince1970: 1_783_123_200)
@@ -91,7 +105,8 @@ enum PerfWorlds {
             let seed = try MobilePerfFixtureSeeder.seed(
                 ops: Operations(undoStack: nil),
                 corpusNotes: corpusNotes,
-                includeMegaPost: includeMega)
+                includeMegaPost: includeMega,
+                wings: wings)
             return World(db: db, seed: seed)
         }
     }
@@ -184,6 +199,12 @@ private func physFootprintMB() -> Double? {
 /// render: VM + surface construction, the authoritative `loadOnce`
 /// read, the projection into storage, and the first layout pass with
 /// the TK2 viewport laid out.
+///
+/// *(VM-66: this is the windowless EDITOR's open — no `start()`, no screen,
+/// no shell, no push — and it stays that, because the budgets below were
+/// derived on exactly it. The open she feels — the real `MobileWriteScreen`
+/// with its live updates started, mounted alone and through the shell's
+/// push — is `MobileHerPathsPerfTests`, which reads VM-65's timing layer.)*
 @MainActor
 private func openSurface(
     _ session: AppSession, postID: String
@@ -442,6 +463,84 @@ struct MobilePerfFixtureTests {
                     "evenly spread — corpus SIZE is the axis, never its shape")
             #expect(world.seed.corpusNoteCount == notes)
         }
+    }
+
+    /// **THE NINE-WING SHAPE (VM-66): each wing holds its own library** —
+    /// the contract `MobilePerfFixtureSeeder.WingShape` states, read back
+    /// from the store. The one-wing worlds above are untouched by it (their
+    /// pins pass unchanged); this pins only the new option.
+    @Test func theNineWingShapeSeedsEachWingItsOwnLibrary() async throws {
+        let world = try PerfWorlds.nineWings.get()
+        let notesPerWing = PerfWorlds.nineWingNotes / 9
+        let bookless = (0..<notesPerWing).filter {
+            MobilePerfFixtureSeeder.isBookless(indexInWing: $0)
+        }.count
+        let gathered = (0..<notesPerWing).filter {
+            MobilePerfFixtureSeeder.isGathered(indexInWing: $0)
+        }.count
+
+        #expect(world.seed.wingCount == 9)
+        #expect(world.seed.wingIDs.count == 9 && world.seed.wingIDs.first == "",
+                "Home first, then the eight minted wings")
+        #expect(world.seed.corpusNoteCount == PerfWorlds.nineWingNotes)
+        #expect(world.seed.booklessNoteCount == bookless * 9)
+        #expect(world.seed.gatheredNoteCount == gathered * 9)
+        #expect(world.seed.gatheringCount == 9)
+        #expect(world.seed.megaPostID == nil, "the 100k note is the big world's axis")
+
+        for wingID in world.seed.wingIDs {
+            let facts: (notes: Int, bookless: Int, books: Int, gatherings: Int, fixtureTags: Int,
+                        gatheredWearers: Int) = try await world.db.read { db in
+                let notes = try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container
+                    WHERE kind = 'post' AND deleted_at IS NULL AND wing_id = ?
+                      AND title LIKE 'corpus note %'
+                    """, arguments: [wingID]) ?? -1
+                let bookless = try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container c
+                    WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.wing_id = ?
+                      AND c.title LIKE 'corpus note %'
+                      AND NOT EXISTS (SELECT 1 FROM reading_post rp
+                                      WHERE rp.post_id = c.id AND rp.deleted_at IS NULL)
+                    """, arguments: [wingID]) ?? -1
+                let books = try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM reading
+                    WHERE kind = 'book' AND deleted_at IS NULL AND wing_id = ?
+                      AND name LIKE '% notebook %'
+                    """, arguments: [wingID]) ?? -1
+                let gatherings = try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM reading
+                    WHERE kind = 'gathering' AND deleted_at IS NULL AND wing_id = ?
+                    """, arguments: [wingID]) ?? -1
+                let fixtureTags = try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM tag WHERE path = ? AND wing_id = ? AND deleted_at IS NULL
+                    """, arguments: [MobilePerfFixtureSeeder.tagName, wingID]) ?? -1
+                let gatheredWearers = try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM post_tag pt
+                    JOIN tag t ON t.id = pt.tag_id AND t.path = 'gathered' AND t.wing_id = ?
+                    WHERE pt.deleted_at IS NULL
+                    """, arguments: [wingID]) ?? -1
+                return (notes, bookless, books, gatherings, fixtureTags, gatheredWearers)
+            }
+            #expect(facts.notes == notesPerWing, "wing \(wingID.isEmpty ? "Home" : "minted"): \(facts)")
+            #expect(facts.bookless == bookless)
+            #expect(facts.books == MobilePerfFixtureSeeder.booksPerWing)
+            #expect(facts.gatherings == 1)
+            #expect(facts.fixtureTags == 1, "a per-wing twin of the fixture tag")
+            #expect(facts.gatheredWearers == gathered)
+        }
+        // The fixture book and its control post stay in Home, as in `.oneWing`.
+        let controlID = world.seed.controlPostID
+        let controlWing = try await world.db.read { db in
+            try String.fetchOne(
+                db, sql: "SELECT wing_id FROM container WHERE id = ?",
+                arguments: [controlID])
+        }
+        #expect(controlWing == "")
+        print("PERF[fixture] nine wings: \(world.seed.corpusNoteCount) notes · "
+            + "\(world.seed.corpusBookCount) books · \(world.seed.gatheringCount) gatherings · "
+            + "\(world.seed.booklessNoteCount) bookless · \(world.seed.gatheredNoteCount) gathered · "
+            + "\(world.seed.corpusBlockCount) blocks")
     }
 
     @Test func theProseGeneratorIsDeterministic() {
@@ -946,33 +1045,41 @@ struct MobilePerfWalkTests {
 
 // MARK: - The launch path (4.5a, B45-1)
 
-/// **`AppBootstrap.init` OPENS THE STORE AND RUNS THE WHOLE MIGRATION SET
-/// SYNCHRONOUSLY, ON THE MAIN THREAD, BEFORE FIRST PAINT.**
-/// `VariorumMobileApp` constructs it as `@State`, so it is the app's very
-/// first act on every single launch — a P2 violation (OverallModel §5: all
-/// DB I/O off the main thread) on the launch path, the same family as the
-/// synchronous Keychain load 13e batch 9 moved off-main.
+/// **THE LAUNCH PATH'S STORE OPEN, MEASURED — the open and the whole
+/// migration set, before the library's first frame.**
 ///
-/// **The stability survey said *"a measurement is one signpost away"* and
-/// nobody ever briefed one. This is the signpost.** No budget is asserted
-/// and nothing is optimized here: the numbers are the deliverable, and the
-/// fix's shape is an architect call because `AppBootstrap` lives in
-/// `Shared/` and a change there is a both-platform change (M-B).
+/// *(Corrected at VM-66 — the VM-64 run, batch 3; audit F §9/§12.6. This
+/// doc used to say the open ran SYNCHRONOUSLY ON THE MAIN THREAD inside
+/// `AppBootstrap.init`, a live P2 violation on every launch. That was true
+/// when 4.5a wrote it and stopped being true at 13l L-c (B45-1's fix): the
+/// bootstrap now enters an `.opening` state and runs the road's facts and
+/// `openStore` on a DETACHED task (`AppBootstrap.beginOpening` →
+/// `routeAndOpen`), hopping back to the main actor only for `install` and
+/// the state write. So nothing timed here blocks the main thread any more;
+/// it is still the store cost every launch pays before the library can
+/// show — which is why the measurement stays.)*
 ///
-/// **What is timed is `openStore(at:)`, which is MOST of `AppBootstrap.init`
-/// but not all of it** — and the gap is stated because a number in a record
-/// gets quoted (4.5a's cold review, MINOR 6).
+/// No budget is asserted and nothing is optimized here: the numbers are the
+/// deliverable. (The whole-launch spans — process start to library open,
+/// home on screen, Library ready — are VM-65's timing layer, filled on the
+/// device and on a simulator walk; a test host never launches through the
+/// bootstrap, `AppBootstrap.Launch`.)
 ///
-/// · `init` also calls `AppDatabase.install` → `prepareDependencies`, which
-///   a test host cannot safely re-enter (a once-per-process door).
-/// · **`defaultStoreURL` and the iOS-only `prepareStoreDirectoryProtection`
-///   run OUTSIDE `openStore(at:)`** and are therefore NOT in these numbers.
+/// **What is timed is `openStore(at:)`, which is MOST of the bootstrap's
+/// open road but not all of it** — and the gap is stated because a number
+/// in a record gets quoted (4.5a's cold review, MINOR 6).
+///
+/// · The road also calls `AppDatabase.install` → `prepareDependencies`,
+///   which a test host cannot safely re-enter (a once-per-process door).
+/// · **`defaultStoreURL`, the iOS-only `prepareStoreDirectoryProtection`
+///   and the protection road's own facts (custody, the key file) run
+///   OUTSIDE `openStore(at:)`** and are therefore NOT in these numbers.
 ///   The directory creation and the `DatabasePool` open and
-///   `AppDatabase.migrator.migrate` are. So the launch cost is **at least**
-///   what is printed below, never at most it.
+///   `AppDatabase.migrator.migrate` are. So the launch's store cost is **at
+///   least** what is printed below, never at most it.
 /// · **These are SIMULATOR numbers on a Mac SSD, not device numbers.** A
-///   real cold first launch timed on her iPhone is on the device queue for
-///   exactly this reason.
+///   real cold first launch timed on her iPhone is the timing layer's to
+///   read (VM-65's readout).
 /// · **The first-launch figure is host-load-dependent and must not be
 ///   quoted as a single number**: 4.5a measured 54.0 ms and its cold
 ///   reviewer measured 23.4 ms on the same code. Report a RANGE.
@@ -981,12 +1088,6 @@ struct MobilePerfWalkTests {
 /// CORPUS-INDEPENDENT** — ~4.5–5 ms at twelve notes and ~3.6–4.5 ms at the
 /// 100k proving ground. The cost is O(migrations), not O(corpus), and the
 /// migration set only grows.
-///
-/// **B45-1 IS NOT CLOSED BY THIS SUITE.** These are the measurement half
-/// only; the fix — an `.opening` state with the file work off the main
-/// thread — needs `Shared/AppBootstrap.swift`, which is outside 4.5a's
-/// fence, and it belongs to sub-batch 4.5e. Until that lands, the P2
-/// violation this suite documents is live on every launch.
 ///
 /// The 100k store is the SAME fixture the walk above measures, written to
 /// disk through `AppDatabase.backup(to:)` — a plain self-contained file the
@@ -1015,7 +1116,7 @@ struct MobileLaunchPathTests {
 
         // 1 — FIRST LAUNCH: an empty store, every migration applied from
         // scratch. This is the cost the very first launch after an install
-        // pays, and it is all main-thread.
+        // pays (off the main thread since 13l L-c — the doc above).
         let freshURL = root.appendingPathComponent("fresh/variorum.sqlite")
         let t0 = CACurrentMediaTime()
         _ = try AppDatabase.openStore(at: freshURL)
@@ -1038,14 +1139,14 @@ struct MobileLaunchPathTests {
         let bytes = (try? FileManager.default.attributesOfItem(atPath: bigURL.path)[.size]
             as? Int) ?? 0
         print(String(
-            format: "PERF[sim] LAUNCH(AppBootstrap.init body — MAIN THREAD, before first paint): "
+            format: "PERF[sim] LAUNCH(the bootstrap's store open — off the main thread since 13l L-c, before the library's first frame): "
                 + "first launch (empty store, full migration set) %.1f ms · "
                 + "ordinary store %.1f ms · 100k store %.1f ms (%.1f MiB on disk)",
             firstLaunchMS, ordinaryMS, hundredKMS, Double(bytes) / 1_048_576))
 
         // Liveness only — a dead probe must not pass silently. NO BUDGET is
-        // asserted: B45-1 is measure-then-fix, and the fix is the
-        // architect's fork (a `Shared/` file).
+        // asserted: the numbers are the deliverable (B45-1's fix landed at
+        // 13l L-c; the doc above).
         #expect(firstLaunchMS > 0)
         #expect(ordinaryMS > 0)
         #expect(hundredKMS > 0)

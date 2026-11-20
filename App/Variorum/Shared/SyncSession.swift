@@ -221,6 +221,7 @@ final class SyncSession {
             // — the status stream IS the seam, `roundsCompleted` its count.)
             for await status in await scheduler.statusUpdates() {
                 guard let self else { break }
+                self.noteRoundTiming(from: self.status, to: status) // VM-65
                 self.status = status
             }
         })
@@ -402,6 +403,7 @@ final class SyncSession {
     }
 
     private func stopObservations() {
+        dropRoundTiming() // VM-65: a round the chain's end interrupts is not measured
         for task in observationTasks { task.cancel() }
         observationTasks.removeAll()
         settleTask?.cancel()
@@ -419,6 +421,84 @@ final class SyncSession {
             guard (try? await Task.sleep(for: settleDebounce)) != nil else { return }
             guard !Task.isCancelled else { return }
             self?.triggerSync()
+        }
+    }
+
+    // MARK: - VM-65: the timing layer's sync round
+
+    /// **THE ROUND, TIMED FROM THE SCHEDULER'S OWN STATUS** (the VM-64 run,
+    /// batch 1 — `notes/plans/fixes/vm-64-timing-and-lags.md`). A round starts
+    /// when the status turns to syncing and ends when it stops, or when the
+    /// completed-rounds count moves (a follow-up round can start without the
+    /// status ever reading idle). No `Sync/` line: the status is the
+    /// scheduler's public surface. The row counts are two cheap local readings
+    /// (the outbox's size and the pull cursor) at the start and the end — the
+    /// sent count is the outbox's drop, the received count the cursor's
+    /// advance; both are labelled "about" (a write landing mid-round, and this
+    /// device's own pushed rows, blur them). Numbers only. Inert unless the
+    /// timing layer is on, so the Mac never reads anything here.
+    nonisolated private struct RoundReading: Sendable {
+        var owed: Int
+        var cursor: Int
+    }
+
+    @ObservationIgnored private var roundTiming: AppTiming.Token?
+    @ObservationIgnored private var roundStart: RoundReading?
+    /// Bumped at every round's start and end, so a start reading that lands
+    /// after its round ended is never adopted by the next one.
+    @ObservationIgnored private var roundSerial = 0
+
+    private func noteRoundTiming(from previous: SyncScheduler.Status, to next: SyncScheduler.Status) {
+        guard AppTiming.isEnabled else { return }
+        if roundTiming != nil, !next.isSyncing || next.roundsCompleted != previous.roundsCompleted {
+            endRoundTiming(stillOwed: next.pendingPushCount)
+        }
+        if next.isSyncing, roundTiming == nil {
+            startRoundTiming()
+        }
+    }
+
+    private func startRoundTiming() {
+        roundSerial &+= 1
+        let serial = roundSerial
+        roundTiming = AppTiming.syncRoundStarted()
+        roundStart = nil
+        Task { [weak self, database] in
+            let reading = await Self.roundReading(database)
+            guard let self, self.roundSerial == serial else { return }
+            self.roundStart = reading
+        }
+    }
+
+    private func endRoundTiming(stillOwed: Int) {
+        let start = roundStart
+        AppTiming.syncRoundEnded(roundTiming, sent: start.map { $0.owed - stillOwed })
+        roundTiming = nil
+        roundStart = nil
+        roundSerial &+= 1
+        guard let start else { return }
+        Task { [database] in
+            guard let end = await Self.roundReading(database) else { return }
+            AppTiming.syncRoundReceived(end.cursor - start.cursor)
+        }
+    }
+
+    private func dropRoundTiming() {
+        AppTiming.syncRoundDropped(roundTiming)
+        roundTiming = nil
+        roundStart = nil
+        roundSerial &+= 1
+    }
+
+    /// The outbox's size and the pull cursor, in one read (nil on a locked or
+    /// failing store — the round's counts are then simply not recorded).
+    private nonisolated static func roundReading(_ database: AppDatabase) async -> RoundReading? {
+        try? await database.read { db in
+            let owed = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0
+            let cursor = try String.fetchOne(
+                db, sql: "SELECT value FROM sync_state WHERE key = 'last_server_seq'"
+            ).flatMap { Int($0) } ?? 0
+            return RoundReading(owed: owed, cursor: cursor)
         }
     }
 }

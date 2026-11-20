@@ -162,6 +162,29 @@ final class MobileMembershipModel {
         }
     }
 
+    /// **The masthead chip's read** (VM-69 — the open's chips read only what
+    /// they show). The chip shows the books holding this note and nothing
+    /// else, so it reads exactly that — `Queries.readingsContaining`, the Mac
+    /// chip's own feed, ordered by the same `ordered` as `refresh()`, so the
+    /// chip's rows are `refresh()`'s rows. The every-book listing behind the
+    /// sheet's "Add to a book" is the SHEET's to read, and it does on appear
+    /// (`MobileMembershipSheet`'s `.task`). A failure falls back to the full
+    /// read, which speaks as it always has (a cancellation — the screen gone —
+    /// says nothing).
+    func refreshChip() async {
+        do {
+            let postID = postID
+            let membership = try await session.database.read { db in
+                try Queries.readingsContaining(db, postID: postID)
+            }
+            books = Self.ordered(membership)
+        } catch is CancellationError {
+            // The screen left before the chip answered: nothing to show.
+        } catch {
+            await refresh()
+        }
+    }
+
     // MARK: - Acts (every one an existing core operation)
 
     func add(to book: Reading) async {

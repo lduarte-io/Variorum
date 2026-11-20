@@ -49,7 +49,11 @@ final class MobileEditorViewModel {
 
     private let session: AppSession
     let postID: String
-    @ObservationIgnored let autosave: AutosaveCoordinator
+    /// The post's ONE coordinator (the session's registry's). A `var` since
+    /// VM-70 r1, and re-pointed in exactly one place: a screen shown again
+    /// that is handed a DIFFERENT coordinator than the one it gave back
+    /// adopts it (`takeAutosaveHold`). Every reader reads it at use time.
+    @ObservationIgnored private(set) var autosave: AutosaveCoordinator
     /// The takes/peek brain (S2 batch 1) — a SIBLING object per the S1
     /// ladder's binding NIT-3: the VM only routes (overlay at ingest, the
     /// targeted display apply below); every takes decision lives there.
@@ -157,6 +161,12 @@ final class MobileEditorViewModel {
     /// than a verdict that does (gate-less paths use the report-derived
     /// cost; churn is approximate by design — SyncSpec §6).
     @ObservationIgnored private var pendingEdit: ArmedEdit?
+    /// **VM-2 — the keystroke fence around a structural flight** (the pure
+    /// rule is `StructuralFlightFence`, core Domain; this model is its face).
+    /// Raised and landed by `MobileStructuralController`'s one latch
+    /// (`structuralFlightChanged`); read by the text view's two typed-input
+    /// doors, the gate, and the storage report. Readable so pins can see it.
+    @ObservationIgnored private(set) var flightFence = StructuralFlightFence()
     @ObservationIgnored private var suppressEditProcessing = false
     /// One mint batch in flight (the crystallizer's; read-only here, as before).
     var mintInFlight: Bool { crystallizer.mintInFlight }
@@ -169,6 +179,12 @@ final class MobileEditorViewModel {
     /// Full surface renders performed — the echo pin's oracle (an autosave
     /// echo must not rewrite the surface).
     @ObservationIgnored private(set) var fullRenderCount = 0
+    /// **VM-69 — the whole-document chrome passes the PROJECTION road asks
+    /// for** (a full render's, a differential's, an ingest's — `layOutChrome`).
+    /// Each is O(the note's decorated blocks) once the page is laid out
+    /// (audit F §4: "the chrome is laid out three times" per open). The pins
+    /// read it; nothing in the app decides anything from it.
+    @ObservationIgnored private(set) var projectionChromePasses = 0
     /// DEBUG identity-audit failures — the obligation-1 oracle; asserts
     /// fire in debug, this counter lets tests observe without dying.
     @ObservationIgnored private(set) var identityAuditFailures = 0
@@ -202,6 +218,7 @@ final class MobileEditorViewModel {
         debounce: Duration = .milliseconds(500),
         sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
     ) {
+        AppTiming.editorBuilt() // VM-65: builds ÷ arrivals > 1 is audit F 2D's twin graph
         self.session = session
         self.postID = postID
         // S3 ladder, round-1 BLOCKER: the ONE per-post coordinator (the N3
@@ -213,6 +230,8 @@ final class MobileEditorViewModel {
         // clock parameters apply only when this call MINTS the coordinator
         // (the harness's deterministic sleep; production passes defaults).
         self.autosave = session.autosave(forPost: postID, debounce: debounce, sleep: sleep)
+        self.autosaveDebounce = debounce
+        self.autosaveSleep = sleep
         self.takes = MobileTakesController(runner: session.runner)
         self.takesBrowser = MobileTakesBrowserController(session: session)
         self.comments = MobileCommentsController(session: session)
@@ -242,6 +261,106 @@ final class MobileEditorViewModel {
     }
 
     @ObservationIgnored private var autosaveToken: UUID?
+
+    /// **VM-70 — the editor's hold on its post's coordinator, given back when
+    /// its screen LEAVES and taken back if the screen is shown again** (audit F
+    /// §4/§12.4: nothing on the phone released an editor's coordinator, so the
+    /// session's registry grew by one per note opened, and every filing, every
+    /// background flush and every sync round's flush-first walked them all).
+    ///
+    /// **r1 — why not at the model's death** (r0 released in an `isolated
+    /// deinit`, the Mac's 18k C1 shape): the first stage window showed a
+    /// closed screen's editor ALIVE ten seconds after its leaving work ended
+    /// while its host lived, on both builds — SwiftUI frees a removed screen's
+    /// state on its own schedule, and her shell is a host that lives for the
+    /// app's life. On the Mac a release only decrements (the drop is the
+    /// leaving savepoint's, and ⌘Q/the lock savepoint what is still held), so
+    /// a late death costs nothing there; on the phone the release IS the drop,
+    /// so a late or missing death is exactly the growth VM-70 measures. The
+    /// release is therefore the leaving work's LAST act, deterministic: the
+    /// screen's `onDisappear` task runs `teardown()` (the flush), then
+    /// `savepointOnLeaving` (its own flush, then the savepoint), then
+    /// `releaseAutosaveHold(ifNotShownSince:)`.
+    ///
+    /// What the session does with a release is `releaseAutosave(forPost:)`'s
+    /// phone rule, unchanged: the entry goes only when NO holder is left (a
+    /// second tab's editor on the same note, the quick note) and nothing is
+    /// pending — a dirty coordinator stays reachable to every flush walk.
+    @ObservationIgnored private(set) var holdsAutosave = true
+
+    /// How many times this editor's screen has ARRIVED (its `.task` began).
+    /// The leaving captures it at `onDisappear`; a leaving gives the hold back
+    /// only if no arrival came after it — a screen covered by a push and shown
+    /// again before its leaving work finished keeps its hold.
+    @ObservationIgnored private(set) var arrivalCount = 0
+
+    /// The clock the editor's own acquisition used — a re-mint at a re-show
+    /// passes the same (the harness's deterministic sleep; production's
+    /// defaults).
+    @ObservationIgnored private let autosaveDebounce: Duration
+    @ObservationIgnored private let autosaveSleep: @Sendable (Duration) async throws -> Void
+
+    /// Whether this editor is listening to the coordinator it records into —
+    /// the pins read it; nothing in the app decides anything from it.
+    var observesAutosave: Bool { autosaveToken != nil }
+
+    /// **The arrival's first act** (the screen's `.task`, before the liveness
+    /// grant's flush): count the arrival, and if a leaving gave the hold back,
+    /// take it again. The registry hands back the post's ONE coordinator; if
+    /// that is not the one this editor gave back — the entry dropped clean and
+    /// was minted again (by another tab's editor of the same note, or by this
+    /// very call) — the editor ADOPTS it, so two coordinators for one note
+    /// can never stand (the S3 ladder BLOCKER's class). Either way the editor
+    /// ends wired to the coordinator it records into — and so does a screen
+    /// shown again BEFORE its leaving gave the hold back (the leaving parked
+    /// in its savepoint after teardown stopped the listening: it still holds,
+    /// so there is nothing to re-acquire, but it must listen again — the VM-64
+    /// ladder's round 1, finding 2). A first arrival holds already (`init`
+    /// acquired, and listens) and only counts.
+    func takeAutosaveHold() async {
+        arrivalCount += 1
+        if !holdsAutosave {
+            holdsAutosave = true
+            let current = session.autosave(
+                forPost: postID, debounce: autosaveDebounce, sleep: autosaveSleep)
+            if current !== autosave {
+                // The one given back is clean by construction (the registry drops
+                // only a clean entry, and nothing records while the screen is
+                // gone) — landed anyway if it is not, before it is let go.
+                if autosave.isDirty { await autosave.flushNow() }
+                if let token = autosaveToken { autosave.stopObserving(token) }
+                autosaveToken = nil
+                autosave = current
+            }
+        }
+        if autosaveToken == nil {
+            // `init`'s two hooks, re-made for the coordinator this editor now
+            // records into (the leaving's `teardown()` stopped the old one).
+            autosaveToken = autosave.observe(
+                onError: { [weak self] error in self?.reportOperationError(error) },
+                onSettled: { [weak self] in
+                    self?.storeWriteGeneration &+= 1
+                    self?.applyPendingIfClean()
+                })
+        }
+    }
+
+    /// **The leaving's last act** — after `teardown()`'s flush and the leaving
+    /// savepoint: give the hold back, unless the screen arrived again since the
+    /// leaving began (`arrival` is the count `onDisappear` captured).
+    func releaseAutosaveHold(ifNotShownSince arrival: Int) {
+        guard holdsAutosave, arrivalCount == arrival else { return }
+        holdsAutosave = false
+        session.releaseAutosave(forPost: postID)
+    }
+
+    /// The remainder: a hold no leaving gave back — a model built by a view
+    /// re-init and discarded (it acquired in `init` and never arrived), or a
+    /// harness model — is given back at the model's end of life. Exactly one
+    /// release per acquisition, whichever road ends it.
+    isolated deinit {
+        if holdsAutosave { session.releaseAutosave(forPost: postID) }
+    }
 
     /// The store-write freshness generation (S3 ladder, MAJOR 3 — the
     /// retired Phase 8 VM's `readGeneration` fence restored): bumped
@@ -555,8 +674,12 @@ final class MobileEditorViewModel {
     /// pin keeps it so). The focus raise then reveals the caret's line
     /// MINIMALLY — UIKit's own reveal, through the text view's scroll
     /// authority, which never lets it reach into the typewriter room.
+    ///
+    /// **VM-69 — the authoritative first load is the LIVE observation's
+    /// first value** (`loadLive`): one whole-note read per open, where the
+    /// arrival used to read the note and `start()` then read it again.
     func arrive(focus: Bool) async {
-        await loadOnce()
+        await loadLive()
         if let place = placeMemory?.place(for: postID) {
             textView?.restore(place)
         }
@@ -579,6 +702,9 @@ final class MobileEditorViewModel {
     /// Runs for the editor's lifetime: header + the takes projection, live.
     /// NEVER RETURNS while the editor lives (the loops end at task
     /// cancellation) — sequence nothing after it; that is `arrive`'s job.
+    /// VM-69: it CONTINUES the two observations the arrival started (their
+    /// first values were the arrival's load); with no arrival before it — the
+    /// harness's `loadOnce` + `start` — it starts its own, exactly as before.
     func start() async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.observeHeader() }
@@ -586,8 +712,68 @@ final class MobileEditorViewModel {
         }
     }
 
-    /// One authoritative load (first paint + deterministic tests).
+    /// **VM-69 — the live observations the ARRIVAL started**, handed on to
+    /// `start()`, which takes them (`observeHeader` / `observeTakesProjection`)
+    /// and continues them for the editor's life. Each holds its observation
+    /// open (GRDB cancels it when the iterator goes), so nothing here is
+    /// read twice and nothing written meanwhile is missed. nil before an
+    /// arrival and after `start()` took them.
+    @ObservationIgnored private var liveHeader: AsyncValueObservation<Queries.ContainerHeader?>.Iterator?
+    @ObservationIgnored private var liveTakes: AsyncValueObservation<Queries.TakesProjection>.Iterator?
+
+    /// **VM-69 — THE ARRIVAL'S ONE READ IS THE LIVE UPDATES' FIRST** (audit F
+    /// 2C: the arrival read the note, then `start()`'s observation read it
+    /// again before delivering the same bytes — two whole-note reads per open,
+    /// 2 → 1 here).
+    ///
+    /// Both live observations begin HERE, and their first values are the
+    /// load: the header adopted first, then the projection through the one
+    /// projection door — `loadOnce`'s order. The running observations are kept
+    /// for `start()`, so the live updates CONTINUE from the load rather than
+    /// starting over with a second read.
+    ///
+    /// **Nothing can fall in a gap, because there is none.** A write landing
+    /// after this read — a sync apply, another surface's flush — is the
+    /// observation's next value: GRDB tracks the observed region from the
+    /// first fetch on (on a pool it compares the first fetch's WAL snapshot
+    /// with the writer's and fetches again if anything committed between —
+    /// `ValueConcurrentObserver`), and the values wait in the stream until
+    /// `start()` takes them. The write is delivered, never dropped.
+    ///
+    /// **A RE-arrival takes its first value as a DELIVERY.** A screen that was
+    /// covered and shown again arrives over a page it already rendered; the
+    /// second read that used to follow a re-arrival's load is gone, so its
+    /// value goes through MAJOR 3's delivery arm (a signal: adopted when the
+    /// page already holds it, else settled by the fresh-read road), never
+    /// rewriting the page from a value whose age nothing checked. A FIRST
+    /// arrival renders it, as `loadOnce` did (the policy's `.initialRender`).
+    ///
+    /// A failure falls back to the one-shot load, which speaks as it always
+    /// has; a cancellation (a push then an immediate pop) paints nothing.
+    func loadLive() async {
+        var header = session.database.observeContainerHeader(postID).makeAsyncIterator()
+        var updates = takesObservation().makeAsyncIterator()
+        do {
+            guard let projection = try await updates.next(isolation: #isolation),
+                  let value = try await header.next(isolation: #isolation)
+            else { return }
+            adoptHeader(value)
+            ingest(projection, fromDelivery: loaded)
+            // VM-65's mark, at its meaning: the live updates' first delivery
+            // is this one (it closes the open's read count — one).
+            AppTiming.noteProjectionDelivered(first: true)
+            liveHeader = header
+            liveTakes = updates
+        } catch is CancellationError {
+        } catch {
+            await loadOnce()
+        }
+    }
+
+    /// One authoritative load (deterministic tests, and `loadLive`'s
+    /// fallback; the screen's arrival loads through `loadLive` since VM-69).
     func loadOnce() async {
+        AppTiming.noteProjectionLoaded() // VM-65: a whole-note read
         do {
             let value = try await session.database.read { [postID] db in
                 (projection: try Queries.takesProjection(db, post: postID),
@@ -620,8 +806,15 @@ final class MobileEditorViewModel {
         takes.adoptFans(projection.fans)
         // S4: callout frames adopt the same way (decor bookkeeping).
         presentations = projection.presentations
+        // VM-69 — the chrome ONCE: an arm that rewrote the page (a full
+        // render, a differential) laid the chrome out as its own last act,
+        // over these same inputs (the fans and frames adopted above), so a
+        // second whole-document pass here would redo it exactly. The arms
+        // that touch nothing in the view — an echo, a deferral, a refetch —
+        // still get it: a take can arrive without a byte of text moving.
+        chromeLaidOutByApply = false
         applyProjection(takes.overlay(projection.slots), fromDelivery: fromDelivery)
-        textView?.refreshChrome()
+        if !chromeLaidOutByApply { layOutChrome() }
         // S2 batch 2: an open browser re-renders its cards from the fresh
         // fan state (and closes if its block left the surface). S4: the
         // comments sheet follows the same discipline. C4a: the history
@@ -655,7 +848,11 @@ final class MobileEditorViewModel {
 
     private func observeHeader() async {
         do {
-            for try await value in session.database.observeContainerHeader(postID) {
+            // VM-69: the arrival's observation, continued (its first value
+            // was adopted there); a start with no arrival starts its own.
+            var updates = liveHeader ?? session.database.observeContainerHeader(postID).makeAsyncIterator()
+            liveHeader = nil
+            while let value = try await updates.next(isolation: #isolation) {
                 adoptHeader(value)
             }
         } catch is CancellationError {
@@ -673,9 +870,28 @@ final class MobileEditorViewModel {
         }
     }
 
+    /// The note's live projection — `observeTakes`'s own body (`observe {
+    /// takesProjection }`), spelled out so its fetch can count itself (VM-65)
+    /// — every run, the first and each re-run on a write anywhere — for the
+    /// timing layer. One home for the arrival's start and `start()`'s own.
+    private func takesObservation() -> AsyncValueObservation<Queries.TakesProjection> {
+        session.database.observe { [postID] db in
+            AppTiming.noteProjectionFetched()
+            return try Queries.takesProjection(db, post: postID)
+        }
+    }
+
     private func observeTakesProjection() async {
         do {
-            for try await value in session.database.observeTakes(postID) {
+            // VM-69: the arrival's observation, continued — its first value
+            // was the arrival's load and already counted as the first live
+            // delivery; a start with no arrival starts its own.
+            var first = liveTakes == nil
+            var updates = liveTakes ?? takesObservation().makeAsyncIterator()
+            liveTakes = nil
+            while let value = try await updates.next(isolation: #isolation) {
+                AppTiming.noteProjectionDelivered(first: first)
+                first = false
                 // A delivery is a SIGNAL, never surface-rewrite authority
                 // (S3 ladder, MAJOR 3 — the shared policy's delivery arm).
                 ingest(value, fromDelivery: true)
@@ -805,6 +1021,7 @@ final class MobileEditorViewModel {
         case .initialRender:
             renderFull(new, preserveTail: false)
             loaded = true
+            MobileTiming.noteRendered() // VM-65: the note's text is on screen one frame on
         case .deferUntilClean:
             pendingProjection = new
         case .forcedFullRender:
@@ -828,6 +1045,18 @@ final class MobileEditorViewModel {
             // non-delivery and takes the render arms above.
             pendingProjection = new
             applyPendingIfClean()
+        }
+        // VM-2: a fence still waiting for its flight's surface to settle
+        // drops at the first projection that leaves the page holding the
+        // store — checked on the next turn, never from inside this apply.
+        // The drain only REPORTS (refuse-and-say: nothing is held or
+        // replayed): it lowers the fence and, if anything was refused or
+        // withheld, says the one sentence through `report`, writing the
+        // status line and its action. Deferring keeps those status/undo
+        // writes out of a projection apply, and reads the settle rule only
+        // after this apply's own bookkeeping has finished. A no-op otherwise.
+        if flightFence.phase == .settling {
+            Task { @MainActor [weak self] in self?.drainFlightFenceIfSettled() }
         }
     }
 
@@ -873,7 +1102,7 @@ final class MobileEditorViewModel {
         }
         auditIdentityProjection()
         textView?.canaryCheckpointAfterMutation()
-        textView?.refreshChrome()
+        layOutChrome()
     }
 
     /// Same block sequence, changed texts: replace only changed slots,
@@ -917,8 +1146,20 @@ final class MobileEditorViewModel {
         // still missing it (round-2 ladder round 2, NIT 3) — `renderFull`,
         // `programmaticReplace`'s callers and the take-swap door all check.
         textView?.canaryCheckpointAfterMutation()
+        layOutChrome()
+    }
+
+    /// **The projection road's one whole-document chrome pass** (VM-69 —
+    /// counted, so a pin can hold how many an open asks for).
+    private func layOutChrome() {
+        projectionChromePasses += 1
+        chromeLaidOutByApply = true
         textView?.refreshChrome()
     }
+
+    /// Set by every `layOutChrome`; `ingest` clears it before its apply and
+    /// reads it after (VM-69 — the chrome once).
+    @ObservationIgnored private var chromeLaidOutByApply = false
 
     /// **Is a projection still waiting?** A fact on the model rather than a
     /// private field a pin cannot see — the Mac's 17b P36 fact, its phone
@@ -1032,7 +1273,107 @@ final class MobileEditorViewModel {
             report(Self.unsavedChangesRefusal)
             return false
         }
+        // VM-2: a structural door calls this before it plans against the page
+        // (a divide snaps its cut in the page's text, a span act plans over
+        // it). If the flight's storage belt withheld an edit while this flush
+        // was suspended, the page holds bytes the store never saw — before
+        // the belt, that edit would have dirtied the buffer and refused the
+        // door here. Re-read the page instead, so the plan is made against
+        // the store's text; the withheld bytes are spoken for as the fence
+        // drops. Only ever true inside a flight.
+        if flightFence.isUp, forceFullRender {
+            await refreshTakesFromStore()
+        }
         return true
+    }
+
+    // MARK: - VM-2: the keystroke fence around a structural flight
+
+    /// **The window this closes** (the VM-5 pass's MAJOR 1, measured there
+    /// as probe 2; the record `notes/plans/fixes/vm-64-timing-and-lags.md`
+    /// batch 2). Every structural door — `MobileStructuralController`'s and
+    /// the structural undo/redo door's (`MobileUndoDoor`) — flushes and then
+    /// SUSPENDS (its fan read, the operation, its settle's read) while the
+    /// page and `index` still show the note as it was. An edit landing there
+    /// routes against the old tiling; `recordAutosave` records the WHOLE old
+    /// block text; the door's own settle flushes it after the operation. Since
+    /// VX-683 B that write RESCUES rather than clobbering (the op's real
+    /// result becomes a spurious `'conflict'` take), so a divide still reads
+    /// its moved half twice, an extract its span twice, an undo reverses
+    /// itself, and a merge leaves her prose in a released source's take.
+    ///
+    /// **The fence — REFUSE AND SAY** (`StructuralFlightFence` carries the
+    /// why: her keyboard asks the gate BEFORE it inserts, so a key cannot be
+    /// held and replayed honestly): while a flight is landing the gate
+    /// refuses every edit it is asked about, typed keys included; an edit that
+    /// reaches the text with no gate consult keeps the tiling but writes
+    /// nothing toward the store, and the surface is re-read before the fence
+    /// drops; anything refused or withheld is said once, as the fence drops,
+    /// in the sentence every structural door already speaks.
+    ///
+    /// Called on EVERY edge of either door's latch. The fence flies while any
+    /// FENCING latch is up and lands only when none is — so an undo landing
+    /// inside a divide's flight (or the reverse) never drops the other's
+    /// fence. Insert Below holds the structural latch WITHOUT fencing (its
+    /// `newBlock` rewrites no text, so its window holds no stale write —
+    /// `MobileStructuralController.holdsFencingFlight`).
+    func structuralFlightChanged() {
+        if structural.holdsFencingFlight || undoDoor.inFlight {
+            flightFence.flightBegan()
+            return
+        }
+        // No fencing latch is up. Nothing to land unless a flight was flying
+        // (an exempt door's own edges, or a fence already settling, pass by).
+        guard flightFence.phase == .flying else { return }
+        switch flightFence.flightLanded(surfaceSettled: flightSurfaceHoldsTheStore) {
+        case .drain:
+            drainFlightFence()
+        case .awaitSettle:
+            settleFlightSurface()
+        }
+    }
+
+    /// The fence's settle rule, read from this model's own two facts.
+    private var flightSurfaceHoldsTheStore: Bool {
+        StructuralFlightFence.surfaceHoldsTheStore(
+            forcedRenderOwed: forceFullRender, projectionDeferred: pendingProjection != nil)
+    }
+
+    /// The door's own settle did not leave the page holding the store (it was
+    /// parked behind a mint or a dirty buffer, or a withheld edit owes a
+    /// re-read): re-read it, at most `flightSettleAttempts` times, then rely on
+    /// the next projection to apply (`applyProjection`'s settling hook). Until
+    /// then the fence stays up: a key typed into the old page is refused,
+    /// nothing is written against it. Fail-CLOSED on purpose — a refusal said
+    /// a moment longer costs a key; a key approved over a page that has not
+    /// settled is exactly the stale write this fence exists to stop.
+    private func settleFlightSurface() {
+        Task { @MainActor [weak self] in
+            for _ in 0..<Self.flightSettleAttempts {
+                guard let self, self.flightFence.phase == .settling else { return }
+                if self.flightSurfaceHoldsTheStore { break }
+                await self.awaitMintSettle()
+                await self.refreshTakesFromStore()
+            }
+            self?.drainFlightFenceIfSettled()
+        }
+    }
+
+    private static let flightSettleAttempts = 3
+
+    private func drainFlightFenceIfSettled() {
+        guard flightSurfaceHoldsTheStore, flightFence.surfaceSettled() else { return }
+        drainFlightFence()
+    }
+
+    /// Lowers the fence, saying the sentence once if anything was refused or
+    /// withheld while it was up (the door's own receipt would otherwise have
+    /// cleared the gate's refusal before she could read it). The receipt's
+    /// action (the door's Undo or Redo) is kept beside the sentence.
+    private func drainFlightFence() {
+        if flightFence.drain() {
+            report(StructuralUndoCopy.anotherIsLanding, action: statusAction)
+        }
     }
 
     // MARK: - Find in note (parity C4b item 3 — the ⌘F family's phone
@@ -1456,6 +1797,7 @@ final class MobileEditorViewModel {
     /// adopts cleanly instead of deferring against a dirty buffer).
     func refreshTakesFromStore() async {
         await autosave.flushNow()
+        AppTiming.noteProjectionRefreshed() // VM-65: a whole-note read
         guard let fresh = try? await session.database.read({ [postID] in
             try Queries.takesProjection($0, post: postID)
         }) else { return }
@@ -1592,6 +1934,21 @@ final class MobileEditorViewModel {
             return false
         }
         guard let replacement else { return true } // attribute-only
+        // **VM-2 — THE FLIGHT BELT.** A structural flight is landing: the
+        // page still shows the note as it was, so an edit approved here
+        // would record a whole block the operation is rewriting. Every edit
+        // the gate is asked about is refused — her typed keys and ⌫ (her
+        // keyboard asks here BEFORE it inserts), a paste, a formatting act,
+        // an autocorrection — and the fence says so again as it drops (the
+        // door's own receipt would otherwise clear this line before she could
+        // read it). Below the three belts above: a gone, stood-down or sealed
+        // note's truth is the more lasting one.
+        if flightFence.refusesPolicedEdit() {
+            pendingEdit = nil
+            bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
+            refuse(StructuralUndoCopy.anotherIsLanding)
+            return false
+        }
         let verdict = index.verdict(
             replacing: range,
             replacementIsSingleNewline: replacement == "\n",
@@ -1908,9 +2265,22 @@ final class MobileEditorViewModel {
             // arrived attribute-stripped; identity is re-derived from the
             // index, never inherited.
             restampProjection(over: editedRange)
-            recordAutosave(
-                entryIndex: i, editedRange: editedRange, delta: delta,
-                exactCost: exactCost)
+            // **VM-2 — THE STORAGE BELT.** During a structural flight the
+            // gate refuses every edit it is asked about, so a block edit
+            // arriving here is one that never asked (a system rewrite — a
+            // composition commit, dictation, a programmatic replace — M25's
+            // measured bypass). The tiling above stays coherent with the
+            // page; nothing of it is written toward the store, because the
+            // whole-block text it would record is the OLD block's; and the
+            // page is re-read from the store before the fence drops, so the
+            // bytes the store never saw cannot linger unsaved.
+            if flightFence.withholdsSystemEdit() {
+                forceFullRender = true
+            } else {
+                recordAutosave(
+                    entryIndex: i, editedRange: editedRange, delta: delta,
+                    exactCost: exactCost)
+            }
         case .tail:
             guard index.applyTailEdit(lengthDelta: delta) else {
                 recoverFromUnroutableEdit()
