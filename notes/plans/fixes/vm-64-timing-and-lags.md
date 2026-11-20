@@ -190,6 +190,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | Ladder r2 · fix pass | **DONE 2026-11-19** — part B built and the whole Core package green (`74d91c666`); settled by its stage window: the seven meant reds on `vm64-gate2-red` and no other, green alone and in company, the gated suite alone 13 passed ("Orchestrator's stage results" ▸ "Ladder round 2's fixes — THE STAGE WINDOW") | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, the no-choice fixes with their pins, the final calls in the second turn, part B's builds. *(Was: IN-PROGRESS, part B waiting on the QUIET window — flipped at ladder round 3, finding 2(c).)* |
 | Ladder r3 · fix pass | **DONE (both turns)** — the final calls applied (`6aa357bff`): (i′) confirmed with its guard; `merged` bounded, pin first; the migration comment. Owed with the gate tree after VM-78's merge-in: finding 1's red build and the hosted runs of its suite | see "Ladder round 3 — fix pass · LIVE STATUS" below | the last round (no major found). *(Was: FIRST TURN DONE, the arms waiting.)* |
 | The merge of main (VM-78) and the gate tree | **DONE 2026-11-19** — merge `a18fae31f` (clean; no collision); `vm64-gate3` phone + Mac built at `5a4045303`, no compile fix; the whole Core package 4,975 in 721 green; `vm64-gate3-red` built and restored. Stage runs owed (the orchestrator's) | see "The merge of main (VM-78) and the gate tree · LIVE STATUS" below | merge exactly `f909d6714` (VM-78's PR #15); the five shared files read; builds into `vm64-gate3` / `vm64-gate3-red`; the whole Core package |
+| The merge gate's Mac red — the readout's two rows say commit | **IN-PROGRESS** — see its block below | see "The merge gate's Mac red · LIVE STATUS" below | `DeadVocabularyTests.noLabelOrHeaderSaysSavepoint` red on three readout labels; wording only (Part of VM-65); builds into `vm64-gate4` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -873,6 +874,23 @@ orchestrator's). The record of what was checked: §7 ▸ "The merge of main (VM-
 | G4 — the whole Core package, `swift test`, once, on the final tree | DONE at `d1bae169b` (code = `a18fae31f`'s) — 4,975 tests in 721 suites, no red: MCP 746/139 · Core 4,197/578 with the 5 declared known issues · StringsWorkbook 32/4; +4 against the 4,971 baseline, all round 3's `TimingRecorderTests`; VM-78 +0 |
 | G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | DONE — **no revert is in flight; the tree is restored.** Announced at `ac3d8165c` and built there with the one hunk reversed (`git apply -R` clean; every test file in): `** TEST BUILD SUCCEEDED **`, 0 errors; restored by `git checkout HEAD --` the one file; `git status --short` and `git diff HEAD --stat` both EMPTY, the file's blob HEAD's (`d88239219`). *(The cell's text while it ran: "IN-PROGRESS — THE REVERT STARTS AFTER THIS COMMIT", with the restore command.)* |
 | G6 — §7's section, the final stage commands, the report | DONE (this commit) — §7 ▸ "The merge of main (VM-78) and the gate tree": the merge, the blob check, the five files, the composition, the meeting points, the guards, compile fixes NONE, the whole-package counts, the products, the FINAL stage commands (i)–(iv), "For QUESTIONS at the merge". The FOR A LATER READER and the gate/walk/merge `PENDING(…)` slots stay the orchestrator's |
+
+### The merge gate's Mac red · LIVE STATUS (implementer, opus, the same session as the VM-78 merge-in; started 2026-11-19)
+
+**No revert is in flight, and none is owed** (the pin's red is the gate run's own log on `5a4045303`). Base: `09a33071b`
+(code `5a4045303`'s). DerivedData: `App/Variorum/DerivedData/vm64-gate4/` (phone + Mac) — gitignored; no other `vm64-*`
+folder is written. No hosted run (the stage is the orchestrator's). The record: §7 ▸ "The merge gate's Mac red — the
+readout's two rows say commit".
+
+| Piece | State |
+|---|---|
+| H0 — this live status | DONE (this commit) |
+| H1 — the three literals say commit ("Commits per leaving" ×2, "Commit tries"); the tests and comments that quote them follow (Part of VM-65) | NOT-STARTED |
+| H2 — the scan mirrored headlessly (an exact copy of its extractor and rule, its roots and allow-lists) — zero offenders on the tree | NOT-STARTED |
+| H3 — the handoff's readout steps and wording-pass item; the closeout drafts | NOT-STARTED |
+| H4 — the Mac target's suites that read the phone's or `Shared/`'s source, by TYPE (the coordinator's question) | NOT-STARTED |
+| H5 — phone and Mac `build-for-testing` into `vm64-gate4`; the diff touches nothing under `Sources/` or `Tests/` | NOT-STARTED |
+| H6 — §7's section, the hosted commands, the report | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
