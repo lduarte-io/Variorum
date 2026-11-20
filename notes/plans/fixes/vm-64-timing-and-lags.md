@@ -824,6 +824,25 @@ orchestrator's word that the window ended. **No revert is in flight.**
 | S6 — the red-on-old phone build into `vm64-gate2-red` (the first turn's recipe plus arm (A)'s hunks; announced and committed before it; restored; `git status` / `git diff HEAD` empty) | DONE — **no revert is in flight; the tree is restored.** Announced at `b44622e62` and built there with the recipe exactly (`git diff 85762803a HEAD` over the six production files reversed; `MobileLibraryRowActsTests.swift` aside): `** TEST BUILD SUCCEEDED **`, 0 errors; restored by `git checkout HEAD --` of the seven paths, the aside folder removed, `git status --short` and `git diff HEAD --stat` both empty |
 | S7 — §7 ▸ "Ladder round 2 — fix pass" ▸ its "Second turn" part; the §5 rows flipped | DONE (this commit) — the section written by the second turn (`500c907b1`) with part B's results as PENDING slots; part B's builder filled them: §7 ▸ "… second turn" ▸ "Part B" (the merge and its semantic check, the builds, the whole-package counts, the products' SHAs), "Compile fixes" NONE, the stage commands (i)–(iv) unchanged (no test's name or count moved). The FOR A LATER READER and the gate/merge/round-3 `PENDING(…)` slots stay the orchestrator's. *(The second turn's text of this cell, kept: "IN-PROGRESS — … filled and the rows flipped after part B. The turn ENDS here under QUIET, owing S4–S6".)* |
 
+### Ladder round 3 — fix pass · LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** Base: `e78c5f1fa` (the round's findings as written, `notes/plans/fixes/vm-64-ladder-round3.md`,
+`16581e7ad`; code unchanged since `74d91c666`). The flow (cross-model, the last round — no major was found): the
+responses to findings 1–5 first, at the end of the round file, pushed before any code; the agreed fixes with nothing left
+to choose applied this turn with their pins; any arm laid out waits for the reviewer's final call. Builds this turn: ONE
+warm incremental phone `build-for-testing` into `App/Variorum/DerivedData/vm64-gate2/` (the gate tree and finding 1's
+red-on-old build are made after VM-78's merge-in, not now). No hosted run (the stage's).
+
+| Piece | State |
+|---|---|
+| T0 — this live status | DONE (this commit) |
+| T1 — the responses (round file ▸ "Implementer responses (round 3 fix pass)"), committed and pushed before any code | NOT-STARTED |
+| T2 — finding 1 (Part of VM-68): the agreed shape and its pins | NOT-STARTED |
+| T3 — finding 5(b) (VM-65): the damaged-record decode and the report's number; the headless pin red, then green; the touched Core suites | NOT-STARTED |
+| T4 — record and handoff edits: 2(c) the two fix passes' rows; 2(d) the handoff's "What happened" and "Reviews"; 3 the handoff's P-2-4 and the bundle; 4 the readout caveats; 5(a) the SurfaceContracts draft; 5(c) "empty in the steady state"; 5(d) declined, recorded | NOT-STARTED |
+| T5 — ONE warm phone `build-for-testing` into `vm64-gate2` | NOT-STARTED |
+| T6 — §7 ▸ "Ladder round 3 — fix pass" closeout; the report | NOT-STARTED |
+
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
 **Batch 1 · VM-65 — CLOSED 2026-11-19.** Run from `DerivedData/vm64-b1` (built at `808f333a8`), `test-without-building` against the batch's `.xctestrun` files.
