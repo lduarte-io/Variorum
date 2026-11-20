@@ -115,6 +115,13 @@ struct MobileReadView: View {
         // the cream read page isn't on a colorful background"; R2: only the
         // room follows the voice), now that the phone wears a palette.
         .background(ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark).ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // this room at both edges. The cream page is the scroll's content, so
+        // it ends at the band's foot (the band's clip) and the room runs on
+        // below it to the home indicator.
+        .mobileEdgeGrounds(
+            top: ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark),
+            bottom: ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark))
         .navigationBarTitleDisplayMode(.inline)
         .task { await model.start() }
     }

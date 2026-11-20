@@ -106,6 +106,10 @@ struct MobileTrashView: View {
         // VM-51 (R-47-1, "prose should not be on the tint"): the Trash's rows
         // on the paper (its answers speak on the shell's one line, VM-61).
         .background(tokens.surface.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the page's paper at both edges (the bar's room at its foot is the
+        // shell's to paint while the bar stands there).
+        .mobileEdgeGrounds(top: tokens.surface, bottom: tokens.surface)
         .navigationBarTitleDisplayMode(.inline)
         // The filter and the sort are applied IN SQL, so a change restarts
         // the observation rather than re-sorting a window of the wrong set.

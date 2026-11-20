@@ -345,6 +345,12 @@ struct MobileVersionsView: View {
         // VM-51 (R-47-1, "prose should not be on the tint"): a note's moments and the version she reads
         // on the paper (its answers speak on the shell's one line, VM-61).
         .background(tokens.surface.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the paper above; below, the listing's paper (the bar's room is the
+        // shell's to paint while the bar stands there) or, while a moment is
+        // read, the reader's verbs band, which sits on the room.
+        .mobileEdgeGrounds(
+            top: tokens.surface, bottom: model.reading == nil ? tokens.surface : tokens.room)
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if model.reading == nil, let listingBar { listingBar }

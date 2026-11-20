@@ -105,6 +105,9 @@ struct MobileProtectionScreen: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .background(tokens.room.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the room at both edges.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
         .navigationBarTitleDisplayMode(.inline)
         // New words' look holds the words on screen: no way back until her close (past the look's warning).
         .navigationBarBackButtonHidden(wordsLook?.holdsWords == true)

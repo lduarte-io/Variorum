@@ -186,6 +186,10 @@ struct MobileWriteScreen: View {
             // ground is the editor's own — the paper (`MobileEditorStyle.Face
             // .paper`, the Mac's editor and note masthead on `tokens.surface`).
             .background(tokens.surface.ignoresSafeArea())
+            // VM-47 (the walk's W-A1, redone): the strips beyond the shell's
+            // band — the paper at both edges, so with the keyboard up the
+            // keyboard and its bar sit over her paper, never the bare window.
+            .mobileEdgeGrounds(top: tokens.surface, bottom: tokens.surface)
             .safeAreaInset(edge: .top) { masthead }
             .task {
                 // Wiring COMPLETES before the infinite observation loops

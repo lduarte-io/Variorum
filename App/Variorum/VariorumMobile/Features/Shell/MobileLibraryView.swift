@@ -117,6 +117,9 @@ struct MobileLibraryView<TabBar: View>: View {
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the path line's room above, the bar's room below.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
         // The listing observation restarts when the sort flips (parity
         // C3 — a way of looking; nothing is written).
         .task(id: model.sort) { await model.startAll() }

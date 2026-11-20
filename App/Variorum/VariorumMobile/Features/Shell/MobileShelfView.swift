@@ -137,6 +137,9 @@ struct MobileShelfView<TabBar: View>: View {
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the path line's room above, the bar's room below.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
         .task { await model.start() }
         .task { await model.refreshTags() }
         // PR4's confirm. `$model.deleteBookPresented` is a real `@Bindable`
