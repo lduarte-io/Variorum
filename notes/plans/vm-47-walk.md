@@ -1248,3 +1248,71 @@ ANOTHER TICKET'S — VM-137 (Umbrella: Writing — the keyboard bar), and a look
 - **The keyboard-up band at AX5 in a note, Terminal light at the default size, teal & rust:** not in this set.
 - **Whether the Mac's editor pairs the same dark take tint with the same paper (W-E2):** not seen; inferred from the shared
   tokens.
+
+### The re-capture, set 2 — findings
+
+Read 2026-11-19 (night) — §4f rows F1–F27: the bar's roads, the message line and the wider pass, Study light and Terminal
+dark at the default size, on the fixed, re-landed tree (the walk app on `4866c7fb8`'s app code; code traced at HEAD
+`d0c878d74`, the same app code). 84 of 84 captures present (r05b absent in both, the driver's stale label).
+
+| Run (test, combination) | Verdict in one line |
+|---|---|
+| `test40_shell`, `seaglass-study-light-default` (19) | **W-C2 fixed** (b10 is the untouched Bookcase root to the pixel — no keyboard, the bar at 784–874; b11's field holds "swipe" unfocused); **m3 caught** — the Undo takes the line away and puts the note back (not in the next Trash); the line itself as before (above the bar, inks clear, two lines — W-C1); W-A1, W-A9, W-A10, W-B1, W-C3 confirmed; **no unexplained difference**. |
+| `test40_shell`, `seaglass-terminal-dark-default` (19) | The same verdicts in Terminal (b10 = b3 but the ▋ blink; the line's words 6.44:1, Undo 10.43:1; m3 shows both runs' put-back notes atop the Library); W-A3's ≈ 2 pt at the default size; **no unexplained difference**. |
+| `test20_rest`, `seaglass-study-light-default` (23) | W-B3 (Delete Note… #9B3B2F = Delete Book…'s), W-B4 (one hairline at 651), W-C7 (#CBE2D9), W-A10 (3.93:1), W-C3, W-B1, W-A9 confirmed; the merge's Create Book ("Gathering"), Book Details (VM-81's Finish caption, no Unarchive on screen) and membership sheet (Diverge on a book's row) read as built; P-47-38's cut as before; **one new look — W-F1** (r04b: her prose under the status bar); **one unexplained difference — set 1's W-E4** (r13). |
+| `test20_rest`, `seaglass-terminal-dark-default` (23) | The same, in Terminal's own inks (#E08A7C, #1C332A, #8B9088 5.46 / 6.44:1, placeholders 3.55:1); r03's Finish row 75.7 pt (the merge's three-line caption); W-F1 on black (1.28–1.75:1 behind the clock); W-E4 on r13 too — its first sighting outside Study light. |
+
+**W-F1 — On a scrolled page her prose now runs up under the status bar, behind the clock.** A QUESTION FOR HER (beside
+P-47-20, the pushed screens' top edges).
+- Captures: `seaglass-study-light-default--r04b-book-read-scrolled`, `seaglass-terminal-dark-default--r04b-book-read-scrolled`
+  (twins in `final/`).
+- Seen: once the Read page is scrolled, its lines continue to the screen's top edge under the system's soft scroll-edge
+  fade (≈ 0–110 pt): Study light 2.0–18.0 #D8D6D2 (1.34:1 on #F8F6F1), 25.7–45.7 behind "9:41" and the status icons
+  (#D6D3CF, 1.38:1 — the clock's #000000 over it), 56.7–73.0 #C2BFBA (1.70:1), 84–100 #827F79 (3.79:1), full ink from
+  ≈ 111 pt; Terminal dark on black 1.28 / 1.31 / 1.75:1 behind the clock. The status bar stays legible; her words read
+  as a faded ghost under it — and under the glass back circle, as set 2 already saw at 62–106 (C4). In the twins the clip
+  hid everything above 62 behind a #FFFFFF / #000000 strip.
+- The standard: nothing in the sizing sheet or the record rules a scrolled page's top edge; W-A1's fix was meant to carry
+  each page's GROUND to the edges, and its own comment says "everything laid out stays in the safe area" — true of layout,
+  not of a scroll view's scrolled content. This is the platform's own behaviour for a scrolled page under a bar (iOS 26's
+  soft edge), which the old clip had been hiding.
+- Where it comes from (HEAD): `App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift:297`
+  (`.clipShape(MobileBandClip())`) and `:758–762` (the clip's top and bottom two band-heights past the band — `67525b499`);
+  `Features/Read/MobileReadView.swift:56` (the page's `ScrollView`, whose scrolled content the system draws under the
+  status bar). Inferred, not seen: every pushed page that scrolls (the Trash, a book's contents, Versions, Archived) does
+  the same once scrolled — r04b is the only scrolled frame in this set.
+- Options for her: (a) as built — the platform's soft edge, the status bar legible over a faded ghost of her prose, as a
+  scrolled page reads in the system's own apps; (b) scrolled content stops at the safe area's top while each page's
+  ground still reaches the edge (the band's clip keeps its sideways and bottom reach but takes its top at the safe area,
+  with the page's own ground painted above it) — every page, one place; (c) the Read page alone keeps a solid top band in
+  its room above its prose (the reading page is where her words are the page), the lists left as (a).
+
+**Set 1's W-E4 on a second road (not re-filed):** `seaglass-study-light-default--r13-comments-overlay` and
+`seaglass-terminal-dark-default--r13-comments-overlay` show the same thing as f3–f5 — the note behind the Comments overlay
+sits at its top (its lines at 295.7 / 323.0 / 350.3 / 377.3 / 418.3, exactly r11's unscrolled note), where both twins had
+it scrolled **146 pt** (block 3, the fanned "The rain came in…", at 395.3 above the overlay). The road is `test20_rest`'s
+(after the takes overlay and Block History: a tap on the editor's TextView, the keyboard bar's ⋯ ▸ Comments…), not
+`test30_flip`'s, and Terminal dark shows it as well as Study light — so it is not one test's timing or one voice. The
+caret is under the overlay here too; W-E4's settling capture covers this road.
+
+**No other new finding.** Every fix in this set's brief shows in both combinations (§4f F1, F5–F7, F9–F18); the merge's
+faces read as built with nothing under 13 pt, no word in the faint and every ink over its floor (F20–F22); the known
+items stand as before (F19, F25).
+
+**What I could not judge, and why**
+- **Every capture at full resolution throughout:** each was looked at whole at 2 px per point (two-thirds of full size —
+  the context's limit), with full 3x before | after pairs or crops of every band that differs from its twin and of every
+  element measured; the pixel-identical captures named in §4f were looked at once.
+- **A one-frame keyboard flicker at b10 (W-C2's possible cost):** a settled still cannot show one; b10 being identical to
+  b3 proves only that nothing was left behind.
+- **Create Book with "Gathering" chosen (r05b):** not shot — so the merge's no-tags line, the tag rows' inks after the merge
+  and the OR / AND choice are unseen.
+- **The merge's other faces:** Book Details' Unarchive row (no archived book in the walk), the membership sheet's kind mark
+  and "(archived)" name (no gathering or archived book among the note's books) and the collect receipt — not on screen.
+- **Tap areas:** drawn shapes only; the Delete rows on Book Details and Note Actions have no hairline below them, so even
+  their drawn height is not bounded; the hit areas are the geometry pins' evidence.
+- **W-F1's reach:** only the Read page is scrolled in this set; the other pushed pages are inferred from the mechanism.
+  r04b's own offset (12.3 pt off its twin's) is a frame caught mid-deceleration by the driver, not a measurement of the app.
+- **W-E4's caret on r13:** under the overlay, as in set 1's frames.
+- **AX5, Study dark, Terminal light, teal & rust on these screens; the Account sheet:** not in this set (the walk never
+  opens the Account sheet).
