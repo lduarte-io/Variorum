@@ -558,8 +558,8 @@ ever edited after the fix lands, the red build is remade by the revert protocol 
 | A macOS probe (a scratch script, not a test host): `NSTextStorageDelegate.willProcessEditing` fires for a programmatic `replaceCharacters`, with the exact change; `didProcessEditing` widens a font-only insert through the paragraph's terminator. macOS evidence for UIFoundation's shared storage, NOT an iOS measurement | DONE |
 | Pins 1–4 (`MobileUnarmedEditRoutingTests`, base API only) | DONE (`ea5a7a635`) — red/green PENDING the stage window |
 | Red build `DerivedData/vm24-a-red` (the tree at `ea5a7a635`: `git diff --stat 4b0eaaacb ea5a7a635` = the new test file + this record, no production file) | DONE — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-red-bft.log`; the test binary carries the new suite. FROZEN: never rebuilt into |
-| The fix (D-24-1): the capture in `MobileStorageObserver`, `storageDidEdit(_:changeInLength:changedCharacters:)`, `fallbackVerdict`, the unbound churn cost | IN-PROGRESS |
-| The trace (D-24-4): widened · rescued · no capture | NOT-STARTED |
+| The fix (D-24-1): the capture in `MobileStorageObserver`, `storageDidEdit(_:changeInLength:changedCharacters:)`, `fallbackVerdict`, the unbound churn cost | DONE (this commit) — green PENDING the stage window |
+| The trace (D-24-4): widened · rescued · no capture | DONE (this commit) — DRAFT words; green PENDING |
 | Pins 5 (capture belts) and 6 (trace) | NOT-STARTED |
 | Fix build `DerivedData/vm24-a` + Mac `DerivedData/vm24-a-mac` | NOT-STARTED |
 | Closeout in §12 + the READY report | NOT-STARTED |

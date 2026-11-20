@@ -28,7 +28,13 @@
 //  character edit — including system paths that never consult the gate
 //  (autocorrect, dictation, marked text) — and an edit arriving WITHOUT a
 //  pending verdict is routed by `fallbackVerdict` against the pre-edit
-//  index. Nothing that lands in storage goes unrouted.
+//  index. Nothing that lands in storage goes unrouted. **VM-24:** that
+//  fallback rebuilds the edit's old range from the characters that changed,
+//  as the storage's FIRST callback (`willProcessEditing`) reported them —
+//  never from the post-fixing report alone, which iOS widens through the
+//  paragraph's terminator (TEXTKIT2 §3) and which, in a block with a block
+//  after it, crossed the separator and snapped her words back
+//  (`MobileChangedCharactersCapture`, at the storage observer).
 //
 //  PROJECTION DISCIPLINE: the Mac's ledger/policy pattern — the buffer is
 //  authoritative while dirty (deliveries defer); `applyPendingIfClean`
@@ -2187,12 +2193,25 @@ final class MobileEditorViewModel {
 
     @ObservationIgnored private var pendingGestureToken: UUID?
 
-    /// The exact-changed-range report (NSTextStorage didProcessEditing,
-    /// characters only). `editedRange` is the NEW characters' range; the
-    /// old length is `editedRange.length - delta`. System paths that
-    /// bypassed the gate (autocorrect, dictation, marked text) arrive here
-    /// with no pending verdict and route by `fallbackVerdict`.
-    func storageDidEdit(_ editedRange: NSRange, changeInLength delta: Int) {
+    /// The character-edit report (NSTextStorage didProcessEditing, characters
+    /// only). `editedRange` is the NEW characters' range AS REPORTED — after
+    /// attribute fixing, so it may run past what changed, through the
+    /// paragraph's terminator (TEXTKIT2 §3); the old length is
+    /// `editedRange.length - delta`. System paths that bypassed the gate
+    /// (autocorrect, dictation, marked text) arrive here with no pending
+    /// verdict and route by `fallbackVerdict`.
+    ///
+    /// **VM-24 (D-24-1) — `changedCharacters`:** the same transaction's range
+    /// BEFORE fixing, as the storage's first callback reported it
+    /// (`MobileChangedCharactersCapture`, kept by the storage observer), or
+    /// nil when none was kept. An edit no arming describes routes from it, and
+    /// its churn cost is counted from it; with nil, everything below is
+    /// exactly what it was before. The re-stamp, the face restyle, the caret
+    /// claim and the chrome keep the REPORTED range — each needs the extent
+    /// and each is extent-safe by its own rule.
+    func storageDidEdit(
+        _ editedRange: NSRange, changeInLength delta: Int, changedCharacters: NSRange? = nil
+    ) {
         // VX-296: EVERY character edit moves the markdown face's caret claim
         // with the text (the suppressed programmatic writes included) and
         // marks it for the next settle — the Mac's `storageDidEdit` line for
@@ -2227,14 +2246,6 @@ final class MobileEditorViewModel {
                 documentLength: index.documentLength,
                 landedText: { viewText($0) }) ? $0 : nil
         }
-        // E1 — the settling experiment's REPORT half: the numbers that
-        // decide whether the gate and the storage report are 1:1 inside one
-        // coordinated edit (`MobileEditTrace`'s header carries the whole
-        // why). `hadArming && !bound` is the binding's own refusal, which is
-        // the closest thing this code already had to an alarm.
-        MobileEditTrace.report(
-            editedRange: editedRange, delta: delta,
-            hadArming: armed != nil, bound: bound != nil)
         if armed != nil, bound == nil {
             // M13 (round-2 ladder round 1, MINOR 5): the paste's bulk-entry
             // intent was armed BESIDE this verdict, off the same gate call.
@@ -2246,8 +2257,37 @@ final class MobileEditorViewModel {
             // closes where it was opened.
             bulkPending = false
         }
-        let verdict = bound?.verdict ?? fallbackVerdict(editedRange: editedRange, delta: delta)
+        // **VM-24 (D-24-1):** an edit no arming describes is routed from the
+        // characters that changed when the storage's first callback kept
+        // them, else from the report exactly as before (`fallbackVerdict`).
+        let verdict = bound?.verdict
+            ?? fallbackVerdict(
+                editedRange: editedRange, delta: delta, changedCharacters: changedCharacters)
+        // The churn cost: a bound arming's exact figure; for an unbound edit
+        // the changed characters' own (old + new lengths — `exactCost`'s rule,
+        // immune to the widening); with neither, `recordAutosave` derives it
+        // from the report, as before.
         let exactCost = bound?.exactCost
+            ?? changedCharacters.map { ($0.length - delta) + $0.length }
+        // E1 — the settling experiment's REPORT half: the numbers that
+        // decide whether the gate and the storage report are 1:1 inside one
+        // coordinated edit (`MobileEditTrace`'s header carries the whole
+        // why). `hadArming && !bound` is the binding's own refusal, which is
+        // the closest thing this code already had to an alarm. VM-24 moved
+        // it below the verdict so it can say what routing from the changed
+        // characters did (widened · rescued · no capture); it is still a pure
+        // append before any arm runs, and `rescued` — the report-alone
+        // verdict — is asked only by an ARMED trace, and only for an unbound,
+        // widened report (D-24-4), so the disarmed cost stays one `Bool` read.
+        MobileEditTrace.report(
+            editedRange: editedRange, delta: delta,
+            hadArming: armed != nil, bound: bound != nil,
+            changedCharacters: changedCharacters,
+            rescued: {
+                !Self.refuses(verdict)
+                    && Self.refuses(fallbackVerdict(
+                        editedRange: editedRange, delta: delta, changedCharacters: nil))
+            })
         switch verdict {
         case .block(let i):
             // The mutators REFUSE rather than trap (BlockRangeIndex's
@@ -2339,9 +2379,26 @@ final class MobileEditorViewModel {
         textView?.refreshChrome(scope: .edit(editedRange))
     }
 
-    private func fallbackVerdict(editedRange: NSRange, delta: Int) -> BlockRangeIndex.Verdict {
+    /// Routes an edit no arming describes, against the PRE-edit index.
+    ///
+    /// **VM-24 (D-24-1) — the old range is rebuilt from the characters that
+    /// changed.** The report is the range AFTER attribute fixing, which iOS
+    /// widens through the paragraph's terminator (TEXTKIT2 §3); at the end of
+    /// a block with a block after it that terminator is the SEPARATOR, so an
+    /// old range rebuilt from the report crossed it and a plain in-block edit
+    /// refused — the heal from the store, her snap-back. `changedCharacters`
+    /// is the storage's own pre-fixing range of the same transaction: it holds
+    /// every character the transaction changed (and any attribute write inside
+    /// it, which only widens it), so it cannot loosen a refusal — a change
+    /// that truly crosses a block still crosses it. **With nil it is the
+    /// report, byte for byte as before** (the fail-safe for a road that ever
+    /// reports without the first callback).
+    private func fallbackVerdict(
+        editedRange: NSRange, delta: Int, changedCharacters: NSRange?
+    ) -> BlockRangeIndex.Verdict {
         // The index still describes the PRE-edit document here.
-        let oldRange = NSRange(location: editedRange.location, length: editedRange.length - delta)
+        let changed = changedCharacters ?? editedRange
+        let oldRange = NSRange(location: changed.location, length: changed.length - delta)
         guard oldRange.length >= 0, oldRange.upperBound <= index.documentLength else {
             return .refuse(.crossesBlockBoundary)
         }
@@ -2349,6 +2406,12 @@ final class MobileEditorViewModel {
             replacing: oldRange,
             replacementIsSingleNewline: false,
             segmentation: header?.effectiveSegmentation ?? .paragraph)
+    }
+
+    /// Whether a verdict refuses (the `.refuse` arm's whole family).
+    private static func refuses(_ verdict: BlockRangeIndex.Verdict) -> Bool {
+        if case .refuse = verdict { return true }
+        return false
     }
 
     private func recordAutosave(
@@ -2367,8 +2430,10 @@ final class MobileEditorViewModel {
         // Block-scoped edit cost (AppSpec §10): old + new lengths of the
         // exact changed edit, UTF-16 — the Mac's shape, retiring the
         // Phase 8 whole-buffer diff for this surface. Policed edits carry
-        // the gate's exact figure; system paths derive from the report
-        // (which iOS may widen — approximate is acceptable there).
+        // the gate's exact figure; system paths carry the changed
+        // characters' own figure when the storage's first callback kept
+        // them (VM-24), else derive from the report (which iOS may widen —
+        // approximate is acceptable there).
         let oldLength = editedRange.length - delta
         autosave.record(
             variantID: variantID, text: text,
@@ -2778,12 +2843,32 @@ final class MobileEditorGateDelegate: NSObject, UITextViewDelegate {
 
 /// NSTextStorageDelegate is a nonisolated protocol; the report hops onto
 /// the main actor exactly as the Mac's `EditorSurfaceDelegate` does.
+///
+/// **VM-24 (D-24-1): it hears BOTH of the storage's callbacks.** The first
+/// (`willProcessEditing`) carries the characters that changed, before
+/// attribute fixing widens the range; the second (`didProcessEditing`)
+/// carries the report, and hands the model both. The pairing is
+/// `MobileChangedCharactersCapture`'s pure rule.
 @MainActor
 final class MobileStorageObserver: NSObject, NSTextStorageDelegate {
     private weak var model: MobileEditorViewModel?
+    /// The first callback's account of the characters that changed, held
+    /// until the second callback of the same pass takes it.
+    private var capture = MobileChangedCharactersCapture()
 
     init(model: MobileEditorViewModel) {
         self.model = model
+    }
+
+    nonisolated func textStorage(
+        _ textStorage: NSTextStorage,
+        willProcessEditing editedMask: NSTextStorage.EditActions,
+        range editedRange: NSRange,
+        changeInLength delta: Int
+    ) {
+        MainActor.assumeIsolated {
+            capture.willProcess(editedMask, range: editedRange, delta: delta)
+        }
     }
 
     nonisolated func textStorage(
@@ -2792,9 +2877,84 @@ final class MobileStorageObserver: NSObject, NSTextStorageDelegate {
         range editedRange: NSRange,
         changeInLength delta: Int
     ) {
-        guard editedMask.contains(.editedCharacters) else { return }
         MainActor.assumeIsolated {
-            model?.storageDidEdit(editedRange, changeInLength: delta)
+            // TAKEN FIRST, on every callback whatever its mask, and cleared by
+            // the taking — so a pass that changed no characters (the re-stamp,
+            // the face restyle, any attribute-only transaction, nested inside
+            // `storageDidEdit` or not) can neither read the value nor leave one
+            // behind for a later report.
+            let changed = capture.take(reportedRange: editedRange, delta: delta)
+            guard editedMask.contains(.editedCharacters) else { return }
+            model?.storageDidEdit(editedRange, changeInLength: delta, changedCharacters: changed)
         }
+    }
+}
+
+// MARK: - VM-24: the characters that changed (the storage's first callback)
+
+/// **VM-24 (D-24-1) — the characters an edit changed, as the storage
+/// accumulated them BEFORE attribute fixing** (the record
+/// `notes/plans/vm-24-unwarned-edit-routing.md` §4.1–§4.3).
+///
+/// `didProcessEditing`'s range is the range AFTER fixing, and iOS's fixing
+/// re-propagates the paragraph's style through the paragraph's terminator
+/// (TEXTKIT2 §3) — which, at the end of a block with a block after it, is
+/// the block SEPARATOR. An edit the gate armed and the report still describes
+/// is routed by its arming and never minds the width; one that arrived
+/// unarmed (autocorrect, dictation, a marked-text commit, any programmatic
+/// replace or insert, a typed key whose arming another report spent first —
+/// her phone's E1 #50–#52) is routed by `fallbackVerdict`, and from a widened
+/// report its old range crossed the separator: the refusal, the heal from the
+/// store, the word she just entered snapping back. `willProcessEditing`
+/// reports the same transaction's range before fixing touches it: the
+/// characters that changed, plus any attribute write inside the same
+/// transaction (which only ever widens it, the safe way).
+///
+/// The pairing rule, pure so it is pinned without a storage
+/// (`MobileChangedCharactersCaptureTests`):
+/// · `willProcess` KEEPS the range only when the pass changed characters,
+///   and replaces whatever was kept before — a pass that changed only
+///   attributes keeps nothing;
+/// · `take` runs at EVERY `didProcessEditing`, whatever its mask, and always
+///   leaves nothing kept;
+/// · a kept value is ACCEPTED only when its delta equals the report's and
+///   its range lies inside the reported range. Anything else is dropped, and
+///   the report routes exactly as it did before this type existed.
+///
+/// `nonisolated` (the `ArmedEdit` precedent): a pure value the main-actor
+/// observer holds, read by headless pins with no actor in sight.
+nonisolated struct MobileChangedCharactersCapture: Equatable {
+    /// One pass's pre-fixing account: the range (post-edit coordinates) and
+    /// the net change.
+    nonisolated struct Kept: Equatable {
+        let range: NSRange
+        let delta: Int
+    }
+
+    private(set) var kept: Kept?
+
+    /// The storage's first callback of a pass.
+    mutating func willProcess(_ mask: NSTextStorage.EditActions, range: NSRange, delta: Int) {
+        kept = mask.contains(.editedCharacters) ? Kept(range: range, delta: delta) : nil
+    }
+
+    /// The storage's second callback of the same pass: the kept range when it
+    /// belongs to this report, else nil — and nothing is kept afterwards,
+    /// either way.
+    mutating func take(reportedRange: NSRange, delta: Int) -> NSRange? {
+        let candidate = kept
+        kept = nil
+        guard let candidate, Self.accepts(candidate, reportedRange: reportedRange, delta: delta)
+        else { return nil }
+        return candidate.range
+    }
+
+    /// Does a kept value belong to the report that arrived? Fixing moves
+    /// neither the net change nor the characters, so the delta must be the
+    /// report's own and the range must lie inside the reported one.
+    static func accepts(_ kept: Kept, reportedRange: NSRange, delta: Int) -> Bool {
+        kept.delta == delta
+            && kept.range.location >= reportedRange.location
+            && kept.range.upperBound <= reportedRange.upperBound
     }
 }
