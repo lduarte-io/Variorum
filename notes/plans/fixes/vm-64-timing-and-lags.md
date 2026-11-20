@@ -4868,3 +4868,81 @@ runs (it walks `Shared/`); expected green — this run's `Shared/` lines say "sm
    fence drops" broken for that case); (c) the drain speaks first and the door's refusal second — reordering the door's
    last two acts, a change to VM-2's and VM-16's lines both. **Left at (a), PROVISIONAL**; hers with P-2-2, P-55-3 and
    P-55-5. No other product question from this merge.
+
+### The merge gate's Mac red — the readout's two rows say commit (implementer; the same session as the VM-78 merge-in)
+
+**Not done here (first, by the record's rule):** no hosted run (the re-run of the gate's legs is the orchestrator's
+stage; the commands are below); no red build (the pin's red is the gate run's own log on `5a4045303`); no `swift test`
+(this pass changed nothing under `Sources/` or `Tests/`: `git diff --stat 09a33071b HEAD -- Sources Tests` is empty).
+`DeadVocabularyTests` itself is not edited and gains no allow-list entry (these are labels). Nothing in `Sync/`,
+`Server/`, custody or `Features/Protection/`; no schema change; `MobileEditorViewModel.swift` and `MobileLine.swift`
+untouched; no other shown word changed; no shared ledger edited. The record's earlier sections keep the old labels as
+they were written (history is not rewritten); this section is the correction.
+
+**The red, as the gate logged it** (the orchestrator's merge gate, the whole Mac target from `vm64-gate3`, code
+`5a4045303`): `DeadVocabularyTests.noLabelOrHeaderSaysSavepoint` — the fence for her ruling R-13s-31 ("renaming
+savepoints to commits … I want that changed everywhere"; R-13s-32 keeps "savepoint" only as explanatory prose) — found
+three offenders, all this run's timing readout labels: `App/Variorum/Shared/AppTiming.swift:134` — "Savepoints per
+leaving" (the series' `signpostName`); `App/Variorum/VariorumMobile/Features/Perf/MobileTimingView.swift:67` —
+"Savepoints per leaving"; `…/MobileTimingView.swift:85` — "Savepoint tries". Red since batch 1 (`808f333a8`): no Mac
+piece before the gate ran that suite — the scan walks `VariorumMobile/` as well as `Shared/`, so a phone label trips a
+Mac test (the list of such Mac suites is below).
+
+**The change** (`63ccbadd9`, wording only, Part of VM-65):
+- `Shared/AppTiming.swift:134` — `case .savepointsPerLeaving: return "Commits per leaving"`. It names the series'
+  `os_signpost` interval only (`TimingRecorder.swift:601/606` are its sole readers); nothing persisted or compared reads
+  it — the kept timing file keys a series by its raw value, `savepointsPerLeaving`, unchanged.
+- `VariorumMobile/Features/Perf/MobileTimingView.swift:67` — `(.savepointsPerLeaving, "Commits per leaving")`; `:85` —
+  `(.savepointAttempt, "Commit tries")`. Both stay under the tables' `// DRAFT` marks.
+- `VariorumMobileTests/MobileHerPathsPerfTests.swift:1085` — the MARK comment that quoted the row: "Commits per leaving
+  (the readout's row): a note, and the app".
+- **Unchanged, deliberately:** the code names (`savepointsPerLeaving`, `savepointAttempt`, `savepointAttempted`); the
+  speed suite's series keys (`savepoints-per-note-leaving`, `-per-backgrounding-…`, `-per-lock` — report identifiers,
+  never shown); the tests' expectation messages; and two prose comments that describe what the counter counts, quoting no
+  label (`VariorumMobileApp.swift:260` "its savepoint tries are …", `MobileWriteView.swift:233` "its savepoint tries
+  counted" — the latter a file both wave-1 runs share). No test reads the labels' text: `MobileTimingTests`,
+  `MobileBoxOpenTimingTests` and `TimingRecorderTests` hold no "savepoint" at all, and the readout's copied text is built
+  from the same tables.
+- **Documents:** the handoff's readout step names the row "Commits per leaving", and its wording-pass item says once
+  that the two rows were renamed to follow her commit rule and stay DRAFT (`9fa47d6bb`). The closeout drafts quote
+  neither label (the SurfaceContracts readout line names no row) — nothing changed there.
+
+**The scan, mirrored headlessly.** A throwaway copy (the session scratchpad, never committed) of the test's own
+`literals(in:)`, `afterInterpolation`, `isRetiredLabel`, `isLabelShaped` and `containsWord`, verbatim, with its
+`savepointRoots` (`App/Variorum/Variorum`, `App/Variorum/Shared`, `Sources/VariorumCore`, `App/Variorum/VariorumMobile`),
+`savepointAllowedFiles` and `savepointAllowedLiterals`:
+- on `09a33071b`'s tree (before the change): 936 files; **3 offenders, exactly the gate's three** (the same files,
+  lines and literals) — so the mirror reads what the test reads;
+- on `63ccbadd9`'s tree: 936 files; **0 offenders**; the three allow-list entries each seen, none stale; the walk's
+  floor (more than 600 files) met.
+- This run's own product files (the 36 Swift files under the scan's roots in `git diff a4634b288 48a94ea43`, which
+  include `Shared/AppTiming.swift` and every `VariorumMobile/Features/Perf/*.swift` it touched) hold **no string
+  literal with the word at all** after the change, label-shaped or not (a listing variant of the mirror, checked against
+  a control file that does print).
+
+**The Mac target's suites that read the phone's or `Shared/`'s source** (the stage coordinator's question; found by
+what each walks — every Mac test file that resolves a path from `#filePath` and reads files, each reading line
+attributed to its enclosing TYPE):
+- **Walk `Shared/`** (with the Mac app): `AlertCancelSweepTests`, `ChromeMenuRowSizeTests`, `DragTypeDeclarationTests`,
+  `DuplicateDoorsTests`, `NoLiteralColourTests`, `PaneFindFaceTests`, `Phase9cAuthWiringTests` (deep, `Shared/` only),
+  `OneTimeCodeAutoFillTests` (in `ShellChromeTests.swift`), `StatusSeamVocabularyTests`, `UnfiledWordTests`,
+  `VM61MacStatusSeamPinTests`, `VM62MacRefusalWordsPinTests`.
+- **Walk `Shared/` AND `VariorumMobile/`, or the whole app or repo:** `DeadVocabularyTests` (its savepoint fence adds
+  `VariorumMobile/` and `Sources/VariorumCore`), `DataSafetySearchIndexTests` (+ `Sources/VariorumMCP`),
+  `PaneLineMetricsScopeTests` (in `IndexTierMetricsTests.swift`), `OneRefreshAuthorityCompositionTests` (in
+  `OneRefreshAuthorityTests.swift`), `OneInputPathTests`, `PaletteDerivationTests`, `GlyphRainTests` (the whole
+  `App/Variorum` folder).
+- **Read NAMED files under `Shared/` or `VariorumMobile/`** (trip only when those files change): `CopyRegisterPinTests`
+  (`Shared/Protection/ProtectionCopy.swift`, `ProtectionWords.swift`, `Shared/SampleLibrary/SampleLibraryEncryptionBook.swift`),
+  `OpsRefusalTableIntegrityTests` (`Shared/OpsRefusalTable.swift`, `VariorumMobile/Features/Write/MobileEditorViewModel.swift`),
+  `ProdTestRoadTests` (`Shared/AppServices.swift`, `ProjectConfig.swift`, `Protection/ProtectionWalkSwitch.swift`,
+  `SyncStatusViews.swift`), `SyncWalkFenceTests` (`Shared/AppServices.swift`), `TravellingDotsIndicatorTests` (three
+  `VariorumMobile/Features/Protection/` faces), `TutorialProtectionRecoveryTests` (`Shared/AuthViews.swift`,
+  `SyncStatusViews.swift`), `VM63MacWingBrainsHoistPinTests` (its hoisted brains under `Shared/`),
+  `WhatsNewWaitsCompositionTests` (in `WhatsNewWaitsAfterAdoptionTests.swift`; `Shared/AppBootstrap.swift`).
+- Not in the list: `MCPAsksWaitTests` and `MCPIconTwinsTests` match "Shared" only in copy ("Shared with …"; they walk
+  the Mac app). The handoff's "The next runs" says this in plain words with the two walking groups named (`5017e198e`).
+
+**Builds:** PENDING(phone and Mac `build-for-testing` into `vm64-gate4`).
+
+**The hosted commands for the gate's re-run:** PENDING(written once the products exist).
