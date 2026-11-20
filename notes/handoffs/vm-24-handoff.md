@@ -84,8 +84,10 @@ Both fixes are on the phone only. Nothing in the shared code or the Mac changed.
   is the pins, and your phone's two sessions.
 - **The review:** one round, a fresh reviewer, no blocker and no major finding; two minor and a nit, all words or
   comments, all fixed and confirmed.
-- **The gate:** ‹PENDING: the whole phone target's verdict line; the speed suite alone; the Mac's suites that read
-  the phone's source›.
+- **The gate:** the whole phone test target ran 1,226 tests in 215 suites with no failure — the first time since
+  October that main's standing red is gone. The speed suite, run alone, passed its 13. The 22 Mac suites that read
+  the phone's source passed (129 tests). The whole Mac target was not run: nothing in the shared code or the Mac
+  changed (the coordinator read the rule the same way).
 
 ## The after session (the same fifteen minutes, on the "after" app)
 

@@ -50,7 +50,7 @@ one Fable cold review, nov18 on the stage. Two phone-only fixes in the Write edi
 on the fix, alone and in company (371 tests in 52 suites; then 385 in 55). The walk: VM-243's bug on the BEFORE
 captures, gone on the AFTER; the simulator's keyboard asked the gate before every edit, so the walk met no unarmed
 edit — VM-24's device evidence is her phone's "before" and "after" sessions (§10). The ladder: one round,
-0 BLOCKER · 0 MAJOR · 2 MINOR · 1 NIT, all landed and confirmed. The gate: PENDING(the gate's three legs).
+0 BLOCKER · 0 MAJOR · 2 MINOR · 1 NIT, all landed and confirmed. The gate (§12, "THE GATE"): the whole phone target 1,226 tests in 215 suites with ZERO red — main's one standing red gone — the gated speed suite's 13 alone, and the Mac's 22 suites that read the phone's source (129 tests), all green.
 
 **Canon.** TEXTKIT2_NOTES §3 (two iOS 26.2 findings and their rules); MobileSoul PL-81. No AppSpec or
 SurfaceContracts line moved.
@@ -590,7 +590,7 @@ ink).
 | L8 | Batch B's window | orchestrator, nov18's GO | DONE — the confirm 05:08–05:10 (red as predicted); the red/green 05:27–05:31 (7 issues at the tabled lines on the build without the fix; 385 tests in 55 suites green on the fix; the Mac's 46 in 7 green) |
 | L9 | The simulator walk (typing mid-note, paste, the readout's new lines; a dash line and the paragraph after it) | orchestrator | DONE 06:06–06:21 — both passes; rows a, b, c, e, f, g, h PASS, row d PASS for the paste at a paragraph's end and NOT WALKED for the paste over a selection; VM-243's bug on the BEFORE captures and gone on the AFTER; the simulator produced no unarmed or widened edit, so VM-24's device evidence is still her "after" session; one finding, W-1 (`notes/plans/vm-24-walk.md`, "The verdicts") |
 | L10 | The ladder (`fable-reviewer`, fresh per round, up to five) | orchestrator | CLOSED after ONE round — `notes/plans/fixes/vm-24-ladder-round1.md`: 0 BLOCKER · 0 MAJOR · 2 MINOR · 1 NIT, every finding agreed and landed (`9675f8888`, `b3fa281f9`), the reviewer's final calls confirming each, plus its final call 2 on the implementer's own observation (`8f5323554`: the new "widened" line fits both voices); no second round earned; the orchestrator's line-by-line check of the final round's four hunks done (strings and comments only) |
-| L11 | The gate: the whole phone target, the gated speed suite alone; a Mac leg only if a shared file changed | orchestrator, nov18 | NOT STARTED |
+| L11 | The gate: the whole phone target, the gated speed suite alone; the Mac's readers of the phone's source | orchestrator, nov18 | DONE 06:52–07:09 — 1,226 tests in 215 suites, ZERO red (main's standing red gone); the speed suite 13 alone; the Mac's 22 source-reading types 129 tests (§12, "THE GATE") |
 | L12 | Canon: TEXTKIT2_NOTES §3 (what was measured about the first callback and the fix's rule); SurfaceContracts only if a contract line moved; MobileSoul PL-81 | orchestrator at closeout | NOT STARTED |
 | L13 | VX-68 closed with a comment naming the pin (D-24-5) | orchestrator at the merge | NOT STARTED |
 | L14 | The Mac twin's ticket (D-24-3) | orchestrator at closeout | NOT STARTED |
@@ -1349,6 +1349,28 @@ instance; no Problem Reporter; no new crash report; the Debug defaults 1,356 key
 
 **Both batches' code is now built and proved in windows. The commit the walk's AFTER pass and the ladder read is
 `a43b5fe70`'s code** (no App or Sources line after `106a0d2a4`).
+
+#### THE GATE — the orchestrator's stage results
+
+**Claim `vm-24`, 2026-11-20 06:52:08 → released 07:09:50, nov18's GO.** The tree that merges: `cdc1e3b7b` and the
+notes commits after it (main `508a2bae0` merged in at `190165014`; nothing under App or Sources after `8f5323554`).
+Products: `DerivedData/vm24-gate` (the phone, built from `8f5323554`), `DerivedData/vm24-a-mac` (the Mac; no
+Mac-compiled file changed in the run). The standing simulator, one fresh boot, a 30 s settle (06:52:45), legs (1)
+and (2) on that boot, then shut down; `Restarting after unexpected exit` = 0 in every log; every `xcodebuild`
+exited by itself. Logs `DerivedData/logs/vm24-gate-phone.log`, `-perf.log`, `-mac.log`, the summary
+`vm24-gate-summary.txt`.
+
+| Leg | Verdict line | Notes |
+|---|---|---|
+| (1) the whole phone target, one launch (`-only-testing:VariorumMobileTests`) | "Test run with 1226 tests in 215 suites passed after 761.034 seconds with 6 known issues." | **ZERO red — main's one standing red is gone.** Main's count was 1,194 in 209 with that one red; this tree adds the run's 32 tests and 6 suites. The standing pin: `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:)` "with 3 test cases passed". Skipped: 13, every one `MobileHerPathsPerfTests`' ("reads the process's one timing recorder"). Known issues, declared, in suites this run does not touch: 4 in "Mobile filter row — width, measured on the real surface", 2 in "Mobile Trash — PR2's recovery surface". Named as run and passed: the fence suite (VM-2), VM-78's guards (the membership sheet's G3 suite, VM-81's three, VM-83's three, VM-21's), VM-64's "VM-68 — the Library's paging and hold rules", VM-47's keyboard and edge pins ("a hidden page never holds the keyboard", "The grounds reach the screen's edges", "Which page colours the strips beyond the band") |
+| (2) `MobileHerPathsPerfTests` alone, `TEST_RUNNER_VM66_PERF=1` | "Test run with 13 tests in 1 suite passed after 128.795 seconds." | no skip, no known issue |
+| (3) the Mac's 22 types that read the phone's source | "Test run with 129 tests in 22 suites passed after 30.645 seconds with 4 known issues." | the 4 known issues are `IndexTierMetricsTests`' declared ones (TEXTKIT2 §3's short trailing blank line). The types: CrystallizationPlannerTests · CrystallizationReconcilerTests · DataSafetySearchIndexSettingsSearchTests · DataSafetySearchIndexTests · DeadVocabularyTests · ArmedEditTests · MacEditRoutingTests · IndexTierMetricsTests · PaneLineMetricsScopeTests · OneInputPathTests · OneRefreshAuthorityCompositionTests · OneRefreshAuthorityRaceTests · OpsRefusalTableIntegrityTests · PaletteDerivationTests · LobbyWordsDoorPressTargetTests · NotOnYetWordsTests · ProtectionWordsVX307Tests · WordsFieldsConcealTests · SpaceEaterTests · TravellingDotsIndicatorTests · TrayFilterTests · GlyphRainTests |
+
+Headless before the gate, on the final words: the Core suites that name phone files — `MCPProviderNeutralityTests`
+"2 tests in 1 suite passed"; `Phase13icOutflowTests` and `OutflowRetirementTests` "13 tests in 2 suites passed".
+No whole Mac target was owed or run: the run changes no line under `Shared/`, `Sources/` or the Mac app (nov18's
+reading too). After the gate: the simulator shut down (0 booted); its app container lists `Variorum-dev` only; no
+instance; no Problem Reporter; no new crash report; the Debug defaults 1,356 keys, unchanged.
 
 ---
 
