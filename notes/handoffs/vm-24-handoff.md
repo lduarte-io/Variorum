@@ -1,7 +1,7 @@
 # VM-24 — the snap-back, and the faint text after a dash: your handoff
 
-**Status: ‹PENDING: the gate, the PR and the merge commit›.** The run started 2026-11-20 at about 03:50 while you
-slept and ran through the night under the stage coordinator (nov18). Your words that covered it: "if you finish
+**Status: merged to main 2026-11-20 (PR #19, merge commit `fe1493c16`).** The run started 2026-11-20 at about 03:50
+while you slept and ran through the night under the stage coordinator (nov18). Both tickets are Done. Your words that covered it: "if you finish
 vm-24 before i'm back, do your own closeout and i'll start from handoffs for everythign."
 
 **Two apps, one order — read this before the cable.**
@@ -11,8 +11,10 @@ vm-24 before i'm back, do your own closeout and i'll start from handoffs for eve
    Its install block is the top of `notes/handoffs/vm-47-handoff.md`. It does NOT hold this run's fixes, which is
    the point: your "before" count runs on it. The script is `notes/handoffs/vm-24-morning-phone-session.md`
    (fifteen minutes; on main since this run merged).
-2. **The "after" app** holds this run's two fixes: ‹PENDING: its path, in a folder with "after" in its name, and the
-   commit it was built from›. Install it **only once the "before" counts are copied out** to the Mac. Nobody
+2. **The "after" app** holds this run's two fixes:
+   `~/Library/Developer/Xcode/DerivedData/vm24-after-device/Build/Products/Release-iphoneos/VariorumMobile.app`,
+   built 2026-11-20 at 07:14 from the merge commit `fe1493c16` in a clean checkout. Its install block is "Installing
+   the after app" below. Install it **only once the "before" counts are copied out** to the Mac. Nobody
    rebuilds main for the wave-1 install: main now carries the fixes, and a fresh build would leave no "before".
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets. A **pin** is a test written to fail on the old code
@@ -32,8 +34,9 @@ section is the short version.
   the readout and the two extra things only your phone can show.
 - [ ] **3. Your calls** — five small ones, in "Your calls" below. They are QUESTIONS #282.
 - [ ] **4. The wording pass** — the edit trace's new lines, in "The wording pass" below.
-- [ ] **5. The gate's call** — ‹PENDING: the coordinator's call on the gate, made in your absence and yours to
-  ratify›.
+- [ ] **5. The gate's call** — the coordinator (nov18) called the gate passed while you slept: the whole phone
+  test target with no failure, the speed suite alone, and the Mac suites that read the phone's source. No whole Mac
+  run, because nothing shared or Mac-side changed. That call is yours to confirm.
 - [ ] **6. The tickets filed** — one, at the bottom.
 
 ## What was wrong, in plain words
@@ -77,8 +80,8 @@ Both fixes are on the phone only. Nothing in the shared code or the Mac changed.
 - **The walk** (a dedicated simulator, the same script on main's code and on the fix): the BEFORE screenshots show
   the dash line and the paragraph after it faint and "word" in the heading's big face; the AFTER screenshots show
   only the dash faint. The screenshots are kept for you on the Pro in
-  `~/dev/variorum-vm-24/App/Variorum/DerivedData/vm24-walk-screens/` ‹PENDING: their place after the cleanup› — say
-  "delete the screens" when you have looked.
+  `~/dev/variorum/App/Variorum/DerivedData/vm24-walk-screens/` (`before/` and `after/`; start with
+  `g-note-end-keyboard-down.png` in each) — say "delete the screens" when you have looked.
 - **What the walk could not show, said plainly:** the simulator's keyboard asked the editor before every key,
   autocorrection and paste, so the walk met no unasked-about change and no snap-back to avoid. For VM-24 the proof
   is the pins, and your phone's two sessions.
@@ -115,6 +118,29 @@ Two things only your phone can show, a minute each:
 2. **The dash bug's three questions** from the morning script, again: with the fix, "one", "two" and " b" should be
    in full ink, and a line under a heading in the body face.
 
+## Installing the "after" app
+
+**Nothing has been installed and no phone was contacted.** The road is the same one as the wave-1 install
+(`notes/plans/vm-44/plans/vm-45-install-runbook.md`, with the differences `notes/handoffs/vm-47-handoff.md` lists in
+its morning block); only the build's path changes. The session helping you asks the coordinator for the stage first.
+
+| | |
+|---|---|
+| The build | Release, a generic iOS device build from a clean checkout at exactly `fe1493c16`; BUILD SUCCEEDED; `codesign --verify --deep --strict` OK; about 52 MB |
+| Bundle id · version · build | `io.lduarte.VariorumMobile` · 1.0 · 1 — the same as the wave-1 app, so the version cannot tell them apart. The way to tell: Settings ▸ Diagnostics ▸ Edit trace… shows a "rescued" line only on the "after" app |
+| Signing | Apple Development, the same team as the wave-1 app; the entitlements identical to it; nothing minted, refreshed or prompted |
+| Against the wave-1 app | three phone editor files differ (the two fixes and the trace); no shared or Core file, no package version, no project setting |
+| Sync version | 15, unchanged: nothing pauses |
+| The first open | NO migration (the wave-1 app's one migration will already have run) |
+
+The step that changes, in place of the runbook's `APP=` line:
+
+`APP="$HOME/Library/Developer/Xcode/DerivedData/vm24-after-device/Build/Products/Release-iphoneos/VariorumMobile.app"`
+
+As ever: Variorum fully quit on the phone, install in place, **never uninstall**. A safety copy before this second
+install is your call; this build adds no migration, so going back to the wave-1 app is the same install the other
+way.
+
 ## Your calls (QUESTIONS #282)
 
 1. **No run ticket.** The phase skill says several tickets make a run with a fresh `Run:` ticket. Your words made
@@ -146,6 +172,15 @@ Two notes for the same pass:
 - **"snap-backs avoided" is slightly generous in one rare case:** during a divide or merge, a rescued change is
   still withheld by the keystroke fence (the phone says "Another structural change is still landing."). It is
   counted as rescued because the old code would have redrawn the page mid-act.
+
+## Housekeeping
+
+- `Tools/canon-size`: 143606 (harness limit 150000, headroom 6394) — unchanged; this run touched no loaded canon
+  file.
+- Canon: `notes/TEXTKIT2_NOTES.md` §3 gained the run's two findings and their rules; `notes/MobileSoul.md` gained
+  parity row PL-81. No AppSpec or SurfaceContracts line moved.
+- Kept on the Pro for your sitting: the "after" app (above) and the walk's screenshots. Everything else of the run —
+  its worktree, its test builds, the walk's throwaway driver, the branch — is removed.
 
 ## Not done, or left for later — honestly
 

@@ -1,8 +1,9 @@
 # VM-24 — An unwarned edit whose report TextKit widens snaps back on the phone (VM-243 riding)
 
-**STATUS: OPEN 2026-11-20 — /architect-phase on the Pro, an away run (she is asleep until morning); orchestrator
-session `vm-24`; stage coordinator `nov18`.** Ticket VM-24 (team VM, project "Mobile — the catch-up & launch") ·
-rider VM-243, at her word · Branch `vm-24-unwarned-edit-routing` · Worktree `~/dev/variorum-vm-24` · PR: PENDING.
+**STATUS: CLOSED 2026-11-20 — merged to main (PR #19, merge commit `fe1493c16`); /architect-phase on the Pro, an away
+run overnight (she slept; her words in §1); orchestrator session `vm-24`; stage coordinator `nov18`.** Ticket VM-24
+(team VM, project "Mobile — the catch-up & launch") · rider VM-243, at her word · Branch
+`vm-24-unwarned-edit-routing` (deleted after the merge) · PR #19.
 
 This file is the run's ONE record: her words, the binding principles, the design as ruled, the batches and their
 briefs, the ledger, what is held for her, and each batch's live status and closeout. The kickoff VM-78 wrote is kept
@@ -10,8 +11,7 @@ whole at its end.
 
 ## FOR A LATER READER
 
-*Written at the closeout from the settled facts; the slots marked PENDING are filled at the merge. Below it is the
-night's working record.*
+*Written at the closeout from the settled facts. Below it is the night's working record, kept as written.*
 
 **What the run was.** VM-24 as its own run after wave 1 of the mobile catch-up (her ruling, §1), with VM-243 riding
 at her word; /architect-phase, an away run on 2026-11-20, Fable orchestrating, a fresh Opus implementer per batch,
@@ -57,9 +57,17 @@ SurfaceContracts line moved.
 
 **Open items.** Her phone's two sessions (`notes/handoffs/vm-24-morning-phone-session.md`, then the "after" app);
 her five calls and the wording pass (QUESTIONS #282; `notes/handoffs/vm-24-handoff.md`); VX-1031 (the Mac's twin,
-not fixed); VX-68 closed with this merge, PROVISIONAL. PR: PENDING. Merge commit: PENDING.
+not fixed); VX-68 closed with this merge, PROVISIONAL. PR #19, merge commit `fe1493c16`. The gate's call was the stage coordinator's (nov18), provisional in her absence
+and hers to confirm. The "after" app for her phone is named in the handoff's first lines; the walk's captures are kept
+for her on the Pro in `~/dev/variorum/App/Variorum/DerivedData/vm24-walk-screens/` until she says "delete the
+screens".
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
+
+**CLOSED 2026-11-20 07:11 — merged (PR #19, merge commit `fe1493c16`).** The gate passed (§12, "THE GATE"; the
+coordinator's call, hers to confirm). What remains is hers: the "before" session on the wave-1 app, the "after" app
+and the same session, QUESTIONS #282 (`notes/handoffs/vm-24-handoff.md`). The blocks below are the night's states,
+kept as written.
 
 **As of 2026-11-20 06:55.** BOTH BATCHES PROVED, THE WALK DONE, THE LADDER CLOSED AFTER ONE ROUND, MAIN MERGED IN
 (`190165014`; main had moved by four notes files only). The code is `8f5323554`'s — nothing under App or Sources
@@ -580,7 +588,7 @@ ink).
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| L1 | Unit 0, the "before" session on her phone | her hands; the script `notes/handoffs/vm-24-morning-phone-session.md` | HELD (§10) |
+| L1 | Unit 0, the "before" session on her phone | her hands; the script `notes/handoffs/vm-24-morning-phone-session.md` | HELD for her morning (§10) — the script is on main since the merge |
 | L2 | Is the wave-1 build's trace enough for the "before"? | orchestrator | DONE — yes (§4.6) |
 | L3 | The standing pin re-run alone on main's code | orchestrator | DONE — red, main's shape (the live state) |
 | L4 | The design: VM-24's options against the fence; VM-243's trace | architect | DONE (§4) |
@@ -591,12 +599,12 @@ ink).
 | L9 | The simulator walk (typing mid-note, paste, the readout's new lines; a dash line and the paragraph after it) | orchestrator | DONE 06:06–06:21 — both passes; rows a, b, c, e, f, g, h PASS, row d PASS for the paste at a paragraph's end and NOT WALKED for the paste over a selection; VM-243's bug on the BEFORE captures and gone on the AFTER; the simulator produced no unarmed or widened edit, so VM-24's device evidence is still her "after" session; one finding, W-1 (`notes/plans/vm-24-walk.md`, "The verdicts") |
 | L10 | The ladder (`fable-reviewer`, fresh per round, up to five) | orchestrator | CLOSED after ONE round — `notes/plans/fixes/vm-24-ladder-round1.md`: 0 BLOCKER · 0 MAJOR · 2 MINOR · 1 NIT, every finding agreed and landed (`9675f8888`, `b3fa281f9`), the reviewer's final calls confirming each, plus its final call 2 on the implementer's own observation (`8f5323554`: the new "widened" line fits both voices); no second round earned; the orchestrator's line-by-line check of the final round's four hunks done (strings and comments only) |
 | L11 | The gate: the whole phone target, the gated speed suite alone; the Mac's readers of the phone's source | orchestrator, nov18 | DONE 06:52–07:09 — 1,226 tests in 215 suites, ZERO red (main's standing red gone); the speed suite 13 alone; the Mac's 22 source-reading types 129 tests (§12, "THE GATE") |
-| L12 | Canon: TEXTKIT2_NOTES §3 (what was measured about the first callback and the fix's rule); SurfaceContracts only if a contract line moved; MobileSoul PL-81 | orchestrator at closeout | NOT STARTED |
-| L13 | VX-68 closed with a comment naming the pin (D-24-5) | orchestrator at the merge | NOT STARTED |
-| L14 | The Mac twin's ticket (D-24-3) | orchestrator at closeout | NOT STARTED |
-| L15 | The device build of the fixed tree for her "after" session, and its block in the handoff | orchestrator after the merge | NOT STARTED |
-| L16 | Unit 0's "after" session | her hands | HELD (§10) |
-| L17 | Closeout: this record's FOR A LATER READER, the shared ledgers at the merge (QUESTIONS #282, AppSpecRecord, the finals line, the master plan), `Tools/canon-size`, the tickets, the handoff `notes/handoffs/vm-24-handoff.md`, the cleanup | orchestrator | NOT STARTED |
+| L12 | Canon: TEXTKIT2_NOTES §3 (what was measured about the first callback and the fix's rule); SurfaceContracts only if a contract line moved; MobileSoul PL-81 | orchestrator at closeout | DONE — TEXTKIT2_NOTES §3 (two findings) and MobileSoul PL-81 (`b29705c7f`); no SurfaceContracts or AppSpec line moved |
+| L13 | VX-68 closed with a comment naming the pin (D-24-5) | orchestrator at the merge | DONE at the merge — VX-68 closed with a comment naming the pins; PROVISIONAL (QUESTIONS #282 item 2) |
+| L14 | The Mac twin's ticket (D-24-3) | orchestrator at closeout | DONE — VX-1031 (Exploration · Editor · Low · Backlog) |
+| L15 | The device build of the fixed tree for her "after" session, and its block in the handoff | orchestrator after the merge | DONE — the "after" app built from the merge commit `fe1493c16`; its path and facts are the handoff's first lines |
+| L16 | Unit 0's "after" session | her hands | HELD for her hands (§10) |
+| L17 | Closeout: this record's FOR A LATER READER, the shared ledgers at the merge (QUESTIONS #282, AppSpecRecord, the finals line, the master plan), `Tools/canon-size`, the tickets, the handoff `notes/handoffs/vm-24-handoff.md`, the cleanup | orchestrator | DONE — this record closed; QUESTIONS #282, the AppSpecRecord entry, the finals line and the master plan on main in the ledger commit; `Tools/canon-size` 143606 (headroom 6394); VM-24 and VM-243 Done; the handoff final; the cleanup done at the hard stop |
 
 ## 10. Held for her (the sitting bundle; nothing here was improvised around)
 
