@@ -4487,13 +4487,11 @@ invocation as above in "The hosted command for finding 1's pins"):
 
 **Not done here (first, by the record's rule):** no hosted run of any kind — every `xcodebuild test`, simulator boot and
 walk is the orchestrator's stage window; the commands are at the end of this section. **Main's own phone count from
-VM-78's gate could not be quoted:** on main at `f909d6714` (origin/main had not moved past it when this section was
-written) VM-78's record still holds its gate as a slot — "Gate 1, the whole phone target: PENDING(gate 1: its verdict;
-VM-24's caret pin the one red by decision)" (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`, FOR A LATER READER), its
-gate table's row "PENDING(gate 1: every red by name — the one standing red by decision is VM-24's caret pin,
-`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`)", and its handoff
-"PENDING(gate 1: the whole phone test suite on the merged code …)"; the count presumably rides main's notes-only ledger
-commit, which this branch does not take (the orchestrator merges it). No shared ledger touched (`notes/QUESTIONS.md`,
+VM-78's gate is not on this branch:** at `f909d6714` VM-78's record still holds its gate as a slot ("Gate 1, the whole
+phone target: PENDING(gate 1: its verdict; VM-24's caret pin the one red by decision)"). It landed on main AFTER this
+merge, in VM-78's notes-only closeout ledgers commit `fd0f992f8` (then `a09d6a025`, a board snapshot) — which this
+branch does not take (the orchestrator merges it); read there with `git show origin/main:…`, never merged, and quoted
+in the stage commands (ii) and (iv) below. No shared ledger touched (`notes/QUESTIONS.md`,
 `notes/TICKETS.md`, the master plan, `notes/AppSpecRecord.md`, `notes/MobileSoul.md`, `notes/SurfaceContracts.md`,
 `notes/AppSpec.md` arrive from main exactly as main has them). Nothing in `Sources/VariorumCore/Sync/`, `Server/`,
 custody or keychain code, or `VariorumMobile/Features/Protection/`; no schema change. `storageDidEdit`'s routing,
@@ -4778,17 +4776,21 @@ xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMob
 Expected: **`MobileHerPathsPerfTests`' 13 shown SKIPPED** ("13 skipped — the gated speed suite", never folded into
 "passed"); **the reds from main only — VM-24's caret pin,
 `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`** (2 of 3 cases, 2 issues, as
-this record's earlier gate commands expected it), red by decision on main. **What main's own records say:** VM-78's record
-at `f909d6714` leaves its whole-phone verdict as a slot — "Gate 1, the whole phone target: PENDING(gate 1: its verdict;
-VM-24's caret pin the one red by decision)"; its gate table names "the one standing red by decision is VM-24's caret
-pin"; it records NO count on main as this section is written (its ledger commit, not on this branch, is where the
-orchestrator will find it). The last whole-phone count on main's records is older (VX-849's closeout in
-`notes/PhaseCloseoutArchive.md`: "whole phone 857/141 at baseline", 2026-11-09). VM-78's merge adds, by its test diff
-(counting `@Test` and `@Suite` lines), net +39 tests and +8 suites — `MobileBookFixesTests` new, 30 tests in 8 suites;
-+9 net across eight other files (`MobileBlockHistoryTests` +2, `MobileBooksTests` −1, `MobileMembershipTests` +2,
-`MobileShellTests` −1, `MobileTrashTests` +2, `MobileTutorialWalkTests` +1, `MobileUndoDoorTests` +3,
-`MobileUndoWarningWordsTests` +1).
-Anything red beyond the caret pin is real until traced.
+this record's earlier gate commands expected it), red by decision on main. **What main's own record says** (VM-78's, as its
+closeout ledgers commit `fd0f992f8` on main has it — read, not merged): "**Gate 1, the whole phone target** (claim
+18:28:35–18:40:03): `test-without-building` on the worktree's `vm78-ios` products (built from the code of `d55d22db9`)
+by explicit `-xctestrun`, `-only-testing:VariorumMobileTests`, one launch — `Test run with 992 tests in 170 suites
+failed after 527.109 seconds with 4 issues (including 2 known issues)`; 991 passed, the one red main's standing VM-24
+caret pin (two of three cases, `:215`) by decision", and its FOR A LATER READER: "992 tests in 170 suites, 991 passed —
+the one red VM-24's caret pin (two of its three cases), by decision"; main's code is "byte-identical to the
+gate-tested `d55d22db9`". **So on the joined tree, by arithmetic: about 1,071 tests in 181 suites, "failed … with 4
+issues (including 2 known issues)"** — main's 992 in 170 plus this run's phone tests, +79 `@Test` and +11 `@Suite`
+lines (`git diff a4634b288 48a94ea43 -- App/Variorum/VariorumMobileTests`, eleven new test types, none removed); of
+the 1,071, `MobileHerPathsPerfTests`' 13 SKIPPED (Swift Testing counts them in N) and the caret pin the one red (2
+issues); the 2 known issues main's (`MobileTrashTests`' declared ones). (VM-78's own net, for the reader of its diff:
++39 tests and +7 suites — `MobileBookFixesTests` new with 30 tests in 8 suites, the Shelf's pin/unpin suite in
+`MobileBooksTests` retired with the Pin door, +9 tests net across eight other files.) Anything red beyond the caret
+pin is real until traced.
 
 (iii) **The gated speed suite ALONE**, from `vm64-gate3`:
 ```
@@ -4810,10 +4812,13 @@ xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum \
 ```
 Expected: main's known flake by name, if it appears — **VX-701, `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary`**
 (its keyboard-focus precondition under whole-target load; two issues, "Expectation failed: model.find.fieldHoldsKeyboard"
-and "Known issue was not recorded") — re-run alone before it is leaned on. By arithmetic about **6,435 tests in 1,114
-suites** with 14 known issues on a green run (VX-981's gate read 6,434 in 1,114 on its merged tree `9007f4686`, 13 known
-issues recorded plus VX-701's own — and no Mac test file changed between that tree and `a4634b288`; VM-78 adds one Mac test, `theMacsDetailIsByteIdenticalThroughTheHoist`; this run changed no
-Mac test file). VM-78's gate names `DeadVocabularyTests.noShippedWordSpeaksTheRetiredVocabulary` among what this target
+and "Known issue was not recorded") — re-run alone before it is leaned on. **Main's own record** (VM-78's gate 2,
+`fd0f992f8` on main): "`Test run with 6435 tests in 1114 suites failed after 3105.422 seconds with 15 issues (including
+13 known issues)`; the one red VX-701's known flake, its type green alone inside the claim (7 tests in 1 suite): main's
+baseline." **This run changed no Mac test file** (`git diff a4634b288 48a94ea43 -- App/Variorum/VariorumTests` is
+empty), so the joined tree's Mac target is expected at **6,435 tests in 1,114 suites** — the same arithmetic gives it
+(VX-981's gate 6,434 in 1,114 on `9007f4686`, no Mac test changed between it and `a4634b288`, VM-78 +1,
+`theMacsDetailIsByteIdenticalThroughTheHoist`). VM-78's gate names `DeadVocabularyTests.noShippedWordSpeaksTheRetiredVocabulary` among what this target
 runs (it walks `Shared/`); expected green — this run's `Shared/` lines say "smart" nowhere (the scan above).
 
 #### For QUESTIONS at the merge
