@@ -14,8 +14,9 @@ whole at its end.
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
-**As of 2026-11-20 04:50.** Batch A (VM-24's fix) is BUILT and READY was sent to nov18 for its red/green window;
-nothing of it has run yet. Batch B is not started.
+**As of 2026-11-20 04:55.** Batch A (VM-24's fix) is BUILT AND PROVED in its window (§12, "the orchestrator's
+stage results": red as tabled on the old code, green on the fix alone and in company, the standing pin green 3 of
+3). Batch B (VM-243) is with a fresh implementer, half 1 first (the pin as the confirm, then a stop).
 
 - **Batch A, checked by the orchestrator against the implementer's report (never trusted):** tip `cd72732ec`;
   the fix is `a8662b81e` — `MobileEditorViewModel.swift` and `MobileEditTrace.swift` only, read line by line against
@@ -529,8 +530,8 @@ ink).
 | L2 | Is the wave-1 build's trace enough for the "before"? | orchestrator | DONE — yes (§4.6) |
 | L3 | The standing pin re-run alone on main's code | orchestrator | DONE — red, main's shape (the live state) |
 | L4 | The design: VM-24's options against the fence; VM-243's trace | architect | DONE (§4) |
-| L5 | Batch A — VM-24's fix and pins | implementer | BUILT (`a8662b81e`, tip `cd72732ec`; §12) — every red and green PENDING the window |
-| L6 | Batch A's red/green window, the Mac's seven source-reading types | orchestrator, nov18's GO | READY sent 04:48; PENDING the GO |
+| L5 | Batch A — VM-24's fix and pins | implementer | DONE (`a8662b81e`; §12) |
+| L6 | Batch A's red/green window, the Mac's seven source-reading types | orchestrator, nov18's GO | DONE 04:47–04:51 — red as tabled on the old code, 371 tests in 52 suites green on the fix, the standing pin green 3 of 3, the Mac's 46 in 7 green (§12, "the orchestrator's stage results") |
 | L7 | Batch B — VM-243: the pin as the confirm, then the fix | implementer | NOT STARTED |
 | L8 | Batch B's window | orchestrator, nov18's GO | NOT STARTED |
 | L9 | The simulator walk (typing mid-note, paste, the readout's new lines; a dash line and the paragraph after it) | orchestrator | NOT STARTED |
@@ -836,6 +837,34 @@ Expected (Swift Testing counts test FUNCTIONS, a parameterized one once; read th
   13. Any red is named and is a finding (main's whole-target baseline after wave 1 had only the standing pin red).
 - **(iv)** "Test run with N tests in 7 suites passed".
 - **(v)** "Test run with 1 test in 1 suite passed" (heavy: the 100k worlds).
+
+#### Batch A — the orchestrator's stage results (the window; every PENDING above is settled here)
+
+**Claim `vm-24`, 2026-11-20 04:47:46 → released 04:51:34, nov18's GO.** The tree at `2ad0eabce` (code as built: the
+red build `vm24-a-red` at `ea5a7a635`, the fix `vm24-a` at `d4085103c`, the Mac `vm24-a-mac` at `d98d12517`; the
+later commits are records). The standing iPhone 17 Pro / iOS 26.2 simulator, one fresh boot, a 30 s settle, one
+launch per leg, `Restarting after unexpected exit` = 0 in every log, every `xcodebuild` exited by itself. Logs:
+`App/Variorum/DerivedData/logs/vm24-a-red-run.log`, `-alone.log`, `-company.log`, `-mac-run.log`, and the summary
+`vm24-a-window-summary.txt`. Run by the orchestrator from the implementer's products, with §12's commands.
+
+| Leg | Verdict line | Reds, by name |
+|---|---|---|
+| (i) the red build: the new suite and the caret suite | "Test run with 8 tests in 2 suites failed after 2.631 seconds with 31 issues." | `anUnarmedEditWhoseReportIsWidenedPastItsBlockRoutesToItsBlock(_:)` — all three cases (an insert at the block's end, an insert mid-paragraph, a replace mid-paragraph): a recorded desync, the index lengths, `autosave.isDirty`, the stored text, the page · `aConsultedInsertWhoseArmingWasSpentRoutesToItsBlock()` · `anUnarmedWidenedEditInANonLastBlockDuringADivideIsWithheldAndSaid()` (a desync; the fence's sentence not said) · `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:)` for "hi" and "hello there" (`:215`). **Green:** `anUnarmedReplaceThatTrulySpansASeparatorStillRefusesAndHeals()` (the control) and the caret suite's other three tests. Every red is an outcome line; no premise line (no consult, the pre-fixing range exact, the report widened) failed |
+| (ii-a) the fix build: the three new types alone | "Test run with 13 tests in 3 suites passed after 1.192 seconds." | none |
+| (ii-b) the fix build: the three new types, then VM-64's 49, ONE invocation | "Test run with 371 tests in 52 suites passed after 57.135 seconds." — 52 passed-suite lines, 0 failed, 0 skipped | none. **The standing pin is green, three cases of three, its file unedited** ("with 3 test cases passed"); the fence suite passed, its ten pins byte-identical to main's |
+| (iv) the Mac's seven types that read every phone file | "Test run with 46 tests in 7 suites passed after 13.770 seconds." | none |
+
+After the window: the simulator shut down (0 booted); its app container lists `Variorum-dev` only; no Variorum or
+VariorumMobile instance; no Problem Reporter; no new crash report; the Debug defaults 1,356 keys, unchanged.
+
+**What this settles.** The new pins are red on the old code in the shape the closeout tabled and green on the fix,
+alone and in company. The standing pin going green by the fix alone shows the storage delegate's
+`willProcessEditing` DOES fire, with the exact range, on UIKit's own `replace(_:withText:)` road on iOS 26.2 (the
+simulator) — the measurement L12's TEXTKIT2 line records. Not run: item (v), the 100k trace pin alone; the gate's
+whole phone target runs `MobilePerfWalkTests`.
+
+**The fence file** (`MobileStructuralFlightFenceTests.swift`): the batch changed a doc comment above the road-C pin,
+four lines; no test was added and no expectation moved.
 
 ---
 
