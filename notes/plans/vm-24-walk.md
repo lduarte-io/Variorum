@@ -1,6 +1,6 @@
 # VM-24 — the simulator walk (the brief, and then its record)
 
-**STATUS: BRIEF WRITTEN 2026-11-20; the walk has not run.** Part of the VM-24 run
+**STATUS: WALKED 2026-11-20 06:06–06:21, both passes; the verdicts are at the end ("The verdicts"). One half-row not walked (the paste over a selected word); one finding (W-1, a readout line that wraps).** Part of the VM-24 run
 (`notes/plans/vm-24-unwarned-edit-routing.md`, ledger row L9). The walk is the run's use-shaped evidence on the
 simulator for both units: VM-24 (an edit the editor was not asked about no longer snaps back) and VM-243 (text typed
 after a dash line is in full ink). It does not replace her phone: the simulator's keyboard is not her keyboard, and
@@ -169,3 +169,43 @@ row c's and d's placement if the drawn lines do not equal the paragraphs (a deco
 the editor); row d's Paste if the edit menu's Paste is not exposed as a menu item, button or text; rows b, e and z if the
 readout's headline is not readable from its text element; every row from c on if the note's Library row is not
 titled by its day.
+
+## The verdicts (the orchestrator's, judged from the captures and the driver's log)
+
+**The window:** claim `vm-24`, 2026-11-20 06:06:48 → released 06:21:14, nov18's GO. `walk.sh` ran whole and ended by
+itself ("VM24 WALK END"): the dedicated device `vm24-walk` created, the BEFORE pass (the products of `8ff1d08af`),
+the device erased, the AFTER pass (the products of `562f815bd`), the device deleted (0 listed after). Each pass:
+`VM24WalkFirstRun` "Executed 1 test, with 0 failures", then `VM24Walk` "Executed 1 test, with 0 failures" (319.5 s
+before, 320.1 s after). The driver recorded no NOT WALKED line; the one act it could not drive is said in row d.
+The host: the Simulator preferences exported by the orchestrator before and after — 8 top-level keys both times,
+none changed, added or removed; no Simulator app running before or after; no Variorum or VariorumMobile instance;
+no Problem Reporter; no new crash report. The standing device was never booted. The captures and logs:
+`App/Variorum/DerivedData/vm24-walk-screens/before/`, `after/`, `walk-run.txt` (kept until the merge).
+
+| Row | BEFORE (main's code) | AFTER (the branch) | Verdict |
+|---|---|---|---|
+| a | four paragraphs typed; re-opened, the same four | the same | PASS |
+| b | the switch on; the readout empty after Clear | the same, with the three new lines at 0 | PASS |
+| c | 22 of 22 keys tapped on the software keyboard's own keys at the end of the second paragraph; the keyboard corrected "teh" to "the" and "recieve" to "receive"; "mid" typed in the middle of the third; every key on the page | the same | PASS |
+| d | Paste at the end of the second paragraph: "kilo" landed. **The paste over a selected word: NOT WALKED** — the driver selected the word but did not find the edit menu's Paste | the same | PASS for the paste at a paragraph's end; the paste over a selection NOT WALKED on both passes. What stands in for it: batch A's pin 1, case "a replace mid-paragraph" (an unarmed replace) and the caret suite's replace pin. It is not re-driven: a paste is asked about at the gate on this keyboard (gate-less 0 with the paste in the count), a road neither fix changes |
+| e | gate calls 25 · storage edits 25 · gate-less 0 · arming rejected 0 · desync recoveries 0 (the three new lines absent, as that build has none) | gate calls 25 · storage edits 25 · gate-less 0 · arming rejected 0 · **widened 0 · rescued 0 · no capture 0** · desync recoveries 0 | PASS. After rows c–h (the extra readout): 57 gate calls, 55 storage edits on both passes; after: widened 0, rescued 0, no capture 0, desync recoveries 0 |
+| f | "- one" faint through its words; "two" faint | only the dash faint; "one" and "two" in full ink | PASS — the bug on the BEFORE capture, gone on the AFTER |
+| g | "word", typed under the heading, in the heading's large bold face and faint; " b" after the closing star faint | "word" in the body face and full ink; " b" in full ink; the heading itself and the italic letter as before | PASS |
+| h | — | re-opened: the same words and the same inks as before leaving | PASS |
+
+**What the two passes say about VM-24, plainly.** The simulator's software keyboard asked the gate before every key,
+every autocorrection and the paste (gate-less 0, arming rejected 0 on both passes), and not one of the AFTER pass's
+55 reports was widened. So this walk met no unarmed edit and no widened report: it shows the fix changes nothing on
+the asked-about road (the same 25 and 55 edits, the same words on the page), and that the first callback fired for
+every edit this keyboard made ("no capture 0" of 55). It does NOT show a snap-back avoided — the simulator did not
+produce one to avoid. That evidence is the pins (red on the old code, green on the fix) and her phone's "after"
+session; the run record's §10 holds it as owed.
+
+**W-1 (a finding, from capture `after/z-readout-after-all.png`):** the readout's new "rescued" line is too long for
+the phone's width and wraps onto a second line ("rescued 0 (each one a snap-back that did / not happen)"); the
+other lines fit. The words are DRAFT (hers), but a wrapped line in a column of numbers is a defect of the instrument.
+Disposition: shortened in the ladder's fix pass by an implementer, the new words still DRAFT.
+
+**Left in place until the ladder closes** (a second AFTER pass may be wanted if the ladder's fixes touch what a row
+shows): the two snapshot worktrees `~/dev/variorum-vm-24-walk` and `~/dev/variorum-vm-24-walk-before` with their
+DerivedData. They are removed at the closeout with the captures.
