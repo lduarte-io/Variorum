@@ -426,3 +426,140 @@ undocumented variable untested on a device. Neither is a NIT's work; the caveats
   seam; a cleanliness nit does not open it). Read for a correctness reason and found none: `reportOperationError(_:)`
   is `report(OpsRefusalCopy.sentence(for: error, roads: .phone))`, the very call `init`'s hook makes, so the two
   spellings are one road today.
+
+## Final calls (reviewer)
+
+*The round-3 reviewer, same session, after reading the implementer's responses above (`6cc3f9705`, with its two
+in-place corrections), every commit of the fix pass in the code itself (`2543a81f3` · `8d48a682c` · `cd828fe16` ·
+`848b98b66` · `fb55c3cbf`) and its closeout (the record's §7 ▸ "Ladder round 3 — fix pass", `1d781c237`). Re-run
+here: `swift test --filter TimingRecorderTests` — 35 tests in 1 suite passed on the tip. **Finding 1's call is on
+the code AS READ:** its three pins are hosted and have run on neither build, so it stands only with the gate's two
+runs named below. One call per finding. Nothing here touches `Sources/VariorumCore/Sync/`.*
+
+**Finding 1 (a fully listed listing one row short) — CONFIRMED; the arm: (i′) AS BUILT, with one guard added and
+its residual ticketed.**
+*The dispute with my own shape, rechecked.* The implementer's over-read under (i) is real: in `holdFirstPage`'s
+direct arm a complete listing SHORTER than a page (0 rows on a first sync; any wing under 200) that one landing
+reaches past meets `state.next == nil, page.next != nil`, so (i) reads a second page she did not come near and the
+held listing is two pages deep from then on. Bounded, but it is a read outside the viewport on the Library's
+heaviest road, and nothing is stuck there. The added clause (`page.items.count <= rows(question.listing).count`,
+read before `place` replaces the rows) is true exactly where the finding's shapes live: every `reread` (its depth IS
+the listed rows — the Put back, the arrival at the top of a deep listing, the return) and a one-page listing that
+was exactly full. That last case also closes the boundary I had not named: with one note more than a page (5 notes,
+a page of 4), delete the last and Undo — `reaskAfterRowAct` does not fire (4 > 4 is false), the held page's cursor
+flips, the direct arm lands 4 over 4, the clause holds, the page is asked for and appended. Traced by reading.
+*What (i′) leaves, which (i) would have covered — said so it is not found again as new:* a one-page listing short of
+full by m, complete, with her parked at its end, and ONE landing that adds more than m notes above it (several
+notes filed in the box while the Library was hidden; a sync apply). The landing is a full page and a cursor, deeper
+than the rows it replaces, so nothing is asked; the rows it pushed past the page were listed before and now wait
+for a scroll. It needs the wing's note count to cross the page boundary inside one landing while she is at the
+listing's end; it is not a regression (round 2's tree does the same), the notes stay reachable, and it heals as the
+finding's own shapes did. It is VM-242's shape by another road: **add it to VM-242's body** (title unchanged), with
+the note that deleting the clause is the fix if her use ever shows it, at the price of the over-read above.
+*The blink the response names* (All's older books withheld for the one keyset read between the landing and the
+append) — ACCEPTED as recorded: it is P-68-4's own rule held for one read, where the tree before held it until a
+scroll.
+*What the pins must hold.* (1) The three as written — `aPutBackOfTheLastRowOfAFullyListedListingReturnsIt`,
+`aPutBackOfARowAboveTheEndOfAFullyListedListingKeepsItsLastRow`,
+`aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow`: RED on the build with only `848b98b66`'s hunk reversed,
+at exactly 3 · 2 · 2 issues (7) and at the expectations their docs name, with every other test of the suite green
+there; GREEN on the fix build, alone and in company with round 2's (ii) list. (2) Round 2's four pins that list 8
+of 12 stay green on BOTH builds — they are the guards that an incomplete listing is never chased (any of them
+reading 12 means the raise over-reads). (3) **One GUARD more, test-only, the implementer's — because no pin holds
+the clause that makes (i′) differ from (i)**, and a later edit that deletes it would stay green:
+`MobileLibraryPagingRulesTests`, the same world — `listingLimit: 4`; 3 notes; `await
+model.hold(model.hold(onScreen: false))` (the hidden read: 3 rows, complete); 3 more notes minted while it is
+hidden; then held on screen; settle until `model.all.count == 4`; after a bounded quiet window (about 150 ms)
+`model.all.count == 4 && model.allHasMore` ("a short listing a page reaches past is not chased"); then `loadMore` to
+the end equals `Queries.library`'s 6 (still reachable). Named a guard in its doc: green on the reversed build too
+(nothing raises there) and red only under (i). It joins the gate's hosted run of that suite.
+*Condition.* If the reversed build shows any other red in the suite, or a different count, the record explains it
+before the gate counts as open; if a pin is green on the reversed build, the finding's fix is hollow at that pin
+and is said so.
+
+**Finding 2 (the gate; three stale texts) — (c) and (d) CONFIRMED AS APPLIED; (a) and (b) stay the
+orchestrator's.** Read in `fb55c3cbf`: the two fix-pass rows flipped with their first texts kept and the windows
+that settled them named; the handoff's opening and its "Reviews" say in plain words that round 2 found a major,
+what it was and that it was fixed. One condition on (d): the handoff's round-3 sentence says the one-row-short
+listing was "fixed" — true only once finding 1's red and green runs have landed, so its `PENDING(merge gate)` stays
+beside it until then and is filled with those runs' counts. For (b), FOR A LATER READER must carry: round 2's major
+and its fix; round 3's verdict and finding 1's fix as (i′) with its residual under VM-242; VM-240, VM-241, VM-242;
+and the stuck-fence case under VM-226.
+
+**Finding 3 (a refusing door lands a flight) — CONFIRMED: no code; the records as applied.** The handoff's P-2-4
+and the bundle's P-2-4 now name the case her ruling should be asked with (a save that cannot land keeps typing
+refused until the note is reopened, and a refusing press can start it), and VM-226 carries the finding with its pin.
+Both texts read; accurate. Nothing in `MobileEditorViewModel.swift` or `MobileStructural.swift` moves — correct.
+
+**Finding 4 (two readout pitfalls) — the caveats ACCEPTED in place of the code.** Both reasons hold. (b)'s cancel
+belongs where `loadLive` returns without a delivery, inside the editor's model file; a second owner of that window
+in the screen's task would be a guess, and a NIT does not open the editor seam in a round whose fixes no reviewer
+reads again. (a)'s code options either give up the pre-main time the row was built to include (a change to what a
+mark measures) or lean on a variable Apple does not document. The two handoff sentences are plain and true ("do
+several launches and read the median and the smallest"; "it can show 2 when you open a note within about ten
+seconds of backing out of one before it finished loading"). So they are not lost as work: **add both to VM-234's
+body** (the readout's launch rows — already a readout-fidelity ticket), as two lines: a prewarmed start can inflate
+a Launch row (confirm on a device before any code); the per-open window is left open by an arrival that ends
+without a delivery (the one-line cancel at `loadLive`'s two early exits, with a pin beside
+`MobileBoxOpenTimingTests`).
+
+**Finding 5(a) (a ladder clause inside a contract line) — CONFIRMED AS APPLIED.**
+
+**Finding 5(b) (a damaged timing file) — the applied half CONFIRMED; the `merged` arm: APPLY A BOUND AT `merged`
+(arm (B), placed where the sums are), not (A) and not (C).**
+*The applied half.* The decode holds a capacity outside `1…defaultCapacity` to the default, and `number` bounds its
+value before both conversions; the three pins read and re-run green here; the corrected trace (the decode never
+trapped — the reserve is a no-op at `Int.max`; the report's conversion did) is accepted, and my finding's "reserves
+that many slots" stands corrected by it for the largest sizes. One limit of the clamp, accepted and already said in
+its comment: a recorder ever built larger than the default would get back only the newest `defaultCapacity`
+samples of a persisted series; no recorder is.
+*The arm.* Traced in `TimingRecorder.merged` (`:537-561`): `stats.count + (current?.count ?? 0)`, `counters[key] +=
+max(0, value)`, and the three footer adds are checked arithmetic over decoded numbers, so a damaged count near
+`Int.max` traps the launch's `absorb` — on the timing file's own queue, at every launch, before `write()` can ever
+replace the file. That is worse than the readout's trap just fixed (which needed her to open the readout), so (C)
+is not the call. **(A) alone is not enough, and this is why the call is (B):** after a saturating absorb the series
+holds `Int.max`, and the NEXT mark increments it with checked arithmetic — `TimingStats.record`'s `count += 1`,
+`count(_:by:)`'s `+= n`, `restarts += 1` — so the trap only moves from the launch's queue to a marked path on the
+main thread. A bound far below `Int.max`, applied to every decoded number as it enters a sum, removes every one of
+them at the one door all decoded archives pass (`absorb` and `restore` both go through `merged`): **what lands** —
+in `merged`, the decoded series count, each decoded counter and the decoded `restarts`, `abandoned` and
+`unmatchedEnds` are each held to `0…bound` before they are added (the existing `max(0, …)` kept), with ONE named
+constant for the bound — 10¹⁵, the report's own `drawnBound` as an `Int` — and a comment saying why it is a bound
+and not saturation. Nothing else moves; an ordinary archive's numbers are far inside it, so every existing absorb
+and restore pin stays green. **Pin first (headless, `TimingRecorderTests`, an exit test as 5(b)'s are — red on
+today's code by the trap):** an enabled recorder with one live sample in a series and one live count; an archive
+whose same series decodes with `count` = `Int.max`, whose same counter is `Int.max`, and whose three footer counts
+are `Int.max`; `absorb` it; then one more sample into that series, one more count, one restarted begin and one
+unmatched end; take a snapshot and draw `TimingReport.summary` for the series — the child exits cleanly. In the
+same child (or an in-process arm on the fixed code): the series' count is the bound plus the two live samples, the
+counter the bound plus its two counts. Its own commit after the pin's, in 5(b)'s commit class (Core
+`Diagnostics/`, VM-65); `swift test --filter TimingRecorderTests` red on the pin-only tree at that one pin, green
+on the fix.
+
+**Finding 5(c) (the index's "steady state") — the record and the draft CONFIRMED AS APPLIED; the migration's
+comment: YES, one comment-only commit.** The drafts' own (e)1 says the migration set is the truth for local
+performance indexes, so its comment is the line a later reader sizes the index from. In
+`Persistence/Migrations.swift`, `v1_38`'s comment at `:1232-1234`: "empty in the steady state (a signed-in mint is
+stamped at birth)" becomes the signed-in steady state, plus one clause — in a library never signed in every row of
+these tables is unowned, so each index holds every row of its table. Comment lines only: the migration's name, its
+SQL and its position untouched (`git show --stat` names the one file and its diff holds only `//` lines);
+`swift test --filter MigrationTests` green after it; its own commit, saying "comment only" in its message.
+
+**Finding 5(d) (the two spellings of the coordinator's hooks) — the decline ACCEPTED.** Checked at
+`MobileEditorViewModel.swift:2692-2694`: `reportOperationError` is the very call `init`'s hook makes, so there is no
+behaviour to protect today, and a cleanliness nit does not open the editor seam in the last round. It stays a note
+for whoever next opens that file (VM-226's or VM-227's session); no ticket of its own.
+
+*No FINDER-FIXES: finding 1's guard, 5(b)'s bound with its pin, and 5(c)'s comment are specified above for the
+implementer; the ticket-body additions (VM-242, VM-234) and finding 2's (a) and (b) are the orchestrator's.*
+
+**Is anything in this pass a new BLOCKER or MAJOR?** No — by reading. Finding 1's fix is one condition and its three
+pins are unrun, so that answer is owed again once the gate's reversed-build and fix-build runs of
+`MobileLibraryPagingRulesTests` are in; (i′)'s residual is narrower than the finding and not a regression; the
+`merged` trap needs a damaged file and is closed by the call above.
+
+**What the orchestrator's line-by-line check should read first** (no reviewer reads these fixes after it): the
+`else if` in `MobileLibraryViewModel.land` against `holdFirstPage`'s direct arm and `reread`, then the reversed
+build's reds — exactly the three pins at 3 · 2 · 2, round 2's four 8-of-12 pins and the new guard green on both
+builds; then that `merged` bounds every decoded number before it is added and that its pin ran red before the fix;
+then that the migration commit's diff is comment lines alone.
