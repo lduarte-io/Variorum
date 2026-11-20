@@ -184,7 +184,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | Ladder r1 · fix pass | **DONE 2026-11-19** — settled by the merged tree's stage window (finding 2 red on its hunk-reversed build, green alone and in company; "Orchestrator's stage results" ▸ "The merged tree (main's VM-55 in)") | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); part 2 ran as the merge block below. *(Was: IN-PROGRESS, "owed: the stage" — flipped at ladder round 3, finding 2(c).)* |
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
 | Ladder r2 · fix pass | **DONE 2026-11-19** — part B built and the whole Core package green (`74d91c666`); settled by its stage window: the seven meant reds on `vm64-gate2-red` and no other, green alone and in company, the gated suite alone 13 passed ("Orchestrator's stage results" ▸ "Ladder round 2's fixes — THE STAGE WINDOW") | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, the no-choice fixes with their pins, the final calls in the second turn, part B's builds. *(Was: IN-PROGRESS, part B waiting on the QUIET window — flipped at ladder round 3, finding 2(c).)* |
-| Ladder r3 · fix pass | **IN-PROGRESS** — see "Ladder round 3 — fix pass · LIVE STATUS" below | see that block | the last round (no major found); the responses first, the agreed fixes with their pins, the arms for the final call |
+| Ladder r3 · fix pass | **FIRST TURN DONE** — responses, fixes 1 and 5(b) with their pins, the records; the arms (finding 1's (i′)/(i), `merged`'s overflow, the migration comment) wait for the reviewer's final call; finding 1's runs and red build wait for the gate tree | see "Ladder round 3 — fix pass · LIVE STATUS" below | the last round (no major found) |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -840,12 +840,12 @@ red-on-old build are made after VM-78's merge-in, not now). No hosted run (the s
 | Piece | State |
 |---|---|
 | T0 — this live status | DONE (this commit) |
-| T1 — the responses (round file ▸ "Implementer responses (round 3 fix pass)"), committed and pushed before any code | NOT-STARTED |
-| T2 — finding 1 (Part of VM-68): the agreed shape and its pins | NOT-STARTED |
-| T3 — finding 5(b) (VM-65): the damaged-record decode and the report's number; the headless pin red, then green; the touched Core suites | NOT-STARTED |
-| T4 — record and handoff edits: 2(c) the two fix passes' rows; 2(d) the handoff's "What happened" and "Reviews"; 3 the handoff's P-2-4 and the bundle; 4 the readout caveats; 5(a) the SurfaceContracts draft; 5(c) "empty in the steady state"; 5(d) declined, recorded | NOT-STARTED |
-| T5 — ONE warm phone `build-for-testing` into `vm64-gate2` | NOT-STARTED |
-| T6 — §7 ▸ "Ladder round 3 — fix pass" closeout; the report | NOT-STARTED |
+| T1 — the responses (round file ▸ "Implementer responses (round 3 fix pass)"), committed and pushed before any code | DONE (`6cc3f9705`); two in-place corrections before each fix landed, marked: 5(b)'s trap-at-decode claim (false — a probe; with `8d48a682c`) and finding 1's missed over-read, which makes the (i′)/(i) arm (with `848b98b66`) |
+| T2 — finding 1 (Part of VM-68): the agreed shape and its pins | DONE — pins `cd828fe16` (three, hosted; red-on-old 3 · 2 · 2 issues by trace), the fix `848b98b66` (one condition in `land`, shape (i′) — an arm for the final call). Runs PENDING the gate tree's stage; the red build PENDING (made with the gate tree after VM-78's merge-in — recipe in §7 ▸ "Ladder round 3 — fix pass") |
+| T3 — finding 5(b) (VM-65): the damaged-record decode and the report's number; the headless pin red, then green; the touched Core suites | DONE — pins `2543a81f3` RAN RED (35 in 1 suite failed with 5 issues — the three pins only), fix `8d48a682c` RAN GREEN (35 in 1 suite passed). `merged`'s overflow NOT applied (an arm) |
+| T4 — record and handoff edits: 2(c) the two fix passes' rows; 2(d) the handoff's "What happened" and "Reviews"; 3 the handoff's P-2-4 and the bundle; 4 the readout caveats; 5(a) the SurfaceContracts draft; 5(c) "empty in the steady state"; 5(d) declined, recorded | DONE (`fb55c3cbf`); 5(c)'s migration comment NOT touched (an arm); 5(d) declined in §7 ▸ "Ladder round 3 — fix pass" |
+| T5 — ONE warm phone `build-for-testing` into `vm64-gate2` | DONE at `848b98b66` — `** TEST BUILD SUCCEEDED **`, 0 errors, no warning in a touched file (`DerivedData/vm64-gate2-r3-phone-build.log`, local) |
+| T6 — §7 ▸ "Ladder round 3 — fix pass" closeout; the report | DONE (this commit). **The turn ENDS here** — the arms wait for the reviewer's final call |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -4283,3 +4283,118 @@ decided (a listing made honest after a Put back is the Mac's own rule, `LibraryC
    remains unproven is every run: (i)–(iv).)*
 6. **VX-981's merge** (part B (1)–(2)): `UndoStack`'s walk observers beside the phone's undo door's fence hook, and
    `privateBookMarks`' new return type — checked, no collision; read it again if a hosted red lands near either.
+
+### Ladder round 3 — fix pass (implementer closeout; the last round)
+
+**Not done (first, by the record's rule):** NO hosted run — finding 1's three pins are hosted and have not run on either
+build; their red-on-old build is NOT made (by the brief: it is made with the gate tree after VM-78's merge-in — the
+recipe below). The Mac `build-for-testing` was not run this turn (the brief's one build is the phone's; the Mac compiles
+the Core change — see "The Mac" below). The whole Core package was not re-run (the touched suite was). Finding 2's (a)
+and (b) — the merge gate and the FOR A LATER READER — are the orchestrator's. Three arms wait for the reviewer's final
+call: finding 1's (i′) as built against (i) as written; 5(b)'s `merged` overflow (not applied); 5(c)'s migration comment
+(not applied). No line in `Sources/VariorumCore/Sync/`, `Server/`, custody/keychain code or
+`VariorumMobile/Features/Protection/`; no schema change (`Persistence/Migrations.swift` untouched); `MobileEditorViewModel.swift`
+and `MobileStructural.swift` untouched; `MobileLine.swift` untouched by this pass; no new user-facing copy; no shared
+ledger edited.
+
+**Base:** `e78c5f1fa` (code `74d91c666`'s). **Commits:** `9c3b05a49` (live status) · `6cc3f9705` (the responses, before
+any code) · `2543a81f3` (5(b) pins, red) · `8d48a682c` (5(b) fix; the response's trap-at-decode claim corrected) ·
+`cd828fe16` (finding 1 pins) · `848b98b66` (finding 1 fix; the response's over-read added) · `fb55c3cbf` (the records
+and the handoff) · this closeout. **Machinery honesty:** the same session as round 2's part B, continued by the
+orchestrator's message; nothing adopted from another session.
+
+#### What changed, per finding
+
+| # | Call | What landed |
+|---|---|---|
+| 1 · MINOR (Part of VM-68) | AGREE; shape (i) built one clause narrower as (i′) — an arm for the final call | `MobileLibraryViewModel.land`: `if state.question != question { wantsMore = false } else if state.next == nil, page.next != nil, page.items.count <= rows(question.listing).count { wantsMore = true }` with its comment — a listing complete for this question whose re-ask (no deeper than it listed) now carries a cursor asks for the one page after it; the follow's exit starts it. The extra clause keeps (i) from chasing a SHORT complete listing a page reaches past (a first sync onto an empty Library held on screen would otherwise read a second page and hold two). Three hosted pins (below). The caller-by-caller check is the round file's response 1 |
+| 2 · MINOR | (a) (b) the orchestrator's; (c) (d) applied | (c) §5's summary rows "Ladder r1 · fix pass" and "Ladder r2 · fix pass" → DONE with the windows that settled them (first texts kept); a "Ladder r3 · fix pass" row. (d) the handoff's "What happened" (a midpoint review and three rounds; round 2's one major in plain words, fixed and seen failing on the old build and passing on the new; `PENDING(merge gate: …)`) and "Reviews" (each round's counts; round 2's major; round 3 the last, its two minor; `PENDING(merge gate)`) |
+| 3 · NIT | AGREE by reading; no code (the reviewer's disposition) | the handoff's P-2-4 bullet: the next update ends a stuck fence — except while a save is stuck and cannot land, when typing stays refused in that note until it is closed and opened again, and a refusing Divide or Merge can start it; the drafts' bundle P-2-4 the same (pointing at VM-226); the handoff's VM-226 line in "What was found and not fixed" gains that third way in. VM-226's body: the orchestrator's |
+| 4 · NIT | AGREE; caveats, no code | the handoff's readout steps: the Launch row (several launches; the median and the smallest, never one — a prewarmed start can read long) and "Note reads per open" (2 when opened within about ten seconds of an open abandoned mid-load; read the median). Why not code: (b)'s cancel belongs in `loadLive` (`MobileEditorViewModel.swift`, fenced); (a)'s options change what the mark measures or read an undocumented variable — the response |
+| 5(a) · NIT | applied | the drafts' (e) Library contract line: "— ladder round 2, finding 1" removed (the record pointer stays) |
+| 5(b) · NIT (VM-65) | applied with headless pins | `TimingStats.init(from:)`: a decoded capacity outside `1…defaultCapacity` takes `defaultCapacity`; `TimingReport.number`: the value bounded to ±`drawnBound` (10¹⁵) before either `Int(_:)` (a NaN → 0); comments on both. *Corrected trace:* the decode never trapped (`reserveCapacity(Int.max)` is a silent no-op — a probe binary); what it did was keep every sample of a damaged file and reserve that many slots; the report's conversion DID trap (`.signal(SIGTRAP)`, observed). One more, NOT applied (an arm): `TimingRecorder.merged` adds a decoded count/counters to the live ones with checked arithmetic — a damaged count near `Int.max` traps the launch's `absorb` |
+| 5(c) · NIT | applied in the record and the draft; the migration comment an arm | §5 batch 4's row and §7 batch 4's P-67-2 (in place, marked, first text kept) and the drafts' AppSpecRecord §7 narrative: the SIGNED-IN steady state; a never-signed-in library's index holds every row of its table (one small entry per row written). `Migrations.swift`'s same phrase: untouched, for the final call |
+| 5(d) · NIT | DECLINED, recorded | `MobileEditorViewModel.swift` stays untouched by the ladder's fix passes (the editor seam; a cleanliness nit does not open it). No correctness reason found: `reportOperationError(_:)` IS `report(OpsRefusalCopy.sentence(for: error, roads: .phone))`, `init`'s own call |
+
+**The Mac:** finding 1 is phone-only (`VariorumMobile/`). 5(b)'s two files are Core, which the Mac compiles; nothing of
+the Mac's calls the decode or the report — the decode's one caller is the phone's `MobileTiming` (`TimingBook.decode` →
+`absorb`), the report's the phone's readout (`MobileTimingView`), and `Shared/AppTiming` uses only the recorder's marks
+(grep over `App/Variorum/Variorum`, `App/Variorum/Shared`: no `TimingStats`/`TimingReport`/`TimingBook` reference). The
+Mac's statements are untouched. A Mac `build-for-testing` was not run this turn; the gate tree's rebuild covers it.
+
+#### The pins, and what each build should show
+
+| Pin | Kind | Red-on-old (expected) | Fix (expected) |
+|---|---|---|---|
+| `TimingRecorderTests.aDecodedCapacityIsHeldToTheRingsBound` | bug pin (5(b), headless) | **RAN RED** on today's code: 3 issues (capacity 100,000 ≠ 64; all 70 samples held; `Int.max` ≠ 64) | **RAN GREEN** |
+| `TimingRecorderTests.aSampleOutsideIntsRangeIsReportedWithoutTrapping` | bug pin (5(b), exit test) | **RAN RED**: 1 issue, the child `.signal(SIGTRAP)` | **RAN GREEN** |
+| `TimingRecorderTests.aValueOutsideTheDrawnBoundIsDrawnAtTheBound` | design pin (5(b), exit test — the bound drawn) | **RAN RED**: 1 issue (the old conversion traps) | **RAN GREEN** |
+| `MobileLibraryPagingRulesTests.aPutBackOfTheLastRowOfAFullyListedListingReturnsIt` | bug pin (finding 1, the reviewer's) | RED — 3 issues: "the note Put back is listed again"; "the store's whole listing, in its order"; `!allHasMore` | green |
+| `MobileLibraryPagingRulesTests.aPutBackOfARowAboveTheEndOfAFullyListedListingKeepsItsLastRow` | bug pin (finding 1, shapes (b)/(c) at the model level) | RED — 2 issues: "the store's whole listing — the last row kept"; `!allHasMore` | green |
+| `MobileLibraryPagingRulesTests.aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow` | bug pin (finding 1, the arrival) | RED — 2 issues: "the store's whole listing — the oldest kept"; `!allHasMore` | green |
+| the rest of `MobileLibraryPagingRulesTests` (round 2's four 8-of-12 pins among them — the guards that a listing NOT complete is untouched) | unchanged | green | green |
+
+**Run headless:** `swift test --filter TimingRecorderTests` — on the pins-only tree **35 tests in 1 suite failed with 5
+issues** (exactly the three pins above); on the fix **35 tests in 1 suite passed**. No other Core suite references the
+two types (grep over `Tests/`).
+
+**Built:** ONE warm incremental phone `build-for-testing` into `App/Variorum/DerivedData/vm64-gate2/` at `848b98b66` (the
+pass's last code commit; every later commit is the record or the handoff) — `** TEST BUILD SUCCEEDED **`, 0 errors, no
+warning in a touched file. Log and stamp `DerivedData/vm64-gate2-r3-phone-build.log` / `-r3-phone.sha` (local). This
+overwrites round 2's phone product in that folder; the gate tree is rebuilt after VM-78's merge-in anyway.
+
+#### Finding 1's red-on-old build (made with the gate tree, after VM-78's merge-in — the orchestrator's brief)
+
+Announce it in the live status and commit before it starts; it reverses round 3's ONE production hunk and nothing else
+(the pins name only old API, so nothing moves aside):
+```
+cd ~/dev/variorum-vm-64
+git show 848b98b66 -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift | git apply -R
+cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/<the gate's red folder>
+cd ~/dev/variorum-vm-64 && git checkout HEAD -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift
+git status --short; git diff HEAD --stat   # both must be empty
+```
+(If VM-78's merge moved the hunk's context, `git apply -R` refuses rather than guesses; then reverse the
+`else if state.next == nil, page.next != nil, page.items.count <= rows(question.listing).count { state.wantsMore = true }`
+arm by hand to `if state.question != question { state.wantsMore = false }` alone, and say so.)
+
+#### The hosted command for finding 1's pins (the orchestrator's stage; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+Red-on-old, ONE invocation from the red folder above:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileLibraryPagingRulesTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/<the gate's red folder> \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-r3-red>
+```
+Expected: exactly the three finding-1 pins failing, with 7 issues (3 · 2 · 2); every other test of the suite green.
+The fix, from the gate folder: the same `tests` alone — all green — and then in company with round 2's (ii) list
+(the record's "Ladder round 2 — fix pass, second turn" ▸ "The hosted commands — FINAL" (ii), which already holds
+`MobileLibraryPagingRulesTests`) — all green, `MobileHerPathsPerfTests`' 13 skipped; the gated suite alone (iii) as
+before, every asserted count unchanged (by reading: no perf world lands a complete listing that a page pushes past — a wing
+of the nine-wing world holds 50 notes, under a page even after a box save, so its pages never carry a cursor; a larger
+world's listing is never scrolled (the suite drives no paging), so its first page's cursor stands and the raise never
+applies).
+
+#### For QUESTIONS at the merge
+
+None from this pass — no product behaviour was decided: finding 1 makes the listing show what the store holds (the
+Mac's own rule); 5(b) touches only how a damaged diagnostic file is read; the caveats are wording in the handoff, hers
+to correct.
+
+#### What the orchestrator's line-by-line check should read first (the last round — no reviewer reads these fixes after it)
+
+1. **Finding 1's one condition** in `MobileLibraryViewModel.land` — against `prime` (always a new question), the direct
+   arm of `holdFirstPage` (a new question, or ≤ one page), `reread` (inside the follow; its exit asks), and `append`
+   (clears `wantsMore`); and the extra clause `page.items.count <= rows(question.listing).count` (the arm (i′) vs (i)) —
+   true for every `reread` (its depth IS the listed rows) and for an exactly-full one-page listing, false for a short
+   listing a page reaches past.
+2. **The three pins' red on the reversed build** — 3 · 2 · 2 issues, nothing else red in the suite.
+3. **5(b)'s two lines** (`TimingStats.init(from:)`'s range; `TimingReport.number`'s bound before both conversions) and
+   the corrected trace (the decode never trapped; the report did).
+4. **The arms left for the final call:** (i′)/(i); `merged`'s overflow (A saturating adds, pin first · B bound the
+   decoded count · C record only); the migration comment (yes/no).
+5. **The handoff's new sentences** read as plain English for her (P-2-4; VM-226's third way in; the two caveats; "What
+   happened"; "Reviews").
