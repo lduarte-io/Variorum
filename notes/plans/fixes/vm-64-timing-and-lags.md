@@ -845,7 +845,11 @@ red-on-old build are made after VM-78's merge-in, not now). No hosted run (the s
 | T3 — finding 5(b) (VM-65): the damaged-record decode and the report's number; the headless pin red, then green; the touched Core suites | DONE — pins `2543a81f3` RAN RED (35 in 1 suite failed with 5 issues — the three pins only), fix `8d48a682c` RAN GREEN (35 in 1 suite passed). `merged`'s overflow NOT applied (an arm) |
 | T4 — record and handoff edits: 2(c) the two fix passes' rows; 2(d) the handoff's "What happened" and "Reviews"; 3 the handoff's P-2-4 and the bundle; 4 the readout caveats; 5(a) the SurfaceContracts draft; 5(c) "empty in the steady state"; 5(d) declined, recorded | DONE (`fb55c3cbf`); 5(c)'s migration comment NOT touched (an arm); 5(d) declined in §7 ▸ "Ladder round 3 — fix pass" |
 | T5 — ONE warm phone `build-for-testing` into `vm64-gate2` | DONE at `848b98b66` — `** TEST BUILD SUCCEEDED **`, 0 errors, no warning in a touched file (`DerivedData/vm64-gate2-r3-phone-build.log`, local) |
-| T6 — §7 ▸ "Ladder round 3 — fix pass" closeout; the report | DONE (this commit). **The turn ENDS here** — the arms wait for the reviewer's final call |
+| T6 — §7 ▸ "Ladder round 3 — fix pass" closeout; the report | DONE (`1d781c237`). The first turn ended here — the arms waited for the reviewer's final call |
+| **Second turn** (the final calls, `6aa357bff`): T7 — finding 1's GUARD (the short complete listing a page reaches past is not chased; test-only) | NOT-STARTED |
+| T8 — 5(b)'s `merged` bound, arm (B): the exit-test pin first (its own commit, red), then the bound (green) | NOT-STARTED |
+| T9 — 5(c): `Migrations.swift`'s `v1_38` comment, COMMENT ONLY; `MigrationTests` green | NOT-STARTED |
+| T10 — ONE warm phone `build-for-testing` into `vm64-gate2`; §7's second-turn part; these rows | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
