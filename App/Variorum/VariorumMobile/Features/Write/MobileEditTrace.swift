@@ -94,7 +94,11 @@
 //
 //  · **widened** — the report ran past the characters that changed (the
 //    widening this file's carve-out below reasons about, now MEASURED, not
-//    inferred from `length - delta`);
+//    inferred from `length - delta` — measured against the storage's
+//    accumulated pre-fixing range, which also holds any attribute write made
+//    in the same transaction, so a transaction that bundles a wider
+//    attribute write reads as not widened and its changed length overstates
+//    the change: the instrument under-counts, the routing is unaffected);
 //  · **rescued** — unbound (no arming described it), widened, and the
 //    report ALONE would have refused where the changed characters route:
 //    each one is a snap-back that did not happen. That second verdict is
@@ -550,7 +554,7 @@ enum MobileEditTrace {
         out += "  arming rejected   \(s.armingsRejected)\n"
         // VM-24 — DRAFT words, hers to word (the record §10 item 6).
         out += "  widened           \(s.widenedReports)   (ran past the characters that changed)\n"
-        out += "  rescued           \(s.rescuedReports)   (each one a snap-back that did not happen)\n"
+        out += "  rescued           \(s.rescuedReports)   (snap-backs avoided)\n"
         out += "  no capture        \(s.reportsWithoutCapture)   (expected 0)\n"
         out += "  most gate calls before one edit: \(s.maxConsultsBeforeAReport)\n"
         out += "\n"
