@@ -1496,3 +1496,51 @@ G1, G2).
   at-rest order is last-touched). Read as the store's data; the sort is not this run's surface and was not judged.
 - **What I did not open as an image:** the keyboard-only thirds and the thirds pixel-identical (≤ 3 levels) to a third I
   opened (§4g, "How it was read") — checked by diff and column runs, not by eye.
+
+### The final tree, set 2 — findings
+
+Read 2026-11-20 (§4h rows H1–H15): the 59 final-tree captures of the core in Study dark, the wider pass (with r05b, now
+shot under "Gathering") and the bar's roads in Study light, on the final tree's app (W.11 — W-A1 redone, both merges of main
+in), each against its twin in `recapture/` (r05b has none) and, where the question is "as on main", the first walk's frame
+in `final/`. Code read at HEAD (its app code is `d78853d8e`'s).
+
+| Run (test, combination) | Verdict in one line |
+|---|---|
+| `test10_core`, `seaglass-study-dark-default` (16) | W-A1 holds where dark can show it: the note's paper #0F1A16 at both strips (no black band), behind the keyboard bar's cells and beside the keyboard's corners; the roots' room #000000 at both; **W-E3 gone** — nothing of her prose behind the bar, her line cut at 487.0 as on main; the merge's Timing… row in Diagnostics (44.0 pt, #E8E3D8 13.91:1); the filter row, placeholders, chips, the peek and pill and the accent caret pixel-identical to the twins; **no unexplained difference**. |
+| `test20_rest`, `seaglass-study-light-default` (24) | **W-F1 fixed** — r04b: Read's room alone behind "9:41", her words stop at 62.0; **W-E4's second road fixed** — r13's note scrolled 146.0 pt, pixel-identical to main's frame; the Read page's foot **given back by design** — cut at 840.0 as on main, Read's room below; the pushed lists, the reader, Protection and the sheets' strips as the record's table says; r05b's Gathering face as built (W-C4 4.44:1 and W-C5 1.65:1 as before); 19 of the 23 twinned captures pixel-identical; **no unexplained difference**. |
+| `test40_shell`, `seaglass-study-light-default` (19) | Pushed lists: the paper above, the bar's room below, every pixel of rows 831–874 #E5F0EC (no seam, one hairline); the message line above the bar on one continuous room, its Undo taking the line away and putting the note back; tab taps land on roots, b10 keyboard-free; no bar on Read, the note, the reader or Protection; 12 of 19 pixel-identical, the rest the store's rows or Read's foot; **no unexplained difference**. |
+
+**Earlier findings in this set, as they show now** (not re-filed): W-A1 — as the record's table on every page (H1–H8);
+W-E3 — fixed (H9); W-E4 — fixed on its second road (H10); W-F1 — fixed (H4); W-A9, W-A10, W-B1, W-B3, W-B4, W-C3, W-C7 — as
+fixed (H14); W-C1 (P-47-36), W-C4 and W-C5 (P-47-37) — as before (H12, H13); W-A2 (Study's path line whole), W-A5 (the 🗑
+emoji), W-A7 (the box's and the search's blue caret, dark c2 / c4), W-A12 (no dates on Library rows), W-E1 / W-E2 (the pill
+over her words, the dark take tint — dark c6) and W-B5 (the overlays' veil, r11–r13) — as before, unchanged pixels.
+
+**No new finding.** One small thing seen and dispositioned in place, not filed: on the scrolled Read page (r04b) the
+system's soft scroll edge now begins at 62.0, under the painted strip, which leaves a tone step of ≈ 1.04:1 in the side
+margins outside the cream card (#FAF8F3 → #F5F3EE … #F8F6F1) — the fade's own top; main's frame had the same edge under a
+#FFFFFF strip (1.09:1). The record's W-F1 line leaves "whether a question for her remains" to the orchestrator; on this frame
+nothing of her words shows in the status bar.
+
+**What I could not judge, and why**
+- **Paper or bare window in Study light** (b6, r11–r13, the overlays' feet): Study's paper is #FFFFFF, the window's own
+  white, so the painted strip and a bare window are the same pixels there; the evidence is Study dark's c5–c9 (#0F1A16).
+- **Painted room or bare window on the dark roots** (c1–c4, k0): the dark room is #000000, the window's own black; the
+  evidence is the light roots (H1).
+- **The painted layer's approximations 1 and 3** (the record's "W-A1 redone"): no capture of the set is caught mid-push,
+  mid-pop or in a cancelled swipe-back.
+- **The caret on r13's road:** under the Comments overlay; here the 146.0 pt scroll is the evidence, the caret itself is
+  set 1's (e4a / e4b) and the UI test's (W.11 (7)).
+- **The reveal behind r11 / r12:** no keyboard was up before them on the driver's road.
+- **The m3 put-back against the whole Trash:** m2 shows only the Trash's first five rows above the line; the conclusion rests
+  on the Trash's newest-first order and the Library's three "A note for the message line" rows.
+- **r05b's other states:** the no-tags line, the OR / AND choice and a picked tag's ✓ are not on screen (two tags in the
+  store, none picked); their words and roles read in code only (`MobileCreateBook.swift:132–133`, `:304–306`, `:316–321`,
+  `:337–339`).
+- **VM-64's Library paging and the Timing readout:** the store holds far fewer notes than a page, so no capture can show a
+  page's edge; no capture opens the Timing door's sheet.
+- **Hit areas:** drawn shapes only (the tag rows' 44.0 pitch, the Timing row's 44.0).
+- **Terminal, AX5 and teal & rust on these screens:** not in this set.
+- **What I did not open as an image:** the lower halves of r06b, r06c, r07, r07b and r08 (100 % #E5F0EC by pixel count),
+  and the halves pixel-identical to a half I opened (§4h, "How it was read") — checked by hash, diff and column runs, not by
+  eye.
