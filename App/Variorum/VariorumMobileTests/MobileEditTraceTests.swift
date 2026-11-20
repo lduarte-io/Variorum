@@ -441,9 +441,9 @@ struct MobileEditTraceTests {
 
         await withTraceDisarmed {
             report(bound: false, changed: oneCharacter)
+            #expect(MobileEditTrace.summary == MobileEditTrace.Summary(), "disarmed: nothing recorded")
         }
         #expect(asked == 0, "disarmed: nothing computed")
-        #expect(MobileEditTrace.summary == MobileEditTrace.Summary())
 
         await withTraceArmed {
             report(bound: true, changed: oneCharacter)    // widened, but bound
