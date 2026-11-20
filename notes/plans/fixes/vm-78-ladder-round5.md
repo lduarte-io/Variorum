@@ -270,3 +270,104 @@ final round's fixes they are read by the orchestrator line by line against this 
 - **Her rulings, against what shipped.** Nothing in the diff is product behaviour that is neither ruled, in the
   approved plan, nor listed as PROVISIONAL for her (the archived gathering's mark; F8). VM-24 and VM-17 are out
   of the run by her picks, no fix of either is in the tree, and the caret test is red and unwrapped.
+
+## Final calls
+
+*Made by the round-5 reviewer after the answers came back: the implementer (a fresh documents-only
+`opus-implementer`) AGREED on all nine and disputed nothing, and applied each fix under this file's standing
+ruling (`e9d509d98`, `baf510391`, `096a942eb`, `e67287d1b`, `506033895`, `38ba37d3d`, `028e42135`). I read each
+applied line at the tip `028e42135` before calling.*
+
+**What I re-ran, read-only** (the gate's Mac leg was running: no build, no test). Nothing under `App/`, `Sources/`
+or `Tests/` changed since this file's findings commit, and HEAD's code is still `d55d22db9`'s. Main was merged in
+a third time since my review — `54e38785f`, main at `a4634b288`: its tree is git's own merge, it brings three of
+VX-981's notes files and no file of this run's, and `origin/main` is an ancestor of HEAD. VM-64's tip has moved
+to `dd7da4f4c`; the trial merge is still clean (tree `47de8cb69`) and the five shared files' blobs there are the
+five this file names, so the read of that join under "What is still owed" still holds.
+
+| Finding | Final call |
+|---|---|
+| R5-N1 | CONFIRMED as applied — PL-78, the reconcile bullet, both owner lines, the guards in the member rows. One wording: in the VM-212 line "When this literal is reworded" follows three items, the last a comment — say "When the "smart book" literal is reworded" |
+| R5-N2 | CONFIRMED as applied — the Gate 2 row, FOR A LATER READER's slot and the handoff's two places say the whole Mac target and name the dead-vocabulary test |
+| R5-N3 | CONFIRMED as applied |
+| R5-N4 | CONFIRMED AS AMENDED — five sites, not three (call 1 below) |
+| R5-N5 | CONFIRMED as applied — the master plan's paragraph with its three merge-moment moves; the Cast names every session |
+| R5-N6 | CONFIRMED AS AMENDED — the cut stands; five lines come back or change (call 2 below) |
+| R5-N7 | CONFIRMED — no change in the tree; the fold is in VM-85's and VM-212's owner lines |
+| R5-N8 | CONFIRMED as applied. The message as quoted settles the reading: its item 1 says the fix makes the order a–z and its default leaves the visible choice to wave 3, so her "that's fine to leave it for wave 3" answers the choice, as the record read it |
+| R5-N9 | CONFIRMED as applied; the gate's walk saw the same thing (its observation 1) |
+
+**Call 1 — R5-N4's added site: KEEP it, and there is a fifth.** The implementer's fourth site is real
+(`App/Variorum/VariorumTests/RestoreFlushFirstInsuranceTests.swift:5`). My finding swept `Sources/` and the app's
+product folders only; swept over the test folders too, the same mark stands at
+`Tests/VariorumCoreTests/RestoreInsuranceTests.swift:7` ("**P-849-1 — her restore, INSURED** (PROVISIONAL; …"). No
+other site carries it (`grep -rn "P-849-1" Sources Tests App/Variorum`, each hit read with its next line). So
+to-file item 4's clause reads: "and five comments still mark P-849-1 PROVISIONAL (ratified, QUESTIONS #274
+addendum 2) — three in code (`Sources/VariorumCore/Operations/Operations+Variant.swift:201`,
+`App/Variorum/Variorum/Features/History/CommitsFaceModel.swift:782`,
+`App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:3228-3229`) and two test files' opening comments
+(`App/Variorum/VariorumTests/RestoreFlushFirstInsuranceTests.swift:5`,
+`Tests/VariorumCoreTests/RestoreInsuranceTests.swift:7`)"; the handoff's ticket line says "three code comments and
+two test files' opening comments". The item's Area is Books for the bookshelf doc line, while these comments sit
+under Takes & Lenses: a ticket takes one Area, so the merging session picks or splits, as item 7 already says of
+itself.
+
+**Call 2 — R5-N6's cut: it carries what the rule asks, with five amendments.** Read against CLAUDE.md's list: the
+mechanisms are each there in a line; the fixes have one pointer per piece; the two handed-on runs carry their
+commands and kickoffs; the rulings are named by where they are quoted; the evidence is a few true lines with a
+pointer to the table; the open items are complete. Doing it now and not at the merge is the orchestrator's call
+and a sound one — the merge then only fills slots. About 650 words is a full page; the five amendments add about
+seventy, and that is where it should stop.
+1. *False as it stands:* "main merged in twice" — three times now. "…; main merged in three times (`ed1266e2f`;
+   `d55d22db9` after VX-981; `54e38785f`, VX-981's later notes only)."
+2. *A mechanism as settled, lost:* "VM-19 — a test's stale first responder." asserts what the run did not
+   establish. "…a test's stale first responder (its desync did not reproduce here; the pin is test hygiene)."
+3. *A fix as built, lost:* VM-81's pointer `081af74b0` holds a refusal arm that is not in the tree. After
+   "re-landed on VM-55's seams `ed1266e2f` (pins `c652d1669`, `8d2b9f8bf`)" add: "— where VM-81's own refusal arm
+   was deleted (main's road already speaks the sealed Reopen's and the raced Unarchive's sentences; this run's two
+   pins guard it)".
+4. *The one standing red, by name:* "the caret test stays red on main by decision" becomes
+   "`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` stays red on main by
+   decision, never wrapped as a known issue". A later reader meets that red in a whole-target run and has only
+   this section.
+5. *Her rulings by id:* the section names none. To the rulings paragraph add "; the one with an id is QUESTIONS
+   #274 addendum 2 (the insured restore — VM-43, and the PROVISIONAL mark dropped from AppSpec §9 and OverallModel
+   §3)", and let the evidence line's canon pointer name the row: "(canon — SurfaceContracts ×5, MobileSoul PL-78,
+   TEXTKIT2_NOTES §3 — in its "Canon deltas")".
+
+Nothing else needs to come back: every other fact the cut dropped that I spot-checked stands in the Closeout
+(window (3)'s counts, the back-out's check, the four canon commits, the lost bundles by name).
+
+**Call 3 — the three corrected lines that were not findings: CONFIRMED, each.**
+- *"Not done" on the walk:* true as corrected. I read the walk's table: fifteen rows, a to o, each PASS in Study,
+  and rows a, c, d, e and o again in Terminal; rows c, d, i and o show the one line with its sheet still up, row k
+  is a titled note, and row l says what a recording can and cannot show — the rows round 4's R4-N4 asked for.
+- *The finals-ledger draft's gate slot, split:* right — the walk's result is a fact and the two whole-target legs
+  were not when it was written.
+- *"Study; five again in Terminal":* an accurate statement of what ran, in the record, the drafts and the handoff
+  ("in Study and the five book-and-sheet screens again in Terminal"). Whether five Terminal rows meet the walk's
+  own "both voices where a face has one" is the gate's question, not this round's; the record and the handoff now
+  put it to her as it is.
+
+**One line this re-read asks for.** The third merge of main has no line of its own in the record (the walk's
+section mentions `54e38785f` in passing). After "THE SECOND MERGE-IN", or in the live state: "A third merge of
+main — `54e38785f`, main at `a4634b288`, before the gate: VX-981's handoff and release record, three notes files
+(`notes/handoffs/vx-981-handoff.md`, `notes/plans/fixes/vx-981-closeout-drafts.md`,
+`notes/plans/fixes/vx-981-mcp-door-followups.md`), none this run's; no conflict (the commit's tree is git's own
+merge); nothing under `App/`, `Sources/` or `Tests/`."
+
+**Who applies these.** The amendments above are sentences, each given as it should read: a small adjudication
+fix the orchestrator may type, or the implementer's; as a final round's they get the orchestrator's line-by-line
+check against this section (CLAUDE.md). None touches a product line or a test.
+
+**Where the run stands as this is written** (the coordinator's facts, and what I read of them). The gate began
+at 17:54 with main held still. Leg 3, the walk, ran first and passed every row (above). Leg 1, the whole phone
+target, ran 18:28–18:40: in `vm78-gate-phone.log`, 992 tests in 170 suites with 4 issues, 2 of them the designed
+Trash diagnostic; the one red test is VM-24's caret test, two of its three cases ("hi", "hello there") at
+`MobileMarkdownCaretTests.swift:215`; the three guards, the phone's no-redirect sweep and the pins I looked for
+by name passed inside it. Its slots in the record, FOR A LATER READER and the handoff are still PENDING and are
+the orchestrator's to fill from that log. Leg 2, the whole Mac target, was running; I have not read it.
+
+**The ladder is closed: 0 BLOCKER · 0 MAJOR · 0 MINOR · 9 NIT in round 5, every finding dispositioned, none
+disputed, none FINDER-FIXES.** A product line the Mac leg forces is new work no round reads, as "What is still
+owed" says.
