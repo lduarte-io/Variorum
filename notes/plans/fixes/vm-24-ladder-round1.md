@@ -326,3 +326,66 @@ compiled. The products hold `VariorumMobile_VariorumMobile_iphonesimulator27.1-a
 "widened" words once, as a control). **No Mac build is owed:** `git diff --stat 6b5dfb41d b3fa281f9 --
 App/Variorum/Shared Sources App/Variorum/Variorum` is empty. **Nothing under App or Sources changes after
 `b3fa281f9`**; the commits after it are records only.
+
+## Final calls (the round-1 reviewer, same session, 2026-11-20)
+
+*Read before calling: the fix-pass diff `6b5dfb41d..b3fa281f9` whole (two files, strings and
+comments only — no executable line moves, and no test asserted the old words: the headline checks
+stop at the count, verified in `MobileEditTraceTests` myself); the implementer's answers above;
+the width table and its calibration against the W-1 capture.*
+
+**F1 — CONFIRMED as landed** (`9675f8888`). "(snap-backs avoided)" at the rescued line, DRAFT
+marker kept; 245.9 pt against the 362 pt Study measure, with the calibration against the real
+capture within ~2 pt on three lines. **The pin's absence is ACCEPTED, for the implementer's
+reason, which is better than my proxy:** ~45 characters fit Terminal where ~62 fit Study, so a
+63-character bound would bless a line that wraps in Terminal — the proxy was weaker than the
+measurement, and the finding had already made it optional. Verification stands on the calibrated
+measurement; if the orchestrator re-runs any AFTER pass in the kept snapshot before closeout, a
+capture of the fixed readout rides along as the closing picture — recommended, not owed (the
+measurement is accepted evidence on its own).
+
+**F2 — CONFIRMED as landed** (`b3fa281f9`). The sentence as my finding worded it, with the trace
+suite's clause, so the two suites now state the same contract. Nothing else in the file moved.
+
+**F3 — CONFIRMED as landed** (rides `9675f8888`). The header's "widened" bullet now says the
+baseline (the accumulated pre-fixing range) and both consequences (instrument under-count;
+routing unaffected). Exactly the clause asked.
+
+**Observation 1 — call: (b), narrowly.** This run's own new line must fit BOTH voices; the
+pre-existing lines are not this diff's defect.
+
+- **The "widened" line's DRAFT parenthetical becomes `(past the change)`** — the one wording, no
+  choice left: `"  widened           \(s.widenedReports)   (past the change)\n"`. The acceptance
+  bound: the line fits the Terminal measure (SF Mono 13 pt, 362 pt on the walk device — about
+  45 monospace characters) **at a five-digit count** — widened is per-character-report and a long
+  session can run it to four digits, so the bound leaves a digit of air; by the implementer's own
+  pt-per-character calibration (~8.04 pt) the fixed part (20) + 5 digits + 3 spaces + 17 = 45
+  characters ≈ 361.6 pt. The implementer verifies with the same CoreText script before
+  committing; words stay DRAFT, hers.
+- **"rescued (snap-backs avoided)" stays as landed**, with its bound RECORDED: fits Terminal
+  through a two-digit count (361.6 pt); a three-digit rescue count in one session would itself be
+  a finding worth more than the gloss. No change.
+- **"no capture (expected 0)" fits everywhere** at any plausible digit count. No change.
+- **The pre-existing "gate-less" line (E1's, older than this run) and the xxxLarge text-size wrap
+  are NOT this run's to fix:** both go to her wording pass as one line in the closeout's held
+  bundle beside §10 item 6 (the readout's DRAFT words), so the choice is hers — option (c)'s
+  own-line layout included if she wants it. Nothing else owed.
+
+**Observation 2 — call: record only.** The `rescued` counter's semantics are D-24-4's as ruled —
+a ROUTING verdict, decided before the arms, and that is the right instrument semantics: during a
+flight the rescue is real at the routing level, and what follows is the fence's designed, SAID
+withholding — a different mechanism from the silent snap-back VM-24 removes. Coupling the counter
+to fence state would buy no diagnosis and cost clarity. One line rides the same her-wording bundle
+("the gloss reads slightly past the in-flight withheld case, which the fence says aloud"); no code
+change, no pin (no behavior).
+
+**Second round — NOT EARNED.** Round 1 found no BLOCKER or MAJOR; the fix pass and observation 1's
+remaining fix are words and comments only, with no executable change and no test expectation
+touched (verified in the diff, and no pin asserts any of these strings beyond the count prefix).
+Under the cap rule the ladder closes after observation 1's one-line fix lands: that landing gets
+the orchestrator's line-by-line check against this call (the final-round rule), the implementer's
+CoreText verification at the stated bound, and the gate's company run as the compile proof. The
+pieces this round leaves open are already in the ledger: the gate's two owed legs (the 100k
+trace-inert pin and the gated speed suite, L11 — with the `typeEdit` one-pass-per-keystroke note
+as the first place to look if the speed leg moves), the Mac twin ticket (L14), the TEXTKIT2 §3
+canon line (L12), and her device "after" session (§10).
