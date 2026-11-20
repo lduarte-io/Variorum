@@ -270,6 +270,80 @@ struct MobileBlockHistoryTests {
         }
     }
 
+    /// **VM-43 — a restore keeps the words it replaces** (her ruling, QUESTIONS
+    /// #274 addendum 2: "Ratify + wire the phone."; AppSpec §9 `restoreCommit`).
+    /// Type past the take's last savepoint — still PENDING in the coordinator,
+    /// so the door's flush-first order is in the pin too — then restore that
+    /// savepoint through the phone's own door: the take now carries one more
+    /// quiet `auto` savepoint holding exactly the typed words, and the buffer
+    /// reads the restored savepoint.
+    ///
+    /// **Red on old:** the door called `restoreCommit` with no insurance, so
+    /// the commit run stayed `["manual"]` and the typed words were gone.
+    @Test func aRestoreKeepsTheReplacedWordsAsAQuietSavepoint() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedPost(session)
+            let saved = "First sentence stays. Second sentence leaves."
+            try await session.runner.run { ops in
+                _ = try ops.commit(seed.variantID, kind: .manual)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            let typed = "First sentence stays. Second sentence leaves. Typed past it."
+            model.recordTakeEdit(variantID: seed.variantID, text: typed, charDelta: 14)
+            #expect(model.autosave.isDirty, "the typing is still pending — the flush is in the pin")
+
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+            let commit = try #require(
+                savepoints(model.blockHistory.rows(), of: seed.variantID).first)
+            #expect(commit.text == saved)
+
+            await model.blockHistory.restore(commit, of: seed.variantID)
+            #expect(model.blockHistory.status == .receipt(BlockHistoryCopy.restoredSavepoint))
+            #expect(try await storedTakeText(db, variantID: seed.variantID) == saved,
+                    "the buffer reads the restored savepoint")
+            let commits = try await commitRows(db, variantID: seed.variantID)
+            #expect(commits.map(\.kind) == ["manual", "auto"],
+                    "one quiet savepoint more — the insurance: \(commits.map(\.kind))")
+            #expect(commits.last?.text == typed,
+                    "it holds exactly the words the restore replaced, pending typing included")
+        }
+    }
+
+    /// The dedupe half (AppSpec §9: "deduped against the take's last
+    /// savepoint"): when the buffer already equals the last savepoint there is
+    /// nothing to insure, so a restore adds NO savepoint. Green on both sides
+    /// by design — the control that says the insurance is not a blanket
+    /// commit-before-every-restore.
+    @Test func aRestoreOverABufferEqualToItsLastSavepointAddsNoSavepoint() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedPost(session)
+            let saved = "First sentence stays. Second sentence leaves."
+            let second = "First sentence stays. Second sentence leaves, twice."
+            try await session.runner.run { ops in
+                _ = try ops.commit(seed.variantID, kind: .manual)
+                try ops.autosave(seed.variantID, text: second, charDelta: 7)
+                _ = try ops.commit(seed.variantID, kind: .manual)
+            }
+            let (model, _) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+            model.blockHistory.open(blockID: seed.blockID)
+            await model.blockHistory.refresh()
+            let older = try #require(
+                savepoints(model.blockHistory.rows(), of: seed.variantID).last,
+                "newest first — the last row is the older savepoint")
+            #expect(older.text == saved)
+
+            await model.blockHistory.restore(older, of: seed.variantID)
+            #expect(try await storedTakeText(db, variantID: seed.variantID) == saved)
+            let commits = try await commitRows(db, variantID: seed.variantID)
+            #expect(commits.map(\.kind) == ["manual", "manual"],
+                    "the buffer equalled its last savepoint, so nothing was insured")
+        }
+    }
+
     /// Restore refuses under the seal, in phone words, and the refusal is
     /// CLASSED as one so the face can wear its alarm token; the buffer stays.
     @Test func restoreUnderASealedNoteRefusesInPhoneWords() async throws {

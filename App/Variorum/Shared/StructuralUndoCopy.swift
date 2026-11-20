@@ -20,11 +20,12 @@
 //  because the Mac already shipped them, so a second phrasing on the phone
 //  would be drift, not localization.
 //
-//  What deliberately did NOT move: the Mac's `discardingUndoDetail`, whose
-//  sentence names ⌘S. A chord is a platform fact, so the destructive-undo
-//  warning's DETAIL is written per-platform over the shared QUESTION below
-//  — the same split the phone's structural refusals already use against the
-//  Mac's `RefusalCopy`.
+//  The destructive-undo warning's DETAIL moved here at VM-20 (the phone said
+//  "It is saved first" where the Mac says "committed"): ONE sentence, with
+//  the one per-platform part — WHERE the set-aside writing is read back —
+//  passed in, because the Mac names ⌘S's list and a chord is a platform
+//  fact (the same split the phone's structural refusals already use against
+//  the Mac's `RefusalCopy`).
 //
 
 import Foundation
@@ -79,5 +80,21 @@ nonisolated enum StructuralUndoCopy {
     /// Every other structural undo stays silent, and redo is untouched.
     static func discardingUndoQuestion(_ warning: UndoStack.PendingUndoWarning) -> String {
         "Undo \(warning.label)?"
+    }
+
+    /// **The warning's DETAIL** (VM-20 — hoisted from the Mac's
+    /// `ShellActions.discardingUndoDetail`, byte-identical there): what is
+    /// set aside, that it is COMMITTED first (the app's word wherever a
+    /// savepoint is named — AppSpec §12), and where it is read back. `place`
+    /// is the one per-platform part: the Mac passes "the take's history
+    /// (⌘S's list)", the phone "the block's Block History".
+    static func discardingUndoDetail(
+        _ warning: UndoStack.PendingUndoWarning, readBackFrom place: String
+    ) -> String {
+        let subject = warning.bufferCount == 1
+            ? "One take has been edited since" : "\(warning.bufferCount) takes have been edited since"
+        return "\(subject) — undoing puts back the text as it was before the "
+            + "\(warning.label.lowercased()), so that writing is set aside. "
+            + "It is committed first, so you can bring it back from \(place) at any time."
     }
 }

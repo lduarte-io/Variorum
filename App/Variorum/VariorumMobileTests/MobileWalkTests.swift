@@ -606,7 +606,8 @@ struct MobileWalkTests {
             #expect(tokens.chromeLabel(shelf.rowName(for: poems)) == "poems ✓",
                     "✓ finished is a STATE on the name")
             let smart = try #require(shelf.books.first { $0.reading.kind == .gathering })
-            #expect(tokens.chromeLabel(shelf.rowMeta(for: smart)) == "smart · #books")
+            // VM-83 (W-073): the kind word is "gathering", never "smart".
+            #expect(tokens.chromeLabel(shelf.rowMeta(for: smart)) == "gathering · #books")
 
             // TODAY: create-or-open + the shared daily-book shelving door.
             let todayID = try #require(await shelf.openToday(day: "2026-08-03"))

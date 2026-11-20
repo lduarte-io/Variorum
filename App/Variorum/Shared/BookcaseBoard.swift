@@ -12,9 +12,10 @@
 //  where a context mint lands. A view renders these answers; it never
 //  re-derives them (P-3's authority rule, one level up). Shared, because the
 //  phone owes the same board (the sitting §18.5 — "the Bookcase/shelf strip
-//  as a list"): the brain is shared, the chrome is not (the `ShelfOrder`
-//  precedent beside it, which keeps the phone's shipped pin-then-journal
-//  order until the phone's catch-up adopts this).
+//  as a list"): the brain is shared, the chrome is not. The phone's shelf
+//  already orders by `ordered(_:mode:lastEdited:)` here (A–Z, starred first —
+//  VM-83 retired the pin-then-journal `ShelfOrder.ordered`); its order choice
+//  and the rest of the board arrive with the phone's Bookcase (VM-113).
 //
 //  The rules that the OPERATIONS layer must agree with (A–Z, the my-order
 //  sequence, the dangling-shelf rule) live in core `BookcaseOrdering`; this

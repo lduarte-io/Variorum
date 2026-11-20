@@ -38,4 +38,23 @@ struct UndoWarningWordsTests {
             #expect(shoutedWords(ShellActions.discardingUndoQuestion(warning)).isEmpty)
         }
     }
+
+    /// **VM-20's hoist leaves the Mac's sentence byte-identical.** The detail
+    /// moved to `StructuralUndoCopy` (the phone said "saved" where this says
+    /// "committed"); the Mac passes only its read-back place. A guard, green
+    /// on both sides of the hoist by design — the exact bytes the Mac shipped.
+    @Test func theMacsDetailIsByteIdenticalThroughTheHoist() {
+        let one = UndoStack.PendingUndoWarning(label: "Divide", bufferCount: 1)
+        let oneDetail: String =
+            "One take has been edited since — undoing puts back the text as it was before the "
+            + "divide, so that writing is set aside. It is committed first, so you can bring it "
+            + "back from the take's history (⌘S's list) at any time."
+        #expect(ShellActions.discardingUndoDetail(one) == oneDetail)
+        let many = UndoStack.PendingUndoWarning(label: "Make Block", bufferCount: 3)
+        let manyDetail: String =
+            "3 takes have been edited since — undoing puts back the text as it was before the "
+            + "make block, so that writing is set aside. It is committed first, so you can bring "
+            + "it back from the take's history (⌘S's list) at any time."
+        #expect(ShellActions.discardingUndoDetail(many) == manyDetail)
+    }
 }

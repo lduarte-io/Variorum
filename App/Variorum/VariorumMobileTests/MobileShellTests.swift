@@ -66,8 +66,9 @@ struct MobileShellTests {
                     for: smart, curatedTags: [:], ruleTags: [smart.reading.id: ["books"]])
                 == ["books"],
                 "a gathering's tags are its rule's, resolved")
+        // VM-83 (W-073): the kind word is "gathering", never "smart".
         #expect(MobileShelfFaces.meta(for: smart, tagPaths: ["books"], isDaily: false)
-            == "smart · #books", "derived membership is never a count")
+            == "gathering · #books", "derived membership is never a count")
     }
 
     /// LK5's rider: ✓ finished is a STATE riding the NAME (the Mac
@@ -86,42 +87,24 @@ struct MobileShellTests {
         #expect(!meta.contains("finished"), "the state lives on the name")
     }
 
-    /// The Mac `ShelfViewModel.ordered` semantics, mirrored: pins first
-    /// in pin order, then journal-profile books by name, then the rest by
-    /// name.
-    @Test func shelfOrderPutsPinsFirstThenJournalsThenName() throws {
-        func book(_ id: String, _ name: String, profile: String? = nil) -> Queries.ShelfBook {
-            Queries.ShelfBook(
-                reading: Reading(
-                    id: id, ownerId: nil, name: name, kind: .book, profile: profile,
-                    sortField: .manual, sortDir: .asc, groupingTagId: nil,
-                    querySpec: nil, maxPosts: nil, wordTarget: nil, locked: false,
-                    createdAt: Date(), updatedAt: Date(), deletedAt: nil,
-                    syncVersion: 0),
-                postCount: 0, sectionCount: 0)
-        }
-        let books = [
-            book("z", "Zebra"), book("j", "Journal", profile: "journal"),
-            book("a", "Aster"), book("d", "Dreams", profile: "journal"),
-            book("p", "Pinned late"),
-        ]
-        let ordered = MobileShelfFaces.ordered(books: books, pins: ["p", "z"])
-        #expect(ordered.map(\.reading.id) == ["p", "z", "d", "j", "a"],
-                "pin order · journals by name · the rest by name")
-    }
+    // (VM-83, W-068: `shelfOrderPutsPinsFirstThenJournalsThenName` RETIRED with
+    // the rule it pinned — `ShelfOrder.ordered`, deleted in the same commit. The
+    // shelf orders by the Mac Bookcase's `BookcaseBoard` rule now, pinned by
+    // `MobileShelfOrderTests` in `MobileBookFixesTests.swift`.)
 
-    /// The held observation delivers books + pins + the daily mark, and
+    /// The held observation delivers books (with their union star) + the daily mark, and
     /// the row faces compose from a real store (tags one-shot).
-    @Test func theShelfObservationDeliversBooksPinsAndTheDailyMark() async throws {
+    @Test func theShelfObservationDeliversBooksStarsAndTheDailyMark() async throws {
         try await withEditorWorld { session, _ in
-            let (bookID, pinnedID) = try await session.runner.run { ops -> (String, String) in
+            let (bookID, starredID) = try await session.runner.run { ops -> (String, String) in
                 let journal = try ops.createReading(
                     name: "Journal", kind: .book, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
                 try ops.setDailyJournalBook(journal.id)
-                let pinned = try ops.createReading(name: "Essays", kind: .book)
-                try ops.setShelfPinned(pinned.id, pinned: true)
-                return (journal.id, pinned.id)
+                let starred = try ops.createReading(name: "Essays", kind: .book)
+                // The core op's older name: `setShelfPinned` IS `setStarred` since 13i-d.
+                try ops.setShelfPinned(starred.id, pinned: true)
+                return (journal.id, starred.id)
             }
             let model = MobileShelfViewModel(session: session)
             let observation = Task { await model.start() }
@@ -131,10 +114,12 @@ struct MobileShellTests {
                 try? await Task.sleep(for: .milliseconds(1))
             }
             #expect(model.books.count == 2)
-            #expect(model.pins == [pinnedID])
+            // VM-83: the shelf reads the union star its listing carries (the
+            // retired pin list went with the Pin door).
+            #expect(model.books.first { $0.reading.id == starredID }?.starred == true)
             #expect(model.dailyBookID == bookID)
-            #expect(model.orderedBooks.map(\.reading.id) == [pinnedID, bookID],
-                    "the pinned book leads; the journal follows")
+            #expect(model.orderedBooks.map(\.reading.id) == [starredID, bookID],
+                    "the starred book leads; the journal follows")
             #expect(model.rowMeta(for: model.orderedBooks[1]) == "0 entries · daily")
         }
     }

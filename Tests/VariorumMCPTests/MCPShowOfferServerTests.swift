@@ -54,7 +54,7 @@ private final class FakeApp: @unchecked Sendable {
             switch verdict {
             case .navigate: delivered.withValue { $0.append(request.target) }
             case .offer: offered.withValue { $0.append(request) }
-            case .refuse: break
+            case .refuse, .partial: break  // the rule never answers `.partial` (round 1's F2 — a delivery's answer)
             }
             return verdict
         }

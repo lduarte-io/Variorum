@@ -85,6 +85,10 @@ struct MobileShelfView<TabBar: View>: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     @State private var createBookPresented = false
+    /// VM-83: the delete confirm's title, held so a gathering's never flashes
+    /// the book's word while the alert animates away (the model clears
+    /// `pendingDeleteBook` on dismissal).
+    @State private var deleteTitle = MobileShelfFaces.deleteConfirmTitle(for: .book)
 
     var body: some View {
         VStack(spacing: 0) {
@@ -146,7 +150,9 @@ struct MobileShelfView<TabBar: View>: View {
         // the book from the SAME captured value, so it can never blank
         // mid-presentation either.
         .alert(
-            MobileShelfFaces.deleteBookConfirmTitle,
+            model.pendingDeleteBook.map {
+                MobileShelfFaces.deleteConfirmTitle(for: $0.reading.kind)
+            } ?? deleteTitle,
             isPresented: $model.deleteBookPresented,
             presenting: model.pendingDeleteBook
         ) { book in
@@ -158,6 +164,9 @@ struct MobileShelfView<TabBar: View>: View {
         } message: { book in
             Text(MobileShelfFaces.deleteBookConfirmDetail(
                 name: book.reading.name))
+        }
+        .onChange(of: model.pendingDeleteBook) { _, book in
+            if let book { deleteTitle = MobileShelfFaces.deleteConfirmTitle(for: book.reading.kind) }
         }
     }
 
@@ -307,42 +316,46 @@ struct MobileShelfView<TabBar: View>: View {
             }
         }
         .padding(.trailing, 12)
-        // Pin/unpin (parity C2): the long-press menu — the act belongs
-        // where the list it orders lives (the Mac shelf row's own context
-        // menu, the phone's long-press grammar). One state-mirroring door;
-        // the book's other acts live on its details surface, not here.
+        // The long-press menu (parity C2/C3 — the Mac shelf row's own context
+        // menu, the phone's long-press grammar): Star, then Delete (or
+        // Archive on the daily Journal); the book's other acts live on its
+        // details surface. VM-83 (W-071): the Pin door is retired — it wrote
+        // the same star. The menu is the model's act table (`rowActs`), drawn
+        // in its order — the doors are data, so a pin reads what she sees.
         .contextMenu {
-            let pinned = model.pins.contains(book.reading.id)
-            Button(tokens.chromeLabel(MobileShelfFaces.pinDoorTitle(pinned: pinned))) {
-                Task { await model.setPinned(book.reading.id, pinned: !pinned) }
-            }
-            // Star (parity C3) — deliberately beside Pin, the Mac 13f
-            // adjacency: pinning orders THIS list; a star lifts the book
-            // to the starred section at the top.
             let target = StarTarget.reading(book.reading.id)
-            Button(tokens.chromeLabel(
-                MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
+            ForEach(
+                Array(model.rowActs(for: book, starred: stars.isStarred(target)).enumerated()),
+                id: \.offset
+            ) { _, act in
+                rowActButton(act, book: book, target: target)
+            }
+        }
+    }
+
+    /// One act of the row's menu. Star (parity C3) lifts the book to the top
+    /// of the shelf. Delete (round 2 batch 4 — PR4): the confirm and the
+    /// wording are the model's, so this door and the book-details door
+    /// cannot describe one act two ways. 13i-e U2 (P-2; the sitting record
+    /// §10): the daily Journal's row offers ARCHIVE in Delete's place.
+    @ViewBuilder
+    private func rowActButton(
+        _ act: MobileShelfRowAct, book: Queries.ShelfBook, target: StarTarget
+    ) -> some View {
+        switch act {
+        case .star:
+            Button(tokens.chromeLabel(act.title)) {
                 let stars = stars
                 Task { await stars.toggle(target, from: .shelf) }
             }
-            // Delete the book (round 2 batch 4 — PR4). The row's long-press
-            // is where its other acts already live; the confirm and the
-            // wording are the model's, so this door and the book-details
-            // door cannot describe one act two ways.
-            // 13i-e U2 (P-2; the sitting record §10): the daily Journal can
-            // be archived, never deleted — its row offers ARCHIVE instead.
-            if MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading) {
-                Button(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDoorTitle)) {
-                    let model = model
-                    Task { await model.archiveDailyJournal(book) }
-                }
-            } else {
-                Button(
-                    tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle),
-                    role: .destructive
-                ) {
-                    model.requestDeleteBook(book)
-                }
+        case .archiveDailyJournal:
+            Button(tokens.chromeLabel(act.title)) {
+                let model = model
+                Task { await model.archiveDailyJournal(book) }
+            }
+        case .delete:
+            Button(tokens.chromeLabel(act.title), role: .destructive) {
+                model.requestDeleteBook(book)
             }
         }
     }

@@ -250,4 +250,75 @@ struct VX775ActivityLogFailureDoorTests {
             #expect(door.lastShow != nil, "RED ON OLD: the landed write's receipt reached her (⌥⌘O's last change)")
         }
     }
+
+    // MARK: - VX-961 (the VX-981 run, batch 2 — APPENDED): show_in_app rides the same road
+
+    /// **VX-961 — the words for a show** (PROVISIONAL P-981-B2-3, her trim): a show is no
+    /// "change", so its failure says its own subject — true of a move and an ask alike — with
+    /// the store's words, or ending at "it." where the store says nothing safe. A NEW-CONTRACT
+    /// pin (red on old by mechanism: the old words said "change landed" for every tool).
+    @Test func aShowsFailureSaysItsOwnSubject() {
+        #expect(MCPReceiptCopy.activityLogFailed(MCPActivityLogFailure(
+            clientName: "claude-code", tool: "show_in_app", unrecorded: 1,
+            storeWords: "SQLite error 13: database or disk is full"))
+                == "claude-code's request to show you something went through, but the activity log couldn't record it "
+                + "\u{2014} SQLite error 13: database or disk is full.")
+        #expect(MCPReceiptCopy.activityLogFailed(MCPActivityLogFailure(
+            clientName: "codex", tool: "show_in_app", unrecorded: 1, storeWords: nil))
+                == "codex's request to show you something went through, but the activity log couldn't record it.")
+        // A GUARD: the write family's words are unchanged (VX-775, her ruling at #271).
+        #expect(MCPReceiptCopy.activityLogFailed(fullDisk)
+                == "claude-code's change landed, but the activity log couldn't record it \u{2014} SQLite error 13: database or disk is full.")
+    }
+
+    /// **RED ON OLD (the behavioural revert of the core fix — `MCPShowTool.swift` from its
+    /// parent):** through the REAL door, host and socket — a client's `show_in_app` under her
+    /// default dial (the ask) while her store refuses the Activity row: the client hears the
+    /// OFFERED answer, the ask STANDS (the toast's refusal sends it to the line, never ends it),
+    /// and her seam's toast says the failure as a refusal naming the client. Old: `isError` in the
+    /// store-failure words, the ask standing with nothing said of the log.
+    @Test func throughTheRealDoorAShowsClientHearsOfferedAndSheHearsTheFailure() async throws {
+        try await withDoorWorld { (session: AppSession, db: AppDatabase) async throws in
+            let server = DoorServer()
+            defer { server.cleanUp() }
+            let door = server.door
+            door.attach(session: session)
+            defer { door.detach() }
+            session.status.receiptStyle = .quiet
+            door.setEnabled(true)
+            #expect(try await settle { door.serverState == .running })
+            let note = try server.operations.createPost(title: "ch 1")
+            _ = try server.operations.newBlock(in: note.id, text: "Her line.", registeringUndo: false)
+            let key = try server.operations.mintMCPSetupKey(copiedFor: "claude-code")
+            let directory = server.directory
+            let fd = try await Task.detached { try connectNamed(directory, as: "claude-code", key: key) }.value
+            defer { close(fd) }
+            let client = try #require(try await db.read { try Queries.mcpClient($0, name: "claude-code") })
+            _ = try server.operations.approveMCPClient(
+                client.id, granting: .init(rung: .read, scopeKind: .note, scopeID: note.id, duration: .always))
+
+            try await db.write { db in
+                try db.execute(sql: """
+                    CREATE TEMP TRIGGER vx961_log_failure BEFORE INSERT ON mcp_activity
+                    BEGIN SELECT RAISE(ABORT, 'the store refused'); END
+                    """)
+            }
+            let noteID = note.id
+            let result = try await Task.detached { try callTool(fd, "show_in_app", ["note_id": noteID]) }.value
+            try await db.write { db in try db.execute(sql: "DROP TRIGGER vx961_log_failure") }
+
+            #expect(!result.isError, "RED ON OLD: the act's own answer — \(result.text)")
+            #expect(result.text.contains("\"offered\":true"), "the offered answer: \(result.text)")
+            let expected = MCPReceiptCopy.activityLogFailed(MCPActivityLogFailure(
+                clientName: "claude-code", tool: "show_in_app", unrecorded: 1,
+                storeWords: "SQLite error 19: the store refused"))
+            #expect(try await settle { session.status.current?.text == expected },
+                    "RED ON OLD: her seam says the failure — got \(String(describing: session.status.spoken?.text))")
+            #expect(session.status.current?.kind == .refusal)
+            let stands = door.showOffer != nil
+            let onTheLine = session.status.lineItem?.id == session.status.standing?.id && session.status.standing != nil
+            #expect(stands, "the ask still stands — the failure never ends it")
+            #expect(onTheLine, "the refusal holds the toast; the ask holds the line")
+        }
+    }
 }

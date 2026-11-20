@@ -11,8 +11,9 @@ import Testing
 // VX-943 (the VX-915 run, batch 6 — the record `notes/plans/fixes/vx-915-recents-sweep.md`
 // BATCH 6): `unlink_versions`, link_versions' opposite (her relay: "an unlink_versions that
 // takes the ID link_versions already returns, at the same permission level"). ONE link taken
-// back by the `edge_id` link_versions answered; WRITE NEW on BOTH notes the link joins, their
-// once grants spent together; BOTH notes READABLE before any other answer, so a link to a note
+// back by the `edge_id` link_versions answered; EDIT on BOTH notes the link joins (VX-977 — her
+// ruling on P-915-B6-1, the VX-981 run's batch 2; VX-943 built it at write new), their once
+// grants spent together; BOTH notes READABLE before any other answer, so a link to a note
 // the client cannot read answers the one not-shared shape byte-identical to an id naming
 // nothing (VX-825); a saved version's link and a gone link refuse in words; ONE client-named
 // undo honouring VX-276. An Improvement: these pins assert the NEW contract (red on old by
@@ -117,7 +118,7 @@ struct MCPUnlinkVersionsServerTests {
         try await h.within {
             let w = try world(h)
             let connection = try await h.connect(as: "claude-code")
-            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            _ = try h.approve("claude-code", spec(.edit, .book, w.book.id))  // VX-977: the unlink lands at edit
             let edge = try #require(try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0])]).first)
             let stored = try await ends(h, edge)
             #expect(Set(stored.noteIDs) == [w.a.id, w.b.id] && Set(stored.blockIDs) == [w.aBlocks[0], w.bBlocks[0]])
@@ -172,7 +173,7 @@ struct MCPUnlinkVersionsServerTests {
         try await h.within {
             let w = try world(h)
             let connection = try await h.connect(as: "claude-code")
-            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            _ = try h.approve("claude-code", spec(.edit, .book, w.book.id))  // VX-977: the unlink lands at edit
             let edges = try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0]), (w.aBlocks[1], w.bBlocks[1])])
             #expect(edges.count == 2)
             let first = try json(try await unlink(connection, edges[0]))
@@ -199,7 +200,7 @@ struct MCPUnlinkVersionsServerTests {
         try await h.within {
             let w = try world(h)
             let connection = try await h.connect(as: "claude-code")
-            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            _ = try h.approve("claude-code", spec(.edit, .book, w.book.id))  // VX-977: the unlink lands at edit
             let edge = try #require(try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0])]).first)
             try h.operations.moveBlock(w.bBlocks[0], to: w.a.id)
             let stored = try await ends(h, edge)
@@ -229,7 +230,7 @@ struct MCPUnlinkVersionsServerTests {
         try await h.within {
             let w = try world(h)
             let connection = try await h.connect(as: "claude-code")
-            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            _ = try h.approve("claude-code", spec(.edit, .book, w.book.id))  // VX-977: the unlink lands at edit
             let edge = try #require(try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0])]).first)
             #expect(try await unlink(connection, edge).isError != true)
             let hers = try h.operations.markVersionOf(w.aBlocks[0], w.bBlocks[0])
@@ -261,11 +262,52 @@ struct MCPUnlinkVersionsServerTests {
 
     // MARK: - The grant matrix
 
-    /// WRITE NEW on BOTH notes (link_versions' rung — the agent's ask she relayed, an OPEN choice
-    /// for her, PROVISIONAL P-915-B6-1; the VX-915 ladder's F-3): a side the client may only
-    /// read hears the rung's refusal, naming nothing else, with ITS ask; once grants on both
-    /// sides are spent together by the one act.
-    @Test func writeNewOnBothNotesTheShortSideSpeaksAndOnceGrantsSpendTogether() async throws {
+    /// **VX-977 — RED ON OLD: a write-new-only client no longer unlinks** (her ruling, QUESTIONS
+    /// #273 addendum, P-915-B6-1 RULED: "i imagine with edit to both, they should also be able to
+    /// unlink something a user made. I don't think AI links are stored differently." — the EDIT
+    /// rung on both notes; no authorship fence, a `version_of` edge carries no author). Write new on
+    /// both notes — the rung that MAKES the link — now hears the rung-too-low family, the first
+    /// short side in the link's stored order speaking, with HER ask raised at EDIT, exactly as the
+    /// door's other past-its-rung arms speak (`insert_blocks` with an anchor); nothing is written.
+    /// Granted edit, the same call lands. Old: it landed at write new.
+    @Test func writeNewOnBothNotesNoLongerUnlinksTheRungSpeaksWithHerAskAtEdit() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try world(h)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            let edge = try #require(try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0])]).first)
+            let stored = try await ends(h, edge)
+            let asksBefore = h.asks.value.count
+
+            let refused = try await unlink(connection, edge)
+            let words = text(refused)
+            #expect(refused.isError == true && words == "This client may only read, suggest and write new here. "
+                    + MCPRefusalCopy.askedSentence, "RED ON OLD: write new unlinked — \(words)")
+            let ask = h.asks.value.last
+            let askedOnce = h.asks.value.count == asksBefore + 1
+            #expect(askedOnce && ask?.scopeKind == .note && ask?.scopeID == stored.noteIDs[0] && ask?.rung == .edit,
+                    "RED ON OLD: her ask, at edit, on the first short side — \(String(describing: ask))")
+            #expect(try await edgeIsLive(h, edge), "RED ON OLD: nothing was unlinked")
+            #expect(h.undoStack.depth == 1, "RED ON OLD: only the link's own entry — no unlink registered")
+
+            // Granted edit on the book (one standing row per place — it replaces), the same call lands.
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.edit, .book, w.book.id))
+            let landed = try await unlink(connection, edge)
+            #expect(landed.isError != true, "at edit on both notes it lands: \(text(landed))")
+            #expect(try await edgeIsLive(h, edge) == false)
+            #expect(h.undoStack.topLabel == "claude-code's version link removal")
+            await h.hangUp(connection)
+        }
+    }
+
+    /// EDIT on BOTH notes (VX-977 — the matrix, rewritten for the ruled rung; it replaces the
+    /// write-new matrix VX-943 built): edit on one side only refuses — a side at write new hears
+    /// the write-new words, a side at read the read words — each naming nothing else, with ITS
+    /// ask at edit; edit on both lands; once edit grants on both sides are spent together by the
+    /// one act. RED ON OLD in its first leg (write new on A, edit on B — old: it landed).
+    @Test func editOnBothNotesTheShortSideSpeaksAndOnceGrantsSpendTogether() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -274,14 +316,25 @@ struct MCPUnlinkVersionsServerTests {
             _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
             let edge = try #require(try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0])]).first)
             let client = try h.client("claude-code").id
+
+            // Write new on A, edit on B: A is the short side, whichever order the link stores.
             try revokeAll(h)
             _ = try h.operations.grantMCPAccess(client, spec(.writeNew, .note, w.a.id))
-            _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.b.id))
+            _ = try h.operations.grantMCPAccess(client, spec(.edit, .note, w.b.id))
+            let shortA = try await unlink(connection, edge)
+            #expect(shortA.isError == true && text(shortA) == "This client may only read, suggest and write new here. "
+                    + MCPRefusalCopy.askedSentence, "RED ON OLD: \(text(shortA))")
+            #expect(h.asks.value.last?.scopeID == w.a.id && h.asks.value.last?.rung == .edit)
+            #expect(try await edgeIsLive(h, edge), "RED ON OLD: nothing was unlinked")
 
-            let short = try await unlink(connection, edge)
-            #expect(short.isError == true && text(short) == "This client may only read here. "
-                    + MCPRefusalCopy.askedSentence, "\(text(short))")
-            #expect(h.asks.value.last?.scopeID == w.b.id && h.asks.value.last?.rung == .writeNew)
+            // Edit on A, read on B: B speaks the read words.
+            try revokeAll(h)
+            _ = try h.operations.grantMCPAccess(client, spec(.edit, .note, w.a.id))
+            _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.b.id))
+            let shortB = try await unlink(connection, edge)
+            #expect(shortB.isError == true && text(shortB) == "This client may only read here. "
+                    + MCPRefusalCopy.askedSentence, "\(text(shortB))")
+            #expect(h.asks.value.last?.scopeID == w.b.id && h.asks.value.last?.rung == .edit)
             #expect(try await edgeIsLive(h, edge))
 
             // Read on both: the FIRST note in the link's stored order speaks.
@@ -291,11 +344,12 @@ struct MCPUnlinkVersionsServerTests {
             let stored = try await ends(h, edge)
             let readOnly = try await unlink(connection, edge)
             #expect(readOnly.isError == true && text(readOnly).hasPrefix("This client may only read here."))
-            #expect(h.asks.value.last?.scopeID == stored.noteIDs[0])
+            #expect(h.asks.value.last?.scopeID == stored.noteIDs[0] && h.asks.value.last?.rung == .edit)
 
+            // Once edit grants on both: the one act spends both.
             try revokeAll(h)
-            _ = try h.operations.grantMCPAccess(client, spec(.writeNew, .note, w.a.id, .once))
-            _ = try h.operations.grantMCPAccess(client, spec(.writeNew, .note, w.b.id, .once))
+            _ = try h.operations.grantMCPAccess(client, spec(.edit, .note, w.a.id, .once))
+            _ = try h.operations.grantMCPAccess(client, spec(.edit, .note, w.b.id, .once))
             #expect(try await unlink(connection, edge).isError != true)
             let spent = try await h.database.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM mcp_grant WHERE consumed_at IS NOT NULL")
@@ -335,8 +389,9 @@ struct MCPUnlinkVersionsServerTests {
             let asksBefore = h.asks.value.count
             let hiddenB = try await unlink(connection, edge)
             #expect(hiddenB.isError == true && text(hiddenB) == text(missing), "write new on A, B hidden")
+            // VX-977 (a JUSTIFIED EDIT — the ask names the act's rung, now edit).
             #expect(h.asks.value.count == asksBefore + 1 && h.asks.value.last?.scopeID == w.b.id
-                    && h.asks.value.last?.rung == .writeNew, "the hidden side's ask is put to HER, silently")
+                    && h.asks.value.last?.rung == .edit, "the hidden side's ask is put to HER, silently")
 
             try revokeAll(h)
             _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.a.id))
@@ -418,7 +473,7 @@ struct MCPUnlinkVersionsServerTests {
         try await h.within {
             let w = try world(h)
             let connection = try await h.connect(as: "claude-code")
-            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            _ = try h.approve("claude-code", spec(.edit, .book, w.book.id))  // VX-977: the unlink lands at edit
             let edges = try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0])])
             let edge = try #require(edges.first)
             #expect(try await unlink(connection, edge).isError != true)
@@ -467,7 +522,9 @@ struct MCPUnlinkVersionsServerTests {
         #expect(!text.contains("link_versions made"), "no own-only claim the act does not enforce: \(text)")
         #expect(text.hasPrefix("Remove one version link by its edge_id"), "the link, by its id: \(text)")
         #expect(text.contains("the ids come from link_versions' answers"), "where the ids come from: \(text)")
-        #expect(text.contains("Needs write new on both notes the link joins"), "the rung, still said: \(text)")
+        // VX-977 (a JUSTIFIED EDIT — the ruled rung, said where the client reads it).
+        #expect(text.contains("Needs edit on both notes the link joins"), "the rung, said: \(text)")
+        #expect(!text.contains("write new on both"), "the old rung is not said: \(text)")
         #expect(text.contains("A link that ties a note to one of its saved versions is refused"),
                 "the saved version's refusal, still said: \(text)")
     }
@@ -517,7 +574,7 @@ struct MCPUnlinkVersionsServerTests {
         try await h.within {
             let w = try world(h)
             let connection = try await h.connect(as: "claude-code")
-            _ = try h.approve("claude-code", spec(.writeNew, .book, w.book.id))
+            _ = try h.approve("claude-code", spec(.edit, .book, w.book.id))  // VX-977: the unlink lands at edit
             let edges = try await link(connection, w, [(w.aBlocks[0], w.bBlocks[0]), (w.aBlocks[1], w.bBlocks[1])])
             let stored = try await ends(h, edges[0])
             #expect(try await unlink(connection, edges[0]).isError != true)

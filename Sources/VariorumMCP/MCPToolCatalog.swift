@@ -127,10 +127,8 @@ enum MCPToolCatalog {
         // U4 — the carriage (R-13nb-18, R-13nb-26 f, P-13nb-U3-8 → PROVISIONAL).
         saveVersion, fileNoteInChapter, setBookRule,
         // VX-184 U3 — VX-187: two notes linked as versions by named pairs (R-VX187-1).
+        // (Its opposite, unlink_versions, is an EDIT act — VX-977, below.)
         linkVersions,
-        // VX-943 (the VX-915 run, batch 6): its opposite — one link taken back
-        // by the edge_id link_versions answered (write new on both notes).
-        unlinkVersions,
         // VX-336 U5b — VX-255: blocks added to a note (write new at its end,
         // edit anywhere — the call's rung read from its arguments).
         insertBlocks,
@@ -161,6 +159,10 @@ enum MCPToolCatalog {
         // VX-812 (the VX-809 run, batch 3 — R-812): tag A → tag B across the
         // client's reach in one wing.
         replaceTag,
+        // VX-977 (the VX-981 run, batch 2 — her ruling on P-915-B6-1): one
+        // version link taken back by the edge_id link_versions answered, at
+        // EDIT on both notes (VX-943 built it at write new).
+        unlinkVersions,
         // VX-184 U4 — VX-195: edit parity inside a note (R-VX184-1) — comments.
         editComment, restoreComment,
         // …the takes family (the LAST take ⇒ the block, R-VX184-1).
@@ -1281,21 +1283,25 @@ enum MCPToolCatalog {
     // MARK: - VX-943 (the VX-915 run, batch 6) — unlink_versions
 
     /// VX-943 (her relay of her agent's ask: "an unlink_versions that takes the
-    /// ID link_versions already returns, at the same permission level"): ONE
-    /// link taken back by its `edge_id`; write new on both notes, as making it
-    /// needs (R-VX187-1's rung — the agent's relayed ask, an OPEN choice for
-    /// her: PROVISIONAL P-915-B6-1); a saved version's link refused in words
-    /// (P-915-B6-2), a gone link too (P-915-B6-3). The VX-915 ladder's F-3: the
-    /// act takes ANY live version link by its id (no authorship fence — the ids
-    /// reach the wire only from link_versions' answers), so the description
-    /// says where the ids come from and claims no "that link_versions made".
+    /// ID link_versions already returns"): ONE link taken back by its
+    /// `edge_id`; a saved version's link refused in words (P-915-B6-2), a gone
+    /// link too (P-915-B6-3). The VX-915 ladder's F-3: the act takes ANY live
+    /// version link by its id (no authorship fence — the ids reach the wire
+    /// only from link_versions' answers), so the description says where the
+    /// ids come from and claims no "that link_versions made". **VX-977 (her
+    /// ruling on P-915-B6-1, QUESTIONS #273 addendum — "i imagine with edit to
+    /// both, they should also be able to unlink something a user made. I don't
+    /// think AI links are stored differently."): EDIT on both notes** — a
+    /// `version_of` edge carries no author, so there is no fence to draw; the
+    /// rung is the edit rung's "change and delete what you shared". Making the
+    /// link stays write new (link_versions).
     static let unlinkVersions = MCPToolDeclaration(
-        name: "unlink_versions", rung: .writeNew, title: "Unlink a version link",
+        name: "unlink_versions", rung: .edit, title: "Unlink a version link",
         description: """
             Remove one version link by its edge_id — the ids come from link_versions' answers \
             (each pair a link_versions call named is its own link, with its own edge_id). Needs \
-            write new on both notes the link joins, the same as making it. Both notes stay exactly as \
-            they are; only the link goes. When the answer's still_versions is true, another link still \
+            edit on both notes the link joins (making a link needs only write new). Both notes stay \
+            exactly as they are; only the link goes. When the answer's still_versions is true, another link still \
             makes the two notes versions, so Compare still offers each beside the other — unlink its \
             edge_id too if they should part. A link that ties a note to one of its saved versions is \
             refused: only the author removes that, in Compare, where unmarking a saved version promotes \

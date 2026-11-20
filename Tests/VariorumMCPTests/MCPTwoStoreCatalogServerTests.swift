@@ -76,6 +76,12 @@ struct CatalogWorld: Sendable {
     // to a Private member and to the daily Journal's entry — whose edge ids
     // unlink_versions names (A only; B and C pass strings naming nothing).
     var privateLink = "", journalLink = ""
+    // VX-977 (the VX-981 run, batch 2): two Home notes the client holds at
+    // WRITE NEW only (note grants) — the link the walk makes between them is
+    // unlinked at the rung's refusal — and (A only) rung one's hidden link to
+    // the secret note, which answers the one shape before any rung.
+    var rungOne = "", rungTwo = "", rungOneBlock = "", rungTwoBlock = ""
+    var rungHiddenLink = ""
 }
 
 /// One call of the walk.
@@ -214,6 +220,14 @@ struct MCPTwoStoreCatalogServerTests {
         w.interleavedGathering = try ops.createReading(
             name: "Interleaved gathering", kind: .gathering,
             querySpec: try RuleGrammar.encode(.tag(interleave.id)), wingId: studio.id).id
+        // VX-977 (the VX-981 run, batch 2): the write-new pair — Home notes in no
+        // book, reached only by their own write-new note grants (`connect`).
+        let rungOne = try ops.createPost(title: "rung one")
+        w.rungOneBlock = try ops.newBlock(in: rungOne.id, text: "Rung one's line.", registeringUndo: false).block.id
+        w.rungOne = rungOne.id
+        let rungTwo = try ops.createPost(title: "rung two")
+        w.rungTwoBlock = try ops.newBlock(in: rungTwo.id, text: "Rung two's line.", registeringUndo: false).block.id
+        w.rungTwo = rungTwo.id
         if hidden { try buildHidden(h, &w, board: board.id, idea: idea.id) }
 
         // VX-859 (red on old): the interleaved book's READABLE members, minted
@@ -382,6 +396,10 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try ops.setNotePrivate(gathered.id, true)
             _ = try ops.applyTag(w.interleaveTag, toPost: gathered.id)
             w.privateGathered = gathered.id
+            // VX-977 (the VX-981 run, batch 2): a version link from the write-new
+            // note to the HIDDEN secret note — unlink_versions answers the one
+            // shape before any rung (B and C pass a string naming nothing).
+            w.rungHiddenLink = try ops.markPostsAsVersions(w.rungOne, w.secretNote).id
         }
     }
 
@@ -406,6 +424,8 @@ struct MCPTwoStoreCatalogServerTests {
         }
         _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.loose))
         _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.empty))
+        // VX-977 (the VX-981 run, batch 2): write new — and only write new — on the pair.
+        for note in [w.rungOne, w.rungTwo] { _ = try h.operations.grantMCPAccess(client, spec(.writeNew, .note, note)) }
         return connection
     }
 
@@ -570,5 +590,6 @@ extension CatalogWorld {
         journalBook = a.journalBook; locket = a.locket
         privateGathered = a.privateGathered
         privateLink = a.privateLink; journalLink = a.journalLink
+        rungHiddenLink = a.rungHiddenLink
     }
 }

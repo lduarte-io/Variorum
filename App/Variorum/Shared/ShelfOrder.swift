@@ -26,33 +26,22 @@
 //  session trusts it.
 //
 //  Each platform keeps its own FACE (leaf display, casing, the meta column's
-//  count/smart split): the brain is shared, the chrome is not.
+//  count/kind split): the brain is shared, the chrome is not.
+//
+//  **VM-78 batch A (VM-83, W-068): THE ORDER HALF IS RETIRED.** The phone was
+//  this file's last caller of `ordered(books:pins:)` (pins, then journal-trait
+//  books, then case-sensitive `<` — "Zebra" before "apple", "Book 10" before
+//  "Book 2"); it now orders by the Mac Bookcase's own rule,
+//  `BookcaseBoard.ordered` (starred first, then a–z, digit-aware). The
+//  function and its one pin (`MobileShellTests`'s pins-then-journals test)
+//  went in the same commit. The gathering's tag identity below still has
+//  both platforms as callers.
 //
 
 import Foundation
 import VariorumCore
 
 nonisolated enum ShelfOrder {
-    /// Shelf order: **pinned books first, in PIN order** (R38), then
-    /// journal-profile books by name (the journal lives on the shelf), then
-    /// everything else by name.
-    static func ordered(
-        books: [Queries.ShelfBook], pins: [String]
-    ) -> [Queries.ShelfBook] {
-        var pinned: [Queries.ShelfBook] = []
-        for pin in pins {
-            if let book = books.first(where: { $0.reading.id == pin }) {
-                pinned.append(book)
-            }
-        }
-        let rest = books.filter { !pins.contains($0.reading.id) }
-        let journals = rest.filter { Queries.hasJournalTrait($0.reading.profile) }
-            .sorted { $0.reading.name < $1.reading.name }
-        let others = rest.filter { !Queries.hasJournalTrait($0.reading.profile) }
-            .sorted { $0.reading.name < $1.reading.name }
-        return pinned + journals + others
-    }
-
     /// A SMART book's own query tags — `tagsAll` then `tags`, the shipped
     /// order — or **nil when the book is not smart**, which is the caller's
     /// signal to fall back to its curated aggregate

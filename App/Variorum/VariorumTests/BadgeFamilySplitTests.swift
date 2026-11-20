@@ -343,7 +343,9 @@ struct BadgeFamilySplitTests {
         // to it): the badge family's switch cannot reach the eye any more.
         let face = try source("Core/Views/PrivateMarkView.swift")
         #expect(face.contains("static func note(_ fact: Queries.PrivateMark?) -> Mark? {"))
-        #expect(face.contains("static func book(marked: Bool) -> Mark? {"))
+        // VX-1007 (A JUSTIFIED EDIT): the book rule takes the book's keyed
+        // fact (own stamp · the daily Journal) — still no switch.
+        #expect(face.contains("static func book(_ fact: Queries.PrivateBookMark?) -> Mark? {"))
         #expect(!face.contains("badgesOn"), "the eye's face names no badge switch")
 
         let files = try #require(FileManager.default.enumerator(at: app, includingPropertiesForKeys: nil))

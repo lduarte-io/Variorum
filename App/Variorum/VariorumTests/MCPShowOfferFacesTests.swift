@@ -628,6 +628,257 @@ struct MCPShowOfferFacesTests {
         }
     }
 
+    // MARK: - VX-705 (the VX-981 run, batch 2 — a rider, R-981-2): the move-at-once road re-reads
+
+    /// **VX-705 — RED ON OLD: a move at once whose place DIED since the wire's read opens nothing
+    /// and says so.** The wire decides the target at READ (it was live and readable), then awaits
+    /// the app's delivery; under move at once with Variorum in front the `.navigate` arm adopted
+    /// the target directly — none of the press roads' gone-check (F-L2) — so a deletion landing
+    /// between the read and the adopt (her own Delete, a sync apply) opened a tombstone's empty
+    /// page silently, recorded the trail row "opened" and answered the client `shown`.
+    ///
+    /// THE HOOK (deterministic, no sleeps): `agentShow` reads where she stands FIRST
+    /// (`standingProvider`), after the wire's read and before the adopt — the deletion lands
+    /// inside that read, exactly in the window. Now the place is re-read before the move
+    /// (`showTargetStands`, the press roads' one table): gone ⇒ nothing opens, no trail row, her
+    /// seam says the press roads' own gone words, and the client hears the one not-shared shape
+    /// (the answer a call one moment later gets — PROVISIONAL P-981-B2-5). Old: four failing
+    /// expectations (the page opened, `.navigate`, nothing said, a trail row).
+    @Test func aMoveAtOnceWhosePlaceDiedSinceTheWiresReadOpensNothingAndSaysSo() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "gone at once")
+            let noteID = post.id
+            let rig = Rig(session, standing: .frontmostMainWindow)
+            defer { rig.door.detach() }
+            let resting = rig.router.workspace.focusedSelection
+            let router = rig.router
+            let operations = session.operations
+            var deletedInTheWindow = false
+            rig.door.standingProvider = {
+                if !deletedInTheWindow {
+                    deletedInTheWindow = true
+                    try? operations.deleteContainer(noteID)  // lands between the wire's read and the adopt
+                }
+                return (.frontmostMainWindow, router)
+            }
+
+            let verdict = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: noteID, blockID: nil, select: nil), clientName: "claude-code",
+                title: "gone at once", dial: .moveAtOnce, activityKind: "note", activityID: noteID))
+
+            let selection = rig.router.workspace.focusedSelection
+            let words = session.status.current?.text ?? "nothing"
+            let saidIt = session.status.current?.kind == .refusal
+                && words == "\u{201C}gone at once\u{201D} is gone, so claude-code's ask was let go."
+            let noRow = rig.door.trail.trail.isEmpty
+            let notShared = "That note isn't shared with this client, or doesn't exist. The author can share it "
+                + "from Variorum \u{25B8} Settings \u{25B8} MCP."
+            #expect(deletedInTheWindow, "the hook ran in the window")
+            #expect(selection == resting, "RED ON OLD: the dead note's page opened — \(String(describing: selection))")
+            #expect(verdict == .refuse(notShared), "RED ON OLD: the client heard shown — \(verdict)")
+            #expect(saidIt, "RED ON OLD: her seam says the press roads' gone words — said: \(words)")
+            #expect(noRow, "RED ON OLD: a trail row for a place that never opened")
+        }
+    }
+
+    /// **VX-705 — the GUARD: a move at once whose place STANDS moves exactly as before** — the note
+    /// opens in place, `.navigate`, nothing refused, its trail row `opened`. Green on both trees: it
+    /// keeps the pin above able to tell a dead place from a live one.
+    @Test func aMoveAtOnceWhosePlaceStandsStillMoves() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "standing at once")
+            let noteID = post.id
+            let rig = Rig(session, standing: .frontmostMainWindow)
+            defer { rig.door.detach() }
+            let verdict = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: noteID, blockID: nil, select: nil), clientName: "claude-code",
+                title: "standing at once", dial: .moveAtOnce, activityKind: "note", activityID: noteID))
+            let opened = rig.router.workspace.focusedSelection == .post(noteID)
+            let quiet = session.status.current == nil
+            let row = rig.door.trail.trail.entries.first?.kind == .opened
+            #expect(verdict == .navigate)
+            #expect(opened, "the note opened")
+            #expect(quiet, "nothing refused")
+            #expect(row, "its trail row reads opened")
+        }
+    }
+
+    /// **Round 1's F4 (the VX-981 ladder) — RED ON OLD: a move at once that finds its place GONE
+    /// lets that place's dead doors go** (PROVISIONAL P-981-L1-1, option (a): the press roads' own
+    /// table, on the move's own re-read). A client's earlier write on the note left a trail row and
+    /// the session's last change — keyed `.note(…, blockID:)`, so they must match by PLACE
+    /// (`MCPTrail.placeKey`), never by the exact target; VX-705's deletion lands inside the standing
+    /// read; the move's re-read proves the place gone — and now the place's rows go and ⌥⌘O stops
+    /// offering that change (P-FL2-1: a door whose only press refuses is a dead door). Another
+    /// place's row stays (non-vacuity: the forgetting is the place's own). Old: the row and the lit
+    /// chord outlived the re-read that had just said the place is gone.
+    @Test func aMoveAtOnceThatFindsItsPlaceGoneLetsThatPlacesRowsAndLastChangeGo() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let other = try session.operations.createPost(title: "still here")
+            let otherID = other.id
+            let post = try session.operations.createPost(title: "gone with its doors")
+            let noteID = post.id
+            let block = try session.operations.newBlock(in: noteID, text: "words").block.id
+            let rig = Rig(session, standing: .frontmostMainWindow)
+            defer { rig.door.detach() }
+            // The client's earlier writes: one on another note, then one on this note's block —
+            // a row each, and this note's the session's last change.
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: otherID, targetTitle: "still here",
+                show: .note(noteID: otherID, blockID: nil, select: nil)))
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: noteID, targetTitle: "gone with its doors",
+                show: .note(noteID: noteID, blockID: block, select: nil)))
+            session.status.clear()
+            let place = "note:\(noteID)"
+            let staged = rig.door.trail.trail.entries.contains { $0.place == place }
+            let litBefore = session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(staged && litBefore, "premise: a row and a lit ⌥⌘O on the note")
+
+            let router = rig.router
+            let operations = session.operations
+            var deletedInTheWindow = false
+            rig.door.standingProvider = {
+                if !deletedInTheWindow {
+                    deletedInTheWindow = true
+                    try? operations.deleteContainer(noteID)  // lands between the wire's read and the adopt
+                }
+                return (.frontmostMainWindow, router)
+            }
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: noteID, blockID: nil, select: nil), clientName: "claude-code",
+                title: "gone with its doors", dial: .moveAtOnce, activityKind: "note", activityID: noteID))
+
+            let rowGone = !rig.door.trail.trail.entries.contains { $0.place == place }
+            let changeGone = rig.door.lastShow == nil
+            let greyed = !session.commandRouter.isEnabled(.showLastAIChange)
+            let otherKept = rig.door.trail.trail.entries.contains { $0.place == "note:\(otherID)" }
+            #expect(deletedInTheWindow, "the hook ran in the window")
+            #expect(rowGone, "RED ON OLD: the gone place's row outlived the move's re-read")
+            #expect(changeGone, "RED ON OLD: the gone place's change is still the last change")
+            #expect(greyed, "RED ON OLD: ⌥⌘O stays lit over a door that can only refuse")
+            #expect(otherKept, "another place's row stays — the forgetting is the gone place's own")
+        }
+    }
+
+    // MARK: - Round 2's R2-F1 (the VX-981 ladder — VX-1025): every gone road retires a last change by PLACE
+
+    /// **R2-F1 (i) — RED ON OLD: her TAKE of an ask whose place is GONE stops ⌥⌘O offering a last change
+    /// on that place.** `takeShowOffer`'s gone arm let the ask go and forgot the place's rows but never
+    /// touched ⌥⌘O's last change, so a client's earlier write on the same note (keyed on a block —
+    /// `.note(n, b, nil)` against the ask's `.note(n, nil, nil)`) kept the chord lit over a door whose
+    /// only press refuses (P-FL2-1; MCPSpec: "a gone last change no longer lighting ⌥⌘O"). Arm 1, the
+    /// non-vacuity: a last change on ANOTHER place survives the gone take. Old: arm 2's two expectations.
+    @Test func takingAnAskWhosePlaceIsGoneRetiresALastChangeOnThatPlace() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+
+            // Arm 1 — the last change is on another note: it stays, ⌥⌘O lit.
+            let kept = try session.operations.createPost(title: "kept change")
+            let keptTarget = MCPShowTarget.note(noteID: kept.id, blockID: nil, select: nil)
+            let away = try session.operations.createPost(title: "gone away")
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: kept.id, targetTitle: "kept change", show: keptTarget))
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: away.id, blockID: nil, select: nil), clientName: "claude-code",
+                title: "gone away", dial: .ask, activityKind: "note", activityID: away.id))
+            let firstStood = rig.door.showOffer != nil
+            try #require(firstStood, "fixture: the ask stands")
+            try session.operations.deleteContainer(away.id)
+            session.status.clear()
+            rig.door.takeShowOffer()
+            let firstRefused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            let keptStill = rig.door.lastShow == keptTarget
+            let keptLit = session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(firstRefused, "the gone take said so")
+            #expect(keptStill && keptLit, "another place's last change stays, ⌥⌘O lit")
+            session.status.clear()
+
+            // Arm 2 — the last change is on the ask's own note (a block of it).
+            let post = try session.operations.createPost(title: "gone with its change")
+            let block = try session.operations.newBlock(in: post.id, text: "words").block.id
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: post.id, targetTitle: "gone with its change",
+                show: .note(noteID: post.id, blockID: block, select: nil)))
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: post.id, blockID: nil, select: nil), clientName: "claude-code",
+                title: "gone with its change", dial: .ask, activityKind: "note", activityID: post.id))
+            let stood = rig.door.showOffer != nil
+            try #require(stood, "fixture: the ask stands")
+            try session.operations.deleteContainer(post.id)
+            session.status.clear()
+            rig.door.takeShowOffer()
+            let refused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            let retired = rig.door.lastShow == nil
+            let greyed = !session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(refused, "the gone take said so")
+            #expect(retired, "RED ON OLD: the gone place's change is still the last change")
+            #expect(greyed, "RED ON OLD: ⌥⌘O stays lit over a door that can only refuse")
+        }
+    }
+
+    /// **R2-F1 (ii) — RED ON OLD: her press on a WRITE row whose place is GONE retires ANOTHER client's
+    /// last change on that place.** The row's road is `openShow`, which retired the last change only on
+    /// an EXACT target match; two clients' receipts on one note carry different shapes (A's
+    /// `.takes(n, b1)` row, B's `.note(n, b2, nil)` last change), so the press forgot both rows
+    /// (place-level) and left ⌥⌘O lit. Arm 1, the non-vacuity: a last change on ANOTHER place
+    /// survives the gone press. Old: arm 2's two expectations.
+    @Test func pressingAWriteRowWhosePlaceIsGoneRetiresAnotherClientsLastChangeThere() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+
+            // Arm 1 — A wrote on the gone note, B's last change is on another note: it stays.
+            let kept = try session.operations.createPost(title: "kept change")
+            let keptTarget = MCPShowTarget.note(noteID: kept.id, blockID: nil, select: nil)
+            let away = try session.operations.createPost(title: "gone row")
+            let awayBlock = try session.operations.newBlock(in: away.id, text: "words").block.id
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: away.id, targetTitle: "gone row",
+                show: .takes(noteID: away.id, blockID: awayBlock)))
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "codex", act: .take, targetID: kept.id, targetTitle: "kept change", show: keptTarget))
+            try session.operations.deleteContainer(away.id)
+            session.status.clear()
+            let awayRowID = rig.door.trail.trail.entries.first {
+                $0.place == "note:\(away.id)" && $0.clientName == "claude-code"
+            }?.id
+            let awayRow = try #require(awayRowID)
+            rig.door.openTrailEntry(awayRow)
+            let firstRefused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            let keptStill = rig.door.lastShow == keptTarget
+            let keptLit = session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(firstRefused, "the gone press said so")
+            #expect(keptStill && keptLit, "another place's last change stays, ⌥⌘O lit")
+            session.status.clear()
+
+            // Arm 2 — A's row and B's last change on ONE note, in different shapes.
+            let post = try session.operations.createPost(title: "gone for both")
+            let first = try session.operations.newBlock(in: post.id, text: "one").block.id
+            let second = try session.operations.newBlock(in: post.id, text: "two").block.id
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: post.id, targetTitle: "gone for both",
+                show: .takes(noteID: post.id, blockID: first)))
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "codex", act: .take, targetID: post.id, targetTitle: "gone for both",
+                show: .note(noteID: post.id, blockID: second, select: nil)))
+            try session.operations.deleteContainer(post.id)
+            session.status.clear()
+            let rowID = rig.door.trail.trail.entries.first {
+                $0.place == "note:\(post.id)" && $0.clientName == "claude-code"
+            }?.id
+            let row = try #require(rowID)
+            rig.door.openTrailEntry(row)
+            let refused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            let retired = rig.door.lastShow == nil
+            let greyed = !session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(refused, "the gone press said so")
+            #expect(retired, "RED ON OLD: another client's change on the gone place is still the last change")
+            #expect(greyed, "RED ON OLD: ⌥⌘O stays lit over a door that can only refuse")
+        }
+    }
+
     // MARK: - VX-675: a saved version, full size
 
     /// A version target opens the VX-440 full-size page — its own destination
@@ -637,8 +888,12 @@ struct MCPShowOfferFacesTests {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
             // F-L2 (the VX-677 ladder round 1) — STAGING ONLY, assertions unchanged: the take half's
             // version is one of its note's saved versions, as a real ask's is (her press now re-reads
-            // it). The move half never meets the read (the agent road is unchanged).
+            // it). (VX-705 since: the move half meets the read too — below.)
             try await stageVersion(db, note: "n2", version: "v2")
+            // VX-705 (the VX-981 run, batch 2) — STAGING ONLY, assertions unchanged: the move half now
+            // re-reads its place before it moves (the press roads' gone table), so its version is one
+            // of its note's saved versions too, as a real show's is.
+            try await stageVersion(db, note: "n1", version: "v1")
             let rig = Rig(session, standing: .frontmostMainWindow)
             defer { rig.door.detach() }
             let target = MCPShowTarget.version(noteID: "n1", versionID: "v1")

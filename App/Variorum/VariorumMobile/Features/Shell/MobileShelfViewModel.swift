@@ -4,7 +4,7 @@
 //
 //  Mobile Stage 3, batch 1 — the shelf home's model (M7: shelf-first).
 //  Mirrors the Mac `ShelfViewModel`'s cost tiers exactly (the P1
-//  discipline the core query documents): the book list + pins + the daily
+//  discipline the core query documents): the book list + the daily
 //  designation ride ONE held observation (author-scale rows); the tags
 //  column is a ONE-SHOT load on appearance/refresh — corpus-adjacent
 //  aggregates never re-run at autosave rate. Word counts (the Mac's other
@@ -27,7 +27,6 @@ final class MobileShelfViewModel {
     @ObservationIgnored let session: AppSession
 
     private(set) var books: [Queries.ShelfBook] = []
-    private(set) var pins: [String] = []
     private(set) var dailyBookID: String?
     private(set) var bookTags: [String: [String]] = [:]
     /// 13i-a: gatherings' rule tags as live paths (rules hold IDs now).
@@ -60,11 +59,12 @@ final class MobileShelfViewModel {
     /// inside the observation).
     nonisolated struct Snapshot: Equatable, Sendable {
         var books: [Queries.ShelfBook]
-        var pins: [String]
         var dailyBookID: String?
     }
 
-    /// The held half: books + pins + the daily designation (all tiny).
+    /// The held half: books + the daily designation (all tiny). VM-83: the
+    /// pin list left with the Pin door — each `ShelfBook` carries the UNION
+    /// star (`starred`), which is what the order floats.
     ///
     /// VM-57: the books of the wing the phone stands in (the Shelf AND the
     /// Library's Books filter, which wears this same model), re-read for
@@ -75,12 +75,10 @@ final class MobileShelfViewModel {
                 for try await value in session.database.observe({ db in
                     Snapshot(
                         books: try Queries.bookshelf(db, wingID: wing),
-                        pins: try Queries.shelfPins(db),
                         dailyBookID: try Queries.dailyJournalBookID(db))
                 }) {
                     observationTicks += 1
                     books = value.books
-                    pins = value.pins
                     dailyBookID = value.dailyBookID
                 }
             } catch is CancellationError {
@@ -102,9 +100,17 @@ final class MobileShelfViewModel {
         }
     }
 
-    /// Shelf order — the Mac semantics via the pure face brain.
+    /// **Shelf order — the Mac Bookcase's own rule** (VM-83, W-068; her
+    /// ruling 2026-11-19: "book order - that's fine to leave it for wave 3"):
+    /// the shared `BookcaseBoard.ordered` — STARRED books float first, then
+    /// a–z by Finder's comparison (case-blind, digit-aware: "apple" before
+    /// "Zebra", "Book 2" before "Book 10"), journal books among the rest. The
+    /// retired `ShelfOrder` rule (pins, then journal-trait books, then
+    /// case-sensitive `<`) is gone. A–Z only: the visible "a–z or last
+    /// edited" choice is the Bookcase's real chrome, wave 3 (VM-113). The
+    /// Library's book rows read this order too.
     var orderedBooks: [Queries.ShelfBook] {
-        MobileShelfFaces.ordered(books: books, pins: pins)
+        BookcaseBoard.ordered(books, mode: .alphabetical, lastEdited: [:])
     }
 
     /// One row's faces (LK5): name-with-state, and the meta line.
@@ -127,20 +133,22 @@ final class MobileShelfViewModel {
             isDaily: showingDailyMarker && book.reading.id == dailyBookID)
     }
 
-    /// Pin / unpin (parity C2 — the [B1] record's deliberately-deferred
-    /// ACT; the phone has RENDERED pin order since S3): one reversible
-    /// toggle through the core's own `setShelfPinned` (append-to-pin-order
-    /// semantics, idempotent both ways — R38's letter).
-    func setPinned(_ readingID: String, pinned: Bool) async {
-        do {
-            try await session.runner.run { ops in
-                try ops.setShelfPinned(readingID, pinned: pinned)
-            }
-            lastError = nil
-        } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
-        }
+    /// **The row's long-press menu, as data** (VM-83, W-071): the acts in the
+    /// order the view draws them. `starred` is the stars model's answer (the
+    /// Star door's own state source).
+    func rowActs(for book: Queries.ShelfBook, starred: Bool) -> [MobileShelfRowAct] {
+        [
+            .star(starred: starred),
+            MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading)
+                ? .archiveDailyJournal : .delete(book.reading.kind),
+        ]
     }
+
+    // (VM-83, W-071: `setPinned` — the row's "Pin to Shelf Top" — RETIRED.
+    // Since 13i-d `setShelfPinned` IS `setStarred`, so Pin and Star were two
+    // doors writing one star, and pressing Pin flipped Star's label too. The
+    // Star door is the one door, as on the Mac: SurfaceContracts, The
+    // Bookcase — "the Mac's Pin door is retired into Star".)
 
     /// + New Note (P33, parity A3 — Library's twin through the ONE
     /// shared mint): a nameless bookless note, opened for writing.
@@ -203,7 +211,9 @@ final class MobileShelfViewModel {
                 try ops.deleteReading(book.reading.id)
             }
             lastError = nil
-            lastReport = RecoveryCopy.movedToTrashReceipt(.book)
+            // VM-83 (W-073): a gathering's receipt names a gathering.
+            lastReport = RecoveryCopy.movedToTrashReceipt(
+                .book, isGathering: book.reading.kind == .gathering)
             MobileLine.say(
                 lastReport, as: .removal(.putBackBook(book.reading.id)), session: session)
             return true

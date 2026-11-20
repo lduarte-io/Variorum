@@ -22,8 +22,11 @@ import Foundation
 /// sentence). The answers depend on the frame alone, so the window is no
 /// oracle, and it decides nothing.
 ///
-/// Every line is read a byte at a time up to its newline, so nothing past the
-/// opening's frame is consumed — the next reader starts at the next byte.
+/// VX-952 (the VX-981 run, batch 4): the lines are read in CHUNKS by the
+/// opening's `Reader` (they were read a byte at a time — a 1 MiB opening line
+/// cost a million `read` calls on the handshake's thread), and nothing is lost:
+/// whatever the reader read past the opening's frame is its `leftover`, handed
+/// on byte for byte to whoever reads the connection next (the app's transport).
 /// Foundation and Darwin only, like the rest of this module (the shim links
 /// nothing of Variorum's).
 public enum MCPOpeningWindow {
@@ -104,7 +107,7 @@ public enum MCPOpeningWindow {
         return data + Data("\n".utf8)
     }
 
-    // MARK: - The reads
+    // MARK: - The reads (VX-952: buffered — the opening's own reader)
 
     /// One read of a line.
     public enum LineRead: Equatable, Sendable {
@@ -117,28 +120,87 @@ public enum MCPOpeningWindow {
         case overLimit
     }
 
-    /// One line, a byte at a time.
-    public static func readLine(_ fd: Int32, limit: Int = lineLimit) -> LineRead {
-        var line = Data()
-        var byte: UInt8 = 0
-        while true {
-            let count = Darwin.read(fd, &byte, 1)
-            if count < 0, errno == EINTR { continue }
-            guard count == 1 else { return .ended }
-            if byte == UInt8(ascii: "\n") { return .line(line) }
-            line.append(byte)
-            if line.count > limit { return .overLimit }
-        }
-    }
+    /// **The opening's reader** (VX-952 — the vx-940 run's F-W4-3): one
+    /// descriptor, read in CHUNKS — a line of the full 1 MiB costs seventeen
+    /// `read` calls, not a million — handing out lines with the byte-at-a-time
+    /// reader's exact verdicts (a line of `limit` bytes is a line, one byte more
+    /// is over, wherever its newline falls; EOF or an error ends it). A read is
+    /// made only when no complete line is buffered, so it blocks exactly where
+    /// a byte-at-a-time read would (the window's answer is always written
+    /// before it). Whatever it read past the lines it handed out is its
+    /// `leftover` — the NEXT reader's to start with, byte for byte (the app's
+    /// transport; the shim and the over-cap refusal end the connection and drop
+    /// it).
+    public struct Reader {
+        /// The bytes each read asks for — the transport's own (`readLines`).
+        public static let chunk = 64 * 1024
 
-    /// The next non-blank line.
-    public static func nextLine(_ fd: Int32) -> LineRead {
-        for _ in 0...blankLimit {
-            let result = readLine(fd)
-            if case .line(let line) = result, line.isEmpty { continue }
-            return result
+        private let fd: Int32
+        private let read: (Int32, UnsafeMutableRawPointer, Int) -> Int
+        private var scratch: [UInt8]
+        /// Bytes read and not yet handed out begin at `start`.
+        private var pending: [UInt8] = []
+        private var start = 0
+
+        public init(_ fd: Int32) {
+            self.init(fd, chunk: Self.chunk) { Darwin.read($0, $1, $2) }
         }
-        return .ended
+
+        /// A reader over `read` (a pin counts its calls), asking `chunk` bytes
+        /// at a time.
+        init(_ fd: Int32, chunk: Int, read: @escaping (Int32, UnsafeMutableRawPointer, Int) -> Int) {
+            self.fd = fd
+            self.read = read
+            self.scratch = [UInt8](repeating: 0, count: max(chunk, 1))
+        }
+
+        /// Every byte read past the lines handed out, in order.
+        public var leftover: Data { Data(pending[start...]) }
+
+        /// One line, its newline removed.
+        public mutating func readLine(limit: Int = lineLimit) -> LineRead {
+            var scanned = start  // the bytes before `scanned` hold no newline
+            while true {
+                if let newline = pending[scanned...].firstIndex(of: UInt8(ascii: "\n")) {
+                    guard newline - start <= limit else { return .overLimit }
+                    let line = Data(pending[start..<newline])
+                    start = newline + 1
+                    if start == pending.count {
+                        pending.removeAll(keepingCapacity: true)
+                        start = 0
+                    } else if start >= Self.chunk {
+                        pending.removeFirst(start)   // a long line handed out: keep only what follows it
+                        start = 0
+                    }
+                    return .line(line)
+                }
+                guard pending.count - start <= limit else { return .overLimit }
+                scanned = pending.count
+                guard fill() else { return .ended }
+            }
+        }
+
+        /// The next non-blank line.
+        public mutating func nextLine() -> LineRead {
+            for _ in 0...blankLimit {
+                let result = readLine()
+                if case .line(let line) = result, line.isEmpty { continue }
+                return result
+            }
+            return .ended
+        }
+
+        /// One read appended to `pending`; false at EOF or an error.
+        private mutating func fill() -> Bool {
+            let (fd, read) = (self.fd, self.read)
+            while true {
+                let count = scratch.withUnsafeMutableBytes { read(fd, $0.baseAddress!, $0.count) }
+                if count < 0, errno == EINTR { continue }
+                guard count > 0 else { return false }
+                pending.append(contentsOf: scratch[0..<count])
+                return true
+            }
+        }
     }
 
     /// How a window's read ended.
@@ -154,9 +216,10 @@ public enum MCPOpeningWindow {
     }
 
     /// **Read past the window**, from `first` (the line already read), on
-    /// `input`, answering its requests on `output` — each answer written
-    /// before the next read.
-    public static func read(startingWith first: Data, from input: Int32, answeringOn output: Int32) -> Opening {
+    /// `reader`, answering its requests on `output` — each answer written
+    /// before the next read (VX-952: the reader reads only when no complete
+    /// line is buffered, so it blocks exactly where a byte-at-a-time read did).
+    public static func read(startingWith first: Data, from reader: inout Reader, answeringOn output: Int32) -> Opening {
         var frame = first
         for _ in 0..<limit {
             switch classify(frame) {
@@ -167,7 +230,7 @@ public enum MCPOpeningWindow {
             case .notification:
                 break
             }
-            switch nextLine(input) {
+            switch reader.nextLine() {
             case .line(let next): frame = next
             case .ended: return .ended
             case .overLimit: return .overLimit
@@ -176,11 +239,11 @@ public enum MCPOpeningWindow {
         return .frame(frame)
     }
 
-    /// Read a whole opening from `input` — its first non-blank line, then the
+    /// Read a whole opening from `reader` — its first non-blank line, then the
     /// window — answering on `output`.
-    public static func read(from input: Int32, answeringOn output: Int32) -> Opening {
-        switch nextLine(input) {
-        case .line(let first): read(startingWith: first, from: input, answeringOn: output)
+    public static func read(from reader: inout Reader, answeringOn output: Int32) -> Opening {
+        switch reader.nextLine() {
+        case .line(let first): read(startingWith: first, from: &reader, answeringOn: output)
         case .ended: .ended
         case .overLimit: .overLimit
         }

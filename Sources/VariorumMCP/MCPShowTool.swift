@@ -110,6 +110,12 @@ public enum MCPShowRule {
         case offer
         /// Nothing was shown or offered, and this says why.
         case refuse(String)
+        /// **The show PARTLY landed** (round 1's F2 — the VX-981 ladder): the
+        /// delivery opened the note in front of her, and the rest (the takes, a
+        /// lens, Compare's columns) never arrived — answered `partialShowWords`,
+        /// `isError`. A DELIVERY's answer only: the etiquette rule
+        /// (`verdict(_:dial:)`) never returns it.
+        case partial
     }
 
     public static func verdict(_ standing: Standing, dial: MCPShowDial) -> Verdict {
@@ -141,6 +147,18 @@ public enum MCPShowRule {
     /// is offered, never raced); a delivery she LEFT mid-way lands as the ask.
     public static let partialShowWords =
         "Variorum opened the note, but the rest of the show didn't land \u{2014} nothing more was moved."
+
+    /// **VX-705 (the VX-981 run, batch 2):** a move at once whose place died
+    /// between the wire's read and the move — the ONE not-shared shape for the
+    /// target's kind (hidden = missing: exactly what a call one moment later is
+    /// answered). PROVISIONAL P-981-B2-5.
+    public static func goneWords(_ target: MCPShowTarget) -> String {
+        switch target {
+        case .book: MCPRefusalCopy.words(.notShared, .book)
+        case .wing: MCPRefusalCopy.words(.notShared, .wing)
+        case .note, .takes, .lens, .compare, .version: MCPRefusalCopy.words(.notShared, .note)
+        }
+    }
 }
 
 /// **`show_in_app`** — the READ rung's one navigation tool (AF-11 F-3):
@@ -200,18 +218,28 @@ struct MCPShowTool: Sendable {
                     activityKind: kind, activityID: id)
                 switch await show(request) {
                 case .navigate:
-                    try log(clientName, kind, id, title, allowed: true)
-                    return Outcome(text: try encode(["shown": true]), isError: false)
+                    // VX-961: her view MOVED — the act landed, so its line's
+                    // failure is hers, never this call's answer.
+                    let answer = try encode(["shown": true])
+                    recordShown(clientName, kind, id, title, act: MCPToolCatalog.showInApp.name)
+                    return Outcome(text: answer, isError: false)
                 case .offer:
                     // VX-676 (4): the ask is its own Activity row — the client's
                     // call, allowed, nothing moved — and the answer is at once.
-                    try log(clientName, kind, id, title, allowed: true, act: MCPShowActivity.offeredAct)
-                    return Outcome(
-                        text: try encode(["shown": false, "offered": true, "landed": MCPShowRule.offeredWords]),
-                        isError: false)
+                    // VX-961: the ask STANDS on her seam — landed, as the move.
+                    let answer = try encode(["shown": false, "offered": true, "landed": MCPShowRule.offeredWords])
+                    recordShown(clientName, kind, id, title, act: MCPShowActivity.offeredAct)
+                    return Outcome(text: answer, isError: false)
                 case .refuse(let words):
                     try log(clientName, kind, id, title, allowed: false)
                     return Outcome(text: words, isError: true)
+                case .partial:
+                    // Round 1's F2 (the VX-981 ladder): the note OPENED in front
+                    // of her and the rest never landed — her view moved, so the
+                    // line's failure is hers, never this call's answer (VX-961's
+                    // split); the line is TODAY's row, logged as the refusal it is.
+                    recordShown(clientName, kind, id, title, act: MCPToolCatalog.showInApp.name, allowed: false)
+                    return Outcome(text: MCPShowRule.partialShowWords, isError: true)
                 }
             }
         } catch let failure as ArgumentFailure {
@@ -467,6 +495,33 @@ struct MCPShowTool: Sendable {
     private func refusal(_ decision: MCPGrantRule.Decision, _ target: MCPRefusalCopy.Target) -> Outcome {
         let reason = MCPRefusalCopy.reason(of: decision) ?? .notShared
         return Outcome(text: MCPRefusalCopy.words(reason, target), isError: true)
+    }
+
+    /// **VX-961 — a LANDED show's Activity line** (the move, the ask — VX-775's
+    /// split for the write family, `MCPWriteTools.recordLanded`, on the read
+    /// rung's one acting tool): written as ever; a failure is caught here and
+    /// told to HER through the one tail hook (`MCPHostHooks.onActivityLogFailure`
+    /// — the store's words in VX-369's form, no receipts: a show is no write),
+    /// while the client is answered the act's own answer byte for byte (R-825 —
+    /// her app-side state never reaches the wire). One attempt, nothing
+    /// synthesized: `list_my_activity` simply lacks the row. Round 1's F2 (the
+    /// VX-981 ladder): a PARTIAL show (`.partial` — the note opened, the rest
+    /// never landed) takes this road too, its row the refusal it is
+    /// (`allowed: false`). The refusal arms where NOTHING landed keep `log` — the
+    /// store's failure stays the call's own answer (the write family's
+    /// refusal-line posture).
+    private func recordShown(
+        _ clientName: String, _ kind: String, _ id: String, _ title: String?, act: String, allowed: Bool = true
+    ) {
+        do {
+            try log(clientName, kind, id, title, allowed: allowed, act: act)
+        } catch {
+            hooks.onActivityLogFailure?(
+                MCPActivityLogFailure(
+                    clientName: clientName, tool: MCPToolCatalog.showInApp.name, unrecorded: 1,
+                    storeWords: MCPStoreFailure(error)?.detail),
+                [])
+        }
     }
 
     /// `act`: the tool's own (a move, a refusal) — or, VX-676, the ask's.

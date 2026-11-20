@@ -83,6 +83,68 @@ final class MCPSession: @unchecked Sendable {
     /// client already holds; nothing read). nil until the first list.
     private var lastListed: [Tool]?
 
+    // MARK: - The announce's gate (VX-951 — the VX-981 run, batch 3)
+
+    /// **This connection's announce gate** (`MCPAnnounceGate`, her R-981-3):
+    /// shut until the `initialize` answer is written AND the client is ready.
+    /// Guarded by `lock`.
+    private var announceGate = MCPAnnounceGate()
+
+    /// Hear one of the gate's events (the transport's report, the client's
+    /// `initialized`, its first served request). The event that OPENS the gate
+    /// with an announce remembered owes the one catch-up.
+    private func hear(_ event: MCPAnnounceGate.Event) {
+        #if DEBUG
+        gateEventProbe?(event)
+        #endif
+        if lock.withLock({ announceGate.hear(event) && oweAnnounce() }) { startAnnouncing() }
+    }
+
+    // MARK: - The announcer (VX-944 — the VX-981 run, batch 3)
+
+    /// **This connection's announcer:** the notices owed to it and not yet
+    /// sent, and whether its ONE task is sending them. Guarded by `lock`. An
+    /// announce is ASKED, never awaited — the host's rounds and the unlock never
+    /// wait on a client (VX-944: one that stopped reading held the old serial
+    /// round at its session, so every later session missed the change and the
+    /// unlock never returned). Bounded: at most one task per connection and a
+    /// count; nothing is dropped or merged — N asks send N notices, one at a
+    /// time, in order, each behind this connection's earlier frames (its writer
+    /// is FIFO), so a client that stopped reading gets every one once it reads.
+    private var announcesOwed = 0
+    private var announcing = false
+
+    /// Owe one more notice; true when the caller must start the announcer.
+    /// Under `lock`.
+    private func oweAnnounce() -> Bool {
+        announcesOwed += 1
+        guard !announcing else { return false }
+        announcing = true
+        return true
+    }
+
+    /// Take one owed notice; false — and the announcer ends — when none is
+    /// owed. Under `lock`.
+    private func takeOwedAnnounce() -> Bool {
+        guard announcesOwed > 0 else {
+            announcing = false
+            return false
+        }
+        announcesOwed -= 1
+        return true
+    }
+
+    /// The announcer's task: the owed notices, one at a time. A session that
+    /// has ended answers each at once (its server has no connection), so the
+    /// task never outlives what was owed.
+    private func startAnnouncing() {
+        Task { [self] in
+            while lock.withLock({ takeOwedAnnounce() }) {
+                try? await server.notify(ToolListChangedNotification.message())
+            }
+        }
+    }
+
     /// The client's self-declared name, once `initialize` has run — and,
     /// VX-258, only once the connection IS that client: nil while its key
     /// waits for her OK, so a waiting connection never counts as the name's
@@ -451,10 +513,24 @@ final class MCPSession: @unchecked Sendable {
             }
         }
         if holding { lock.withLock { self.held = held } }
-        let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
+        // VX-951: the transport reports the `initialize` answer once it is
+        // written — the gate's first half.
+        // VX-952: and whatever the opening's reader read past that frame — the
+        // stream's next bytes, handed on before the transport's first read.
+        let transport = MCPSocketTransport(
+            fd: fd, replay: [opening.firstFrame], leftover: opening.leftover,
+            onOpeningAnswered: { [weak self] in self?.hear(.initializeAnswered) })
         lock.withLock { self.transport = transport }
+        // VX-951: the client's `initialized` — the gate's second half (the SDK
+        // keeps no such state of its own, and answers nothing to it).
+        await server.onNotification(InitializedNotification.self) { [weak self] _ in
+            self?.hear(.clientInitialized)
+        }
         await server.withMethodHandler(ListTools.self) { [weak self] _ in
             guard let self else { return .init(tools: []) }
+            // VX-951 (b′): a client that lists without ever saying
+            // `initialized` has finished initializing all the same.
+            self.hear(.clientRequest)
             // VX-818 (F-15b (i)): while the library is locked, the list this
             // connection was last served — nothing read (a held one: none).
             if self.latch.isShut { return .init(tools: self.listedWhileLocked) }
@@ -477,6 +553,8 @@ final class MCPSession: @unchecked Sendable {
         }
         await server.withMethodHandler(CallTool.self) { [weak self] params in
             guard let self else { throw MCPError.internalError("The session ended.") }
+            // VX-951 (b′): so has a client that calls a tool.
+            self.hear(.clientRequest)
             // VX-818 (her R-818, A-809-20): THE LIBRARY IS LOCKED — checked at
             // the call door AHEAD OF EVERYTHING: no name, no waiting check (a
             // store read), no schema, no decision, nothing logged or spent.
@@ -560,6 +638,11 @@ final class MCPSession: @unchecked Sendable {
                 // observation as before). VX-818: a HELD connection names no
                 // one yet — its admission says so when it lands.
                 if !self.isHeld { self.onNamed() }
+                #if DEBUG
+                // VX-951's pins: the window between the naming and the
+                // answer's write, where a grant change can land.
+                await self.namingProbe?()
+                #endif
             }
             // VX-818: the library came back between this connection's hold and
             // now, so the host's resume may have passed it by — decide it here
@@ -648,7 +731,7 @@ final class MCPSession: @unchecked Sendable {
             held = nil
         }
         onNamed()
-        await announceToolsChanged()
+        announceToolsChanged()
         return true
     }
 
@@ -657,9 +740,19 @@ final class MCPSession: @unchecked Sendable {
     /// VX-258: a connection whose key still waits for her OK has nothing new
     /// to read; the moment she allows it (the binding is part of the grants
     /// fingerprint), it is told.
-    func announceToolsChanged() async {
+    ///
+    /// VX-951 (the VX-981 run, batch 3 — her R-981-3): and only through this
+    /// connection's gate — while it is shut (the `initialize` answer not yet
+    /// written, or the client not yet ready) the announce is remembered, and
+    /// the gate's opening sends exactly one (`hear`).
+    ///
+    /// VX-944 (the same batch): ASKED, never awaited — the notice is owed to
+    /// this connection's announcer and this returns at once; no caller ever
+    /// waits on a client reading (the decision before it — the name, her OK —
+    /// reads only the store).
+    func announceToolsChanged() {
         guard declaredName != nil, (try? awaitsHerOK()) == false else { return }
-        try? await server.notify(ToolListChangedNotification.message())
+        if lock.withLock({ announceGate.announce() && oweAnnounce() }) { startAnnouncing() }
     }
 
     /// **The descriptor's end, under ONE lock** (VX-279 — VX-184's ladder,
@@ -698,6 +791,16 @@ final class MCPSession: @unchecked Sendable {
     /// TEST-ONLY (VX-776): the host's failing reader (`MCPServerHost.handlerReadProbe`),
     /// set once by the host before the session runs.
     var handlerReadProbe: (() throws -> Void)?
+
+    /// TEST-ONLY (VX-951): the host's `namingProbe`, run inside the SDK's
+    /// `initialize` hook just after this connection named itself — before the
+    /// answer is written. Set once by the host before the session runs.
+    var namingProbe: (() async -> Void)?
+
+    /// TEST-ONLY (VX-951): the host's `gateEventProbe`, told each gate event
+    /// as this session hears it, before the gate does. Set once by the host
+    /// before the session runs.
+    var gateEventProbe: ((MCPAnnounceGate.Event) -> Void)?
     #endif
 
     /// **VX-776 — the ONE seam in front of every store read the SDK handlers

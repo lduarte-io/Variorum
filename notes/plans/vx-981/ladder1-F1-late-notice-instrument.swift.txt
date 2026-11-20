@@ -1,0 +1,54 @@
+import Darwin
+import Foundation
+import Testing
+
+@testable import VariorumCore
+@testable import VariorumMCP
+@testable import VariorumMCPSocket
+
+// INSTRUMENT ONLY (VX-981 ladder round 1, F1 — the reviewer's instrument (b)). Never shipped.
+// The over-cap test's own exchange, with the approval's notice made LATE on purpose: the
+// client's `notifications/initialized` is held at the gate's probe until the client has read
+// the over-cap answer, and a grants round is asked while the gate is shut (the notice is
+// remembered, so the gate's opening sends exactly one). Then the hang-up read: what today's
+// `isHungUp()` would have seen, and every byte up to EOF.
+
+private func initialize(_ name: String) -> String {
+    #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"},"pad":""}}"#
+}
+
+@Suite("VX981 INSTRUMENT — a notice made late lands between the over-cap answer and EOF", .serialized)
+struct VX981NoticeAfterAnswerProbe {
+    @Test(arguments: 0..<10) func aLateNoticeIsReadByTheHangUpCheck(_ round: Int) async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        let timeline = VX981Timeline("late-notice-\(round)")
+        let release = DispatchSemaphore(value: 0)
+        h.host.gateEventProbe = { _, event in
+            timeline.mark("gate \(event)")
+            if event == .clientInitialized { _ = release.wait(timeout: .now() + 20) }
+        }
+        h.host.connectTraceProbe = { timeline.mark($0) }
+        let name = "late-notice"
+        let socket = try RawSocket(h, timeout: 30)
+        defer { socket.close() }
+        socket.send(preamble: try h.setupKey(for: name), initialize(name))
+        _ = try #require(await socket.nextResponse(), "initialized")
+        socket.send(#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#)
+        _ = try h.approve(name, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
+        h.host.announceGrantsChanged()  // a round asked while the gate is shut: remembered
+        timeline.mark("approved, round asked")
+        let pad = String(repeating: "a", count: MCPSocketTransport.lineCap + 1)
+        let call = #"{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"list_books","arguments":{},"pad":""#
+            + pad + #""}}"#
+        Thread { _ = MCPShim.writeAll(socket.fd, Data((call + "\n").utf8)) }.start()
+        let answer = await socket.next()
+        timeline.mark("first line after: \((answer?["id"] is NSNull) ? "the over-cap answer" : String(describing: answer))")
+        release.signal()
+        let fd = socket.fd
+        let drain = await HarnessWait.offPool { VX981Drain.read(fd, timeline: timeline) }
+        timeline.report(drain.firstWasEOF
+            ? "isHungUp would be TRUE"
+            : "isHungUp would be FALSE — read \(drain.bytes.count) B then \(drain.ending): \(drain.text)")
+    }
+}

@@ -772,12 +772,11 @@ struct ShellActions {
     nonisolated static func discardingUndoDetail(
         _ warning: UndoStack.PendingUndoWarning
     ) -> String {
-        let subject = warning.bufferCount == 1
-            ? "One take has been edited since" : "\(warning.bufferCount) takes have been edited since"
-        return "\(subject) — undoing puts back the text as it was before the "
-            + "\(warning.label.lowercased()), so that writing is set aside. "
-            + "It is committed first, so you can bring it back from the take's "
-            + "history (⌘S's list) at any time."
+        // VM-20: the sentence is shared now (the phone said "saved" where
+        // this says "committed"); only the read-back place is the Mac's —
+        // it names ⌘S's list. Byte-identical (`UndoWarningWordsTests`).
+        StructuralUndoCopy.discardingUndoDetail(
+            warning, readBackFrom: "the take's history (⌘S's list)")
     }
 
     @MainActor

@@ -72,6 +72,15 @@ struct MobileTrashView: View {
     static let allFilterWord = "All"
     static let emptyTrashLine = "Nothing in the Trash."
 
+    /// **The empty line, or nil while there is nothing true to say** (VM-33 —
+    /// the Mac's `RecoveryViewModel.trashEmptyStateLine` rule). Before the
+    /// listing's first value it is nil, never the false "Nothing in the
+    /// Trash." — the face draws nothing in its place (calm, no spinner).
+    static func emptyStateLine(_ model: MobileTrashModel) -> String? {
+        guard model.trashListingLoaded, model.trash.isEmpty else { return nil }
+        return emptyTrashLine
+    }
+
     static func truncationMarker(shown: Int) -> String {
         "Showing the first \(shown) — narrow the filter to see more."
     }
@@ -81,8 +90,8 @@ struct MobileTrashView: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 trashHeader
                 filterRow
-                if model.trash.isEmpty {
-                    emptyLine(Self.emptyTrashLine)
+                if let line = Self.emptyStateLine(model) {
+                    emptyLine(line)
                 } else {
                     ForEach(model.trash, id: \.id) { item in
                         trashRow(item)
@@ -272,7 +281,12 @@ struct MobileTrashView: View {
     static func rowTitle(_ item: Queries.TrashItem) -> String {
         if let title = item.title, !title.isEmpty { return title }
         if let text = item.text, !text.isEmpty { return text }
-        return "(empty \(RecoveryCopy.rowKind(item.kind)))"
+        // VM-83 (W-073): an untitled GATHERING is named by its own kind word
+        // (VX-611's rule — the row's kind word already was), never "(empty
+        // book)". Round 1, N2: the ITEM overload, the shared file's rule
+        // wherever the row is in hand — so an untitled saved version is
+        // named as one too, as its meta line already says.
+        return "(empty \(RecoveryCopy.rowKind(item)))"
     }
 
     /// The row's second line: what it is · where it came from · and the
