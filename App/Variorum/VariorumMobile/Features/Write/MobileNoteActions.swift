@@ -248,7 +248,12 @@ struct MobileNoteActionsSheet: View {
     @ViewBuilder
     private var settingsRow: some View {
         if settingsDoor != nil {
-            Divider().overlay(tokens.line)
+            // Its own hairline only when an undo or redo row sits above it —
+            // otherwise the group's divider after Versions… already separates
+            // them, and two would draw 14 pt apart (VM-47, the walk's W-B4).
+            if door.undoLabel != nil || door.redoLabel != nil {
+                Divider().overlay(tokens.line)
+            }
             actRow(title: Self.settingsTitle, detail: nil, tint: tokens.accent) {
                 settingsAfterClosing = true
                 dismiss()
