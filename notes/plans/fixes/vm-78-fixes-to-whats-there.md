@@ -9,8 +9,8 @@ the merges. Branch `vm-78-fixes-to-whats-there`, worktree `~/dev/variorum-vm-78`
 is the night's working record.*
 
 **What the run was.** The mobile catch-up's wave 1, umbrella 4: ten fixes to the phone's existing faces, pin before
-fix per member, no `Sync/`, custody, schema or `Sources/` line; main merged in twice (`ed1266e2f`, then `d55d22db9`
-after VX-981). **It ships EIGHT members** — VM-16 (with VM-20), VM-43, VM-3, VM-84, VM-33, VM-81, VM-83, VM-21 — and
+fix per member, no `Sync/`, custody, schema or `Sources/` line; main merged in three times (`ed1266e2f`;
+`d55d22db9` after VX-981; `54e38785f`, VX-981's later notes only). **It ships EIGHT members** — VM-16 (with VM-20), VM-43, VM-3, VM-84, VM-33, VM-81, VM-83, VM-21 — and
 VM-19's teardown pin. **VM-24 and VM-17 were traced here and left for their own runs by her rulings.**
 
 **The mechanisms:** VM-16 — `undo(with:)` / `redo(with:)` label a quiet press too, so the door kept a way back
@@ -18,17 +18,22 @@ acting on another entry · VM-43 — the restore door passed no `insuringBuffer`
 `header` · VM-33 — the empty line drew before the listing answered (found real) · VM-3 and F4 — two guide lessons outlived
 what they taught · VM-81 — Finish dismisses waiting arrivals unseen; Details could not find an archived book; doors
 that could only refuse · VM-83 — the retired `ShelfOrder`, two doors over one star, "smart" · VM-21 — a collect receipt blind to
-the star and to archiving · VM-19 — a test's stale first responder.
+the star and to archiving · VM-19 — a test's stale first responder (its desync did not reproduce here;
+the pin is test hygiene).
 
 **The fixes:** VM-16 and VM-20 `48055fa9c` · VM-43 `0f8ca319d` · VM-3 `c29095d35` · VM-84 `f933a4663` (seam
 `2d66e9a30`) · VM-33 `e1d709b1b` · the word hoists `68f7e7eab`, `4118af9b3` · VM-81 `aa4a8670f`, `081af74b0`,
 `326d61da4`, `97282e72f` · VM-83 `0abaf3938`, `36ace0aa5` · VM-21 `ea3b965af` · VM-19 `615a12189`, `5ec59922c`,
-`839d86dd9` · re-landed on VM-55's seams `ed1266e2f` (pins `c652d1669`, `8d2b9f8bf`) · round 4's face guards
+`839d86dd9` · re-landed on VM-55's seams `ed1266e2f` (pins `c652d1669`, `8d2b9f8bf`) — where VM-81's own
+refusal arm was deleted (main's road already speaks the sealed Reopen's and the raced Unarchive's sentences; this
+run's two pins guard it) · round 4's face guards
 `43fec9e9c`, `e9823efaf`, `905a12eb0`.
 
 **Handed on** (each kickoff names the evidence its run reads):
 - **VM-24** — an unarmed edit whose report TextKit's fixing widens past the block's end is refused and re-rendered:
-  the word just entered snaps back (stored text is safe); the caret test stays red on main by decision.
+  the word just entered snaps back (stored text is safe);
+  `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` stays red on main by
+  decision, never wrapped as a known issue.
   `/architect-phase vm-24`, kickoff `notes/plans/vm-24-unwarned-edit-routing.md`; the coordinator launches it after
   wave 1, starting with a measuring session on her phone.
 - **VM-17** — stray fan badges on a long note's stepped scroll: a frame kept from a forced mid-document read that
@@ -37,11 +42,14 @@ the star and to archiving · VM-19 — a test's stale first responder.
   vm-179`, kickoff `notes/plans/vm-17-chrome-geometry.md`, hers to launch after wave 1.
 
 **Her rulings** are quoted verbatim in Kickoff facts (with the message her book-order answer replied to), the live
-state (VM-24), BATCH D's "THE WINDOW AND HER RULING" (VM-17) and the Closeout's "Her rulings built here". Two
+state (VM-24), BATCH D's "THE WINDOW AND HER RULING" (VM-17) and the Closeout's "Her rulings built here"; the one with
+an id is QUESTIONS #274 addendum 2 (the insured restore — VM-43, and the PROVISIONAL mark dropped from AppSpec §9
+and OverallModel §3). Two
 PROVISIONAL calls wait for her — an archived gathering's "(archived)" mark, and F8: QUESTIONS PENDING(the QUESTIONS
 number, at the merge).
 
-**The evidence** (in full: the Closeout's "The evidence"; canon: its "Canon deltas"). Every shipped fix's pin red on
+**The evidence** (in full: the Closeout's "The evidence"; canon — SurfaceContracts ×5, MobileSoul PL-78,
+TEXTKIT2_NOTES §3 — in its "Canon deltas"). Every shipped fix's pin red on
 the old code, green on the fix; on the merged tree the re-land's six pins and the three guards red on the wrong
 side, then green; the walk every row PASS (Study; five again in Terminal); five bundles lost or unreadable, their
 logs kept. Ladder (B/M/m/N, all Fable): 0/2/6/11 · 0/0/3/5 · 0/1/5/3 · 0/1/0/5 · 0/0/0/9 — closed at the cap. Gate 1, the whole phone target: PENDING(gate 1: its verdict;
@@ -3406,6 +3414,16 @@ is in flight.***
 | 3 — R5-N5: the master plan's closeout paragraph, the merge-moment steps, the Cast | DONE (`e67287d1b`, trimmed `506033895`) — "To land on main at the merge" opens with the master plan's draft: the three merge-moment moves (the in-flight row deleted; the standing "Latest closeout" paragraph moved verbatim to the archive's head; this one in its place) and the paragraph in VX-981's shape, PL-78's MOBILE PARITY line inside it, its slots PENDING; the AppSpecRecord draft's Cast names every session (the closeout re-fit, round 4's fix pass, the second merge-in, the walk, this pass; the one orchestrator throughout); "Not done" names the master plan's draft |
 | 4 — R5-N6: FOR A LATER READER cut to about a page, from the settled text | DONE (`38ba37d3d`; VM-17's two mechanisms put back into its handed-on line in a follow-up, this commit) — rewritten from the settled text, 1,368 words → about 650 (the hashes counted as words): what the run was; each mechanism in a line; one pointer per fix; the two handed-off runs with their commands and kickoffs; her rulings by where they are quoted; the evidence in a few lines with a pointer to the Closeout's "The evidence" (and its "Canon deltas"); the open items. Slots kept: gate 1, gate 2, the QUESTIONS number, the PR, the merge SHA. Every fact cut was checked to stand in the Closeout first; the one that did not — the second merge-in's reads showing no clash and the red patch still applying — was added to the Closeout's opening paragraph. Every hash the section cites resolves and is an ancestor of HEAD. Also corrected: the walk's "in both voices" in the drafts for main reads "Study; five again in Terminal" |
 
+**Round 5's final calls (`040f9e56a`, the round file's "Final calls").** Seven findings CONFIRMED as applied; two
+CONFIRMED AS AMENDED, in sentences the reviewer gave as they should read: R5-N4 — five comments carry the stale
+mark, not three (the implementer's fourth site kept, a fifth found in `Tests/VariorumCoreTests/`); R5-N6 — the cut
+stands and five lines came back or changed in FOR A LATER READER (main merged in three times; VM-19's settled
+half; VM-81's deleted refusal arm; the standing red by name; her one ruling with an id and the canon pointer).
+Also by that call: the VM-212 owner line names its literal, and the third merge of main has its line in the live
+state. The orchestrator typed these — sentences only, no product line and no test — and checked each against the
+round file's text. **The ladder is closed: five rounds, the fifth with no BLOCKER or MAJOR, every finding
+dispositioned, none disputed, none FINDER-FIXES.**
+
 ## Closeout
 
 #### THE CLOSEOUT RE-FIT — LIVE STATUS
@@ -4060,7 +4078,7 @@ and since the merge main's road speaks it too.)
   walk" ▸ "Observations from the walk").
 - **VM-212 (wave 6, the pocket guide):** the guide's "a smart book collecting by tags"; "starred things sit above
   everything at the shelf's very top" (false for notes since the Starred page); the seeder's cleanup comment about
-  "the shelf-pins setting". When this literal is reworded, delete its entry from `noPhoneStringLiteralSaysSmart`'s
+  "the shelf-pins setting". When the "smart book" literal is reworded, delete its entry from `noPhoneStringLiteralSaysSmart`'s
   exemption table (the guard goes red on a stale entry by design); opening that test file, fold its two copies of
   the whole-word rule into one (round 5's R5-N7).
 - **VM-85:** the Today door's `.wrongKind` note still says "smart book" (`MobileTodayDoor.swift`). When this literal
@@ -4121,11 +4139,14 @@ and since the merge main's road speaks it too.)
    doc still says shelf ordering is the view model's call over `shelfPins`." Debt · Confirmed · Books · Low.
    One-liner: `Sources/VariorumCore/Queries/ShelfQueries.swift:43-44`; both platforms order by `BookcaseBoard`
    since VM-83 and the phone no longer reads `shelfPins` (comment only — this run opened no `Sources/` line); and
-   three code comments still mark P-849-1 PROVISIONAL (ratified, QUESTIONS #274 addendum 2):
-   `Sources/VariorumCore/Operations/Operations+Variant.swift:201`,
-   `App/Variorum/Variorum/Features/History/CommitsFaceModel.swift:782` and
-   `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:3228-3229` (a fourth, the header comment of the Mac
-   test `App/Variorum/VariorumTests/RestoreFlushFirstInsuranceTests.swift:5`, says the same). Pointer: round 1's
+   five comments still mark P-849-1 PROVISIONAL (ratified, QUESTIONS #274 addendum 2) — three in code
+   (`Sources/VariorumCore/Operations/Operations+Variant.swift:201`,
+   `App/Variorum/Variorum/Features/History/CommitsFaceModel.swift:782`,
+   `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:3228-3229`) and two test files' opening comments
+   (`App/Variorum/VariorumTests/RestoreFlushFirstInsuranceTests.swift:5`,
+   `Tests/VariorumCoreTests/RestoreInsuranceTests.swift:7`). The item's Area is Books for the bookshelf doc line,
+   while these comments sit under Takes & Lenses: one ticket takes one Area, so the merging session picks or
+   splits (round 5's final call 1). Pointer: round 1's
    N4; round 5's R5-N4. (Still so at HEAD.)
 5. **To mint on VX, only if F8 is answered (a)** — "The membership chip draws Diverge on a gathering's row, then
    refuses." Bug · Confirmed · Books · Low. One-liner: `MembershipChip.swift:136-145`; the phone stopped drawing it

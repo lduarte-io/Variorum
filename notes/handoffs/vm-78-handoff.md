@@ -301,6 +301,6 @@ Tickets filed:
 - [ ] PENDING(id) (Low, Bug, Todo): a book's contents may show "No notes in this book yet." before its list loads.
 - [ ] PENDING(id, or a line on VM-218) (Low, Bug, Todo): Book Details' name row and the note's date chip hide what they show from VoiceOver (the book's name; the note's day).
 - [ ] PENDING(id, or a line on VM-156) (Low, Bug, Todo): pressing Unarchive twice quickly in Book Details shows a refusal under the book the first press unarchived.
-- [ ] PENDING(id) (Low, Debt, Backlog): a core comment still describes the shelf's retired pin order; and three code comments (and one Mac test file's opening comment) still call the insured restore provisional, though you ratified it.
+- [ ] PENDING(id) (Low, Debt, Backlog): a core comment still describes the shelf's retired pin order; and three code comments and two test files' opening comments still call the insured restore provisional, though you ratified it.
 - [ ] PENDING(id, only if your answer to call 2 is that neither platform offers it) (Low, Bug, Backlog): the Mac's book chip offers Diverge on a gathering's row, then refuses.
 - [ ] PENDING(id) (Low, Debt, Backlog): three lines in `notes/SurfaceContracts.md` that no longer match — the Finish confirm quoted "at the door", and two marks you ratified still saying PROVISIONAL (P-849-4, P-849-5); they sit on three different screens, so this may become more than one ticket.
