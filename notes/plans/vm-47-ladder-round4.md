@@ -73,7 +73,21 @@ no code or test file changed. The fix is record work this pass owes whatever the
 
 ### 2b. The reviewer's final calls
 
-PENDING.
+The implementer's answer (§2a) went back to the round's reviewer, which read the rewritten banner against §4's
+rows and made the final call. Its reply, verbatim (its closing list of the two files' absolute paths is left out —
+they are this file and the run record):
+
+VM-47 ladder round 4 — the reviewer's FINAL CALL on R4-n1 (for §2b, verbatim-landable). Read-only held; nothing was edited, built or run.
+
+**R4-n1 (NIT — the stale STATUS banner) — CONFIRMED, the implementer's five-clause amendment ADOPTED, and the rewritten banner DISCHARGES it. One residual of the same class is named for the next record pass; nothing else to change.**
+
+- I read §2a and the banner as it now stands (`8dbea836b`) against §4's rows and the log. The implementer's amendment is right and staler-than-filed in exactly the five clauses it names: main through `64fde83b0` at `3d55b51f6` (rows 7b–7b.7); the merge-in FOUR conflicted files, not three (row 7b.1's table — `.gitignore`, `VariorumMobileApp.swift`, `MobileSettingsView.swift`, `MobileLibraryView.swift`; round 3's §3 had predicted three); the narrow read = round 4 (my report's own sentence); the targeted window = row W.11 (1)–(8); the re-capture = rows W.9 and W.11 (9). I verified each clause of the NEW banner against its source: "all code is in" with the two re-lands and W-A1 redone (the log; code tip `d78853d8e`); "rounds 1–4 in, no MAJOR open, round 4's final call PENDING" (true at that commit; this call flips it — the ordinary one-step lag the §2b landing corrects); "driven and read in four capture sets" (parts A and B §4a–4d, the re-capture §4e–4f, the final tree §4g–4h — the reads are in the walk file at `4d6d2b9f0`/`3f6ebf8de`/`8de6debd2`); "the post-merge window ran green (row W.11)"; and the owed list (the merge gate with VM-64's speed suite as its own leg, the whole Mac target, the PR and merge; after it the ledgers from the closeout drafts, the cleanup, the wave-1 build preparation) — all correct as of the final record pass. **Nothing in the banner is wrong.**
+
+- **The residual, same class, one clause:** row W.11's clause (9) still says "READ by a fresh reader — PENDING", and those reads have since landed (`vm-47-walk.md` §4g–§4h and the two §6 final-tree blocks, commits `4d6d2b9f0`/`3f6ebf8de`/`8de6debd2` — all BEFORE the banner rewrite, so the banner is right and the row's cell lags). Flip it with those source commits at the next record pass — naturally the W.8 pass, which also closes the walk file's own PENDING result blocks (the closeout slot already owns that work; the banner correctly leaves it to the slots). Not a new finding: R1.2's flip-answered-slots convention covers it.
+
+- Two readings I made and accepted without asking for a change: "main merged in twice" reads as the two code re-lands (batches 7 and 7b) — the earlier merges were notes/ledgers or other runs' Mac/Core files, which the ladder has always excluded as not this run's work, and the clause anchors on the exact SHA; "ran green" means the final tree's legs — row W.11 itself states the deliberate snapshot REDs and the UI test's red-on-first-fix, which is the point of the matrices.
+
+- **Round-4 tally after dispositions: 0 BLOCKER · 0 MAJOR · 0 MINOR · 1 NIT (confirmed, discharged by the banner rewrite).** No MAJOR — under her five-round rule no further round is earned. The condition left from my report that the window did not answer is now only the merge gate (whole phone target, the speed suite alone, whole Mac target) and the closeout slots, exactly as the new banner says. W.11's honest difference on snapshot A (the Read-page pin's light case passing on the first fix — the cream page within the pin's tolerance of Read's own room) is a tolerance fact about the OLD tree, weakens no pin on the final tree, and needs nothing. Nothing is FINDER-FIXES; nothing goes to `notes/QUESTIONS.md`.
 
 ## 3. What this round did not read
 
