@@ -558,11 +558,13 @@ ever edited after the fix lands, the red build is remade by the revert protocol 
 | A macOS probe (a scratch script, not a test host): `NSTextStorageDelegate.willProcessEditing` fires for a programmatic `replaceCharacters`, with the exact change; `didProcessEditing` widens a font-only insert through the paragraph's terminator. macOS evidence for UIFoundation's shared storage, NOT an iOS measurement | DONE |
 | Pins 1–4 (`MobileUnarmedEditRoutingTests`, base API only) | DONE (`ea5a7a635`) — red/green PENDING the stage window |
 | Red build `DerivedData/vm24-a-red` (the tree at `ea5a7a635`: `git diff --stat 4b0eaaacb ea5a7a635` = the new test file + this record, no production file) | DONE — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-red-bft.log`; the test binary carries the new suite. FROZEN: never rebuilt into |
-| The fix (D-24-1): the capture in `MobileStorageObserver`, `storageDidEdit(_:changeInLength:changedCharacters:)`, `fallbackVerdict`, the unbound churn cost | DONE (this commit) — green PENDING the stage window |
-| The trace (D-24-4): widened · rescued · no capture | DONE (this commit) — DRAFT words; green PENDING |
-| Pins 5 (capture belts: `MobileChangedCharactersCaptureTests` + `MobileChangedCharactersObserverTests`) and 6 (trace: five new tests in `MobileEditTraceTests`) | DONE (this commit) — green PENDING the stage window |
-| Fix build `DerivedData/vm24-a` (phone, `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-bft2.log`, no new warning in a touched file) + Mac `DerivedData/vm24-a-mac` | phone DONE at the code of this commit; Mac NOT-STARTED |
-| Closeout in §12 + the READY report | NOT-STARTED |
+| The fix (D-24-1): the capture in `MobileStorageObserver`, `storageDidEdit(_:changeInLength:changedCharacters:)`, `fallbackVerdict`, the unbound churn cost | DONE (`a8662b81e`) — green PENDING the stage window |
+| The trace (D-24-4): widened · rescued · no capture | DONE (`a8662b81e`) — DRAFT words; green PENDING |
+| Pins 5 (capture belts: `MobileChangedCharactersCaptureTests` + `MobileChangedCharactersObserverTests`) and 6 (trace: five new tests in `MobileEditTraceTests`) | DONE (`d98d12517`, `d4085103c`) — green PENDING the stage window |
+| Fix build `DerivedData/vm24-a` (phone) | DONE at the code of `d4085103c` — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-bft3.log`; no new warning in a touched file (the one warning in `MobileEditTraceTests.swift`, an unneeded `try` in `theRingIsBoundedWhileTheCountersStayTrue`, is the base's) |
+| Mac `DerivedData/vm24-a-mac` | DONE at the code of `d98d12517` (no Mac, `Shared/` or `Sources/` file differs from the base: `git diff --stat 4b0eaaacb HEAD -- App/Variorum/Shared Sources App/Variorum/Variorum` is empty) — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-mac-bft.log` |
+| Closeout in §12 + the READY report | DONE (this commit) |
+| The stage window (§12, "The stage window") | PENDING — the orchestrator's, from these products |
 
 ## 12. Batch closeouts, findings and dispositions
 
