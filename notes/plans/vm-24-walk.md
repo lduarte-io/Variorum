@@ -75,9 +75,9 @@ edit trace's readout; the VM-55 record's walk-instrument section; the VM-44 runb
 
 | Piece | State |
 |---|---|
-| Record skeleton | IN-PROGRESS (this commit) |
-| The two snapshots (AFTER at `562f815bd`, BEFORE at `8ff1d08af`), detached, nothing committed in either | NOT-STARTED |
-| The driver `VM24Walk.swift` (rows a–h), in both snapshots' `VariorumMobileUITests/` only, untracked | NOT-STARTED |
+| Record skeleton | DONE (`830d8d2d5`) |
+| The two snapshots (AFTER at `562f815bd`, BEFORE at `8ff1d08af`), detached, nothing committed in either | DONE — `~/dev/variorum-vm-24-walk` and `~/dev/variorum-vm-24-walk-before`; `git status` in each shows only the untracked driver |
+| The driver `VM24Walk.swift` (rows a–h), in both snapshots' `VariorumMobileUITests/` only, untracked | IN-PROGRESS — written; the same bytes in both snapshots; compiling next. The UI test folder is a synchronized group, so the file joins the target by being there (no project edit) |
 | `build-for-testing`, AFTER (`vm24-walk-after`) and BEFORE (`vm24-walk-before`) | NOT-STARTED |
 | `walk.sh` (untracked, in the AFTER snapshot) | NOT-STARTED |
 | READY report | NOT-STARTED |
