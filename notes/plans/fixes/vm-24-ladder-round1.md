@@ -228,3 +228,65 @@ F1 and F2 are implementer-applied fixes under the cross-model flow (neither is F
 both are fully specified above; no `Sync/` line exists in this run). F3 is a one-clause doc note,
 take or leave with F1's commit. No finding here earns a further round on its own (nothing
 BLOCKER/MAJOR); round 2, if the cap rule grants one, would only re-check F1/F2's landings.
+
+## The implementer's answers (round 1 fix pass)
+
+*Opus implementer, fresh session, base `6b5dfb41d`. Each finding re-traced in the code before answering; written and
+pushed before any fix.*
+
+### F1 — AGREE
+
+- **Traced.** `MobileEditTrace.headline()` writes the line as a fixed string (`MobileEditTrace.swift:553` on
+  `6b5dfb41d`; the finding's `:552` is the "widened" line just above it — the same defect, one line off). The readout
+  draws the headline in the `meta` role: Study `.system(size: 13)` (SF Pro), Terminal `.system(size: 13, design:
+  .monospaced)` (SF Mono) (`Shared/Theme/PhoneType.swift:168-170`, `:230-238`), inside a stack padded 20 pt each side
+  (`MobileEditTrace.swift:653`). On the walk's iPhone 17 Pro (402 pt wide) the measure is 362 pt.
+- **Measured, not counted** (a font-metrics fact, as the finding says). A throwaway CoreText script in the session
+  scratchpad (never in the PR) measured each headline line in the same two faces at the default text size, and the
+  numbers match the capture: "widened" 350.5 pt measured, about 349 pt on `after/z-readout-after-all.png`; "gate-less"
+  326.9 pt measured, about 326 pt on the capture. The old "rescued" line measures **380.0 pt, past the 362 pt
+  measure — the wrap W-1 saw.**
+- **The words.** Of the finding's two examples I take **"(snap-backs avoided)"**: 245.9 pt in Study, clearly inside
+  its siblings that fit (326.9 and 350.5 pt) with 116 pt to spare; it also fits Terminal at a one-digit count (353.6
+  pt; a two-digit count reaches 361.6 pt, at the edge). The other example, "(snap-backs that did not happen)", fits
+  Study only (317.1 pt) and wraps in Terminal (450.0 pt). Both say what D-24-4 rules ("each rescued edit is one
+  snap-back that did not happen"); the DRAFT marker stays; neither word is on the retired list.
+- **The pin: NOT added.** The finding makes it optional. Two reasons: showing it red needs a stage window, which this
+  pass is not given; and a character count is a weak stand-in here — the measurement shows it: about 45 characters
+  fit in Terminal and 62 in Study, so "no line longer than 63 characters" would pass a line that wraps in Terminal.
+  The verification is the measurement above, plus a capture of the readout on the fixed build, which is the
+  orchestrator's to take (this pass boots no simulator). No existing pin asserts the old parenthetical: the trace
+  suite's headline checks stop at the count (`MobileEditTraceTests.swift:399-401`, `:491`), so no test line changes
+  for F1.
+- **Two observations, not acted on** (each needs a choice the finding does not make):
+  1. In **Terminal** at the default text size the other two parenthetical lines wrap too: "gate-less" (466.1 pt; E1's
+     own line, older than VM-24) and VM-24's "widened" (498.2 pt). The walk's capture is Study, so nobody has seen it.
+     Options: (a) leave it — the column holds in Study, and Copy hands over plain text either way; (b) shorten every
+     parenthetical to fit Terminal; (c) put each explanation on its own line under its number. The meta role also
+     grows with the text size up to xxxLarge, where every long line wraps; the same class.
+  2. For her wording pass: `rescued` is decided before the arms run (`MobileEditorViewModel.swift:2289-2297`), so
+     during a structural flight a rescued edit is then withheld by the storage belt and the page re-read (`:2324`,
+     D-24-2's second row): the characters do not stay on the page in that rare case either, though the fence now says
+     its sentence instead of desyncing. The old words, the new words and D-24-4's own sentence all read slightly
+     past that case. Unchanged here: the meaning is D-24-4's, and the words are hers.
+
+### F2 — AGREE
+
+- **Traced.** `fallbackVerdict` reads `changedCharacters ?? editedRange` (`MobileEditorViewModel.swift:2425`), and
+  the observer hands the kept value whenever the first callback fired and the capture accepted it (`:2911-2913`;
+  `accepts`, `:2980-2984`). So a widened gate-less report can overflow its entry and take the recovery road only when
+  nothing was kept (the `noCapture` case) — exactly as the finding says. The routing suite's doc
+  (`MobileEditRoutingTests.swift:139-142`) still states the pre-VM-24 road as current, while its twin in the trace
+  suite (`MobileEditTraceTests.swift:287-289`) was updated in this run.
+- **Applied as the finding words it**, with the trace suite's own clause ("since VM-24 it routes from the changed
+  characters") so the two suites say the same thing. Doc only; no pin (nothing executable changes).
+
+### F3 — AGREE
+
+- **Traced.** `MobileChangedCharactersCapture.willProcess` keeps the `willProcessEditing` range whenever the pass
+  changed characters (`MobileEditorViewModel.swift:2962-2964`). That range is the transaction's accumulated range,
+  attribute writes included (the type's own doc, `:2934-2936`). `MobileEditTrace.report` flags widened on
+  `editedRange.length > changed.length` alone (`MobileEditTrace.swift:384`). So a transaction that bundles a wider
+  attribute write reads as not widened, and its "changed … len" overstates the change. The routing reads the same
+  wider range only toward refusal, so it is unaffected.
+- **Taken** as one clause in the header's "widened" bullet, riding F1's commit. Comment only.
