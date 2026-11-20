@@ -3430,8 +3430,8 @@ is in flight.***
 
 | Piece | State |
 |---|---|
-| 0 — this section, the disposition table and its LIVE STATUS | DONE (this commit) |
-| 1 — R5-N1: PL-78's still-owed list, the W-073 reconcile, the VM-212 and VM-85 owner lines, G1–G3 in the member rows | NOT-STARTED |
+| 0 — this section, the disposition table and its LIVE STATUS | DONE (`e9d509d98`) |
+| 1 — R5-N1: PL-78's still-owed list, the W-073 reconcile, the VM-212 and VM-85 owner lines, G1–G3 in the member rows | DONE (this commit) — PL-78: "the guide's other stale lines and its exempt "smart" literal in the phone's word scan (VM-212) · the Today door's "smart book" note and its exempt literal (VM-85)"; the reconcile bullet names G2 as the source scan; both owner lines say to delete the entry when the literal is reworded (and carry R5-N7's fold); G1 under VM-84's pin, G2 under VM-83's, G3 under VM-21's and VM-81's; the round 1 fix pass's history line untouched. `grep -n PENDING notes/MobileSoul.md notes/SurfaceContracts.md` answers nothing |
 | 2 — R5-N2, N3, N4, N8, N9 and every round-5 slot in the record and the handoff | NOT-STARTED |
 | 3 — R5-N5: the master plan's closeout paragraph, the merge-moment steps, the Cast | NOT-STARTED |
 | 4 — R5-N6: FOR A LATER READER cut to about a page, from the settled text | NOT-STARTED |
@@ -3562,7 +3562,9 @@ the gate's legs are the slots below.
   (the mirror's one set sits beside the one `header = value`; the chip beside main's removal of the masthead's
   status row); read, unchanged.
 - *Pin.* `MobileNoteEntryDateTests/theDateChipFollowsTheDateWhenTheTitleDoesNot` (in `MobileMembershipTests.swift`;
-  its third arm: an unchanged header wakes nothing).
+  its third arm: an unchanged header wakes nothing). The face's guard, round 4's G1:
+  `MobileNoteEntryDateTests/noPhoneFaceReadsTheEditorsUnobservedHeaderDate` (`43fec9e9c`) — no phone face reads the
+  unobserved `header?.entryDate`; red on the wrong side and green on the tree in the guards' window.
 - *Evidence.* Window (2) red/green; on the merged tree its type rode the re-land's window's GREEN
   leg, green.
 
@@ -3624,7 +3626,10 @@ the gate's legs are the slots below.
   `finishIsNotDrawnOnAGathering`, `reopenOnASealedBookSpeaksTheSharedSentence`, `divergeIsNotDrawnOnAGatheringRow`,
   R2-N1's `theBookDetailsRowsSpeakTheirCaptionsAsHints`) · `MobileArchivedStarredBookTests`
   (`anArchivedStarredBooksDetailsCarriesTheUnarchiveDoor`, F3's `aRacedUnarchiveSpeaksTheSharedSentence`) · the
-  join's `bookDetailsDeleteLineNamesAGathering`.
+  join's `bookDetailsDeleteLineNamesAGathering` · the membership sheet's face guard, round 4's G3:
+  `MobileMembershipSheetFaceTests/theSheetMarksAnArchivedBookAndAGatheringAndDrawsDivergeOnTheBookOnly` (`905a12eb0`)
+  — the real sheet hosted, exactly one "diverge", on the book row; red on the wrong side and green on the tree in
+  the guards' window.
 - *Evidence.* Window (1): red on the seam commit `7c9fc0151`, green on the tip. Window (5): F3 red/green; F5's two
   guards red only because the reverted row had no label for the driver to find, green on the tip. R2-N1's window
   (07:19:38–07:23:59): its pin red on `046a886fc`'s `MobileBookDetails.swift`, green on the tip, F5's guards green
@@ -3659,7 +3664,10 @@ the gate's legs are the slots below.
   `theTrashNamesAnUntitledGatheringAGathering`, `noRenderedStringInTheseFacesSaysSmart`, N2's
   `theTrashNamesAnUntitledSavedVersionAsOne`) · `MobilePocketGuideDeletionTests/theShelfLessonDescribesTheShelfThatExists`
   (F4) · the edited existing pins `MobileBookDetailsTests/theIdentityBlockDisplaysTagsForBothKinds`,
-  `MobileShellTests/lk5FacesLeadWithCountAndTags`, `MobileWalkTests/walk7_shelfTodayLibraryColdLaunch`.
+  `MobileShellTests/lk5FacesLeadWithCountAndTags`, `MobileWalkTests/walk7_shelfTodayLibraryColdLaunch` · the faces'
+  guard, round 4's G2: `MobileGatheringWordTests/noPhoneStringLiteralSaysSmart` (`e9823efaf`) — every string literal
+  under `VariorumMobile/` and `Shared/`, "smart" as a whole word, two exact exemptions each held to one match (VM-85's,
+  VM-212's); red on the wrong side and green on the tree in the guards' window.
 - *Evidence.* Window (1) red/green; window (5): N2 red/green, N1 green on both sides by design; F4's follow-up
   red/green. On the merged tree: the re-land's window — the Trash placeholder's two pins
   (`theTrashNamesAnUntitledGatheringAGathering`, `theTrashNamesAnUntitledSavedVersionAsOne`) red with the Trash view
@@ -3679,7 +3687,10 @@ the gate's legs are the slots below.
 - *Pins.* `MobileCollectReceiptTests` (`aStarOnlyCollectNamesTheStar`, `aTagAndStarCollectNamesBoth`,
   `anArchivedGatheringsReceiptSaysWhenItWillShow`, `pickersMarkAnArchivedBook`; control
   `aLiveTagsOnlyCollectKeepsTheChipsWords`), the collects re-shaped to read the line (`c652d1669`); the Mac's
-  `GatheringCollectReceiptTests` and `GatheringCollectStarReceiptTests` over the hoisted bytes.
+  `GatheringCollectReceiptTests` and `GatheringCollectStarReceiptTests` over the hoisted bytes · the sheet's face
+  guard, round 4's G3: `MobileMembershipSheetFaceTests/theSheetMarksAnArchivedBookAndAGatheringAndDrawsDivergeOnTheBookOnly`
+  (`905a12eb0`) — the real sheet hosted, "(archived)" on the archived book's row; red on the wrong side and green on
+  the tree in the guards' window.
 - *Evidence.* Window (1) red/green and its Mac leg green. On the merged tree: green in the re-land's
   window's GREEN leg, and PENDING(gate 2, the Mac leg).
 
@@ -3934,8 +3945,9 @@ tree ships):**
   (not "smart", but the Mac has a separate "Create Gathering…") — VM-117, the new-book sheet; the Starred page's
   "book" kind word on a gathering row — VM-94; the delete confirm's detail "Its notes stay in the library." on a
   gathering (true; the Mac's gathering confirm says "No note is touched: a gathering holds none.") — the wording
-  pass. Identifiers and the model's older spelling in code are out of scope (AppSpec §7). The sweep pin is a
-  hand-kept list of strings; the Mac's source-scanning ban comes to the phone with VM-212 (round 1's N7).
+  pass. Identifiers and the model's older spelling in code are out of scope (AppSpec §7). The source scan over
+  every phone and shared literal is `noPhoneStringLiteralSaysSmart` (round 4, G2), the hand-kept list beside it
+  checks the pure functions.
 - **"every phone restore call site"** (the brief's VM-43 line) — there is one at HEAD; it is wired.
 - **The receipts ruling** — no ordinary act gained a line; every line this run speaks is a refusal, a direction or
   a removal in VM-55's classes (item 6).
@@ -4063,10 +4075,13 @@ and since the merge main's road speaks it too.)
   order becomes a live choice, decide whether to sort once where the observation delivers.
 - **VM-212 (wave 6, the pocket guide):** the guide's "a smart book collecting by tags"; "starred things sit above
   everything at the shelf's very top" (false for notes since the Starred page); the seeder's cleanup comment about
-  "the shelf-pins setting"; and, once VM-85 and VM-212 retire the last two phone "smart" sites, the Mac's
-  source-scanning ban (`DeadVocabularyTests`) in place of `noRenderedStringInTheseFacesSaysSmart`'s hand-kept list
-  (N7).
-- **VM-85:** the Today door's `.wrongKind` note still says "smart book" (`MobileTodayDoor.swift`).
+  "the shelf-pins setting". When this literal is reworded, delete its entry from `noPhoneStringLiteralSaysSmart`'s
+  exemption table (the guard goes red on a stale entry by design); opening that test file, fold its two copies of
+  the whole-word rule into one (round 5's R5-N7).
+- **VM-85:** the Today door's `.wrongKind` note still says "smart book" (`MobileTodayDoor.swift`). When this literal
+  is reworded, delete its entry from `noPhoneStringLiteralSaysSmart`'s exemption table (the guard goes red on a
+  stale entry by design); opening that test file, fold its two copies of the whole-word rule into one (round 5's
+  R5-N7).
 - **VM-117:** the create sheet's "Create Book" button on the gathering kind (the record named the umbrella, VM-112).
 - **VM-94:** the Starred page's "book" kind word on a gathering row.
 - **VM-175 (wave 4):** the Finish confirm's "Open Arrivals first" button.
