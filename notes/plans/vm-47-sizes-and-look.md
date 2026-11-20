@@ -3,13 +3,82 @@
 **Ticket: VM-47 (team VM) · Project: Mobile — the catch-up & launch · Branch: `vm-47-sizes-and-look` ·
 Worktree: `~/dev/variorum-vm-47` (Pro)**
 
-**STATUS: OPEN 2026-11-19** (overnight; `/run-phase vm-47`; the stage coordinator is the session `nov18`).
+**STATUS: OPEN 2026-11-19** (overnight; `/run-phase vm-47`; the stage coordinator is the session `nov18`). All
+code is in; the midway review and ladder rounds 1–3 are closed with no MAJOR open; the walk is driven, read and its
+fixes are in; main is merged in through `a09d6a025`. **Owed before the merge:** the last mobile run's (VM-64's)
+three-file merge-in and its narrow read, the targeted test window, the re-capture, the merge gate (the whole phone
+and whole Mac targets), the PR and its merge. The closeout's drafts wait in `notes/plans/vm-47-closeout-drafts.md`.
 
 ## FOR A LATER READER
 
-PENDING — written at closeout from the settled facts (the mechanism as settled, what was built with one
-pointer per piece, her rulings by id, the evidence lines that matter, the open items). Until then the
-sections below are the working record.
+*Written at the closeout from the settled facts, before the merge; each `‹PENDING: …›` slot is filled at the merge.
+Everything below this section is the night's working record.*
+
+**What the run was.** The mobile catch-up's wave 1, umbrella 1: the phone takes the Mac's look at phone-right sizes.
+Eight members — VM-48 · VM-49 · VM-50 · VM-51 · VM-52 · VM-53 · VM-54 · VM-27 — in five batches, then two re-lands
+(VM-55's branch, batch 6; main with VX-981 and VM-78, batch 7) and two batches of the walk's fixes. No `Sources/`,
+`Sync/`, custody, schema or operation line; the Mac's look is unchanged (`VoiceTokens.swift` untouched, every Mac
+token pin green). PR ‹PENDING: number›, merge commit ‹PENDING: SHA›.
+
+**As built, one pointer per piece** (paths under `App/Variorum/`):
+- *Type (VM-48).* `Shared/Theme/PhoneType.swift`: twelve roles from one table (13 · 15 · 17 · 20 · 24; Terminal's
+  prose roles two points under, P-47-4), a SwiftUI form (`.phoneType`) and a UIKit one (`PhoneType.uiFont`); her
+  words grow across the whole text-size range, chrome to xxxLarge and holds, nothing under 13 pt (`f5e21610d`; the
+  sites `ccd481162` … `7cd8b866f`; the editor's face `575bb8677`; the shelf's arithmetic `6b02c806c`).
+- *Inks, room to tap, controls (VM-49, VM-50).* `Shared/Theme/PhoneInks.swift` (`tokens.phone.muted` / `.faint`,
+  clearing 4.5:1 and 3:1 on every shipped ground), `PhoneMetrics.swift` (the spacing scale, the 20 pt gutter,
+  `phoneHitArea`), `PhoneControls.swift` (text button, inline act, icon button, chip, field, the one calm button,
+  sheet header, segmented choice, section header, menu row, `PhoneHitAreaButton`).
+- *Voice and palette (VM-51).* `ThemeStore` moved whole to `Shared/Theme/ThemeStore.swift` (`dc9a5fd05`), held by
+  `MobileShellRouter`; every phone read takes `VoiceTokens.resolve(settings:dark:)` (`987e9edc5`); the phone's own
+  voice preference is deleted; the grounds `af487bfe7` and the note in Write on the paper `4cca58a8e` (R-47-1).
+- *The bar (VM-52).* `VariorumMobile/Features/Shell/MobileTabBar.swift` (`9c76b335c`), on the roots and pushed lists.
+- *Settings (VM-53).* `Shell/MobileSettingsView.swift`, one grouped list that scrolls (`70368f6dc`); the appearance
+  choice `Shared/Theme/AppearanceChoiceRule.swift` + `Shell/MobileAppearance.swift` (`a83c586f3`, this device's
+  defaults); the ⋯ menu `Shell/MobileRootMenu.swift` and the note's door (`e622cbbb9`).
+
+**The mechanisms, as settled — each pin red on the old code, green on the new:**
+- *The Terminal path line wrapped:* a 13 pt mono path beside two 17 pt mono word doors wanted ≈ 437 pt at 402 —
+  `47ee432fc`; `MobilePathLineGeometryTests` (22 issues on old).
+- *UIKit had no 13 pt floor* (midway M-1): `PhoneType.uiFont` floored neither scaling class — `8bea26402`;
+  `theUIKitFormIsNeverBelowThirteenPointsEither` (20 on old). Batch 1's held chrome also grew ⅓ pt past xxxLarge —
+  `4ec664f2b`.
+- *VM-54's borders* froze a dynamic colour into `CALayer.borderColor` with no trait hook — `1c3621719`
+  (`MobileTraitBorder`); `MobileBorderTraitTests` (5 on old).
+- *VM-27's one door:* one closure fed both the sync row's door and the standing row — `9c9aa4b6c` (the sync row in
+  Settings is handed none; the standing row stays); `MobileSettingsProtectionDoorTests` (2 on old).
+- *The screen-edge grounds* (W-A1): the band's `.clipped()` cut every page's `ignoresSafeArea()` ground at the safe
+  area — `67525b499` (`MobileBandClip`, sideways only); `MobileScreenEdgeGroundsTests`.
+- *The hidden page's keyboard* (W-C2): the tab road's unanimated pop uncovers the Library and the framework hands
+  its search the keyboard back — `05afd4b34` (`mobilePageShowing`); `MobileHiddenPageKeyboardTests`.
+- The walk's other fixes: W-A3 `d974162f4` (its pin moved to the layout origin, `c72e65201`) · W-A9 `36987c78e` ·
+  W-A10 `7734f0f05` · W-B1/W-C3 `a21110f9d` · W-B3 `71ccdd4fc` · W-B4 `fb649d6a8` · W-C7 `c7b6f0459` · the Account
+  sheet's header and placeholders `2345a713a`, `c64f23782`.
+
+**Her rulings** (verbatim in §1 and §5): **R-47-1** — "grounds - prose should not be on the tint, which is what I
+understood you mean. that sounds good." · **R-47-2** — "voice only row - yeah, that's fine." · **R-47-3** — her pick
+"Bookcase (Recommended)" (the Bookcase root's top line says Bookcase). The run's shape: "yeah that's fine on the five
+sequential batches - you can do a midway through review it if you prefer. also - up to 5 rounds as long as a major
+is found." Built on the wave's LK-1/LK-2, LK-5, LK-6 and SW-1 (`notes/plans/vm-44/plans/sitting-1-rulings.md`).
+
+**The evidence that matters.** Ladder (a fresh Fable reviewer each round, B/M/m/N): midway 0/1/2/2 · round 1 0/0/1/4
+· round 2 0/0/0/2 · round 3 0/0/1/2. On the tree with VM-55 re-landed: the whole phone target 1,045 tests in 179
+suites (the one red main's VM-24 caret pin), a targeted Mac leg 565 tests in 114 suites green. The walk: 283 of 285
+captures, read by four fresh readers against the sizing sheet (`notes/plans/vm-47-walk.md`) — the second palette,
+the voice flip, the appearance choice, Settings' doors, VM-54's flip, the bar and its tab roads matched; eleven of
+this run's defects found, ten fixed with pins, one put to her (P-47-30). ‹PENDING (the targeted window)› ·
+‹PENDING (the re-capture)› · ‹PENDING (the merge gate: whole phone / whole Mac)›.
+
+**Open items.**
+- Thirty-eight PROVISIONAL calls (P-47-1, P-47-4 … P-47-27, P-47-29 … P-47-41; §5): QUESTIONS #‹PENDING›, her
+  checklist `notes/handoffs/vm-47-handoff.md`.
+- Never seen rendered: the Account sheet's restyled header and placeholders ‹PENDING: whether the re-capture reached
+  it›; VM-27's doored sync states (the pin only); the lobby (P-47-15); the filter row at 320 pt; the take peek and
+  the takes pill (c6, f5).
+- Filed: VM-247 (a palette row on the phone), VM-248 (an unscoped database read in a phone test opens the simulator
+  app's own store). The remainders on their owners: §6 "Closeout" and the handoff (VM-218, VM-93, VM-152, VM-148,
+  VM-137, P-47-20's five owners, and others).
+- The wave-1 phone install is this run's to prepare as the last mobile merger: ‹PENDING: the build and its block›.
 
 ---
 
@@ -2578,3 +2647,117 @@ whole phone target and the whole Mac target on this tree.
    layer, the walk has not seen (the run's one walk predates the join).
 5. **The Mac**: compiled green; VX-981's new Mac faces have never run beside this run's hoisted `ThemeStore` —
    the targeted leg (b) and the gate's whole Mac target are the evidence.
+
+### Closeout (written 2026-11-19, before the merge — documents only; every slot is filled at the merge)
+
+**Not done here, first:** nothing was built, run or captured in this pass, and no shared ledger or canon file was
+edited. The canon lines, the parity row, the AppSpecRecord entry, the QUESTIONS bundle, the master plan's paragraph
+and the run-finals row are DRAFT TEXT in `notes/plans/vm-47-closeout-drafts.md`, applied at the merge on latest main
+and then deleted; the author's handoff is `notes/handoffs/vm-47-handoff.md` (a draft until its slots fill).
+
+**The slots still open** (each written `‹PENDING: …›` in the three closeout files):
+1. VM-64's three-file merge-in (`.gitignore`, `MobileSettingsView.swift`, `VariorumMobileApp.swift`) — its merge
+   commit, what its timing door and readout sheet wear on this run's layer, and its narrow read (round 3's §3: a
+   narrow cold pass, or the orchestrator's line-by-line check against VM-64's map).
+2. The targeted window — batch 7's 64-type phone array and 25-type Mac leg plus what the merge-in adds; the join
+   pin's first run and its snapshot red-on-old; the re-run of `MobileFaintOnDoorsSourceTests` (`94f4e752d` and
+   `1306a9f07` both ride it).
+3. The re-capture (row W.8) — the walk's re-capture lists (§6 "The walk's fixes (part A)" and "(batch 2)", the
+   screens the joins drew: Book Details, Create Book, the membership sheet, Write, Settings), the two missing `m3`
+   captures, c6's take peek and c8's caret; whether it reached the Account sheet; the walk file's FOR A LATER READER
+   and §5 result blocks (still PENDING there).
+4. The merge gate: the whole phone target and the whole Mac target on the tree that merges.
+5. The PR number, the merge commit, the QUESTIONS number (VM-64's drafts take #280, so likely #281), the parity row's
+   number (VM-64's take PL-79, so likely PL-80), `Tools/canon-size`'s line.
+6. The wave-1 phone install's preparation — this run is the last mobile merger: a Release device build of merged
+   main, its signing check, main's sync version against production's, and the paste-ready block
+   (`notes/plans/vm-44/plans/vm-45-install-runbook.md`); the install itself is hers.
+7. Whether `notes/plans/vm-47-screens/final/` stays until her sitting: the handoff's questions name captures there,
+   and the closeout ritual deletes a merged effort's walk evidence (her 13x ruling) — a call for the orchestrator or
+   her.
+
+**The rulings reconciled** (CLAUDE.md's closeout rule — each ruling the run built, read word by word against what
+shipped; the plain-English version is in the handoff):
+- **R-47-1** — "grounds - prose should not be on the tint". The record's test (§3, batch 3): wherever her words are
+  read or written the ground is the paper, in light and in dark, under every palette. Shipped: the roots' lists, a
+  book's contents, Archived, the Trash, Versions' listing and reader, the note in Write with its masthead (P-47-16,
+  P-47-17); the grounds now reach the screen's edges (W-A1); pinned under two palettes. Read's cream page sits in the
+  voice's own room, never the tint (R-13u-10). **Remainders:** the only prose inside a SHEET — the Blocks sheet's
+  block previews (VM-149) and the tray's previews (VM-153) — still sits on the sheet's room, which in light is the
+  palette's tint; the three hand-built overlays' grounds (VM-152); a peeked take card wears the take tint (R13's
+  ruled register, kept for her look). Names inside sheets (books, tags, wings) sit on the room by the sizing sheet's
+  own "sheets on the room".
+- **R-47-2** — "voice only row". Shipped: Look ▸ Voice writes the library's voice through the Mac Settings' own
+  write. No palette row, as ruled; the palette chooser is filed as VM-247 for a later call.
+- **R-47-3** — "The top line says Bookcase, matching the tab, your swipe names and the Mac." Shipped on the Bookcase
+  root's line in both voices (pinned). **The other places the phone still says "shelf"** (read over the merged tree
+  at this pass): the pocket guide's seeded prose ("a book on your shelf", "The SHELF is home", "on the shelf's top
+  line", "on the Shelf's"; and "Settings, on the shelf's top line" is now wrong twice, since Settings moved into the
+  ⋯) — VM-212; the Debug-only guide door's note "The pocket guide is on your shelf." — VM-211; the shared refusal
+  sentences about a shelf ("That shelf isn't there any more…" and its kin) name the Bookcase's shelves and are right
+  as they are. "Pin to Shelf Top" is gone (VM-78's VM-83, merged in at batch 7). Comments, identifiers and file names
+  are not rendered.
+- **LK-1 / LK-2** — "Follow the library's synced voice and palette; light or dark stays each device's own."
+  Shipped: the voice and palette from the library's synced settings, observed both ways; light, dark or follow the
+  system on this phone's own defaults, never synced. Remainder: before a library opens the phone wears Study under
+  the sea-glass (P-47-15).
+- **LK-5** — "Three words at 17 pt, the current one on a chip, 56 pt targets. Shown on roots and lists; hidden
+  inside a note." Shipped as ruled on the three roots and the four pushed lists. Remainders: Read, Versions' reader
+  and Protection carry no bar (P-47-18); the screens inside Settings are covered by its sheet; at 320 pt in Terminal
+  at the largest sizes a word may shrink toward the 13 pt floor (never under it); the mockup's "the bar leaves while
+  the keyboard is up" is VM-73's.
+- **LK-6** — Terminal keeps its lowercase chrome: kept. P-47-39 asks whether her own quoted words should keep their
+  capitals in Terminal.
+- **SW-1** — the Starred · Bookcase · Library swipe kept and the tab says Bookcase; the wing title's swipe, dots and
+  dropdown are VM-80's (wave 2).
+- **The tickets' "every" lines.** VM-49 "a 44 pt minimum for every target": every site of audit G §2 is adopted, given
+  a hit area or left with its owner (§6 "Batch 2 — results", the inventory; the formatting strip's 28 pt acts are her
+  ruled exception). VM-48 "nothing on the phone is set below 13 pt": held by the source rules and both type forms;
+  the remainder is the editor's own body in Terminal at the smallest text setting (≈ 12.4 pt, VM-137). VM-53
+  "reachable from every screen" (its title; its text says "from every root and from a note", which shipped): a pushed
+  list, a book's Read page and Protection carry no Settings door of their own — a pushed list is one tap from a root
+  by the bar — **no ticket owns that remainder; it needs a ticket or her acceptance of the text's scope.** VM-52 "on
+  every root and list": as LK-5 above. VM-54 "the take cards, the takes pill and the comment draft": the pin covers
+  all three; the walk saw the cards and the draft follow and caught no pill (f5).
+
+**Tickets.** The members VM-48, VM-49, VM-50, VM-51, VM-52, VM-53, VM-54 and VM-27 and the umbrella VM-47 close with
+the merge. **Filed during the run (both Medium, Backlog):** VM-247 (Feature · Settings & onboarding — a Palette row in
+Settings, the lock mockup's S1 draws it and no ticket owned it; §5 "Held for her hands") and VM-248 (Debt · Confirmed ·
+Tests & tooling — a phone test that reads `@Dependency(\.database)` unscoped falls through to the live value and opens
+or creates the simulator app's own store; batch 5's "The pin's unscoped round"). **Remainders, for a comment on each
+owner at the ticket pass** (each fact from this record or the walk file; the handoff words them plainly): VM-218 (W-A4,
+W-D1, W-D2; Book Details' detail lines beside their labels — round 3's noted item; Create Book's ✓ in a fixed 14 pt
+frame) · VM-93 (the filter row kept as words, P-47-10; P-47-7's Terminal-320 known issue, whose two strings name
+VM-93; W-A11's Terminal-AX5 "bookless" shrink, which the known issue should also name; the full 44 × 44 width of the
+filter doors) · VM-90 (the sort glyph's full 44) · VM-89 (W-A12, no date on a Library row) · VM-188 and VM-195 (T51–T54;
+W-A13, the ⑂ mark 7 pt tall) · VM-152 (the overlays' fixed frames past xxxLarge; T63; the sheets' grabber and detents;
+the overlays' grounds; W-B5, the scrim that lightens the note in dark) · VM-14 (T65; the walk's re-seed measured the
+draft field and its Add at y 784 under a keyboard whose top is at y 583 — evidence to move its label from Suspected
+to Confirmed) · VM-148 (the masthead: P-47-12,
+P-47-29, the chips' capsules and one row, T44–T48, the cut title; Write's top edge, P-47-20) · VM-122 (a book's
+contents' and Read's top edges, P-47-20; the system toolbar's "Details · Read" in the system's label colour — round 3's
+noted item) · VM-100 and VM-99 (the Trash's and Archived's top edges, P-47-20; T97's separation) · VM-110 (Protection's
+top edge, P-47-20; its words) · VM-147 (the Versions screen's top edge, P-47-20; W-C8's casing there) · VM-137 (the
+editor body's floor in Terminal at the smallest setting; the paragraph scale taken at launch; the stale comment above
+the one changed line of `MobileEditorTextView.applyVoiceChrome`; the markdown marker's ink; the text inset, already 20
+pt visible; the process-global look the suites share across awaits, #195 MINOR 3's residual; the keyboard bar's 14 pt
+chrome and its own ground) · VM-73 (T11; the bar above the keyboard while the box is focused) · VM-138 and VM-139 (the
+keyboard bar's shape and glyph sizes; T56, her ruled exception) · VM-212 and VM-211 (the "shelf" words above) · VM-74
+(T10, the box at rest) · VM-149 and VM-153 (the sheets' previews on the room; T87) · VM-41 (T71) · VM-86 / VM-101
+(T103). **VM-112: nothing now** — its one item ("Pin to Shelf Top") left the phone with VM-83. **VM-61: nothing** (Done;
+T50's Undo moved onto VM-55's one line at batch 6).
+
+**Corrections to earlier sections (read these over them; those sections are the night's record and stay as written):**
+- §6 "Batch 6 — results", meeting 3: "Pin to Shelf Top" / "Unpin from Shelf Top", left for VM-112 — gone since batch
+  7's merge of main (VM-83 retired the Pin door); and `OpsRefusalTable.swift`'s dated comment, recorded there as
+  left, was made true at `e9e865435` (comment only), a commit no other section records.
+- §5's closing paragraph ("For the orchestrator to ticket at closeout (batch 5): a palette row…") — filed as VM-247.
+- The orchestrator's handoff names "the doubled divider in the note's ⋯ sheet: VM-61 / VM-148" — it was fixed by W-B4
+  (`fb649d6a8`); nothing is re-owned.
+- §1's "CLAUDE.md's standing cap of three is unchanged for other runs": VM-64's branch carries her ruling that the
+  standing cap is five (`742a39af0`); once VM-64 merges, that clause is history.
+- §6's opening paragraph still names only the midway and round-1 ladder files and lists the walk, the canon deltas
+  and the tickets as PENDING: the ladder is four files (`…-midway`, `…-round1`, `…-round2`, `…-round3`), the walk is
+  `notes/plans/vm-47-walk.md`, and this block carries the rest.
+- Row 6.9 counts eight known issues on the phone ("the four standing ones"); main's VM-3 unwrapped the tutorial pair,
+  so the merged tree expects fewer (batch 7's "The stage window" says which).
