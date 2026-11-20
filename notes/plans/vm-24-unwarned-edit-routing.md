@@ -604,8 +604,21 @@ lands, its red build is remade by the revert protocol and this line says so firs
 | The pin (`MobileTypedTextFaceTests`, readings (a)–(e), base API only) | DONE (`b437305db`) — compiles; red/green PENDING the stage window |
 | Pin build `DerivedData/vm24-b-pin` (`build-for-testing`) | DONE at the tree of `b437305db` (no production file differs from `d63c1e2cd`) — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-b-pin-bft.log`, no warning in the new file, the test binary carries the suite |
 | Half 1's closeout in §12 (expected result per reading, by expectation line) + the READY report | DONE (the commit after `b437305db`) |
-| The stage window (the pin alone; the orchestrator's) | PENDING — the orchestrator's, from these products |
-| Half 2 (D-243-1, the fix and its pins) | NOT STARTED — waits on the orchestrator's word after the window |
+| The stage window (the pin alone; the orchestrator's) | DONE by the orchestrator 05:08–05:10 — red as predicted (§12, "Batch B, half 1 — the orchestrator's stage results…"); the architect's ruling: half 2 proceeds, D-243-1 unchanged, plus reading (f) and the reset's range precision |
+
+**HALF 2 (started ~05:20 on the orchestrator's word; the tip at its start `ceca0af3b`).** Revert state: **NO REVERT IS
+IN FLIGHT and none is needed** — reading (f) lands in the pin file FIRST, in its own commit, with no production line;
+`DerivedData/vm24-b-red` is built from the tree at that commit (production files byte-identical to `d63c1e2cd`'s).
+`vm24-b-pin` stays frozen as half 1's product. The fix lands only after that build has succeeded.
+
+| Half 2 piece | State |
+|---|---|
+| Reading (f), the open tail, added to `MobileTypedTextFaceTests` (base API only) | DONE (the commit naming this line) — compile PENDING the red build; red/green PENDING the window |
+| Red build `DerivedData/vm24-b-red` (the pin with (f), no fix) | IN-PROGRESS |
+| The fix (D-243-1): the changed characters' face reset to the base before the line's restyle, every routed arm, equality-gated | NOT STARTED — the range: the kept value (`changedCharacters`), else a bound arming's `(location, replacementLength)`, else none |
+| The gate's pins (plain prose typed in plain prose writes nothing; the reset's own pass count) | NOT STARTED |
+| Fix build `DerivedData/vm24-b`; the Mac — no Mac-compiled file is to change, so batch A's `vm24-a-mac` serves | NOT STARTED |
+| Half 2's closeout in §12 + the READY report | NOT STARTED |
 
 ## 12. Batch closeouts, findings and dispositions
 

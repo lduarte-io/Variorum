@@ -22,7 +22,8 @@
 //    4. nothing clears it, and every next character inherits from the one
 //       before it, through the Return, into the next paragraph, until a write
 //       with the base attributes lands there (a re-open is one).
-//  Each test is one of the batch's readings (a)–(e); every reading PRINTS what
+//  Each test is one of the batch's readings (a)–(e), plus the architect's
+//  added (f), the open tail (half 1's ruling); every reading PRINTS what
 //  it found (`VM243|…` lines: offsets, the fixture's own characters, the ink
 //  and the font of each run by name), so a result that differs from §4.4's
 //  prediction can still be read from the log.
@@ -33,9 +34,10 @@
 //  turn between keystrokes as her keys arrive. Every edit here is ARMED, so
 //  it binds however far iOS widens its report: the routing cannot decide the
 //  outcome, and nothing here depends on what an earlier suite left behind.
-//  The fixture types inside block 0 of a two-block note (`"After."` stands
-//  after it), so no open tail, no crystallization and no programmatic
-//  normalizing write ever touches the typed text.
+//  Readings (a)–(e) type inside block 0 of a two-block note (`"After."`
+//  stands after it), so no open tail, no crystallization and no programmatic
+//  normalizing write ever touches the typed text; (f) types at the note's
+//  very end, through the open tail and its crystallization, on purpose.
 //
 //  STUDY VOICE, where the marker's ink and the prose ink differ (a premise
 //  each test asserts). Colours are compared RESOLVED under one fixed light
@@ -478,6 +480,69 @@ struct MobileTypedTextFaceTests {
             #expect(face.isBaseFont(words),
                     "(d) OUTCOME: “word” wears the base font, not the heading's — found \(face.runs(words))")
         }
+    }
+
+    /// **(f) The open tail** (the architect's added reading, 2026-11-20 —
+    /// "every routed arm"). The dash line and the paragraph after it typed at
+    /// the note's VERY END, where she mostly types: the Return after
+    /// `"Intro."` opens the tail (the `.openTail` arm), `- one`, the list's
+    /// continuation and its exit, and `two` are tail edits (the `.tail` arm),
+    /// and the completed dash line crystallizes into a block on the way. Read
+    /// after the mint has settled and before any re-open; the words must be
+    /// in full ink.
+    ///
+    /// EXPECTED ON THE TREE BEFORE THE FIX: "one" and "two" in the marker's
+    /// ink, as in (a) and (b) — unless the tail's own writes (a normalizing
+    /// replace, a re-render) already lay the base back, in which case this
+    /// reading is green on both trees and is recorded so, never forced red.
+    @Test func aDashLineTypedAtTheNotesEndAndTheParagraphAfterItAreInFullInk() async throws {
+        try await withDesyncsRecorded { try await withEditorWorld { session, db in
+            MobileEditorStyle.voice = .study
+            defer { MobileEditorStyle.voice = .terminal }
+            let postID = try await makePost(session, blocks: ["Intro."])
+            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+            let window = try host(surface)
+            defer { dismiss(window, surface) }
+            let view = surface.textView
+            let face = FaceReading(view.textStorage)
+            try #require(
+                !face.drawSame(MobileEditorStyle.face.ink, MobileEditorStyle.markdownPalette.marker),
+                "(f) PREMISE: in Study the marker's ink differs from the prose ink")
+            try #require(view.textStorage.string == "Intro.", "(f) PREMISE: the fixture")
+            try #require(model.index.tailLength == nil, "(f) PREMISE: no tail is open yet")
+
+            view.selectedRange = NSRange(location: 6, length: 0)  // the note's very end
+            await betweenKeystrokes()
+            await typeKeys(view, "\n", reading: "(f)")
+            #expect(model.index.tailLength == 0,
+                    "(f) PREMISE: the Return at the note's end opened the tail")
+            await typeKeys(view, "- one\n\ntwo", reading: "(f)")
+            await model.awaitMintSettle()
+            await betweenKeystrokes()
+
+            #expect(view.textStorage.string == "Intro.\n- one\ntwo",
+                    "(f) PREMISE: the page holds what was typed")
+            #expect(model.index.tailLength == 3,
+                    "(f) PREMISE: the dash line crystallized and “two” stands in the open tail")
+            #expect(model.desyncRecoveryCount == 0 && model.identityAuditFailures == 0,
+                    "(f) PREMISE: every key routed and the identity audit stayed quiet")
+            await model.autosave.flushNow()
+            #expect(try await storedBlockTexts(db, postID: postID) == ["Intro.", "- one"],
+                    "(f) PREMISE: the store holds the dash line as its own block")
+
+            let marker = NSRange(location: 7, length: 2)   // "- "
+            let one = NSRange(location: 9, length: 3)
+            let two = NSRange(location: 13, length: 3)
+            face.report("(f)", "the dash line and the open tail after it", NSRange(location: 7, length: 9))
+            #expect(face.isMarkerInk(marker) && face.isFaced(marker),
+                    "(f) PREMISE: the dash is the bullet's marker — the marker's ink, faced — found \(face.runs(marker))")
+            #expect(face.isFullInk(one),
+                    "(f) OUTCOME: “one”, typed in the open tail, is in full ink — found \(face.runs(one))")
+            #expect(face.isFullInk(two),
+                    "(f) OUTCOME: “two”, typed in the open tail after the dash line, is in full ink — found \(face.runs(two))")
+            #expect(face.isBaseFont(one) && face.isBaseFont(two),
+                    "(f) OUTCOME: “one” and “two” wear the base font — found \(face.runs(one)) / \(face.runs(two))")
+        } }
     }
 
     /// **(e) The note re-opened.** What (a) and (b) typed, flushed, the editor
