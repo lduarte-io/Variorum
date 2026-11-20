@@ -257,3 +257,151 @@ coordinator hooks twice (`init`'s `onError` goes through `report(OpsRefusalCopy.
 with three stale texts. Findings 3–5 are new. No finding touches `Sources/VariorumCore/Sync/`; none is marked
 FINDER-FIXES — finding 1's fix and pin are specified above for the implementer. No new BLOCKER or MAJOR: by the
 ladder's rule this round earns no round 4, so finding 1's fix is the orchestrator's line-by-line check.)*
+
+## Implementer responses (round 3 fix pass)
+
+*The round-3 fix pass's implementer (opus, the same session that built round 2's part B), after reading this file
+whole, `MobileLibraryViewModel.swift` whole, the view's row `onAppear`, `MobileLibraryPagingRulesTests.swift` whole,
+§7 batch 5's "The shape chosen" and the hidden-Library rules, Core's `TimingStats.swift`, `TimingReport.swift`,
+`TimingRecorder.swift`'s `restore`/`absorb`/`merged` and `TimingRecorderTests.swift`, and — read only —
+`AppTiming.swift`'s two named passages, `MobileStructural.divide`'s guard order and `MobileEditorViewModel`'s
+`structuralFlightChanged` and its two `autosave.observe` sites. Written and pushed before any code. Every finding is
+AGREED; the arms that wait for your final call are named in each entry.*
+
+### 1 · [MINOR] a fully listed listing comes back one row short after a delete and the line's Undo — AGREE; build shape (i); applied this pass with three pins
+
+**My trace, in the pin world (`listingLimit: 4`, held on screen, 6 notes, the edited sort):** the hold's first
+delivery lands 4 and a cursor; `loadMore` appends 2 → 6, `next == nil`, `allHasMore == false`. The delete of `all[5]`
+(the oldest) leaves the held first page byte-identical (no delivery); `reaskAfterRowAct` (6 > 4) → `followFirstPage` →
+`reread` at `max(4, 6) = 6` over 5 live notes → 5 rows, `next == nil` (`catalogNotesPage` probes `limit + 1`, so an
+exact-depth read of the whole store carries no cursor). The line's Undo → `restoreContainer` (no sort key stamped) → the
+first page unchanged again → only the signal → `reaskAfterRowAct` (5 > 4) → `reread` at `max(4, 5) = 5` over 6 →
+the first 5 and a cursor; `place` finds `all` unchanged (no redraw), sets `next`, flips `allHasMore` true; `land`'s
+`askForMore` finds `wantsMore == false` (raised only by `rowAppeared` while `next != nil` — nil when the tail came on
+screen) and the follow still set. Nothing asks again; the restored (oldest) note is not listed. Your shapes (b) and (c)
+are the same model state with the restored row inside the listing and its LAST row dropped; they differ only in
+whether a view's `onAppear` fires for a row near the end — the model is identical. And the arrival case (a note at the
+top of a fully listed deep listing, no Undo): the held page changes → the follow → `reread` at depth N over N + 1 → the
+oldest drops, the same stuck cursor. Confirmed in every shape you named.
+
+**Shape (i), checked against every caller of `land`** (`land` has exactly three: `prime`, `holdFirstPage`'s direct arm,
+`reread`; `loadMore` APPENDS through `append`, never `land`):
+- `prime` lands only when `paging.question != question` — always a NEW question, whose existing first branch clears
+  `wantsMore`; (i)'s branch is `else`, so it never runs there. The same for every new question elsewhere: a first
+  landing, a sort change, a wing change.
+- `holdFirstPage`'s direct arm: a new question (as above), or a listing of at most one page (`rows ≤ limit`). There (i)
+  runs only when that one-page listing was complete and the new first page carries a cursor — the store crossed a
+  page (a note at the top; or the return after notes arrived while hidden). It reads ONE page after the cursor —
+  what the store's growth pushed off the end. Today that row comes back only if the new row's `onAppear` finds it in
+  the 30-row tail.
+- `reread` (the follow's re-ask; the return's re-ask of a deeper listing; a row act; a Put back): it lands INSIDE the
+  follow task, so `land`'s own `askForMore` is a no-op (`follow != nil`); the follow's existing exit (`follow = nil`,
+  then `askForMore`) starts the one `loadMore`. `followAgain` re-reads land with `next` already set, so they never
+  raise again; the raised `wantsMore` simply waits for the exit.
+- A filter change: each listing has its own `Paging`; a return to a filter whose listing was complete for the same
+  question re-lands through the two arms above and stays complete.
+- `loadMore` itself: `append` clears `wantsMore`; a superseded page asks again (the existing rule, once per landing
+  that superseded it).
+
+**Why it cannot loop or over-read (P1):** the raise fires only on the one transition "the rows were complete for this
+question, and this landing carries a cursor"; the same landing sets `next`, so no later landing re-raises until a page
+has appended AND the listing is complete again. Each raise costs at most one keyset page after the cursor (∝ the page);
+a store that grew by more than a page between two landings (a large sync) ends with ONE page appended, a cursor and
+`wantsMore` false — the rest load as she scrolls, the ordinary road, never a chase of the store. A listing that was not
+complete is untouched (its `next` was already set): round 2's four pins at 8 of 12 are the guards for that (they expect
+exactly the listed depth back, and would read 12 if (i) over-read).
+
+**Why (i) over (ii):** (ii) heals only the Put back's road (not the arrival, not the return after a hidden arrival, not
+a ★ or delete whose re-ask meets a store that grew meanwhile), and reads one row more on every Put back. (i) is one
+condition in `land`, and every road through it heals.
+
+**One residual of (i), said rather than built:** in All, between the landing that breaks completeness and the one page
+appending (one keyset read), `allHasMore` reads true, so books older than the last listed note are withheld for that
+read and then return — a one-read blink at the listing's end, where today they stay withheld until a scroll. Holding
+`allHasMore` false over the chase would draw books the union cannot yet place (P-68-4's own rule), so I left `place`
+alone.
+
+**What lands (Part of VM-68):** in `land`, the existing `if state.question != question { state.wantsMore = false }`
+gains `else if state.next == nil, page.next != nil { state.wantsMore = true }`, with its comment. No other line moves.
+**Pins** (`MobileLibraryPagingRulesTests`, hosted, model level; the expected red is on the pre-fix code — round 2's
+tree with this one hunk reversed):
+- `aPutBackOfTheLastRowOfAFullyListedListingReturnsIt` — your pin as specified (6 notes, limit 4, held, listed to the
+  end; delete `all[5]`; the line's own Undo read off the line; settle until 5; Undo; expect the store's whole 6, no note
+  twice, `!allHasMore`). RED on old with 3 issues: "the note Put back is listed again", "the store's whole listing",
+  `!allHasMore`.
+- `aPutBackOfARowAboveTheEndOfAFullyListedListingKeepsItsLastRow` — the arm for shapes (b) and (c), at the model level
+  (12 notes, three pages, listed to the end; delete `all[6]`; the line's Undo). RED on old with 2 issues (the store's
+  whole 12 — the last row dropped; `!allHasMore`); the restored row itself IS listed on both trees. Its doc says why a
+  view-level arm for the 30-row margin is not reached at this size: the two shapes differ only by a view's
+  `onAppear`, which a model world has none of.
+- `aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow` — the arrival case, no Undo (6 notes listed to the end;
+  a seventh minted). RED on old with 2 issues (the store's whole 7; `!allHasMore`).
+The hosted run for them is in the record's §7 ▸ "Ladder round 3 — fix pass"; the red-on-old build is made after the
+VM-78 merge-in, with the gate tree.
+
+### 2 · [MINOR] the gate is still owed; three texts are stale — AGREE
+
+(a) and (b) are the orchestrator's (the merge gate on the final tree, the FOR A LATER READER at closeout). Mine, this
+pass: (c) §5's two summary rows "Ladder r1 · fix pass" and "Ladder r2 · fix pass" flipped to what is true (DONE, each
+with the stage window that settled it), and the round-3 row added; (d) the handoff's "What happened" and "Reviews" in
+plain words — a midpoint review and three rounds; round 1 and round 3 found no blocker and no major; round 2 found one
+major (a note deleted from a Library row past the first page stayed on screen, and putting it back did not bring it
+back), fixed and then seen failing on the old build and passing on the new — with `PENDING(merge gate)` where the
+gate's results go. No pin.
+
+### 3 · [NIT] a door that refuses before doing anything still lands a flight — AGREE by reading; no code (your disposition)
+
+Read: every door raises its latch before its guards (`MobileStructural.divide`: `structuralInFlight = true` then the
+seal and tail refusals return through the `defer`), and `structuralFlightChanged` lands the flight through
+`flightLanded(surfaceSettled:)`, which reads unsettled while `pendingProjection != nil` — so a refusing press over a
+deferred projection goes to `.settling`, and with a buffer that cannot go clean every re-read defers behind it
+(`EditorProjectionPolicy` — busy outranks every apply) and the fence never drops until the note is reopened. VM-226's
+body is the orchestrator's (Linear). Mine: the handoff's P-2-4 bullet and the drafts' bundle say, in plain words, that
+the next update from her library ends a stuck fence — except when a save is stuck and cannot land, when typing stays
+refused in that note until it is closed and opened again; and the same line goes under VM-226 in "What was found and not
+fixed". `MobileEditorViewModel.swift` and `MobileStructural.swift` untouched.
+
+### 4 · [NIT] two more places the readout can mislead her sitting — AGREE; caveats, no code
+
+Both as you traced them (read: `processStartInstant` accepts a start under a minute old whole; `noteArrived` opens the
+`.keepFirst` 10 s window that only a first delivery closes). Caveats in the handoff's readout steps: (a) a Launch row can
+include time the system spent starting the app before she touched it, so several launches and the median and the
+smallest, never one; (b) "Note reads per open" can read 2 when a note is opened within about ten seconds of an open that
+was abandoned before it finished loading. **Why not code:** (b)'s cancel belongs where `loadLive` returns without a
+delivery — inside `MobileEditorViewModel.swift`, which this pass may not open; placing it elsewhere (the screen's task)
+would be a second, guessed owner of the window. (a)'s options either give up the pre-main time the row was built to
+include (batch 1's rule: no change to what a mark measures without saying so and re-taking the BEFORE) or read an
+undocumented variable untested on a device. Neither is a NIT's work; the caveats are honest and cost nothing.
+
+### 5 · [NIT] small things — AGREE (a) (b) (c); (d) declined, with the reason
+
+- **(a)** the clause "— ladder round 2, finding 1" removed from the drafts' SurfaceContracts line; the record pointer at
+  the line's end stays.
+- **(b) — applied with headless pins (VM-65).** Traced worse than "reachable at the readout": the decode itself traps.
+  A positive decoded `capacity` is taken as written, and the first `record` calls `ring.reserveCapacity(capacity)` —
+  a capacity near `Int.max` traps INSIDE `init(from:)`, which `absorb` runs at every launch on the timing file's queue,
+  so a damaged file would end every launch the same way. And `TimingReport.number` converts with `Int(_:)` (both
+  branches, `oneDecimal` too): a sample past `Int`'s range traps at the readout. The fix: the decode clamps a positive
+  capacity to `TimingStats.defaultCapacity` (the ring's own bound — the app's one recorder is built at the default; a
+  re-ring at `merged` takes the recorder's own capacity anyway); `number` bounds its value to ±10¹⁵ before converting
+  (a NaN, reachable only as ±∞'s median, reads 0). Pins in `TimingRecorderTests`: an EXIT TEST (Swift Testing's
+  `#expect(processExitsWith: .success)`, so the trap is asserted in a child process and the suite survives it) —
+  a damaged record decoded and reported, RED on today's code; and a plain value pin that a capacity of 100,000 decodes
+  as 64 keeping the newest samples (RED on old by value, no trap at that size). The Mac: both types are Core, compiled
+  by the Mac, called by nothing of the Mac's (the only caller in the app tree is the phone's readout and the inert
+  `AppTiming` recorder) — checked by grep, said in the record.
+  **One more, found while tracing, NOT applied — your call:** `TimingRecorder.merged` (the launch's `absorb`) ADDS a
+  decoded `count` and the decoded counters to the live ones (`stats.count + current.count`; `counters[key] += value`;
+  `restarts`/`abandoned`/`unmatchedEnds`), and a damaged count near `Int.max` overflows there — the same trap at
+  launch, by the same file. Arms: (A) saturating adds in `merged` (`addingReportingOverflow`, clamped to `Int.max`),
+  pin first (a damaged count absorbed under a live sample must not trap — red today); (B) the decode bounds `count` (an
+  arbitrary ceiling); (C) leave it, recorded. I recommend (A), in this pass's same commit class, if you rule it in.
+- **(c)** the record's two "empty in the steady state" (§7 batch 4, and batch 4's live-status row) and the drafts' §7
+  narrative say the SIGNED-IN steady state, and that in a library never signed in each index holds every row of its
+  table (one small index entry per row written). **Arm for your call:** the same phrase in the `v1_38` migration's
+  comment (`Persistence/Migrations.swift`) — a comment only, no DDL; I did not touch the migration file without your
+  word (the brief named the record and the draft). Recommend: yes, its own commit.
+- **(d) — DECLINED, recorded:** `MobileEditorViewModel.swift` stays untouched by the ladder's fix passes (the editor
+  seam; a cleanliness nit does not open it). Read for a correctness reason and found none: `reportOperationError(_:)`
+  is `report(OpsRefusalCopy.sentence(for: error, roads: .phone))`, the very call `init`'s hook makes, so the two
+  spellings are one road today.
