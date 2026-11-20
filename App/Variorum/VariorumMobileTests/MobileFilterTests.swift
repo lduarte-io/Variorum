@@ -670,10 +670,7 @@ struct MobileFilterTests {
             try await session.runner.run { ops in
                 _ = try ops.createReading(name: "Aster", kind: .book)
             }
-            let suite = "filters-shell-\(UUID().uuidString)"
-            let defaults = try #require(UserDefaults(suiteName: suite))
-            defer { defaults.removePersistentDomain(forName: suite) }
-            let router = MobileShellRouter(defaults: defaults)
+            let router = MobileShellRouter()
 
             try await withHostedSurface(
                 MobileShellView(session: session, services: nil, router: router)

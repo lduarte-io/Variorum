@@ -308,16 +308,7 @@ struct MobileMembershipSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Books"))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Books"), tokens: tokens) { dismiss() }
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     membershipSection
@@ -327,8 +318,8 @@ struct MobileMembershipSheet: View {
                         // (the L17 conditioning).
                         Text(tokens.chromeLabel(
                             "Editing here edits the note everywhere it appears."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
@@ -338,10 +329,8 @@ struct MobileMembershipSheet: View {
                             onOpenNote(copy)
                         } label: {
                             Text(tokens.chromeLabel(openCopyLabel))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.accent)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                     }
                 }
             }
@@ -361,37 +350,33 @@ struct MobileMembershipSheet: View {
         if model.books.isEmpty {
             Text(tokens.chromeLabel(
                 "This note is in no book yet — it lives in the Library's bookless filter."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             ForEach(model.books, id: \.id) { book in
                 HStack(spacing: 10) {
                     Text(tokens.chromeLabel(MobileMembershipModel.memberRowName(for: book)))
-                        .font(tokens.body)
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
                     if let mark = MobileMembershipModel.kindMark(for: book) {
                         Text(tokens.chromeLabel(mark))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                     Spacer()
                     if MobileMembershipModel.rowCarriesDiverge(book) {
                         Button(tokens.chromeLabel("diverge")) {
                             Task { await model.diverge(for: book) }
                         }
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     }
                     if MobileMembershipModel.rowCarriesRemove(book) {
                         Button(tokens.chromeLabel("remove")) {
                             Task { await model.remove(from: book) }
                         }
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     }
                 }
                 .padding(.vertical, 4)
@@ -404,8 +389,8 @@ struct MobileMembershipSheet: View {
         if !model.addableBooks.isEmpty || !model.addableSmartBooks.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel("Add to a book"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.sectionHeader, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.top, 6)
                 ForEach(model.addableBooks, id: \.id) { book in
                     addRow(MobileMembershipModel.addRowLabel(for: book)) {
@@ -431,13 +416,13 @@ struct MobileMembershipSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("+ \(label)"))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
                 Spacer()
             }
             .padding(.vertical, 4)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
     }

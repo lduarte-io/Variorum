@@ -539,27 +539,17 @@ struct MobileEditTraceView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tokens.path(["Settings", "edit-trace"]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                Spacer()
-                Button { dismiss() } label: {
-                    Text(tokens.chromeLabel("Done"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 12)
+            PhoneSheetHeader(
+                tokens.path(["Settings", "edit-trace"]), tokens: tokens,
+                titleInk: tokens.phone.muted
+            ) { dismiss() }
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.top, PhoneMetrics.Space.s8)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(headline)
-                        .font(.system(.footnote, design: .monospaced))
+                        .phoneType(.meta, tokens)
                         .foregroundStyle(tokens.ink)
                         .textSelection(.enabled)
 
@@ -568,15 +558,15 @@ struct MobileEditTraceView: View {
                     if snapshot.isEmpty {
                         Text(tokens.chromeLabel(
                             "Nothing recorded yet. Arm the trace, type in a note, then come back."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                     ForEach(snapshot.reversed(), id: \.seq) { event in
                         Text(MobileEditTrace.line(for: event))
-                            .font(.system(.caption2, design: .monospaced))
+                            .phoneType(.meta, tokens)
                             .foregroundStyle(
                                 event.flags.isDisjoint(with: MobileEditTrace.Flags.mismatch)
-                                    ? tokens.muted : tokens.accent)
+                                    ? tokens.phone.muted : tokens.accent)
                             .textSelection(.enabled)
                     }
                 }
@@ -592,19 +582,17 @@ struct MobileEditTraceView: View {
                     copied = true
                 } label: {
                     Text(tokens.chromeLabel(copied ? "Copied" : "Copy"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 .accessibilityLabel("Copy the edit trace")
                 Button {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel("Refresh"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 Spacer()
                 Button {
                     MobileEditTrace.clear()
@@ -612,10 +600,9 @@ struct MobileEditTraceView: View {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel("Clear"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .muted, role: .control, alignment: .leading))
                 .accessibilityLabel("Clear the edit trace")
             }
             .padding(.horizontal, 20)

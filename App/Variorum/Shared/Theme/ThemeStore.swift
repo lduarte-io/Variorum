@@ -1,12 +1,23 @@
 //
 //  ThemeStore.swift
-//  Variorum
+//  Variorum (Shared — the Mac and the phone)
 //
 //  Phase 13, B1 — the live theme: observes the synced appearance settings
 //  (Queries.themeSettings — a bounded fetch over the tiny setting table)
 //  and resolves VoiceTokens per color scheme. Setters go through the
 //  operations runner like every write. Views take the store from the
 //  environment and never hold literal colors.
+//
+//  VM-51 (the VM-47 run, batch 3 — QUESTIONS #199's deferred hoist): MOVED
+//  here from the Mac's `Theme/` so the phone wears the library's voice and
+//  palette through the same store (her LK-1/LK-2: voice and palette follow
+//  the synced library; light or dark stays each device's own). A move, not a
+//  rewrite: the observation, the resolver road and every setter are the
+//  Mac's, byte for byte. The two adoptions that are the Mac's alone — the
+//  editor typography (`EditorTypography`, Mac-only) and the receipt style
+//  (the status seam is both platforms' since VM-61, but only the Mac's
+//  placement reads `receipt_style` — the phone never does, P-55-1) — stay
+//  where they were, behind the platform check.
 //
 
 import Foundation
@@ -22,8 +33,20 @@ final class ThemeStore {
     private(set) var settings = Queries.ThemeSettings()
     private(set) var lastError: String?
 
-    init(session: AppSession) {
+    /// **VM-51 — where a landed value goes on a host with no Mac adoptions**
+    /// (the phone). The Mac adopts its typography and receipt style inline
+    /// below; the phone hands the landed settings to its UIKit editor face and
+    /// its open editors through this, by the same rule (a settings value is
+    /// adopted where it LANDS, never noticed later by a view). Nil — the Mac,
+    /// and every host that sets nothing — changes nothing.
+    @ObservationIgnored var onLanded: (@MainActor (Queries.ThemeSettings) -> Void)?
+
+    /// `placeholder` is what the store holds before its first emission. The
+    /// Mac's hosts take the default (`Queries.ThemeSettings()`, R1's leading
+    /// voice); the phone hands its own (VM-51, PROVISIONAL P-47-15).
+    init(session: AppSession, placeholder: Queries.ThemeSettings = Queries.ThemeSettings()) {
         self.session = session
+        self.settings = placeholder
     }
 
     /// Runs for the app's lifetime; the setting table is tiny, so the held
@@ -47,6 +70,7 @@ final class ThemeStore {
                 try Queries.themeSettings(db)
             }) {
                 settings = value
+                #if os(macOS)
                 EditorTypography.adopt(value)
                 // 18i (her R-Q5): the receipt style is adopted HERE too,
                 // for the same reason and by the same rule — a settings
@@ -56,6 +80,8 @@ final class ThemeStore {
                 // compile-time value is already her default, so the gap
                 // before the first emission behaves as the store says.
                 session.status.receiptStyle = value.receiptStyle
+                #endif
+                onLanded?(value)
             }
         } catch is CancellationError {
         } catch {

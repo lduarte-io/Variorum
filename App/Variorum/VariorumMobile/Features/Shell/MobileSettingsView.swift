@@ -4,8 +4,9 @@
 //
 //  Mobile Stage 3, batch 1 — the voice switch's real home (scope item 6:
 //  P11's placement lands; the S1 masthead door RETIRED — recorded). A
-//  minimal voiced sheet off the shelf: the two voices (LK2 — the
-//  phone-local preference, never synced), the sync status row (the Phase
+//  minimal voiced sheet off the shelf: the two voices (since VM-51 the
+//  LIBRARY's synced voice, R-47-2 — LK2's phone-local preference retired),
+//  the sync status row (the Phase
 //  8 shell that carries over), and the DEBUG spike door (the Stage 0
 //  KEPT deviation's manual entry).
 //
@@ -16,6 +17,12 @@
 //  (PROVISIONAL PB1-1). The doors are thin wiring onto the tested
 //  seeder seams (`MobileTutorialSeeder.findOrSeed`/`restore`) — the
 //  walk suites drive those seams headlessly.
+//
+//  VM-53 + VM-27 (the VM-47 run, batch 5): ONE scrolling, grouped list on the
+//  phone's shared controls (the body's doc says how), opened from the roots' ⋯
+//  menu and a note's ⋯ sheet; this phone's light · dark · follow-the-system
+//  choice (LK-2 — a local preference) beside the library's voice; and ONE
+//  Protection door (VM-27 — the sync row is handed none of its own here).
 //
 
 import SwiftUI
@@ -30,8 +37,8 @@ struct MobileSettingsView: View {
     /// like `services`: the sheet says nothing about what it does not have.
     var bootstrap: AppBootstrap? = nil
     /// VM-8 unit 1 (PROVISIONAL P-VM8-2): the shell's door to the phone's Protection screen — dismisses Settings and
-    /// pushes the screen (the settings-sheet grammar, the pocket guide's precedent). nil ⇒ neither the row nor the sync
-    /// row's *Protection…* door renders (P-2).
+    /// pushes the screen (the settings-sheet grammar, the pocket guide's precedent). nil ⇒ the Protection row does not
+    /// render (P-2). Since VM-27 it is the sheet's ONE Protection door — the sync row is never handed one here.
     var onOpenProtection: (() -> Void)? = nil
     #if DEBUG
     /// FIX-B4 (Stage B ladder round 1, NIT 2 — fire-and-DO): the shell's
@@ -75,8 +82,9 @@ struct MobileSettingsView: View {
     @State private var perfNote: String?
     #endif
 
+    /// VM-51: the library's voice and palette, this device's appearance.
     private var tokens: VoiceTokens {
-        .resolve(voice: router.voice, dark: scheme == .dark)
+        router.tokens(dark: scheme == .dark)
     }
 
     /// VM-8 unit 1: the Protection screen's door where it can act — the shell gave the road, the app's services exist (the
@@ -88,312 +96,99 @@ struct MobileSettingsView: View {
         return onOpenProtection
     }
 
+    // MARK: - The list's words (VM-53)
+    //
+    // Every word below is either on screen today (the voice rows' Terminal /
+    // Study and their section's "Voice"; Tags; Diagnostics; the doors' own
+    // words), the Mac's own for the same row (the appearance choice — the Mac's
+    // Settings ▸ General: "Appearance", "Follow system", "Light", "Dark",
+    // `AppearanceChoiceRow`), or — where a row had none — the wording list's
+    // draft (`notes/plans/vm-44/design/wording-list-2.md`, lock-and-protection
+    // S1: the group names "Library", "Look", "Help"), listed for her wording
+    // pass in the run record §5.
+
+    static let libraryGroupTitle = "Library"
+    static let lookGroupTitle = "Look"
+    static let tagsGroupTitle = "Tags"
+    static let helpGroupTitle = "Help"
+    static let diagnosticsGroupTitle = "Diagnostics"
+    static let voiceLabel = "Voice"
+    static let appearanceLabel = "Appearance"
+
+    /// The voice choice's two words — the two rows' own, kept (R-47-2).
+    static func voiceWord(_ voice: ThemeVoice) -> String {
+        switch voice {
+        case .terminal: "Terminal"
+        case .study: "Study"
+        }
+    }
+
+    /// The appearance choice's three words — the Mac's own
+    /// (`AppearanceChoiceRow`; a phone pin holds them equal).
+    static func appearanceWord(_ choice: AppearanceChoice) -> String {
+        switch choice {
+        case .system: "Follow system"
+        case .light: "Light"
+        case .dark: "Dark"
+        }
+    }
+
+    // MARK: - The list (VM-53)
+
+    /// **ONE scrolling, grouped list** (VM-53 — the ticket: "Settings is a
+    /// fixed stack that cannot scroll, nearly every row is a 14 pt tall word").
+    /// The sheet header stays put; under it everything scrolls, so the list
+    /// grows with the text size and nothing clips. Groups under their section
+    /// names on the room, rows on the paper with hairlines from the gutter (the
+    /// lock mockup's settings rows, sheet §C/§E); every door is a whole-row
+    /// target at least the menu row's 44 (`PhoneMenuRow`, the gutter inside
+    /// it), every choice the system's segmented control (`PhoneSegmentedChoice`).
+    /// Today's rows only, grouped: rows whose features do not exist on the phone
+    /// yet (the palette, Lock now, the writing and document settings, crash
+    /// reports, the tour) are other tickets'.
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tokens.path(["Settings"]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                Spacer()
-                Button {
-                    dismiss()
-                } label: {
-                    Text(tokens.chromeLabel("Done"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
+            PhoneSheetHeader(
+                tokens.path(["Settings"]), tokens: tokens, titleInk: tokens.phone.muted
+            ) { dismiss() }
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.top, PhoneMetrics.Space.s8)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    libraryGroup
+                    lookGroup
+                    // Tag management (parity C3 — her cross-fully ruling; R52's
+                    // Settings home mirrored: the manager is where you look at
+                    // tags).
+                    MobileSettingsGroup(Self.tagsGroupTitle, tokens: tokens) {
+                        PhoneMenuRow(
+                            tokens.chromeLabel(MobileTagManagerSheet.doorTitle),
+                            tokens: tokens, inset: PhoneMetrics.gutter
+                        ) { tagsPresented = true }
+                        .accessibilityLabel(MobileTagManagerSheet.doorTitle)
+                    }
+                    // R13p-11's attribution obligation reaches the phone too — it
+                    // ships the same SQLCipher, so it owes the same notice. Same
+                    // words as the Mac's pane (`AcknowledgmentsCopy`, Shared).
+                    MobileSettingsGroup(Self.helpGroupTitle, tokens: tokens) {
+                        PhoneMenuRow(
+                            tokens.chromeLabel("Acknowledgments"),
+                            tokens: tokens, inset: PhoneMetrics.gutter
+                        ) { acknowledgmentsPresented = true }
+                        .accessibilityLabel("Acknowledgments")
+                    }
+                    diagnosticsGroup
+                    #if DEBUG
+                    debugGroups
+                    #endif
                 }
-                .buttonStyle(.plain)
+                .padding(.bottom, PhoneMetrics.Space.s48)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 14)
-
-            Text(tokens.chromeLabel("Voice"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 4)
-            voiceRow(.terminal, "Terminal")
-            voiceRow(.study, "Study")
-
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 14)
-
-            Text(tokens.chromeLabel("Sync"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .padding(.horizontal, 20)
-            if let services {
-                // D1: the ONE injection site of the shared pages' phone
-                // style — the row restyles to the live voice, and the
-                // Account sheet it presents inherits the style through
-                // the environment (sheets inherit their presenter's
-                // environment — the SnapshotPrivacy precedent). The Mac
-                // never sets this key (its accessor compiles to nil).
-                // Horizontal 20 aligns the row with the section headers
-                // (the styled row carries no horizontal padding of its
-                // own — the old 14+6 composition is the nil arm's).
-                SyncStatusRow(services: services)
-                    .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
-                    // VM-8 unit 1 (VX-486's door, the phone's home): the keys-locked and not-on-yet rows' *Protection…*
-                    // door opens the phone's Protection screen — only where that screen can act (P-2).
-                    .environment(\.protectionPaneDoor, protectionDoor.map { open in ProtectionPaneDoor { open() } })
-                    .padding(.horizontal, 20)
-            } else {
-                Text(tokens.chromeLabel("Starting…"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .padding(.horizontal, 20)
-            }
-
-            // VM-8 unit 1 (PROVISIONAL P-VM8-2): Settings ▸ Protection — the phone's screen over the shared protection
-            // brains (unit 1: the Sync/account section). The row's name is the sync row's own door name (P-VX486-1).
-            if let protectionDoor {
-                Button {
-                    protectionDoor()
-                } label: {
-                    Text(tokens.chromeLabel(SyncRowFace.openProtectionLabel))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-                .accessibilityLabel(SyncRowFace.openProtectionLabel)
-            }
-
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 14)
-
-            // (13p Batch 4's PROTECTION door — the phone's posture screen over today's protection brain — was today's
-            // road and left with it at VX-329 U1; VM-8 unit 1's Protection row stands above, in the Sync section.)
-            // R13p-11's attribution obligation reaches the phone too — it
-            // ships the same SQLCipher, so it owes the same notice. Same
-            // words as the Mac's pane (`AcknowledgmentsCopy`, Shared).
-            Button {
-                acknowledgmentsPresented = true
-            } label: {
-                Text(tokens.chromeLabel("Acknowledgments"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            .accessibilityLabel("Acknowledgments")
-
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 14)
-
-            // Tag management (parity C3 — her cross-fully ruling; R52's
-            // Settings home mirrored: the manager is where you look at
-            // tags).
-            Text(tokens.chromeLabel("Tags"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 4)
-            Button {
-                tagsPresented = true
-            } label: {
-                Text(tokens.chromeLabel(MobileTagManagerSheet.doorTitle))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            .accessibilityLabel("Manage Tags")
-
-            // ── E1, THE SETTLING EXPERIMENT (temporary; mobile round 2) ──
-            //
-            // ⚠️ THE WALK SCRIPT LIVES HERE, because the arming point is
-            // where someone will look for it.
-            //
-            // WHAT IT ANSWERS. Her delete-at-the-end crash is fixed, but the
-            // trace could not prove WHERE the stale verdict came from. The
-            // leading suspect is that iOS asks the editor's gate about one
-            // small edit and then performs a WIDER one in the same
-            // transaction. This records both halves so the answer stops
-            // being a guess. **It must run on HER device (iOS 26.6)** — the
-            // newest simulator here is 26.2, and a non-reproduction on an
-            // older runtime is a runtime gap, not an answer.
-            //
-            // HOW SHE RUNS IT.
-            //  1. Turn "Record edit trace" ON here. Tap Done.
-            //  2. Open any note with several paragraphs. Type a couple of
-            //     words first, so the last paragraph is freshly typed.
-            //  3. Do these five things, in order, with ordinary typing in
-            //     between:
-            //       a. select from the MIDDLE of a paragraph all the way to
-            //          the very end of the note, and press ⌫;
-            //       b. select two whole paragraphs in the middle, press ⌫;
-            //       c. the same as (a), but end the selection ONE CHARACTER
-            //          short of the end;
-            //       d. type a word wrong on purpose and accept the
-            //          autocorrect suggestion;
-            //       e. dictate a sentence with the microphone key.
-            //  4. Come back here → "Edit trace…". Read the first six lines.
-            //  5. Tap Copy and paste the whole thing into a message.
-            //
-            // WHAT THE NUMBERS MEAN.
-            //  · **"SUSPECT SIGNATURE" above 0 → confirmed.** The event
-            //    list underneath names the exact edit, and its ⚠ words say
-            //    which way it disagreed.
-            //  · **"most gate calls before one edit" above 1 → confirmed**
-            //    on its own: iOS asked more than once for a single edit.
-            //  · "gate-less" above 0 is EXPECTED and is not a finding —
-            //    that is autocorrect and dictation, which never ask.
-            //  · "of which overrun N of M testable" is the sub-signal the
-            //    round's record named by hand; M is smaller than the edit
-            //    count on purpose (iOS reports a wider range than it
-            //    changed for anything that INSERTS, so that sub-test is
-            //    only run on pure deletions).
-            //  · Everything at 0 after all five gestures → evidence AGAINST
-            //    the suspect on this iOS version, but not proof: it only
-            //    covers the gestures that were actually performed.
-            //
-            // Turning it back OFF makes it completely inert; leaving it on
-            // costs a few numbers per keystroke and nothing else.
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 14)
-            Text(tokens.chromeLabel("Diagnostics"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 4)
-            Button {
-                traceArmed.toggle()
-                MobileEditTrace.setArmed(traceArmed)
-            } label: {
-                Text(tokens.chromeLabel(
-                    traceArmed ? "Recording edit trace — tap to stop"
-                               : "Record edit trace"))
-                    .font(tokens.small)
-                    .foregroundStyle(traceArmed ? tokens.accent : tokens.muted)
-                    .lineLimit(2)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            .accessibilityLabel("Record edit trace")
-            .accessibilityValue(traceArmed ? "on" : "off")
-            Button {
-                tracePresented = true
-            } label: {
-                Text(tokens.chromeLabel("Edit trace…"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            .accessibilityLabel("Open the edit trace")
-            // VM-65 (PROVISIONAL P-65-1): the timing readout — her moments'
-            // numbers, before and after every speed fix. Release-live, like the
-            // edit trace beside it.
-            Button {
-                timingPresented = true
-            } label: {
-                Text(tokens.chromeLabel(MobileTimingCopy.door))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            .accessibilityLabel("Open the timing readout")
-
-            #if DEBUG
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 14)
-            Text(tokens.chromeLabel("Tutorial (dev store)"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 4)
-            Button {
-                Task { await openGuideDoor() }
-            } label: {
-                Text(tokens.chromeLabel("Open the pocket guide"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            Button {
-                Task { await restoreGuideDoor() }
-            } label: {
-                Text(tokens.chromeLabel("Restore the pocket guide…"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            if let tutorialNote {
-                Text(tokens.chromeLabel(tutorialNote))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 2)
-            }
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 14)
-            Text(tokens.chromeLabel("Performance (dev store)"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 4)
-            Button {
-                Task { await perfDoor() }
-            } label: {
-                Text(tokens.chromeLabel("Seed the 100k fixture"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-            if let perfNote {
-                Text(tokens.chromeLabel(perfNote))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 2)
-            }
-            Divider()
-                .overlay(tokens.line)
-                .padding(.vertical, 14)
-            // D2 look sweep: the spike door joins the one register
-            // (it rendered system-blue written case — the only chrome
-            // on this sheet outside the voice).
-            Button {
-                spikePresented = true
-            } label: {
-                Text(tokens.chromeLabel("TK2 Spike"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            // (The pre-13x batch 0 keychain probe row lived here — deleted
-            // at batch 2a with the real Apple-key item, row 12.)
-            #endif
-
             // (The Restore “Encryption Explained” row — pre-13x F2 —
             // REMOVED at 13s-b U1b, R-13s-37: "encryption explained not
             // present and not restorable". An existing store's copy is her
             // data and stays.)
-
-            Spacer()
         }
         .background(tokens.room.ignoresSafeArea())
         .sheet(isPresented: $tagsPresented) {
@@ -438,6 +233,221 @@ struct MobileSettingsView: View {
         }
         #endif
     }
+
+    /// **The library's group** — the sync row, then the ONE Protection door.
+    private var libraryGroup: some View {
+        MobileSettingsGroup(Self.libraryGroupTitle, tokens: tokens) {
+            if let services {
+                // D1: the ONE injection site of the shared pages' phone
+                // style — the row restyles to the live voice, and the
+                // Account sheet it presents inherits the style through
+                // the environment (sheets inherit their presenter's
+                // environment — the SnapshotPrivacy precedent). The Mac
+                // never sets this key (its accessor compiles to nil).
+                // The gutter aligns the row with the section names (the
+                // styled row carries no horizontal padding of its own —
+                // the old 14+6 composition is the nil arm's).
+                SyncStatusRow(services: services)
+                    .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
+                    // VM-27 (her report — "file the double protections as a bug"): the row gets NO Protection door
+                    // here. Its keys-locked and not-yet faces used to draw their own *Protection…* door directly above
+                    // the standing row below — one gate (`protectionDoor`) fed both, so the sheet said the word twice.
+                    // The standing row is the one door: it is on this sheet whenever the row's door could be, and in
+                    // every other state too. A doored paused state says its sentence alone (the face's P-2 arm).
+                    .environment(\.protectionPaneDoor, nil)
+                    .frame(
+                        maxWidth: .infinity, minHeight: PhoneMetrics.RowHeight.accessory,
+                        alignment: .leading)
+                    .padding(.horizontal, PhoneMetrics.gutter)
+                    .padding(.vertical, PhoneMetrics.Space.s4)
+            } else {
+                Text(tokens.chromeLabel("Starting…"))
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
+                    .frame(
+                        maxWidth: .infinity, minHeight: PhoneMetrics.RowHeight.menu,
+                        alignment: .leading)
+                    .padding(.horizontal, PhoneMetrics.gutter)
+            }
+            // VM-8 unit 1 (PROVISIONAL P-VM8-2): Settings ▸ Protection — the phone's screen over the shared protection
+            // brains (unit 1: the Sync/account section). The row's name is the sync row's own door name (P-VX486-1).
+            // Since VM-27 the sheet's ONE Protection door.
+            if let protectionDoor {
+                PhoneMenuRow(
+                    tokens.chromeLabel(SyncRowFace.openProtectionLabel),
+                    tokens: tokens, inset: PhoneMetrics.gutter
+                ) { protectionDoor() }
+                .accessibilityLabel(SyncRowFace.openProtectionLabel)
+            }
+        }
+    }
+
+    /// **The look** — the library's voice (R-47-2: the row writes the LIBRARY's
+    /// voice, the Mac Settings' own write, through the router's theme store; its
+    /// selection reads the voice as it landed, so a voice chosen on the Mac shows
+    /// here too) and THIS phone's light · dark · follow-the-system choice (VM-53;
+    /// her LK-1/LK-2 — light or dark is each device's own: a local preference,
+    /// `MobileAppearanceController`, never the synced `setting` table).
+    private var lookGroup: some View {
+        MobileSettingsGroup(Self.lookGroupTitle, tokens: tokens) {
+            choiceRow(Self.voiceLabel) {
+                PhoneSegmentedChoice(
+                    [ThemeVoice.terminal, .study], selection: router.voice, tokens: tokens,
+                    word: Self.voiceWord, select: { router.setVoice($0) })
+            }
+            choiceRow(Self.appearanceLabel) {
+                PhoneSegmentedChoice(
+                    AppearanceChoice.allCases, selection: router.appearance.choice, tokens: tokens,
+                    word: Self.appearanceWord, select: { router.appearance.set($0) })
+            }
+        }
+    }
+
+    /// A labelled choice: the label on its own line, the system control under
+    /// it across the row (three words do not share a line with a label at 402
+    /// pt in Terminal).
+    private func choiceRow<Choice: View>(
+        _ label: String, @ViewBuilder choice: () -> Choice
+    ) -> some View {
+        VStack(alignment: .leading, spacing: PhoneMetrics.Space.s8) {
+            Text(tokens.chromeLabel(label))
+                .phoneType(.control, tokens)
+                .foregroundStyle(tokens.ink)
+                .accessibilityLabel(label)
+            choice()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.vertical, PhoneMetrics.Space.s12)
+    }
+
+    // ── E1, THE SETTLING EXPERIMENT (temporary; mobile round 2) ──
+    //
+    // ⚠️ THE WALK SCRIPT LIVES HERE, because the arming point is
+    // where someone will look for it.
+    //
+    // WHAT IT ANSWERS. Her delete-at-the-end crash is fixed, but the
+    // trace could not prove WHERE the stale verdict came from. The
+    // leading suspect is that iOS asks the editor's gate about one
+    // small edit and then performs a WIDER one in the same
+    // transaction. This records both halves so the answer stops
+    // being a guess. **It must run on HER device (iOS 26.6)** — the
+    // newest simulator here is 26.2, and a non-reproduction on an
+    // older runtime is a runtime gap, not an answer.
+    //
+    // HOW SHE RUNS IT.
+    //  1. Turn "Record edit trace" ON here. Tap Done.
+    //  2. Open any note with several paragraphs. Type a couple of
+    //     words first, so the last paragraph is freshly typed.
+    //  3. Do these five things, in order, with ordinary typing in
+    //     between:
+    //       a. select from the MIDDLE of a paragraph all the way to
+    //          the very end of the note, and press ⌫;
+    //       b. select two whole paragraphs in the middle, press ⌫;
+    //       c. the same as (a), but end the selection ONE CHARACTER
+    //          short of the end;
+    //       d. type a word wrong on purpose and accept the
+    //          autocorrect suggestion;
+    //       e. dictate a sentence with the microphone key.
+    //  4. Come back here → "Edit trace…". Read the first six lines.
+    //  5. Tap Copy and paste the whole thing into a message.
+    //
+    // WHAT THE NUMBERS MEAN.
+    //  · **"SUSPECT SIGNATURE" above 0 → confirmed.** The event
+    //    list underneath names the exact edit, and its ⚠ words say
+    //    which way it disagreed.
+    //  · **"most gate calls before one edit" above 1 → confirmed**
+    //    on its own: iOS asked more than once for a single edit.
+    //  · "gate-less" above 0 is EXPECTED and is not a finding —
+    //    that is autocorrect and dictation, which never ask.
+    //  · "of which overrun N of M testable" is the sub-signal the
+    //    round's record named by hand; M is smaller than the edit
+    //    count on purpose (iOS reports a wider range than it
+    //    changed for anything that INSERTS, so that sub-test is
+    //    only run on pure deletions).
+    //  · Everything at 0 after all five gestures → evidence AGAINST
+    //    the suspect on this iOS version, but not proof: it only
+    //    covers the gestures that were actually performed.
+    //
+    // Turning it back OFF makes it completely inert; leaving it on
+    // costs a few numbers per keystroke and nothing else.
+    //
+    // VM-53: the on/off is the system switch (it was a text button whose
+    // words flipped to "Recording edit trace — tap to stop"); its words are
+    // the row's own. Whether it ships in Release is W-214's, not this list's.
+    private var diagnosticsGroup: some View {
+        MobileSettingsGroup(Self.diagnosticsGroupTitle, tokens: tokens) {
+            Toggle(isOn: $traceArmed) {
+                Text(tokens.chromeLabel("Record edit trace"))
+                    .phoneType(.control, tokens)
+                    .foregroundStyle(tokens.ink)
+            }
+            .tint(tokens.accent)
+            .frame(minHeight: PhoneMetrics.RowHeight.menu)
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .accessibilityLabel("Record edit trace")
+            .onChange(of: traceArmed) { _, armed in
+                // The appear's seed reads the recorder; only a change she made
+                // writes it back.
+                if armed != MobileEditTrace.isArmed { MobileEditTrace.setArmed(armed) }
+            }
+            PhoneMenuRow(
+                tokens.chromeLabel("Edit trace…"), tokens: tokens, inset: PhoneMetrics.gutter
+            ) { tracePresented = true }
+            .accessibilityLabel("Open the edit trace")
+            // VM-65 (PROVISIONAL P-65-1): the timing readout — her moments'
+            // numbers, before and after every speed fix. Release-live, like the
+            // edit trace beside it. (VM-47's re-land: the group's menu row, the
+            // edit trace's own door shape.)
+            PhoneMenuRow(
+                tokens.chromeLabel(MobileTimingCopy.door), tokens: tokens, inset: PhoneMetrics.gutter
+            ) { timingPresented = true }
+            .accessibilityLabel("Open the timing readout")
+        }
+    }
+
+    #if DEBUG
+    /// The dev store's own doors (DEBUG-only by design — the A4 fence), grouped
+    /// as they were sectioned.
+    @ViewBuilder
+    private var debugGroups: some View {
+        MobileSettingsGroup("Tutorial (dev store)", tokens: tokens) {
+            PhoneMenuRow(
+                tokens.chromeLabel("Open the pocket guide"), tokens: tokens, inset: PhoneMetrics.gutter
+            ) { Task { await openGuideDoor() } }
+            PhoneMenuRow(
+                tokens.chromeLabel("Restore the pocket guide…"), tokens: tokens,
+                inset: PhoneMetrics.gutter
+            ) { Task { await restoreGuideDoor() } }
+            if let tutorialNote { noteLine(tutorialNote) }
+        }
+        MobileSettingsGroup("Performance (dev store)", tokens: tokens) {
+            PhoneMenuRow(
+                tokens.chromeLabel("Seed the 100k fixture"), tokens: tokens, inset: PhoneMetrics.gutter
+            ) { Task { await perfDoor() } }
+            if let perfNote { noteLine(perfNote) }
+        }
+        // D2 look sweep: the spike door joins the one register.
+        // (The pre-13x batch 0 keychain probe row lived here — deleted
+        // at batch 2a with the real Apple-key item, row 12.)
+        MobileSettingsGroup(nil, tokens: tokens) {
+            PhoneMenuRow(
+                tokens.chromeLabel("TK2 Spike"), tokens: tokens, inset: PhoneMetrics.gutter
+            ) { spikePresented = true }
+        }
+    }
+
+    /// A door's spoken outcome, as a row of the group it belongs to.
+    private func noteLine(_ note: String) -> some View {
+        Text(tokens.chromeLabel(note))
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.vertical, PhoneMetrics.Space.s8)
+    }
+    #endif
 
     #if DEBUG
     /// The OPEN door (FIX-B4, Stage B ladder round 1, NIT 2): one call
@@ -532,36 +542,53 @@ struct MobileSettingsView: View {
     }
     #endif
 
-    /// One voice's row: the terminal `›` marker carries the selection
-    /// (the R1 idiom); study renders the plain selected ink.
-    private func voiceRow(_ voice: ThemeVoice, _ label: String) -> some View {
-        let selected = router.voice == voice
-        return Button {
-            router.setVoice(voice)
-        } label: {
-            HStack(spacing: 4) {
-                if !tokens.selectionMarker.isEmpty {
-                    Text(tokens.selectionMarker)
-                        .font(tokens.body)
-                        .foregroundStyle(tokens.accent)
-                        .opacity(selected ? 1 : 0)
-                }
-                Text(tokens.chromeLabel(label))
-                    .font(tokens.body)
-                    .foregroundStyle(selected ? tokens.ink : tokens.muted)
-                if selected, tokens.selectionMarker.isEmpty {
-                    Text("✓")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-                Spacer()
+    // (VM-53: the two voice rows — `voiceRow(_:_:)`, the R1 `›` marker or a
+    // ✓ carrying the selection — became ONE choice in the Look group, the
+    // system's segmented control; their words stay.)
+}
+
+/// **One group of the Settings list** (VM-53): its section name on the room
+/// (`PhoneSectionHeader` — 24 above, 8 below, at the gutter; none for an
+/// unnamed group, which keeps the same air), then its rows full width on the
+/// paper with a hairline between rows from the gutter (the lock mockup's
+/// settings rows; sheet §C/§E). A row the caller does not render (a door that
+/// cannot act — P-2) leaves no hairline behind. Phone-local composition, not a
+/// control: the rows inside it are the shared controls.
+struct MobileSettingsGroup<Rows: View>: View {
+    let title: String?
+    let tokens: VoiceTokens
+    let rows: Rows
+
+    init(_ title: String?, tokens: VoiceTokens, @ViewBuilder rows: () -> Rows) {
+        self.title = title
+        self.tokens = tokens
+        self.rows = rows()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let title {
+                PhoneSectionHeader(tokens.chromeLabel(title), tokens: tokens)
+                    .padding(.horizontal, PhoneMetrics.gutter)
+                    .accessibilityLabel(title)
+            } else {
+                Color.clear.frame(height: PhoneControlMetrics.sectionAbove)
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 20)
-            .contentShape(Rectangle())
+            VStack(alignment: .leading, spacing: 0) {
+                Group(subviews: rows) { subviews in
+                    ForEach(subviews) { row in
+                        if row.id != subviews.first?.id {
+                            Divider()
+                                .overlay(tokens.line)
+                                .padding(.leading, PhoneMetrics.gutter)
+                        }
+                        row
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(tokens.surface)
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 

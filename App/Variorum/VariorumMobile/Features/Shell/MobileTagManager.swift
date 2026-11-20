@@ -303,18 +303,9 @@ struct MobileTagManagerSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                // VM-60: the list names its wing — the Mac's Settings ▸ Tags
-                // words (R-828-2).
-                Text(tokens.chromeLabel(model.title))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            // VM-60: the list names its wing — the Mac's Settings ▸ Tags
+            // words (R-828-2) — on the shared sheet header (VM-50).
+            PhoneSheetHeader(tokens.chromeLabel(model.title), tokens: tokens) { dismiss() }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(model.tags, id: \.id) { tag in
@@ -322,8 +313,8 @@ struct MobileTagManagerSheet: View {
                     }
                     if model.tags.isEmpty {
                         Text(tokens.chromeLabel(Self.emptyStateHint))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .padding(.vertical, 20)
                     }
                     newTagRow
@@ -410,20 +401,20 @@ struct MobileTagManagerSheet: View {
         let depth = MobileTagsModel.depth(of: tag)
         return HStack(spacing: 8) {
             Text("#\(tag.name)")
-                .font(tokens.body)
+                .phoneType(.rowTitle, tokens)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
                 .padding(.leading, CGFloat(depth) * 18)
             if depth > 0 {
                 Text(tag.path)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(1)
             }
             Spacer()
         }
         .padding(.vertical, 9)
-        .contentShape(Rectangle())
+        .phoneHitArea(alignment: .leading)
         .contextMenu {
             Button(tokens.chromeLabel("New Child Tag…")) {
                 nameField = ""
@@ -449,12 +440,12 @@ struct MobileTagManagerSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("+ new tag"))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
             }
             .padding(.vertical, 11)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New Tag")

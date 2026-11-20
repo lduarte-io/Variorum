@@ -844,7 +844,10 @@ struct MobileHerPathsPerfTests {
                 }
                 await idle(.milliseconds(400))
                 returnRereads.append(Double(Probe.delta(.libraryFetch, since: returning)))
-                #expect(shell.surface.activate("Shelf"), "the Shelf's tab door")
+                // The tab's word is "Bookcase" (her LK-5, SW-1 — the VM-47 run's
+                // bar, VM-52): MOVED from "Shelf" at VM-47's re-land of main, the
+                // fact unchanged (the Shelf page's tab door is chosen).
+                #expect(shell.surface.activate("Bookcase"), "the Shelf's tab door")
                 await shell.surface.settle(10)
             }
             // RECORDED (the design's honest cost: one read per return).

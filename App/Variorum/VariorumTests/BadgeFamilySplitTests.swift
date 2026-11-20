@@ -174,7 +174,11 @@ struct BadgeFamilySplitTests {
                 let text = try String(contentsOf: app.appendingPathComponent(window), encoding: .utf8)
                 #expect(text.contains("aiMarksOn: theme.settings.aiMarks,"), "\(window) hands the switch to its road")
             }
-            let store = try String(contentsOf: app.appendingPathComponent("Theme/ThemeStore.swift"), encoding: .utf8)
+            // The theme store lives in `Shared/Theme/` since VM-51's hoist (the VM-47
+            // run, batch 3 — the phone wears the library's look through it too).
+            let shared = app.deletingLastPathComponent().appendingPathComponent("Shared")
+            let store = try String(
+                contentsOf: shared.appendingPathComponent("Theme/ThemeStore.swift"), encoding: .utf8)
             #expect(store.contains("try Queries.themeSettings(db)") && store.contains("settings = value"),
                     "the theme store lands the one settings read whole")
         }

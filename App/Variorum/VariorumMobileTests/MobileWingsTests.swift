@@ -221,8 +221,10 @@ struct MobileWingStandTests {
         #expect(MobileWingTitle.components(wing: nil, page: "Library") == ["Library"])
         let study = VoiceTokens.resolve(voice: .study, dark: false)
         let terminal = VoiceTokens.resolve(voice: .terminal, dark: false)
-        #expect(study.path(MobileWingTitle.components(wing: "Work", page: "Shelf")) == "Work · Shelf")
-        #expect(terminal.path(MobileWingTitle.components(wing: "Work", page: "Shelf")) == "~/work/shelf")
+        // R-47-3 MOVED from "Shelf": the Bookcase root's page word is its tab's,
+        // "Bookcase" (her ruling, 2026-11-19).
+        #expect(study.path(MobileWingTitle.components(wing: "Work", page: "Bookcase")) == "Work · Bookcase")
+        #expect(terminal.path(MobileWingTitle.components(wing: "Work", page: "Bookcase")) == "~/work/bookcase")
     }
 }
 

@@ -124,8 +124,7 @@ struct MobileEmptyStoreTests {
                     stars: MobileStarsModel(session: session),
                     quickNote: MobileQuickNoteModel(session: session),
                     tokens: tokens, tabBar: { EmptyView() },
-                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onSettings: {})
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
                 await surface.settle(40)
                 let labels = surface.visibleLabels

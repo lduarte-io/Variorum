@@ -85,6 +85,13 @@ struct MobileNoteActionsSheet: View {
     var onOpenVersions: (() -> Void)?
     @State private var deletePresented = false
     @Environment(\.dismiss) private var dismiss
+    /// **Settings, from a note** (VM-53 — the ticket: Settings "reachable from
+    /// every root and from a note"). The shell's door, from the environment
+    /// (`MobileRootMenu.swift`); nil outside a shell, and then no row (P-2).
+    @Environment(\.mobileSettingsDoor) private var settingsDoor
+    /// Set by the Settings row: the shell's sheet is asked for only once THIS
+    /// sheet has gone (`onDisappear`), so two presentations never overlap.
+    @State private var settingsAfterClosing = false
 
     static let sheetTitle = "Note"
     /// The masthead door's accessibility name (the pin's handle, and what
@@ -93,16 +100,7 @@ struct MobileNoteActionsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(tokens.chromeLabel(Self.sheetTitle))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel(Self.sheetTitle), tokens: tokens) { dismiss() }
             // The note's two TIME controls first — the grain pairing the
             // phone teaches here instead of with chords (finding 2).
             saveVersionRow
@@ -110,12 +108,21 @@ struct MobileNoteActionsSheet: View {
             Divider().overlay(tokens.line)
             undoRow
             redoRow
+            settingsRow
             Divider().overlay(tokens.line)
             deleteRow
             Spacer(minLength: 0)
         }
         .padding(20)
         .background(tokens.room.ignoresSafeArea())
+        // VM-53: the Settings row's ask, once this sheet is gone (a swipe-down
+        // or Done never asks).
+        .onDisappear {
+            guard settingsAfterClosing else { return }
+            settingsAfterClosing = false
+            let door = settingsDoor
+            Task { @MainActor in door?.open() }
+        }
         // A12's destructive-undo warning — raised only when the undo would
         // set aside text edited since the operation (the insurance class).
         // Bound to THIS surface, so the masthead's twin host stays quiet
@@ -234,6 +241,28 @@ struct MobileNoteActionsSheet: View {
             + "\(VersionsPath.promoteVerb.lowercased()) a saved moment"
     }
 
+    /// **Settings…** (VM-53): this sheet closes, then the shell's Settings
+    /// sheet opens over the note — Done there returns her to the note. Its word
+    /// is Settings' door word on screen today; it has no detail line (none is
+    /// drafted for it).
+    @ViewBuilder
+    private var settingsRow: some View {
+        if settingsDoor != nil {
+            // Its own hairline only when an undo or redo row sits above it —
+            // otherwise the group's divider after Versions… already separates
+            // them, and two would draw 14 pt apart (VM-47, the walk's W-B4).
+            if door.undoLabel != nil || door.redoLabel != nil {
+                Divider().overlay(tokens.line)
+            }
+            actRow(title: Self.settingsTitle, detail: nil, tint: tokens.accent) {
+                settingsAfterClosing = true
+                dismiss()
+            }
+        }
+    }
+
+    static let settingsTitle = "Settings"
+
     /// The stack's undo end. Rendered only when there IS one — P-2: a door
     /// that can never act in its context isn't rendered, and "Undo" with an
     /// empty stack is exactly that.
@@ -265,11 +294,14 @@ struct MobileNoteActionsSheet: View {
         }
     }
 
+    /// The removing act wears the voice's ALARM, last (sheet §D: the alarm
+    /// "replaces the literal red on Delete note…"; §E's menu row — VM-47, the
+    /// walk's W-B3: the system red read 3.43:1 on the room).
     private var deleteRow: some View {
         actRow(
             title: MobileEditorViewModel.deleteNoteTitle,
             detail: RecoveryCopy.moveToTrashDetail(.note),
-            tint: .red, role: .destructive
+            tint: tokens.alarm, role: .destructive
         ) {
             deletePresented = true
         }
@@ -296,24 +328,29 @@ struct MobileNoteActionsSheet: View {
     /// (principle M-E), so it is flagged for a device look rather than
     /// assumed good.
     private func actRow(
-        title: String, detail: String, tint: Color,
+        title: String, detail: String?, tint: Color,
         role: ButtonRole? = nil, act: @escaping () -> Void
     ) -> some View {
         Button(role: role, action: act) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(tokens.chromeLabel(title))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tint)
-                Text(tokens.chromeLabel(detail))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
+                if let detail {
+                    Text(tokens.chromeLabel(detail))
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        // VM-50: the menu row — a title and a detail line, 64 at least (VM-53:
+        // a row with no detail line, the one-line menu row's 44).
+        .buttonStyle(PhoneMenuRowStyle(minHeight: detail == nil
+            ? PhoneControlMetrics.menuRowPlain : PhoneControlMetrics.menuRowWithDetail))
         .accessibilityLabel(title)
     }
 }

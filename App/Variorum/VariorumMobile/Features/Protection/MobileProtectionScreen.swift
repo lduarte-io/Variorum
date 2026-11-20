@@ -57,16 +57,16 @@ struct MobileProtectionScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text(tokens.path([ProtectionCopy.protectionPaneTitle]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.screenTitle, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                 // F-U2-E (P-VM8-8): what the protection acts said — muted, under the title: up to three lines (the
                 // holder keeps the newest three), oldest first.
                 if let receipts, !receipts.lines.isEmpty {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(Array(receipts.lines.enumerated()), id: \.offset) { _, line in
                             Text(line)
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
+                                .phoneType(.meta, tokens)
+                                .foregroundStyle(tokens.phone.muted)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -105,6 +105,9 @@ struct MobileProtectionScreen: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .background(tokens.room.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the room at both edges.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
         .navigationBarTitleDisplayMode(.inline)
         // New words' look holds the words on screen: no way back until her close (past the look's warning).
         .navigationBarBackButtonHidden(wordsLook?.holdsWords == true)
@@ -135,8 +138,8 @@ struct MobileRoadAccountSection: View {
         if let faces = model.faces {
             VStack(alignment: .leading, spacing: 10) {
                 Text(tokens.chromeLabel(ProtectionWords.accountSectionTitle))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.sectionHeader, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                 situation(faces)
                 // VX-457: the follow's Done — a durable notice until her OK.
                 if let followed = model.followDone {
@@ -224,27 +227,26 @@ struct MobileRoadAccountSection: View {
     private func door(_ label: String, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(tokens.chromeLabel(label))
-                .font(tokens.body)
-                .foregroundStyle(tokens.accent)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .buttonStyle(.plain)
+        // VM-50: an inline act at 17 with a 44 pt hit area.
+        .buttonStyle(PhoneInlineActStyle(tokens: tokens, role: .control, alignment: .leading))
         .accessibilityLabel(label)
         .disabled(model.presenter.sheet != nil)
     }
 
     private func line(_ text: String, ink: Color) -> some View {
         Text(text)
-            .font(tokens.body)
+            .phoneType(.rowPreview, tokens)
             .foregroundStyle(ink)
             .fixedSize(horizontal: false, vertical: true)
     }
 
     private func caption(_ text: String) -> some View {
         Text(text)
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -301,7 +303,7 @@ private struct MobileProtectionSheetNotHere: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(ProtectionWords.signInUnavailable)
-                .font(tokens.body)
+                .phoneType(.rowPreview, tokens)
                 .foregroundStyle(tokens.ink)
                 .fixedSize(horizontal: false, vertical: true)
             MobileRoadButton(title: ProtectionWords.signInUnavailableClose, tokens: tokens) {
@@ -332,7 +334,7 @@ struct MobileRoadAccountConfirmSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text(tokens.chromeLabel(model.title))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 if let moment = model.moment {
                     wordsMoment(moment)
@@ -357,14 +359,14 @@ struct MobileRoadAccountConfirmSheet: View {
     private var confirm: some View {
         ForEach(Array(model.door.sentences.enumerated()), id: \.offset) { _, sentence in
             Text(sentence)
-                .font(tokens.body)
-                .foregroundStyle(Self.hers.contains(sentence) ? tokens.ink : tokens.muted)
+                .phoneType(.rowPreview, tokens)
+                .foregroundStyle(Self.hers.contains(sentence) ? tokens.ink : tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
             if sentence == ProtectionWords.copiesUnderAKeyThisMacCantDelete {
                 ForEach(model.door.undeletableCopies, id: \.self) { copy in
                     Text("\u{2022} \(copy)")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             }
         }
@@ -374,16 +376,16 @@ struct MobileRoadAccountConfirmSheet: View {
         fields
         if let refusal = model.refusal {
             Text(refusal)
-                .font(tokens.small)
+                .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.alarm)
                 .fixedSize(horizontal: false, vertical: true)
         }
         if model.busy {
             HStack(spacing: 6) {
-                TravellingDotsIndicator(ink: tokens.muted)
+                TravellingDotsIndicator(ink: tokens.phone.muted)
                 Text(tokens.chromeLabel(ProtectionWords.accountWorking))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
             }
         }
         HStack(spacing: 16) {
@@ -413,8 +415,8 @@ struct MobileRoadAccountConfirmSheet: View {
         if ask.asksPassphrase {
             if model.asksNewPassphrase {
                 Text(ProtectionWords.turnOnSyncNewPassphraseLead)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .fixedSize(horizontal: false, vertical: true)
                 styled(PeekableSecretField(label: ProtectionWords.crossingNewPassphraseField, text: $passphrase))
                 // VM-8 unit 2 — F-U2-C (VX-211): the quiet strength hint beneath a passphrase being SET.
@@ -442,14 +444,14 @@ struct MobileRoadAccountConfirmSheet: View {
         switch moment {
         case .shown(let look):
             Text(ProtectionWords.joinWordsSentence)
-                .font(tokens.body)
+                .phoneType(.rowPreview, tokens)
                 .foregroundStyle(tokens.ink)
                 .fixedSize(horizontal: false, vertical: true)
             MobileWordsLookPanel(look: look, tokens: tokens)
         case .notShown:
             // VX-309 U2: her draft — the library adopts the account's words, the account named by its email.
             Text(ProtectionWords.joinWordsNotShown(model.door.accountEmail))
-                .font(tokens.body)
+                .phoneType(.rowPreview, tokens)
                 .foregroundStyle(tokens.ink)
                 .fixedSize(horizontal: false, vertical: true)
             MobileRoadButton(title: ProtectionWords.joinWordsMomentOK, tokens: tokens) { model.closeMoment() }
@@ -464,9 +466,9 @@ struct MobileRoadAccountConfirmSheet: View {
         switch round {
         case .running:
             HStack(spacing: 8) {
-                TravellingDotsIndicator(ink: tokens.muted)
+                TravellingDotsIndicator(ink: tokens.phone.muted)
                 Text(ProtectionWords.firstRoundProgress)
-                    .font(tokens.body)
+                    .phoneType(.rowPreview, tokens)
                     .foregroundStyle(tokens.ink)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -474,14 +476,14 @@ struct MobileRoadAccountConfirmSheet: View {
         case .done:
             if let line = model.roundLine {
                 Text(line)
-                    .font(tokens.body)
+                    .phoneType(.rowPreview, tokens)
                     .foregroundStyle(tokens.ink)
                     .fixedSize(horizontal: false, vertical: true)
                 // VX-496 (P-500-2): the count beneath the frozen progress sentence — the sync row's own spelling.
                 if let count = model.roundCountLine {
                     Text(count)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 // VX-510 ladder round 2, F-R2-2: a settle past the bound freezes the progress words as the outcome — the
@@ -490,14 +492,14 @@ struct MobileRoadAccountConfirmSheet: View {
             }
             if let cause = model.roundErrorCause {
                 ErrorCauseNote(error: cause)
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
             }
         }
         // VX-529 unit 2 (R-529-5): the pair catch-up landed by the twelve words — the window and the Reset chain.
         ForEach(Array(model.landedLines.enumerated()), id: \.offset) { _, line in
             Text(line)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
         MobileRoadButton(title: ProtectionWords.firstRoundDone, tokens: tokens) { model.done() }
@@ -506,8 +508,8 @@ struct MobileRoadAccountConfirmSheet: View {
 
     private var closeNote: some View {
         Text(ProtectionWords.firstRoundCloseNote)
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -542,26 +544,26 @@ struct MobileWordsLookPanel: View {
                 asking
             case .minting:
                 HStack(spacing: 8) {
-                    TravellingDotsIndicator(ink: tokens.muted)
+                    TravellingDotsIndicator(ink: tokens.phone.muted)
                     Text(ProtectionWords.wordsLookMinting)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             case .shown, .warning:
                 Text(ProtectionWords.wordsLookLead)
-                    .font(tokens.body)
+                    .phoneType(.rowPreview, tokens)
                     .foregroundStyle(tokens.ink)
                     .fixedSize(horizontal: false, vertical: true)
                 if look.saysRuleSix {
                     Text(ProtectionWords.wordsLookRuleSix)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 columns
                 if look.phase == .warning {
                     Text(ProtectionWords.wordsLookWarning)
-                        .font(tokens.body.weight(.semibold))
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                     HStack(spacing: 16) {
                         MobileRoadButton(title: ProtectionWords.wordsLookGoBack, tokens: tokens) { look.goBack() }
@@ -573,7 +575,7 @@ struct MobileWordsLookPanel: View {
             }
             if let message = look.message, look.phase != .closed {
                 Text(message)
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.alarm)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -584,12 +586,12 @@ struct MobileWordsLookPanel: View {
         VStack(alignment: .leading, spacing: 10) {
             if look.saysAccountWords {
                 Text(ProtectionWords.wordsLookReplacesAccountWords)
-                    .font(tokens.body)
+                    .phoneType(.rowPreview, tokens)
                     .foregroundStyle(tokens.ink)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Text(ProtectionWords.wordsLookAsk)
-                .font(tokens.body)
+                .phoneType(.rowPreview, tokens)
                 .foregroundStyle(tokens.ink)
                 .fixedSize(horizontal: false, vertical: true)
             PeekableSecretField(label: ProtectionWords.wordsLookPassphraseField, text: $passphrase, onSubmit: submit)
@@ -618,11 +620,11 @@ struct MobileWordsLookPanel: View {
                     ForEach(column, id: \.number) { entry in
                         HStack(spacing: 8) {
                             Text("\(entry.number)")
-                                .font(tokens.mono)
-                                .foregroundStyle(tokens.muted)
+                                .phoneType(.mono, tokens)
+                                .foregroundStyle(tokens.phone.muted)
                                 .frame(minWidth: 20, alignment: .trailing)
                             Text(entry.word)
-                                .font(tokens.mono)
+                                .phoneType(.mono, tokens)
                                 .foregroundStyle(tokens.ink)
                                 .lineLimit(1)
                         }
@@ -647,16 +649,16 @@ struct MobileRoadSignOutSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(tokens.chromeLabel(ProtectionWords.accountSignOutTitle))
-                .font(tokens.title)
+                .phoneType(.screenTitle, tokens)
                 .foregroundStyle(tokens.ink)
             Text(ProtectionWords.accountSignOutBody)
-                .font(tokens.body)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.rowPreview, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 16) {
                 MobileRoadButton(title: ProtectionWords.accountCancel, tokens: tokens) { model.cancel() }
                     .disabled(model.busy)
-                if model.busy { TravellingDotsIndicator(ink: tokens.muted) }
+                if model.busy { TravellingDotsIndicator(ink: tokens.phone.muted) }
                 MobileRoadButton(title: ProtectionWords.accountSignOutButton, tokens: tokens) {
                     Task { await model.confirm() }
                 }

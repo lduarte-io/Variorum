@@ -73,7 +73,6 @@ struct MobileShelfView<TabBar: View>: View {
     /// Open a note straight into typing — the Today button's landing AND
     /// the + New Note door's (P33: "the note opens for writing").
     let onOpenForWriting: (String) -> Void
-    let onSettings: () -> Void
     /// **The Trash room's door, SECOND renderer** (batch 6c — the design
     /// record's finding 1, and PROVISIONAL by its Q6). Books live HERE and
     /// a deleted book rows in the Trash, so a trash door reachable only from
@@ -81,6 +80,9 @@ struct MobileShelfView<TabBar: View>: View {
     /// getting it back. One declaration (`MobileRecoveryDoors`), two
     /// renderers, no new surface. nil in harness/preview use.
     var onOpenTrash: (() -> Void)?
+    /// VM-48: the quick-entry box types in the note body, which follows the
+    /// text size; the layout brain's floor is in lines of it.
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     @State private var createBookPresented = false
     /// VM-83: the delete confirm's title, held so a gathering's never flashes
@@ -102,7 +104,11 @@ struct MobileShelfView<TabBar: View>: View {
                     bookRows: model.orderedBooks.count,
                     extraRows: extraBooksRegionRows,
                     // Her 2026-08-30 ruling: one line until she clicks in.
-                    writing: quickNote.isFocused ? .expanded : .collapsed)
+                    writing: quickNote.isFocused ? .expanded : .collapsed,
+                    // VM-48 (W-024): her floor in lines of the box's own
+                    // text, at the current text size.
+                    lineHeight: MobileShelfLayout.quickEntryLineHeight(
+                        voice: tokens.voice, typeSize: typeSize))
                 VStack(spacing: 0) {
                     booksRegion
                         .frame(height: split.booksHeight)
@@ -117,6 +123,10 @@ struct MobileShelfView<TabBar: View>: View {
                 .frame(
                     width: proxy.size.width, height: proxy.size.height,
                     alignment: .top)
+                // VM-51 (R-47-1, "prose should not be on the tint"): her books
+                // and the box she writes into on the paper; the path line, the
+                // status lines and the tab bar stay on the room.
+                .background(tokens.surface)
                 // The two shapes are a state change she asked for, so it
                 // reads as one motion rather than a jump. Chrome-only:
                 // nothing here wakes the text layer (P3).
@@ -127,6 +137,9 @@ struct MobileShelfView<TabBar: View>: View {
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the path line's room above, the bar's room below.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
         .task { await model.start() }
         .task { await model.refreshTags() }
         // PR4's confirm. `$model.deleteBookPresented` is a real `@Bindable`
@@ -191,10 +204,10 @@ struct MobileShelfView<TabBar: View>: View {
                     VStack(spacing: 6) {
                         Text(tokens.chromeLabel(MobileEmptyStoreCopy.noBooks))
                         Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
-                            .foregroundStyle(tokens.faint)
+                            .foregroundStyle(tokens.phone.muted)
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 20)
@@ -209,16 +222,28 @@ struct MobileShelfView<TabBar: View>: View {
         }
     }
 
-    /// "~/shelf · 6 books" (terminal) / "Shelf · 6 books" (study); the
-    /// + New Note door (P33 — Library's twin, same path-line placement)
-    /// and the settings door trailing.
+    /// "~/home/bookcase · 6 books" (terminal) / "Home · Bookcase · 6 books"
+    /// (study) — the page word is the tab's, "Bookcase" (R-47-3: her ruling
+    /// that this line matches the tab, the swipe names and the Mac; it read
+    /// "Shelf" before) — the wing's name leading (VM-56) and the wing door (VM-225,
+    /// `MobileWingPath`); the + New Note door (P33 — Library's twin, same
+    /// path-line placement) and the ⋯ menu trailing.
+    ///
+    /// **ONE line at 402 pt in both voices** (VM-50, the batch-1 carry-in:
+    /// Terminal's 13 pt mono path beside two 17 pt mono words needed ~437 pt
+    /// and wrapped). The doors are the phone's controls with 44 pt hit areas
+    /// that touch: 🗑 an icon button, + New Note an inline act (15), and —
+    /// since VM-53 — the roots' one ⋯ menu (`MobileRootMenu`, the same 44 pt
+    /// icon door), where Settings went from its gear (PROVISIONAL P-47-9). The
+    /// path's own line keeps its place; the hit areas reach into the line's
+    /// air. Pinned by `MobilePathLineGeometryTests`.
     private var pathLine: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
+        HStack(alignment: .center, spacing: 0) {
             MobileWingPath(
-                tokens: tokens, wing: wingName, page: "Shelf",
+                tokens: tokens, wing: wingName, page: "Bookcase",  // R-47-3: the tab's word
                 trailing: tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"),
                 onDoor: onWingDoor)
-            Spacer()
+            Spacer(minLength: PhoneMetrics.Space.s16)
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
             }
@@ -230,24 +255,13 @@ struct MobileShelfView<TabBar: View>: View {
                 }
             } label: {
                 Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens))
             .accessibilityLabel("New Note")
-            Button {
-                onSettings()
-            } label: {
-                Text(tokens.chromeLabel("Settings"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Settings")
+            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     /// One book's row. Since batch 5 the row is an HStack of two doors
@@ -263,15 +277,19 @@ struct MobileShelfView<TabBar: View>: View {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     // Terminal reserves the selection-marker column (the
                     // mockup's alignment); the marker itself marks nothing
-                    // at rest — rows are doors, not a selection.
+                    // at rest — rows are doors, not a selection. A marker is
+                    // chrome, so `meta` (batch 1's role map; the wing list's
+                    // ✓ column): it holds at xxxLarge, where `rowTitle` grew
+                    // with her words to ≈55 pt at AX5 and left two letters of
+                    // a name (VM-47, the walk's W-A3).
                     if !tokens.selectionMarker.isEmpty {
                         Text(tokens.selectionMarker)
-                            .font(tokens.body)
+                            .phoneType(.meta, tokens)
                             .foregroundStyle(tokens.accent)
                             .opacity(0)
                     }
                     Text(tokens.chromeLabel(model.rowName(for: book)))
-                        .font(tokens.body.weight(.semibold))
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(book.reading.locked ? tokens.accent : tokens.ink)
                         .lineLimit(1)
                     Spacer(minLength: 12)
@@ -282,8 +300,8 @@ struct MobileShelfView<TabBar: View>: View {
                     // untouched, so every other surface still reads
                     // `meta(…, isDaily:)` exactly as before.)
                     Text(tokens.chromeLabel(model.rowMeta(for: book, showingDailyMarker: !isDaily)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .lineLimit(1)
                 }
                 // The padding rides INSIDE the button's label, so the whole
@@ -293,7 +311,7 @@ struct MobileShelfView<TabBar: View>: View {
                 // the element came back 17 pt tall against a 39 pt row.)
                 .padding(.vertical, 11)
                 .padding(.leading, 12)
-                .contentShape(Rectangle())
+                .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             if isDaily {
@@ -375,13 +393,13 @@ struct MobileShelfView<TabBar: View>: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileCreateBookSheet.doorTitle))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
             }
             .padding(.vertical, 11)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New Book")
@@ -403,19 +421,10 @@ struct MobileShelfView<TabBar: View>: View {
             openToday()
         } label: {
             Text(tokens.chromeLabel(MobileShelfFaces.todayDoorTitle))
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(tokens.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(tokens.line, lineWidth: 1)))
-                .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        // VM-50: the chip (sheet §E's Today door — a 32 pt capsule, 15
+        // medium, a 44 pt hit area), replacing the badge's own calm build.
+        .buttonStyle(PhoneChipStyle(tokens: tokens))
         .accessibilityLabel(MobileShelfFaces.todayDoorSpoken)
     }
 
@@ -430,13 +439,13 @@ struct MobileShelfView<TabBar: View>: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileShelfFaces.todayDoorRowTitle))
-                    .font(tokens.small)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
             }
             .padding(.vertical, 11)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(MobileShelfFaces.todayDoorSpoken)

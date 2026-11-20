@@ -92,10 +92,9 @@ struct MobileTrashDoor: View {
     var body: some View {
         Button(action: act) {
             Text(MobileRecoveryDoors.trashGlyph)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
         }
-        .buttonStyle(.plain)
+        // VM-50: the icon button — the glyph at 22, a 44 × 44 hit area.
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: .muted))
         .accessibilityLabel(MobileRecoveryDoors.trashLabel)
     }
 }

@@ -583,23 +583,14 @@ struct MobileLensSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Lenses"))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Lenses"), tokens: tokens) { dismiss() }
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     noteRow
                     if model.rows.isEmpty {
                         Text(tokens.chromeLabel(MobileLensesModel.emptyStateHint))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     ForEach(model.rows) { row in
@@ -612,7 +603,7 @@ struct MobileLensSheet: View {
                             }
                         }
                     }
-                    Divider()
+                    Divider().overlay(tokens.line)  // VM-47 (the walk's W-C7): the palette's hairline, not the system's grey
                     saveDoors
                     // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                 }
@@ -684,10 +675,11 @@ struct MobileLensSheet: View {
             HStack(spacing: 6) {
                 Text(tokens.chromeLabel(
                     (model.activeLensID == nil ? "› " : "") + MobileLensesModel.noteRowTitle))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(model.activeLensID == nil ? tokens.accent : tokens.ink)
                 Spacer()
             }
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("The Note")
@@ -701,15 +693,16 @@ struct MobileLensSheet: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(tokens.chromeLabel(
                     (model.activeLensID == row.id ? "› " : "") + row.name))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(model.activeLensID == row.id ? tokens.accent : tokens.ink)
                     .lineLimit(1)
                 Text(tokens.chromeLabel(row.meta))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(row.name)
@@ -733,7 +726,7 @@ struct MobileLensSheet: View {
     private func fallbackRow(_ dangle: MobileLensesModel.Dangle) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(tokens.chromeLabel(MobileLensesModel.fallbackNotice(dangle)))
-                .font(tokens.small)
+                .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.alarm)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityLabel(MobileLensesModel.fallbackNotice(dangle))
@@ -743,16 +736,14 @@ struct MobileLensSheet: View {
                     Task { await model.restoreDangling(dangle) }
                 } label: {
                     Text(tokens.chromeLabel(MobileLensesModel.restoreVerb))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel(
                     "\(MobileLensesModel.restoreVerb) \(dangle.handle)")
             } else {
                 Text(tokens.chromeLabel(MobileLensesModel.nothingToRestore))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityLabel(MobileLensesModel.nothingToRestore)
             }
@@ -769,10 +760,9 @@ struct MobileLensSheet: View {
                 savePresented = true
             } label: {
                 Text(tokens.chromeLabel(MobileLensesModel.saveDoorTitle))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .accessibilityLabel("Save the Current View as a Lens")
             if let name = model.activeLensName {
                 Button {
@@ -780,10 +770,9 @@ struct MobileLensSheet: View {
                     Task { await model.saveIntoActiveLens() }
                 } label: {
                     Text(tokens.chromeLabel(MobileLensesModel.saveIntoDoorTitle(name: name)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 .accessibilityLabel("Save into the Active Lens")
             }
             if model.viewDiverges {
@@ -792,10 +781,9 @@ struct MobileLensSheet: View {
                     Task { await model.adoptView() }
                 } label: {
                     Text(tokens.chromeLabel(MobileLensesModel.adoptDoorTitle))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 .accessibilityLabel("Make This the Note")
             }
         }

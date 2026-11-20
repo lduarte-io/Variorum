@@ -413,16 +413,7 @@ struct MobileBookDetailsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(tokens.chromeLabel("Book Details"))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Book Details"), tokens: tokens) { dismiss() }
             if let book = model.book {
                 identityBlock(book)
                 // VM-81: a gathering draws no Finish (and no daily door), so the
@@ -527,17 +518,17 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDoorTitle))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
                 Text(tokens.chromeLabel(MobileShelfFaces.archiveDailyJournalDetail))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
             }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneMenuRowStyle())
         .accessibilityLabel(MobileShelfFaces.archiveDailyJournalDoorTitle)
         // Ladder round 2, R2-N1: the caption the row draws, for VoiceOver.
         .accessibilityHint(MobileShelfFaces.archiveDailyJournalDetail)
@@ -555,19 +546,19 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(BookStateCopy.unarchiveVerb))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                 Spacer()
                 if let paused = BookArchiveCopy.pausedSentence(for: reading) {
                     Text(tokens.chromeLabel(paused))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .lineLimit(3)
                 }
             }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneMenuRowStyle())
         .accessibilityLabel(BookStateCopy.unarchiveVerb)
         // Ladder round 2, R2-N1: the pause sentence the row draws, when it
         // draws one — no hint otherwise.
@@ -582,17 +573,17 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel(MobileShelfFaces.deleteDoorTitle(for: kind)))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.alarm)
                 Spacer()
                 Text(tokens.chromeLabel(RecoveryCopy.deleteBookKeepsItsNotes))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(2)
             }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneMenuRowStyle())
         .accessibilityLabel(MobileShelfFaces.deleteDoorTitle(for: kind))
         // Ladder round 2, R2-N1: the caption the row draws, for VoiceOver.
         .accessibilityHint(RecoveryCopy.deleteBookKeepsItsNotes)
@@ -608,16 +599,17 @@ struct MobileBookDetailsSheet: View {
                 renamePresented = true
             } label: {
                 Text(tokens.chromeLabel(model.nameLine ?? ""))
-                    .font(tokens.body.weight(.semibold))
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(book.reading.locked ? tokens.accent : tokens.ink)
                     .lineLimit(2)
+                    .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Rename Book")
             if let meta = model.metaLine {
                 Text(tokens.chromeLabel(meta))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
             }
         }
     }
@@ -638,20 +630,20 @@ struct MobileBookDetailsSheet: View {
                 HStack {
                     Text(tokens.chromeLabel(act == .reopen
                         ? BookStateCopy.reopenVerb : BookStateCopy.finishVerb))
-                        .font(tokens.body)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                     Spacer()
                     // The Mac's sentence is longer than the shipped caption:
                     // three lines, the archive row's own cap.
                     Text(tokens.chromeLabel(
                         MobileBookDetailsModel.finishCaption(for: book.reading)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .lineLimit(3)
                 }
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneMenuRowStyle())
             // Round 1, F5: the row's verb as its label, like the archive,
             // unarchive and delete rows beside it — so VoiceOver and the
             // hosted pin name the door. Round 2, R2-N1: the caption the row
@@ -669,16 +661,17 @@ struct MobileBookDetailsSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("Use as Daily Journal"))
-                    .font(tokens.body)
-                    .foregroundStyle(model.isDaily ? tokens.faint : tokens.accent)
+                    .phoneType(.control, tokens)
+                    .foregroundStyle(model.isDaily ? tokens.phone.faint : tokens.accent)
                 Spacer()
                 if model.isDaily {
                     Text(tokens.chromeLabel("daily ✓"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             }
-            .contentShape(Rectangle())
+            // VM-49: 44 tall; its own disabled read stays (the ✓ is a readout).
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .disabled(model.isDaily)

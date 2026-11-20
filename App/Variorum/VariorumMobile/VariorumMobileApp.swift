@@ -29,7 +29,7 @@ struct VariorumMobileApp: App {
     @State private var bootstrap: AppBootstrap
     @State private var services: AppServices?
     /// The shell's shared routing state: the active editor (for the
-    /// background flush) + the one voice authority (LK2).
+    /// background flush) + the open library's theme (VM-51, LK-1/LK-2).
     @State private var shellRouter = MobileShellRouter()
     /// 13p Batch 4 (item g): the phone's re-lock coordinator — the open
     /// library's relock policy read the phone's way (lock on leaving · lock
@@ -59,10 +59,16 @@ struct VariorumMobileApp: App {
         _bootstrap = State(initialValue: AppBootstrap())
     }
 
-    /// The lobby's voice comes from the DEVICE preference, not the store —
-    /// the store is exactly what is not open yet.
+    /// The lobby's look: no library is open to ask (that is what a lobby is),
+    /// so it wears what a library that has chosen nothing reads — the shell's
+    /// own placeholder (VM-51, PROVISIONAL P-47-15). The phone keeps no voice
+    /// of its own (the device preference retired with VM-51).
     private var lockedTokens: VoiceTokens {
-        .resolve(voice: MobileVoicePreference.current(), dark: scheme == .dark)
+        // VM-53: this phone's light/dark choice — resolved here at the app's
+        // root, where the windows' override is not seen (`isDark(system:)`).
+        .resolve(
+            settings: MobileShellRouter.placeholder,
+            dark: shellRouter.appearance.choice.isDark(system: scheme == .dark))
     }
 
     var body: some Scene {

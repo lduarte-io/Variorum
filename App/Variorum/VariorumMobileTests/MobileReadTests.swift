@@ -75,14 +75,19 @@ struct MobileReadTests {
         #expect(clamped[0].indent == maxIndent)
     }
 
+    /// VM-48 moved this pin with the face: the page's body is the sizing
+    /// sheet's "Reading page" row — serif 17 on a 27 pt line — and the
+    /// headings scale from it (27 · 23 · 20), semibold, on their own line.
     @Test func headingsScaleSerifAndBodyIsThePageSerif() {
-        let page = ReadingPageTokens.light
         let h1 = MobileReadPage.Paragraph(text: "", style: .heading(level: 1))
+        let h2 = MobileReadPage.Paragraph(text: "", style: .heading(level: 2))
         let h3 = MobileReadPage.Paragraph(text: "", style: .heading(level: 3))
         let body = MobileReadPage.Paragraph(text: "", style: .body)
-        #expect(h1.font(page) != body.font(page))
-        #expect(h3.font(page) != h1.font(page))
-        #expect(body.font(page) == page.serif)
+        let bullet = MobileReadPage.Paragraph(text: "", style: .bullet)
+        #expect(body.readingSize == 17 && bullet.readingSize == 17)
+        #expect([h1.readingSize, h2.readingSize, h3.readingSize] == [27, 23, 20])
+        #expect(h1.readingWeight == .semibold && body.readingWeight == .regular)
+        #expect(body.readingPitch == 27 && h1.readingPitch == nil)
     }
 
     // MARK: LK9's chrome strings

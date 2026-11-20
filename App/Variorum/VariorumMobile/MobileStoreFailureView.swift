@@ -35,7 +35,7 @@ struct MobileStoreFailureView: View {
                     .font(.headline)
                 if !error.storePath.isEmpty {
                     Text("Store: \(error.storePath)")
-                        .font(.caption)
+                        .font(.footnote)  // VM-48: nothing on the phone under 13 pt
                         .textSelection(.enabled)
                 }
                 Text(error.reason)

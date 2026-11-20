@@ -220,7 +220,7 @@ final class MobileTakesChromeController {
                 height: max(line.firstLineHeight, 18))
             if badge.frame != frame { badge.frame = frame }
             badge.setTitleColor(face.muted, for: .normal)
-            badge.titleLabel?.font = face.chrome.withSize(12)
+            badge.titleLabel?.font = face.font(.meta)
         }
         for (blockID, badge) in badges where !seen.contains(blockID) {
             badge.removeFromSuperview()
@@ -455,17 +455,21 @@ final class MobileTakesPillView: UIView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("not used") }
 
+    /// VM-54: the pill's edge, re-resolved at every light/dark change.
+    private lazy var border = MobileTraitBorder(self)
+
     func apply(content: MobileTakesController.PillContent, face: MobileEditorStyle.Face) {
         backgroundColor = face.card
-        layer.borderColor = face.takeLine.resolvedColor(
-            with: traitCollection).cgColor
-        let chrome = face.chrome.withSize(12)
+        // VM-54: the DYNAMIC colour, kept — a CGColor resolved here alone
+        // stayed in the old appearance after a light/dark flip.
+        border.set(face.takeLine)
+        let chrome = face.font(.meta)
         infoLabel.text = content.text
         infoLabel.font = chrome
         infoLabel.textColor = face.muted
         for button in [previousButton, nextButton] {
             button.setTitleColor(face.muted, for: .normal)
-            button.titleLabel?.font = face.chrome.withSize(15)
+            button.titleLabel?.font = face.font(.controlInline)
         }
         chooseButton.setTitleColor(face.chosenMark, for: .normal)
         chooseButton.titleLabel?.font = chrome.bold

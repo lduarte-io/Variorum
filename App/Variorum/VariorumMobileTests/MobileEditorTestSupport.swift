@@ -39,11 +39,13 @@ struct SeededGenerator: RandomNumberGenerator {
 func withEditorWorld<T>(
     _ body: @MainActor (AppSession, AppDatabase) async throws -> T
 ) async throws -> T {
-    // Batch 3: every world runs in the DEFAULT voice, deterministically —
-    // LK2's stored preference must never leak simulator state into byte/
-    // attribute expectations (voice-switch tests set and restore their
-    // own).
-    MobileEditorStyle.voice = .terminal
+    // Batch 3: every world runs in the DEFAULT look, deterministically —
+    // VM-51: the editor face wears the library's landed voice AND palette
+    // now, so a world resets both (R1's placeholder: Terminal, the voice's
+    // own colours) and a landing a mounted shell adopted in an earlier test
+    // never leaks into byte/attribute expectations (look-switch tests set
+    // and restore their own).
+    MobileEditorStyle.adopt(Queries.ThemeSettings())
     let db = try AppDatabase.inMemory()
     let start = Date(timeIntervalSince1970: 1_782_864_000)
     let tick = LockIsolated(0)

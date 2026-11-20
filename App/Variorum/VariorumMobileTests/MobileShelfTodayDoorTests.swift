@@ -37,8 +37,7 @@ private func todayShelf(
         MobileShelfView(
             model: shelf, stars: stars, quickNote: quickNote,
             tokens: .terminalLight, tabBar: { EmptyView() },
-            onOpenBook: { _ in }, onOpenForWriting: opened,
-            onSettings: {}),
+            onOpenBook: { _ in }, onOpenForWriting: opened),
         size: CGSize(width: 430, height: 932))
 }
 

@@ -46,17 +46,12 @@
 import AppKit
 import Observation
 
-/// Follow the system · Light · Dark. The pure half — a rule with no state,
-/// so the mapping and the stored form are unit-pinnable without an
-/// `NSApplication` (`AppearanceChoiceTests`).
-nonisolated enum AppearanceChoice: String, CaseIterable, Sendable {
-    /// Whatever the system says — the shipped behaviour, and the default,
-    /// so an app that has never been told anything behaves exactly as it
-    /// did before 18j.
-    case system
-    case light
-    case dark
-
+/// Follow the system · Light · Dark — the pure half (the three cases, the
+/// key and the remembered rule) lives in `Shared/Theme/AppearanceChoiceRule
+/// .swift` since VM-53, where the phone shares it (MobileSoul §3: one brain);
+/// what stays here is the Mac's AppKit half, beside the one owner that
+/// applies it.
+nonisolated extension AppearanceChoice {
     /// The AppKit appearance this choice names. **Nil is meaningful**: it
     /// is what `NSApp.appearance = nil` means — "inherit the system's" —
     /// and not an error case.
@@ -66,17 +61,6 @@ nonisolated enum AppearanceChoice: String, CaseIterable, Sendable {
         case .light: .aqua
         case .dark: .darkAqua
         }
-    }
-
-    /// This Mac's `UserDefaults` key.
-    static let settingKey = "appearanceChoice"
-
-    /// A stored value that is not one of the three reads as `.system` —
-    /// the same posture `ReadModeView.rememberedFace` and
-    /// `LibraryCatalogModel`'s sort take with their local keys.
-    static func remembered(_ defaults: UserDefaults = .standard) -> AppearanceChoice {
-        defaults.string(forKey: settingKey)
-            .flatMap(AppearanceChoice.init(rawValue:)) ?? .system
     }
 }
 

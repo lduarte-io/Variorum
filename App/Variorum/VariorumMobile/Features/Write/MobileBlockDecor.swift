@@ -204,7 +204,7 @@ final class MobileBlockDecorController {
                 mark.setTitle(title, for: .normal)
             }
             mark.setTitleColor(face.commentInk, for: .normal)
-            mark.titleLabel?.font = face.chrome.withSize(10.5)
+            mark.titleLabel?.font = face.font(.meta)
             mark.sizeToFit()
             let frame = CGRect(
                 x: inset.left + end.x + 3,

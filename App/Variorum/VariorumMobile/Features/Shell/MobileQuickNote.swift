@@ -54,6 +54,18 @@ enum MobileQuickNoteCopy {
     /// The Mac bar's hint, phone-worded (its `⏎ opens it` grammar is
     /// A5-1's, and it is the reason no newline can be typed here).
     static let hint = "new note — just start typing · ⏎ opens it"
+
+    /// **The hint's fit rule** (VM-48, W-024): at the note body's size the
+    /// whole hint no longer fits one line on every phone, so the box shows
+    /// the longest of these that fits — the hint itself, then its own first
+    /// clause, then its first words. No new words: each is the hint cut at
+    /// one of its own separators. PROVISIONAL (P-47-6): her wording pass,
+    /// and the capture box's rebuild (SW-3/SW-4), may replace the hint.
+    static let hintFits: [String] = [
+        hint,
+        String(hint.components(separatedBy: " · ")[0]),
+        String(hint.components(separatedBy: " — ")[0]),
+    ]
     /// The visible door A5-1 requires beside ⏎ ("press a button to go into
     /// the particular note for it" — her sentence names both).
     static let openDoor = "open ↵"
@@ -1162,6 +1174,8 @@ final class MobileQuickNoteModel {
 struct MobileQuickNoteBox: View {
     @Bindable var model: MobileQuickNoteModel
     let tokens: VoiceTokens
+    /// VM-48: the box types in the note body, which follows the text size.
+    @Environment(\.dynamicTypeSize) private var typeSize
     /// The ruled writing region (`MobileShelfLayout.split`). `nil` keeps
     /// the compact five-line box — the shape every other host would get.
     var writingHeight: CGFloat?
@@ -1185,8 +1199,8 @@ struct MobileQuickNoteBox: View {
                 // nothing failed and nothing was lost — the box simply
                 // cannot restructure a real note.
                 Text(tokens.chromeLabel(note))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
                     .accessibilityLabel(note)
             }
@@ -1230,7 +1244,10 @@ struct MobileQuickNoteBox: View {
     private var lineCap: Int {
         if collapsed { return 1 }
         guard let writingHeight else { return 5 }
-        return MobileShelfLayout.writingLineCap(writingHeight: writingHeight)
+        return MobileShelfLayout.writingLineCap(
+            writingHeight: writingHeight,
+            lineHeight: MobileShelfLayout.quickEntryLineHeight(
+                voice: tokens.voice, typeSize: typeSize))
     }
 
     /// Her ruling: *"the box should be one line until you click into it."*
@@ -1246,19 +1263,20 @@ struct MobileQuickNoteBox: View {
     private var field: some View {
         ZStack(alignment: .topLeading) {
             if model.text.isEmpty {
-                HStack(spacing: 6) {
-                    Text(tokens.chromeLabel(MobileQuickNoteCopy.hint))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
-                    if tokens.showsBlockCursor && !focused {
-                        BlinkingCursorBlock(color: tokens.accent)
-                    }
+                // The hint's fit rule (W-024): the longest of its own
+                // cuts that fits the box's line.
+                ViewThatFits(in: .horizontal) {
+                    hintLine(MobileQuickNoteCopy.hintFits[0])
+                    hintLine(MobileQuickNoteCopy.hintFits[1])
+                    hintLine(MobileQuickNoteCopy.hintFits[2])
                 }
                 .allowsHitTesting(false)
             }
             TextField("", text: $model.text, axis: .vertical)
                 .textFieldStyle(.plain)
-                .font(tokens.small)
+                // VM-48: the typed text is the note body, on the box's own
+                // 24 pt line (sheet §E).
+                .phoneType(.noteBody, tokens, linePitch: MobileShelfLayout.quickEntryLineHeight)
                 .foregroundStyle(tokens.ink)
                 .focused($focused)
                 .lineLimit(1...lineCap)
@@ -1286,9 +1304,23 @@ struct MobileQuickNoteBox: View {
         .padding(.vertical, 10)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+                .stroke(tokens.phone.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
         .contentShape(Rectangle())
         .onTapGesture { focused = true }
+    }
+
+    /// One cut of the hint, in the box's type, with Terminal's resting
+    /// cursor beside it.
+    private func hintLine(_ phrase: String) -> some View {
+        HStack(spacing: 6) {
+            Text(tokens.chromeLabel(phrase))
+                .phoneType(.noteBody, tokens, linePitch: MobileShelfLayout.quickEntryLineHeight)
+                .foregroundStyle(tokens.phone.faint)
+                .lineLimit(1)
+            if tokens.showsBlockCursor && !focused {
+                BlinkingCursorBlock(color: tokens.accent)
+            }
+        }
     }
 
     /// What the box's own chrome leaves for the field. `nil` at rest —
@@ -1301,8 +1333,8 @@ struct MobileQuickNoteBox: View {
     private func statusRow(_ indicator: String) -> some View {
         HStack(spacing: 12) {
             Text(tokens.chromeLabel(indicator))
-                .font(tokens.small)
-                .foregroundStyle(model.visibleState == .saved ? tokens.accent : tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(model.visibleState == .saved ? tokens.accent : tokens.phone.muted)
                 .accessibilityLabel(
                     MobileQuickNoteCopy.spokenIndicator(model.visibleState) ?? "")
             Spacer()
@@ -1312,12 +1344,25 @@ struct MobileQuickNoteBox: View {
                 model.open()
             } label: {
                 Text(tokens.chromeLabel(MobileQuickNoteCopy.openDoor))
-                    .font(tokens.small)
+                    .phoneType(.controlInline, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(MobileQuickNoteCopy.openDoorSpoken)
         }
         .padding(.horizontal, 2)
+    }
+}
+
+// MARK: - The box's line at the current text size (VM-48, W-024)
+
+extension MobileShelfLayout {
+    /// One line of the box's text at a text size: the sheet's 24 pt line,
+    /// scaled as the note body scales (exact at the default size).
+    @MainActor
+    static func quickEntryLineHeight(voice: ThemeVoice, typeSize: DynamicTypeSize) -> CGFloat {
+        let spec = PhoneType.spec(.noteBody, voice: voice)
+        let size = PhoneType.resolved(.noteBody, voice: voice, at: typeSize.phoneCategory).pointSize
+        return quickEntryLineHeight * size / spec.size
     }
 }

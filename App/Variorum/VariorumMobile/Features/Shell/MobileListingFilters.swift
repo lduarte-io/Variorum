@@ -157,7 +157,8 @@ nonisolated enum MobileListingFilter: String, CaseIterable, Sendable, Hashable {
 /// `lineLimit(1)` + `minimumScaleFactor` is the degradation road her ruling
 /// leaves open: a door that cannot fit its nominal size SHRINKS rather than
 /// clipping or wrapping, exactly as the keyboard strip narrows at 320 instead
-/// of hanging off both edges. The measurements live in
+/// of hanging off both edges — and since VM-48 it shrinks no further than the
+/// phone's 13 pt floor (`meta`, `shrinkingToFloor`). The measurements live in
 /// `MobileFilterRowGeometryTests` and in the batch record.
 struct MobileFilterRow<Trailing: View>: View {
     let doors: [MobileListingFilter]
@@ -189,11 +190,18 @@ struct MobileFilterRow<Trailing: View>: View {
                     select(door)
                 } label: {
                     Text(tokens.chromeLabel(door.word))
-                        .font(tokens.small)
-                        .foregroundStyle(selection == door ? tokens.ink : tokens.faint)
+                        // The floor size, not the sheet's chip 15: five words
+                        // must hold one row at 375 pt (#92(b)) — P-47-7.
+                        .phoneType(.meta, tokens, shrinkingToFloor: true)
+                        .foregroundStyle(selection == door ? tokens.ink : tokens.phone.muted)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
                         .fixedSize(horizontal: false, vertical: true)
+                        // VM-49: each door answers 44 tall; its width stays
+                        // its word's — the row's one-line budget (#92(b)) is
+                        // what a 44-wide door would spend. The row's rebuild
+                        // (the rooms as chips) is VM-93's; P-47-10.
+                        .frame(minHeight: PhoneMetrics.touchMinimum)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(door.word)
@@ -203,7 +211,6 @@ struct MobileFilterRow<Trailing: View>: View {
             trailing()
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 6)
     }
 }
 

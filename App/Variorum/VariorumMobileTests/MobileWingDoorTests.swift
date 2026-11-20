@@ -265,7 +265,9 @@ struct MobileWingDoorTests {
             let tokens = VoiceTokens.resolve(voice: voice, dark: false)
             for (wing, page, trailing) in [
                 ("Home", "Library", ""), ("Work", MobileStarsModel.pageName, ""),
-                ("Taxes 2025", "Shelf", tokens.chromeLabel("  ·  6 books")),
+                // R-47-3 MOVED from "Shelf": the Bookcase root's page word is its
+                // tab's, "Bookcase" (her ruling, 2026-11-19).
+                ("Taxes 2025", "Bookcase", tokens.chromeLabel("  ·  6 books")),
             ] {
                 let parts = MobileWingTitle.doorParts(
                     tokens, wing: wing, page: page, trailing: trailing)
@@ -391,13 +393,15 @@ struct MobileWingDoorGeometryTests {
                     wingName: "Home", onWingDoor: { presses += 1 },
                     tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onSettings: {}, onOpenTrash: {})
+                    onOpenTrash: {})
             ) { surface in
                 // The page and the count, as the line draws them (an empty
-                // store: no books).
+                // store: no books). R-47-3 MOVED both from "Shelf": the root's
+                // own line says its tab's word, "Bookcase" (her ruling,
+                // 2026-11-19) — the door's value is that line's rest.
                 try await measure(
-                    surface, pressed: { presses }, root: "Shelf",
-                    value: "Shelf" + Self.study.chromeLabel("  ·  0 books"))
+                    surface, pressed: { presses }, root: "Bookcase",
+                    value: "Bookcase" + Self.study.chromeLabel("  ·  0 books"))
             }
         }
     }
@@ -528,7 +532,10 @@ struct MobileWingDoorShellTests {
                 #expect(await eventually { session.wing.currentID == world.work })
                 await surface.settle(40)
                 #expect(surface.host.presentedViewController == nil, "the list went")
-                #expect(surface.elements(selected: "Shelf"), "landed on the Bookcase")
+                // The tab's word is "Bookcase" (her LK-5, SW-1 — the VM-47 run's
+                // bar, VM-52): MOVED from "Shelf" at the VM-55 re-land, the
+                // landing's fact unchanged (the Shelf page's door is chosen).
+                #expect(surface.elements(selected: "Bookcase"), "landed on the Bookcase")
                 #expect(surface.visibleElements.contains {
                     $0.accessibilityLabel == "Work" && $0.accessibilityTraits.contains(.button)
                 }, "the title names the wing; labels were \(surface.visibleLabels)")

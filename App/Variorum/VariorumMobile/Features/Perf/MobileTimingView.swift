@@ -172,33 +172,27 @@ struct MobileTimingView: View {
     @State private var copied = false
 
     var body: some View {
+        // VM-47 (the re-land of main): the phone's layer, in the edit trace's
+        // own shape (`MobileEditTraceView`) — the shared sheet header (the path
+        // title in the corrected muted, Done), the readout's lines on `meta`,
+        // its three acts the inline act at the control role. Words unchanged.
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tokens.path(["Settings", "timing"]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                Spacer()
-                Button { dismiss() } label: {
-                    Text(tokens.chromeLabel("Done"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 12)
+            PhoneSheetHeader(
+                tokens.path(["Settings", "timing"]), tokens: tokens,
+                titleInk: tokens.phone.muted
+            ) { dismiss() }
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.top, PhoneMetrics.Space.s8)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     if !anything {
                         Text(tokens.chromeLabel(MobileTimingCopy.empty))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                     Text(text)
-                        .font(.system(.caption, design: .monospaced))
+                        .phoneType(.meta, tokens)
                         .foregroundStyle(tokens.ink)
                         .textSelection(.enabled)
                 }
@@ -215,19 +209,17 @@ struct MobileTimingView: View {
                     copied = true
                 } label: {
                     Text(tokens.chromeLabel(copied ? MobileTimingCopy.copied : MobileTimingCopy.copy))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 .accessibilityLabel("Copy the timing readout")
                 Button {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel(MobileTimingCopy.refresh))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 Spacer()
                 Button {
                     MobileTiming.reset()
@@ -235,10 +227,9 @@ struct MobileTimingView: View {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel(MobileTimingCopy.reset))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .muted, role: .control, alignment: .leading))
                 .accessibilityLabel("Reset the timing readout")
             }
             .padding(.horizontal, 20)

@@ -71,6 +71,12 @@ struct MobileLibraryView<TabBar: View>: View {
     var isOnScreen: Bool = true
 
     @State private var query = ""
+    /// VM-47 (the walk's W-C2): whether the search field holds the keyboard —
+    /// so a page she is not on can give it back (`pageShowing`).
+    @FocusState private var searchFocused: Bool
+    /// Whether this root's page is the one on screen (the shell's band; true
+    /// outside a shell).
+    @Environment(\.mobilePageShowing) private var pageShowing
 
     var body: some View {
         // VM-68: the listings' one task key (the shown question, and whether
@@ -113,11 +119,18 @@ struct MobileLibraryView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
+            // VM-51 (R-47-1, "prose should not be on the tint"): her rows,
+            // previews and search passages on the paper; the path line, the
+            // field, the filter row and the tab bar stay on the room.
+            .background(tokens.surface)
             // VM-61: the Library's error, its delete line and a star refusal
             // speak on the shell's one line (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the path line's room above, the bar's room below.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
         // VM-68: ONE task holds the listing the filter shows, and only while
         // the Library is on screen; it restarts when the question changes —
         // the sort (parity C3 — a way of looking; nothing is written), the
@@ -173,13 +186,13 @@ struct MobileLibraryView<TabBar: View>: View {
             Button(action: onOpenArchive) {
                 HStack {
                     Text(tokens.chromeLabel(MobileRecoveryDoors.archiveLabel))
-                        .font(tokens.small)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                     Spacer()
                 }
                 .padding(.vertical, 11)
                 .padding(.horizontal, 12)
-                .contentShape(Rectangle())
+                .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(MobileRecoveryDoors.archiveLabel)
@@ -195,10 +208,13 @@ struct MobileLibraryView<TabBar: View>: View {
     private var pathLine: some View {
         // `spacing: 16` — the Shelf path line's own value, adopted now that
         // this strip carries two trailing doors instead of one.
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
+        // VM-50: the Bookcase's twin — the same controls, the same one line
+        // (🗑 an icon button, + New Note an inline act, hit areas touching).
+        // VM-225: the path text is the wing door's line (`MobileWingPath`).
+        HStack(alignment: .center, spacing: 0) {
             MobileWingPath(
                 tokens: tokens, wing: wingName, page: "Library", onDoor: onWingDoor)
-            Spacer()
+            Spacer(minLength: PhoneMetrics.Space.s16)
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
             }
@@ -211,32 +227,34 @@ struct MobileLibraryView<TabBar: View>: View {
             } label: {
                 // The ONE door word (P33: the shelf's twin reads it too).
                 Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens))
             .accessibilityLabel("New Note")
+            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     private var searchField: some View {
-        TextField(tokens.chromeLabel("Search notes, books…"), text: $query)
+        TextField(phonePlaceholder: tokens.chromeLabel("Search notes, books…"), text: $query, tokens: tokens)
             .textFieldStyle(.plain)
-            .font(tokens.small)
-            .foregroundStyle(tokens.ink)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(tokens.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(tokens.line, lineWidth: 1)))
+            .phoneField(tokens)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
+            // VM-47 (the walk's W-C2): a page that is not on screen never holds
+            // the keyboard. When the tab road pops this stack back to its root
+            // while the page slides away (P-47-19), the framework hands the
+            // field it covered back its first responder; the field gives it up
+            // at once while hidden, and on leaving the screen. On the screen —
+            // a Back from her hit — that restoration stands, as before.
+            .focused($searchFocused)
+            .onChange(of: searchFocused) { _, focused in
+                if focused && !pageShowing { searchFocused = false }
+            }
+            .onChange(of: pageShowing) { _, showing in
+                if !showing { searchFocused = false }
+            }
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
     }
@@ -291,8 +309,12 @@ struct MobileLibraryView<TabBar: View>: View {
             }
         } label: {
             Image(systemName: MobileSortDoor.symbol)
-                .font(tokens.small)
+                .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.accent)
+                // VM-49: 44 tall; its width stays the glyph's (#92(b)'s
+                // budget — the full 44 × 44 is the Library's sort, VM-90).
+                .frame(minHeight: PhoneMetrics.touchMinimum)
+                .contentShape(Rectangle())
         }
         .accessibilityLabel(
             MobileSortDoor.label(
@@ -320,8 +342,8 @@ struct MobileLibraryView<TabBar: View>: View {
         let windowed = model.windowedBooks(books.orderedBooks)
         if windowed.rows.isEmpty {
             Text(tokens.chromeLabel(MobileListingFilter.noBooksLine))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
                 .accessibilityLabel(MobileListingFilter.noBooksLine)
         }
@@ -349,19 +371,19 @@ struct MobileLibraryView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(tokens.chromeLabel(name))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(
                         book.reading.locked ? tokens.accent : tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 Text(tokens.chromeLabel(meta))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(1)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // Plain, and it carries the META as well as the name — an
@@ -390,8 +412,8 @@ struct MobileLibraryView<TabBar: View>: View {
             let marker = MobileRoomListing.truncationMarker(
                 shown: windowed.rows.count, of: books.orderedBooks.count)
             Text(tokens.chromeLabel(marker))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 12)
                 .accessibilityLabel(marker)
@@ -444,10 +466,10 @@ struct MobileLibraryView<TabBar: View>: View {
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotes))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
-                    .foregroundStyle(tokens.faint)
+                    .foregroundStyle(tokens.phone.muted)
             }
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
@@ -456,8 +478,8 @@ struct MobileLibraryView<TabBar: View>: View {
             // The books listing's empty-line shape (`bookRows`), and its
             // accessibility rule: the plain sentence, never voice-cased.
             Text(tokens.chromeLabel(MobileListingFilter.noBooklessLine))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
                 .accessibilityLabel(MobileListingFilter.noBooklessLine)
         case nil:
@@ -478,19 +500,19 @@ struct MobileLibraryView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(MobileLibraryViewModel.rowTitle(item))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 if let day = item.entryDate {
                     Text(day)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // VM-68: near the end of what is listed, the next page is asked for.
@@ -528,8 +550,8 @@ struct MobileLibraryView<TabBar: View>: View {
     private func hitRows(_ hits: [Queries.CatalogHit]) -> some View {
         if hits.isEmpty {
             Text(tokens.chromeLabel("Nothing found."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
         }
         ForEach(Array(hits.enumerated()), id: \.offset) { _, hit in
@@ -539,18 +561,18 @@ struct MobileLibraryView<TabBar: View>: View {
                 } label: {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(hit.title)
-                            .font(tokens.body)
+                            .phoneType(.rowTitle, tokens)
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
                         Spacer(minLength: 12)
                         Text(tokens.chromeLabel(hitDetail(hit)))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .lineLimit(1)
                     }
                     .padding(.vertical, 10)
                     .padding(.horizontal, 12)
-                    .contentShape(Rectangle())
+                    .phoneHitArea(alignment: .leading)
                 }
                 .buttonStyle(.plain)
             }

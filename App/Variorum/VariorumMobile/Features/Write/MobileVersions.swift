@@ -306,20 +306,30 @@ final class MobileVersionsModel {
 struct MobileVersionsScreen: View {
     @State private var model: MobileVersionsModel
     let tokens: VoiceTokens
+    /// VM-52: the shell's bottom bar, for the listing (see `MobileVersionsView`).
+    let listingBar: AnyView?
 
-    init(session: AppSession, postID: String, tokens: VoiceTokens) {
+    init(
+        session: AppSession, postID: String, tokens: VoiceTokens,
+        listingBar: AnyView? = nil
+    ) {
         _model = State(initialValue: MobileVersionsModel(session: session, postID: postID))
         self.tokens = tokens
+        self.listingBar = listingBar
     }
 
     var body: some View {
-        MobileVersionsView(model: model, tokens: tokens)
+        MobileVersionsView(model: model, tokens: tokens, listingBar: listingBar)
     }
 }
 
 struct MobileVersionsView: View {
     @Bindable var model: MobileVersionsModel
     let tokens: VoiceTokens
+    /// VM-52 (her LK-5, "Roots and lists, not notes"): the shell's bottom bar
+    /// rides the LISTING, a list, and leaves while a moment's words are read.
+    /// nil in harness use.
+    var listingBar: AnyView? = nil
 
     /// The reader's back door, and the proposal's own drawn path line.
     static let backToListing = "\u{2039} \(VersionsPath.name)"
@@ -332,8 +342,19 @@ struct MobileVersionsView: View {
                 listing
             }
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51 (R-47-1, "prose should not be on the tint"): a note's moments and the version she reads
+        // on the paper (its answers speak on the shell's one line, VM-61).
+        .background(tokens.surface.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the paper above; below, the listing's paper (the bar's room is the
+        // shell's to paint while the bar stands there) or, while a moment is
+        // read, the reader's verbs band, which sits on the room.
+        .mobileEdgeGrounds(
+            top: tokens.surface, bottom: model.reading == nil ? tokens.surface : tokens.room)
         .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if model.reading == nil, let listingBar { listingBar }
+        }
         .task { await model.load() }
         .alert(
             VersionsPath.restoreConfirmTitle,
@@ -394,11 +415,11 @@ struct MobileVersionsView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(tokens.path([VersionsPath.name]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.screenTitle, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Text(tokens.chromeLabel(VersionsPath.explainer))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 12)
@@ -416,18 +437,18 @@ struct MobileVersionsView: View {
         } label: {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel(MobileVersionsModel.rowTitle(item)))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Text(tokens.chromeLabel(MobileVersionsModel.rowMeta(item)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // The row IS the Read door, so it says so — `VersionsPath.openVerb`
@@ -447,10 +468,9 @@ struct MobileVersionsView: View {
                         model.closeReader()
                     } label: {
                         Text(tokens.chromeLabel(Self.backToListing))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.accent)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(
+                        tokens: tokens, role: .control, alignment: .leading))
                     .accessibilityLabel(Self.backToListing)
                     Spacer()
                 }
@@ -458,11 +478,11 @@ struct MobileVersionsView: View {
                 .padding(.top, 12)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(tokens.path([MobileVersionsModel.rowTitle(item)]))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.screenTitle, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                     Text(tokens.chromeLabel(MobileVersionsModel.rowMeta(item)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .lineLimit(2)
                 }
                 .padding(.horizontal, 20)
@@ -473,7 +493,7 @@ struct MobileVersionsView: View {
                         ForEach(Array(model.readingBlocks.enumerated()), id: \.offset) {
                             _, text in
                             Text(text)
-                                .font(tokens.body)
+                                .phoneType(.noteBody, tokens)
                                 .foregroundStyle(tokens.ink)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -494,30 +514,24 @@ struct MobileVersionsView: View {
                 model.pendingRestore = item
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.restoreVerb))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
             .accessibilityLabel(VersionsPath.restoreVerb)
             Button {
                 let model = model
                 Task { await model.promote(item) }
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.promoteVerb))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
             .accessibilityLabel(VersionsPath.promoteVerb)
             Spacer(minLength: 0)
             Button {
                 model.pendingDelete = item
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.deleteVerb))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .alarm))
             .accessibilityLabel(VersionsPath.deleteVerb)
         }
         .padding(.horizontal, 20)
@@ -536,8 +550,8 @@ struct MobileVersionsView: View {
     /// not chrome styling"* (`MobileWriteScreen`'s own note).
     private func line(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)

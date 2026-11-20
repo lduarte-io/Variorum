@@ -110,3 +110,7 @@ enum MobileNewNoteDoor {
         return id
     }
 }
+
+// (The Bookcase path line's Settings gear — VM-50, P-47-9 — retired into the
+// roots' ⋯ menu at VM-53: `MobileRootMenu.swift`, where `MobileSettingsDoor`
+// is now the shell's Settings door itself.)

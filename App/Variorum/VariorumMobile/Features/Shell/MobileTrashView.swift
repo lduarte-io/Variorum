@@ -103,7 +103,13 @@ struct MobileTrashView: View {
             }
             .padding(.horizontal, 8)
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51 (R-47-1, "prose should not be on the tint"): the Trash's rows
+        // on the paper (its answers speak on the shell's one line, VM-61).
+        .background(tokens.surface.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the page's paper at both edges (the bar's room at its foot is the
+        // shell's to paint while the bar stands there).
+        .mobileEdgeGrounds(top: tokens.surface, bottom: tokens.surface)
         .navigationBarTitleDisplayMode(.inline)
         // The filter and the sort are applied IN SQL, so a change restarts
         // the observation rather than re-sorting a window of the wrong set.
@@ -141,8 +147,8 @@ struct MobileTrashView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
                 Text(tokens.path([RecoveryCopy.trashSection]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.screenTitle, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                 Spacer()
                 sortDoor
                 if !model.trash.isEmpty {
@@ -151,16 +157,15 @@ struct MobileTrashView: View {
                         Task { await model.requestEmptyTrash() }
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.emptyTrashVerb))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.alarm)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(
+                        tokens: tokens, tone: .alarm, role: .control, alignment: .leading))
                     .accessibilityLabel(RecoveryCopy.emptyTrashVerb)
                 }
             }
             Text(tokens.chromeLabel(RecoveryCopy.windowNote))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -173,10 +178,8 @@ struct MobileTrashView: View {
             model.setOldestFirst(!model.oldestFirst)
         } label: {
             Text(tokens.chromeLabel(model.oldestFirst ? "oldest first" : "newest first"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
         .accessibilityLabel("Sort")
     }
 
@@ -184,17 +187,18 @@ struct MobileTrashView: View {
     /// row's grammar), never a `Menu`: a door a pin can drive.
     private var filterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
+            // VM-50: filter chips (seven words do not share a segmented
+            // choice at phone width; the sheet's chip is "filters … one row
+            // that scrolls sideways") — P-47-11.
+            HStack(spacing: PhoneMetrics.Space.s8) {
                 ForEach(Array(Self.filterKinds.enumerated()), id: \.offset) { _, kind in
                     let word = kind.map(RecoveryCopy.kindLabel) ?? Self.allFilterWord
                     Button {
                         model.setKindFilter(kind)
                     } label: {
                         Text(tokens.chromeLabel(word))
-                            .font(tokens.small)
-                            .foregroundStyle(model.kindFilter == kind ? tokens.ink : tokens.faint)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneChipStyle(tokens: tokens, selected: model.kindFilter == kind))
                     .accessibilityLabel(word)
                     .accessibilityAddTraits(model.kindFilter == kind ? .isSelected : [])
                 }
@@ -212,8 +216,8 @@ struct MobileTrashView: View {
     /// marker pin.
     private func emptyLine(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
             .accessibilityLabel(text)
@@ -227,12 +231,12 @@ struct MobileTrashView: View {
     private func trashRow(_ item: Queries.TrashItem) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(Self.rowTitle(item))
-                .font(tokens.body)
+                .phoneType(.rowTitle, tokens)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(2)
             Text(tokens.chromeLabel(rowMeta(item)))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .lineLimit(2)
             HStack(spacing: 18) {
                 Button {
@@ -240,10 +244,8 @@ struct MobileTrashView: View {
                     Task { await model.putBack(item) }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel("\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(item))")
                 // **Delete Now lives HERE and nowhere else** (her round-3
                 // rider: never a full delete from inside a note). A
@@ -254,10 +256,8 @@ struct MobileTrashView: View {
                         model.requestDeleteNow(item)
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.deleteNowVerb))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.alarm)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .alarm))
                     .accessibilityLabel(
                         "\(RecoveryCopy.deleteNowVerb) \(RecoveryCopy.rowKind(item))")
                 }
@@ -267,10 +267,8 @@ struct MobileTrashView: View {
                         onOpen(noteID)
                     } label: {
                         Text(tokens.chromeLabel("Open note"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.accent)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                     .accessibilityLabel("Open note")
                 }
                 Spacer(minLength: 0)
