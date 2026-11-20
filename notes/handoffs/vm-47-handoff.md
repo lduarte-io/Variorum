@@ -1,8 +1,8 @@
 # VM-47 — Sizes and look: your handoff
 
-**Final but for the merge.** Brought up to date 2026-11-20, after the merge gate's test runs. Three things are still
-written `‹PENDING: …›` below and are filled as the run merges: the merge gate's last run (the whole phone suite once
-more, on the exact code that merges) · the PR and its merge commit · the wave-1 phone build this run prepares for you.
+**Final but for the merge.** Brought up to date 2026-11-20, after the merge gate passed. Two things are still written
+`‹PENDING: …›` below and are filled as the run merges: the PR and its merge commit · the wave-1 phone build this run
+prepares for you.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. **P-47-N** is a provisional call — built
 the most defensible way while you were away, waiting for your word. **R-47-N** is one of your rulings from this run. A
@@ -478,7 +478,8 @@ the redo closely and found them sound.
   this run had made untrue (below), and a Mac test known to fail now and then (VX-701), which passed when run alone
   straight after. Neither VM-24's red nor VX-701's is yours to worry about. This run's two reds were both in tests;
   both were fixed and proven in a last test window. The whole phone suite and the speed tests were then run once more
-  on the exact code that merges: ‹PENDING: closing leg (c)›.
+  on the exact code that merges: 1,194 tests in 209 groups with only main's one known red (VM-24's), and the 13 speed
+  tests all passed. The gate passed.
 - **What the gate found** — two things, both in tests; no app code changed.
   (1) A timing test from the last merged run (the timing run, VM-64) checks that opening a note from the new-note box
   is timed. In the whole suite it failed once. An earlier test — one of this run's, which now runs just before it —
