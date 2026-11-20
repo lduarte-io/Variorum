@@ -8,11 +8,13 @@ final tree), so they merge with the PR; (c)–(e) are the ledgers, applied on la
 session.
 
 **The slots** — every one left is spelled `‹PENDING: …›`, so one search finds them all: the PR number · the merge
-commit · the merge gate (the whole phone target with VM-64's speed suite as its own leg, the whole Mac target) · the
-wave-1 phone build. Filled at this pass: QUESTIONS #281 · PL-80 · VM-64's merge-in (four files, `3d55b51f6`) and its
-narrow read (ladder round 4) · the timing door's place · the targeted window and the post-merge window · the
-re-capture and the final-tree captures · `Tools/canon-size` · the screenshots, KEPT until her sitting. The two applied
-canon files carry their own merge slots (PL-80's gate and PR) for the merging session to fill there.
+commit · the merge gate's closing leg (c), the phone legs again whole on the tree that merges · the wave-1 phone build.
+Filled at this pass: QUESTIONS #281 · PL-80 · VM-64's merge-in (four files, `3d55b51f6`) and its narrow read (ladder
+round 4) · the timing door's place · the targeted window and the post-merge window · the re-capture and the final-tree
+captures · `Tools/canon-size` · the screenshots, KEPT until her sitting. **Filled at the gate record pass
+(2026-11-20):** the merge gate's legs 1–3 and the closing window's (a) and (b), with its two test-only findings G.1 and
+G.2 (the record's rows G.0–G.2). The two applied canon files carry their own merge slots (PL-80's gate — now filled but
+its closing leg — and PR) for the merging session to fill there.
 
 ---
 
@@ -139,7 +141,8 @@ text brought current (2026-11-20; the edge grounds painted by the shell with the
 VM-64's timing readout on the same layer; the keyboard bar's own ground among VM-137's; Settings from a pushed list as
 VM-249; the forty-one calls as QUESTIONS #281; a peeked take's dark tint beside the callout's wash for the Mac, P-47-42;
 "Verified by" the post-merge window and the four capture sets). The row is in `notes/MobileSoul.md` itself; its two
-merge slots — the merge gate and the PR with its merge commit — are filled there by the merging session.
+merge slots — the merge gate and the PR with its merge commit — are filled there by the merging session (the gate's
+clause written on the branch at the gate record pass, all but its closing leg (c)).
 
 ---
 
@@ -161,7 +164,10 @@ batches, the two re-lands of main, the W-A1 redo, rounds 2, 3 and 4's answers an
 final record pass; fresh readers for each capture set (four for the walk, two for the re-capture, two for the final
 tree); the orchestrator ran every test window, drove every walk part with the runbook's own calls once the walker stood
 down, and took the settling capture that proved W-E4. A fresh `fable-reviewer` for the midway review and each of rounds
-1–4 (the diff changes the editor's face values and a default's meaning, the phone's voice). The record
+1–4 (the diff changes the editor's face values and a default's meaning, the phone's voice). The merge gate's two reds
+were traced and fixed test-only (Opus implementing) after round 4 had closed, so no round read those three commits:
+the orchestrator read all three diffs line by line, and the stage coordinator read the Mac guard's change as well. The
+record
 `notes/plans/vm-47-sizes-and-look.md` (FOR A LATER READER at its top); the walk `notes/plans/vm-47-walk.md`; the ladder
 files `notes/plans/vm-47-ladder-midway.md`, `-round1.md`, `-round2.md`, `-round3.md`, `-round4.md`; the handoff
 `notes/handoffs/vm-47-handoff.md`; the bundle QUESTIONS #281.
@@ -278,7 +284,8 @@ sentence). Round 3 was taken because the walk's fixes and the re-land of main en
 (the walk's questions not yet in §5 — discharged by the rows) · 2 NIT (one test-only narrowing of a placeholder
 exemption). Round 4 was taken because the redo and the second re-land of main entered after round 3: 0 · 0 · 0 · 1 NIT
 (the record's status banner stale — confirmed, discharged by its rewrite). Every finding dispositioned in its round
-file; no MAJOR open.
+file; no MAJOR open. The merge gate's two test-only fixes (G.1, G.2 under "The gates") came after round 4: no fifth
+round was earned, and the orchestrator read the three commits line by line.
 
 **The gates.** Batch 1, the whole phone target: 883 tests in 145 suites, its reds traced (one real defect fixed, one pin
 moved to its rule, VM-24's caret test main's); the targeted re-run 118 in 12 green; the Mac's seven theme types 42 green.
@@ -296,8 +303,39 @@ with one red, the moved store's source path (fixed test-only, the class swept). 
 (both merges in, the redo): the phone's 98 types 581 green (six declared known issues); VM-64's speed suite alone 13
 green; three snapshots red as their fixes require (the first fix: the redo's no-content pins; main's band: the ground
 pins; the raw merge: the join pin, "the Unarchive row answers 22.0 pt tall"); the keyboard UI test red on the first fix,
-green on the final tree; the Mac's 21 types 118 green. The merge gate: ‹PENDING: the whole phone target with the speed
-suite as its own leg · the whole Mac target›.
+green on the final tree; the Mac's 21 types 118 green. **The merge gate** (the orchestrator's, 2026-11-20, every leg
+on the final tree — code `d78853d8e` with main `64fde83b0` in — from one build folder, the pin's snapshot from its
+own): the whole phone target, "Test run with 1193 tests in 209 suites failed after 758.332 seconds with 10 issues
+(including 6 known issues)", one launch —
+main's own known red, VM-24's caret pin (2 of 3 cases, main's baseline), and one beyond baseline, VM-64's
+`MobileBoxOpenTimingTests.anOpenThatFilesIsStillTimed` (G.1); the six known issues `MobileTrashTests`' declared one and
+P-47-7's four filter-row marks; VM-64's speed suite alone, "Test run with 13 tests in 1 suite passed after 128.472
+seconds"; the whole Mac target, "Test run with 6435 tests in 1114 suites failed after 3102.017 seconds with 16 issues
+(including 13 known issues)", main's counts exactly — one red this branch's, `LobbyWordsDoorPressTargetTests` (G.2), and
+VX-701's known flake `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary`, green alone in the same claim;
+`DeadVocabularyTests`, `BadgeFamilySplitTests` and every other Mac suite that reads the phone's or the shared code's
+source green. **G.1 — a frame-later timing mark crossing a suite boundary.** A frame-later paint mark an earlier test's
+editor scheduled — a one-shot display link nothing cancels at a test's end — fired inside the guard's wait for the
+filing and closed the box's Open span on the wrong paint, so the guard's own paint found nothing open; traced by
+elimination over every closer of the span with the logged numbers (`painted` = 1: exactly one sample in the process).
+Likeliest from this run's `MobileBorderTraitTests`, which runs just before it by type-name order and renders an editor
+where on main the suite before it renders none; which editor's mark, and why its frame came late, stays a suspicion.
+Green in eleven launches (alone 3 of 3, beside the borders suite 8 of 8), so a deterministic reproduction was written —
+`aPaintMarkAnEarlierRenderLeftCannotEndTheOpen` (`07190ee14`) — and the fix made in the one test file (`bb0e2285d`:
+`freshSpans` drains every frame-later mark already scheduled, ordered by its own display link's second refresh, before
+a span begins); VM-64's two tests keep their words and every expectation. In the closing window the pin was red on old
+in both launches at exactly its two named expectations (`recorder.isOpen(.boxOpenToNote)`,
+`samples(.boxOpenToNote) == painted + 1`), green on the fix in three, and green beside the borders suite ("Test run with
+7 tests in 2 suites passed"). **G.2 — a Mac source pin's idiom line met the phone's control style.** VX-510 D-B9's
+guard over the phone's lobby words door (`MobileRoadFaces.swift`) read `.buttonStyle(.plain)`, the idiom the door wore
+when the guard was written; batch 2 (`a77374d8a`, VM-50) had moved the door onto `PhoneInlineActStyle` — the same
+Button, action and label, the whole label still pressing, now across at least 44 × 44 — and D-B9 binds the mechanism,
+never the idiom, so the guard's style line accepts `.plain` or the phone's inline act (`e8c986cac`, the one Mac test
+file; the phone's face unchanged); green in the closing window's short Mac leg, "Test run with 172 tests in 33 suites
+passed after 51.390 seconds", with the source-reading Mac types and `BadgeFamilySplitTests` (the whole Mac target ran
+once, before the edit). Both edits came after round 4 had closed with no MAJOR, so no fifth round was earned; the
+orchestrator read all three diffs line by line and the stage coordinator read the Mac guard's. The phone legs again,
+whole, on the tree that merges: ‹PENDING: closing leg (c)›.
 
 **Born, triaged at mint:** VM-247 (Feature · Settings & onboarding · Mobile · Medium · Backlog — the palette row the lock
 mockup draws, which no ticket owned) · VM-248 (Debt · Confirmed · Tests & tooling · Mobile · Medium · Backlog — an
@@ -511,13 +549,17 @@ re-landed ahead of its PR (23 files), main merged in with VX-981 and VM-78 by VM
 (four files). The screen-edge fix (W-A1) was REDONE after the re-capture caught its cost — the first fix's free clip had
 stopped the keyboard reveal in a note (W-E4) — main's clip back and the strips painted by the shell, held by a
 committed UI test. The ladder (all Fable): midway 0B/1M/2m/2n · r1 0/0/1/4 · r2 0/0/0/2 · r3 0/0/1/2 · r4 0/0/0/1 — no
-MAJOR open. The walk: four capture sets read by fresh readers — 283 of 285, the re-capture 164 of 166, the settling
+MAJOR open; the merge gate's two test-only fixes came after round 4 and were read line by line by the orchestrator. The
+walk: four capture sets read by fresh readers — 283 of 285, the re-capture 164 of 166, the settling
 capture, the final tree 119 of 119 (no regression, no new finding); 11 of this run's defects in the first walk (10
 fixed with pins red on old, one a question) and, at the re-capture, the first edge fix's own cost (W-E4, with W-E3 and
 W-F1), removed by the redo. The whole phone target on the VM-55 tree 1,045 / 179 (main's VM-24 red
 only), the Mac's 114 types 565 green; the post-merge window on the final tree — phone 581 / 98, the speed suite 13
-alone, the snapshots red as meant, the keyboard UI test both ways, Mac 118 / 21 — green; ‹PENDING: the merge gate, the
-whole phone target with the speed suite as its own leg · the whole Mac target›. Canon: SurfaceContracts ×7 (the
+alone, the snapshots red as meant, the keyboard UI test both ways, Mac 118 / 21 — green; the merge gate — the whole
+phone target 1,193 / 209 (main's VM-24 red, and G.1: VM-64's box-Open timing guard ended early by a frame-later mark
+an earlier test left — a deterministic pin red on old, the fix test-only), the speed suite 13 alone, the whole Mac
+target 6,435 / 1,114 at main's counts (G.2: a source guard's idiom line met the phone's control, fixed test-only;
+VX-701's flake green alone); the phone legs again on the tree that merges ‹PENDING: closing leg (c)›. Canon: SurfaceContracts ×7 (the
 phone's look, sizes, inks and grounds with the painted edges, bar and Settings; the Bookcase's top line; the one
 Protection door); QUESTIONS #199 and #195 MINOR 3 marked; `Tools/canon-size` 143606 (headroom 6394). QUESTIONS #281
 (forty-one PROVISIONAL calls and the wording pass). Born, triaged: VM-247 · VM-248 · VM-249. MOBILE PARITY: PL-80 — the
@@ -537,7 +579,8 @@ install.**
   implemented with fresh closers at the ~530–713k context seams, fresh readers per capture set (4 + 2 + 2); a fresh
   fable-reviewer per round — midway 0B/1M/2m/2n (M-1 the UIKit 13 pt floor, red on old 20 issues), round 1 0B/0M/1m/4n
   (one NIT dismissed), round 2 0B/0M/0m/2n, round 3 0B/0M/1m/2n (the walk's questions into §5), round 4 0B/0M/0m/1n (the
-  banner) — rounds 2–4 taken for new ground, not earned; windows: batch 1 883/145
+  banner) — rounds 2–4 taken for new ground, not earned; the gate's two test-only fixes after round 4, read line by
+  line by the orchestrator; windows: batch 1 883/145
   (one real defect, one pin moved), re-run 118/12; batch 2 900/148, re-run 13/1, the path line red on old 22 issues;
   midway fix 75/6 + Mac 40/6, red on old 20; batch 3 916/151 + Mac 511/102, VM-54 red on old 5 issues; batch 4 117/12;
   batch 5 80/14 + Mac 84/15, VM-27 red on old 2 issues after its harness fix; the VM-55 tree's whole phone target
@@ -547,6 +590,8 @@ install.**
   window phone 373/64 + Mac 161/25 (one red this run had made, fixed test-only); the re-capture 164 of 166 (5 more
   findings — W-E4 this run's, from the first edge fix); the post-merge window on the final tree phone 581/98, the speed
   suite 13/1 alone, three snapshots red as meant, the keyboard UI test red on the first fix and green on the final
-  tree, Mac 118/21; the final-tree captures 119 of 119, no regression; ‹PENDING: the merge gate — the whole phone target
-  with the speed suite as its own leg · the whole Mac target›; born VM-247/248/249; bundle QUESTIONS #281; PL-80;
+  tree, Mac 118/21; the final-tree captures 119 of 119, no regression; the merge gate phone 1193/209 (VM-24's red + G.1,
+  a frame-later mark ending VM-64's box-Open span: pin `07190ee14` red on old ×2, fix `bb0e2285d` test-only), the speed
+  suite 13/1 alone, Mac 6435/1114 at main's counts (G.2, a source guard's idiom line, `e8c986cac`, green 172/33;
+  VX-701's flake green alone), the phone legs again ‹PENDING: closing leg (c)›; born VM-247/248/249; bundle QUESTIONS #281; PL-80;
   canon-size 143606 (headroom 6394); the wave-1 phone build ‹PENDING›.
