@@ -265,10 +265,14 @@ struct MobileShelfView<TabBar: View>: View {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     // Terminal reserves the selection-marker column (the
                     // mockup's alignment); the marker itself marks nothing
-                    // at rest — rows are doors, not a selection.
+                    // at rest — rows are doors, not a selection. A marker is
+                    // chrome, so `meta` (batch 1's role map; the wing list's
+                    // ✓ column): it holds at xxxLarge, where `rowTitle` grew
+                    // with her words to ≈55 pt at AX5 and left two letters of
+                    // a name (VM-47, the walk's W-A3).
                     if !tokens.selectionMarker.isEmpty {
                         Text(tokens.selectionMarker)
-                            .phoneType(.rowTitle, tokens)
+                            .phoneType(.meta, tokens)
                             .foregroundStyle(tokens.accent)
                             .opacity(0)
                     }
