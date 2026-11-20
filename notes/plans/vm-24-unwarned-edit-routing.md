@@ -634,8 +634,8 @@ answers say why). Headless only: no `xcodebuild test`, no simulator boot.
 | Reading (CLAUDE.md + canon, the protocol, the round-1 report whole, this record §1, §4.3, §5's common rules, §6, §7, the walk's verdicts, `MobileEditTrace.swift` whole, the two test files at the cited lines, `fallbackVerdict` and the capture) | DONE |
 | The answers to F1, F2, F3 in the round-1 file, committed before any fix | DONE (this commit) — all three AGREE; F1 takes "(snap-backs avoided)", no optional pin; two observations left for the reviewer and her (Terminal wraps its other parenthetical lines; "rescued" during a flight) |
 | F1 (the "rescued" line's parenthetical) + F3 (one clause in the trace header), one commit | DONE (this commit) — `MobileEditTrace.swift` only; the capture of the fixed readout is the orchestrator's (PENDING) |
-| F2 (the routing suite's doc sentence) | IN-PROGRESS |
-| The phone `build-for-testing` of the final tree into `DerivedData/vm24-gate` | NOT-STARTED |
+| F2 (the routing suite's doc sentence) | DONE (this commit) — `MobileEditRoutingTests.swift` doc comment only |
+| The phone `build-for-testing` of the final tree into `DerivedData/vm24-gate` | IN-PROGRESS — of the tree at this commit |
 | "What was applied" + the build's result in the round-1 file | NOT-STARTED |
 
 ## 12. Batch closeouts, findings and dispositions
