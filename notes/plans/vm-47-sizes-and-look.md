@@ -2689,20 +2689,20 @@ shipped; the plain-English version is in the handoff):
   own "sheets on the room".
 - **R-47-2** — "voice only row". Shipped: Look ▸ Voice writes the library's voice through the Mac Settings' own
   write. No palette row, as ruled; the palette chooser is filed as VM-247 for a later call.
-- **R-47-3** — "The top line says Bookcase, matching the tab, your swipe names and the Mac." Shipped on the Bookcase
-  root's line in both voices (pinned). **The other places the phone still says "shelf"** (read over the merged tree
+- **R-47-3** — her pick "Bookcase (Recommended)", the option reading "The top line says Bookcase, matching the tab,
+  your swipe names and the Mac." Shipped on the Bookcase root's line in both voices (pinned). **The other places the phone still says "shelf"** (read over the merged tree
   at this pass): the pocket guide's seeded prose ("a book on your shelf", "The SHELF is home", "on the shelf's top
   line", "on the Shelf's"; and "Settings, on the shelf's top line" is now wrong twice, since Settings moved into the
   ⋯) — VM-212; the Debug-only guide door's note "The pocket guide is on your shelf." — VM-211; the shared refusal
   sentences about a shelf ("That shelf isn't there any more…" and its kin) name the Bookcase's shelves and are right
   as they are. "Pin to Shelf Top" is gone (VM-78's VM-83, merged in at batch 7). Comments, identifiers and file names
   are not rendered.
-- **LK-1 / LK-2** — "Follow the library's synced voice and palette; light or dark stays each device's own."
-  Shipped: the voice and palette from the library's synced settings, observed both ways; light, dark or follow the
+- **LK-1 / LK-2** — her words "follow the library but if the phone has dark mode on, that shouldn't change what your
+  mac is like (the device dark mode)" (`notes/plans/vm-44/her-words.md`). Shipped: the voice and palette from the library's synced settings, observed both ways; light, dark or follow the
   system on this phone's own defaults, never synced. Remainder: before a library opens the phone wears Study under
   the sea-glass (P-47-15).
-- **LK-5** — "Three words at 17 pt, the current one on a chip, 56 pt targets. Shown on roots and lists; hidden
-  inside a note." Shipped as ruled on the three roots and the four pushed lists. Remainders: Read, Versions' reader
+- **LK-5** — her words "Words on a chip" and "Roots and lists, not notes" (the rulings file: three words at 17 pt,
+  the current one on a chip, 56 pt targets). Shipped as ruled on the three roots and the four pushed lists. Remainders: Read, Versions' reader
   and Protection carry no bar (P-47-18); the screens inside Settings are covered by its sheet; at 320 pt in Terminal
   at the largest sizes a word may shrink toward the 13 pt floor (never under it); the mockup's "the bar leaves while
   the keyboard is up" is VM-73's.
