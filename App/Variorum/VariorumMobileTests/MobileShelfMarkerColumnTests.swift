@@ -108,8 +108,9 @@ struct MobileShelfMarkerColumnTests {
     /// twenty-eight times that.
     @Test func atAX5TheNameStartsWhereItDoesAtXXXLarge() async throws {
         try await withEditorWorld { session, _ in
+            let name = Self.name
             _ = try await session.runner.run { ops in
-                try ops.createReading(name: Self.name, kind: .book)
+                try ops.createReading(name: name, kind: .book)
             }
             let held = try await nameStart(session, size: .xxxLarge)
             let largest = try await nameStart(session, size: .accessibility5)
