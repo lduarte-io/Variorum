@@ -325,7 +325,48 @@ compiled. The products hold `VariorumMobile_VariorumMobile_iphonesimulator27.1-a
 `VariorumMobile.debug.dylib` carries "snap-backs avoided" once and "each one a snap-back" zero times (the unchanged
 "widened" words once, as a control). **No Mac build is owed:** `git diff --stat 6b5dfb41d b3fa281f9 --
 App/Variorum/Shared Sources App/Variorum/Variorum` is empty. **Nothing under App or Sources changes after
-`b3fa281f9`**; the commits after it are records only.
+`b3fa281f9`**; the commits after it are records only. *(SUPERSEDED by the rebuild below: final call 2 changed one
+string after this build, and the gate's product is now the rebuild's, of `8f5323554`.)*
+
+#### Final call 2 — applied after the reviewer's final calls
+
+**Not done:** nothing the call names is left. The "rescued", "no capture" and "gate-less" lines, the per-event
+"widened — changed at …" mark, and the header and `Summary` doc comments that describe the concept are all
+untouched, as the call says. Observation 2 is record-only, by the call.
+
+| Call | Commit | Where | Old | New |
+|---|---|---|---|---|
+| Final call 2 | `8f5323554` | `MobileEditTrace.swift:556`, `headline()` | `"  widened           \(s.widenedReports)   (ran past the characters that changed)\n"` | `"  widened           \(s.widenedReports)   (past the change)\n"` — DRAFT, the marker comment above it unchanged |
+
+No pin asserted the old words. The trace suite checks only the prefix `"  widened           1"`
+(`MobileEditTraceTests.swift:399`), which still holds; `:396` asserts the per-event mark, which did not change.
+
+**Measured before committing** (the same CoreText method, the readout's two faces at 13 pt, the 362 pt measure):
+
+| "widened" line | Characters | Study, SF Pro | Terminal, SF Mono |
+|---|---|---|---|
+| NEW, one-digit count | 41 | 223.9 pt | 329.5 pt |
+| NEW, two digits | 42 | 232.2 pt | 337.5 pt |
+| NEW, three digits | 43 | 240.5 pt | 345.6 pt |
+| NEW, four digits | 44 | 248.7 pt | 353.6 pt |
+| **NEW, five digits (the bound)** | **45** | **256.9 pt** | **361.6 pt — fits, by 0.4 pt** |
+| OLD, one digit | 62 | 350.5 pt | 498.2 pt |
+| OLD, three digits | 64 | 367.1 pt (wraps even in Study) | 514.3 pt |
+
+The bound is met in both voices. The Terminal figures cannot be checked against a capture, because no capture of the
+Terminal readout exists; the Study calibration was within about 2 pt. So the five-digit Terminal fit is at the edge,
+and four digits leave 8.4 pt to spare, as the call's "a digit of air" intends.
+
+**The rebuild.** A phone `build-for-testing` of the tree at **`8f5323554`** (the working tree clean), the same
+command and folder as before (scheme `VariorumMobile`, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no
+simulator booted, `-derivedDataPath App/Variorum/DerivedData/vm24-gate`): **`** TEST BUILD SUCCEEDED **`** (started
+06:48:58, done by 06:49:26), log `App/Variorum/DerivedData/logs/vm24-gate-bft2.log` (the first build's log kept beside
+it). It had 0 errors and no warning in `MobileEditTrace.swift`, which was recompiled. The products still hold
+`VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64.xctestrun`. The app's `VariorumMobile.debug.dylib` carries
+"(past the change)" once and "ran past the characters that changed" zero times, and "snap-backs avoided" once and
+"each one a snap-back" zero times. **No Mac build is owed:** `git diff --stat 6b5dfb41d 8f5323554 --
+App/Variorum/Shared Sources App/Variorum/Variorum` is empty. **Nothing under App or Sources changes after
+`8f5323554`**; every commit after it is a record.
 
 ## Final calls (the round-1 reviewer, same session, 2026-11-20)
 

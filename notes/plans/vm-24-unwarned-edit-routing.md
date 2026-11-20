@@ -638,8 +638,8 @@ answers say why). Headless only: no `xcodebuild test`, no simulator boot.
 | The phone `build-for-testing` into `DerivedData/vm24-gate` (first build) | DONE — of the tree at `b3fa281f9`: `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-gate-bft.log`, 0 errors, no warning in a touched file. SUPERSEDED by the rebuild below (final call 2 changed one string after it) |
 | "What was applied" + the first build's result in the round-1 file | DONE (`afc808024`) |
 | **Final call 2** (the reviewer's "## Final calls", relayed by the orchestrator): the "widened" headline's DRAFT parenthetical becomes "(past the change)", exactly as specified; measured BEFORE committing with the same CoreText method — Terminal 361.6 pt at a five-digit count against the 362 pt measure, Study 256.9 pt | DONE (this commit) — `MobileEditTrace.swift`'s headline only; no pin asserted the old words (the trace suite checks the prefix `"  widened           1"`, still true); the per-event mark untouched. Observation 2 is record-only, by the call |
-| The gate's phone product rebuilt into `DerivedData/vm24-gate` from the tree at this commit | IN-PROGRESS |
-| Final call 2 in the round file's "What was applied" + the rebuild's result | NOT-STARTED |
+| The gate's phone product rebuilt into `DerivedData/vm24-gate` | DONE — of the tree at `8f5323554`: `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-gate-bft2.log`, 0 errors, no warning in the touched file; the dylib carries "(past the change)" and "snap-backs avoided", neither old wording. No Mac build owed. **Nothing under App or Sources changes after `8f5323554`** — THE GATE'S PRODUCT |
+| Final call 2 in the round file's "What was applied" + the rebuild's result | DONE (this commit) |
 | Owed elsewhere, not this pass's | a capture of the fixed readout (recommended by the reviewer, not owed; the orchestrator's) |
 
 ## 12. Batch closeouts, findings and dispositions
