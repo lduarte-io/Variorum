@@ -1,43 +1,47 @@
 # VM-47 — Sizes and look: your handoff
 
-**A draft until the merge.** Written 2026-11-19 before the last steps; it becomes final when these slots are filled
-(each is written `‹PENDING: …›` below): the timing run's (VM-64's) three files merged in · the targeted test window ·
-the re-capture of the screens the walk's fixes and the merges changed · the merge gate (the whole phone and whole Mac
-test suites) · the PR and its merge commit · the QUESTIONS number of your bundle · the parity row's number · the
-canon-size line · the wave-1 phone build this run prepares · whether the walk's screenshots are kept until your
-sitting.
+**Final but for the merge.** Brought up to date 2026-11-20, after the last screenshots were read. Three things are
+still written `‹PENDING: …›` below and are filled when the run merges: the merge gate's results (the whole phone and
+whole Mac test suites) · the PR and its merge commit · the wave-1 phone build this run prepares for you.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. **P-47-N** is a provisional call — built
 the most defensible way while you were away, waiting for your word. **R-47-N** is one of your rulings from this run. A
 **test window** is a test run on the shared Mac, granted by the stage coordinator. The **review** is the cold code
 review, a fresh reviewer each round. The **walk** is the simulator session that photographed every screen this run
-changed. A **capture** is one of its screenshots: they are on the Pro in `notes/plans/vm-47-screens/final/` (kept out of
-the repo), named `<palette>-<voice>-<light|dark>-<default|ax5>--<id>-<what>.png` — for example
-`seaglass-study-light-default--c1-bookcase-rest.png`; "ax5" is the largest accessibility text size. The record behind
-everything here is `notes/plans/vm-47-sizes-and-look.md`; its FOR A LATER READER section is the short version.
+changed. A **capture** is one of its screenshots, named `<palette>-<voice>-<light|dark>-<default|ax5>--<id>-<what>.png`
+— for example `seaglass-study-light-default--c1-bookcase-rest.png`; "ax5" is the largest accessibility text size. They
+are in four folders (checklist item 1): a capture named below without a folder is the walk's, in `final/`, and the later
+folders hold the same names where a screen was shot again. The record behind everything here is
+`notes/plans/vm-47-sizes-and-look.md`; its FOR A LATER READER section is the short version.
 
 ---
 
 ## Your checklist
 
-- [ ] **1. The one phone install for wave 1** — yours, from merged main, after all four mobile runs have merged. This
+- [ ] **1. The walk's screenshots are kept for you.** The closeout normally deletes a merged run's walk screenshots
+  (your rule from the 13x closeout), but the questions below point at them, so they stay until your sitting. After the
+  merge they are on the Pro in the main checkout's `notes/plans/vm-47-screens/` (kept out of the repo), in four
+  folders: `final/` (the walk), `recapture/` (after the first fixes), `e4-before/` (the typing problem on the first
+  edge fix — "What shipped" tells it) and `final-tree/` (the code that merges). Say "delete the screens" when you are
+  done with them.
+- [ ] **2. The one phone install for wave 1** — yours, from merged main, after all four mobile runs have merged. This
   run merges last of the four, so it prepares it: ‹PENDING: the Release device build of merged main, its signing
   check, main's sync version against production's, and the paste-ready block for the session that helps you install
   (`notes/plans/vm-44/plans/vm-45-install-runbook.md`)›. Your words (2026-11-19): "the phone step is the single wave-1
   install after all four runs have merged. whoever is last can probably do it overnight over wifi." and "agreed, i'll
   do the hands part in the morning." The runbook needs you at the phone: unlocked and awake for the safety copy and the
-  install, Variorum fully quit first. **What to look at first,** in "The phone, first look" below.
-- [ ] **2. Your sitting's questions** — thirty-eight provisional calls, grouped, most consequential first, in "Your
-  questions" below. They are QUESTIONS #‹PENDING›. The ones marked *(your phone)* are best judged at true size in your
-  hand.
-- [ ] **3. The wording pass** — every new line this run put on the phone, in "The wording pass" below.
-- [ ] **4. Held for your hands** — the Account sheet's first sight, your glance at which Protection door stayed, and
-  the palette row when you want it ("Held for your hands" below).
-- [ ] **5. One remainder, now on its own ticket (VM-249, waiting on you)** — Settings opens from the three home pages and
+  install, Variorum fully quit first. **What to try first** — typing low in a note with the keyboard up — is the top
+  of "The phone, first look" below.
+- [ ] **3. Your sitting's questions** — forty-one provisional calls, grouped, most consequential first, in "Your
+  questions" below. They are QUESTIONS #281. The ones marked *(your phone)* are best judged at true size in your hand.
+- [ ] **4. The wording pass** — every new line this run put on the phone, in "The wording pass" below.
+- [ ] **5. Held for your hands** — two screens no screenshot has shown (the Account sheet and the timing readout), your
+  glance at which Protection door stayed, and the palette row when you want it ("Held for your hands" below).
+- [ ] **6. One remainder, now on its own ticket (VM-249, waiting on you)** — Settings opens from the three home pages and
   from a note, but not from a pushed list, a book's Read page or Protection. Say whether that is fine as built (VM-53's
   own text says "from every root and from a note") or wants a door on those screens.
-- [ ] **6. The tickets filed** — three, at the bottom.
-- [ ] **7. The run's size, for your awareness:** the umbrella held more than two phase-sized pieces of work (the
+- [ ] **7. The tickets filed** — three, at the bottom.
+- [ ] **8. The run's size, for your awareness:** the umbrella held more than two phase-sized pieces of work (the
   phone-wide type pass, the controls, the palette). You approved the composition as a run ("22 is fine, composition is
   fine.", 2026-11-15), so it ran as five batches in a row, one builder each, with one review over the whole — raised
   here as the sizing guidance asks, not split.
@@ -46,6 +50,10 @@ everything here is `notes/plans/vm-47-sizes-and-look.md`; its FOR A LATER READER
 
 When the build is on your phone, these are the things this run changed, in the order worth checking:
 
+0. **Typing low in a note, with the keyboard up — try this first.** Open a long note, tap a line in its lower half so
+   the keyboard comes up, and type a few letters. The note should scroll that line up above the keyboard's bar, and
+   your letters should show there. One of this run's fixes once broke exactly this ("What shipped" tells it); it is
+   mended and held by a test, and this is the one behaviour worth checking in your hand.
 1. **The bottom bar.** Starred · Bookcase · Library, the current one on a chip. It now also shows on a book's
    contents, the Trash, Archived and Versions' list; tapping a tab from one of those takes you to that page's start.
    It never shows inside a note.
@@ -55,22 +63,27 @@ When the build is on your phone, these are the things this run changed, in the o
    Voice (writes your library's voice) and Look ▸ Appearance (follow the system, light or dark — this phone only).
 4. **Your library's colours.** The phone now wears the palette your library has on the Mac (sea-glass unless you chose
    another), and the voice your library has (Study for a fresh library). Your words on the paper (white in Study light), the
-   bars and sheets on the tinted room.
+   bars and sheets on the tinted room, and each screen's colour running to the very top and bottom of the glass. Two
+   small things that came with that, both yours to judge (P-47-43, P-47-44): a book's Read page cuts its last line at
+   the bottom edge, as it did before this run; and when you move between a list and a note, the strips at the top and
+   bottom change colour at once rather than sliding with the page.
 5. **Sizes and taps.** Text at 13 · 15 · 17 · 20 · 24; every button answers across a fingertip (44 points) even where
    it looks small. If you use a larger text size, your words grow and the app's chrome stops growing at the largest
    standard size.
-6. **The Account sheet** (Settings ▸ the sync row ▸ Account, or Protection's sign-in): no screenshot or test has
-   ever shown it with this run's sizes and colours, so your look is its first sight.
+6. **Two screens no screenshot has shown:** the Account sheet (Settings ▸ the sync row ▸ Account, or Protection's
+   sign-in) and the timing readout (Settings ▸ Diagnostics ▸ Timing…, the timing run's, drawn in this run's sizes and
+   colours). Neither has been seen with this run's look, so your look is their first sight.
 7. **While sync is paused for keys** (locked or not yet joined): Settings should say the sync sentence and show one
    "Protection…" row, not two (VM-27). The walk could not reach that state.
 8. **A light/dark switch with a note's takes open:** the take cards' and the comment draft's edges should change with
    it (VM-54).
 
-## Your questions (QUESTIONS #‹PENDING›)
+## Your questions (QUESTIONS #281)
 
-Each says what you would see, the options, what is built, and where a capture shows it. ‹PENDING: whether the walk's
-screenshots are kept on the Pro until your sitting — the closeout normally deletes a merged run's walk screenshots
-(your rule from the 13x closeout); if they go, the record's walk file still describes each one in words.›
+Each says what you would see, the options, what is built, and where a capture shows it. The captures are kept for
+your sitting (checklist item 1); the record's walk file (`notes/plans/vm-47-walk.md`) also describes each one in words.
+Three calls are new since the walk's first reading — P-47-42 (the dark take tint) under "Grounds and colours", and
+P-47-43 and P-47-44 under "The screen's edges", both from the fix that was redone.
 
 ### Sizes and numbers
 
@@ -99,8 +112,10 @@ screenshots are kept on the Pro until your sitting — the closeout normally del
 - **P-47-8 — which size each kind of text took.** Where a spot could have taken either of two sizes, the smaller was
   taken: the home pages' top lines at 13 (not 24), a book's name in Book Details at row size, a comment's words at 15,
   the sentences on the lock and Protection screens at 15, section labels at 13, the message line's words at 15, the
-  wing list's names at 17. Options: as built · name any you'd like larger. **Built:** the smaller each time (the full
-  list is the record's batch-1 role map). Captures: any.
+  wing list's names at 17, and the timing readout's text at 13 (in Study that is no longer a fixed-width face — the
+  readout never lines up columns, so nothing breaks, but it reads differently from what the timing run drew). Options:
+  as built · name any you'd like larger. **Built:** the smaller each time (the full list is the record's batch-1 role
+  map). Captures: any (no capture opens the readout).
 - **P-47-7 — the Library's filter row at 13 points.** All · Notes · … five words on one line. It fits at 375 and 402
   points wide in both voices; on the narrowest setting (320 points, Display Zoom) Terminal cannot fit all five at 13,
   so the last words are cut — never drawn under 13 — and at the largest text size in Terminal "bookless" shrinks a
@@ -132,7 +147,9 @@ screenshots are kept on the Pro until your sitting — the closeout normally del
 - **P-47-29 — the note's chips' colours.** After the walk's fix: a chip that is set (a date, tags, more info) in ink,
   an empty one in the readable grey; the active lens keeps the accent; the "in ‹book›" chip and the blocks chip stay
   grey. Options: (a) as built · (b) the one-book "in ‹book›" chip in ink too · (c) set chips grey as well, so set and
-  empty differ only by their words. **Built:** (a). Capture: the re-capture of `c5-note-write` ‹PENDING›.
+  empty differ only by their words. **Built:** (a). What the re-capture shows: in the pocket guide's lesson only the
+  tags chip is set, so "#pocket guide" alone is in ink, and the date, more info, lens, blocks and "in ‹book›" words all
+  read the same grey. Capture: `recapture/` `c5-note-write` (Study light and dark, Terminal dark).
 - **P-47-30 — the segmented choices' grey words** (Voice, Appearance, Create Book's kind, the block list's views). The
   unchosen words sit on iOS's own grey track and read 4.44:1 in light and about 4.1:1 in dark — just under the 4.5:1
   the sheet asks. The track is iOS 26's own drawing; nothing short of a hand-built control recolours it. Options: (a)
@@ -154,6 +171,32 @@ screenshots are kept on the Pro until your sitting — the closeout normally del
   Mac's own wash; what moved is the ground, since your words now sit on the hued paper. Options: (a) as built · (b) the
   dark washes stepped away from the paper on every palette, Mac and phone alike · (c) a hairline edge on a callout in
   dark. **Built:** (a). Capture: `teal_rust-study-dark-default--c7-callout-comment`.
+- **P-47-42 — a peeked take in dark is a shade darker than the paper** (the same cause as P-47-35). When you swipe a
+  block to peek at another take, its tint is 1.03:1 against the dark paper — a band the eye barely finds; what marks
+  the peek is its thin left edge, and your words over it stay clear. These are the sizing sheet's own dark values; what
+  moved is the ground, since your words now sit on the hued paper (on the old black room the same tint read lighter
+  than its ground). Options: (a) as built · (b) the dark take tint a step lighter than the paper, so a peek reads as a
+  raised band like the take cards · (c) a heavier edge in dark only. **Built:** (a). Captures: `recapture/` and
+  `final-tree/` `seaglass-study-dark-default--c6-note-peek-take-tint` and `seaglass-terminal-dark-default--c6-note-peek-take-tint`.
+
+### The screen's edges (from the fix that was redone)
+
+- **P-47-43 — a book's Read page cuts its last line at the bottom edge again** *(your phone)*. Under the redo the page
+  stops at the bottom of the safe area, exactly as before this run: at rest its last visible line shows about
+  three-quarters of its height and the strip below is the Read page's own colour. The first edge fix had let the page
+  run on to the very bottom with both lines whole — the same freedom that broke typing in a note. Options: (a) as built
+  — as before this run · (b) the first fix's look on the Read page alone, its page running on behind the home bar (it
+  would need that one page let past the frame at the bottom, with its own test beside the keyboard test). **Built:**
+  (a). Captures: `final-tree/seaglass-study-light-default--b5-book-read-no-bar` (and `r04-book-read`), the first fix's
+  look in `recapture/`.
+- **P-47-44 — the top and bottom strips change colour at once when you move between pages** *(your phone — it is a
+  motion)*. Each strip is one colour across the width. When you open a list or a note from a home page, or go back,
+  the strip takes the new page's colour at once and does not slide with the page, so for the slide's third of a second
+  part of a strip above the page going away wears the arriving page's colour — never white or black, never another
+  page's. The first edge fix had each page's colour slide with it. Options: (a) as built · (b) a fade between the two
+  colours during the slide (not built: it would show a third colour neither page wears) · (c) each page's colour
+  sliding with it, as the first fix drew (it needs each page drawn past its frame again, the road the redo closed).
+  **Built:** (a). No capture: none was caught mid-slide.
 
 ### The top line, the bar and the message line
 
@@ -272,8 +315,9 @@ screenshots are kept on the Pro until your sitting — the closeout normally del
   hint, Terminal default the middle cut, ax5 "new note").
 - **P-47-38 — the tag field's hint is cut mid-word.** "type a tag — ⏎ applies it ("/" nests: life/go…" at 17 points
   (Terminal cuts sooner). Options: (a) as built · (b) P-47-6's rule here — "type a tag — ⏎ applies it" · (c) new words
-  in your wording pass. **Built:** (a); the hint's colour has changed since the capture ‹PENDING: the re-capture of
-  `r06-tags-sheet` shows whether the cut stands›. Captures: `seaglass-study-light-default--r06-tags-sheet`,
+  in your wording pass. **Built:** (a); the hint's colour has changed since the walk, and the re-capture shows the cut
+  standing at the same place — only its grey changed (`recapture/` `r06-tags-sheet`, Study light and Terminal dark;
+  the largest size was not shot again). Captures: `seaglass-study-light-default--r06-tags-sheet`,
   `seaglass-terminal-dark-default--r06-tags-sheet`, `seaglass-study-light-ax5--r06-tags-sheet`.
 - **P-47-11 — the Trash's seven kinds as chips** (All · Notes · Books · Blocks · Takes · Snippet groups · Originals),
   in a row that scrolls sideways: the chosen one on the wash in ink, the others edged and grey. Options: (a) as built ·
@@ -294,17 +338,23 @@ Every line this run put on the phone that you have not worded:
 - **Shortened, no new words:** the capture box's hint (P-47-6).
 - **Drafted, not built:** "Variorum for iPhone" (a foot line under Settings), "System", "Light or dark is for this
   iPhone only.", "Voice and palette belong to your library, so they change on every device." (P-47-24, P-47-26).
-- ‹PENDING: the timing run's readout door in Settings — its words are VM-64's; this run only places and draws it›.
+- **The timing readout's door and the readout** (Settings ▸ Diagnostics ▸ "Timing…"): their words are the timing run's
+  (VM-64's — its readout's labels are drafts in its own bundle, QUESTIONS #280); this run only placed the door as a row
+  in Diagnostics, after "Edit trace…", and drew both in the phone's sizes and colours.
 - **Your ruled words, listed so you see them:** "Bookcase" on the bottom bar's middle tab (LK-5) and on the Bookcase's
   top line (R-47-3).
 
 ## Held for your hands
 
-- **The wave-1 install** (checklist item 1).
+- **The wave-1 install** (checklist item 2), and on it the first thing to try: typing low in a note with the keyboard
+  up ("The phone, first look", item 0).
 - **The Account sheet's first sight:** its header and its seven fields' hints were put on the phone's sizes and
   colours in the walk's second fix batch; no screenshot and no test shows that sheet (a test cannot open it without
-  the whole app). Settings ▸ the sync row ▸ Account on your phone, in either voice. ‹PENDING: whether the re-capture
-  reached the sheet›.
+  the whole app, and the re-captures could not reach it either — the dev library's sync row has no Account door).
+  Settings ▸ the sync row ▸ Account on your phone, in either voice.
+- **The timing readout's first sight:** the timing run's readout (Settings ▸ Diagnostics ▸ Timing…) was drawn in this
+  run's sizes and colours when the two runs were joined; no screenshot opens it.
+- **The screenshots kept for you** (checklist item 1) — "delete the screens" when you are done with them.
 - **Your glance at which Protection door stayed (VM-27):** the standing "Protection…" row stays; the sync row's own
   door is gone from Settings, so a paused sync says its sentence alone. The lock mockup's note says the same ("One
   Protection row, always").
@@ -359,12 +409,26 @@ sheet, not two; a tab tap from a list no longer pulls the hidden Library's keybo
 sheet's hairline in the palette's colour; and the Account sheet's header and hints on the phone's sizes and colours.
 The eleventh — the segmented controls' grey words on iOS's own track — is your call (P-47-30).
 
+**One fix broke typing; a screenshot caught it, and it was redone.** The first fix for the screen's edges let each
+page draw past its frame so its colour could reach the top and bottom of the glass. That also let the note's text run
+on under the keyboard's bar, and with the keyboard up a tap in the lower half of a note no longer scrolled the note:
+the line you tapped and the letters you typed stayed hidden under the bar. The re-capture of the screens showed the
+note not scrolling, and one more screenshot on that build proved a typed letter was out of sight. The fix was redone:
+each page's frame is cut exactly as before this run, and the app paints the strips above and below in each page's own
+colour. A test now types into a note on a simulator and checks that the letter shows — it fails on the first fix and
+passes now — and the last screenshots show the note scrolling just as before this run. The same redo took away two
+other things the first fix had let through (your words behind the keyboard's bar, and under the clock on a scrolled
+page). What it gives back is P-47-43 and P-47-44 in your questions.
+
 **The other runs, merged in.** The wings run (VM-55) was merged into this branch before its own merge, both runs' work
 kept line by line in 23 phone files, and its new faces — the wing door, its list, the one message line — put on this
 run's sizes and colours; its tab tests now say "Bookcase". Then main came in with the MCP run (VX-981) and the fixes run
 (VM-78): four phone files, resolved part by part by the fixes run's written map, and one new test for the one row the
-join restyled by hand (Book Details' Unarchive). ‹PENDING: the timing run's (VM-64) three files, and their narrow
-read›.
+join restyled by hand (Book Details' Unarchive). Last, main came in again with the timing run (VM-64): four files
+resolved by its written maps — the Library screen among them, holding both runs' lines —; its timing readout and its
+Settings door drawn in this run's sizes and colours with its words kept; two of its tests now tap the tab by its word
+"Bookcase"; and this run's style checks now read the readout's file too. The fourth review round read that join and
+the redo closely and found them sound.
 
 ## The evidence
 
@@ -372,36 +436,48 @@ read›.
   900; batch 3: 916), each red traced — one real defect fixed (the chrome grew a third of a point past its hold), test
   premises corrected, and the one red that is not this run's (VM-24's caret test, failing on main on purpose by your
   decision); on the code with the wings run merged in, the whole phone suite 1,045 tests in 179 suites with only VM-24's
-  red, and a targeted Mac run of 565 tests in 114 suites, green; the Mac's theme tests green at every step.
+  red, and a targeted Mac run of 565 tests in 114 suites, green; the Mac's theme tests green at every step; after the
+  first merge of main, the phone tests over the joined screens (373 in 64 groups) green and the Mac's (161 in 25) with
+  one red this run had made — a Mac test that read the theme code at its old place — fixed. **On the final code**
+  (both merges of main in, the edge fix redone): the phone tests that cover this run, 581 in 98 groups, green; the
+  timing run's speed tests alone, 13, green; the Mac tests that cover this run, 118 in 21 groups, green.
 - **Shown failing on the old code and passing on the fix:** the Terminal top line that wrapped
   (`MobilePathLineGeometryTests`), the 13-point floor in the UIKit text (`theUIKitFormIsNeverBelowThirteenPointsEither`),
   the borders after a light/dark switch (`MobileBorderTraitTests`), the doubled Protection row
-  (`MobileSettingsProtectionDoorTests`), and every walk fix's test (`MobileScreenEdgeGroundsTests`,
+  (`MobileSettingsProtectionDoorTests`), every walk fix's test (`MobileScreenEdgeGroundsTests`,
   `MobileShelfMarkerColumnTests`, the faint-grey and hint tests, `MobileNoteActionsAlarmTests`,
-  `MobileNoteActionsHairlineTests`, `MobileHiddenPageKeyboardTests`, and the colour and divider rules).
-- **The walk:** 283 of 285 screenshots in two parts on a simulator made for it, under the sea-glass and teal & rust,
-  both voices, light and dark, the default and the largest text sizes; read one by one against the sizing sheet by four
-  fresh readers (the walk file `notes/plans/vm-47-walk.md`). What matched: the second palette, the voice flip, the
-  appearance choice in the editor and the overlays, Settings from every home page and a note, Protection's road, the
-  borders' flip, the bar on lists and its tab roads, no bar where none belongs, the wing list, the message line above
-  the bar; at the largest size your words grow and the chrome holds; no "Shelf" left on the top line. Not seen: the take
-  peek and the takes pill, the two "after Undo" shots (the line had faded), the paused sync states, the lobby, the
-  320-point width.
-- **The review:** a midway review after the second batch and three rounds over the whole run, a fresh reviewer each.
+  `MobileNoteActionsHairlineTests`, `MobileHiddenPageKeyboardTests`, and the colour and divider rules), the joined
+  Unarchive row's 44-point floor (`MobileBookDetailsJoinRowsTests`), and the redo's: its edge tests failing on the first
+  fix and on the old frame where each should, and the typing test (`MobileKeyboardRevealUITests`) failing on the first
+  fix and passing on the final code.
+- **The walk, in four sets of screenshots,** each read one by one against the sizing sheet by fresh readers (the walk
+  file `notes/plans/vm-47-walk.md`): the walk itself, 283 of 285, under the sea-glass and teal & rust, both voices,
+  light and dark, the default and the largest text sizes — the second palette, the voice flip, the appearance choice
+  in the editor and the overlays, Settings from every home page and a note, Protection's road, the borders' flip, the
+  bar on lists and its tab roads, no bar where none belongs, the wing list and the message line above the bar all
+  matched; at the largest size your words grow and the chrome holds; no "Shelf" left on the top line. The re-capture
+  after the first fixes, 164 of 166: every fix showed, the take peek, the takes pill and the line's Undo were caught,
+  and the typing problem was found. One settling screenshot on the first fix proved it. The final code, 119 of 119:
+  every fix shows, the note scrolls for the keyboard as before this run, nothing of your words sits behind the
+  keyboard's bar or under the clock, nothing went backwards and nothing new was found. Never seen in any of them: the
+  Account sheet, the timing readout, the paused sync states, the lobby, the 320-point width, a page caught mid-slide.
+- **The review:** a midway review after the second batch and four rounds over the whole run, a fresh reviewer each.
   Midway: one major (the UIKit text had no 13-point floor — fixed, proved) and four small points. Round 1: one minor and
   four nits, nothing major — so by your rule ("up to 5 rounds as long as a major is found") no further round was owed;
   round 2 was still taken because the wings run's merge and your Bookcase ruling came in after round 1, and found two
   nits; round 3 was taken because the walk's fixes and main's merge came in after round 2, and found one minor (the
-  walk's questions for you were not yet in the list for your sitting — they are now, P-47-31 to P-47-41) and two nits.
-  Nothing major is open.
-- ‹PENDING (the targeted window)› · ‹PENDING (the re-capture)› · ‹PENDING (the merge gate: the whole phone suite / the
-  whole Mac suite)›.
+  walk's questions for you were not yet in the list for your sitting — they are now, P-47-31 to P-47-41) and two nits;
+  round 4 was taken because the redo and the timing run's merge came in after round 3, and found one nit (the record's
+  status line was out of date — fixed). Nothing major is open.
+- **The merge gate:** ‹PENDING: the whole phone suite, with the timing run's speed tests as their own run · the whole
+  Mac suite›.
 
 ## Your rulings, read again against what shipped
 
 - **R-47-1 — "grounds - prose should not be on the tint"** (2026-11-19). Your words are on the paper everywhere they
   are listed or written on a page — the home pages, a book, the Trash, Archived, Versions, the note — and the grounds now
-  reach the screen's edges. **Left:** inside two sheets your words still sit on the tinted room — the Blocks sheet's
+  reach the screen's edges (since the redo, painted by the app above and below each page, while your words themselves
+  stop where they did before this run). **Left:** inside two sheets your words still sit on the tinted room — the Blocks sheet's
   block previews (VM-149) and this note's tray previews (VM-153); the takes, comments and history overlays keep their
   own grounds until they become real sheets (VM-152); a take you peek at wears the take tint, its ruled colour.
 - **R-47-2 — "voice only row"** (2026-11-19). Settings ▸ Look ▸ Voice writes your library's voice; there is no palette
@@ -422,19 +498,20 @@ read›.
   named with its owner below. Batch 1's "Nothing on the phone is set below 13 pt" (VM-48): held everywhere except the note's own
   body in Terminal at the very smallest text setting, about 12.4 points (VM-137, the editor's run). "reachable from
   every screen" (VM-53's title; its text says "from every root and from a note", which shipped): pushed lists, Read
-  and Protection have no Settings door of their own — VM-249 holds that question for you (checklist item 5).
+  and Protection have no Settings door of their own — VM-249 holds that question for you (checklist item 6).
 
 ## Tickets
 
-The eight members — VM-48, VM-49, VM-50, VM-51, VM-52, VM-53, VM-54, VM-27 — and the umbrella VM-47 close with the merge.
+The eight members — VM-48, VM-49, VM-50, VM-51, VM-52, VM-53, VM-54, VM-27 — and the umbrella VM-47 close with the merge:
+PR #‹PENDING›, merge commit `‹PENDING›`.
 
 Tickets filed:
 - [ ] VM-247 (Medium, Feature, Backlog): choose the library's palette on the phone — a Palette row in Settings ▸ Look, which the lock mockup draws and no ticket owned.
 - [ ] VM-248 (Medium, Debt, Backlog): a phone test that reads the database dependency unscoped opens the simulator app's own store instead of failing.
 - [ ] VM-249 (Low, Improvement, Needs Lillian): Settings from a pushed list, a book's Read page and Protection — your call whether "every root and a note" is enough.
 
-**Remainders on other tickets** (one comment on each at the ticket pass; nothing here is re-owned to VM-61, which is
-done):
+**Remainders on other tickets** (a comment was posted on each at the ticket pass; nothing here is re-owned to VM-61,
+which is done):
 - **VM-218** (VoiceOver and the largest text size): at ax5 one-line rows cut your book names, Library titles and search
   hits; Book Details stays half-height at ax5 and cuts its title and your book's name; Create Book's tag list breaks a
   tag's name mid-word at ax5; Book Details' detail lines sit beside their labels, not under them; Create Book's ✓ sits in
@@ -445,7 +522,8 @@ done):
 - **VM-90:** the sort glyph's full 44-point width.
 - **VM-89:** no Library row shows a date.
 - **VM-188 and VM-195:** the takes badge, the comment mark and the takes pill keep their small targets; the ⑂ mark is
-  7 points tall.
+  7 points tall; and (added after the re-capture, on VM-188) while it shows, the takes pill covers the first line of
+  the next block.
 - **VM-152:** the three hand-built overlays keep fixed frames that larger text can outgrow; the take card's body; real
   sheets with a grabber; the overlays' own grounds; their dim layer lightens the note in dark.
 - **VM-14:** the comment field under the keyboard — the walk measured it (the field and its Add at y 784, the keyboard's
@@ -460,7 +538,8 @@ done):
 - **VM-147:** the Versions screen's top edge (P-47-20) and Terminal's lowercasing of your words there (P-47-39).
 - **VM-137** (Writing): the note's body under 13 points in Terminal at the smallest setting; the paragraph spacing
   fixed at launch; one stale comment in the editor's file; the markdown marker's grey; the text margin (already 20
-  points as seen); the shared look the tests use; the keyboard bar's 14-point words and its own ground.
+  points as seen); the shared look the tests use; the keyboard bar's 14-point words and its own ground (added after the
+  re-capture: with the keyboard up, what stands behind the bar's glass — since the redo, the note's paper).
 - **VM-73:** the capture box's open ↵ door; the bar stays above the keyboard while the box is typing.
 - **VM-138 and VM-139:** the keyboard bar's shape and glyph sizes; the formatting strip (your exception).
 - **VM-212 and VM-211:** the "shelf" words above.
@@ -507,6 +586,11 @@ Every later mobile run builds its faces on this layer (all in `App/Variorum/Shar
   list adds its `listBar`); the ⋯ menu is `MobileRootMenu`, whose items are data — wave 2's doors add items there;
   Settings' groups are `MobileSettingsGroup` with `PhoneMenuRow` rows; light or dark is `MobileAppearanceController`
   (this device's defaults, never the `setting` table).
+- **The screen's edges.** The shell's band clips its pages at the safe area (main's line) — never draw past it; a new
+  page declares its grounds with `.mobileEdgeGrounds(top:bottom:)` (`Features/Shell/MobileEdgeGrounds.swift`) and the
+  shell paints the strips. Re-run `VariorumMobileUITests/MobileKeyboardRevealUITests` (scheme `TK2SpikeUITests`, a
+  dedicated simulator under a stage claim) on any change to the band's clip or frame, the Write screen's layout or the
+  editor host's keyboard handling — no unit target's whole run includes it.
 - **The rules that go red, and why:** `MobilePhoneTypeSourceTests` (a Mac type slot, a size under 13, a literal shrink
   factor, a Mac slot in a shared phone arm), `MobilePhoneControlsSourceTests` (a private button, field or header),
   `MobileLookSourceTests` (a ground, the Read page, the note on the paper, the ★, a literal or system colour, a bare
