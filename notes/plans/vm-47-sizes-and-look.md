@@ -2690,29 +2690,29 @@ shipped; the plain-English version is in the handoff):
 - **R-47-2** — "voice only row". Shipped: Look ▸ Voice writes the library's voice through the Mac Settings' own
   write. No palette row, as ruled; the palette chooser is filed as VM-247 for a later call.
 - **R-47-3** — her pick "Bookcase (Recommended)", the option reading "The top line says Bookcase, matching the tab,
-  your swipe names and the Mac." Shipped on the Bookcase root's line in both voices (pinned). **The other places the phone still says "shelf"** (read over the merged tree
-  at this pass): the pocket guide's seeded prose ("a book on your shelf", "The SHELF is home", "on the shelf's top
-  line", "on the Shelf's"; and "Settings, on the shelf's top line" is now wrong twice, since Settings moved into the
-  ⋯) — VM-212; the Debug-only guide door's note "The pocket guide is on your shelf." — VM-211; the shared refusal
-  sentences about a shelf ("That shelf isn't there any more…" and its kin) name the Bookcase's shelves and are right
-  as they are. "Pin to Shelf Top" is gone (VM-78's VM-83, merged in at batch 7). Comments, identifiers and file names
-  are not rendered.
+  your swipe names and the Mac." Shipped on the Bookcase root's line in both voices (pinned). **The other places the
+  phone still says "shelf"** (read over the merged tree at this pass): the pocket guide's seeded prose ("a book on
+  your shelf", "The SHELF is home", "on the shelf's top line", "on the Shelf's"; and "Settings, on the shelf's top
+  line" is now wrong twice, since Settings moved into the ⋯) — VM-212; the Debug-only guide door's note "The pocket
+  guide is on your shelf." — VM-211; the shared refusal sentences about a shelf ("That shelf isn't there any more…"
+  and its kin) name the Bookcase's shelves and are right as they are. "Pin to Shelf Top" is gone (VM-78's VM-83,
+  merged in at batch 7). Comments, identifiers and file names are not rendered.
 - **LK-1 / LK-2** — her words "follow the library but if the phone has dark mode on, that shouldn't change what your
-  mac is like (the device dark mode)" (`notes/plans/vm-44/her-words.md`). Shipped: the voice and palette from the library's synced settings, observed both ways; light, dark or follow the
-  system on this phone's own defaults, never synced. Remainder: before a library opens the phone wears Study under
-  the sea-glass (P-47-15).
-- **LK-5** — her words "Words on a chip" and "Roots and lists, not notes" (the rulings file: three words at 17 pt,
-  the current one on a chip, 56 pt targets). Shipped as ruled on the three roots and the four pushed lists. Remainders: Read, Versions' reader
-  and Protection carry no bar (P-47-18); the screens inside Settings are covered by its sheet; at 320 pt in Terminal
-  at the largest sizes a word may shrink toward the 13 pt floor (never under it); the mockup's "the bar leaves while
-  the keyboard is up" is VM-73's.
+  mac is like (the device dark mode)" (`notes/plans/vm-44/her-words.md`). Shipped: the voice and palette from the
+  library's synced settings, observed both ways; light, dark or follow the system on this phone's own defaults, never
+  synced. Remainder: before a library opens the phone wears Study under the sea-glass (P-47-15).
+- **LK-5** — her words "Words on a chip" and "Roots and lists, not notes" (the rulings file: three words at 17 pt, the
+  current one on a chip, 56 pt targets). Shipped as ruled on the three roots and the four pushed lists. Remainders:
+  Read, Versions' reader and Protection carry no bar (P-47-18); the screens inside Settings are covered by its sheet;
+  at 320 pt in Terminal at the largest sizes a word may shrink toward the 13 pt floor (never under it); the mockup's
+  "the bar leaves while the keyboard is up" is VM-73's.
 - **LK-6** — Terminal keeps its lowercase chrome: kept. P-47-39 asks whether her own quoted words should keep their
   capitals in Terminal.
 - **SW-1** — the Starred · Bookcase · Library swipe kept and the tab says Bookcase; the wing title's swipe, dots and
   dropdown are VM-80's (wave 2).
 - **The tickets' "every" lines.** VM-49 "a 44 pt minimum for every target": every site of audit G §2 is adopted, given
   a hit area or left with its owner (§6 "Batch 2 — results", the inventory; the formatting strip's 28 pt acts are her
-  ruled exception). VM-48 "nothing on the phone is set below 13 pt": held by the source rules and both type forms;
+  ruled exception). VM-48's batch-1 line "Nothing on the phone is set below 13 pt": held by the source rules and both type forms;
   the remainder is the editor's own body in Terminal at the smallest text setting (≈ 12.4 pt, VM-137). VM-53
   "reachable from every screen" (its title; its text says "from every root and from a note", which shipped): a pushed
   list, a book's Read page and Protection carry no Settings door of their own — a pushed list is one tap from a root

@@ -1,6 +1,6 @@
 # VM-47 — Sizes and look: your handoff
 
-**DRAFT until the merge.** Written 2026-11-19 before the last steps; it becomes final when these slots are filled
+**A draft until the merge.** Written 2026-11-19 before the last steps; it becomes final when these slots are filled
 (each is written `‹PENDING: …›` below): the timing run's (VM-64's) three files merged in · the targeted test window ·
 the re-capture of the screens the walk's fixes and the merges changed · the merge gate (the whole phone and whole Mac
 test suites) · the PR and its merge commit · the QUESTIONS number of your bundle · the parity row's number · the
@@ -34,8 +34,8 @@ everything here is `notes/plans/vm-47-sizes-and-look.md`; its FOR A LATER READER
 - [ ] **4. Held for your hands** — the Account sheet's first sight, your glance at which Protection door stayed, and
   the palette row when you want it ("Held for your hands" below).
 - [ ] **5. One remainder that no ticket owns** — Settings opens from the three home pages and from a note, but not from a
-  pushed list, a book's Read page or Protection. Say whether that is fine as built (the ticket's own text names "every
-  root and a note") or wants a ticket.
+  pushed list, a book's Read page or Protection. Say whether that is fine as built (the ticket's own text says "from
+  every root and from a note") or wants a ticket.
 - [ ] **6. The tickets filed** — two, at the bottom.
 - [ ] **7. The run's size, for your awareness:** the umbrella held more than two phase-sized pieces of work (the
   phone-wide type pass, the controls, the palette). You approved the composition as a run ("22 is fine, composition is
@@ -54,15 +54,15 @@ When the build is on your phone, these are the things this run changed, in the o
 3. **Settings.** From the ⋯ on any of the three home pages, or from a note's ⋯ sheet. One list that scrolls; Look ▸
    Voice (writes your library's voice) and Look ▸ Appearance (follow the system, light or dark — this phone only).
 4. **Your library's colours.** The phone now wears the palette your library has on the Mac (sea-glass unless you chose
-   another), and the voice your library has (Study for a fresh library). Your words on white (the paper), the bars and
-   sheets on the tinted room.
+   another), and the voice your library has (Study for a fresh library). Your words on the paper (white in Study light), the
+   bars and sheets on the tinted room.
 5. **Sizes and taps.** Text at 13 · 15 · 17 · 20 · 24; every button answers across a fingertip (44 points) even where
    it looks small. If you use a larger text size, your words grow and the app's chrome stops growing at the largest
    standard size.
 6. **The Account sheet** (Settings ▸ the sync row ▸ Account, or Protection's sign-in): no screenshot or test has
    ever shown it with this run's sizes and colours, so your look is its first sight.
-7. **While sync is paused for keys** (locked or not yet joined): Settings should say the sync sentence and show ONE
-   "Protection…" row (VM-27). The walk could not reach that state.
+7. **While sync is paused for keys** (locked or not yet joined): Settings should say the sync sentence and show one
+   "Protection…" row, not two (VM-27). The walk could not reach that state.
 8. **A light/dark switch with a note's takes open:** the take cards' and the comment draft's edges should change with
    it (VM-54).
 
@@ -407,11 +407,11 @@ read›.
 - **R-47-2 — "voice only row"** (2026-11-19). Settings ▸ Look ▸ Voice writes your library's voice; there is no palette
   row, as you said — VM-247 holds that for later.
 - **R-47-3 — your pick "Bookcase (Recommended)"** (2026-11-19), whose option read "The top line says Bookcase,
-  matching the tab, your swipe names and the Mac." Done on the Bookcase's top line in both voices. **Where the phone still says "shelf":** the pocket guide's text ("a
-  book on your shelf", "The SHELF is home", "on the shelf's top line" — and it says Settings is on that line, which is no
-  longer true) — VM-212; the Debug-only guide door's note "The pocket guide is on your shelf." — VM-211; the refusal
-  sentences about a shelf ("That shelf isn't there any more…") mean the Bookcase's shelves and are right. "Pin to Shelf
-  Top" is gone (the fixes run).
+  matching the tab, your swipe names and the Mac." Done on the Bookcase's top line in both voices. **Where the phone
+  still says "shelf":** the pocket guide's text ("a book on your shelf", "The SHELF is home", "on the shelf's top
+  line" — and it says Settings is on that line, which is no longer true) — VM-212; the Debug-only guide door's note
+  "The pocket guide is on your shelf." — VM-211; the refusal sentences about a shelf ("That shelf isn't there any
+  more…") mean the Bookcase's shelves and are right. "Pin to Shelf Top" is gone (the fixes run).
 - **Your wave rulings.** LK-1/LK-2 (the library's voice and palette; light or dark per device) — as built; before a
   library opens, the phone wears Study under the sea-glass (P-47-15). LK-5 (three words at 17, a chip, 56-point
   targets, "Roots and lists, not notes") — as built; Read, a version's reader and Protection have no bar (P-47-18);
@@ -419,7 +419,7 @@ read›.
   P-47-39 asks about your own words in it. SW-1 (the Starred · Bookcase · Library swipe) — kept; the wing title's swipe
   and dots are wave 2's (VM-80).
 - **The tickets' "every".** "a 44 pt minimum for every target" (VM-49): every tappable spot the audit counted is done or
-  named with its owner below. "Nothing on the phone is set below 13 pt" (VM-48): held everywhere except the note's own
+  named with its owner below. Batch 1's "Nothing on the phone is set below 13 pt" (VM-48): held everywhere except the note's own
   body in Terminal at the very smallest text setting, about 12.4 points (VM-137, the editor's run). "reachable from
   every screen" (VM-53's title; its text says "from every root and from a note", which shipped): pushed lists, Read
   and Protection have no Settings door of their own — no ticket owns that (checklist item 5).
