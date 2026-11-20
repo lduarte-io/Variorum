@@ -511,6 +511,12 @@ THIS RUN'S DEFECT.
 - FIXED — `67525b499` (the band's clip is sideways only, `MobileBandClip`); pin `MobileScreenEdgeGroundsTests`; re-capture:
   c1, c2, c3, c5, c8 in all eight part A combinations (read (3, 30), (200, 860) and, keyboard up, (110, 500)), and part B's
   b1, b4, b5, b8 and s03b in both its combinations (a pushed list's, Read's and Protection's grounds to the edges).
+- REDONE — `5daf61efd` (pins `9f0dc1229`; the UI test `b1e345be0`): the first fix's sideways-only clip let each page's
+  CONTENT out with its ground (W-E3, W-E4, W-F1), so the band's `.clipped()` is main's line again and the strips beyond the
+  band are painted by the SHELL, behind it, in each page's declared edge grounds (`Features/Shell/MobileEdgeGrounds.swift`;
+  the record §6, "W-A1 redone"). Kept: the roots' room, a pushed list's paper above and the bar's room below, the note's
+  paper, Protection's room, all to the screen's edges. Given back by design: the Read page's cream page ends at the band's
+  foot again, as on main (its room below). Re-capture owed: the record's list.
 
 **W-A2 — The Bookcase path line, as built under P-47-27 (a): what gives way, measured.** A QUESTION FOR HER (already
 hers: P-47-27, R-47-3).
@@ -1205,6 +1211,10 @@ ANOTHER TICKET'S — VM-137 (Umbrella: Writing — the keyboard bar), and a look
   it is still bare after the re-capture, that is the bar's" — it is no longer bare: it is her text).
 - Class: ANOTHER TICKET'S — VM-137 (the bar's shape and ground); for her: whether her words may show through the bar's
   glass (the system's own idiom) or the bar sits on a ground of its own.
+- FIXED — `5daf61efd` (W-A1 redone): the band clips at the keyboard bar's top again, as on main, so nothing of her prose is
+  drawn behind the bar's cells; behind the bar and the keyboard is the painted strip in Write's paper. The look question
+  (her words through the bar's glass, the system's idiom) no longer arises from this run; the bar's own ground stays
+  VM-137's. Re-capture c8/c9 owed.
 
 **W-E4 — Focusing the note at its middle no longer scrolls it; where the caret went is hidden.** CLASS PENDING ONE CAPTURE
 — THIS RUN'S DEFECT if the caret is under the keyboard (the editor seam; Fable's review class).
@@ -1263,6 +1273,11 @@ Study light default, the fanned lesson: log `editor.frame`; `tap(editor, "editor
 above the bar's cells (≤ ≈ 485 pt), block 3 moved up, the "x" seen in e4b. FAIL — THIS RUN'S DEFECT (the editor seam,
 Fable's class): block 3 still at 541.7, no caret and no "x" above the bar; `editor.frame.maxY` past the keyboard's top is
 then the root to trace.
+- FIXED — `5daf61efd` (W-A1 redone): main's `.clipped()` on the band is restored and everything inside the band is laid out
+  and clipped as on main — the road the 146 / 118 pt reveal ran on (the orchestrator's settling capture proved the defect on
+  the first fix's app: the editor shortens to 539 pt, the caret's line is not scrolled into it). Held by the committed UI test
+  `VariorumMobileUITests/MobileKeyboardRevealUITests` (`b1e345be0` — red on the first fix's app by design; its run PENDING);
+  re-capture f3–f5 and r13 owed.
 
 **What I could not judge, and why**
 - **W-E4's caret:** under the comments overlay in f3 / f4, and the keyboard gone in f5; no capture of this set shows the
@@ -1318,6 +1333,10 @@ P-47-20, the pushed screens' top edges).
   ground still reaches the edge (the band's clip keeps its sideways and bottom reach but takes its top at the safe area,
   with the page's own ground painted above it) — every page, one place; (c) the Read page alone keeps a solid top band in
   its room above its prose (the reading page is where her words are the page), the lists left as (a).
+- FIXED — `5daf61efd` (W-A1 redone): a scrolled page's content stops at the band's top again, and the page's own ground is
+  painted above it (the Read page's room) — the content-at-the-safe-area half of option (b), at the top and the foot alike;
+  pinned by `MobileScreenEdgeGroundsTests.aScrolledPagesWordsStayOutOfTheStatusBar`. Re-capture r04b owed; whether a
+  question for her remains is the orchestrator's call after the captures.
 
 **Set 1's W-E4 on a second road (not re-filed):** `seaglass-study-light-default--r13-comments-overlay` and
 `seaglass-terminal-dark-default--r13-comments-overlay` show the same thing as f3–f5 — the note behind the Comments overlay

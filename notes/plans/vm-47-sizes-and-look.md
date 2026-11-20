@@ -728,12 +728,12 @@ hold it, and re-captured), a defect another ticket owns (named), or a question f
 | W.7s | The window's one red: the first batch's door rule flags `pagePlainField`'s placeholder | DONE (this commit) — traced: `insideADoor` takes any enclosing block whose opening line holds "label:" for a door (a `label:` closure), and `pagePlainField(_ label: String, …)`'s signature holds it; no role (`Text(label)`), no glyph, no edge — so the placeholder's faint read as a door's word; fixed (b), test-only: the door rule gains the sibling's placeholder exemption (a line holding "prompt"); measured by a verbatim port: 13 sites at `273bcec51` with and without it, 1 at `70320b2bb` without it (`AuthViews.swift:469`), 0 with it; production untouched (no Mac build owed); `theAccountSheetsFieldsGiveTheirPlaceholderOnThePhone` (7 fields, 0 offenders) and `everyPhoneFieldIsBuiltWithItsPlaceholder` (the phone tree, unchanged) hold by their own patterns; phone `build-for-testing` into `vm47-fix` GREEN; the re-run rides the orchestrator's next window |
 | W.8 | The record: the findings file closed; §5 for any new question; this row flipped | NOT-STARTED |
 | W.9 | The RE-CAPTURE (part C of the walk) on the fixed, re-landed tree — the fixes' re-shoots, the four conflict screens after main's merge, the evidence gaps (the message line's Undo, the take peek, the caret, the pill) — on the kept device `vm47-walk`, into the gitignored `notes/plans/vm-47-screens/recapture/` (parts A and B stay in `final/`) | DRIVEN BY THE ORCHESTRATOR, 21:49–22:28 under its stage claim (45 minutes, no renew; released 22:28:07), the walk app rebuilt at 20:22 on the merged tree's app code (`4866c7fb8`): **164 captures of 166**, every step run, none dropped for time, all eleven driver tests passed — the core in four combinations (Study light 16, Terminal dark 16, Terminal light AX5 10, Study dark 16), the bar's roads ×2 (19 + 19), the wider pass ×2 (23 + 23), Settings' flows 16, the border flip 6. The message line's Undo was PRESSED IN TIME in both combinations ("UNDO pressed 2.0 s after the removal") and `m3-after-undo` is captured; the take's peek state was CAUGHT in the three default-size core runs and in the flip (the pill up, the shot 0.9 s after the flip — the phone has no held mid-drag peek: a take flips when the swipe ends); the caret is shot three times per run. The TWO missing: `r05b-create-book-smart` in both wider passes — the driver looked for the kind segment by its old label "Smart Book", and the merged tree says "Gathering" (the driver's stale label; re-shot in the final-tree pass). The two Account-sheet steps were skipped beforehand: a dev store's sync row has no Account door, so that sheet stays unseen by any capture (§5, "Held for her hands"). The device is SHUT DOWN and KEPT; its app container lists `Variorum-dev` only; no Problem Reporter, no new crash report. READ by two fresh readers into `notes/plans/vm-47-walk.md` §4e and §4f — PENDING |
-| W.10 | W-A1 REDONE (implementer: Opus, 2026-11-19 night) — the band's `.clipped()` back exactly as on main and `MobileBandClip` deleted, so W-E3, W-E4 and W-F1 cannot come from this run; W-A1's result given back by the SHELL painting the strips beyond the band, behind it, in each page's DECLARED edge grounds (§6, "W-A1 redone") | IN-PROGRESS — pieces below |
+| W.10 | W-A1 REDONE (implementer: Opus, 2026-11-19 night) — the band's `.clipped()` back exactly as on main and `MobileBandClip` deleted, so W-E3, W-E4 and W-F1 cannot come from this run; W-A1's result given back by the SHELL painting the strips beyond the band, behind it, in each page's DECLARED edge grounds (§6, "W-A1 redone") | DONE (`5daf61efd`, `9f0dc1229`, `b1e345be0`; the record this commit) — both builds green; the test windows, the red-on-old snapshots and the re-captures PENDING (the orchestrator's — §6 "W-A1 redone": the matrix, the recipe, the zsh array, the UI test's line, the captures owed); merged into by `3d55b51f6` (main `64fde83b0`) with every line of the redo standing (read after the merge) |
 | W.10a | Reading: CLAUDE.md, the resiliency protocol, `vm-47-walk.md` §6 (W-A1, W-E3, W-E4 with its TRACE, W-F1) and §4e/§4f's W-A1 rows; this record §6 (W-A1's block, batch 3's grounds table, batch 4's bar); the shell whole, every page's ground line, `67525b499`, main's line; the walk driver (read-only, for the UI test's helpers); one Sonnet lookup (XCUITest screenshot/attachment/keyboard APIs; preference propagation and appear/disappear across `NavigationStack` — the latter two undocumented) | DONE |
 | W.10b | The code: `Features/Shell/MobileEdgeGrounds.swift` (new — the declaration, the shell's board and its pure rule, the environment entries, the page modifier, the painted layer); `MobileShellView` (main's `.clipped()` and comment back, `MobileBandClip` gone; the board held; the layer as the band's `.background`; the board and stack set per band page; the root marked, every destination marked not); the ten pages' declarations (Bookcase, Library, Starred · a book's contents, Trash, Archived, Versions · Read · Write · Protection) | DONE (`5daf61efd`) — BUILT GREEN (row W.10f) |
 | W.10c | The pins: `MobileScreenEdgeGroundsTests` extended (its three pins unchanged) — a pushed list's grounds; a scrolled Read page's words never under the status bar; the Read page's words stop at the band's foot; the Read page's room at both strips; the board's rule (`MobileEdgeGroundsBoardTests`) | DONE (`9f0dc1229`) — built green (row W.10f); RUN PENDING (the orchestrator's window; the matrix in §6 "W-A1 redone") |
 | W.10d | The keyboard reveal's committed UI test, `VariorumMobileUITests/MobileKeyboardRevealUITests` (the orchestrator's added piece): a long lesson tapped below the keyboard bar's top, the software keyboard proven up, one letter typed, the screen read above the bar for it; cleanup | DONE (this commit) — the bundle built green (row W.10f); RUN PENDING (the orchestrator's, a dedicated simulator under its claim) |
-| W.10e | The record: §6 "W-A1 redone" (why, the mechanism, the pins and their matrix, what each page declares, the snapshot recipe, the UI test's run line, the re-captures owed); one line under W-A1, W-E3, W-E4, W-F1 in `vm-47-walk.md` §6 | NOT-STARTED |
+| W.10e | The record: §6 "W-A1 redone" (why, the mechanism, the pins and their matrix, what each page declares, the snapshot recipe, the UI test's run line, the re-captures owed); one line under W-A1, W-E3, W-E4, W-F1 in `vm-47-walk.md` §6 | DONE (this commit) — §6's block sits before "Closeout"; §5 untouched (the orchestrator's call once the captures are in) |
 | W.10f | After "QUIET over": the phone `build-for-testing` and the UI-test bundle's (`TK2SpikeUITests`) into `DerivedData/vm47-fix`, incremental, one at a time (no `Shared/` file changes, so no Mac build) | DONE (after QUIET's end, 23:39) — the phone `build-for-testing` at `9f0dc1229` + the UI test `** TEST BUILD SUCCEEDED **`; the `TK2SpikeUITests` bundle `** TEST BUILD SUCCEEDED **`; no warning in any file this redo touched |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks — each step since DONE (rows M.1–M.6), and round 1 found the fix pass APPLIED AS CONFIRMED (`vm-47-ladder-round1.md` §1). The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) was then still queued — since SUPERSEDED (row 2.9; the run's one walk, §3) |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
@@ -2714,6 +2714,231 @@ cases), and with it the two whose walks the sweep read as holding: `VariorumTest
 `VariorumTests/VM61MacStatusSeamPinTests` `VariorumTests/VM62MacRefusalWordsPinTests`
 `VariorumTests/VM63MacWingBrainsHoistPinTests` (all five green in the window except the red; the re-run is the
 fix's evidence); the phone — none.
+
+### W-A1 redone — the band's clip restored, the grounds painted by the shell (implementer: Opus, 2026-11-19 night)
+
+**Not done, first:** no test was run (every run is the orchestrator's — "The windows" below), no re-capture was shot (owed —
+"The re-captures owed"), no Mac build (no `Shared/` file changed). `MobileTabBar.swift`, `MobileEditorTextView.swift`,
+`MobileEditorViewModel.swift`, `MobileKeyboardBar.swift` and `Shared/` are untouched. Pieces: `5daf61efd` (the code),
+`9f0dc1229` (the pins), `b1e345be0` (the UI test; both builds green), §4 rows W.10–W.10f.
+
+**Why.** The first fix (`67525b499`) gave W-A1 its result by letting each page's own ground run past the band —
+`.clipShape(MobileBandClip())`, a clip free above and below — and with the grounds it let every page's CONTENT out:
+- **W-E4** (the serious one): with the software keyboard up, a mid-note tap no longer moves the note above the keyboard —
+  0 pt where main moved it 146 pt (Study) / 118 pt (Terminal), on three roads, both voices. The orchestrator's settling
+  capture on the first fix's app, Study light: the editor's frame (0, 283, 402 × 557) before the tap at (201, 561.5),
+  402 × 256 after it (ending at 539) — so the text view DOES shorten to the keyboard; what is missing is the scroll that
+  brings the caret's line into it; the keyboard's frame (0, 583, 402 × 233), the bar's block cell at 496.7; no caret above
+  the bar; a typed "x" lands in the text (it grew by one) and nowhere on the visible page.
+- **W-E3**: her prose ran behind the keyboard bar's glass cells and was cut at the keyboard's top.
+- **W-F1**: on a scrolled page (a book's Read page) her words ran up under the status bar.
+Still inferred, not traced: how the band's clip feeds UIKit's caret reveal (the guess stands — over hosted UIKit content
+`.clipped()` is a clipping ancestor at the band's frame, which shrinks to the keyboard bar's top, where the shape clip was a
+mask that marked nothing as covered). The redo does not need that road traced: it puts the one line back, and the UI test
+holds the road itself.
+
+**What makes the reveal main's again (by reading; the proof is the UI test).** Main's band is `GeometryReader { ZStack { the
+three pages } .frame(…) .clipped() .contentShape(…) .coordinateSpace(…) .simultaneousGesture(…) }`; the redo's band is that,
+line for line — `git diff origin/main -- …/MobileShellView.swift` shows no change from the `.frame(width:height:)` line
+through the gesture, the clip's comment included. What the redo adds sits outside the clipped subtree or moves nothing:
+(1) a `.background` on the `GeometryReader` — behind the band, never inside its clip, and a background never changes the
+size of the view it backs, so the band's frame (the safe area, shrinking to the keyboard bar's top) is main's; (2) three
+environment values per band page and one on each stack's root and each destination — values, no views; (3) one
+`.mobileEdgeGrounds` modifier per page — appear/disappear/change hooks, no view and no frame. The band's clip is the one line
+on the reveal's road that differed between main and the first fix (the trace: nothing else on that road moved), and it is
+main's again.
+
+**The painting** (`App/Variorum/VariorumMobile/Features/Shell/MobileEdgeGrounds.swift` — its header is the full statement).
+- *Who declares:* each page, in its own body, `.mobileEdgeGrounds(top:bottom:)` — a page knows its ground; the shell never
+  guesses one from the route. A no-op outside a shell (harness mounts, previews).
+- *The road:* an environment board, `MobileEdgeGroundsBoard` (held by the shell as `@State`; the board and the band page set
+  per page in `page(_:)`; "at root" set true on each stack's root and false, explicitly, on every destination in `stack(…)`) —
+  declared at a page's appearance, revised when its grounds change, withdrawn at its disappearance. NOT a SwiftUI preference,
+  by design: a preference's reduce sees every mounted page of all three stacks — both band neighbours, and a root still
+  mounted under a pushed screen — with no order SwiftUI documents between a stack's root and its destinations, and whether a
+  custom preference crosses a `NavigationStack`'s per-screen hosting at all is undocumented (the lookup: nothing from Apple,
+  only iOS 13-era `NavigationView` reports). The orchestrator's brief named a preference; this is the deviation, and why.
+- *Who paints:* the shell — `MobileEdgeGroundsLayer`, the band's `.background` (`MobileShellView.body`): its top half the
+  showing page's top ground carried up past the status bar, its bottom half the bottom ground carried down past the home
+  indicator and the keyboard (`ignoresSafeArea(.all, edges: .top / .bottom)` — never the sides, so the guard pin holds); the
+  halves split at the band's middle, inside the band at any portrait keyboard height; no hit testing, hidden from
+  accessibility.
+- *What wins* (`MobileEdgeGroundsBoard.showing`, pure, pinned in `MobileEdgeGroundsBoardTests`): only the CURRENT band page's
+  stack (`tab`); while that stack stands at its root (`pagingAllowed`) its root's declaration; otherwise its NEWEST pushed
+  screen still declared, and the root's until a freshly pushed screen has declared; nothing declared: the room.
+  - a push: the arriving screen from its first appearance; a pop to the root: the root as the path empties (before the
+    popped screen's disappearance); a pop between pushed screens: the one below at the popped screen's disappearance;
+  - a tab change from a pushed list: the leaving stack pops to its root unanimated, then the band slides — both pages are
+    roots; a band swipe: only roots page (the root-surfaces-only rule; a hidden stack always stands at its root,
+    P-47-19); every root declares the room at both edges, so neither shows a mismatch;
+  - a sheet over a page: the strips belong to the presenting screen, dimmed with it by the system.
+- *The bottom strip and the bar:* wherever a bar stands at the foot (`barOnScreen` — VM-55's re-land's own fact: a root, or
+  a pushed list wearing its bar) the bottom strip is the bar's ground, `tokens.room` — the bar draws its room inside the band
+  down to the band's foot (`MobileTabBar.body`, unchanged; clipped there as on main) and the painted strip continues it from
+  the foot to the screen's edge. One token on both sides of the band's edge: no seam; one hairline, the bar's own at its top.
+- *With a keyboard up:* the band ends at the keyboard bar's top (main's); behind the bar's glass cells, the keyboard's
+  rounded corners and the keyboard is the painted bottom strip — Write's paper in a note; the room on a root (the bar rides
+  above the keyboard there); nothing of her prose is drawn behind the bar.
+
+**What each page declares** (top / bottom):
+
+| Page | Top | Bottom |
+|---|---|---|
+| Bookcase · Library · Starred (roots) | the room (the path line's band) | the room (the bar's — the shell paints the bar's room while it stands) |
+| A book's contents · Trash · Archived (pushed lists) | the paper (`tokens.surface`, the whole page) | the paper (under its bar, the shell's bar room shows) |
+| Versions | the paper | the listing's paper (under its bar: the room); while a moment is read, the room — the reader's verbs band sits on the room at the foot |
+| A book's Read page | the voice's own room (`ReadingPageTokens.room`, never the palette's) | the same |
+| Write (and its three UIKit overlays, inside it) | the paper | the paper |
+| Protection | the room | the room |
+| anything undeclared | the room (the shell's fallback) | the room |
+
+**What the painted layer cannot do, said plainly.**
+1. *One colour per strip across the width.* During a push or a pop between pages whose grounds differ (a root's room and a
+   list's or a note's paper), the strip takes the arriving page's ground at its first appearance (a push) or the root's as the
+   path empties (a pop to the root), and does not slide with the pages: for the slide's ≈ 0.35 s the part of the strip above
+   the outgoing page wears the incoming page's ground. The first fix had each page's ground slide with it. It is never the
+   window's white or black, never a band neighbour's, never a page that has left the stack. (A crossfade was not built — it
+   would show a third colour neither page wears.)
+2. *The Read page's foot.* The cream page is scroll content, so it ends at the band's foot again — its last visible line cut
+   at the band's edge (≈ 840 pt), exactly as on main (the twins' "the card flat at 840, its line cut mid-glyph"); the
+   re-capture's F7 ("no line is cut") is given back by design, and the strip below is the Read page's room. Any page whose
+   content scrolls to the foot is cut at the band's edge the same way (as on main).
+3. *A cancelled interactive swipe-back between two PUSHED screens* (Versions over its note; a note over a book's contents):
+   SwiftUI documents no appear/disappear sequence for it (the lookup — nothing reliable). If the screen below re-appears at
+   the swipe's start and no disappearance follows the cancel, the strips wear the lower screen's grounds while the upper one
+   shows — a wrong colour in a strip, never content. Between a root and a pushed screen it cannot happen (the root wins only
+   while the path is empty). The bar's own `listBarsShowing` count (VM-55's re-land) rests on the same pairing.
+
+**The pins and their matrix.** `MobileScreenEdgeGroundsTests` (its three first-fix pins byte-for-byte unchanged — only the
+file's header was brought up to the redo) + `MobileEdgeGroundsBoardTests` (new). The no-content pins read a strip as ONE
+ground: no pixel more than 0.03 a channel from the strip's commonest colour (the walk's faintest ghost under the status bar
+was ≈ 0.12); each first proves her words ARE right inside the band's edge (ink ≥ 3:1 there), so none can pass on an empty
+page. The Read page is reached through the shell's own doors — the long book's Bookcase row, then the contents' Read door in
+the navigation bar, driven by each road a bar door answers to in turn (accessibility activation, the control's actions, the
+bar item's action) with the arrival proven every time: a door that cannot be driven in process fails the pin by its own
+message, never passes it. Columns: the FIRST FIX = 3c960718a's app code; the REDO = `b1e345be0`; MAIN'S BAND = the redo with
+its painted layer removed — the band byte-for-byte main's (main's own tree cannot host these pins: they read this run's
+settings → tokens road, `router.tokens(dark:)`, which main does not have).
+
+| Pin | First fix | Redo | Main's band |
+|---|---|---|---|
+| `onARootTheRoomRunsToBothEdges(dark:)` ×2 (unchanged) | green | green | **RED** (the sentinel) |
+| `inANoteThePaperRunsToBothEdges(dark:)` ×2 (unchanged) | green | green | **RED** |
+| `theBandStillDrawsNothingPastItsOwnWidth` (unchanged, the guard) | green | green | green |
+| `onAPushedListThePaperRunsUpAndTheBarsRoomDown(dark:)` ×2 (new — the Trash; back on the root, no stale paper) | green | green | **RED** |
+| `onTheReadPageItsOwnRoomFillsBothStrips(dark:)` ×2 (new — what Read declares) | **RED** (the foot: the cream page and her lines ran on) | green | **RED** |
+| `aScrolledPagesWordsStayOutOfTheStatusBar(dark:)` ×2 (new — W-F1) | **RED** | green | green |
+| `aPagesWordsStopAtTheBandsFoot(dark:)` ×2 (new — the band clips its content at its foot) | **RED** | green | green |
+| `MobileEdgeGroundsBoardTests` (7, new — the rule) | — (no board there; removed from that snapshot) | green | green |
+| `MobileKeyboardRevealUITests` (the UI test, below) | **RED** | green | green |
+
+All PENDING the orchestrator's runs. (The "band clips its content" check the brief offered as mounted or rendered is the
+rendered one: `aPagesWordsStopAtTheBandsFoot` at the foot and `aScrolledPagesWordsStayOutOfTheStatusBar` at the top.)
+
+**The snapshot recipe** (each a detached worktree, never this one; its own DerivedData; staged there, never committed):
+```zsh
+# THE FIRST FIX — the redo's tests over 3c960718a's app code (the only app commits since are the redo's three):
+git -C ~/dev/variorum-vm-47 worktree add --detach ~/dev/variorum-vm-47-rolx b1e345be0
+cd ~/dev/variorum-vm-47-rolx
+git checkout 3c960718a -- App/Variorum/VariorumMobile        # the shell's clipShape line, MobileBandClip, the pages as they were
+git rm -q App/Variorum/VariorumMobile/Features/Shell/MobileEdgeGrounds.swift \
+          App/Variorum/VariorumMobileTests/MobileEdgeGroundsBoardTests.swift
+git diff --cached --stat     # expect: MobileShellView + the ten pages reverted, the two files removed — nothing else
+cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm47-rolx
+# the UI test's red needs the same tree's app: also
+xcodebuild build-for-testing -project Variorum.xcodeproj -scheme TK2SpikeUITests \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm47-rolx
+# MAIN'S BAND — the redo with its layer removed (a second snapshot, or the first reset to b1e345be0):
+git -C ~/dev/variorum-vm-47 worktree add --detach ~/dev/variorum-vm-47-rolm b1e345be0
+cd ~/dev/variorum-vm-47-rolm && python3 - <<'PY'
+p = 'App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift'
+s = open(p).read()
+a = s.index("        // VM-47 (the walk's W-A1, redone): the strips BEYOND the band")
+b = s.index("        // VM-61: the one message line — its own overlay window over this")
+open(p, 'w').write(s[:a] + s[b:])
+PY
+git diff --stat              # expect: MobileShellView.swift, 13 lines out (the comment and the .background block)
+cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm47-rolm
+```
+On each: `-only-testing:VariorumMobileTests/MobileScreenEdgeGroundsTests` (and on main's band `…/MobileEdgeGroundsBoardTests`);
+the UI test from the first fix's snapshot with the line below and `-derivedDataPath DerivedData/vm47-rolx`. Remove both
+snapshots after (`git worktree remove`).
+
+**The UI test — `App/Variorum/VariorumMobileUITests/MobileKeyboardRevealUITests.swift`** (`b1e345be0`; the orchestrator's
+added piece). One method, `testAMidNoteTapRisesAboveTheKeyboard`, self-contained (the walk driver's proven helpers copied in,
+not depended on): the hardware keyboard detached at its start, the lobby's once-shown cards passed (the twelve words never
+captured), the pocket guide opened through Settings' Debug door (seeded when missing), its long lesson "swipe & choose" by the
+Library's search; the editor tapped at its centre. PREMISE asserted: the tap's y below the keyboard bar's top (the bar's
+block cell's top less its 10 pt of air, never below the keyboard's own top — ≈ 486.7 on the orchestrator's frames, against
+the tap's 561.5); one re-tap 40 pt below the bar's top if not; else INCONCLUSIVE. A software keyboard with a real height is
+asserted (else FAIL "no software keyboard" — never a pass). THE FACT, from the screen's own pixels (XCUITest cannot read a
+caret rect; the pixel scale is measured, pixels ÷ points, never assumed): S0 once the keyboard has settled, S0b 0.6 s later
+with nothing typed (the control), S1 after ONE letter (the keyboard's own key, else `typeText`); only the band from the
+editor's top to the bar's top is read; S1 must differ from BOTH S0 and S0b there by at least a glyph (≥ 30 px spanning
+≥ 4 pt — a caret's blink is 1.7 pt), while the control may differ by no more than a caret (≤ 3 pt wide) and the band's top
+60 pt may not differ between S0 and S1 at all (a page that changes by itself or moved fails as INCONCLUSIVE). It cannot pass
+when the letter is hidden: under the keyboard nothing above the bar changes, so both differences are empty — RED. The three
+screenshots and the frames and difference rows are kept as attachments (and printed "REVEAL …"). Cleanup runs BEFORE the
+assertions: the letter deleted when proven landed (the text grew by one) — one unproven delete, said so, when the text
+cannot be read — the lesson's text checked back as it was, the keyboard dropped by a drag (never Return), Back.
+- Run (from `App/Variorum/`, under a held stage claim, on a DEDICATED simulator, never the shared suite device):
+  `xcodebuild test-without-building -project Variorum.xcodeproj -scheme TK2SpikeUITests -destination 'id=<the dedicated
+  simulator>' -derivedDataPath DerivedData/vm47-fix -only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`
+- Red recipe: the first fix's snapshot above (its app is what the UI-test scheme builds and launches).
+- **Re-run it** on any change to the shell band's clip or frame (`MobileShellView.body`), the Write screen's layout
+  (`MobileWriteView`), or the editor host's keyboard handling (`MobileEditorTextView`), and with the per-release device
+  checks (TEXTKIT2_NOTES §5). It is not part of the unit targets' whole-run gates.
+
+**The windows (READY — the orchestrator's; from `DerivedData/vm47-fix`, built at `b1e345be0`).** Phone,
+`-only-testing:VariorumMobileTests/<type>` for each of:
+```zsh
+phone=(MobileScreenEdgeGroundsTests MobileEdgeGroundsBoardTests
+  MobileShellTests MobileTabBarTests MobileNavigationTests MobileRootMenuTests MobileFilterTests MobileVersionsTests
+  MobileStarsTests MobileLivenessTests MobileVoiceTests
+  MobileMessageLineFaceTests MobileLineDoorTests MobileLineShowRuleTests MobileMessageLineGeometryTests
+  MobileMessageLineHostTests MobileMessageLineInsetTests MobileMessageLineSceneTests
+  MobileWingDoorTests MobileWingDoorGeometryTests MobileWingDoorShellTests MobileWingListSheetTests MobileWingListingTests
+  MobileShelfLayoutBrainTests MobileShelfRenderedLayoutTests MobileShelfTodayDoorTests MobileShelfMarkerColumnTests
+  MobilePathLineGeometryTests MobileFilterRowGeometryTests MobileLibraryLookTests MobileLibraryTests MobileTrashTests
+  MobileReadTests MobileWriteLatchTests MobileWriteScrollAuthorityTests MobileHiddenPageKeyboardTests
+  MobileLookSourceTests MobilePhoneTypeSourceTests MobilePhoneControlsSourceTests
+  MobileFaintOnDoorsSourceTests MobileFieldPlaceholderSourceTests MobileFaintOnDoorsRenderedTests
+  MobileProtectionCompositionTests MobileProtectionReceiptsTests)
+```
+(`MobileLookSourceTests`, `MobilePhoneTypeSourceTests`, `MobilePhoneControlsSourceTests` are the three source rules; the
+redo's lines were written against `MobileLookSourceTests`' grounds patterns — no pushed page gains a room ground line, Read
+keeps `ReadingPageTokens.room(` and no `.background(tokens.room`, Write no room. `MobileProtectionCompositionTests` and
+`MobileProtectionReceiptsTests` hold source rules over the shell's file; `MobileTabBarTests.theRouteRuleIsTheDestinationBuilders`
+reads the destination builder, which the redo did not touch.) Then the UI test, the line above. No Mac run: no `Shared/` file
+changed.
+
+**The re-captures owed** (the walk's kept device, both voices where the surface has a face, light and dark): the roots — c1
+(the Bookcase), c3 (the Library), r01 (Starred) — their status-bar and home-indicator strips the room; a pushed list — b1 (the
+Trash), b4 (a book's contents), r15 (Archived) — the paper above, the bar's room below, one hairline; Write — c5 at rest (the
+paper at both strips) and c8/c9 with the keyboard up (the paper behind the keyboard bar's cells and the keyboard's corners,
+NO prose behind the bar — W-E3 — and the caret above the bar — W-E4, which the UI test also holds); the Read page — b5/r04 at
+rest (its room above and below; the cream page cut at the band's foot, as on main) and r04b scrolled (nothing of her words in
+the status bar's strip — W-F1); the Versions reader — b9 (the room under its verbs band); Protection — b13/s03b (the room at
+both strips); a sheet over a root — w1 or r05 (the dimmed room in the strips); and one push and one pop caught mid-slide
+(the strip's switch, approximation 1) if the driver can catch it.
+
+**Risks, as I see them.**
+1. *The Read door in process.* No suite before these pins drove a navigation-bar door in the unit-test host; the helper tries
+   three roads and proves arrival each time — if all three fail in the host, the three Read pins fail by their own message
+   ("the Read page did not arrive …"), never pass; the remedy would be a different road to the page, not a looser pin.
+2. *The first fix's red for the no-content pins rests on `drawHierarchy` drawing the scroll's content beyond the band as the
+   screen did* (F7, F8 were screen captures). If the host renders the iOS 26 scroll-edge effect stronger than the screen, the
+   status-bar pin's red on the first fix could be weaker; the foot pin does not pass under that effect (no edge effect at the
+   foot of a bar-less page).
+3. *The UI test's "page moved" guard* could fail as INCONCLUSIVE on the redo if typing at a caret flush with the band's foot
+   made UIKit scroll again by a few points (Terminal's reveal lands the caret's line exactly at the bar's top). It would say so
+   in its own words, with the rows; it cannot pass falsely.
+4. *Approximation 3* (a cancelled swipe-back between two pushed screens) is unpinnable in process and undocumented; a strip
+   colour only.
+5. *The keyboard bar's top* is read from its block cell (`kbar.block`) less 10 pt; if VM-137 moves the bar's cells, the
+   test's band edge moves with them (it reads the frame live), but the 10 pt of air is a constant of today's bar.
 
 ### Closeout (written 2026-11-19, before the merge — documents only; every slot is filled at the merge)
 
