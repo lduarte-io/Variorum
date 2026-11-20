@@ -563,3 +563,44 @@ pins are unrun, so that answer is owed again once the gate's reversed-build and 
 build's reds — exactly the three pins at 3 · 2 · 2, round 2's four 8-of-12 pins and the new guard green on both
 builds; then that `merged` bounds every decoded number before it is added and that its pin ran red before the fix;
 then that the migration commit's diff is comment lines alone.
+
+## The orchestrator's line-by-line check (the final round's fixes)
+
+*Round 3 found no new blocker or major, so no later round reads its fixes; by CLAUDE.md's rule the orchestrator read
+each fix against its finding and the reviewer's final call, in the code, at tip `d54a6ed58` (final code `8be3a1f30`).
+What was read, and what it showed:*
+
+- **Finding 1 — `MobileLibraryViewModel.land`, the one `else if`** (`848b98b66`): `state.next == nil, page.next != nil,
+  page.items.count <= rows(question.listing).count` ⇒ `wantsMore = true`, evaluated before `place` replaces the rows.
+  Traced against the machine around it: a delete of a fully listed listing's row re-asks at the listed depth and lands
+  one row fewer with no cursor (nothing raised); the line's Undo re-asks at that shorter depth and lands the same count
+  WITH a cursor — the condition holds, `askForMore` inside `land` is refused while the follow runs, and the follow's exit
+  asks once; `loadMore` appends the missing page and `append` clears `wantsMore`. The last-row shape and the
+  row-above-the-end shape both end with the store's whole listing. No loop: this landing sets the cursor, so no later
+  landing can raise it again until an append has made the listing complete. A new question takes the first branch
+  (`wantsMore = false`). A short complete listing that one page reaches past (three rows, then a full page of four) fails
+  the count clause and is not chased — the guard `aShortCompleteListingThatAPageReachesPastIsNotChased` is built to the
+  final call's words (limit 4; 3 notes read hidden; 3 more; held; 4 rows and a cursor after 150 ms; the whole 6 by
+  `loadMore`). Cost: one more page per landing that broke completeness, ∝ what is listed (P1). **Matches the finding and
+  the call ((i′)).** Its three pins and the guard are HOSTED and have not run: the merge gate's phone leg runs them on the
+  hunk-reversed build (expected: exactly the three pins red at 3 · 2 · 2 issues, round 2's 8-of-12 pins and the guard
+  green) and on the fix (the suite green); any other red or count is explained here before the gate opens.
+- **Finding 5(b), first half — the decode and the readout** (`8d48a682c`): `TimingStats.init(from:)` takes the default
+  for a decoded capacity outside `1…defaultCapacity`; `TimingReport.number` maps a NaN to 0 and bounds the value to
+  ±10¹⁵ before any `Int(_:)`. Red then green headless (35 tests in 1 suite: failed with 5 issues on the pins-only tree,
+  passed on the fix). **Matches.**
+- **Finding 5(b), the `merged` arm — arm (B)** (`adc466230` the pin, `4bee11420` the bound): `bounded(_:)` =
+  `min(max(0, decoded), archivedCountBound)` (10¹⁵) is applied to the decoded series count, every decoded counter and the
+  three footer counts before each sum; the live side's counts are added unbounded (they are this process's own).
+  Nothing else in `merged` moved. The pin ran RED first (36 tests in 1 suite failed with 1 issue: the child exited by
+  SIGTRAP) and green with the bound. **Matches the call, pin first.**
+- **Finding 5(c) — `Migrations.swift`** (`705c6cf8a`): the diff is comment lines alone (2 removed, 4 added, all `//`)
+  in the `v1_38` block; no id, order or body moved; `MigrationTests` 33 tests in 4 suites passed after it. **Matches.**
+- **Findings 2(c), 2(d), 3, 4, 5(a)** — record, handoff and drafts edits; read in place (the handoff's "What happened"
+  and "Reviews" say what each round found, in plain words, with `PENDING(merge gate…)` kept beside round 3's "fixed";
+  P-2-4's wording says what is true while a save is stuck; the two readout caveats are in the readout steps; the
+  drafts' contract line carries no ladder reference). **Finding 5(d)** declined, accepted by the reviewer.
+- **Mine, done:** finding 3 is in VM-226's body; finding 4's two items are in VM-234's; (i′)'s residual is in VM-242's.
+  **Mine, owed at closeout:** finding 2(a) — the merge gate on the final tree (the whole phone target with the gated
+  suite's 13 said as skipped, the whole Mac target, the batches 6 + 7 walk) — and 2(b), FOR A LATER READER brought
+  current.
