@@ -1409,3 +1409,47 @@ items stand as before (F19, F25).
 - **W-E4's caret on r13:** under the overlay, as in set 1's frames.
 - **AX5, Study dark, Terminal light, teal & rust on these screens; the Account sheet:** not in this set (the walk never
   opens the Account sheet).
+
+### The final tree, set 1 — findings
+
+Read 2026-11-20 (§4g rows G1–G15): the 60 final-tree captures of the caret step, Settings' flows and the core in Study
+light and Terminal dark, on the final tree's app (W.11 — W-A1 redone, both merges of main in), each against its twin
+(`e4-before/` for the caret step, `recapture/` for the rest). Code read at HEAD `4b67459c4` (the record and this file only
+since the captures' app).
+
+| Run (test, combination) | Verdict in one line |
+|---|---|
+| `test70_caret`, `seaglass-study-light-default` (6) | **W-E4 fixed:** the mid-note tap scrolls the note 146.0 pt (main's), the editor ends at the bar's top (487.0), the caret (#3B6A59) stands on the line just above it (foot 483.0) and the typed "X" shows there; **W-E3 gone:** the paper behind the bar's cells and the keyboard's corners, the keyboard's glass flat; no unexplained difference. |
+| `test70_caret`, `seaglass-terminal-dark-default` (6) | The same at 118.0 pt (main's): the caret (#90C1AF) on "The rain came in from▏the sea" (foot 483.3), "fromx" after typing; behind the cells and the corners the dark paper #0F1A16, never black; no unexplained difference. |
+| `test50_settings`, `seaglass-study-light-default` (16) | W-A1's strips as the first fix gave them (roots the room, Protection the room, the note the paper, the sheets the dimmed presenter — #B7C0BD over a root, #CCCCCC over the note); the Timing… row at the Settings sheet's foot from every door (s03, s04, s06, s10, s11, s13); s12's one hairline and the alarm's Delete Note… hold; the Library's rows differ by the store's data only; no unexplained difference. |
+| `test10_core`, `seaglass-study-light-default` (16) | Roots and the note as the first fix gave them (no seam at 840, one hairline at 784); W-E3 gone in c8/c9; the Timing… row in Diagnostics, 44.0 pt, ink, 17 pt (k1–k3); filter row 5.08:1, placeholder 3.93:1, chips 5.93 / 15.40:1, the peek and pill, the accent caret — all as before; no unexplained difference. |
+| `test10_core`, `seaglass-terminal-dark-default` (16) | The same in Terminal's own inks (filter 6.44:1, placeholder 3.55:1, chips 5.46 / 12.56:1, "timing…" lowercased in the mono, #D6DAD2 12.56:1); the note's paper #0F1A16 to both edges and behind the keyboard bar; no unexplained difference. |
+
+**Earlier findings in this set, as they show now** (not re-filed): W-A1 — as the first fix gave it on every root, note,
+sheet and Protection, by the shell's painted strips (G4–G8); W-E3 — fixed (G3); W-E4 — fixed (G1, G2); W-A9, W-A10, W-B3,
+W-B4 — as fixed (G10–G12); W-E1 (the pill over her words) and W-E2 (the dark take tint) — as before (G13); W-A2, W-A5,
+W-A7 (the fields' blue caret: the box's in c2, the search's in c4) — as before, unchanged pixels.
+
+**No new finding.** Two small things seen and dispositioned in place, not filed: the back circle's soft shadow now stops at
+62.0 in Study light (a ≤ 5-level step, 1.03:1 — the band's restored clip, main's line; G6); and after the reveal the text
+view's top edge clips the line scrolled under it (its descenders under the chip row — a scrolled text view's own edge,
+G1, G2).
+
+**What I could not judge, and why**
+- **Paper or bare window in Study light:** Study's paper is #FFFFFF, the window's own white, so behind the keyboard bar,
+  beside the keyboard's corners and in the note's strips the painted paper and a bare window are the same pixels. The
+  evidence that it is the painted strip is Terminal dark's #0F1A16 at the same places, and the keyboard's glass, which
+  tints from what is behind it — #E2E4E8 over a note, #D9E0E1 over a root's room.
+- **The keyboard bar's top in Study light:** the cells' glass is not findable against white; 487.0 is the editor frame's
+  foot in the driver's log and the Terminal rim.
+- **The painted layer's three approximations** (the record's "W-A1 redone"): no capture in this set is caught mid-push or
+  mid-pop (the strip's switch), none is a cancelled swipe-back, and the Read page's foot is set 2's (r04).
+- **The reveal elsewhere:** at AX5, in Study dark (the other reader's set), Terminal light and teal & rust, and for a tap
+  lower than one line under the keyboard's top — not in this set. The UI test (W.11 (7)) is the evidence beyond these two.
+- **Hit areas:** drawn shapes only — the Timing row's 44.0 is its drawn row; its hit area is
+  `MobileSettingsListTests.everyDoorIsAWholeRowAtLeastFortyFourTall`'s (the record, 7b).
+- **The Timing readout itself:** no capture opens the door's sheet.
+- **The Library's order:** the caret step's typed-and-deleted letter moved "swipe & choose" to the Library's top (the
+  at-rest order is last-touched). Read as the store's data; the sort is not this run's surface and was not judged.
+- **What I did not open as an image:** the keyboard-only thirds and the thirds pixel-identical (≤ 3 levels) to a third I
+  opened (§4g, "How it was read") — checked by diff and column runs, not by eye.
