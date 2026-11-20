@@ -471,17 +471,20 @@ done):
 
 ## Canon
 
-- **The contract lines changed:** ‹PENDING: as applied from `notes/plans/vm-47-closeout-drafts.md` (a) at the merge —
-  SurfaceContracts › The app (the phone's look, sizes and taps, the bottom bar, Settings), › The Bookcase and books (the
-  Bookcase's top line), › Doors to the outside (the one Protection door); the message line's place above any bar; no
-  change to AppSpec›.
-- **Canon size:** ‹PENDING: `Tools/canon-size` at the merge›.
-- **MOBILE PARITY:** PL-‹PENDING› — the phone takes the Mac's look at phone-right sizes: a type layer that grows with
-  the system text size and never draws under 13 points, the phone's own readable greys, 44-point targets on one
-  spacing scale, one set of controls, the library's voice and palette (the theme store moved to shared code) with light
-  or dark per device, her words on the paper, the bottom bar on home pages and lists, Settings as one list from every
-  home page and a note, one Protection door; zero schema, marker untouched. The row's full text is in the drafts file,
-  (b).
+- **The contract lines changed** (applied on the branch, `71cae0706`, so they merge with the PR): SurfaceContracts ›
+  The app — the phone's look follows your library's voice and palette while light or dark is this phone's own (in the
+  voices bullet); a new bullet for the phone's sizes, greys, taps, controls and grounds, with how the screen's edges
+  are painted; a new bullet for the bottom bar; a new bullet for Settings; the message line's place above any bar ·
+  The Bookcase and books — the Bookcase's top line (in the wing switcher's phone passage) · Doors to the outside — the
+  one Protection door (in the protection bullet's phone passage). No change to AppSpec.
+- **Canon size** (`Tools/canon-size` after those lines; SurfaceContracts is not in the loaded set, so this run moves
+  none of it): `143606 total (harness limit 150000, headroom 6394)`.
+- **MOBILE PARITY:** PL-80 (applied on the branch, `notes/MobileSoul.md` §6) — the phone takes the Mac's look at
+  phone-right sizes: a type layer that grows with the system text size and never draws under 13 points, the phone's
+  own readable greys, 44-point targets on one spacing scale, one set of controls, the library's voice and palette (the
+  theme store moved to shared code) with light or dark per device, your words on the paper and every ground reaching
+  the screen's edges, the bottom bar on home pages and lists, Settings as one list from every home page and a note,
+  one Protection door; zero schema, marker untouched.
 
 ## What wave 2 needs from this run
 
