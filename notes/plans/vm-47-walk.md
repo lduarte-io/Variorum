@@ -333,6 +333,9 @@ THIS RUN'S DEFECT.
   around her paper in a note — not that. Evidence after: re-capture c1, c3, c5 and c8 in light and dark and read
   (3, 30), (200, 860) and, with the keyboard up, (110, 500). If the keyboard-bar band stays bare after the fix, the bar's
   own ground is the rest (VM-137 owns the bar).
+- FIXED — `67525b499` (the band's clip is sideways only, `MobileBandClip`); pin `MobileScreenEdgeGroundsTests`; re-capture:
+  c1, c2, c3, c5, c8 in all eight part A combinations (read (3, 30), (200, 860) and, keyboard up, (110, 500)), and part B's
+  b1, b4, b5, b8 and s03b in both its combinations (a pushed list's, Read's and Protection's grounds to the edges).
 
 **W-A2 — The Bookcase path line, as built under P-47-27 (a): what gives way, measured.** A QUESTION FOR HER (already
 hers: P-47-27, R-47-3).
@@ -360,6 +363,9 @@ hers: P-47-27, R-47-3).
 - Narrowest fix proposed: hold the reserved marker at the chrome's cap — `.dynamicTypeSize(...DynamicTypeSize.xxxLarge)`
   on that one `Text` (the default layout byte-for-byte unchanged) or give it the `meta` role. This alone leaves Terminal
   AX5 names still cut by the trailing meta (W-A4).
+- FIXED — `d974162f4` (the column takes `meta`, the role map's marker role; at the default size it narrows ≈ 2 pt); pin
+  `MobileShelfMarkerColumnTests`; re-capture: `seaglass-terminal-{light,dark}-ax5--c1-bookcase-rest`, the two Terminal AX5
+  `k0` frames, and `seaglass-terminal-{light,dark}-default--c1-bookcase-rest` (names start ≈ 45 pt, not 47.5).
 
 **W-A4 — At AX5 one-line rows cut her words: book names, Library titles and search hits.** ANOTHER TICKET'S — VM-218
 ("Every screen works with VoiceOver and at the largest text size"); the Library row's anatomy is VM-89's.
@@ -418,6 +424,11 @@ hers: P-47-27, R-47-3).
 - Narrowest fix proposed: the filter row's unchosen words to `tokens.phone.muted` (one line; it serves the Archive's
   row too); the masthead's empty chips to `tokens.phone.muted` and, so set and empty stay apart, the set chips to
   `tokens.ink` (the sheet's two chip inks) — the chips' capsule rebuild stays VM-148's.
+- FIXED — `36987c78e` (the filter row's unchosen words and the empty chips in the corrected muted, the set chips in ink —
+  PROVISIONAL P-47-29; the same class swept: Note Actions' and Book Details' detail lines, the link row's "opens",
+  Starred's "note"/"book", Create Book's tag paths, the Account sheet's tabs); pins `MobileFaintOnDoorsSourceTests`,
+  `MobileFaintOnDoorsRenderedTests`; re-capture: c3, c4 (both files) and c5 in all eight part A combinations, and part B's
+  r01, r03, r05b, r09 and s12 (r01's "note"/"book" now read in the corrected muted, not the faint §3's check names).
 
 **W-A10 — The search field's placeholder is the system's grey, under the sheet's floor.** THIS RUN'S DEFECT.
 - Captures: every `*--c3-library-rows` (and s2 under the iOS card).
@@ -430,6 +441,10 @@ hers: P-47-27, R-47-3).
   `Shared/Theme/PhoneControls.swift:299` (`phoneField`).
 - Narrowest fix proposed: pass the words as a `prompt:` `Text` in `tokens.phone.faint` (no rendered word changes); the
   other `phoneField` sites (the tag field, the book name, the protection fields — part B's captures) likely share it.
+- FIXED — `7734f0f05` (`TextField(phonePlaceholder:text:tokens:)` at the search, the tag field and Create Book's name;
+  `phoneField` hands the ink to `PeekableSecretField`, so every passphrase and twelve-words field; the Account sheet's
+  seven shared fields NOT covered — run record §6); pins `MobileFieldPlaceholderRenderedTests`,
+  `MobileFieldPlaceholderSourceTests`; re-capture: c3 in all eight part A combinations (and s2), and part B's r05 and r06.
 
 **W-A11 — At Terminal AX5 the filter row shrinks "bookless".** ANOTHER TICKET'S — VM-93 (the row's rebuild, owner of
 P-47-7's known issue).

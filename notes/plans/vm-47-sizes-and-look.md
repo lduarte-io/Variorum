@@ -624,9 +624,9 @@ hold it, and re-captured), a defect another ticket owns (named), or a question f
 | W.7a | W-A1 — the grounds stop at the safe area: the band's `.clipped()` (`MobileShellView.body`) cut every page's `ignoresSafeArea()` ground at the safe-area frame; replaced by a sideways-only clip (`MobileBandClip`, two band-heights free above and below); pin `MobileScreenEdgeGroundsTests` (rendered pixels of the real shell in a scene window with a sentinel host colour: the status-bar and home-indicator strips are the room on a root and the paper in a note, light and dark; a guard that nothing is drawn past the band's width) + the render helper `MobileRenderedPixels.swift` | DONE (`67525b499`) — code and pin WRITTEN; build PENDING (FREE TO BUILD); pin red-on-old and green-on-new PENDING (the orchestrator's window) |
 | W.7b | W-A3 — Terminal's reserved marker column (`MobileShelfView.bookRow`, the invisible "› ") was set in `rowTitle` (her words' class, full range), so it grew to ≈55 pt at AX5; now `meta` (chrome, holds at xxxLarge — batch 1's role map for markers; the wing list's ✓ column is the same construct on `meta`); the same construct swept on the other roots and lists (only the shelf reserves an invisible column); pin `MobileShelfMarkerColumnTests` (the name's first ink on the rendered Terminal shelf: AX5 no further right than xxxLarge) | DONE (`d974162f4`) — code and pin WRITTEN; build and runs PENDING |
 | W.7c | W-A9 — the corrected faint on live doors' words under 17 pt: batch 1's one-for-one `tokens.faint` → `tokens.phone.faint` kept the faint on words the sheet moved up to the corrected muted. Fixed (13 sites): the filter row's unchosen words; the masthead's chips take the sheet's two chip inks (empty → corrected muted, set date/tags/more-info → ink; the active lens keeps the accent); the swept door words in the same class — Note Actions' detail lines, Book Details' three detail lines, the link row's "opens", Starred's "note"/"book", Create Book's tag paths, the Account sheet's unchosen tab words (`Shared/AuthViews.swift`, styled phone arm only). Left, listed in §6: glyphs, the placeholder, a disabled 17 pt door, and the faint on words that are not doors (outside the class). PROVISIONAL P-47-29 (the membership and blocks chips' inks unchanged). Pins `MobileFaintOnDoorsTests` (a source rule over every phone view and shared phone arm, measured 13 → 0 on the trees before and after; the rendered ink of the filter row's words and the empty chips ≥ 4.5:1) | DONE (`36987c78e`) — code and pins WRITTEN; build and runs PENDING |
-| W.7d | W-A10 — the fields' placeholder in the system's grey: `phoneField` sets the typed text's role and ink, but a field built `TextField(title, text:)` hands its title to iOS as the placeholder in the system's grey (1.72:1), and no modifier outside the field reaches it. Fixed in the layer: `TextField(phonePlaceholder:text:tokens:)` (the words as label AND as a `prompt:` in the corrected faint) at the three sites that build a phone field (the Library search, the tag field, Create Book's name); `phoneField` hands the ink down (`phoneFieldPrompt`) and the shared `PeekableSecretField` reads it on iOS only (every passphrase and twelve-words field on the phone; the Mac's constructors unchanged under `#if os(iOS)`). Not covered, listed in §6: the Account sheet's seven fields (`Shared/AuthViews.swift`, constructors the Mac shares), the system alerts' fields, the comment draft (UIKit, VM-152). Pins `MobileFieldPlaceholderTests` (rendered placeholder ink ≥ 3:1 on the Library search, both voices, light and dark, and on a secret field; a source rule — every phone field under `phoneField` is built with its placeholder, measured 3 → 0) | DONE (this commit) — code and pins WRITTEN; build and runs PENDING |
+| W.7d | W-A10 — the fields' placeholder in the system's grey: `phoneField` sets the typed text's role and ink, but a field built `TextField(title, text:)` hands its title to iOS as the placeholder in the system's grey (1.72:1), and no modifier outside the field reaches it. Fixed in the layer: `TextField(phonePlaceholder:text:tokens:)` (the words as label AND as a `prompt:` in the corrected faint) at the three sites that build a phone field (the Library search, the tag field, Create Book's name); `phoneField` hands the ink down (`phoneFieldPrompt`) and the shared `PeekableSecretField` reads it on iOS only (every passphrase and twelve-words field on the phone; the Mac's constructors unchanged under `#if os(iOS)`). Not covered, listed in §6: the Account sheet's seven fields (`Shared/AuthViews.swift`, constructors the Mac shares), the system alerts' fields, the comment draft (UIKit, VM-152). Pins `MobileFieldPlaceholderTests` (rendered placeholder ink ≥ 3:1 on the Library search, both voices, light and dark, and on a secret field; a source rule — every phone field under `phoneField` is built with its placeholder, measured 3 → 0) | DONE (`7734f0f05`) — code and pins WRITTEN; build and runs PENDING |
 | W.7e | Builds (phone, then Mac if `Shared/` changed) into `DerivedData/vm47-fix`; the red-on-old snapshot `~/dev/variorum-vm-47-rolw` (`DerivedData/vm47-rolw`) | NOT-STARTED — at FREE TO BUILD |
-| W.7f | §6's "The walk's fixes (part A)" block; one FIXED line under each of the four in `vm-47-walk.md` §6 | NOT-STARTED |
+| W.7f | §6's "The walk's fixes (part A)" block; one FIXED line under each of the four in `vm-47-walk.md` §6; P-47-29 in §5 | DONE (this commit) — written before any build; its build and run lines PENDING (W.7e, W.7g) |
 | W.7g | The test windows (the orchestrator's, under its claim): the fixed tree's list and the snapshot's list | NOT-STARTED — lists in the implementer's report |
 | W.8 | The record: the findings file closed; §5 for any new question; this row flipped | NOT-STARTED |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks — each step since DONE (rows M.1–M.6), and round 1 found the fix pass APPLIED AS CONFIRMED (`vm-47-ladder-round1.md` §1). The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) was then still queued — since SUPERSEDED (row 2.9; the run's one walk, §3) |
@@ -679,6 +679,7 @@ Each batch's implementer adds its own piece rows under its batch line as it star
 | P-47-26 | The list's drawn parts and numbers (built against the mockup, which is not a pixel contract; with P-47-1) | as built: a door is the menu row (`PhoneMenuRow`, label 17 in ink, the whole row one target, ≥ 44 — sheet §C's one-line menu row) with no chevron and no trailing value (the mockup draws 52 pt rows with "›" and values like "Castle" and "Study" — values the phone does not hold today); a choice is the label on its own line over the system segmented control (three words and a label do not share a line at 402 pt in Terminal); the sync row's doors are inline acts at 17 in a row under its line (the mockup's single trailing act); the edit trace's on/off is the system switch (it was a text button whose words flipped to "Recording edit trace — tap to stop" — those words retire); no foot line ("Variorum for iPhone" is drafted, not built) | as listed | PROVISIONAL (batch 5) — her look at part B |
 | P-47-27 | The roots' path line with VM-55's wing door (batch 6, meeting 1) — in Terminal at 402 pt the words cannot all sit beside the three doors once a wing's name leads (measured with the real fonts: "~/home/shelf  ·  14 books" wants ≈ 438 pt with the 🗑, + New Note and ⋯ and the gutters; "~/home/shelf  ·  1 book" ≈ 422; Study fits "Home · Shelf  ·  14 books" at ≈ 376 and passes 402 only with a long wing name; since R-47-3 the page word is "Bookcase", three characters longer in Terminal, so the tail truncation bites earlier — "~/home/bookcase  ·  14 books" ≈ 463, "~/home/bookcase  ·  1 book" ≈ 446, and Study's "Home · Bookcase  ·  14 books" ≈ 403, at the edge at 402 — measured with the Mac's system fonts, which reproduce the figures above to the point) | (a) ONE 44 pt line, every target 44 × 44 (the wing door's, VM-55's pin; the three doors', this run's), the path text truncating at its TAIL where it cannot fit — P-47-9's rule (it already truncated at 375 pt in Terminal), so the count goes first and the wing's name last · (b) truncate the MIDDLE of the path (keeps the door's name and the count, cuts the page word) — one modifier · (c) let the path wrap to a second line in Terminal (batch 2's fix reversed: the chrome above her books grows by a line) · (d) + New Note as a glyph door, freeing ≈ 50 pt (loses P33's word) | (a) — `MobileWingPath` draws one `meta` line with `lineLimit(1)`; pinned by `MobilePathLineGeometryTests.theBookcaseLineWithItsWingDoorHoldsOneLineAndEveryTarget` (402 and 430, both voices, 14 books: every target 44 × 44, none grows the line, + New Note's word whole) and VM-55's `MobileWingDoorGeometryTests` | PROVISIONAL (batch 6) — hers: which part of the line gives way (the walk captures it) |
 | R-47-3 (was P-47-28) | The Bookcase root's page word (batch 6, meeting 3) — the merged root's path line said "Home · Shelf · N books" (Study) / "~/home/shelf · N books" (Terminal), while its tab says "Bookcase" (LK-5, SW-1): one screen under two names | (a) keep VM-55's words — its wing door changed this line's words (P-55-2: the wing's name leads, the page word kept until wave 2's band), and the brief keeps them where it did · (b) the page word follows the tab: "Home · Bookcase · N books" / "~/home/bookcase · N books" — one word at the Shelf root's `MobileWingPath(page:)` (and VM-55's pins that name the line's letters) · (c) leave the line to wave 2's band (VM-72), which replaces it whole | BUILT (b), R-47-3 (§4 row R-47-3): `MobileShelfView` hands `MobileWingPath` the page "Bookcase" (`50635a674`) — Study "Home · Bookcase  ·  N books", Terminal "~/home/bookcase  ·  N books" (the voice's own path grammar, `VoiceTokens` untouched), the wing's name still the door and its spoken value the line's rest ("Bookcase  ·  N books"); no other screen's words, no identifier or file renamed; the pins that read the line moved with the ruling as the reason and a literal pin added (`864ef813b`); the walk app rebuilt on it; the line is three characters longer in Terminal (P-47-27) | **RULED 2026-11-19** (asked in chat 13:50; answered by the question tool 14:38) — her answer, the option she chose: "Bookcase (Recommended)" — "The top line says Bookcase, matching the tab, your swipe names and the Mac." (the question verbatim in §1) |
+| P-47-29 | The masthead chips' inks after W-A9 (the walk's fixes, part A) — the sheet's chip has two inks (§A/§B: a set chip in ink, an empty one in the corrected muted); the masthead's chips are still bare words in a wrapping flow (their capsule is VM-148's) | (a) the four chips whose ink already changed with their state take the sheet's two inks: date, tags and more info set → ink, empty → the corrected muted; the lens empty → the corrected muted (active keeps the accent, a fallback the alarm); the membership chip (the corrected muted for one book, the accent for several) and the blocks chip (the corrected muted, no state) unchanged · (b) the membership chip's one-book state to ink too ("in the pocket guide" is a set fact; one more ink argument) · (c) only the empty chips to the corrected muted, the set ones left muted — then set and empty read the same ink and differ by their words alone | (a); the edit stays on the four ink arguments the finding named (`MobileWriteView` is another branch's file too), and VM-148's rebuild settles every chip's capsule and ink at once | PROVISIONAL (the walk's fixes, part A) — her look at the re-captured c5 |
 
 Held for her hands: the wave-1 install on her phone (one install from merged main, after all four runs,
 prepared by the last merger; the hands part is hers in the morning) — it is where she judges P-47-1's
@@ -2023,3 +2024,112 @@ look at the walk decides it; (3) the **message line's 44 pt act** makes the line
 placement exactly, so VM-55's host and inset pins' bounds hold with nothing to spare (the act's foot IS the bar's top);
 (4) the line's **look** is read through a closure in its own window's body — observation tracks it as the shell's own
 reads do.
+
+### The walk's fixes (part A) — results (implementer: Opus, 2026-11-19)
+
+**Not done, first:** nothing of the four is unbuilt; what is OWED is the evidence — the builds into
+`DerivedData/vm47-fix`, the red-on-old snapshot (`~/dev/variorum-vm-47-rolw`, `DerivedData/vm47-rolw`) and the test
+windows (the orchestrator's) are PENDING until "FREE TO BUILD" (§4 rows W.7e, W.7g); every "red on old" below is the
+pins' design and, for the source rules, measured by script over the trees — the rendered pins' red and green are PENDING
+their runs. Not fixed and named for the orchestrator (outside the four findings' classes, or another unit): (1) the faint
+on words that are NOT doors (the class W-A9's sweep did not take — listed under W-A9); (2) `Shared/AuthViews.swift`'s
+styled Account header still reads the Mac's type slots — its tab words `tokens.heading` and its Close `tokens.small`
+(11.5 pt on the phone, under the 13 pt floor) — batch 1's type pass scanned `VariorumMobile/` only, so this shared phone
+arm escaped it (its ink is fixed here, its sizes are not: no size changes in this pass); (3) the Account sheet's seven
+fields keep iOS's placeholder grey (W-A10, below).
+
+**W-A1 — the grounds stop at the safe area.** *Mechanism, traced:* `MobileShellView.body` is a `GeometryReader` whose
+frame is the safe area; its `ZStack` of the three pages took `.frame(width:height:)` at that size and then `.clipped()`.
+Every page paints its own ground with `ignoresSafeArea()` — the roots' room (`MobileShelfView`/`MobileLibraryView`/
+`MobileStarredView`), the bar's room "down past the home indicator" (`MobileTabBar.body`), the note's paper
+(`MobileWriteScreen.body`), the pushed lists' paper (book, Trash, Archived, Versions), Read's room, Protection's room — and
+the clip cut each at the safe-area frame, so the status bar's strip, the home indicator's strip and (keyboard up) the band
+behind the keyboard's bar and its rounded corners showed the window's own background: white in light, black in dark (which
+is why the dark roots passed by coincidence and the dark note did not). The lobby faces are outside the shell
+(`VariorumMobileApp`'s other states) and were never clipped. *Fix:* `.clipShape(MobileBandClip())` — a rectangle whose
+sides are the band's own (a neighbour one width away still never shows; the drag is untouched) and whose top and bottom
+reach two band-heights past the band (more than the status bar, the home indicator or a keyboard ever take from a
+portrait phone — the only orientation shipped). Nothing is laid out differently; the message line's own window,
+`footOffset` and lift are untouched. *What the fix rests on, said plainly:* that each page's `ignoresSafeArea()` ground
+really extends past the band's frame once nothing cuts it — the pin is what proves it. *Pin:*
+`MobileScreenEdgeGroundsTests` — the real shell in a window of the test host's SCENE (the device's own insets), its host
+in a sentinel colour, rendered (`MobileRenderedPixels.swift`): `onARootTheRoomRunsToBothEdges(dark:)` (the Bookcase's
+status-bar and home-indicator strips are the room, light and dark), `inANoteThePaperRunsToBothEdges(dark:)` (a note
+opened by the Today door: both strips are the paper), each first reading a pixel inside the safe area that both trees
+draw alike (so a dead render or a wrong token fails as itself); `theBandStillDrawsNothingPastItsOwnWidth` (a GUARD for
+the kept half: with side insets nothing is drawn beside the band — green before and after; red only for a fix that drops
+the sideways clip). Red on old: the sentinel shows in both strips, every case, both appearances — PENDING the snapshot
+run. *Swept:* every surface inside the band is the same construct and is covered by the one clip; nothing outside it was
+clipped. *Left:* the keyboard bar's own ground (VM-137 owns the bar) — if c8's band behind it is still bare after the
+re-capture, that is the bar's.
+
+**W-A3 — Terminal's marker column eats the names at AX5.** *Mechanism, traced:* `MobileShelfView.bookRow` reserves the
+voice's selection marker ("› ", Terminal only — Study's is empty) at `.opacity(0)` before each name, so the names align;
+batch 1 set it in `rowTitle`, her words' class (full range), so at AX5 the two characters took ≈ 55 pt and the names
+read "jo…", "the…", "the…". *Fix:* the column takes `meta` — the layer's own rule: batch 1's role map (P-47-8) puts every
+marker (the ★, the ✓ in pickers, the pick marks, ⑂) on `meta`, chrome that holds at xxxLarge, and the wing list's
+reserved ✓ column (`MobileWingDoor.wingRow`) is the same construct on `meta`. Chosen over `rowTitle` capped at xxxLarge
+because a capped her-words role is no role the layer has. The one visible cost: at the default size Terminal's column
+narrows from the 15 pt mono pair to the 13 pt one (≈ 2 pt — names start ≈ 45 pt instead of 47.5). *Swept:* no other root
+or list reserves an invisible column — Starred's ★, the block list's ◉/○ and ⑂, and the wing list's ✓ are already
+`meta`; Lenses' "› " rides inside the row's own name text (it marks the active row and grows with it, as her words do);
+the Library, a book's contents, the Trash and Archived carry no marker column. Noted, another class: Create Book's tag
+rows draw their ✓ (`meta`) in a fixed 14 pt frame, narrower than the glyph past the default size (a frame too narrow, not
+a column too wide — not touched). *Pin:* `MobileShelfMarkerColumnTests.atAX5TheNameStartsWhereItDoesAtXXXLarge` — the
+rendered Terminal shelf with one book; where the name's first ink falls: at AX5 no further right than at xxxLarge
+(and at the default no further right than at xxxLarge). Red on old by ≈ 30 pt (the column grew from ≈ 24 to ≈ 55) —
+PENDING the snapshot run.
+
+**W-A9 — the corrected faint on doors' words under 17 pt.** *Mechanism, traced:* batch 1 moved `tokens.faint` to
+`tokens.phone.faint` one for one; the doors whose words had worn the OLD faint kept the faint's role while sheet §D moved
+them up a step ("Words under 17 pt need 4.5:1"; the phone's faint is "glyphs, placeholders, disabled words only").
+*Fix — inks only, no size, no word:* the Library/Archive filter row's unchosen words → the corrected muted
+(`MobileListingFilters.swift`); the masthead's chips → the sheet's two chip inks (empty date, tags, more info and lens →
+the corrected muted; set date, tags and more info → ink; the active lens keeps the accent and a fallback the alarm) — the
+edit confined to those four ink arguments in `MobileWriteView` (PROVISIONAL P-47-29: the membership and blocks chips
+unchanged). *The sweep — every tappable word under 17 pt in the faint, all fixed where the sheet is unambiguous:*
+Note Actions' detail lines (`MobileNoteActions.actRow` — sheet §E's menu row detail is the corrected muted, as the shared
+`PhoneMenuRow`'s is); Book Details' three detail lines (archive, delete, finish rows); the link row's "opens"
+(`MobileReferences`); Starred's "note"/"book" (`MobileStarredView` — the walk's r01 check expected the faint; by §D it is
+the corrected muted now); Create Book's tag paths (`MobileCreateBook.tagRow`); the Account sheet's unchosen tab words
+(`Shared/AuthViews.swift`, the styled phone arm only — they wore the voice's OLD faint, 1.9:1). *Left, with the reason:*
+glyphs (the block list's ◉/○ — 3:1 is a glyph's floor); the box's hint and its dashed edge (a placeholder, an edge); a
+disabled 17 pt door ("Use as Daily Journal" in Book Details); and the faint on words that are NOT doors — outside this
+class, though §D's floor and "faint never carries a sentence" cover them too, offered to the orchestrator as one more pass
+or a ticket: the applied tag's path and the "Apply a tag" header (`MobileNoteTags`), the sentence, "smart" and the
+"Add to a book" header (`MobileMembership` — §A draws that very header in the corrected muted), the file row's note
+(`MobileReferences`), the Versions explainer and a moment's meta (`MobileVersions`), the tray's explainer and row meta
+(`MobileNoteTray`), the Library's and the Bookcase's empty-state sign-in lines, the box's boundary note and status word
+(`MobileQuickNote`), the Archive's promise and the Trash's window note, a nested tag's path in the tag manager, and
+Settings' "Starting…". *Pins:* `MobileFaintOnDoorsSourceTests.noDoorsWordsUnderSeventeenPointsWearTheFaint` — a source
+rule over every phone view and every shared page's styled arm (a faint read inside a `Button`'s or a `label:` block, on a
+role under 17 pt, a glyph-only mark allowed): its patterns measured by script — 13 sites on the tree before (`d974162f4`),
+none after; `MobileFaintOnDoorsRenderedTests` — the rendered ink, off the real surfaces' pixels, of each unchosen filter
+word (`theFilterRowsUnchosenWordsClearTheFloor`, both voices × light/dark) and each empty masthead chip
+(`theMastheadsEmptyChipsClearTheFloor`, light/dark; the set date chip reads above them) at ≥ 4.5:1 — red on old
+(3.3–4.2:1) PENDING the snapshot run.
+
+**W-A10 — the search field's placeholder is the system's grey.** *Mechanism, traced:* `phoneField` sets the typed
+text's role and ink, but a field built `TextField(title, text:)` hands its title to iOS as the placeholder, drawn in
+iOS's placeholder grey; no modifier outside a field reaches it — the prompt is the only public road (the lookup's facts:
+`TextField(_:text:prompt:)`, iOS 15+; Apple documents no placeholder-colour modifier). *Fix, in the control's layer:*
+`TextField(phonePlaceholder:text:tokens:)` (`Shared/Theme/PhoneControls.swift`) — the words as the field's label
+(VoiceOver unchanged) AND as its `prompt:` in the corrected faint; `phoneField` also hands that ink down
+(`EnvironmentValues.phoneFieldPrompt`), and the shared `PeekableSecretField` reads it on iOS only (its Mac constructors
+unchanged under `#if os(iOS)`). *Each field:* the Library search — covered; the note's tag field — covered; Create
+Book's name — covered; every passphrase and twelve-words field on the phone (the lobby's passphrase and words, the
+Protection screen's and the protection doors' set, change, reset, check, crossing and look-inside fields — all
+`PeekableSecretField` under `phoneField`) — covered; the quick-entry box — already its own hint in the corrected faint;
+the comment draft — not this control (a UIKit overlay whose placeholder label reads the corrected muted, VM-152 / VM-189);
+the system alerts' fields (rename, entry date, add a link, new chapter, new scrap, new tag, rename book, lens names) —
+the system's own alert, not the phone layer; **the Account sheet's seven fields (`Shared/AuthViews.swift`: sign-in
+email and password, sign-up email, password and confirm, delete-account password and phrase) — NOT covered**: they are
+built by constructors the Mac shares, and giving them a prompt changes the Mac's field construction (`prompt: nil` is
+not documented as identical on macOS) — left for a pass with a Mac leg. *Pins:*
+`MobileFieldPlaceholderRenderedTests` — the placeholder's rendered ink against the field's own paper, ≥ 3:1, on the
+Library search (`theLibrarySearchsPlaceholderClearsTheFloor`, both voices × light/dark) and on a secret field under
+`phoneField` (`aSecretFieldsPlaceholderClearsTheFloor`, light/dark) — red on old (1.7–2.5:1) PENDING the snapshot run;
+`MobileFieldPlaceholderSourceTests.everyPhoneFieldIsBuiltWithItsPlaceholder` — measured by script: 3 offenders before
+(the search, the tag field, Create Book's name), none after.
+
+**The builds and the windows:** PENDING (§4 rows W.7e, W.7g).
