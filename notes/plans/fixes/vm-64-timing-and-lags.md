@@ -870,8 +870,8 @@ orchestrator's). The record of what was checked: §7 ▸ "The merge of main (VM-
 | G1 — `git merge --no-ff f909d6714` (a merge commit); stop on any code conflict | DONE (`a18fae31f`) — trial and merge clean, no conflict in any file; `git merge-base --is-ancestor f909d6714 HEAD` holds |
 | G2 — the blob check of the five shared files; each read whole against the map's VM-64 bullet and this run's intents; the composition traced; the other meeting points; the guards mirrored | DONE (this commit) — all five blobs MATCH; both runs hold in each file; the quiet-undo composition ends on the fence's sentence, no state wrong (one note for her bundle with P-2-2); the union, the fence's sentence, the Put back line and the timing marks unchanged in meaning; both source scans green by reading. NO collision; no line written. §7 ▸ "The merge of main (VM-78) and the gate tree" |
 | G3 — phone and Mac `build-for-testing` into `vm64-gate3`; compile fixes (if any) listed | DONE — both built at `5a4045303` (code = the merge `a18fae31f`'s; every later commit is this record alone): phone `** TEST BUILD SUCCEEDED **`, 0 errors; Mac `** TEST BUILD SUCCEEDED **`, 0 errors; NO compile fix; no warning in a line this run wrote |
-| G4 — the whole Core package, `swift test`, once, on the final tree | NOT-STARTED |
-| G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
+| G4 — the whole Core package, `swift test`, once, on the final tree | DONE at `d1bae169b` (code = `a18fae31f`'s) — 4,975 tests in 721 suites, no red: MCP 746/139 · Core 4,197/578 with the 5 declared known issues · StringsWorkbook 32/4; +4 against the 4,971 baseline, all round 3's `TimingRecorderTests`; VM-78 +0 |
+| G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | **IN-PROGRESS — THE REVERT STARTS AFTER THIS COMMIT.** Exactly: `git show 848b98b66 -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift \| git apply -R` (its `--check` passes on this tree; no commit since `848b98b66` touches the file), the phone `build-for-testing` into `vm64-gate3-red`, then `git checkout HEAD --` that one file; every test file stays in. **If this session dies mid-revert:** `git diff HEAD` shows the one reversed hunk in `MobileLibraryViewModel.swift`, and `git checkout HEAD -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift` is the SAFE restore (the file is committed; nothing else is reverted) |
 | G6 — §7's section, the final stage commands, the report | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
@@ -4685,10 +4685,26 @@ stamps `vm64-gate3-phone.sha`, `vm64-gate3-mac.sha`.
 
 #### The whole Core package
 
-PENDING(`swift test`, once, on the final tree). Expected by reading: VM-78 changed no Core file or test, so +0 from the
-merge; against the 4,971 in 721 baseline (`74d91c666`, round 2 part B) this run's round 3 added four
-`TimingRecorderTests` (32 → 36: three in `2543a81f3`, one in `adc466230`) and no suite — 4,975 in 721, the five declared
-known issues the baseline's.
+**`swift test`, once, on the final tree — GREEN: 4,975 tests in 721 suites, no red** (run at `d1bae169b`, whose code is
+the merge `a18fae31f`'s; `App/Variorum/DerivedData/vm64-gate3-swifttest.log` / `.sha`, local):
+- `VariorumMCPTests` — "Test run with 746 tests in 139 suites passed after 65.415 seconds."
+- `VariorumCoreTests` — "Test run with 4197 tests in 578 suites passed after 332.592 seconds with 5 known issues."
+- `StringsWorkbookTests` — "Test run with 32 tests in 4 suites passed after 29.923 seconds."
+- XCTest "Executed 0 tests" ×3; `swift test` exit 0; no `✘` line in the log.
+
+**Against the baseline** (4,971 in 721 at `74d91c666`: 746/139 · 4,193/578 · 32/4): **+4 tests, +0 suites, all in
+`VariorumCoreTests`, all this run's round 3** — `TimingRecorderTests` 32 → 36 (`aDecodedCapacityIsHeldToTheRingsBound`,
+`aSampleOutsideIntsRangeIsReportedWithoutTrapping`, `aValueOutsideTheDrawnBoundIsDrawnAtTheBound` in `2543a81f3`;
+`aDamagedArchivesCountsAreBoundedWhenAbsorbed` in `adc466230`; the file holds 36 `@Test`s). **VM-78's merge adds +0**
+— it changed no file under `Sources/` or `Tests/`. **The five known issues, by name, the baseline's:**
+`theGuardBitesOnALockOffTheVaultsDescriptorAndAStaleCopy()` "with 4 known issues" and
+`theResidualCastleAlwaysAskWithOnlyAPassphraseAtTheLobbyHealsAtTheWords()` "with 1 known issue". **Skipped** (counted
+in N by Swift Testing): the same 15 gated harness tests and 8 gated suites as the baseline's —
+`aFirstCatchUpsApplyTimedByPhase`, `aLeavingSavepointOnAHundredThousandWordNote`,
+`basicOfflineEditsConvergeOverTheRealServer`, `bench(notes:)`, `directCost(shape:)`, `fts5InsertCostByTableShape`,
+`memberIDPredicateVersusTheJoin`, `ownerAdoptionWithNothingToAdoptOnAnEncryptedStoreAtHerScale`, `plans`,
+`prefixSizing(prefix:)`, `probeTheLinkedSQLite`, `seamHistoryCost`, `theThreeRoads`, `variantInsertCostByTriggerSet`,
+`writeLatencyWithHeldObservations(shape:)`.
 
 #### The products
 
