@@ -140,7 +140,7 @@ struct MobileFaintOnDoorsSourceTests {
             let relative = file.path.replacingOccurrences(of: appRoot.path + "/", with: "")
             let phone = relative.hasPrefix("VariorumMobile/")
             guard phone || relative.hasPrefix("Shared/") else { continue }
-            if relative.contains("/Spike/") || relative.contains("/Features/Perf/") { continue }
+            if MobileSourceRuleScope.exempts(relative) { continue }  // the debug harnesses (7b.7)
             // A phone view's faint is the phone's; a shared page's styled arm
             // reads `style.tokens` (the Mac's own arms never read the phone).
             let faint = phone ? ["phone.faint", "tokens.faint"] : ["phone.faint", "style.tokens.faint"]
@@ -220,7 +220,7 @@ extension MobileFaintOnDoorsSourceTests {
             let relative = file.path.replacingOccurrences(of: appRoot.path + "/", with: "")
             let phone = relative.hasPrefix("VariorumMobile/")
             guard phone || relative.hasPrefix("Shared/") else { continue }
-            if relative.contains("/Spike/") || relative.contains("/Features/Perf/") { continue }
+            if MobileSourceRuleScope.exempts(relative) { continue }  // the debug harnesses (7b.7)
             let faint = phone ? ["phone.faint", "tokens.faint"] : ["phone.faint", "style.tokens.faint"]
             if relative.hasSuffix("Theme/PhoneInks.swift") { continue }
             scanned += 1

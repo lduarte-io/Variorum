@@ -10,8 +10,9 @@
 //  keeps it there: a phone view that reaches for the Mac's caption, or sets
 //  a size under the 13 pt floor, fails the suite.
 //
-//  THE RULE, over every Swift file under `VariorumMobile/` outside the two
-//  debug harnesses (`Spike/`, `Features/Perf/`), code lines only:
+//  THE RULE, over every Swift file under `VariorumMobile/` outside the debug
+//  harnesses (`Spike/`, and the `Features/Perf/` files named in
+//  `MobileSourceRuleScope` — VM-47 batch 7b.7), code lines only:
 //  · no `tokens.small` (the brief's named slot), and — since every site
 //    reads a role — none of the Mac's other type slots either;
 //  · no literal point size under 13 (`size:` / `ofSize:` / `withSize(`);
@@ -30,6 +31,31 @@
 import Foundation
 import Testing
 
+/// **What every VM-47 source rule leaves out of its walk** (batch 7b.7 — the one
+/// home of the exemption; each rule asks `exempts(_:)`). `Spike/` is the TK2
+/// spike harness, presented only under `#if DEBUG` (`MobileSettingsView`'s
+/// `SpikeScreen` cover). `Features/Perf/` is NO LONGER a whole-folder exemption:
+/// since main `982405967` (VM-64, PR #16) it holds a RELEASE face — the timing
+/// readout `MobileTimingView`, presented from Settings ▸ Diagnostics outside any
+/// `#if DEBUG` (P-65-1), and `MobileTiming.swift`, compiled in every build — so a
+/// file there is SCANNED unless it is named below with its reason. A new file in
+/// that folder is therefore under the rules until someone exempts it by name.
+nonisolated enum MobileSourceRuleScope {
+    /// The harness folder, relative to `VariorumMobile/`.
+    static let harnessFolder = "Spike/"
+    /// The files left out by name, relative to `VariorumMobile/`, each with why.
+    static let exemptFiles: [String: String] = [
+        "Features/Perf/MobilePerfFixtureSeeder.swift":
+            "the performance fixture's seeder — its one door is the DEBUG-only Settings group's; it draws nothing",
+    ]
+    /// Whether a rule leaves `path` out: a path relative to `VariorumMobile/`,
+    /// or to `App/Variorum/` (a `VariorumMobile/…` or `Shared/…` path).
+    static func exempts(_ path: String) -> Bool {
+        let phone = path.hasPrefix("VariorumMobile/") ? String(path.dropFirst("VariorumMobile/".count)) : path
+        return phone.hasPrefix(harnessFolder) || exemptFiles[phone] != nil
+    }
+}
+
 @Suite("Phone type — the source guard (VM-48)")
 struct MobilePhoneTypeSourceTests {
     private static var phoneRoot: URL {
@@ -39,9 +65,6 @@ struct MobilePhoneTypeSourceTests {
             .appendingPathComponent("VariorumMobile", isDirectory: true)
     }
 
-    /// The two debug harnesses the brief leaves out.
-    private static let excludedPrefixes = ["Spike/", "Features/Perf/"]
-
     private func phoneFiles() -> [(relative: String, url: URL)] {
         let root = Self.phoneRoot
         guard let walker = FileManager.default.enumerator(
@@ -49,7 +72,7 @@ struct MobilePhoneTypeSourceTests {
         return walker.compactMap { $0 as? URL }
             .filter { $0.pathExtension == "swift" }
             .map { (relative: $0.path.replacingOccurrences(of: root.path + "/", with: ""), url: $0) }
-            .filter { file in !Self.excludedPrefixes.contains { file.relative.hasPrefix($0) } }
+            .filter { file in !MobileSourceRuleScope.exempts(file.relative) }
     }
 
     /// A line is code (not a comment or a doc line) for this pin's purpose.
@@ -74,11 +97,13 @@ struct MobilePhoneTypeSourceTests {
 
     @Test func theWalkReachesThePhonesViews() {
         let files = phoneFiles().map(\.relative)
-        // 79 files at the batch (Spike/ and Perf/ excluded).
+        // 79 files at the batch (Spike/ and Perf/ excluded); since 7b.7 the
+        // Release faces in Features/Perf/ are walked too (`MobileSourceRuleScope`).
         #expect(files.count > 60, "the walk must reach the phone's views (\(files.count) files)")
         #expect(files.contains("Features/Shell/MobileShelfView.swift"))
         #expect(files.contains("Features/Write/MobileCommentsSheetView.swift"))
-        #expect(!files.contains { $0.hasPrefix("Spike/") || $0.hasPrefix("Features/Perf/") })
+        #expect(!files.contains { MobileSourceRuleScope.exempts($0) })
+        #expect(files.contains("Features/Perf/MobileTimingView.swift"), "the Release readout is walked")
     }
 
     /// **The brief's named pin:** no phone view reads `tokens.small` — and,

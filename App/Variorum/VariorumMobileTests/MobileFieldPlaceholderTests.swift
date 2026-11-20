@@ -136,7 +136,7 @@ struct MobileFieldPlaceholderSourceTests {
         var offenders: [String] = []
         for case let file as URL in walker where file.pathExtension == "swift" {
             let relative = file.path.replacingOccurrences(of: Self.phoneRoot.path + "/", with: "")
-            if relative.hasPrefix("Spike/") || relative.hasPrefix("Features/Perf/") { continue }
+            if MobileSourceRuleScope.exempts(relative) { continue }  // the debug harnesses (7b.7)
             let lines = try String(contentsOf: file, encoding: .utf8)
                 .split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
                 .map { line -> String in

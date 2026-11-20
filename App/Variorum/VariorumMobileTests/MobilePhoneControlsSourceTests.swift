@@ -10,7 +10,7 @@
 //  PhoneControls.swift`); this walk of the source keeps them there.
 //
 //  THE SIGNATURES, over every Swift file under `VariorumMobile/` outside the
-//  two debug harnesses, plus the shared pages' styling seam
+//  debug harnesses (`MobileSourceRuleScope`), plus the shared pages' styling seam
 //  (`Shared/Theme/SharedPageStyle.swift`), the controls' own file excluded:
 //  · a sheet's own Done — `chromeLabel("Done")` (the sheet header owns it);
 //  · a calm button's own padding — vertical 9/10/12 over horizontal 14/16;
@@ -42,8 +42,6 @@ struct MobilePhoneControlsSourceTests {
             .deletingLastPathComponent()  // App/Variorum
     }
 
-    private static let excludedPrefixes = ["VariorumMobile/Spike/", "VariorumMobile/Features/Perf/"]
-
     /// The cards that wear the paper-and-edge shape on purpose — a card is
     /// not a control. File → how many matches of each signature it may hold.
     private static let allowedCards: [String: [String: Int]] = [
@@ -65,7 +63,9 @@ struct MobilePhoneControlsSourceTests {
         for case let url as URL in walker {
             guard url.pathExtension == "swift" else { continue }
             let relative = url.path.replacingOccurrences(of: root.path + "/", with: "")
-            guard !Self.excludedPrefixes.contains(where: { relative.hasPrefix($0) }) else { continue }
+            // The debug harnesses — `MobileSourceRuleScope` (VM-47 batch 7b.7: VM-64's
+            // Release readout in `Features/Perf/` is scanned).
+            guard !MobileSourceRuleScope.exempts(relative) else { continue }
             if let source = try? String(contentsOf: url, encoding: .utf8) {
                 found.append((relative, source))
             }

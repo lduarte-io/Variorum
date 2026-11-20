@@ -17,7 +17,9 @@
 //     never the accent.
 //  3. **No literal colour in a phone view** — the Mac's pin covers its own
 //     views and `Shared/`, and no phone twin existed until now. The same
-//     forms, over `VariorumMobile/` outside `Spike/` and `Features/Perf/`, with
+//     forms, over `VariorumMobile/` outside the debug harnesses
+//     (`MobileSourceRuleScope` — `Spike/` and the `Features/Perf/` files it
+//     names; VM-64's Release readout there is scanned, batch 7b.7), with
 //     ONE allowed form: the editor's TK2 fallback canary line (white-on-red's
 //     phone cousin — TEXTKIT2_NOTES §4's defensive practice, the Mac pin's
 //     own first allowance).
@@ -191,7 +193,7 @@ struct MobileLookSourceTests {
         var offenders: [String] = []
         for case let file as URL in walker where file.pathExtension == "swift" {
             let relative = file.path.replacingOccurrences(of: Self.phoneRoot.path + "/", with: "")
-            if relative.hasPrefix("Spike/") || relative.hasPrefix("Features/Perf/") { continue }
+            if MobileSourceRuleScope.exempts(relative) { continue }  // the debug harnesses (7b.7)
             scanned += 1
             let allowed = Self.allowedForms[relative] ?? []
             for (index, text) in try code(relative).enumerated() {
@@ -266,7 +268,7 @@ struct MobileLookSourceTests {
         var offenders: [String] = []
         for case let file as URL in walker where file.pathExtension == "swift" {
             let relative = file.path.replacingOccurrences(of: Self.phoneRoot.path + "/", with: "")
-            if relative.hasPrefix("Spike/") || relative.hasPrefix("Features/Perf/") { continue }
+            if MobileSourceRuleScope.exempts(relative) { continue }  // the debug harnesses (7b.7)
             let lines = try code(relative)
             for (index, line) in lines.enumerated() where line.contains("Divider()") {
                 dividers += 1
