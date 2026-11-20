@@ -810,6 +810,7 @@ Bookcase.** THIS RUN'S DEFECT (born of P-47-19's pop of the leaving stack).
   785–840; b11 with the field unfocused (or focused only by her tap). A pin in a real scene window (the line host pin's
   shape): a focused text field in one stack's root, a route pushed, the shell's tab road to another page, assert no
   first responder after the run loop settles (red on old: the field is first responder again).
+- FIXED — `05afd4b34` (the shell tells each page whether it is on screen; the Library's search gives the keyboard back while its page is hidden — a Back on screen keeps its restoration); pin `MobileHiddenPageKeyboardTests`; re-capture: b8–b11 in both combinations (b10 with no keyboard and the bar at 785–840; b11 with the field unfocused; look for a one-frame keyboard flicker at b10).
 
 **W-C3 — The corrected faint still carries section headers and sentences W-B1's sweep does not name.** THIS RUN'S
 DEFECT (batch 1's one-for-one `tokens.faint` → `tokens.phone.faint`, W-A9 and W-B1's class).
@@ -835,6 +836,7 @@ DEFECT (batch 1's one-for-one `tokens.faint` → `tokens.phone.faint`, W-A9 and 
 - Narrowest fix proposed (not made): `tokens.phone.muted` at those sites, landed with W-B1's three (one sweep, one pin):
   extend `MobileFaintOnDoorsSourceTests` to name every `phone.faint` site and the reason it may stay (glyph, placeholder,
   disabled) — red on old: the sites above. Re-capture r06, r06b, r07b, b8 / r10, b9 and read the hex.
+- FIXED — `a21110f9d` (with W-B1, one sweep and one rule); pins `MobileFaintCarriesNoWordsSourceTests`, `MobileFaintOnDoorsRenderedTests.theTrashsPromiseClearsTheFloor`; re-capture: r06, r06b, r07b, b8 / r10, b9 (the corrected muted #6A6359 / #948C7C).
 
 **W-C4 — The segmented choice's unchosen words fall under 4.5:1 on the system's track.** THIS RUN'S DEFECT (batch 2's
 segmented choice, `91d406593`).
@@ -853,6 +855,7 @@ segmented choice, `91d406593`).
   in ink; which of the two is a look call. Verify on device that iOS 26's control honours a background colour for its
   track. A pin in the run's rendered-ink style: the unchosen word's contrast over the control's own drawn track ≥ 4.5:1 in
   both voices × appearances (red on old: 4.44 / 4.06 / 4.15).
+- NOT FIXED — traced (the walk's fixes, batch 2, piece 9): the track is iOS's own drawing; no per-instance road gives a token track short of a hand-built control; a question for her as P-47-30 in the run record's §5 (as built · the unchosen words in ink · a hand-built token track); no re-capture.
 
 **W-C5 — The disabled calm button reads 1.65:1.** A QUESTION FOR HER.
 - Captures: `seaglass-study-light-default--r05-create-book`, `…--r05b-create-book-smart` ("Create Book" before a name).
@@ -882,6 +885,7 @@ layer pass missed one divider).
   (predates the run).
 - Narrowest fix proposed (not made): `.overlay(tokens.line)` on it; a source pin that every phone `Divider()` outside a
   `Menu` wears the line.
+- FIXED — `c7b6f0459` (`Divider().overlay(tokens.line)`); pin `MobileLookSourceTests.everyPhoneDividerWearsTheLine`; re-capture: r08 (the hairline #CBE2D9 light).
 
 **W-C8 — Terminal lowercases her words in Versions' rows.** A QUESTION FOR HER (predates the run; the screen's owner
 is VM-147's umbrella, P-47-20's list).
