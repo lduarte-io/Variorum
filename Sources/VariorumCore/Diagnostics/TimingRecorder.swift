@@ -187,6 +187,13 @@ public struct TimingArchive: Codable, Sendable, Equatable {
 
 // MARK: - The recorder
 
+/// **The largest count a persisted record may bring into a sum** (`merged`) —
+/// 10¹⁵, the readout's own `TimingReport.drawnBound` as an `Int`: a count past
+/// it can come only from a damaged file, and below it every later mark's
+/// checked `+=` stays far inside `Int` (VM-64 ladder round 3, finding 5(b)).
+/// File scope because a generic type cannot hold a static stored property.
+private let archivedCountBound = Int(TimingReport.drawnBound)
+
 public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounterKey>: Sendable {
     private struct Pending {
         var start: TimingInstant
@@ -534,7 +541,15 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
 
     /// `archive` folded under `live` (see `absorb`); `restore` folds it under
     /// an empty state.
+    ///
+    /// **Every decoded count is held to `0…archivedCountBound` before it is
+    /// added** (VM-64 ladder round 3, finding 5(b)): the sums are checked
+    /// arithmetic, so a damaged file's count near `Int.max` trapped this fold —
+    /// the launch's `absorb`, before the file could ever be rewritten. A BOUND,
+    /// not saturation: a sum saturated at `Int.max` would trap at the next
+    /// mark's `+= 1` instead; held far below it, every later mark still counts.
     private func merged(_ archive: TimingArchive, into live: State) -> State {
+        func bounded(_ decoded: Int) -> Int { min(max(0, decoded), archivedCountBound) }
         var s = live
         for (name, stats) in archive.series {
             guard let key = Series(rawValue: name) else { continue }
@@ -542,16 +557,16 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
             var ringed = TimingStats(capacity: capacity)
             for value in stats.retained { ringed.record(value) }
             if let current { for value in current.retained { ringed.record(value) } }
-            ringed.adoptCount(stats.count + (current?.count ?? 0), last: current?.last ?? stats.last)
+            ringed.adoptCount(bounded(stats.count) + (current?.count ?? 0), last: current?.last ?? stats.last)
             s.series[key] = ringed
         }
         for (name, value) in archive.counters {
             guard let key = Counter(rawValue: name) else { continue }
-            s.counters[key, default: 0] += max(0, value)
+            s.counters[key, default: 0] += bounded(value)
         }
-        s.restarts += max(0, archive.restarts)
-        s.abandoned += max(0, archive.abandoned)
-        s.unmatchedEnds += max(0, archive.unmatchedEnds)
+        s.restarts += bounded(archive.restarts)
+        s.abandoned += bounded(archive.abandoned)
+        s.unmatchedEnds += bounded(archive.unmatchedEnds)
         switch (archive.since, s.since) {
         case let (old?, new?): s.since = min(old, new)
         case let (old?, nil): s.since = old
