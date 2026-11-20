@@ -49,13 +49,101 @@ VM-47 cold review — ladder ROUND 3 (the whole run's diff vs main `a09d6a025`; 
 
 | Id | Finding | The implementer (§2a) | The reviewer's final call (§2b) | What changed |
 |---|---|---|---|---|
-| R3-m1 | MINOR — the walk's questions for her have not landed in the record's §5, the only road the closeout carries to her | PENDING | PENDING | PENDING |
-| R3-n1 | NIT — the door rule's placeholder exemption (`contains("prompt")`) is broader than the class it states | PENDING | PENDING | PENDING |
-| R3-n2 | NIT — process: the walk driver's untracked copy sat in the tree at the round's start (the walk's own build) | PENDING | PENDING | PENDING |
+| R3-m1 | MINOR — the walk's questions for her have not landed in the record's §5, the only road the closeout carries to her | **AGREE** — checked id by id: seven of the walk's questions were nowhere in §5 (W-A5, W-A6, W-A7, W-B2, W-C1, W-C5, W-C8); three sat beside rows that ask a different question (W-A8 / P-47-13, W-C6 / P-47-6, W-D3 / P-47-8); W-A2 is P-47-27's own question, but the row lacked the walk's measurements; the warning orange was in §6 only. The record work is owed whatever the call, so it landed: one row per question, P-47-27 extended (§2a) | PENDING | PENDING |
+| R3-n1 | NIT — the door rule's placeholder exemption (`contains("prompt")`) is broader than the class it states | **AGREE** on the breadth, with one correction — `code(_:)` blanks comments before the match, so a comment never exempts; identifiers and string literals do (case-folded). Today's four matching lines are all the real class. The sibling rule (:226) has the same breadth. Narrowest: `prompt:` or `\.phoneFieldPrompt`, case-sensitive, at both rules — or nothing; I lean to taking it. The test is NOT changed pending the call (§2a) | PENDING | PENDING |
+| R3-n2 | NIT — process: the walk driver's untracked copy sat in the tree at the round's start (the walk's own build) | **AGREE**, no action — the copy is in no commit on any ref and the tree is clean; its path is not gitignored, and no ignore line should be added (it would hide a stray copy from `git status`) (§2a) | PENDING | PENDING |
 
 ### 2a. The implementer's answers
 
-PENDING.
+The findings reached the implementer (Opus, 2026-11-19) verbatim. Its agree/dispute is below, for this reviewer's
+final call. Nothing was built or run for this step, and no code or test changed. R3-m1's record work, which is owed
+whatever the call, landed after these answers in the run record's §5 (the commit is in §2's table).
+
+**R3-m1 (MINOR) — AGREE. The record work is done (the run record's §5).**
+- *The facts, checked one by one.* The walk file classes eleven findings as A QUESTION FOR HER: W-A2, W-A5, W-A6, W-A7,
+  W-A8, W-B2, W-C1, W-C5, W-C6, W-C8 and W-D3. Its protocol sends each one "into the record's §5, with the capture file
+  names" (`vm-47-walk.md` §2). Before this answer, §5 carried two of the walk's ids, both born of its fixes: W-A9
+  (P-47-29, the chips' inks after the fix) and W-C4 (P-47-30, the segmented track). Of the eleven:
+  - Seven were not in §5 at all: W-A5, W-A6, W-A7, W-B2, W-C1, W-C5 and W-C8, as the finding says.
+  - Three were named beside a §5 row whose question is a different one. W-A8: P-47-13 decides the sheet header's INK
+    and Cancel's weight, while W-A8 asks how a path title breaks at AX5. W-C6: P-47-6 is the quick-entry box's hint,
+    while W-C6 is the tag field's. W-D3: P-47-8 picks "the smaller of the two candidates" by size, while W-D3 asks
+    which scaling CLASS the app's own state lines take. None of the three rows carries the walk's question, so each
+    gets a new row that points at the old one.
+  - W-A2 is covered in substance: its question is P-47-27's own ("which part of the line gives way (the walk
+    captures it)"). R-47-3 ruled the word, not the truncation. The row did not hold what the walk measured, so it is
+    extended, not duplicated.
+  - A twelfth question sat in §6 and row W.7j only: batch 2 piece 3's warning orange on the shared pages ("a question
+    for her, not a plain token").
+- *The mechanism holds.* Row W.8 ("§5 for any new question") is the record's own step for this. It was NOT-STARTED
+  when the round read the tree. A closeout that bundled §5 into QUESTIONS before W.8 ran would have carried none of
+  these.
+- *The shape: one row per question, not one row listing them.* Each question has its own options, capture names and
+  as-built line, and QUESTIONS takes them as separate items for her sitting.
+- *What changed:* in §5, P-47-27 extended with W-A2's measurements; P-47-31 … P-47-41 added (W-A5, W-A6, W-A7, W-A8,
+  W-B2, W-C1, W-C5, W-C6, W-C8, W-D3, the warning orange); one sentence under "Held for her hands" (the Account sheet's
+  first sight is hers).
+- *Not a question on screen:* piece 4's leftover, two hairlines when the note's ⋯ sheet has no settings door. In the
+  app that state cannot occur: the shell sets `mobileSettingsDoor` over everything it presents
+  (`MobileShellView.swift:323`), so every ⋯ sheet draws its Settings row. Only a harness or a preview lacks the door.
+- *Left where they are, for the reviewer's call:* the walk's "Noted, not filed" lines hold three items marked "her
+  look" that no reader classed as a question. Set 1: the note's ⋯ sheet keeps its rows on the room while Settings' rows
+  sit on the paper. Set 2: Book Details' detail lines sit beside their labels, not under them; and the system
+  toolbar's "Details · Read" wear the system's label colour (the reader's two stacked back doors are already P-47-20).
+  I added no rows for them, because their readers did not class them as questions.
+
+**R3-n1 (NIT) — AGREE on the breadth, with one correction. I would narrow both rules together. Nothing changed now.**
+- *The exemption as written.* The door rule (`MobileFaintOnDoorsTests.swift:156`, from `94f4e752d`) is
+  `if line.lowercased().contains("prompt") { continue }`. It reads the line as `code(_:)` returns it (:73–82).
+- *What it really exempts.*
+  - Comments: `code(_:)` blanks every whole-line comment and strips a trailing one (`(^|\s)//.*$`) before any rule
+    reads the line. A trailing COMMENT that mentions "prompt" therefore does NOT exempt a faint read. That half of the
+    finding's example is hollow.
+  - Identifiers and words: string literals are kept and the match is case-folded. So any identifier holding the
+    letters in any case exempts its line (`promptCount`, `showsPrompt`, `PromptBadge`, `isPrompting`). So does any
+    literal holding them: a door whose own word read "Prompt…" in the faint would pass. Here the finding's breadth is
+    real.
+- *Today's tree.* Exactly four faint reads in the scanned files share a line with "prompt", and all four are the real
+  class:
+  - `Shared/AuthViews.swift:469` and `:486`, the Account helpers' `prompt: Text(…).foregroundStyle(style.tokens.phone.faint)`;
+  - `Shared/Theme/PhoneControls.swift:337`, `TextField(phonePlaceholder:)`'s `prompt:`;
+  - `Shared/Theme/PhoneControls.swift:310`, `.environment(\.phoneFieldPrompt, tokens.phone.faint)`. That line is the
+    modifier handing the ink DOWN. The read is `PeekableSecretField.swift:32`
+    (`@Environment(\.phoneFieldPrompt) private var promptInk`), a line that no faint pattern matches.
+
+  No line today is exempted that should not be.
+- *The narrowest match that still exempts both forms:* `line.contains("prompt:") || line.contains("\\.phoneFieldPrompt")`,
+  case-sensitive and not lowercased. These are the argument label and the environment key path, which is how the
+  commit message and both rules' comments word the class. Each of the four lines holds one or the other (checked by
+  grep; nothing was run). An identifier or a word that merely contains "prompt" would no longer pass.
+
+  Narrower still would tie the faint read to the prompt's own `Text`, by a regex on
+  `prompt: Text(…).foregroundStyle(…faint)`. That would also refuse a line holding a prompt beside a separate faint
+  word. No view in this tree is written that way, so I would not take the regex.
+- *The sibling rule has exactly the same breadth.* `wordOffenders()` (:226, from `a21110f9d`) uses the same
+  `line.lowercased().contains("prompt")`, and the door rule copied it (its comment calls it "the sibling rule's
+  exemption"). The sibling is the broader rule: it reads every faint read, not only those inside a door, so a hole
+  there admits any faint word under 17 pt. Narrowing the door rule alone would leave that hole open.
+- *What I would change, if taken:*
+  - the two lines (:156, :226) to the two-substring match;
+  - the door rule's comment (:152–155) and the sibling's doc comment (:200–201), to name the two forms exactly.
+
+  This is test-only, in one commit. No red-on-old exists, because the rule guards future code. The evidence would be
+  that neither rule's count moves (by the grep, all four of today's lines keep their exemption under the narrower
+  match), plus the compile on the next build. The other choice is nothing, since no line today is mis-exempted. I lean
+  to taking it: the rule's job is to catch a future word, and "prompt" is a plausible word in a future door. The
+  reviewer decides.
+
+**R3-n2 (NIT, process) — AGREE: no action.**
+- The path `App/Variorum/VariorumMobileUITests/VM47FinalWalkDriver.swift` is in no commit on any ref: `git log --all`
+  over it is empty. The tree was clean when this answer started (HEAD `be385dbae`, nothing untracked).
+- The convention is the record's. The driver lives gitignored in `vm-47-screens/instruments/`, and its copy in
+  `VariorumMobileUITests/` exists only for a walk build and is removed straight after (rows 1.6e and W.2; R-47-3
+  piece 3).
+- One fact the finding does not name: that path is NOT ignored. `git check-ignore` finds no rule, and the branch's
+  `.gitignore` gains only `notes/plans/vm-47-screens/`. What keeps a stray copy out of a commit is the run's
+  add-by-path rule and the walk's own removal step. I would add no ignore line, because it would hide a left-behind
+  copy from `git status`, the signal that let this round see the tree move.
 
 ### 2b. The reviewer's final calls
 
