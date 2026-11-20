@@ -3395,6 +3395,47 @@ orchestrator's facts and checked line by line against the kept logs).**
   checkout HEAD --` and a clean status shown before the green leg (`status lines=0 diff-vs-HEAD lines=0`), both
   bundles checked with `xcresulttool` and the logs kept (round 2's R2-F1 rule).
 
+### Round 5 — `vm-78-ladder-round5.md` (a fresh `fable-reviewer`; the whole diff `ad5053002..861c053f0`)
+
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 9 NIT**, all new in the round, none against a product line and none saying a test
+is wrong (findings `b76116bfc`). Six are sentences or slots in the record, the handoff and PL-78; one is three
+stale code comments for a ticket already on the to-file list; one is a duplication inside the guards' test file;
+one is a line for another owner. None is a `Sync/` line, none is FINDER-FIXES. It read the three guards, their
+window's logs and bundles, the second merge-in (re-done with `git merge-tree`: the merge differs from git's own
+result in the two notes files only), the NIT edits and the map, and VM-64's join by a trial merge at `beefc79f7`
+(clean; the five shared files' blobs named in the round file). **The ladder closes: the fifth round, no BLOCKER or
+MAJOR** — the cap of five is reached and nothing here would have earned a sixth.
+
+The flow is cross-model: the implementer answers each finding, and the reviewer's report rules in advance that
+"where an answer disputes nothing the finding's own "Fix" is the final call". As a final round's fixes they get
+the orchestrator's line-by-line check against the round file. Dispositions:
+
+| Finding | The implementer's answer | Final call | What changes |
+|---|---|---|---|
+| R5-N1 NIT — three places still say the phone's "smart" source scan is owed (VM-212); round 4's G2 is that scan | AGREE — `noPhoneStringLiteralSaysSmart` walks every literal under `VariorumMobile/` and `Shared/` with two exact exemptions, each held to one match (`MobileBookFixesTests.swift:749`) | the finding's fix (the reviewer's standing ruling) | PL-78's still-owed list, the W-073 reconcile bullet and the VM-212 and VM-85 owner lines say what is owed now (delete the entry when the literal is reworded); the history line in the round 1 fix pass stays; G1, G2 and G3 join the Closeout's member rows (VM-84; VM-83; VM-21 and VM-81) |
+| R5-N2 NIT — "gate 2" described as tier 1's 17 and tier 2's, where the coordinator sized the whole Mac target | AGREE — the 15:20 and 17:00 updates say the WHOLE Mac target, and `DeadVocabularyTests.noShippedWordSpeaksTheRetiredVocabulary` (`VariorumTests/DeadVocabularyTests.swift:100`) is in neither tier list | the finding's fix | the Closeout's Gate 2 row, FOR A LATER READER's gate-2 slot and the handoff's two places say the whole Mac target; the slot stays PENDING and names the dead-vocabulary test among what its result line reports |
+| R5-N3 NIT — the handoff's "three times" and "(the section below)" | AGREE — four rounds are told after it, and the canon-lines section stands above | the finding's fix | "five times, a new reviewer each round"; "(the section above)"; the round-5 slot filled in plain words |
+| R5-N4 NIT — three code comments still mark the insured restore PROVISIONAL | AGREE, with one site added: the header comment of the Mac test file `RestoreFlushFirstInsuranceTests.swift:5` says the same ("P-849-1 (PROVISIONAL — …"); the added site is the implementer's, for the reviewer's eye | the finding's fix; the added site, the orchestrator's to put to the reviewer | to-file item 4 gains the clause with the three sites and the fourth beside them, in the record and the handoff; no code edit |
+| R5-N5 NIT — no closeout paragraph drafted for the master plan; the Cast incomplete | AGREE — "Not done" said the drafts were above, and the master plan's paragraph, the in-flight row's retirement and the outgoing paragraph's roll to the archive were not | the finding's fix | "To land on main at the merge" gains the master plan's paragraph (with PL-78's MOBILE PARITY line) and the two merge-moment steps; the Cast names every session |
+| R5-N6 NIT — FOR A LATER READER is far over a page | AGREE — the cut is made now, from the settled text, rather than at the merge (the orchestrator's word), so the merge only fills slots; nothing cut is lost (each fact already stands in the Closeout or was moved there first) | the finding's fix, its timing at the orchestrator's word | FOR A LATER READER cut to about a page: the evidence paragraph becomes a few lines with a pointer to the Closeout's evidence table |
+| R5-N7 NIT — the whole-word rule written twice in the guards' file | AGREE — no change before the merge: the guards' compiled bytes are what the window ran | the finding's own disposition (no change now) | none in the tree; the fold rides with whichever of VM-85 or VM-212 next opens `MobileBookFixesTests.swift`, said in their owner lines |
+| R5-N8 NIT — her "book order … collect receipt your choice is fine." quoted without the message it answers | AGREE — the orchestrator's numbered message is in the session transcript | the finding's fix | the message quoted verbatim, marked as the orchestrator's words, beside her quote in Kickoff facts; a sentence beside it in the Closeout ("Her rulings built here", item 3, and the AppSpecRecord draft). Batch A's copy (`:1032`) sits inside batch A's LIVE STATUS, which this pass does not edit; the Kickoff facts sentence answers it |
+| R5-N9 NIT — after VM-83 the phone orders the same books two ways | AGREE — `MobileMembershipModel.ordered` sorts by tuple `<` and the add lists come from `Queries.readings`' `ORDER BY name, id`; the gate's walk saw it (its observation 1) | the finding's fix | one line under "Lines for other owners" for VM-113's kickoff, pointing at the walk's observation |
+
+#### Round 5's fix pass — LIVE STATUS
+
+*A fresh `opus-implementer` (2026-11-19, evening), worktree `~/dev/variorum-vm-78`; documents only — no code, no
+test, no build, no simulator, no stage. The gate's legs 1 and 2 have not run; their slots stay PENDING. **No revert
+is in flight.***
+
+| Piece | State |
+|---|---|
+| 0 — this section, the disposition table and its LIVE STATUS | DONE (this commit) |
+| 1 — R5-N1: PL-78's still-owed list, the W-073 reconcile, the VM-212 and VM-85 owner lines, G1–G3 in the member rows | NOT-STARTED |
+| 2 — R5-N2, N3, N4, N8, N9 and every round-5 slot in the record and the handoff | NOT-STARTED |
+| 3 — R5-N5: the master plan's closeout paragraph, the merge-moment steps, the Cast | NOT-STARTED |
+| 4 — R5-N6: FOR A LATER READER cut to about a page, from the settled text | NOT-STARTED |
+
 ## Closeout
 
 #### THE CLOSEOUT RE-FIT — LIVE STATUS
