@@ -184,7 +184,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | Ladder r1 · fix pass | **DONE 2026-11-19** — settled by the merged tree's stage window (finding 2 red on its hunk-reversed build, green alone and in company; "Orchestrator's stage results" ▸ "The merged tree (main's VM-55 in)") | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); part 2 ran as the merge block below. *(Was: IN-PROGRESS, "owed: the stage" — flipped at ladder round 3, finding 2(c).)* |
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
 | Ladder r2 · fix pass | **DONE 2026-11-19** — part B built and the whole Core package green (`74d91c666`); settled by its stage window: the seven meant reds on `vm64-gate2-red` and no other, green alone and in company, the gated suite alone 13 passed ("Orchestrator's stage results" ▸ "Ladder round 2's fixes — THE STAGE WINDOW") | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, the no-choice fixes with their pins, the final calls in the second turn, part B's builds. *(Was: IN-PROGRESS, part B waiting on the QUIET window — flipped at ladder round 3, finding 2(c).)* |
-| Ladder r3 · fix pass | **FIRST TURN DONE** — responses, fixes 1 and 5(b) with their pins, the records; the arms (finding 1's (i′)/(i), `merged`'s overflow, the migration comment) wait for the reviewer's final call; finding 1's runs and red build wait for the gate tree | see "Ladder round 3 — fix pass · LIVE STATUS" below | the last round (no major found) |
+| Ladder r3 · fix pass | **DONE (both turns)** — the final calls applied (`6aa357bff`): (i′) confirmed with its guard; `merged` bounded, pin first; the migration comment. Owed with the gate tree after VM-78's merge-in: finding 1's red build and the hosted runs of its suite | see "Ladder round 3 — fix pass · LIVE STATUS" below | the last round (no major found). *(Was: FIRST TURN DONE, the arms waiting.)* |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -846,10 +846,10 @@ red-on-old build are made after VM-78's merge-in, not now). No hosted run (the s
 | T4 — record and handoff edits: 2(c) the two fix passes' rows; 2(d) the handoff's "What happened" and "Reviews"; 3 the handoff's P-2-4 and the bundle; 4 the readout caveats; 5(a) the SurfaceContracts draft; 5(c) "empty in the steady state"; 5(d) declined, recorded | DONE (`fb55c3cbf`); 5(c)'s migration comment NOT touched (an arm); 5(d) declined in §7 ▸ "Ladder round 3 — fix pass" |
 | T5 — ONE warm phone `build-for-testing` into `vm64-gate2` | DONE at `848b98b66` — `** TEST BUILD SUCCEEDED **`, 0 errors, no warning in a touched file (`DerivedData/vm64-gate2-r3-phone-build.log`, local) |
 | T6 — §7 ▸ "Ladder round 3 — fix pass" closeout; the report | DONE (`1d781c237`). The first turn ended here — the arms waited for the reviewer's final call |
-| **Second turn** (the final calls, `6aa357bff`): T7 — finding 1's GUARD (the short complete listing a page reaches past is not chased; test-only) | NOT-STARTED |
-| T8 — 5(b)'s `merged` bound, arm (B): the exit-test pin first (its own commit, red), then the bound (green) | NOT-STARTED |
-| T9 — 5(c): `Migrations.swift`'s `v1_38` comment, COMMENT ONLY; `MigrationTests` green | NOT-STARTED |
-| T10 — ONE warm phone `build-for-testing` into `vm64-gate2`; §7's second-turn part; these rows | NOT-STARTED |
+| **Second turn** (the final calls, `6aa357bff`): T7 — finding 1's GUARD (the short complete listing a page reaches past is not chased; test-only) | DONE (`8be3a1f30`) — `aShortCompleteListingThatAPageReachesPastIsNotChased`; the handoff's slot beside "fixed" `399846e11`. Runs PENDING the gate tree's stage (green on both builds expected) |
+| T8 — 5(b)'s `merged` bound, arm (B): the exit-test pin first (its own commit, red), then the bound (green) | DONE — pin `adc466230` RAN RED (36 in 1 suite failed with 1 issue, the child's SIGTRAP); bound `4bee11420` RAN GREEN (36 in 1 suite passed) |
+| T9 — 5(c): `Migrations.swift`'s `v1_38` comment, COMMENT ONLY; `MigrationTests` green | DONE (`705c6cf8a`) — `//` lines only; `MigrationTests` 33 in 4 suites passed |
+| T10 — ONE warm phone `build-for-testing` into `vm64-gate2`; §7's second-turn part; these rows | DONE — the build at `8be3a1f30` `** TEST BUILD SUCCEEDED **`, 0 errors; §7 ▸ "Ladder round 3 — fix pass" ▸ "Second turn" (this commit). **The turn ENDS here**; owed, by a fresh session after VM-78's merge-in: the gate tree, finding 1's red build and the hosted runs |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -4402,3 +4402,59 @@ to correct.
    decoded count · C record only); the migration comment (yes/no).
 5. **The handoff's new sentences** read as plain English for her (P-2-4; VM-226's third way in; the two caveats; "What
    happened"; "Reviews").
+
+#### Second turn — the reviewer's final calls (`6aa357bff`) applied
+
+**Not done:** no hosted run, no Mac build, no red build, no whole Core package — by the brief, those come with the gate
+tree after VM-78's merge-in, from a fresh session. The ticket bodies (VM-242 gains (i′)'s residual; VM-234 gains
+finding 4's two lines) and finding 2's (a) and (b) are the orchestrator's.
+
+**Commits:** `6c6d3a01e` (live status) · `adc466230` (the `merged` pin, red) · `4bee11420` (the `merged` bound) ·
+`705c6cf8a` (the migration comment, comment only) · `8be3a1f30` (finding 1's guard) · `399846e11` (the handoff's slot
+beside "fixed") · this part. **The final code tree is `8be3a1f30`**; every later commit is the record or the handoff.
+
+| Final call | What landed |
+|---|---|
+| Finding 1 — (i′) CONFIRMED as built; one guard | `MobileLibraryPagingRulesTests.aShortCompleteListingThatAPageReachesPastIsNotChased` — test-only, a GUARD by its doc: a page of four; three notes read hidden (`hold(onScreen: false)` — three rows, complete); three more minted hidden; held on screen; settle to four rows; after 150 ms still `all.count == 4 && allHasMore`; then `loadMore` to the end equals `Queries.library`'s six. It holds the clause `page.items.count <= rows(listing).count`: GREEN on the fix and on the hunk-reversed build (nothing raises there), RED only under (i) (the clause deleted — the landing would chase and read six) |
+| Finding 1 — the handoff's sentence | round 3's "fixed the same way" keeps `PENDING(merge gate: its tests, seen failing on the old build and passing on the new one)` beside it, until the two runs land |
+| 5(b) — `merged`, arm (B), pin first | **Pin** (`adc466230`): `TimingRecorderTests.aDamagedArchivesCountsAreBoundedWhenAbsorbed`, an exit test exactly as the call words it — a live sample and a live count; an archive whose same series decodes with `count` = `Int.max`, whose same counter and three footer counts are `Int.max`; `absorb`; one more sample, one more count, a restarted begin, an unmatched end; a snapshot and the series' summary; in the child, the series count = bound + 2, the counter = bound + 2, `restarts` and `unmatchedEnds` = bound + 1, `abandoned` = bound. **The bound** (`4bee11420`): in `TimingRecorder.merged`, the decoded series count, each decoded counter and the three footer counts each held to `0…archivedCountBound` before they are added (the old `max(0, …)` kept inside the clamp); ONE named constant, `private let archivedCountBound = Int(TimingReport.drawnBound)` (10¹⁵) at file scope (a generic type cannot hold a static stored property), with a comment saying why it is a bound and not saturation. Nothing else moves |
+| 5(c) — the migration comment | `705c6cf8a`, COMMENT ONLY: `Persistence/Migrations.swift`'s `v1_38` comment "empty in the steady state (a signed-in mint is stamped at birth)" → "empty in the signed-in steady state (a signed-in mint is stamped at birth) — in a library never signed in, each index holds every row of its table, one small entry per row written —". `git diff -U0` holds only `//` lines (2 removed, 4 added; no non-comment line); the migration's name, SQL and position untouched |
+
+**Headless runs:**
+- `swift test --filter TimingRecorderTests` on the pin-only tree (`adc466230`): **36 tests in 1 suite failed with 1 issue** —
+  `aDamagedArchivesCountsAreBoundedWhenAbsorbed`, "expected exit status `.success`, but `.signal(SIGTRAP)`" (the absorb's
+  `Int.max + 1`). On the fix (`4bee11420`): **36 tests in 1 suite passed**.
+- `swift test --filter MigrationTests` after the comment: **33 tests in 4 suites passed**.
+
+**The Mac:** the bound sits in `merged`, reached only through `absorb`/`restore`, whose one caller in the app tree is the
+phone's `MobileTiming` (`recorder.absorb(kept)`); the Mac's recorder is never enabled and never absorbs. The comment
+changes no statement. Nothing of the Mac's moves.
+
+**Built:** ONE warm incremental phone `build-for-testing` into `App/Variorum/DerivedData/vm64-gate2/` at `8be3a1f30` —
+`** TEST BUILD SUCCEEDED **`, 0 errors, no warning in a touched file (`DerivedData/vm64-gate2-r3b-phone-build.log`,
+local).
+
+**Finding 1's red build, as it stands after this turn** (unchanged recipe; checked: `git show 848b98b66 --
+…/MobileLibraryViewModel.swift | git apply -R --check` passes on this tip, and no later commit touches that file — so it
+reverses `848b98b66`'s one hunk and nothing else; the new guard stays IN the red build and must be green there):
+```
+cd ~/dev/variorum-vm-64
+git show 848b98b66 -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift | git apply -R
+cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/<the gate's red folder>
+cd ~/dev/variorum-vm-64 && git checkout HEAD -- App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift
+git status --short; git diff HEAD --stat   # both must be empty
+```
+
+**The final hosted command and expectations** (the orchestrator's stage; `tests=(MobileLibraryPagingRulesTests)`, the
+invocation as above in "The hosted command for finding 1's pins"):
+- **On the hunk-reversed build:** EXACTLY the three finding-1 pins red, at 3 · 2 · 2 issues (7) and at the expectations
+  their docs name — `aPutBackOfTheLastRowOfAFullyListedListingReturnsIt` (listed again; the store's whole listing;
+  `!allHasMore`) · `aPutBackOfARowAboveTheEndOfAFullyListedListingKeepsItsLastRow` (the whole listing; `!allHasMore`) ·
+  `aNoteArrivingAtTheTopOfAFullyListedListingKeepsItsLastRow` (the whole listing; `!allHasMore`); round 2's four
+  8-of-12 pins (`aRowDeletedPastTheFirstPageLeavesTheListing`, `aPutBackThroughTheLinesUndoReturnsARowPastTheFirstPage`,
+  `aPutBackAfterTheLibraryCameBackReturnsARowPastTheFirstPage`, `aDeeperListingFollowsItsFirstPage`) and the new guard
+  `aShortCompleteListingThatAPageReachesPastIsNotChased` GREEN; every other test of the suite green. Any other red, or a
+  different count, is explained in the record before the gate counts as open; a finding-1 pin green there is hollow at
+  that pin and said so.
+- **On the fix build:** the whole suite green, alone and in company with round 2's (ii) list.
