@@ -78,8 +78,7 @@ expected pins, then 283 tests in 41 suites green, both bundles read. The VX-981 
 (`d55d22db9`): no conflict under `App/` or `Sources/`, every read clean, the red patch still applies. The guards' window on that tree (16:43:57–16:46:39): RED 26 tests in
 5 suites failed with 7 issues on exactly the four expected tests (G1, G2, G3 and the Book Details join), the five
 seam pins green; GREEN 42 tests in 7 suites passed, the phone's two undo types among them; both bundles read.
-PENDING(ladder round 5: its count; gate 1, the whole phone target; gate 2, the Mac leg; gate 3,
-the simulator walk).
+The simulator walk (gate 3, 17:54–18:18 on a dedicated device): every row PASS from its captures, in Study and the five again in Terminal, no defect ("### THE GATE — leg 3, the simulator walk"). PENDING(ladder round 5: its count; gate 1, the whole phone target; gate 2, the Mac leg).
 
 **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (`786f50af9`). MobileSoul §6:
 PL-78 (made true of the tree as PL-77, `e24e0fb81`; renumbered PL-78 at the second merge-in, `d55d22db9`, VX-981's
@@ -3011,10 +3010,73 @@ its `DerivedData/vm78-pins` and removed at the end. Captures: this worktree's ig
 | 2 — the instruments written in the pins checkout (seeder + driver) and built incrementally into `vm78-pins` (headless, no boot, no stage) | DONE — three untracked files in `~/dev/variorum-vm-78-pins`: the hosted seeder `VM78WalkSeedTests` (one test; the walk's library minted through ordinary Operations on a quiet facade — the pocket guide by the app's own `MobileTutorialSeeder.seed`, two living books with three notes waiting at Arrivals, a gathering, a sealed book, an archived book holding two notes that match a gathering, a second archived book, a ★-rule gathering, a starred "Zebra notes" beside "Book 2" and "Book 10", two gatherings to delete, a starred archived living book, the starred archived journal-trait book with a rule, the undo, history and date notes, a note in the Trash, and a second wing "Spare room" with no tags); the UI driver `VM78Walk` (classes `VM78WalkFirstRun`, `VM78WalkStudy` — 13 tests, `VM78WalkTrash`, `VM78WalkTerminal` — 5 tests); and the runbook `vm78-walk.zsh`. Built with `-destination "platform=iOS Simulator,id=<walk-device-udid>"` into `DerivedData/vm78-pins`: scheme TK2SpikeUITests (the driver) then VariorumMobile (the app keeps the seeder's test PlugIn), both TEST BUILD SUCCEEDED, incremental (seconds each), no warning in either instrument; nothing under the tracked tree changed there |
 | 3 — the dedicated device `vm78-walk` created (never booted outside the claim) | DONE — iPhone 17 Pro, the iOS 26.2 runtime, `<walk-device-udid>`; created and left Shutdown |
 | 4 — READY to the orchestrator (device id in the message only; minutes; test type names; capture count) | DONE — sent; waiting on the coordinator's GO with the claim line |
-| 5 — the walk, under the coordinator's claim | NOT-STARTED — PENDING(the claim's times) |
-| 6 — every capture looked at and each row judged from it; the table below | NOT-STARTED |
-| 7 — the close: device shut down and deleted, no Variorum process, no booted simulator of mine, the claim released, the instruments removed (`git status --short` empty in the pins checkout) | NOT-STARTED |
-| 8 — the gate-3 `PENDING(…)` slots filled (the Closeout's evidence row and "The walk's rows", FOR A LATER READER's slot, the handoff) | NOT-STARTED |
+| 5 — the walk, under the coordinator's claim | DONE — claim `vm-78` taken by the coordinator 17:54:35 (45 min, to 18:39:35); boot 17:54:59, driving done 18:18:05, released 18:18:26 (`STAGE RELEASED (was 'vm-78')`). Every row driven; one retake (row o in Study, after the driver's own log call failed past o2) |
+| 6 — every capture looked at and each row judged from it; the table below | DONE — each row judged from its decisive capture(s), after the release; row l from the recording's frames. Every row PASS; no defect |
+| 7 — the close: device shut down and deleted, no Variorum process, no booted simulator of mine, the claim released, the instruments removed (`git status --short` empty in the pins checkout) | DONE — 18:18:23: `vm78-walk` shut down and deleted (0 left); no VariorumMobile process on it, no Variorum process; the three instrument files removed — `git -C ~/dev/variorum-vm-78-pins status --short` prints nothing, HEAD `d55d22db9`; a copy of them sits in the ignored screens folder (`instruments-copy/`); released 18:18:26 |
+| 8 — the gate-3 `PENDING(…)` slots filled (the Closeout's evidence row and "The walk's rows", FOR A LATER READER's slot, the handoff) | DONE (this commit) |
+
+
+#### The walk (2026-11-19, claim 17:54:35 → released 18:18:26)
+
+**Where the evidence is:** every capture named below is a PNG in this worktree's ignored
+`App/Variorum/DerivedData/vm78-walk-screens/` (`S-` the Study pass, `T-` the Terminal pass), with the driver's
+`walk-log.txt` (frames in points on the 874 pt screen; the alerts' texts; which doors exist), the screen recording
+`l-trash-first-paint.mp4`, the xcodebuild logs under `logs/`, the result bundles under `bundles/` and a copy of the
+three instruments in `instruments-copy/` — kept until the post-merge cleanup. Each verdict is written from what the
+capture SHOWS, read by eye after the release; the log adds only numbers a picture cannot give.
+
+**The device and the app:** the dedicated `vm78-walk` (iPhone 17 Pro, iOS 26.2, `<walk-device-udid>`), created for the
+walk and deleted after it; the Debug phone app (`io.lduarte.VariorumMobile`, the dev store) built from
+`~/dev/variorum-vm-78-pins` at `d55d22db9` (the code byte-identical to the tip `54e38785f` — the commits after it are
+notes only) into `DerivedData/vm78-pins`; light appearance, Large text; the voice by the launch argument
+(`-io.lduarte.variorum.mobile.themeVoice study|terminal`, nothing persisted). Signed out throughout — never signed in,
+Resume and Sync never pressed, no secret typed, no Castle; the Mac's dev store, her real store, her phone and
+`/Applications` untouched; no other simulator booted or touched.
+
+**The run, in order:** (1) boot and a 30 s settle (autocorrection, prediction and auto-capitals off on this device);
+(2) the first run — the fresh install's once-shown words card pressed through by the driver with NO capture, its
+result bundle deleted at once (0 first-run captures on disk), the app terminated with no write; (3) the hosted
+seed — its summary read back exactly what was planned: 11 books, 5 gatherings, 4 readings archived, 1 sealed, 39
+notes live, 1 in the Trash, 7 Home tags and none in "Spare room", **3 waiting at Arrivals in "Reading inbox" and 3
+in "Story inbox"**, 4 stars (the test itself reported swift-dependencies' "`\.date` accessed from a test context"
+issue raised by the bootstrap after the seed — the summary is the seed's evidence, as the VM-44 runbook warned);
+(4) Study, rows a–o (four invocations); (5) row l, recorded; (6) Terminal, rows a, c, d, e, o; (7) the close.
+74 PNGs: 56 Study (two of them the first try of row o, `-try1`), 18 Terminal; plus the recording.
+
+| Row | What was done | What the screen showed | Capture | Verdict |
+|---|---|---|---|---|
+| a | Shelf ▸ "Reading inbox" ▸ Details ▸ Finish; Cancel; Finish ▸ Finish; then Reopen and Finish once more | The confirm: "Finish “Reading inbox”?" · "3 waiting at Arrivals will be dismissed." · Cancel / Finish. After Cancel: the row still says Finish, the name has no ✓ (open). After Finish: "Reading inbox ✓", the row Reopen. Reopen, then Finish: no confirm at all (the log: ALERT none) — the book finished at once, so nothing was waiting: the three were dismissed | `S-a2-finish-confirm.png` `S-a3-after-cancel.png` `S-a4-finished.png` `S-a6-finish-acts-at-once.png` (`S-a1`, `S-a5` between) | PASS |
+| a Terminal | The same on "Story inbox" | "Finish “Story inbox”?" · "3 waiting at Arrivals will be dismissed." · cancel / finish; finished; Reopen then finish acts at once, no confirm | `T-a2-finish-confirm.png` `T-a3-after-cancel.png` `T-a4-finished.png` `T-a6-finish-acts-at-once.png` | PASS |
+| b | Shelf ▸ "Garden gathering" ▸ Details | Book Details: the name, "gathering · #garden", then only "Delete Gathering…" — no Finish, no Reopen (the log: 0 buttons containing either) | `S-b1-gathering-details.png` | PASS |
+| c | Shelf ▸ "Sealed letters" ▸ Details (medium) ▸ Reopen | Book Details up: "Sealed letters ✓", Reopen with "Sealed — the book is done; no note in it can change.", Delete Book…. The line at the window's foot, in the alarm ink, readable: "This book is sealed, so it can't be reopened here." — its words at 818–832 pt, the sheet's last row (Delete Book…) ending far above it; nothing covered | `S-c2-reopen-refusal-line.png` (`S-c1` before) | PASS |
+| c Terminal | The same | The same sentence at the foot (the line's sentence keeps its capitals while the sheet is lowercased — VM-55's line face, observation 2), the sheet above it untouched | `T-c2-reopen-refusal-line.png` | PASS |
+| d | Library ▸ "Walk membership note" ▸ the books chip; then "+ Starred things (by tagging)" | The sheet: "Old drafts (archived)" with diverge · remove; "Walk notes" with the faint "gathering" mark and NO diverge or remove; "Add to a book": "+ Attic (archived)", "+ Morning pages (archived)", "+ Old letters (archived)", the books, then the gatherings "(by tagging)". After the collect, the line at the foot, readable, with the sheet still up: "Starred — the gathering shows it now."; "Starred things" now in the membership rows with its "gathering" mark | `S-d1-membership-sheet.png` `S-d2-collect-line.png` (`S-d0`, `S-d3`) | PASS |
+| d Terminal | The same on "Walk membership two" | The same rows lowercased; the same line at the foot with the sheet up | `T-d1-membership-sheet.png` `T-d2-collect-line.png` | PASS |
+| e | Shelf at rest; long-press "Book 2" | "Home · Shelf · 12 books": the pocket guide and Zebra notes (both starred) first, then Book 2, Book 10, Garden gathering, Reading inbox ✓, Sealed letters ✓, Starred things, Story inbox, the two Trip gatherings, Walk notes. The menu: Star, Delete Book… — no Pin (the log: 0 buttons containing "Pin") | `S-e1-shelf.png` `S-e2-row-menu.png` | PASS |
+| e Terminal | The same | "~/home/shelf · 11 books": old letters (starred since row h), the pocket guide, zebra notes, book 2, book 10, …; the menu: star, delete book…, no pin | `T-e1-shelf.png` `T-e2-row-menu.png` | PASS |
+| f | Shelf: long-press "Trip gathering A" ▸ Delete Gathering… ▸ Delete; then "Trip gathering B" ▸ Details ▸ Delete Gathering… ▸ Delete | Both confirms "Delete Gathering" · "“Trip gathering …” goes to the Trash for 30 days. Its notes stay in the library. …". Both lines above the tab bar: "Gathering moved to the Trash — 30 days to put it back.  Undo" — the second after the sheet closed and the book screen popped to the shelf | `S-f3-line-from-row.png` `S-f6-line-from-details.png` (`S-f1`, `S-f2`, `S-f4`, `S-f5`) | PASS |
+| g | Shelf ▸ + New Book ▸ Gathering (Home); then the wing door ▸ "Spare room" ▸ + New Book ▸ Gathering; back to Home | Home: the kind row Book · Journal Book · Gathering (selected), the caption "A gathering shows every note these tags match and holds none of them — the tags stay on the notes.", the six Home tags. Spare room: the same caption and "No tags yet — notes get tags first; a gathering shows the notes that match them." | `S-g1-create-gathering-home.png` `S-g3-create-gathering-no-tags.png` (`S-g2`, `S-g4`) | PASS |
+| h | Starred ▸ "Old letters" ▸ Details ▸ Unarchive ▸ Done ▸ Shelf | Details: "Old letters (archived)", Finish, "Unarchive" with "Collecting is paused while this book is archived.", Delete Book…. After Unarchive: the mark and the row gone (no line). The Shelf: "Old letters" first (starred) — back on the shelf, 11 books | `S-h2-details-unarchive.png` `S-h3-after-unarchive.png` `S-h4-shelf-after.png` (`S-h0`, `S-h1`) | PASS |
+| i | "Walk undo note": the caret in "Delete me." ▸ the bar's ⋯ ▸ Delete Block ▸ Delete; blocks ▸ leaving ▸ Put back; the note's ⋯ ▸ "Undo Delete Block" | The sheet before the press: "Undo Delete Block", no Redo row. After the press: the note behind holds both paragraphs (the Put back stands), the sheet shows no Undo and no Redo row, and the line at the foot, readable over the sheet: "Nothing to undo — Delete Block was already undone or changed since." — a refusal with no door on it | `S-i6-note-actions.png` `S-i7-quiet-undo-line.png` (`S-i1`–`S-i5`, `S-i8`) | PASS |
+| j | "Walk history note" (one commit, "First sentence stays."): " Typed past it." typed at the end; ⑂ ▸ Take actions ▸ Block History… ▸ Restore this commit | After the restore the buffer reads "First sentence stays." and Commits lists "First sentence stays. Typed past it." · "quiet" above "First sentence stays." · "the first sentence … saved by hand" — one quiet kept moment holding exactly the replaced words | `S-j4-history-after-restore.png` (`S-j1` the typing, `S-j3` before) | PASS |
+| k | "Walk date note" (titled, undated) ▸ Entry Date ▸ "2026-11-05" ▸ Set | The chip reads "2026-11-05" at once; the title "Walk date note" unchanged | `S-k3-chip-after.png` (`S-k1`, `S-k2`) | PASS |
+| l | The Trash opened from the Library's 🗑 (and again from the Shelf's), the screen recorded (h264, 467 frames over 48.7 s) | Every recorded frame of the first push (22.560–23.003 s): the Trash slides in already listing "Trip gathering B", "Trip gathering A", "Old scrap" — no frame shows "Nothing in the Trash." The settled screens show the listing. What a recording can and cannot show: it holds every frame the device drew while recording, at the display's own rate — a paint shorter than one frame would show in neither it nor a still; the mechanism itself is carried by the pin `MobileTrashTests/theFirstPaintSaysNothingBeforeTheListingAnswers` (red on old, green on the fix). The second opening's push frames were not read (its settled capture was) | `l-trash-first-paint.mp4` (frames 22.560–23.003 s); `S-l1-trash-settled.png` `S-l2-trash-settled-from-shelf.png` | PASS |
+| m | Shelf ▸ the pocket guide ▸ "divide with takes" | "Dividing a block that has several takes follows one simple rule on the phone: the take you're reading is cut in two, and every other take rides along whole onto the top block, …" · "The bottom block holds just the second half. …" — keep-on-top, the draft's words | `S-m1-divide-with-takes.png` | PASS |
+| n | The pocket guide ▸ "getting around" | "The SHELF is home: your books at the top, starred books first — this one is starred. … A long press STARS a note or a book — …" — F4's draft as written (its "a smart book collecting by tags" clause is VM-212's, G2's named exemption) | `S-n1-getting-around.png` | PASS |
+| o | Starred ▸ "Morning pages" ▸ Details; the name row ▸ Rename to "Book 2"; then the sheet dragged to large and the same again | Medium: "Morning pages (archived)", Finish with its caption, Use as Daily Journal, Unarchive with the pause sentence, Delete Book… (its row 664–685 pt); the refusal "A book named “Book 2” already exists — pick a different name, or rename that one first." at 804–832 pt, two lines, readable — it covers nothing (the sheet's last row ends 119 pt above it). Large: the same rows higher (Delete Book… at 321–343 pt), the same line at the foot | `S-o2-medium-refusal.png` `S-o4-large-refusal.png` (`S-o1`, `S-o3`; first try `-try1`) | PASS |
+| o Terminal | The same | The same; in Terminal the Finish caption runs to three lines; the line at the foot covers nothing, at medium and at large | `T-o2-medium-refusal.png` `T-o4-large-refusal.png` | PASS |
+
+**Observations from the walk (none this run's defect; none fixed):**
+1. **The membership sheet's "Add to a book" list orders "Book 10" before "Book 2"** (`S-d1`, `T-d1`) — that list
+   keeps its own name order; VM-83 moved the Shelf and the Library's book rows to the digit-aware rule, not the
+   pickers. Book order elsewhere is wave 3's by her ruling (VM-113).
+2. **In Terminal the one line's refusals keep their capitals** while the chrome around them is lowercased (`T-c2`,
+   `T-d2`, `T-o2`) — VM-55's line face (its own walk showed a removal line lowercased); a voice question, not this run's.
+3. **Terminal wraps the Shelf's path line** ("~/home/shelf ·" / "11 books", `T-e1`) — VM-55's observation 3, VM-47's sizes.
+4. **The quick-note box's block cursor blinks in `T-e1`** with no focus — the Terminal idiom (R26.3), as designed.
+5. **Instrument notes:** the driver's bottom-band log call failed its element snapshot after capture `S-c2` (and
+   after `S-o2` on the first try), ending those two tests early; c's capture stood, and o was re-taken whole with the
+   call dropped. The driver missed the takes browser's Done after row j's captures (the browser had already closed).
 
 ## The ladder
 
@@ -3369,7 +3431,7 @@ green); ladder rounds 1, 2, 3 and 4, and round 4's three guards (built and compi
 the tree in their window, 16:43:57–16:46:39); the canon deltas (below); and `origin/main` merged in a second time after VX-981 (`ad5053002`, by
 `d55d22db9`: two notes conflicts resolved keeping both runs' lines, this run's parity row renumbered PL-78, no
 product line changed, both targets built for testing on that tree — "THE SECOND MERGE-IN"). **Still ahead, each a
-`PENDING(…)` slot below:** ladder round 5 (the last under the cap of five); the gate's three legs (the whole phone target, the Mac leg, the simulator walk); the shared ledgers at the merge moment
+`PENDING(…)` slot below:** ladder round 5 (the last under the cap of five); the gate's first two legs (the whole phone target, the Mac leg — its third, the simulator walk, ran 2026-11-19, every row PASS); the shared ledgers at the merge moment
 (the QUESTIONS number, the minted ticket ids); `Tools/canon-size`; the PR and its merge SHA. Nothing marked PENDING
 is claimed. Facts here trace to this file, the three round files, the two kickoffs
 (`notes/plans/vm-24-unwarned-edit-routing.md`, `notes/plans/vm-17-chrome-geometry.md`), the code at HEAD, or git
@@ -3729,7 +3791,7 @@ slots at the table's foot.
 | round 4's guards' window | claimed 16:43:57, released 16:46:39 (2026-11-19; claim `vm-78`) | the orchestrator's throwaway checkout `~/dev/variorum-vm-78-pins` detached at `d55d22db9` (the tree after the VX-981 merge-in), its own DerivedData `vm78-pins`, one simulator boot; RED — that commit with `guards-red.patch` applied and staged (built headless at 16:37, TEST BUILD SUCCEEDED, the expected unused-`day` warning), five types; GREEN — the restored tree, the five types plus `MobileUndoDoorTests` and `MobileUndoWarningWordsTests` ("The ladder" → "Round 4" → "The guards' window — RAN") | RED: 26 tests in 5 suites failed after 6.620 seconds with 7 issues, no known issue. GREEN: 42 tests in 7 suites passed after 20.642 seconds, no known issue | exactly the four expected on the RED leg and no other: `noPhoneFaceReadsTheEditorsUnobservedHeaderDate` (offenders `MobileWriteView.swift:449`, `:451`) · `noPhoneStringLiteralSaysSmart` (the three literals) · `theSheetMarksAnArchivedBookAndAGatheringAndDrawsDivergeOnTheBookOnly` (4 issues) · `bookDetailsDeleteLineNamesAGathering` (`:666` only); the five seam pins green on the red tree; none on the GREEN | `g-red.xcresult` and `g-green.xcresult` under `vm78-bundles/`, both read; logs `vm78-window-g-red.log`, `vm78-window-g-green.log`, `vm78-g-red-bft.log` |
 | Gate 1: the whole phone target | PENDING(gate 1: when) | the merged tip, the whole `VariorumMobile` test target | PENDING(gate 1: the verdict line) | PENDING(gate 1: every red by name — the one standing red by decision is VM-24's caret pin, `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`) | PENDING(gate 1: bundle and log) |
 | Gate 2: the Mac leg | PENDING(gate 2: when) | the merged tip; the Mac types over the changed `Shared/` files — tier 1's 17 and tier 2's ("THE MERGE-IN" → "The window recipe") | PENDING(gate 2: the verdict line) | PENDING(gate 2: every red by name) | PENDING(gate 2: bundle and log) |
-| Gate 3: the simulator walk | PENDING(gate 3: when) | the dev-store Debug phone build; one capture per row (below), both voices where a face has one | — | — | PENDING(gate 3: the screens folder and each row's capture) |
+| Gate 3: the simulator walk | claim 17:54:35 (the coordinator's), driving 17:54:59–18:18:05, released 18:18:26 (2026-11-19) | the dev-store Debug phone build from `d55d22db9` (the tip's code), signed out, on a dedicated iPhone 17 Pro / iOS 26.2 created and deleted for it; a hosted seeder and a UI driver, throwaway; rows a–o in Study light, a, c, d, e, o again in Terminal | EVERY ROW PASS, judged from its captures; no defect | — | `App/Variorum/DerivedData/vm78-walk-screens/` (74 PNGs, the row-l recording, logs, bundles); the table: "### THE GATE — leg 3, the simulator walk" ▸ "The walk" |
 
 **The walk's rows (gate 3), collected from the record — every row walked on the tree that merges (round 4's
 R4-N4):** Book Details' Finish with notes waiting (the confirm and its count; Cancel leaves the book; Finish
@@ -3749,7 +3811,7 @@ three-line caption, the daily row, Unarchive with its pause sentence, Delete) �
 line (raised from the sheet itself: Rename Book to a live book's name in the same wing — the per-wing name guard
 refuses), at the medium and at the large detent: at the medium detent, does the line cover the sheet's last row
 (Delete), and is the line readable? On the tree that merges — with VM-47's sizes if VM-47 has merged first (N9's
-own re-take note). (No fan-badge row: VM-17 left the run.) PENDING(gate 3: each row's outcome and capture name).
+own re-take note). (No fan-badge row: VM-17 left the run.) **Walked 2026-11-19 (17:54–18:18), every row PASS** — the table with each row's capture is "### THE GATE — leg 3, the simulator walk" ▸ "The walk": the confirm's count and its Cancel, Finish then a confirm-free Finish after Reopen (`S-a2`–`S-a6`, `T-a2`–`T-a6`); no Finish on a gathering (`S-b1`); the sealed Reopen's line at the foot under Book Details, nothing covered (`S-c2`, `T-c2`); the membership sheet's marks and the ★ collect's line over it (`S-d1`, `S-d2`, `T-d2`); a–z digit-aware with the stars first and no Pin (`S-e1`, `S-e2`, `T-e1`, `T-e2`); both gathering deletes' lines (`S-f3`, `S-f6`); Gathering, its caption and the no-tags line (`S-g1`, `S-g3`); Starred → Unarchive → the shelf (`S-h2`–`S-h4`); the quiet undo's refusal with no Redo (`S-i7`); the restore's quiet kept moment (`S-j4`); the chip on a titled note (`S-k3`); no empty line in any recorded frame of the Trash's push (`l-trash-first-paint.mp4`); both lessons (`S-m1`, `S-n1`); the tallest Book Details at medium and large with the refusal at the foot covering nothing (`S-o2`, `S-o4`, `T-o2`, `T-o4`).
 
 ### Her rulings built here, against what shipped
 
@@ -4246,8 +4308,7 @@ This run is a mobile run's own row in `notes/MobileSoul.md` §6: **PL-78** (PL-7
 > built for testing on the merged tree, and again after main was merged in a second time, after VX-981. The re-land's
 > window: 44 tests in 4 suites red on exactly the six expected pins, then 283 tests in 41 suites green.
 > Round 4's three guards' window, on the tree after the VX-981 merge-in: 26 tests in 5 suites red on exactly the
-> four expected tests, then 42 tests in 7 suites green. PENDING(gate 1, the whole phone target; gate 2, the Mac leg; gate 3, the
-> walk).
+> four expected tests, then 42 tests in 7 suites green. The simulator walk: every row passed, in both voices. PENDING(gate 1, the whole phone target; gate 2, the Mac leg).
 >
 > **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (the order, the Finish
 > confirm, "(archived)" in pickers, Delete Gathering…, the Trash's first paint). MobileSoul §6: PL-78. AppSpec §9
