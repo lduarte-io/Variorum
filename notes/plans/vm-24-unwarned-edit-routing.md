@@ -14,13 +14,16 @@ whole at its end.
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
-**As of 2026-11-20 05:35.** BOTH BATCHES ARE BUILT AND PROVED IN THEIR WINDOWS (§12, the three "orchestrator's
-stage results" sections). The code the walk and the ladder read is `a43b5fe70`'s (nothing under App or Sources after
-`106a0d2a4`). Next: the simulator walk (`notes/plans/vm-24-walk.md`; a fresh implementer builds the throwaway UI
-driver in a snapshot worktree, then one claim of about 25 minutes on a dedicated device), then the ladder
-(`fable-reviewer`, fresh per round), then main merged in (notes only so far), the gate, the closeout. The window
-scripts are the orchestrator's throwaways in the session scratchpad (`window-a2.sh`, `window-b.sh`, `window-b2.sh`;
-each is §12's commands with a verdict poll).
+**As of 2026-11-20 06:55.** BOTH BATCHES PROVED, THE WALK DONE, THE LADDER CLOSED AFTER ONE ROUND, MAIN MERGED IN
+(`190165014`; main had moved by four notes files only). The code is `8f5323554`'s — nothing under App or Sources
+after it — and the gate's phone product `App/Variorum/DerivedData/vm24-gate` is built from it. READY for the gate is
+going to nov18: (1) the whole phone target, one launch; (2) `MobileHerPathsPerfTests` alone with
+`TEST_RUNNER_VM66_PERF=1`; (3) the Mac's 22 types that read the phone's source, from `vm24-a-mac` (nov18 widened the
+seven; the list is in the session scratchpad's `gate.sh` and in the gate's result block when it runs). No whole Mac
+target is owed (no `Shared/` or `Sources/` line; nov18 agrees). The Core suites that name phone files ran headless
+on the final words: `MCPProviderNeutralityTests` 2 tests, `Phase13icOutflowTests` + `OutflowRetirementTests` 13
+tests, all passed. After the gate: the PR `VM-24: …` and the merge at nov18's GO, the shared ledgers on main, the
+Release device build for her "after" session in its OWN folder (never `vm47-wave1-device`), the handoff.
 
 - **Batch A, checked by the orchestrator against the implementer's report (never trusted):** tip `cd72732ec`;
   the fix is `a8662b81e` — `MobileEditorViewModel.swift` and `MobileEditTrace.swift` only, read line by line against
@@ -539,7 +542,7 @@ ink).
 | L7 | Batch B — VM-243: the pin as the confirm, then the fix | implementer | DONE — the pin `b437305db` (+ reading (f) `03b06f417`), the fix `efc66ee57`, the reset's pins `151d98a87` (§12) |
 | L8 | Batch B's window | orchestrator, nov18's GO | DONE — the confirm 05:08–05:10 (red as predicted); the red/green 05:27–05:31 (7 issues at the tabled lines on the build without the fix; 385 tests in 55 suites green on the fix; the Mac's 46 in 7 green) |
 | L9 | The simulator walk (typing mid-note, paste, the readout's new lines; a dash line and the paragraph after it) | orchestrator | DONE 06:06–06:21 — both passes; rows a, b, c, e, f, g, h PASS, row d PASS for the paste at a paragraph's end and NOT WALKED for the paste over a selection; VM-243's bug on the BEFORE captures and gone on the AFTER; the simulator produced no unarmed or widened edit, so VM-24's device evidence is still her "after" session; one finding, W-1 (`notes/plans/vm-24-walk.md`, "The verdicts") |
-| L10 | The ladder (`fable-reviewer`, fresh per round, up to five) | orchestrator | NOT STARTED |
+| L10 | The ladder (`fable-reviewer`, fresh per round, up to five) | orchestrator | CLOSED after ONE round — `notes/plans/fixes/vm-24-ladder-round1.md`: 0 BLOCKER · 0 MAJOR · 2 MINOR · 1 NIT, every finding agreed and landed (`9675f8888`, `b3fa281f9`), the reviewer's final calls confirming each, plus its final call 2 on the implementer's own observation (`8f5323554`: the new "widened" line fits both voices); no second round earned; the orchestrator's line-by-line check of the final round's four hunks done (strings and comments only) |
 | L11 | The gate: the whole phone target, the gated speed suite alone; a Mac leg only if a shared file changed | orchestrator, nov18 | NOT STARTED |
 | L12 | Canon: TEXTKIT2_NOTES §3 (what was measured about the first callback and the fix's rule); SurfaceContracts only if a contract line moved; MobileSoul PL-81 | orchestrator at closeout | NOT STARTED |
 | L13 | VX-68 closed with a comment naming the pin (D-24-5) | orchestrator at the merge | NOT STARTED |
