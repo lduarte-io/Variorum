@@ -599,9 +599,9 @@ lands, its red build is remade by the revert protocol and this line says so firs
 | Piece | State |
 |---|---|
 | Reading (CLAUDE.md + canon, TEXTKIT2_NOTES, MobileSoul §1–5, the protocol, this record §1–§7 + batch B + batch A's closeout, VM-78 BATCH C's two sections, VM-64 §7 batch 2's r1→r2 and r2, the fence suite whole, `MobileEditTrace.swift` whole, `MarkdownFaceCore.swift` whole, `MobileMarkdownCaretTests.swift`, `MobileMarkdownTests.swift`); §4.4–§4.5's file:line pointers re-verified on `d63c1e2cd` — all hold but the programmatic replace, which batch A moved (`:2487-2518` → `MobileEditorViewModel.swift:2552-2583`) | DONE |
-| The pin (`MobileTypedTextFaceTests`, readings (a)–(e), base API only) | DONE (the commit naming this line) — compile PENDING the build below; red/green PENDING the stage window |
-| Pin build `DerivedData/vm24-b-pin` (`build-for-testing`) | IN-PROGRESS — a cold build of the tree at the pin's commit |
-| Half 1's closeout in §12 (expected result per reading, by expectation line) + the READY report | NOT STARTED |
+| The pin (`MobileTypedTextFaceTests`, readings (a)–(e), base API only) | DONE (`b437305db`) — compiles; red/green PENDING the stage window |
+| Pin build `DerivedData/vm24-b-pin` (`build-for-testing`) | DONE at the tree of `b437305db` (no production file differs from `d63c1e2cd`) — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-b-pin-bft.log`, no warning in the new file, the test binary carries the suite |
+| Half 1's closeout in §12 (expected result per reading, by expectation line) + the READY report | DONE (the commit after `b437305db`) |
 | The stage window (the pin alone; the orchestrator's) | PENDING — the orchestrator's, from these products |
 | Half 2 (D-243-1, the fix and its pins) | NOT STARTED — waits on the orchestrator's word after the window |
 
@@ -885,6 +885,142 @@ whole phone target runs `MobilePerfWalkTests`.
 
 **The fence file** (`MobileStructuralFlightFenceTests.swift`): the batch changed a doc comment above the road-C pin,
 four lines; no test was added and no expectation moved.
+
+### Batch B · VM-243 — half 1: the pin as the confirm (implementer closeout of the half; STOPPED for the orchestrator)
+
+**Not done in this half (first, by the record's rule):** NO test was run — every red and green below is EXPECTED,
+PENDING the orchestrator's stage window. No fix: D-243-1 is not written, and half 2 waits on the orchestrator's word
+after the window ("red as predicted ⇒ half 2; anything else ⇒ the architect rules", batch B). No simulator walk, no
+device, no Debug launch. Not touched: any production file (`git diff --stat d63c1e2cd -- App/Variorum/VariorumMobile
+App/Variorum/Shared Sources App/Variorum/Variorum` is empty), `Shared/`, `Sources/`, `Sync/`, the Mac, every shared
+ledger.
+
+**Base** `d63c1e2cd` (batch A merged into the branch, no VM-243 line). **Commits:** `3a2dab9b9` (live status) ·
+`b437305db` (the pin) · the next commit (this closeout and the flipped live status).
+
+#### What shipped
+
+- `App/Variorum/VariorumMobileTests/MobileTypedTextFaceTests.swift` (new) — the suite `MobileTypedTextFaceTests`
+  (`.serialized`), five tests, one per reading. File-private copies of the fence suite's `host`, `dismiss`,
+  `withDesyncsRecorded` and `keyboardType` (batch A's design call 5: the fence suite's ten pins stay byte-unchanged);
+  `betweenKeystrokes` (one `Task.yield` and one 1 ms sleep — a run-loop turn between keys, as between her keystrokes);
+  `FaceReading` (reads and names what characters wear; writes nothing); `onAFreshLine` (the world every reading types
+  in); `typeKeys`; `expectTypedAndStored`. Base API only: it builds against this tree, which IS the base for VM-243.
+
+#### The construction
+
+- **The road is her keyboard's** (TEXTKIT2 §3's rule for a pin that types): `keyboardType` asks the gate first and
+  calls `insertText` only on a yes; a `"\n"` goes on through the editor's ⏎ door (`MobileEditorTextView.insertText` →
+  `MobileMarkdownActs.handleReturnKey`: the list's continuation and its K5 exit) exactly as her Return key does. Hosted
+  in her posture (the fence suite's `host`). A run-loop turn between keystrokes.
+- **The fixture** is a Study note `["Intro.", "After."]`; each reading places the caret at `"Intro.|"`, types one
+  Return (content inside block 0) and types on that fresh line — below a line in full ink, inside block 0, with a block
+  after it. So no open tail, no crystallization flight and no normalizing programmatic write ever touches the typed
+  text (the tail's normalizing replace is one of §4.4's "sometimes it does go away" writes, which would confound the
+  reading).
+- **Study voice**, set inside the world after `withEditorWorld`'s reset (the caret suite's shape), restored after.
+  Premise: the marker's ink and the prose ink draw differently there.
+- **Colours are compared RESOLVED** under one fixed light trait collection (`FaceReading.drawSame`, a 0.002 RGBA
+  tolerance), never by object identity, so the reading never depends on the host's appearance or on which object a
+  copy carries. "Full ink" = draws as `MobileEditorStyle.face.ink`; "the marker's ink" = draws as
+  `markdownPalette.marker`; "the base font" = `baseFont`'s PostScript name and size.
+- **Why the reading is deterministic in any company:** every edit is ARMED, so it binds however far iOS widens its
+  report (`ArmedEdit.describes`; the fence suite's road A) — the routing cannot decide the outcome; the typed runs'
+  attribute VALUES come only from this note's own storage (UIKit's typing attributes derive from the character before
+  the caret — the face's writes or the materializer's base); the face's writes are pure functions of the line's text
+  and marks. The one process-state-dependent iOS fact (the report's width, TEXTKIT2 §3) can move the restyle's scope
+  by at most the next line, `After.`, which holds no markdown and no face mark, so it writes nothing there.
+- **What every reading prints** (`grep 'VM243|' <log>`): the fixture before typing; one line per key — where it was
+  typed, where the caret landed, and what the character before the caret wears; and per reading the coalesced runs
+  over the lines that matter: `[start..<end) “chars” ink=<name> #RRGGBB font=<PostScriptName> <size> (base|larger)
+  [faced] [struck] [chip]`. Ink names: `ink` (the face's own object), `prose-ink`, `marker`, `link`, `phone-muted`; a
+  `≈` prefix means another object that draws the same; `rgba` alone means none of them; `none` means no ink attribute.
+  Only the test's own fixture characters are printed; a newline prints as `⏎`. Each OUTCOME expectation's message
+  also carries the runs it found, so a red issue reads by itself.
+
+#### The readings and what §4.4 predicts on THIS tree (the tree before VM-243's fix), by expectation line
+
+Every expectation's message starts with its reading's letter and PREMISE or OUTCOME. **A red at a PREMISE line is not
+the predicted red** — it means the construction did not reach what it reads (the fixture's bytes, the gate's
+approvals, the Return door's continuation and exit, the dash or stars wearing the marker's face, the heading's font,
+the voice): stop and send it to the architect.
+
+| Test (reading) | Expectation line | §4.4 predicts |
+|---|---|---|
+| `aDashLinesWordsAreTypedInFullInk()` (a) — `- one`, a key at a time | `(a) OUTCOME: “one” is typed in full ink` | **RED** — "one" in the marker's ink, no face mark (it inherits the `" "` before it, mark stripped) |
+| | `(a) OUTCOME: “one” wears the base font` | green (a marker is written in the base font) |
+| | every `(a) PREMISE` line (the dash wears the marker's ink, faced; the page; no desync; the store) | green |
+| `theParagraphAfterADashLineIsTypedInFullInk()` (b) — (a), then Return twice, then `two` | `(b) OUTCOME: “two”, on the line after the dash line, is in full ink` | **RED** — the marker's ink (it inherits the Return typed after "one", which inherited "one"'s) |
+| | `(b) OUTCOME: “two” wears the base font` | green |
+| | every `(b) PREMISE` line (the continuation `- `, the exit, the caret at 13) | green |
+| `wordsTypedAfterAClosingMarkerAreInFullInk()` (c) — on a new line, `*a* b` | `(c) OUTCOME: “ b”, typed after the closing star, is in full ink` | **RED** — the marker's ink (it inherits the closing star, mark stripped) |
+| | `(c) OUTCOME: “ b” wears the base font` | green |
+| | every `(c) PREMISE` line (the stars are markers, faced; "a" italic) | green |
+| `theLineTypedAfterAHeadingWearsTheProseFace()` (d) — `# Head`, Return, `word` | `(d) OUTCOME: “word”, on the line after the heading, is in full ink` | **§4.4: TO BE READ, NOT ASSUMED.** The implementer's reading of the same mechanism (not §4.4's text): **RED** — a heading's content is written with its font and NO ink (`MarkdownFaceCore.swift:331-333`), so the last character typed keeps the ink it inherited (the `"# "` marker's) until the next restyle clears it; the Return typed after "Head" inherits that ink and the heading's font, and "word" inherits the Return's |
+| | `(d) OUTCOME: “word” wears the base font, not the heading's` | **to be read**; the implementer's reading: **RED** — the heading's font (`IowanOldStyle-Bold 27.0`, "larger") |
+| | every `(d) PREMISE` line ("Head" in a larger font; the Return ordinary) | green. The print also shows "Head" itself in full ink after the Return (its restyle cleared the last letter) and the `⏎` after it carrying the heading's font — read, not asserted |
+| `aReopenedNoteDrawsWhatWasTypedInFullInk()` (e) — (a) and (b)'s typing, the editor finished, a fresh editor opened | `(e) OUTCOME: after the re-open “one” and “two” are in full ink` | green — **a control, green on both trees** (the face's attributes are never stored) |
+| | `(e) OUTCOME: after the re-open “one” and “two” wear the base font` | green |
+| | every `(e) PREMISE` line (the dash re-derived as the marker; the store) | green; the "before the re-open" print shows the live page faint as (a) and (b) |
+
+**The predicted verdict:** "Test run with 5 tests in 1 suite failed … with 5 issues" — four tests red ((a) 1, (b) 1,
+(c) 1, (d) 2 if it reads as the implementer's extension; 3 or 4 issues if (d) reads otherwise), (e) green. **Red as
+predicted** = (a), (b), (c) red at their ink OUTCOME lines only, every PREMISE line green, (e) green; (d) is read from
+its print whatever it shows. **Anything else** — any of (a)–(c) green at its ink line, a font OUTCOME red in (a)–(c),
+(e) red, any PREMISE red, a host restart — is the architect's to rule before any fix (§4.4's reservation).
+
+#### Design calls (options weighed; the built one first — none is a product decision)
+
+1. **Type inside block 0 of a two-block note, never in the open tail.** (a) built; (b) type at the note's end, as she
+   likely does. (b) puts each completed paragraph through crystallization, whose programmatic write lays the base
+   attributes over the typed text — one of the very writes §4.4 names as "sometimes it does go away" — so the reading
+   would depend on a mint's timing. The face mechanism is the same in a block and in the tail.
+2. **A run-loop turn between keystrokes.** (a) built: one `Task.yield` and a 1 ms sleep; (b) back-to-back calls (the
+   caret suite's loop). Her keys arrive in separate run-loop turns, so if UIKit re-derives its typing attributes on a
+   later turn, (b) could read green over a road her keyboard never takes. Nothing in these worlds runs on a clock.
+3. **One test per reading**, each in its own world, every reading starting on a line in full ink — so (c) and (d) are
+   never confounded by an earlier reading's faint ink, and the verdict names the reading. (e) re-types (a) and (b)'s
+   keys in its own world before the re-open.
+4. **The face is read, never driven:** `FaceReading` writes nothing, and the pin never reads `typingAttributes` (a
+   getter UIKit may compute lazily — reading it could change what the next key wears). What each character landed
+   wearing is read from the storage after the key.
+5. **The OUTCOME expectations state the ruled behaviour** (the ticket's "what the Mac draws", §10 item 7): full ink
+   and the base font for prose typed after a marker, so the same pin goes green on D-243-1 without an edit.
+
+#### The stage window (the orchestrator's; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle 30 s, run, shut down)
+
+Products: `App/Variorum/DerivedData/vm24-b-pin` — `build-for-testing` of the tree at `b437305db` (the pin over the base:
+no production file differs from `d63c1e2cd`), `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-b-pin-bft.log`,
+no warning in the new file; the test binary carries the suite. Logs and bundles as batch A's (`DerivedData/logs/`,
+`DerivedData/vm24-bundles/`, a bundle name never reused). Poll for the Swift Testing verdict line, never the exit.
+
+```zsh
+cd ~/dev/variorum-vm-24/App/Variorum
+T=(xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile
+   -destination 'platform=iOS Simulator,id=<simulator-udid>' -collect-test-diagnostics never)
+
+# (B1) THE CONFIRM: the pin alone, on the tree before the fix
+pin=(MobileTypedTextFaceTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-b-pin -resultBundlePath DerivedData/vm24-bundles/b-pin.xcresult \
+  ${pin/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-b-pin-run.log 2>&1
+grep 'VM243|' DerivedData/logs/vm24-b-pin-run.log > DerivedData/logs/vm24-b-pin-readings.txt
+
+# (B2) OPTIONAL — the same reading in company (the markdown, caret and fence suites in the same host), to show it
+# does not move with what ran before it; the readings are compared line for line with (B1)'s
+company=(MobileMarkdownRenderTests MobileMarkdownReturnTests MobileMarkdownActsTests MobileMarkdownCaretTests
+  MobileStructuralFlightFenceTests MobileTypedTextFaceTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-b-pin -resultBundlePath DerivedData/vm24-bundles/b-pin-company.xcresult \
+  ${company/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-b-pin-company.log 2>&1
+grep 'VM243|' DerivedData/logs/vm24-b-pin-company.log > DerivedData/logs/vm24-b-pin-company-readings.txt
+```
+
+Expected: **(B1)** the predicted verdict above, one launch, `Restarting after unexpected exit` = 0. **(B2)** the five
+pin tests exactly as in (B1), and every other test as on main (the caret suite 4 of 4, its standing pin green 3 of 3
+since batch A; the fence suite 10 of 10; the markdown suites green); the `VM243|` lines identical to (B1)'s.
+
+#### For QUESTIONS at the merge
+
+None from this half.
 
 ---
 
