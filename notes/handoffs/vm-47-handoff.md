@@ -33,11 +33,11 @@ at its sections for the commands and say only what is different this time.
 | Entitlements | the app's own identifier and its two keychain groups (its own first, then the shared one); no app group, no iCloud; unchanged since your phone's build |
 | Your phone now | main `beb638033` (VM-46's build, installed in place 2026-11-15) |
 | Sync version | 15 on your phone's build · 15 at the merge commit · 15 on the server (read 2026-11-20): nothing pauses, syncing carries on before and after |
-| The first open | ONE migration, the timing run's `v1_38_owner_adoption_index`: eleven small indexes over rows with no owner; additive, on the phone only, not a sync event; no row of your writing is rewritten. One-way (step g) |
+| The first open | ONE migration, the timing run's `v1_38_owner_adoption_index`: eleven small indexes over rows with no owner; additive, on the phone only, not a sync event; no row of your writing is rewritten. Treat it as one-way (step g) |
 | Unchanged | the package versions (the same SQLCipher), the entitlements, the protection and keychain code |
 
-**Before the cable — your two answers.** (1) **The safety copy:** recommended yes — the migration is one-way, so the
-copy is the only way back; about 280 MB on the Pro (the last two were 279 and 280 MB). (2) **Anything written on the
+**Before the cable — your two answers.** (1) **The safety copy:** recommended yes — treat the migration as one-way, so the
+copy is the sure way back; about 280 MB on the Pro (the last two were 279 and 280 MB). (2) **Anything written on the
 phone that has not synced?** On today's build, the gear on the Bookcase ▸ the Sync row: "Synced ‹time›" means it is all
 on the server; anything else, read it out and let one more round finish first.
 
@@ -67,9 +67,10 @@ on the server; anything else, read it out and let one more round finish first.
    saying "Synced ‹time›" after a round. The runbook's two-way proof (e4) stands, and its
    not-healthy list: stop, press nothing.
 6. **f — confirm from the Mac** (runbook f), read-only, as before.
-7. **g — if something goes wrong** (runbook g). One thing differs, going back: once the migration has run, the build on
-   your phone today will refuse that library (the runbook's g5 guessed an older build would still open a migrated
-   library; this migration's own note says an older build refuses it), so the way back is the safety copy, at your
+7. **g — if something goes wrong** (runbook g). One thing differs, going back: treat the migration as one-way. Whether
+   the build on your phone today would still open the library once the migration has run was not tested (the runbook's
+   g5 guessed it would; this migration's own note says an older build refuses a copy of such a library, and that check
+   is the one for a library copy you pick, not proven for the phone's own library), so the sure way back is the safety copy, at your
    word only.
 
 **What to look at first, in this order.**
