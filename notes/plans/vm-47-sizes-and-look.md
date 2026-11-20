@@ -612,14 +612,14 @@ hold it, and re-captured), a defect another ticket owns (named), or a question f
 | 6.9 | The whole phone target on the re-landed tree (both runs' tests on one tree for the first time) — run by the ORCHESTRATOR under its own stage claim, from `DerivedData/vm47-b6` at `b20b04fad`, on the standing suite device | DONE — RUN 14:06–14:18 (the stage released 14:18:14), at baseline: 1,045 tests in 179 suites, one host launch; the only red is VM-24's caret test (`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`, 2 of 3 cases — main's baseline); 8 known issues — the four standing ones and this run's four filter-row marks (P-47-7); VM-55's wing-door suites and this run's path-line suite pass on one tree, and so do the message line's, the wing landing's, the tab bar's, the Protection door's, Settings', the appearance choice's and the bottom bar's; the standing simulator's test-host container lists `Variorum-dev` only (the orchestrator's handoff, "UPDATE 14:35"). The tree since moved by R-47-3 (its row): the suites that read the Bookcase root's line were re-run in a short window — GREEN (row R-47-3, 16:11–16:14) |
 | 6.10 | The targeted Mac leg on the re-landed tree — the 114 types of §6 "Batch 6 — results" (batch 3's 102 theme-store types, batch 5's eight, VM-55's four Mac pins), run by the ORCHESTRATOR under its own stage claim, `test-without-building` from `DerivedData/vm47-b6`'s Mac products (`b20b04fad`; what moved in the tree since is `MobileShelfView.swift` and four phone test files — nothing the Mac target compiles) | DONE — RUN 14:51–15:06 (the stage released 15:06:42), GREEN: "Test run with 565 tests in 114 suites passed after 825.229 seconds with 4 known issues", `** TEST EXECUTE SUCCEEDED **`, one host launch, no restart; no red against main's Mac baseline. None of the 114 dropped: the result bundle holds 114 suites and every listed type carries at least one test case; 104 suites passed, 10 skipped by their own opt-in gates (the capture harnesses and the two opt-in measuring suites — 24 tests), 541 tests passed. Batch 5's eight: `AppearanceChoiceTests` 4 · `SyncLockedRowTests` 6 · `SyncProgressRowTests` 8 · `SyncRetryingRowTests` 5 · `SyncOutOfDateFaceTests` 7 · `SyncStalledRowTests` 2 · `NotOnYetWordsTests` 5 · `HostedSyncTierFaceTests` 5. VM-55's four Mac pins: `VM56MacWingScopePinTests` 2 · `VM61MacStatusSeamPinTests` 4 · `VM62MacRefusalWordsPinTests` 4 · `VM63MacWingBrainsHoistPinTests` 2. `TakesEntryBandTests` 11, `WingPaletteDoorsTests` 10 and the seven theme types (`ThemeTokenTests` 9, `PaletteDerivationTests` 16, `NoLiteralColourTests` 2, `SharedPageStyleTests` 1, `PaletteReachTests` 8, `MarkdownPaletteWritersTests` 3, `HelperWindowThemeTests` 3) passed. The 4 known issues are pre-existing (`theBookIndexsLivePaneIsItsReadTierLineForLine` ×2, `theReadEditLivePaneIsItsReadTierLineForLine` ×2). No instance left, no Problem Reporter, no new crash report. The whole Mac target runs once, as the merge gate |
 | R-47-3 | Her ruling (2026-11-19, the question tool): the Bookcase root's own path line says "Bookcase", matching its tab (was P-47-28). Implementer: Opus, 2026-11-19; no revert in flight in this worktree. Pieces: (1) the word — `MobileShelfView`'s `MobileWingPath(page:)`, nothing else; (2) the pins that read the line's words moved, the reason stated, + the new assertion; (3) the walk app and the driver rebuilt into `DerivedData/vm47-walk` (`walk_build`) and the phone unit tests compiled there; (4) the walk's instruments and `vm-47-walk.md`; (5) the record (§1, §4, §5, §6) | DONE — **the short window RAN GREEN** (the orchestrator, 16:11–16:14, the standing device, `test-without-building` from `DerivedData/vm47-walk` at `864ef813b`'s code): "Test run with 65 tests in 9 suites passed after 107.389 seconds", `** TEST EXECUTE SUCCEEDED **`, one host launch, no known issue, no red — the nine types `MobilePathLineGeometryTests` `MobileRootMenuTests` `MobileWingDoorTests` `MobileWingDoorGeometryTests` `MobileWingStandTests` `MobileWingDoorShellTests` `MobileTabBarTests` `MobileNavigationTests` `MobileShelfRenderedLayoutTests`; the pin `theBookcasePathLineIsOneLineAtFourHundredTwoInBothVoices()` ran and passed with its literal assertion, and so did the three moved VM-55 pins (`theShelfRootsDoor()`, `theLineReadsTheSameWithItsDoor()`, `thePathLineLeadsWithTheWing()`) and `everyRootCarriesTheMenuOnItsPathLine()`; the device's test-host container lists `Variorum-dev` only. Pieces: (1) the word DONE (`50635a674`); (2) the pins DONE (this commit): MOVED, the ruling the stated reason in each — `MobilePathLineGeometryTests.theBookcasePathLineIsOneLineAtFourHundredTwoInBothVoices` (its path lookup `tokens.path(["Shelf"])` → `["Bookcase"]`), `MobileRootMenuTests.everyRootCarriesTheMenuOnItsPathLine` (the same), VM-55's `MobileWingDoorGeometryTests.theShelfRootsDoor` (`root:` and the door's `value:` "Shelf  ·  0 books" → "Bookcase  ·  0 books"), VM-55's `MobileWingDoorTests.theLineReadsTheSameWithItsDoor` (its Shelf example's page) and VM-55's `MobileWingStandTests.thePathLineLeadsWithTheWing` (`MobileWingsTests.swift`: "Work · Shelf" / "~/work/shelf" → "Work · Bookcase" / "~/work/bookcase"); NEW, the pin: in `theBookcasePathLineIsOneLineAtFourHundredTwoInBothVoices`, the root's own line begins "Bookcase  ·  " in Study and "~/bookcase  ·  " in Terminal, literal (red on old by construction: "Shelf  ·  …" / "~/shelf  ·  …"); no assertion weakened; the counts PENDING a short stage window (`864ef813b`); (3) the builds DONE (this commit) — headless, one at a time, into `App/Variorum/DerivedData/vm47-walk` only (`vm47-b6` untouched): `walk_build` (the runbook's — the walk app and the UI-test bundle with the driver, from this tree) 14:47:04–14:47:25 `** TEST BUILD SUCCEEDED **`, `MobileShelfView.swift` recompiled, the bundle carries `VM47FinalWalk` (404 symbols), the driver's temporary copy in `VariorumMobileUITests/` removed and the tree clean; then `xcodebuild build-for-testing -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm47-walk` (the phone UNIT tests — `walk_build` builds `TK2SpikeUITests`, whose one testable is the UI-test bundle) 14:47:42–14:48:27 `** TEST BUILD SUCCEEDED **`, the four moved test files compiled, no warning in them; no test run, no simulator, no stage (`bde05a7d8`); (4) the walk DONE (this commit) — the gitignored instruments needed no change: `VM47FinalWalkDriver.swift` finds the tab by its button label "Bookcase" (`label ==[c]`, the wing door's label is the wing's name) and the Bookcase's rows by the identifier `shelf.booksRegion` (unchanged), and reads no path-line words; `walkfinal.zsh` names no page word; `notes/plans/vm-47-walk.md`: the header's tree (+ `50635a674`), §2's questions (P-47-28 → "the line reads Bookcase (R-47-3)", P-47-27's Study edge), §3's c1 row (the line's words and "the line reads Bookcase (R-47-3)"), §4's list of calls shown (R-47-3 as built); its verdicts, result blocks and findings untouched (`4cad6d6c3`); (5) the record DONE (this commit) — §1 her three later items (≈11:50, 14:10, the ruling), §4 rows 6.9 (the whole phone target on the re-landed tree, DONE) and 6, 6.3, 6.4, 6.6 flipped, §5 (R-47-3 was P-47-28; P-47-27's clause), §6 "Batch 6 — results" (the phone result where it said PENDING; meeting 3's ruling and what it changed, with every other "shelf" read and left; the changed word among the new rendered lines). **The suites that read the line PENDING a short stage window** (from `DerivedData/vm47-walk`, which now holds the phone unit tests too: `MobilePathLineGeometryTests MobileRootMenuTests MobileWingDoorTests MobileWingDoorGeometryTests MobileWingStandTests`) |
-| 7 | The re-land of MAIN (VX-981's and VM-78's merges; this run merges last of four, VM-64 after): `origin/main` merged in so both runs' intent survives in every file — the four conflict files by round 4's map (`notes/plans/fixes/vm-78-ladder-round4.md`, "The map, final"), the three lines no hunk shows restyled onto this run's roles, every both-touched auto-merged file read for a clean-merge that is wrong; this run's six source rules and main's guards measured over the merged tree; both schemes' `build-for-testing` into `DerivedData/vm47-fix`. Implementer: Opus, 2026-11-19; no revert in flight in this worktree; while the merge is OPEN its per-file log is the gitignored `notes/plans/vm-47-screens/b7-reland-log.md` | IN-PROGRESS — pieces below |
+| 7 | The re-land of MAIN (VX-981's and VM-78's merges; this run merges last of four, VM-64 after): `origin/main` merged in so both runs' intent survives in every file — the four conflict files by round 4's map (`notes/plans/fixes/vm-78-ladder-round4.md`, "The map, final"), the three lines no hunk shows restyled onto this run's roles, every both-touched auto-merged file read for a clean-merge that is wrong; this run's six source rules and main's guards measured over the merged tree; both schemes' `build-for-testing` into `DerivedData/vm47-fix`. Implementer: Opus, 2026-11-19; no revert in flight in this worktree; while the merge is OPEN its per-file log is the gitignored `notes/plans/vm-47-screens/b7-reland-log.md` | READY for the stage — the merge `4866c7fb8` (main `a09d6a025`), the new pin `9147929f7`, both schemes GREEN into `vm47-fix`, the rules 0 over the merged tree (measured by script), §6 written; the windows (§6 "Batch 7 — results", "The stage window": the phone array before the gate, the Mac leg, then the whole targets) are the orchestrator's, PENDING |
 | 7.0 | Reading: CLAUDE.md, the resiliency protocol, this record §2, batch 6's rows and §6 "Batch 6 — results" whole, the walk's fixes (part A, batch 2); on main the round-4 map (lines 651–733) and its final calls, VM-78's FOR A LATER READER and its batch-A/merge-in sections for the four files; `git fetch`; main's tip `a09d6a025`, 273 commits ahead, 145 files; the trial merge — EXACTLY the four expected conflicts (`Shell/MobileBookDetails`, `Shell/MobileCreateBook`, `Write/MobileMembership`, `Write/MobileWriteView`) | DONE |
 | 7.1 | The merge (`git merge origin/main`, no fast-forward): the four files hunk by hunk by the map; each resolved file read whole; the per-file log | DONE (`4866c7fb8`, parents `c75e4229b` + main `a09d6a025`) — the four files resolved hunk by hunk by the map, each read whole after; the per-file log is the merge commit's message (and the gitignored `vm-47-screens/b7-reland-log.md`). One call the map's quoted inks do not settle, settled by its own rule ("the styling is VM-47's"): where the map quotes this run's PRE-walk inks (the faint on the date chip's empty arm, the kind mark, the finish caption, the pause sentence), this run's LATEST styling stands (the corrected muted, W-A9 / W-B1-W-C3) — measured: the map's literal inks red this run's two faint rules on 4 lines |
 | 7.2 | The lines no hunk shows (the map's three: the Unarchive row's two `.font(…)`, the Diverge button's `.font(tokens.small)`), restyled onto this run's roles; every auto-merged file BOTH runs touched under `App/Variorum/` read for a clean-merge that is wrong, each put on this run's layer (styling only) | DONE (in the merge `4866c7fb8`) — the map's three restyled (the Unarchive verb → `control`, its pause sentence → `meta` + the corrected muted, its button → `PhoneMenuRowStyle`; Diverge → `PhoneInlineActStyle(tone: .muted)` inside its `if`) + `MobileCreateBook`'s `kindWord` deleted ("Smart Book", G2); the both-touched auto-merged files (`MobileLibraryView`, `MobileShelfView`, `MobileTrashView` and three test files) read whole — nothing wrong, nothing changed; every styling line main added to phone code is in the four files |
 | 7.3 | The rules, measured by script over the merged tree (before at the raw merge, after): this run's six rule suites + main's two guard tests; `MobileMembershipSheetFaceTests` checked by reading | DONE — ported verbatim to the gitignored `vm-47-screens/b7-drafts/rules.swift` (validated against the record's counts at `273bcec51` / `fe85ea6d5`); RAW MERGE (the hunks only): type slots 3 (the map's three), both faint rules 1, G2 1, all else 0; THIS TREE: all 18 tests' patterns 0; `MobileMembershipSheetFaceTests` checked by reading — every assertion holds on the merged sheet (§6) |
-| 7.4 | The tests that move (a premise the join changes), each to the fact it protects, reason in the commit; new pins only where the join made a fact no pin holds | NOT-STARTED |
-| 7.5 | Builds into `DerivedData/vm47-fix`, one at a time, never in a QUIET window: phone `build-for-testing` → commit the merge (its message carries the log) and push → Mac `build-for-testing` | IN-PROGRESS — phone `build-for-testing` into `vm47-fix` GREEN before the merge commit (20:11:52–20:12:54, `** TEST BUILD SUCCEEDED **`, 0 errors); the merge committed and pushed (`4866c7fb8`); the Mac build running |
-| 7.6 | The record: §6 "Batch 7 — results" (the log, the restyled lines, the auto-merged files, the moved tests, the rules' table, the builds, "The stage window" with the two zsh arrays); §5 for any PROVISIONAL; these rows flipped | NOT-STARTED |
+| 7.4 | The tests that move (a premise the join changes), each to the fact it protects, reason in the commit; new pins only where the join made a fact no pin holds | DONE — NO test moved: no premise of either run's tests changes in the join (read: this run's chip, Trash and Book Details hosts; VM-78's hosted Book Details and membership tests — labels and hints, which this run's styles never change); ONE new pin for the one fact the join made that no pin held — `MobileBookDetailsJoinRowsTests.anArchivedBooksRowsEachAnswerTheMenuRowsFloor` (`9147929f7`; its red-on-old PENDING a snapshot, recipe in §6) |
+| 7.5 | Builds into `DerivedData/vm47-fix`, one at a time, never in a QUIET window: phone `build-for-testing` → commit the merge (its message carries the log) and push → Mac `build-for-testing` | DONE — phone GREEN on the merge tree before its commit (20:11:52–20:12:54); the merge committed and pushed (`4866c7fb8`); Mac GREEN at `4866c7fb8` (20:13:45–20:17:03, `** TEST BUILD SUCCEEDED **`, 0 errors); phone GREEN again with the new pin (20:18:12–20:18:27, two compile errors in the new file fixed first); no QUIET window met |
+| 7.6 | The record: §6 "Batch 7 — results" (the log, the restyled lines, the auto-merged files, the moved tests, the rules' table, the builds, "The stage window" with the two zsh arrays); §5 for any PROVISIONAL; these rows flipped | DONE (this commit) — §6 "Batch 7 — results" (the merge, the four files, the three restyled lines and their roles, the auto-merged files, the rules' before/after table, the moved tests (none) and the new pin, the builds, "The stage window" with the two zsh arrays, the ranked risks); no new PROVISIONAL |
 | W | The run's ONE walk (two parts, device `vm47-walk`, the unified driver) and its findings in `notes/plans/vm-47-walk.md`; on the re-landed tree beside the whole phone target and a targeted Mac leg (114 types), both run by the orchestrator | IN-PROGRESS — the walker (Opus, 2026-11-19) — pieces W.0–W.8 below; NO app source is edited by the walker before the orchestrator's "tree is free" (a whole-phone suite reads this tree's phone sources) |
 | W.0 | Reading: CLAUDE.md + canon, the resiliency protocol, this record §1–§6 (each batch's "results" and its asks of the walk), the sizing sheet (grounds, §A–§E, the token values), every instrument in `vm-47-screens/instruments/` end to end, the app's faces as they stand after the re-land (the shell, the bar, the ⋯, the wing door and its list, the one message line, the three roots, Settings, the walk seam, Write's masthead, the note's ⋯), and every label and identifier the old drivers look up checked against that code | DONE |
 | W.1 | The unified driver + runbook, gitignored in `vm-47-screens/instruments/`: `VM47FinalWalkDriver.swift` (class `VM47FinalWalk`) and `walkfinal.zsh` (device `vm47-walk`, iPhone 17 Pro, iOS 26.2, created by part A, kept shut down across the seam, deleted at part B's end; captures into `vm-47-screens/final/` as `<palette>-<voice>-<appearance>-<size>--<step>.png`; `walk_part_a` / `walk_part_b` each honouring `WALK_DEADLINE=HH:MM` with a three-minute close; soft MISSING / NOT-HITTABLE logging; the count after every run; exact-name instance checks) | DONE (this commit; the instruments themselves are gitignored) — the driver typechecks standalone in Swift 6 mode against the simulator SDK's XCTest (`swiftc -typecheck`, from the scratchpad: no xcodebuild, nothing under `App/`; a planted error is caught, so the check is real); the runbook's step runner dry-run on stubbed steps (the pause, the call budget, the time guard's NOT CAPTURED skips). Expected captures: part A 99 (seed 3 · 4 default combinations × 14 · 4 AX5 × 10), part B 182 (teal & rust core 2 × 14 · Settings' flows 2 × 16 · the bar's roads and VM-55's faces 2 × 19 · VM-54's flip 2 × 6 · the wider pass 3 × 24). The plan changes it makes are listed in `notes/plans/vm-47-walk.md` ("How the walk runs") and the turn's report: a part runs as repeated FOREGROUND calls under ten minutes, resumable from a progress file (the harness's command limit); part A also shoots Settings top to bottom and the ⋯ menu in all eight combinations (Settings is opened anyway to write the voice); the seed stars a note and a book (no instrument starred anything, so Starred's ★ had nothing to show); the old `dismissEditorMenu` tap would now open Rename (it lands on today's masthead title) — replaced by a tap inside the prose; the search field is emptied before each query. **Machinery honesty:** the runner's second dry run lost its `walk_create` stub and CREATED a real simulator device, `vm47-dryrun-nonexistent` (never booted), while the orchestrator's suite held the standing device; it was deleted by name a minute later (`simctl delete`), the standing device untouched, no other device created. Baseline before any walk: the newest crash report is `VariorumMobile-2026-11-19-120544.ips` (row 5.7's stray-store stop) |
@@ -2368,3 +2368,197 @@ placeholders; a door's word inside such a function would still be caught). Measu
 it. Production untouched, so no Mac build is owed; the two field rules hold by their own patterns (7 Account fields, 0
 offenders; the phone tree unchanged). Phone `build-for-testing` into `vm47-fix`: `** TEST BUILD SUCCEEDED **`. The
 re-run of `MobileFaintOnDoorsSourceTests` rides the orchestrator's next window.
+
+### Batch 7 — results: the re-land of main (implementer: Opus, 2026-11-19)
+
+**Not done in this batch, first:** no test of any kind ran here, no simulator was booted and the stage was never
+claimed — every suite (the arrays below, then the whole-target gate) is the orchestrator's window, PENDING;
+the new pin's red-on-old is PENDING too (a snapshot recipe below). Nothing of VM-64 is in this batch (its own
+small merge of main reaches this branch by message, later). No guard was edited; no hard-line file was resolved
+by hand (none conflicted).
+
+**The merge.** `git merge --no-ff origin/main` at main's tip **`a09d6a025`** ("board snapshot"; VX-981's PR and
+VM-78's PR #15 `f909d6714` with its closeout ledgers), into this branch at `c75e4229b` (batch 7's first, a
+LIVE STATUS commit); merge base `eb18888db`; 273 commits, 145 files. The merge commit: **`4866c7fb8`** (parents
+`c75e4229b`, `a09d6a025`); its message carries the per-file log (kept while the merge was open in the gitignored
+`notes/plans/vm-47-screens/b7-reland-log.md`). Four content conflicts — exactly the trial's
+(`git merge-tree --write-tree`) and the map's. The other 141 files merged clean: VX-981's Mac MCP door and
+Core/`VariorumMCP` sources, VM-78's phone models (`MobileShelfFaces`, `MobileShelfViewModel`, `MobileTrashModel`,
+`MobileUndoDoor`, `MobileBlockHistory`, `MobileTutorialSeeder`, `MobileEditorViewModel`), its `Shared/` words
+(`BookStateCopy`, `ArrivalsCopy`, `CollectReceiptCopy`, `RecoveryCopy`, `StructuralUndoCopy`, `ShelfOrder`,
+`BookcaseBoard`), both runs' tests, the ledgers and canon (main's text; this branch never edited them).
+
+**The rule** (VM-78's round-4 map, `notes/plans/fixes/vm-78-ladder-round4.md` "The map, final", read as written):
+in every hunk the READS and WORDS are VM-78's and the STYLING this run's. **One call the map's quoted text does
+not settle, settled by its own governing sentence** ("The styling is VM-47's in every file"): the map was drawn
+on this run's trial tree before the walk's fixes, so where it quotes an ink it quotes this run's PRE-walk ink —
+the faint on the date chip's empty arm, on the gathering's kind mark, on the finish caption and on the pause
+sentence. The walk moved each of those to the corrected muted (W-A9, `a5c08e9f5`; W-B1/W-C3, `a21110f9d`) and two
+of this run's rules hold that move; the resolution takes this run's LATEST styling. Measured: the map's literal
+inks red `MobileFaintOnDoorsSourceTests` on 3 lines and `MobileFaintCarriesNoWordsSourceTests` on 4. Not a
+PROVISIONAL (no product choice — the styling is this run's by the map's rule, and the latest is the one its
+guards hold).
+
+**The four files — the decisions** (in full: the merge message):
+
+| File | Hunks | What stands |
+|---|---|---|
+| `Write/MobileWriteView.swift` | 1 (`dateChip`) | VM-84's `let day = Self.dateChipDay(model)` — the OBSERVED `entryDate`, never `header` — in this run's `.phoneType(.chip)` and W-A9's chip inks (set: ink; empty: the corrected muted); `day` used; the seed and `dateChipDay` kept; no `.header?.entryDate` in the file |
+| `Shell/MobileCreateBook.swift` | 2 + one function | `kindRow` is this run's `PhoneSegmentedChoice` speaking VM-83's `MobileCreateBookModel.kindLabel` ("Gathering"); this run's `kindWord` ("Smart Book", outside the hunk) DELETED; the no-tags line VM-83's `noTagsLine` on `meta` in the corrected muted |
+| `Write/MobileMembership.swift` | 2 + one restyle | a member row's name VM-21's `memberRowName` ("(archived)") on `rowTitle`; its mark VM-83's `kindMark` ("gathering") on `meta` in the corrected muted; Diverge stays inside VM-81's `if rowCarriesDiverge(book)`, restyled there (below); the add rows and the collect line VM-78's |
+| `Shell/MobileBookDetails.swift` | 4 + one restyle | `deleteRow(_ kind:)`: VM-83's `deleteDoorTitle(for: kind)` (title and label) and R2-N1's hint on `control` + `PhoneMenuRowStyle`; `finishRow`: VM-81's row whole inside `if let act = finishRowAct(for:)` (`requestFinish` / `setFinished(false)`, the hoisted verbs, `finishCaption` at three lines, label and hint) on `control` / `meta` in the corrected muted, `PhoneMenuRowStyle()` on the Button inside the `if let`; the Unarchive row restyled (below) |
+
+**The three lines no hunk shows — restyled, roles named.** (1) The Unarchive row's verb, `.font(tokens.body)` →
+`.phoneType(.control, tokens)`: it is a menu row's label (sheet §E: "the label `control` 17"; batch 1's map,
+P-47-8, `control` over `rowTitle` for a door's word), the role its three siblings on the same sheet wear (Finish,
+Archive, Delete). (2) Its pause sentence, `.font(tokens.small)` + `tokens.faint` → `.phoneType(.meta, tokens)` +
+`tokens.phone.muted`: the menu row's detail line (§E: "`meta` 13 in the corrected muted"; W-A9's rule — a door's
+words under 17 pt never wear the faint), its three-line cap kept. Its `.buttonStyle(.plain)` → `PhoneMenuRowStyle()`
+(the map's restyle; its siblings' row, the 44 pt floor). (3) The Diverge button, `.font(tokens.small)` +
+`.foregroundStyle(tokens.muted)` + `.buttonStyle(.plain)` → `.buttonStyle(PhoneInlineActStyle(tokens: tokens,
+tone: .muted))` — the inline act (`controlInline` 15, a 44 × 44 hit area), batch 2's own style for this same
+button and its Remove neighbour — on the Button INSIDE the `if`; the `if` stays. No read or word of either side
+was put back to quiet a scan.
+
+**Auto-merged files both runs touched, read whole** (`comm` of the two runs' `--name-only` diffs under
+`App/Variorum/`): `Shell/MobileLibraryView` (main: three comments), `Shell/MobileShelfView` (main: the row's act
+table drawn in the system long-press menu, the kind-aware delete confirm and its held title), `Shell/MobileTrashView`
+(main: VM-33's empty line only after the listing answers, drawn through this run's `emptyLine`; the gathering's
+empty-name word), `MobileDeletionTests`, `MobileLivenessTests`, `MobileShellTests` — each a clean join, NOTHING
+changed in any of them. Every styling line main added to phone code (a grep of its `+` lines for fields,
+dividers, buttons, fonts, styles, inks, paddings, frames, colours) sits in the four files above; main's other
+phone files and its `Shared/` files draw nothing.
+
+**The rules — before and after** (each suite's own patterns, ported verbatim to the gitignored
+`notes/plans/vm-47-screens/b7-drafts/rules.swift`; the port validated against the record's counts — at
+`273bcec51` the door rule 13, the field rule 3, the Account rule 6, the shared-arm type rule 2, the divider 1, the
+literal colour 1; at `fe85ea6d5` the sub-13 rule 32; the type-slot rule there 328 by the test's own Swift
+`Regex`, whose `\b` is the Unicode word boundary, where the record's 332 was an ASCII grep — the merged tree is 0
+by both). "Raw merge" = the four files' hunks resolved by the map, nothing outside them; outputs
+`vm-47-screens/b7-scans-before.txt`, `b7-scans-after-7.1.txt`:
+
+| Rule (suite · test) | Raw merge | This tree |
+|---|---|---|
+| `MobilePhoneTypeSourceTests` · Mac type slots | 3 — `MobileMembership.swift:350` (Diverge), `MobileBookDetails.swift:549`, `:554` (Unarchive) | 0 |
+| `MobilePhoneTypeSourceTests` · shared phone arms · sub-13 / caption / scale factor · the walk | 0 · 0 · ok | 0 · 0 · ok |
+| `MobilePhoneControlsSourceTests` (both) | 0 | 0 |
+| `MobileLookSourceTests` (all six: grounds, Read, Write on the paper incl. `backgroundColor = face.paper`, ★, literal colour, dividers) | 0 | 0 |
+| `MobileFaintOnDoorsSourceTests` | 1 — `MobileBookDetails.swift:555` (the pause sentence) | 0 |
+| `MobileFaintCarriesNoWordsSourceTests` | 1 — the same line | 0 |
+| `MobileFieldPlaceholderSourceTests` (both) | 0 | 0 |
+| main's `MobileNoteEntryDateTests.noPhoneFaceReadsTheEditorsUnobservedHeaderDate` (G1) | 0 (3 on this branch's pre-merge tip) | 0 |
+| main's `MobileGatheringWordTests.noPhoneStringLiteralSaysSmart` (G2) | 1 — `MobileCreateBook.swift`: "Smart Book" (`kindWord`) (5 on the pre-merge tip) | 0, both exemptions matched once |
+
+**`MobileMembershipSheetFaceTests` (mounted), checked by reading against the merged sheet:** the archived book's row
+draws `Text(tokens.chromeLabel(memberRowName(for:)))` — "Old projects (archived)" under `.studyLight`
+(`chromeLabel` lowercases only in Terminal); the gathering's row draws "Quotes" and the mark `kindMark` →
+`MobileShelfFaces.gatheringWord`, "gathering"; no literal or drawn word says "smart"; Diverge is drawn inside
+`if rowCarriesDiverge(book)` — the book's row only — through `PhoneInlineActStyle`, whose body draws the Button's
+one label once, so "diverge" appears exactly once; the premise (`books` = "Old projects", "Quotes") is the model's,
+untouched. Every assertion holds by reading; its run is the window's.
+
+**The tests that move: NONE.** Read for a premise the join changes: this run's tests that host what VM-78
+changed — `MobileFaintOnDoorsRenderedTests.theMastheadsEmptyChipsClearTheFloor` (the set date chip — it now reads
+the observed `entryDate`, which a Today note carries: the premise holds, more robustly), `MobileTabBarTests`' three
+Trash walks (they find the Trash by `emptyTrashLine` after `settle(40)`; VM-33 draws it only once the listing
+answers, and VM-78's own `anEmptyTrashSaysSoOnceTheListingAnswers` holds that `settle(40)` is enough — the premise
+holds), `MobileDeletionTests` (merged with VM-78's own `deleteDoorTitle(for:)` edit); VM-78's tests that host what
+this run restyled — `MobileFinishConfirmTests`, `MobileBookStateRowTests`, `MobileGatheringWordTests`,
+`MobileMembershipSheetFaceTests` find doors by accessibility label and hint, which no style of this run changes
+(`PhoneMenuRowStyle` and `PhoneInlineActStyle` wrap the label, never re-label it). No assertion was touched.
+
+**One new pin, where the join made a fact no pin of either run holds:** `MobileBookDetailsJoinRowsTests.
+anArchivedBooksRowsEachAnswerTheMenuRowsFloor` (new file `VariorumMobileTests/MobileBookDetailsJoinRowsTests.swift`,
+both voices): on an archived book's Book Details, the Finish, Unarchive and Delete Book… rows each answer at least
+the menu row's 44 pt floor. Why: VM-78's Unarchive row met this run's layer only in the join, by a hand restyle
+no hunk showed; the type scan and the faint rules hold its role and its ink, nothing held its target. Red on the
+raw merge by construction (a `.plain` button answers at its word's own line); its red-on-old is PENDING a
+snapshot: this tree with `unarchiveRow`'s four styling lines put back to the raw merge's (`.font(tokens.body)`,
+`.font(tokens.small)`, `tokens.faint`, `.buttonStyle(.plain)`), phone `build-for-testing`, the one type.
+
+**Builds** (headless, one at a time, into `App/Variorum/DerivedData/vm47-fix`, no QUIET window open):
+- Phone `build-for-testing` (`-scheme VariorumMobile -destination 'generic/platform=iOS Simulator'`), on the merge
+  tree BEFORE its commit: 20:11:52–20:12:54, `** TEST BUILD SUCCEEDED **`, 0 errors, no warning in the four files
+  (the four, `MobileBookFixesTests`, `MobileMembershipTests`, `MobileUndoDoor(Tests)` and Core's `UndoStack`
+  among the compiled sources) — then the merge committed (`4866c7fb8`) and pushed. No compile error to fix: the
+  map's resolutions compiled as written.
+- Mac `build-for-testing` (`-scheme Variorum -destination 'platform=macOS'`) at `4866c7fb8`: 20:13:45–20:17:03,
+  `** TEST BUILD SUCCEEDED **`, 0 errors (VX-981's Mac and Core changes beside this run's `Shared/` theme layer).
+- Phone again with the new pin (`9147929f7`): two compile errors in the new file only, each fixed before its
+  commit (a `+`-joined `#expect` comment — the macro wants one literal; `accessibilityFrame` needs `import UIKit`
+  under `MemberImportVisibility`), then 20:18:12–20:18:27 `** TEST BUILD SUCCEEDED **`, no warning in the file.
+  The Mac scheme does not compile the phone test target, so no Mac rebuild is owed for it.
+- Logs: the gitignored `notes/plans/vm-47-screens/b7-phone-build1.log`, `b7-mac-build1.log`, `b7-phone-build3.log`.
+
+**The stage window (the orchestrator's — nothing here has run):**
+From `App/Variorum/`, `test-without-building -derivedDataPath DerivedData/vm47-fix` at `9147929f7` (the code of
+every later commit — records only), `-only-testing` by type; every type below checked declared exactly once as a
+suite type in its target.
+
+(a) The phone, BEFORE the whole-target gate — main's three guards, this run's six rules, the new pin, every suite
+of the four conflict files and of the both-touched auto-merged files, the shell, bar and message line, VM-78's
+suites over these faces (64 types):
+```zsh
+phone=(MobileNoteEntryDateTests MobileGatheringWordTests MobileMembershipSheetFaceTests
+MobilePhoneTypeSourceTests MobilePhoneControlsSourceTests MobileLookSourceTests MobileFaintOnDoorsSourceTests
+MobileFaintCarriesNoWordsSourceTests MobileFieldPlaceholderSourceTests MobileBookDetailsJoinRowsTests
+MobileFinishConfirmTests MobileBookStateRowTests MobileArchivedStarredBookTests MobileShelfOrderTests
+MobileShelfRowActsTests MobileCollectReceiptTests MobileBookDetailsTests MobileBookCreateTests
+MobileBookNameGuardTests MobileMembershipTests MobileNoteRenameTests MobileDeletionTests
+MobileRefusalSentencePinTests MobileNoRawErrorPinTests MobileErrorLogPrivacyPinTests MobileLineDirectionTests
+MobileFaintOnDoorsRenderedTests MobileFieldPlaceholderRenderedTests MobileWriteScrollAuthorityTests
+MobileUndoDoorTests MobileUndoWarningWordsTests MobileNoteActionsAlarmTests MobileNoteActionsHairlineTests
+MobileTrashTests MobileShellTests MobileLivenessTests MobileTabBarTests MobileNavigationTests MobileRootMenuTests
+MobilePathLineGeometryTests MobileShelfMarkerColumnTests MobileShelfLayoutBrainTests MobileShelfRenderedLayoutTests
+MobileLibraryLookTests MobileFilterRowGeometryTests MobileFilterTests MobileStarsTests MobileMessageLineFaceTests
+MobileLineShowRuleTests MobileMessageLineGeometryTests MobileMessageLineHostTests MobileMessageLineInsetTests
+MobileMessageLineSceneTests MobileLineDoorTests MobileWingDoorTests MobileWingDoorGeometryTests
+MobileWingListSheetTests MobileWingDoorShellTests MobileWingStandTests MobilePhoneControlsTests
+MobileScreenEdgeGroundsTests MobileHiddenPageKeyboardTests MobileBlockHistoryTests MobileWalkTests)
+```
+`xcodebuild test-without-building -scheme VariorumMobile -destination 'id=<the standing device>'
+-derivedDataPath DerivedData/vm47-fix $(for t in $phone; do print -- "-only-testing:VariorumMobileTests/$t"; done)`.
+Expected: all green, with the declared known issues only — `MobileTrashTests`' empty-tree diagnostic
+(`anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, ×2 in batch 6's run) and P-47-7's four
+filter-row marks (`MobileFilterRowGeometryTests`); main's tutorial pair was unwrapped by VM-3 and is not in this
+list. VM-24's caret test is not in the list (the gate carries it). Any other red is a finding to read.
+The new pin's red-on-old (optional, by the brief's rule for a new pin): a snapshot of this tree with
+`MobileBookDetails.swift`'s `unarchiveRow` set back to the raw merge's four styling lines (`.font(tokens.body)`;
+`.font(tokens.small)` + `.foregroundStyle(tokens.faint)`; `.buttonStyle(.plain)`), phone `build-for-testing` into
+its own folder, `-only-testing:VariorumMobileTests/MobileBookDetailsJoinRowsTests` — expected RED on the Unarchive
+row in both voices (Finish and Delete green: they wear the menu row on both trees).
+
+(b) The Mac, beyond the gate's whole target — the targeted leg for the join (this run's theme layer under
+VX-981's new and changed Mac faces for the first time; VM-55's Mac pins; VM-78's Mac word pins) (25 types):
+```zsh
+mac=(ThemeTokenTests PaletteDerivationTests NoLiteralColourTests SharedPageStyleTests PaletteReachTests
+MarkdownPaletteWritersTests HelperWindowThemeTests AppearanceChoiceTests VX176LibraryTintTests WingPaletteDoorsTests
+BadgeFamilySplitTests PrivateMarkFaceTests JournalPrivateFaceTests MCPShowOfferFacesTests MCPDoorErgonomicsFacesTests
+MCPWingFacesTests ShelfModelTests PromoteAndPaletteTests UndoWarningWordsTests DeadVocabularyTests
+GatheringKindWordTests VM56MacWingScopePinTests VM61MacStatusSeamPinTests VM62MacRefusalWordsPinTests
+VM63MacWingBrainsHoistPinTests)
+```
+`xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+DerivedData/vm47-fix $(for t in $mac; do print -- "-only-testing:VariorumTests/$t"; done)`. Then the gate: the
+whole phone target and the whole Mac target on this tree.
+
+**PROVISIONAL:** none new. **Self-assessment — the risks in the join, ranked:**
+1. **The map's quoted inks vs this run's latest** (the one place the resolution departs from the map's literal
+   text): taken by the map's own governing rule and measured (the literal inks red two of this run's rules on 4
+   lines). A reader who holds the map's text over its rule would call these four lines wrong; they are the walk's
+   fixes, kept.
+2. **VM-33's Trash timing under this run's shell walks.** `MobileTabBarTests`' three Trash walks find the Trash by
+   `emptyTrashLine` after `settle(40)`; on the merged tree that line draws only once the listing answers. VM-78's own
+   hosted Trash holds `settle(40)` as enough, but through the shell's push the first value may land later — if one
+   of those three reds on "the Trash arrived", it is timing in the test's premise, and the move is to wait for the
+   line (the fact it protects), never to drop the check.
+3. **VM-78's hosted Book Details and membership tests under this run's styles for the first time**
+   (`MobileFinishConfirmTests`' two hosted cases, `theBookDetailsRowsSpeakTheirCaptionsAsHints`,
+   `MobileMembershipSheetFaceTests`, `bookDetailsDeleteLineNamesAGathering`). They find doors by label and hint, which
+   `PhoneMenuRowStyle` and `PhoneInlineActStyle` do not touch (one label, `opacity` only), so they should hold; they
+   have never run on this styling.
+4. **The Unarchive row's new height.** `PhoneMenuRowStyle` gives the row a 44 pt floor and full width; with a living
+   book's three-line pause sentence the row is taller than before — a look change on a VM-78 row, by this run's
+   layer, the walk has not seen (the run's one walk predates the join).
+5. **The Mac**: compiled green; VX-981's new Mac faces have never run beside this run's hoisted `ThemeStore` —
+   the targeted leg (b) and the gate's whole Mac target are the evidence.
