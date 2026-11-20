@@ -189,6 +189,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
 | Ladder r2 · fix pass | **DONE 2026-11-19** — part B built and the whole Core package green (`74d91c666`); settled by its stage window: the seven meant reds on `vm64-gate2-red` and no other, green alone and in company, the gated suite alone 13 passed ("Orchestrator's stage results" ▸ "Ladder round 2's fixes — THE STAGE WINDOW") | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, the no-choice fixes with their pins, the final calls in the second turn, part B's builds. *(Was: IN-PROGRESS, part B waiting on the QUIET window — flipped at ladder round 3, finding 2(c).)* |
 | Ladder r3 · fix pass | **DONE (both turns)** — the final calls applied (`6aa357bff`): (i′) confirmed with its guard; `merged` bounded, pin first; the migration comment. Owed with the gate tree after VM-78's merge-in: finding 1's red build and the hosted runs of its suite | see "Ladder round 3 — fix pass · LIVE STATUS" below | the last round (no major found). *(Was: FIRST TURN DONE, the arms waiting.)* |
+| The merge of main (VM-78) and the gate tree | **IN-PROGRESS** — see its block below | see "The merge of main (VM-78) and the gate tree · LIVE STATUS" below | merge exactly `f909d6714` (VM-78's PR #15); the five shared files read; builds into `vm64-gate3` / `vm64-gate3-red`; the whole Core package |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -854,6 +855,24 @@ red-on-old build are made after VM-78's merge-in, not now). No hosted run (the s
 | T8 — 5(b)'s `merged` bound, arm (B): the exit-test pin first (its own commit, red), then the bound (green) | DONE — pin `adc466230` RAN RED (36 in 1 suite failed with 1 issue, the child's SIGTRAP); bound `4bee11420` RAN GREEN (36 in 1 suite passed) |
 | T9 — 5(c): `Migrations.swift`'s `v1_38` comment, COMMENT ONLY; `MigrationTests` green | DONE (`705c6cf8a`) — `//` lines only; `MigrationTests` 33 in 4 suites passed |
 | T10 — ONE warm phone `build-for-testing` into `vm64-gate2`; §7's second-turn part; these rows | DONE — the build at `8be3a1f30` `** TEST BUILD SUCCEEDED **`, 0 errors; §7 ▸ "Ladder round 3 — fix pass" ▸ "Second turn" (this commit). **The turn ENDS here**; owed, by a fresh session after VM-78's merge-in: the gate tree, finding 1's red build and the hosted runs |
+
+### The merge of main (VM-78) and the gate tree · LIVE STATUS (implementer, opus, fresh; started 2026-11-19)
+
+**No revert is in flight.** Base: `dd7da4f4c` (this branch; final code `8be3a1f30`) · the merge target EXACTLY `f909d6714`
+(VM-78's merge, PR #15, a true merge on `a4634b288`, which this branch already holds; `git merge-tree` trial CLEAN).
+DerivedData: `App/Variorum/DerivedData/vm64-gate3/` (phone + Mac, the joined tree) and `vm64-gate3-red/` (phone,
+`848b98b66`'s one hunk reversed) — gitignored; no other `vm64-*` folder is written. No hosted run (the stage is the
+orchestrator's). The record of what was checked: §7 ▸ "The merge of main (VM-78) and the gate tree".
+
+| Piece | State |
+|---|---|
+| G0 — this live status, before any tree change | DONE (this commit) |
+| G1 — `git merge --no-ff f909d6714` (a merge commit); stop on any code conflict | NOT-STARTED |
+| G2 — the blob check of the five shared files; each read whole against the map's VM-64 bullet and this run's intents; the composition traced; the other meeting points; the guards mirrored | NOT-STARTED |
+| G3 — phone and Mac `build-for-testing` into `vm64-gate3`; compile fixes (if any) listed | NOT-STARTED |
+| G4 — the whole Core package, `swift test`, once, on the final tree | NOT-STARTED |
+| G5 — finding 1's red-on-old phone build into `vm64-gate3-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
+| G6 — §7's section, the final stage commands, the report | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
