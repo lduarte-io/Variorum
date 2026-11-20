@@ -2989,6 +2989,33 @@ MERGE-IN row 3's exactly, from `App/Variorum/`:
 - "New" is counted by (file, message) with line and column stripped, since a merge moves line numbers; the two
   logs' own first and last lines carry the invocation and the verdict.
 
+### THE GATE — leg 3, the simulator walk
+
+*The run's use-shaped evidence: the walk's rows (the Closeout's "The walk's rows (gate 3)", re-lettered a–o in the
+walker's brief) driven on the Debug phone app (`io.lduarte.VariorumMobile`, the simulator's dev store — signed out,
+no account, no Castle, nothing synced) on a DEDICATED simulator device created for the walk and deleted after it
+(iPhone 17 Pro, iOS 26.2, named `vm78-walk`; its id is never written here — `<walk-device-udid>`). Study light for
+every row, then rows a, c, d, e and o again in Terminal. Walker: a fresh `opus-implementer` session, no product code
+and no test touched. The instruments are THROWAWAY and never enter the PR: a hosted seeder
+(`VariorumMobileTests/VM78WalkSeedTests.swift`) and a UI driver (`VariorumMobileUITests/VM78Walk.swift`), untracked
+files in the detached checkout `~/dev/variorum-vm-78-pins` (code byte-identical to the tip's), built incrementally into
+its `DerivedData/vm78-pins` and removed at the end. Captures: this worktree's ignored
+`App/Variorum/DerivedData/vm78-walk-screens/`.*
+
+#### THE GATE (leg 3) — LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0 — this LIVE STATUS opens | DONE (this commit) |
+| 1 — the reading (CLAUDE.md, the resiliency protocol, this record's FOR A LATER READER, the 17:00 UPDATE, "Results, member by member", "The walk's rows (gate 3)", round 4's R4-N4; the VM-44 instruments, VM-55's walk; the faces and the staging pins at the tip) | DONE |
+| 2 — the instruments written in the pins checkout (seeder + driver) and built incrementally into `vm78-pins` (headless, no boot, no stage) | IN-PROGRESS |
+| 3 — the dedicated device `vm78-walk` created (never booted outside the claim) | NOT-STARTED |
+| 4 — READY to the orchestrator (device id in the message only; minutes; test type names; capture count) | NOT-STARTED |
+| 5 — the walk, under the coordinator's claim | NOT-STARTED — PENDING(the claim's times) |
+| 6 — every capture looked at and each row judged from it; the table below | NOT-STARTED |
+| 7 — the close: device shut down and deleted, no Variorum process, no booted simulator of mine, the claim released, the instruments removed (`git status --short` empty in the pins checkout) | NOT-STARTED |
+| 8 — the gate-3 `PENDING(…)` slots filled (the Closeout's evidence row and "The walk's rows", FOR A LATER READER's slot, the handoff) | NOT-STARTED |
+
 ## The ladder
 
 *(round files `vm-78-ladder-roundN.md` beside this one; findings and dispositions land here before the next round)*
