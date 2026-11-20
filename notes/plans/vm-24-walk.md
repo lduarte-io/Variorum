@@ -45,8 +45,9 @@ for it).
   BEFORE build. Two `build-for-testing` products, `DerivedData/vm24-walk-before` and `DerivedData/vm24-walk-after`,
   under the snapshot's own `App/Variorum/DerivedData/`.
 - Captures as `XCUIScreen` screenshots written to
-  `~/dev/variorum-vm-24/notes/plans/vm24-screens/<before|after>/<row>-<what>.png` (the gitignored `*-screens`
-  convention), with a `walk-log.txt` beside them (row, time, what was read from the readout — numbers only).
+  `~/dev/variorum-vm-24/App/Variorum/DerivedData/vm24-walk-screens/<before|after>/<row>-<what>.png` (inside the
+  gitignored DerivedData, VM-55's choice), with a `walk-log.txt` beside them (row, time, what was read from the
+  readout — numbers only).
 - A dedicated simulator device, created for the walk (`vm24-walk`, iPhone 17 Pro, iOS 26.2) and deleted after it.
   The driver must leave the host's Simulator preferences as it found them; anything it changes (the hardware
   keyboard connection, for one) is restored and said in the record.
