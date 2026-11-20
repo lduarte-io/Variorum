@@ -149,11 +149,14 @@ struct MobileFaintOnDoorsSourceTests {
             let lines = try code(file)
             for (index, line) in lines.enumerated() where faint.contains(where: { line.contains($0) }) {
                 if line.contains(".stroke(") || line.contains(".fill(") { continue }  // edges and fills
-                // A field's placeholder (`prompt:`, `phoneFieldPrompt`) is the faint's own
-                // use (sheet §D), never a door's word — the sibling rule's exemption.
-                // (The walk's fixes, batch 2: the Account sheet's `pagePlainField` was read
-                // as a door because its signature `_ label: String` holds "label:".)
-                if line.lowercased().contains("prompt") { continue }
+                // A field's placeholder is the faint's own use (sheet §D), never a door's
+                // word — the sibling rule's exemption, by its two exact forms: a `prompt:`
+                // argument, or the `\.phoneFieldPrompt` key path (case-sensitive — an
+                // identifier or a word that merely holds "prompt" is not exempt; ladder
+                // round 3, R3-n1). (The walk's fixes, batch 2: the Account sheet's
+                // `pagePlainField` was read as a door because its signature
+                // `_ label: String` holds "label:".)
+                if line.contains("prompt:") || line.contains("\\.phoneFieldPrompt") { continue }
                 if let found = role(lines, at: index), fullSizeRoles.contains(found) { continue }
                 if (max(index - 4, 0)...index).contains(where: { isGlyph(lines[$0]) }) { continue }
                 if insideADoor(lines, at: index) { sites.append("\(relative):\(index + 1)") }
@@ -198,7 +201,8 @@ extension MobileFaintOnDoorsSourceTests {
     /// keep the faint, each by its own pattern: an edge or a fill (`.stroke(`
     /// / `.fill(` — the box's dashed edge), a glyph-only mark (a `Text` whose
     /// literals hold no letter — the block list's ○), a field's placeholder
-    /// (`prompt` — `phoneFieldPrompt`, a `prompt:` argument), and a word at
+    /// (a line holding a `prompt:` argument or the `\.phoneFieldPrompt` key
+    /// path, case-sensitive — ladder round 3, R3-n1), and a word at
     /// 17 pt or more (the box's 17 pt hint; the disabled "Use as Daily
     /// Journal"). Anything else — a sentence, a section header, a path, a
     /// row's meta line, a status word, a door's word — is the class. A read
@@ -223,7 +227,7 @@ extension MobileFaintOnDoorsSourceTests {
             let lines = try code(file)
             for (index, line) in lines.enumerated() where faint.contains(where: { line.contains($0) }) {
                 if line.contains(".stroke(") || line.contains(".fill(") { continue }  // edges and fills
-                if line.lowercased().contains("prompt") { continue }  // a field's placeholder
+                if line.contains("prompt:") || line.contains("\\.phoneFieldPrompt") { continue }  // a field's placeholder
                 if (max(index - 4, 0)...index).contains(where: { isGlyph(lines[$0]) }) { continue }
                 if let found = nearestRole(lines, at: index), fullSizeRoles.contains(found) { continue }
                 sites.append("\(relative):\(index + 1)")
