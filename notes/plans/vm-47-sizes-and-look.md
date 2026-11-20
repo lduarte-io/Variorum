@@ -799,6 +799,7 @@ hold it, and re-captured), a defect another ticket owns (named), or a question f
 | R3 | Ladder round 3 (a fresh Fable reviewer, `notes/REVIEW_PROMPT.md` verbatim; the whole run's diff after the walk's fixes and the re-land of main, on the tree at `ce9a1e099`; read-only) | FINDINGS IN — `notes/plans/vm-47-ladder-round3.md`: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT (`be385dbae`); the implementer's answers written (its §2a and the table's implementer column, `2d2a6d66f`: R3-m1 AGREE — the walk's questions checked id by id; R3-n1 AGREE on the breadth with one correction (comments are blanked before the match; identifiers and string literals exempt), the narrowest match `prompt:` or `\.phoneFieldPrompt` at both rules, the test NOT changed pending the call; R3-n2 AGREE, no action); §5's rows landed for R3-m1 (`16f9664b0`: P-47-27 extended with W-A2's measurements; P-47-31 … P-47-41 new — W-A5, W-A6, W-A7, W-A8, W-B2, W-C1, W-C5, W-C6, W-C8, W-D3 and batch 2 piece 3's warning orange; the Account sheet's first sight under "Held for her hands"); the reviewer's final calls IN (its §2b, `4c0f9761e`: R3-m1 CONFIRMED and DISCHARGED by the landed rows, nothing further; R3-n1 AMENDED on the mechanism, CONFIRMED on the breadth, the narrowing TAKEN at both rules; R3-n2 CONFIRMED, no action and no ignore line); the confirmed pass APPLIED — R3-n1 test-only (`1306a9f07`: `prompt:` or `\.phoneFieldPrompt`, case-sensitive, at both rules, the two comments updated; a verbatim port of both rules over this tree counts 0 offenders for each with the old match and with the new, the same four placeholder lines exempt — `Shared/AuthViews.swift:469`, `:486`, `Shared/Theme/PhoneControls.swift:310`, `:337`), the phone `build-for-testing` into `DerivedData/vm47-fix` incremental (only that test file compiled) `** TEST BUILD SUCCEEDED **`, and §2's table filled (this commit). **ROUND 3 CLOSED** — no MAJOR, so no further round is earned by her rule; the narrowed rule's re-run rides the next stage window (with `MobileFaintOnDoorsSourceTests`' owed re-run); at the closeout's ticket pass the two "noted" look items go to their owning tickets (Book Details' detail lines beside their labels → VM-218; the system toolbar's "Details · Read" in the system's label colour → the pushed screens' top-edge owner under P-47-20, VM-122 for a book's contents and Read); the round file's owed-evidence list (its §1) stands and gates the closeout — **SINCE ANSWERED** but the merge gate: the narrowed rule and `MobileFaintOnDoorsSourceTests` green in the post-merge window (row W.11 (1)), the re-capture and the final-tree captures read (rows W.9, W.11 (9)); the two noted items commented on VM-218 and VM-122 at the ticket pass (§6 "Closeout") |
 | R4 | Ladder round 4 (a fresh Fable reviewer, `notes/REVIEW_PROMPT.md` verbatim; the whole run's diff on the final tree at `d9235c09c`, code tip `d78853d8e`; read-only; taken for new ground — the W-A1 redo and batch 7b — and the narrow read of batch 7b that round 3's §3 left owed) | FINDINGS IN — `notes/plans/vm-47-ladder-round4.md`: 0 BLOCKER · 0 MAJOR · 0 MINOR · 1 NIT (`d5da04616`) — R4-n1, the record's STATUS banner stale; the redo and the second merge of main read in depth and found sound; the implementer's answer (its §2a, `8dbea836b`: AGREE — stale in five clauses, not one) with the fix, the banner rewritten; the reviewer's final call IN (its §2b, `935c34196`: CONFIRMED, the five-clause amendment adopted, DISCHARGED by the rewritten banner; one residual of the same class named — row W.11's "READ … PENDING" — flipped at the final record pass). **ROUND 4 CLOSED** — no MAJOR, so no further round is earned by her rule; its owed evidence is now the merge gate alone |
 | — | Closeout | IN-PROGRESS — the documents written (§6 "Closeout"; `notes/plans/vm-47-closeout-drafts.md`; `notes/handoffs/vm-47-handoff.md`) and brought to the truth at the final record pass (implementer: Opus, 2026-11-20 — no code, no build, no run), with this run's canon lines applied on the branch (`notes/SurfaceContracts.md`, `notes/MobileSoul.md` PL-80 — `71cae0706`; `Tools/canon-size` 143606 total, headroom 6394, in the handoff `9a9f935e5`). LEFT: the merge gate (the whole phone target with VM-64's speed suite as its own leg, the whole Mac target), the PR and its merge, the ledgers on main from the drafts, the cleanup (the walk's captures HELD until her sitting), the wave-1 phone build's preparation |
+| G.1 | The merge gate's one red beyond main's baseline — `MobileBoxOpenTimingTests.anOpenThatFilesIsStillTimed` (VM-64's guard) in the whole phone target (1193 tests, 209 suites), at `:98` and `:101`; green alone 3 of 3 and beside `MobileBorderTraitTests` 8 of 8: trace it by reading, a deterministic pin red on the tree as it is, the narrowest test-only fix (implementer: Opus, 2026-11-20; nothing built or run by the implementer) | PREPARED — the window owed. Traced (§6 "The gate's one red"): a frame-later paint mark that an earlier test's editor scheduled — a one-shot display link nothing cancels at a test's end — fired inside the guard's wait for the filing and closed the Open's span on the wrong paint. The pin `aPaintMarkAnEarlierRenderLeftCannotEndTheOpen` (`07190ee14`, red by design) and the fix, `freshSpans` draining every pending mark before a span (`bb0e2285d`); test-only, one file. OWED: the suite at `07190ee14` (expect the pin alone red, at its two named expectations), the suite at `bb0e2285d` (expect green), the borders suite beside it, then the whole phone target |
 
 Each batch's implementer adds its own piece rows under its batch line as it starts.
 
@@ -3393,3 +3394,118 @@ and now true or corrected:*
   named residual).
 - The orchestrator's handoff's newest block (15:45) predates batch 7, the re-capture, the redo and batch 7b: its new
   top block, written at this pass, supersedes it.
+
+### The gate's one red — a frame-later timing mark crossing a suite boundary (implementer: Opus, 2026-11-20)
+
+**Not done here, first:** nothing was built or run by the implementer (the orchestrator runs every window); the pin's
+red at `07190ee14` and the fix's green at `bb0e2285d` are OWED (row G.1). Only
+`App/Variorum/VariorumMobileTests/MobileBoxOpenTimingTests.swift` changed — no app, `Shared/` or Core code.
+
+**The red as seen** (the orchestrator's gate log; the whole phone target in one launch, 1193 tests in 209 suites):
+beside main's one known red, `anOpenThatFilesIsStillTimed` recorded two issues and failed after 0.059 s — `:98`
+`recorder.isOpen(.boxOpenToNote)` → false, and `:101` `samples(.boxOpenToNote) == painted + 1` with `samples` → 1 and
+`painted + 1` → 2 (the gate's line numbers); its premise at `:96` held. The suite's first test passed (0.029 s) just
+before; the suite before it was `MobileBorderTraitTests` (this run's, VM-54), whose last test mounts a real surface
+editor. Nothing was printed between the test's start and its issues. It did not reproduce in eleven launches (the suite
+alone 3 of 3; the borders suite with it 8 of 8), and main's whole target passed it in two gate runs.
+
+**The mechanism — proven by reading and the logged numbers, by elimination.** Every way `.boxOpenToNote` can stop being
+open, or gain a sample, between the press (`:92`) and `:98`:
+1. `AppTiming.notePainted()` → `recorder.endIfOpen(.boxOpenToNote)` (`Shared/AppTiming.swift:259–263`) — the ONLY call
+   that both closes the span and records a sample. Its callers: this suite's own direct calls (synchronous, outside the
+   window) and `MobileTiming.noteRendered()`'s frame-later closure (`VariorumMobile/Features/Perf/MobileTiming.swift:138–140`
+   → `afterNextFrame` `:156–159` → `NextFrameTick.schedule` `:190–196`, a one-shot `CADisplayLink` added to `.main` in
+   `.common`, fired at the next refresh, `:198–204`). An editor's first render schedules it
+   (`MobileEditorViewModel.applyProjection`'s `.initialRender` arm, `MobileEditorViewModel.swift:1021–1024`; once per
+   model — `loaded`, `:176` and `:1023`; the policy's first rule, `Shared/EditorBrain/EditorProjectionEngine.swift:153`).
+   **It crosses a suite boundary:** the link holds its target until it fires, its closure captures nothing of its test,
+   and nothing invalidates it when the test ends.
+2. `AppTiming.boxOpenFiledNothing()` → `cancel` (`AppTiming.swift:218–221`) — only from a box's Open task on a nil filing
+   (`MobileQuickNote.swift:905–911`). In the window the only box is the guard's own, which FILED (`:96` held). The first
+   test's box ran its task inside the first test: an empty box's `file()` never suspends (`MobileQuickNote.swift:960–967`),
+   and that test's passing `!isOpen(.boxOpenToKeyboard)` proves the cancel ran there (the keyboard span's only other
+   closer, `keyboardUp`, needs a software keyboard, which the simulator never raises under `xcodebuild test` —
+   `MobileHerPathsPerfTests`' header). No suite before this one constructs a box, and the test host mounts no shell
+   (`VariorumMobileApp.swift:222–226`, `.hostingTests`). Cannot cross.
+3. `recorder.cancel(.boxOpenToNote)` directly — `freshSpans`, before the press.
+4. `recorder.reset()` (`Sources/VariorumCore/Diagnostics/TimingRecorder.swift:483–491`) — reached only through
+   `MobileTiming.reset()` (`MobileTiming.swift:127–130`) from the readout's Reset (`MobileTimingView.swift:225`), never
+   mounted in the target; ruled out by the numbers as well (a reset zeroes the count: `painted` would read 0, the log says
+   1).
+5. `recorder.setEnabled(false)` (`TimingRecorder.swift:254–264`) — no caller in the app or the test target (only `true`).
+6. `recorder.restore(_:)` (`TimingRecorder.swift:515–525`, which drops open spans) — no caller; the timing file's load
+   uses `absorb`, which keeps them, and runs only when the process persists — never in a test host
+   (`MobileTiming.swift:73`, `:84`).
+7. A second `begin` (`boxOpenPressed`) restarts and keeps the span open — not a closer; the 30 s stale limit is out of
+   reach in 0.059 s.
+
+The numbers close it: `painted` = 1 at `:99`, so exactly one `.boxOpenToNote` sample existed in the process. Only (1)
+records one, and no suite before this one presses a box, so it came from a paint landing while a box span was open. Had
+that paint landed in the first test's span, the guard's span would still have needed a non-recording closer inside its
+window, and none of 2–6 exists there. So **one frame-later paint mark, scheduled outside the guard (which renders no
+editor), fired during the guard's wait for the filing (`:93–96`, the only stretch between the press and `:98` where the
+main run loop turns), closed the span and recorded its sample; the guard's own paint at `:100` then found nothing open.**
+Both issues, both numbers.
+
+**Still a suspicion, said plainly: which editor's mark, and why its frame came so late.** The likeliest is
+`MobileBorderTraitTests.theCommentDraftsEdgeFollowsTheFlip`: `makeSurfaceEditor` (`MobileMarkdownTests.swift:29–41`, its
+`loadOnce` at `:39`) schedules the mark, and the test runs only synchronous code to its end
+(`MobileBorderTraitTests.swift:122–143`), so the mark is pending at the suite boundary; on main the suite before this one
+renders no editor, which is why main never showed the red. For it to land in the guard rather than harmlessly earlier,
+no refresh reached the main run loop from the borders test's end until after the first test's box task had cancelled its
+spans — roughly 30–55 ms, two or three refreshes late. The run loop does turn in the gaps between tests and in the first
+test's wait (one yield and one 2 ms sleep; the rest of that test is the in-memory store's synchronous setup), so on an
+ordinary frame cadence the mark fires there — inside the first test's span, where it is harmless, since that test reads
+its counts afterwards. The eleven green launches are consistent with this and do not rule it out. What starved the
+display link in the whole-target launch is not readable from code; a launch with the timing signposts streamed
+(subsystem `io.lduarte.Variorum`, category `timing`) beside the test events would show when the stray span ended.
+**The fix does not depend on it.**
+
+**The reproduction — `aPaintMarkAnEarlierRenderLeftCannotEndTheOpen` (`07190ee14`).** It drains what earlier tests left,
+mints a note and renders an editor the real way (`makeEditor` + `loadOnce` → `.initialRender` → the mark), begins a
+`noteOpenToScreen` span as the planted mark's witness, then runs the guard's own scenario — `freshSpans`, the box, the
+press — with nothing in between that suspends (so the main run loop, the only place the mark can fire, does not turn
+before the press); it waits for the filing, then for two refreshes of its own display link (`drainFrameLaterMarks`), so
+the mark has certainly fired inside the span. **Deterministic:** the mark is pending at the press by the main thread's
+own sequence; it has fired by the drain's second refresh by the drain's ordering (below); and nothing else can close
+the span between (items 2–6). On this tree it is red at exactly two expectations — `recorder.isOpen(.boxOpenToNote)`
+and `samples(.boxOpenToNote) == painted + 1` — with both premises holding (the note filed; the witness closed). **If the
+mechanism were wrong** the pin would be GREEN at `07190ee14` (the mark would not end the span): the finding hollow. A red
+on a PREMISE instead — the witness still open, or the drain's 10 s issue — means the mark was never planted or the
+display link never ticked, and proves nothing either way.
+
+**The fix — `bb0e2285d`, test-only, the one file.** `freshSpans`, which every test in the suite calls first, now awaits
+`drainFrameLaterMarks()` after enabling the recorder and before cancelling the two spans, so every frame-later mark
+already scheduled fires while nothing of the test's is open. **Why the drain is ordered by construction, not by time:**
+it installs its own `CADisplayLink` on the run loop and in the mode `NextFrameTick` uses (`.main`, `.common`) after every
+pending mark (the main actor runs one thing at a time), and returns at that link's second refresh. A link installed
+earlier is due at a refresh no later than one installed after it, so every pending mark was due by the counter's first
+refresh; the main run loop calls one refresh's links before it reaches the next, so by the counter's second every one
+has been called — whatever their order within a refresh. The 10 s deadline only keeps a dead display link from hanging
+the suite, and it records an issue rather than pass silently. VM-64's two tests keep their words and every
+expectation; each now `await`s `freshSpans()`, and the suite's header says why.
+
+**What it does not cover (said once):** a mark scheduled DURING a test by a predecessor's still-running work — an
+editor whose FIRST render comes late, from a first load left un-awaited. No suite before this one leaves one: their
+editors load awaited (`makeEditor` / `makeSurfaceEditor` + `loadOnce`), hosted screens tear down (`withHostedSurface`'s
+`defer`), and their `start()` tasks belong to list and shelf models and are cancelled. The drain catches every mark
+scheduled before the test begins.
+
+**The suite's first test** (`anOpenThatFilesNothingLeavesNoOpenSpan`): exposed, never red by it — a stray paint in its
+wait ends its note span early with a sample, but it reads its counts after the spans close, synchronously, so its
+expectations hold whatever lands; on the tree before VM-64's cancel a stray could have satisfied its note-span
+expectation by accident (its keyboard expectations stayed red). The shared `freshSpans` drains for it too.
+**`MobileHerPathsPerfTests`** (gated, its own launch): exposed in principle — its earlier tests mount editors whose
+marks are frame-later, and one landing inside a later Open's or note open's span would end that span early — but each
+press there follows `idle(400 ms)` and polled waits (about two dozen refreshes of run-loop time at 60 Hz), and a stray
+could only under-read a duration it records and never asserts: the counts it asserts (reads and builds per open,
+savepoints per leaving) are counters a paint does not move, and each run still gathers one sample (the note's own paint
+then finds nothing open). Left as it is; it could adopt the same drain if a duration there is ever asserted.
+
+**The window (OWED — the orchestrator's; the slots):**
+- At `07190ee14`: `-only-testing:VariorumMobileTests/MobileBoxOpenTimingTests` — expect the pin alone red, at its two
+  named expectations, with both premises and both VM-64 tests green. ‹PENDING›
+- At `bb0e2285d`: the same suite — expect green, three of three. ‹PENDING›
+- At `bb0e2285d`: `MobileBorderTraitTests` and `MobileBoxOpenTimingTests` in one launch — expect green. ‹PENDING›
+- At `bb0e2285d` (or the branch's head): the whole phone target, `-only-testing:VariorumMobileTests` — expect main's one
+  known red only. ‹PENDING›
