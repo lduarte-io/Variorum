@@ -289,11 +289,14 @@ struct MobileNoteActionsSheet: View {
         }
     }
 
+    /// The removing act wears the voice's ALARM, last (sheet §D: the alarm
+    /// "replaces the literal red on Delete note…"; §E's menu row — VM-47, the
+    /// walk's W-B3: the system red read 3.43:1 on the room).
     private var deleteRow: some View {
         actRow(
             title: MobileEditorViewModel.deleteNoteTitle,
             detail: RecoveryCopy.moveToTrashDetail(.note),
-            tint: .red, role: .destructive
+            tint: tokens.alarm, role: .destructive
         ) {
             deletePresented = true
         }

@@ -132,10 +132,44 @@ struct MobileLookSourceTests {
 
     // MARK: - 3. No literal colour
 
-    /// The ONE allowed form, with its decision (see the header).
+    /// The allowed forms, each with its decision (see the header):
+    /// · the editor's TK2 fallback canary — deliberately not the voice's alarm;
+    /// · (VM-47, the walk's fixes batch 2) the store's opening frame — it is
+    ///   drawn before any library is open, so no library's tokens exist yet
+    ///   (the failure face beside it is the deliberately unstyled recovery
+    ///   surface);
+    /// · the callout swatch's hairline edge — the image sits in the SYSTEM's
+    ///   menu, and its edge matches that menu's own ground (the Mac's note).
     private static let allowedForms: [String: Set<String>] = [
         "Features/Write/MobileWriteView.swift": [".foregroundStyle(.red)"],
+        "MobileStoreFailureView.swift": ["Color(.system"],
+        "Features/Write/MobileCallout.swift": ["UIColor.separator"],
     ]
+
+    /// **A system colour standing where a token belongs** (VM-47, the walk's
+    /// W-B3 — "Delete Note…" was `tint: .red`, the system red at 3.43:1 on the
+    /// room, where the sheet names the alarm). The forms the modifier list
+    /// below never saw: a hue handed to a parameter (`tint: .red`,
+    /// `? .red :`, `= .red`), and the UIKit/semantic system colours.
+    private static let systemColourForms = [
+        "UIColor.system", "Color(.system", "Color(uiColor: .system", "UIColor.label",
+        "UIColor.secondaryLabel", "UIColor.tertiaryLabel", "UIColor.quaternaryLabel",
+        "UIColor.placeholderText", "UIColor.separator", "UIColor.opaqueSeparator",
+        "UIColor.link", "Color.accentColor", ".tint(.accentColor)",
+    ]
+
+    /// A hue handed to a parameter, ending at an identifier edge.
+    private static func passesBare(_ hue: String, in text: String) -> String? {
+        for lead in [": .", "? .", "= ."] {
+            var searchStart = text.startIndex
+            while let range = text.range(of: lead + hue, range: searchStart ..< text.endIndex) {
+                let next = range.upperBound < text.endIndex ? text[range.upperBound] : " "
+                if !(next.isLetter || next.isNumber || next == "_") { return lead + hue }
+                searchStart = range.upperBound
+            }
+        }
+        return nil
+    }
 
     private static let hues = [
         "white", "black", "red", "orange", "yellow", "green",
@@ -179,7 +213,9 @@ struct MobileLookSourceTests {
                     } else if text.contains(".\(hue).opacity("), !text.contains("shadow(color:") {
                         found.append(".\(hue).opacity(")
                     }
+                    if let passed = Self.passesBare(hue, in: text) { found.append(passed) }
                 }
+                for form in Self.systemColourForms where text.contains(form) { found.append(form) }
                 for form in found where !allowed.contains(form) {
                     offenders.append("\(relative) (code line \(index + 1)) — \(form)")
                 }
