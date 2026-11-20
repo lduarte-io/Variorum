@@ -2243,7 +2243,7 @@ and keep the old citations; this table is how they resolve.)*
 
 #194 — **OPEN — batch 5's remaining PROVISIONALs** (`notes/plans/mobile-batch-5-record.md` §3), all taste, none blocking: the starter-journal copy · the badge's short word · dropping "daily" from the badged row's meta · the starter note sorting last in the book · starred staying inside the bounded region · the box's 11.5 pt type now that it is the main writing surface · **blur-with-text** (the box currently collapses on blur even holding text; "collapse only when empty" is equally defensible and is hers).
 
-#195 — **OPEN — the architecture review's findings to slot** (`notes/plans/mobile-architecture-review.md`). Its two MAJORs are **fixed**; what remains is hers to slot: **MINOR 3** (`MobileEditorStyle.voice`, an unsynchronised mutable global a non-serialized suite mutates while 81 of 86 suites run parallel) · **MINOR 4** (refusal presentation has ten homes and **71 raw `String(describing:)` dumps**, against the project's own "refusals speak" doctrine) · 2 NITs. **MINOR 1 and MINOR 2 are NOT hers to slot — they belong to 13u.** *(Precision, added 2026-08-30 at the Fable sweep's finding 8 — this clause used to read "MINOR 1 **is** 13u item 8's O(N²) row", which over-equates and could cost the fix. MINOR 1 is `applyDifferential`, BOTH platforms — **a DIFFERENT, unreported site** from the row's named `planVisibleTakeEdit` twin, and the review was careful to establish exactly that. It is covered only by the row's **sweep-the-class-to-completion** clause, never by fixing the row's named example: a 13u session that fixes `planVisibleTakeEdit`, declares the row done and stops leaves MINOR 1 standing.)*
+#195 — **OPEN — the architecture review's findings to slot** (`notes/plans/mobile-architecture-review.md`). Its two MAJORs are **fixed**; what remains is hers to slot: **MINOR 3** (`MobileEditorStyle.voice`, an unsynchronised mutable global a non-serialized suite mutates while 81 of 86 suites run parallel — **CLOSED 2026-11-19 at VM-47**, `987e9edc5`, `90228e98a`: main-actor storage, one app writer where the library's settings land; the residual — the suites share the process-global look across awaits — is the editor seam's, VM-137; `notes/plans/vm-47-sizes-and-look.md` batch 3) · **MINOR 4** (refusal presentation has ten homes and **71 raw `String(describing:)` dumps**, against the project's own "refusals speak" doctrine) · 2 NITs. **MINOR 1 and MINOR 2 are NOT hers to slot — they belong to 13u.** *(Precision, added 2026-08-30 at the Fable sweep's finding 8 — this clause used to read "MINOR 1 **is** 13u item 8's O(N²) row", which over-equates and could cost the fix. MINOR 1 is `applyDifferential`, BOTH platforms — **a DIFFERENT, unreported site** from the row's named `planVisibleTakeEdit` twin, and the review was careful to establish exactly that. It is covered only by the row's **sweep-the-class-to-completion** clause, never by fixing the row's named example: a 13u session that fixes `planVisibleTakeEdit`, declares the row done and stops leaves MINOR 1 standing.)*
 
 #196 — **FOR THE 13u/13p-fix SESSION, not mobile's — the `main` iOS build break, found and fixed 2026-08-30.** The 13p-fix ladder's R3-2 moved `ProtectionCopy.wroteButUnreadable` into `Shared/StoreProtection.swift` so that, in its own comment's words, *"BOTH surfaces can say it"* — but placed it **inside the `#else` (macOS-only) arm**. Three `Shared/` sites reference it unconditionally, and `Shared/` is compiled by the phone, so **the iOS target did not build at all**. Proven pre-existing on a clean `origin/main` worktree; fixed by moving the declaration outside the conditional. **The Mac suite gave no signal — it compiled fine there**, which is the MobileSoul §3 class exactly. **Separately and NOT fixed:** `CustodyHandoverTests.theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable` fails on clean `main` too — a *behaviour* bug in the same R3-2 work, already routed to the phase that will cold-review those changes.
 
@@ -2251,7 +2251,7 @@ and keep the old citations; this table is how they resolve.)*
 
 #198 — **RULED 2026-08-31 (author, on the filter batch's report — two rulings, her words verbatim):** *"i think the question of book archiving is going to be handled in 13i, for the record. All should be a book + notes union - otherwise it just doesn't make sense."* **(a) BOOK ARCHIVING IS OWNED BY 13i** — the filter batch's logged candidate (an archived-books state would be an additive migration + a SyncSpec §12 lockstep event) goes to the 13i design sitting, not to a mobile batch; the Archive room's two-door set stands until 13i rules. **(b) The Library's `All` filter IS THE BOOKS + NOTES UNION** — this OVERTURNS the filter batch's PROVISIONAL 3 (which built All = notes-only to change nothing at rest); the union builds in the batch's fix wave. The interleaving detail (how a book's stamp orders against notes under the active sort) was not specified and lands PROVISIONAL with the build.
 
-#199 — **RULED 2026-08-31 (author, verbatim): *"i agree that those four hoists should just be deferred to the post 13u merge - seems cleaner that way."*** The four Shared-hoist parity items — `FindReplaceGate` (rides PR21 replace, which never builds without it) · `TakeClipboard`'s composition (copy-all-takes) · `applyTypedPath` (tag-chip grammar) · `ThemeStore` (PR23 + arch MINOR 3's structural half) — are DEFERRED to the post-13u `main`→`mobile` merge. Batches 7/8 build phone-local halves only; each batch record carries the deferral so the post-merge session inherits a decision.
+#199 — **RULED 2026-08-31 (author, verbatim): *"i agree that those four hoists should just be deferred to the post 13u merge - seems cleaner that way."*** The four Shared-hoist parity items — `FindReplaceGate` (rides PR21 replace, which never builds without it) · `TakeClipboard`'s composition (copy-all-takes) · `applyTypedPath` (tag-chip grammar) · `ThemeStore` (PR23 + arch MINOR 3's structural half — **LANDED 2026-11-19 at VM-47**, `dc9a5fd05`: moved whole to `Shared/Theme/ThemeStore.swift`, the Mac's behaviour and tests byte for byte; `notes/plans/vm-47-sizes-and-look.md` batch 3) — are DEFERRED to the post-13u `main`→`mobile` merge. Batches 7/8 build phone-local halves only; each batch record carries the deferral so the post-merge session inherits a decision.
 
 ## VM-10 — the Write page's scroll authority (2026-10-07)
 
@@ -4012,3 +4012,141 @@ back receipts, "Unarchived — it's back in the library.", the two Versions line
 #279 — **THE VM-78 PROVISIONAL BUNDLE (Run: Fixes to what's there, the mobile catch-up's wave 1, umbrella 4; 2026-11-19; the binding record is `notes/plans/fixes/vm-78-fixes-to-whats-there.md`, FOR A LATER READER at its top; your checklist is `notes/handoffs/vm-78-handoff.md`, which opens in plain words).** (1) **An archived gathering's add row** in the phone's membership sheet wears "(archived)" — as built (a) "Quotes (archived) (by tagging)", since SurfaceContracts says "The pickers, chips and Book Panel mark "(archived)"" with no kind exception; (b) the Mac chip's picker exactly (gatherings carry only "by tagging", unmarked); (c) no archived gathering in the add list (not the contract: explicit adds stay open). Does it wear the mark on both platforms? (2) **F8 — Diverge on a gathering's row** in a note's books list. The Mac's chip draws "diverge" on every row and a gathering refuses with the tag road (13f W23; `MembershipChip.swift:136-145`; the comment's "her ruled shape" there is the 13f orchestrator's batch-5 adjudication, which endorsed the refusal's sentence and, for the W22 offer, P-2's "never offer an act that could only refuse"; no words of yours were found for either reading). The phone since VM-81 (W-110, "a door drawn where it can't act") draws none. (a) neither draws it — the Mac follows in a VX ticket (Books, Low), filed only on this answer; (b) both draw it and refuse with the road — the phone reverts W-110; (c) keep the difference as a recorded compromise (MobileSoul §3). PROVISIONAL as built: the phone's (a). (3) **The wording pass:** the divide lesson (VM-3), the "getting around" lesson's two sentences (F4), the create sheet's three gathering lines, the sealed book's Reopen sentence on the phone, whether the phone keeps a collect line at all — old beside new in the record's Closeout, "For her wording pass". (VM-24 and VM-17 are not in this bundle: you ruled both — each its own run after wave 1. Not provisional, for your call beside it: the three SurfaceContracts lines the run left unedited, the handoff's "Three canon lines I did not change", ticket VX-1030.) **Status: OPEN.**
 
 #280 — **THE VM-64 PROVISIONAL BUNDLE (timing and the two lags — the phone's performance umbrella, mobile catch-up wave 1; 2026-11-19; the binding record is `notes/plans/fixes/vm-64-timing-and-lags.md`, FOR A LATER READER at its top; your checklist is `notes/handoffs/vm-64-handoff.md`, which opens in plain words; each built as described, alternatives in the record's batch sections under "For QUESTIONS at the merge").** **P-2-1 — the keystroke fence's shape on the phone (THE LEAD):** refuse-and-say AS BUILT (batch 2's r2) — while a divide, merge, extract, make block, a block delete or archive, the whole-block or cross-block delete, or the undo door's undo or redo is landing (from the latch to the page holding the post-act store), a key, an autocorrection, a paste or a formatting act that asks the gate is refused; an edit that skipped the gate (dictation's progressive words, a composition update) is withheld and the page re-read from the store; and the existing sentence ("Another structural change is still landing.") is said once as the fence drops, on the phone's one message line, which draws a refusal with no Undo (the door's Undo stays in the note's ⋯ sheet — P-2-2 below). Alternative (b): hold the typed keys and replay them at the landed caret — the first design (r0/r1), the Mac's R1-2 — found NOT honest on the phone: her keyboard asks the gate BEFORE it inserts (her device's E1 trace, `notes/author-reports/2026-08-23-device-walk-and-product-asks.md`), so a refused key never reaches `insertText` and the hold only ever saw keys a test typed; holding at the gate instead risks replaying text she never typed (a consult is not a promise — the same trace: "most gate calls before one edit: 4"). **P-2-5 — Insert Below EXEMPT (the second lead):** AS BUILT — a key typed while New Block Below lands goes where typed, never stale (the row is HOLLOW: `newBlock` rewrites no text, and its guard is green on both trees); (b) fence it like every door (the key refused and said, for no data reason). **P-2-2 — the after-flight sentence** takes the place of the door's own line when something was refused (the undo door's "Undid: …", a delete's, an archive's) — AS BUILT — and it MEETS VM-55's ONE MESSAGE LINE (VM-61): the line draws a refusal with no Undo, and `MobileLine.say` first takes back the note's standing Undo line, so after a merge, a block delete or archive, a whole-paragraph delete or the cross-block compound whose flight refused a key, the line ends on the refusal and the door's Undo stays in the ⋯ sheet (the model's `statusAction` still holds it, unread): (a) AS MERGED, PROVISIONAL — no line written, the refusal wins the line (VM-61's law holds); (b) the drain speaks through the door's own class (`.removal(.structural)` with the sentence), keeping its Undo beside it — a refusal drawn in a removal's ink, outside VM-61's class table; (c) a seam change letting a refusal carry its door's Undo — new behaviour in VM-61's seam. The older alternatives stand: say it only when the line is empty; a new sentence naming what was refused (her words). Hers with P-55-3 and P-55-5. **P-2-3 — a gate-less edit inside the window is always withheld and said**, even when the flight then commits nothing — AS BUILT; (b) release it when no operation committed (a commit signal from every door). **P-2-4 — the settle fails CLOSED** (listed with the batch's calls, not under its QUESTIONS heading): three re-reads, then keys stay refused until the next projection applies — and while a save is stuck and cannot land (a take locked from another device under unsaved words), every projection defers behind the buffer, so typing stays refused in that note until it is closed and opened again; a door that refused before doing anything still lands a flight and can enter this state (ladder round 3, finding 3 — VM-226) — AS BUILT; (b) fail open after N re-reads (the editor never looks stuck; a key could again land on an unsettled page). **P-68-4 — books in a paged All:** a book older than the last listed note waits until the notes around it are read — AS BUILT (the rows are always the union's true head; books stay reachable under the Books filter); (b) every book at once (older books at the listing's end, moving up as pages land); (c) page the books too. **P-68-5 — paging has no face** (the rows continue, the Mac's precedent) — AS BUILT; (b) a quiet foot row ("Loading…" — her words). **P-68-1 — the page is 200** (the phone's window before paging, so the resting listing is byte for byte what it was; fewer landings) — AS BUILT; (b) the Mac's 80, growing to 1,280. **P-71-1 — is switching tabs away a leaving of the note on the hidden stack?** No, AS BUILT (today's rule, kept): the hidden note stays mounted and registered, stood down, and its quiet savepoint comes at its pop, the backgrounding or the lock; a tab switch files only the capture box; (b) a tab switch savepoints the hidden stack's notes as a leaving (cheap now — a read, and a runner turn only if owed). Hers: what "stops being shown anywhere" means on the phone's two live stacks. **The timing readout (VM-65): P-65-8 — Reset asks nothing** (the edit trace's Clear precedent) — AS BUILT; (b) a confirm (protects collected numbers from a stray press). **P-65-2 — always recording on the phone, no arming switch** — AS BUILT; (b) a switch like the edit trace's. **P-65-1 — the home:** Settings ▸ Diagnostics ▸ "Timing…", beside "Edit trace…" — AS BUILT; (b) its own Settings section; (c) DEBUG only (rejected: her phone runs Release). **P-65-3 — the build key:** her words key a table on the bundle's build number, but every phone build says `1` (only the Mac target runs `StampBuildNumber.sh`), so the key is the short version + the build number + the executable's fingerprint (`LC_UUID`) — AS BUILT; (b) stamp the phone's build number (VM-223's build stamping) and key on it alone; (c) the number alone as it stands (blends every build — rejected). **P-65-4 — the previous build's table clears only when a third build opens** — AS BUILT; (b) a "Clear previous" door beside Reset; (c) keep more than two builds. **P-65-7 — a sync round's rows are "about"** (sent = the outbox's drop, under-reading under a mid-round burst, down to 0; received = the pull cursor's advance, this device's own pushes included) — AS BUILT, no `Sync/` line; (b) the engine's exact push and pull counts on the scheduler's status — a `Sync/` line, hers to schedule (the ticket filed beside this bundle for the minute-long round). **P-65-5 — "on screen"** ends at the display-link tick after the render — AS BUILT; (b) the render's return (misses the layout it sets off); (c) a `CATransaction` completion. **P-65-6 — "tap the box"** starts when the box takes focus — AS BUILT; (b) the physical touch (an event-timestamp hook on a surface wave 2 owns). **The labels:** every string in `MobileTimingCopy` (`App/Variorum/VariorumMobile/Features/Perf/MobileTimingView.swift`), the section headings and the footer words — DRAFT, her wording pass. **The speed tests (VM-66): P-66-2 — the nine-wing fixture's size:** 450 notes, 50 per wing, no mega post — AS BUILT; (b) 300 notes; (c) 300 per wing — hers to correct once her real note count is known. **P-66-4 — no new duration budget** until a measured basis exists — AS BUILT; (b) budgets now without one. **P-66-5 — the test host's Castle backgrounding** runs the phone's `onWillLock` and the tree's removal, not the pool close — AS BUILT; (b) a real lock in the test host (not reachable). **Engineering, recorded for the cold review, nothing to rule:** P-66-1/-3/-6/-7/-8 (test-harness shapes), P-67-1…3, P-68-2/-3/-6/-7, D-6-1…6 (D-6-3 superseded by D-6-3r1), D-7-1…5; P-2-6 is MOOT under P-2-1. **Status: OPEN.**
+
+#281 — **THE VM-47 PROVISIONAL BUNDLE (Run: Sizes and look, the mobile catch-up's wave 1, umbrella 1; 2026-11-20; the binding record is `notes/plans/vm-47-sizes-and-look.md`, FOR A LATER READER at its top and §5 the calls in full; your checklist is `notes/handoffs/vm-47-handoff.md`, which opens in plain words and names each call's captures).** Forty-one calls, each built on its most defensible reading while you were away ("rule provisionally in my absence", your words as relayed by the stage coordinator). Ruled during the run and not here: R-47-1 (the grounds), R-47-2 (the voice row), R-47-3 (the Bookcase root's word). Each line: the call · the options · what is built.
+
+**Sizes and numbers**
+- **P-47-1 — the sizing sheet's numbers as a set** (type 13 · 15 · 17 · 20 · 24, the 44 pt minimum, the 20 pt gutter,
+  the spacing scale, the row minimums, the two corrected inks). As drawn · her own numbers. **Built: as drawn.**
+- **P-47-4 — Terminal's prose roles "two points under"**. (a) every prose role, size and line pitch both two under ·
+  (b) sizes two under, pitches proportional · (c) only body, note title and screen title, rows at Study's sizes.
+  **Built: (a).**
+- **P-47-21 — the bar's drawn numbers** (cells a third × at least 56, ≈ 60 at xxxLarge; the chip 8 × 16 → 8 → 4,
+  radius 12 where the mockup draws 9; the bar above the keyboard as before). As built · her numbers. **Built: as
+  listed.**
+- **P-47-12 — the note's top row** (VM-148 rebuilds it). (a) the four tools as 22 pt icon buttons in ink, 44 × 44,
+  the chips 44 tall in their flow · (b) the tools at 17 pt in faint with only a 44 pt frame · (c) the chips as 32 pt
+  capsules in one row. **Built: (a)** — the title has 54 pt less.
+- **P-47-8 — role judgment calls** (the batch-1 role map; batch 6 adds VM-55's faces — the wing door's title `meta`,
+  the wing list's names `control`, the message line's words `controlInline` 15; batch 7b adds VM-64's timing readout —
+  its text `meta` 13, in Study no longer monospaced). The smaller candidate each time · her picks. **Built: the
+  smaller.**
+- **P-47-7 — the Library/Archive filter row's five words.** (a) `meta` 13 (one unshrunk row at 375 and 402 pt; Terminal
+  at 320 pt cuts its last words, a named known issue) · (b) `chip` 15 · (c) scroll or wrap (against #92(b)). **Built:
+  (a)**; the known issue owned by VM-93.
+- **P-47-10 — the filter row stays as words.** (a) five word doors and the sort glyph, 44 tall, word-wide · (b) the
+  system segmented control (truncates; breaks #92(b) at 375 pt Terminal) · (c) chips in a scrolling row. **Built:
+  (a).**
+
+**Grounds and inks**
+- **P-47-16 — the note in Write on the paper.** (a) the paper (`tokens.surface` on the settings road; the Mac editor's
+  ground) · (b) the voice's own room under every palette · (c) the library's room (against R-47-1). **Built: (a).**
+- **P-47-17 — Write's masthead ground.** (a) the paper, one ground with the note · (b) the library's room (her title on
+  the tint in light) · (c) the title on the paper, the tools on the room (needs VM-148). **Built: (a).**
+- **P-47-15 — what the phone wears before a library answers** (the lobby and the shell's first frame). (a) the Mac's
+  storeless placeholder, Terminal in the voice's own colours · (b) what an unset library reads, Study under the
+  sea-glass · (c) a device cache of the last library's look. **Built: (b).**
+- **P-47-5 — the dark faint.** (a) the every-palette floor — Study #766F5F, Terminal #6B7168 · (b) the sheet's #736C5D
+  (2.91:1 on teal & rust's dark card). **Built: (a).**
+- **P-47-29 — the masthead chips' inks after the walk's fix.** (a) set chips ink, empty chips the corrected muted, the
+  active lens the accent, the membership and blocks chips unchanged · (b) the one-book membership chip in ink too · (c)
+  set chips muted as well. **Built: (a)** — the re-capture's c5: in the seeded lesson only the tags chip is set, so it
+  alone reads in ink and four of the five chip words and the membership line read one muted.
+- **P-47-30 — the segmented choice's unchosen words on iOS's track** (4.44:1 light, ≈ 4.1:1 dark, under 4.5:1). (a) as
+  built · (b) the unchosen words in ink · (c) a hand-built control with a token track (loses iOS 26's glass selection).
+  **Built: (a), no code.**
+- **P-47-37 — the disabled calm button** (1.65:1 Study light, 2.09:1 Terminal dark). (a) the Mac's 35% dim · (b) the
+  word in the corrected faint at full opacity · (c) the act shown only when it can act. **Built: (a).**
+- **P-47-41 — the shared pages' warning words in the system orange** (≈ 2.2:1 on the paper; the sync row's paused
+  states, the Account sheet's warnings). (a) as built · (b) a phone warning ink derived to clear §D's floor in every
+  palette, the Mac's arm unchanged · (c) the alarm. **Built: (a).**
+- **P-47-35 — a callout's dark wash on teal & rust's dark paper** (1.05:1; reads by hue alone). (a) the Mac's exact
+  washes · (b) the dark washes stepped off the paper on every palette, Mac and phone alike · (c) a hairline edge in dark.
+  **Built: (a).**
+- **P-47-42 — a peeked take's dark tint is a shade darker than the dark paper** (1.03:1; the edge carries the peek —
+  the same cause as P-47-35: the sheet's own dark pair, her prose moved onto the hued paper). (a) as built · (b) the dark
+  take tint stepped lighter than the paper, a raised band like the take cards · (c) a heavier edge in dark only.
+  **Built: (a).**
+
+**The screen's edges (the W-A1 redo's give-backs)**
+- **P-47-43 — the Read page's last line cut at the band's foot again**, as on main (the strip below in Read's room).
+  (a) as built · (b) the first fix's look on the Read page alone, its page running on behind the home indicator (that
+  page let past the band's clip at the foot, with its own pin beside the keyboard UI test). **Built: (a).**
+- **P-47-44 — the edge strips one colour across the width, switched at once in a push or a pop** (for the slide's
+  ≈ 0.35 s part of a strip wears the arriving page's ground). (a) as built · (b) a crossfade over the slide (a third
+  colour neither page wears) · (c) each page's ground sliding with it, as the first fix drew (each page drawn past the
+  band again — the road the redo closed). **Built: (a).**
+
+**The path line, the bar and the message line**
+- **P-47-27 — what gives way on the Bookcase's top line** (measured by the walk: Terminal loses the count at the default
+  size and the page word at ax5; Study at ax5 loses the count; Study default fits 3 books with ≈ 5.5 pt to spare). (a)
+  one 44 pt line, the text cut at its tail · (b) cut the middle · (c) wrap in Terminal · (d) "+ New Note" as a glyph.
+  **Built: (a).**
+- **P-47-9 — the top line's doors.** (a) 🗑 an icon button, + New Note an inline act at 15 (Settings since moved into
+  the ⋯) · (b) all icons · (c) words at 15 with the path cut. **Built: (a).**
+- **P-47-31 — the trash door is a colour emoji** (U+1F5D1, untintable). (a) keep the emoji · (b) a monochrome glyph in
+  the muted tone or ink. **Built: (a).**
+- **P-47-18 — where the bar shows beyond "Roots and lists, not notes".** (a) the roots and the pushed lists; none on
+  Read, Versions' reader or Protection · (b) every pushed screen but Write · (c) Protection with the bar except while
+  new words are held. **Built: (a).**
+- **P-47-19 — a tab from a pushed list.** (a) the stack being left returns to its root, then the page changes · (b) each
+  stack keeps its place (the system tab bar's memory). **Built: (a).**
+- **P-47-20 — W-009, the system bar on pushed screens.** (a) kept — the back door and both swipe-backs; each screen's
+  owner fills its row (VM-148, VM-122, VM-100/VM-99, VM-110, VM-147) · (b) hidden, a back button in each header · (c) the
+  title in the system bar. **Built: (a)** — W-009 deferred with owners.
+- **P-47-36 — the message line wraps to two lines** (63 pt for "Note moved to the Trash — 30 days to put it back.").
+  (a) the line grows by lines · (b) one line, tail-cut · (c) shorter receipt words in her wording pass. **Built: (a).**
+
+**Settings and its words**
+- **P-47-22 — the ⋯ on a root.** (a) the system `Menu` · (b) a sheet of menu rows · (c) the ⋯ opens Settings directly.
+  **Built: (a).**
+- **P-47-23 — where Protection opens.** (a) on the visible stack · (b) the shelf's stack after a tab change · (c) inside
+  the Settings sheet (the lock mockup's S1). **Built: (a).**
+- **P-47-26 — Settings' drawn parts** (menu rows ≥ 44, no chevron or value; a choice's label over the system control;
+  the sync row's doors under its line; the edit trace's system switch; no foot line). As built · the mockup's chevrons
+  and values once the values exist. **Built: as listed.**
+- **P-47-24 — the appearance row's words.** (a) the Mac's own row, "Appearance" · "Follow system" · "Light" · "Dark",
+  nothing beneath · (b) the drafts ("System"; "Light or dark is for this iPhone only."). **Built: (a).**
+- **P-47-25 — the list's names.** (a) the drafted group names "Library", "Look", "Help" and the voice's word "Voice" ·
+  (b) "Theme" for the voice (the Mac's word) · (c) today's section words as group names. **Built: (a).**
+- **P-47-13 — sheet headers whose title was a muted path, and Create Book's Cancel.** (a) the shared header, the path
+  title kept muted, Cancel semibold in Done's place · (b) an ink title everywhere · (c) Cancel regular. **Built: (a).**
+
+**The largest text size**
+- **P-47-14 — the class of a field's typed text.** (a) `control`, chrome — a field stays one 44 pt line · (b) her
+  words' class — fields grow past 44 at the accessibility sizes. **Built: (a).**
+- **P-47-32 — the capture box focused at ax5 leaves no book on screen.** (a) as built (R27's floor in lines of the
+  scaled text) · (b) the floor's line height capped at xxxLarge · (c) one book row kept at the accessibility sizes.
+  **Built: (a).**
+- **P-47-34 — Terminal's Settings title breaks after "~/" at ax5.** (a) as built · (b) a path-shaped sheet title holds
+  at xxxLarge · (c) one line, tail-cut. **Built: (a).**
+- **P-47-40 — Protection's state lines grow as her words at ax5.** (a) as built · (b) the app's state lines and ruled
+  sentences hold at xxxLarge · (c) the posture line full range, the sync sentence `meta`. **Built: (a).**
+
+**Terminal's lowercase**
+- **P-47-39 — Terminal lowercases her words on some screens** (Versions' rows, Starred's names) and not others. (a) as
+  built, predating the run · (b) the chrome lowercased, her quoted words left as written · (c) no excerpt in Terminal's
+  meta. **Built: (a).**
+
+**Smaller look items**
+- **P-47-33 — the fields' caret is the system blue** (the editor's caret wears the accent). (a) tint the fields with the
+  accent · (b) leave the system blue. **Built: (b).**
+- **P-47-6 — the quick-entry hint at the note-body size.** (a) the longest of its own cuts that fits · (b) let it wrap ·
+  (c) new shorter words in her wording pass. **Built: (a).**
+- **P-47-38 — the tag field's hint cut mid-word at 17 pt.** (a) as built · (b) P-47-6's rule ("type a tag — ⏎ applies
+  it") · (c) new words in her wording pass. **Built: (a)** — re-captured: the cut stands, only its ink changed; the AX5
+  shrink not seen again.
+- **P-47-11 — the Trash's seven kinds.** (a) filter chips in a scrolling row · (b) the segmented choice · (c) a menu.
+  **Built: (a).**
+
+**The wording pass** — the group names "Library", "Look", "Help"; the appearance row's words (the Mac's); "More" (the
+⋯'s spoken name); "Settings" in a note's ⋯ sheet and in the roots' ⋯ menu; retired: the "Sync" and "Voice" section
+words and "Recording edit trace — tap to stop"; the capture box's hint cuts (no new words); drafted and not built:
+"Variorum for iPhone", "System", "Light or dark is for this iPhone only.", "Voice and palette belong to your library, so
+they change on every device." — and VM-64's timing readout's door, its words VM-64's (#280), placed and drawn here.
+**Held for her hands:** the wave-1 install, typing low in a note with the keyboard up the first thing to try there; the
+first sight of the two faces no capture or mounted test shows (the Account sheet; VM-64's timing readout on this run's
+layer); her glance at which Protection door stayed (VM-27 — the standing row); the palette row (VM-247); the walk's
+four capture sets, KEPT until her sitting ("delete the screens" ends that). **The one remainder, now ticketed:** Settings
+has no door on a pushed list, Read or Protection (VM-53's title says "every screen"; its text "every root and a note")
+— VM-249, Needs Lillian. **Status: OPEN.**

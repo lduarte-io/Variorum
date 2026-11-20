@@ -1,8 +1,7 @@
 # VM-47 — Sizes and look: your handoff
 
-**Final but for the merge.** Brought up to date 2026-11-20, after the merge gate passed. Two things are still written
-`‹PENDING: …›` below and are filled as the run merges: the PR and its merge commit · the wave-1 phone build this run
-prepares for you.
+**Final — merged 2026-11-20** (PR #17, merge commit `226edf626`). One thing is still written `‹PENDING: …›` below:
+the wave-1 phone build's block at checklist item 2, which this run is preparing for you now from the merged code.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. **P-47-N** is a provisional call — built
 the most defensible way while you were away, waiting for your word. **R-47-N** is one of your rulings from this run. A
@@ -479,7 +478,7 @@ the redo closely and found them sound.
   straight after. Neither VM-24's red nor VX-701's is yours to worry about. This run's two reds were both in tests;
   both were fixed and proven in a last test window. The whole phone suite and the speed tests were then run once more
   on the exact code that merges: 1,194 tests in 209 groups with only main's one known red (VM-24's), and the 13 speed
-  tests all passed. The gate passed.
+  tests all passed. The stage coordinator called the gate passed while you slept; the call is yours to confirm.
 - **What the gate found** — two things, both in tests; no app code changed.
   (1) A timing test from the last merged run (the timing run, VM-64) checks that opening a note from the new-note box
   is timed. In the whole suite it failed once. An earlier test — one of this run's, which now runs just before it —
@@ -522,8 +521,8 @@ the redo closely and found them sound.
 
 ## Tickets
 
-The eight members — VM-48, VM-49, VM-50, VM-51, VM-52, VM-53, VM-54, VM-27 — and the umbrella VM-47 close with the merge:
-PR #‹PENDING›, merge commit `‹PENDING›`.
+The eight members — VM-48, VM-49, VM-50, VM-51, VM-52, VM-53, VM-54, VM-27 — and the umbrella VM-47 are Done, closed at
+the merge: PR #17, merge commit `226edf626` (2026-11-20).
 
 Tickets filed:
 - [ ] VM-247 (Medium, Feature, Backlog): choose the library's palette on the phone — a Palette row in Settings ▸ Look, which the lock mockup draws and no ticket owned.
@@ -576,8 +575,9 @@ which is done):
   are painted; a new bullet for the bottom bar; a new bullet for Settings; the message line's place above any bar ·
   The Bookcase and books — the Bookcase's top line (in the wing switcher's phone passage) · Doors to the outside — the
   one Protection door (in the protection bullet's phone passage). No change to AppSpec.
-- **Canon size** (`Tools/canon-size` after those lines; SurfaceContracts is not in the loaded set, so this run moves
-  none of it): `143606 total (harness limit 150000, headroom 6394)`.
+- **Canon size** (`Tools/canon-size` on main after the merge and the ledger commit; SurfaceContracts is not in the
+  loaded set, so this run moves none of it): `143606 total (harness limit 150000, headroom 6394)` — CLAUDE.md 25,445 ·
+  CoreDescription 7,812 · OverallModel 18,765 · AppSpec 91,584; nothing removed or compressed.
 - **MOBILE PARITY:** PL-80 (applied on the branch, `notes/MobileSoul.md` §6) — the phone takes the Mac's look at
   phone-right sizes: a type layer that grows with the system text size and never draws under 13 points, the phone's
   own readable greys, 44-point targets on one spacing scale, one set of controls, the library's voice and palette (the

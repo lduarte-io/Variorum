@@ -1,20 +1,25 @@
-# VM-47 — closeout drafts (applied at the merge, then this file is deleted)
+# VM-47 — closeout drafts (applied at the merge; kept beside the record)
 
 **What this is.** The texts the merging session applies at VM-47's merge, each paste-ready under its own heading, and
-this working file is then deleted (it is not a record; the record is `notes/plans/vm-47-sizes-and-look.md`). **Brought
+this working file is kept beside the record, as the other runs' drafts files were (it is not a record; the record is `notes/plans/vm-47-sizes-and-look.md`). **Brought
 current at the final record pass (2026-11-20), after VM-64's merge reached this branch:** (a) the contract lines and
 (b) the parity row are APPLIED ON THE BRANCH (`71cae0706`, re-derived against the files as they now stand and the
 final tree), so they merge with the PR; (c)–(e) are the ledgers, applied on latest main after the merge by the merging
 session.
 
 **The slots** — every one left is spelled `‹PENDING: …›`, so one search finds them all: the PR number · the merge
-commit · the wave-1 phone build.
+commit · the wave-1 phone build. **Filled at the merge (2026-11-20):** PR #17 and its merge commit `226edf626`, here and
+in the files they name; the gate's call is the stage coordinator's (`nov18`, 03:34), provisional in her absence and hers
+to ratify. **Left:** the wave-1 phone build — its copies below stay as drafted; the ledgers on main carry the sentence
+"the wave-1 phone build is prepared from the merge commit by this run after this entry; its block is the top of the
+run's handoff" in its place.
 Filled at this pass: QUESTIONS #281 · PL-80 · VM-64's merge-in (four files, `3d55b51f6`) and its narrow read (ladder
 round 4) · the timing door's place · the targeted window and the post-merge window · the re-capture and the final-tree
 captures · `Tools/canon-size` · the screenshots, KEPT until her sitting. **Filled at the gate record pass
 (2026-11-20):** the whole merge gate — legs 1–3 and the closing window's (a), (b) and (c), PASSED on the orchestrator's
-reading — with its two test-only findings G.1 and G.2 (the record's rows G.0–G.2). The two applied canon files carry
-their own merge slots (PL-80's PR — its gate now filled) for the merging session to fill there.
+reading (the call since made by the stage coordinator — "The slots" above) — with its two test-only findings G.1 and G.2 (the record's rows G.0–G.2). The two applied canon files carry
+their own merge slots (PL-80's PR — its gate now filled) for the merging session to fill there — FILLED at the merge
+(PL-80: PR #17, merge commit `226edf626`).
 
 ---
 
@@ -146,9 +151,16 @@ clause written on the branch at the gate record pass, its closing leg (c) includ
 
 ---
 
-## (c) `notes/AppSpecRecord.md` — the dated entry (append at the end)
+## (c) `notes/AppSpecRecord.md` — the dated entry (append at the end) — APPLIED on main with the ledger commit
 
-## 2026-11-20 — VM-47, Run: Sizes and look (the mobile catch-up's wave 1, umbrella 1; SurfaceContracts The app · The Bookcase and books · Doors · MobileSoul §6 PL-80; branch `vm-47-sizes-and-look`, PR #‹PENDING›, merge commit `‹PENDING›`)
+*Applied at the merge (2026-11-20), the slots filled, each paragraph on one line as the record's entries stand; the
+file is the truth, and the draft below is kept as the history of the wording. What the applied text changed from it:
+the gate's legs are "run by the orchestrator", and the gate's call is the stage coordinator's — `nov18` read every leg's
+log itself, called the gate PASSED at 03:34 on 2026-11-20 and gave the merge GO, provisional in her absence (adjudicating
+a gate is hers), hers to ratify — with the merge commit's parents and the members set Done; the install's slot reads as
+the sentence in "The slots" above.*
+
+## 2026-11-20 — VM-47, Run: Sizes and look (the mobile catch-up's wave 1, umbrella 1; SurfaceContracts The app · The Bookcase and books · Doors · MobileSoul §6 PL-80; branch `vm-47-sizes-and-look`, PR #17, merge commit `226edf626`)
 
 **The effort.** Eight members, the sub-issue roster read at kickoff: VM-48 · VM-49 · VM-50 · VM-51 · VM-52 · VM-53 ·
 VM-54 · VM-27, in five batches (the layer — type, inks, metrics; the controls and the 44 pt targets; the library's
@@ -359,7 +371,10 @@ signing check, the sync-version check and the block›; the install is hers.
 
 ---
 
-## (d) `notes/QUESTIONS.md`
+## (d) `notes/QUESTIONS.md` — APPLIED on main with the ledger commit
+
+*Applied at the merge (2026-11-20): (d1) as #281 (#280 the last on main), its opening paragraph on one line and the
+groups as drafted, in #277's form; (d2)'s two marks exactly as drafted.*
 
 ### (d1) The bundle (append as the next free number)
 
@@ -526,7 +541,14 @@ with
 
 ---
 
-## (e) The master plan and the run-finals ledger
+## (e) The master plan and the run-finals ledger — APPLIED on main with the ledger commit
+
+*Applied at the merge (2026-11-20): (e1) the row retired; (e2) in the place of VM-64's paragraph, which went verbatim to
+`notes/PhaseCloseoutArchive.md` under "VM-64 — the master plan closeout paragraph as it stood until the VM-47 merge
+(2026-11-20)"; (e3) after VM-64's row; each on one line, the slots filled. What the applied text changed from these
+drafts: (e2) and (e3) name the gate's PASSED as the stage coordinator's call, provisional in her absence and hers to
+ratify; (e2) adds a CLEANUP clause (the four capture sets kept for her sitting) and "the gate's call to ratify" at the
+head of her bundle; both carry the install's sentence from "The slots" above in place of the slot.*
 
 ### (e1) `notes/DetailedPlanForPhases.md` — the in-flight row retired
 
@@ -541,7 +563,7 @@ Roll the paragraph under "### Latest closeout" (VM-64's, if it merged first) ver
 
 **→ VM-47 CLOSED 2026-11-20 — RUN: SIZES AND LOOK (the mobile catch-up's wave 1, umbrella 1 — the wave's LAST mobile
 merger; the record `notes/plans/vm-47-sizes-and-look.md`, FOR A LATER READER at its top; /run-phase overnight under her
-frame — provisional running — nov18 coordinating; PR #‹PENDING›, merge commit `‹PENDING›`).** Eight members in five
+frame — provisional running — nov18 coordinating; PR #17, merge commit `226edf626`).** Eight members in five
 batches, then three re-lands, two batches of the walk's fixes and the screen-edge fix redone, no `Sources/`, `Sync/`,
 custody, schema or operation
 line, the Mac's look byte-identical: a phone type layer of twelve roles that grows with the system text size and never
@@ -577,7 +599,7 @@ install.**
 
 ### (e3) `notes/plans/run-finals-ledger.md` — append after the newest row
 
-- **2026-11-20 · VM-47 — Run: Sizes and look** (PR #‹PENDING›, merge commit `‹PENDING›`): eight members (VM-48/49/50/51/
+- **2026-11-20 · VM-47 — Run: Sizes and look** (PR #17, merge commit `226edf626`): eight members (VM-48/49/50/51/
   52/53/54 + VM-27) in five batches, then the VM-55 re-land (its tip merged in ahead of its PR, 23 files), R-47-3, two
   batches of the walk's fixes, the re-land of main (VX-981 + VM-78 by VM-78's round-4 map, `4866c7fb8`), W-A1 redone
   (main's clip back, the strips painted by the shell; the keyboard-reveal UI test) and the second re-land of main

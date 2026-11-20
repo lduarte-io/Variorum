@@ -7,7 +7,15 @@ the truth for every piece); this file says what the ORCHESTRATOR was doing and w
 details that do not belong in a public repo (the session scratchpad's path and its script names, subagent ids,
 the simulator ids) are in the orchestrator's private run-state memory, `vm-47-run-state`.
 
-## UPDATE 2026-11-20, the gate record pass — the newest block (supersedes every block below)
+## UPDATE 2026-11-20, merged — the newest block (supersedes every block below)
+
+- **Merged:** PR #17, merge commit `226edf626` (parents main `64fde83b0`, branch tip `38ba9d35b`), 2026-11-20.
+- **The gate's call** was the stage coordinator's (`nov18`, 03:34, from every leg's log), provisional in her absence, hers to ratify.
+- **Ledgers on main** with the ledger commit: the AppSpecRecord entry, QUESTIONS #281 (+ #199, #195 marks), the master plan, the archive, run-finals, PL-80's slot; the drafts kept, marked APPLIED.
+- **The record is CLOSED** and her handoff final but for the phone build's block; Linear: the members and VM-47 Done.
+- **Left:** (1) the wave-1 phone build's block from the merge commit (in progress; checklist item 2 of her handoff); (2) the cleanup — the captures (still in this run's worktree) into the main checkout's gitignored `notes/plans/vm-47-screens/`, KEPT until her sitting, then the worktree.
+
+## UPDATE 2026-11-20, the gate record pass
 
 - **The merge gate ran** (record row G.0; one build folder, code `d78853d8e` with main `64fde83b0` in): the whole phone
   target 1193 / 209, one launch — main's VM-24 red and ONE beyond, VM-64's `anOpenThatFilesIsStillTimed` (G.1); the
