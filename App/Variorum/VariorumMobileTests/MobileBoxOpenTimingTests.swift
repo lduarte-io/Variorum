@@ -20,6 +20,13 @@
 //  built into the xctestrun as `InProcessParallelizationEnabled = false` (the
 //  ladder round 2 responses, O-1). The suite is `.serialized` as well.
 //
+//  One after another is not enough on its own (VM-47's merge gate, G.1 — the
+//  run record `notes/plans/vm-47-sizes-and-look.md` §6): an earlier test's
+//  editor schedules its note's paint for the next frame, nothing cancels that
+//  mark when its test ends, and a paint ends the Open's span. So each test here
+//  lets every frame-later mark already scheduled fire, with nothing open,
+//  before it begins a span (`freshSpans` → `drainFrameLaterMarks`).
+//
 
 import Foundation
 import QuartzCore
@@ -66,9 +73,13 @@ struct MobileBoxOpenTimingTests {
     }
 
     /// The test host's launch enabled the recorder (`MobileTiming.start`); no
-    /// span an earlier suite left open may stand in for this test's own.
-    private func freshSpans() {
+    /// span an earlier suite left open may stand in for this test's own — and
+    /// no paint mark an earlier test scheduled may land inside it: every
+    /// frame-later mark already scheduled fires first, while nothing of this
+    /// test's is open (G.1 — `drainFrameLaterMarks`).
+    private func freshSpans() async {
         recorder.setEnabled(true)
+        await drainFrameLaterMarks()
         recorder.cancel(.boxOpenToNote)
         recorder.cancel(.boxOpenToKeyboard)
     }
@@ -118,7 +129,7 @@ struct MobileBoxOpenTimingTests {
     /// recorded one false sample.
     @Test func anOpenThatFilesNothingLeavesNoOpenSpan() async throws {
         try await withEditorWorld { session, _ in
-            freshSpans()
+            await freshSpans()
             let box = quietBox(session)
             box.open()
             #expect(recorder.isOpen(.boxOpenToNote), "the premise: the press begins the span")
@@ -144,7 +155,7 @@ struct MobileBoxOpenTimingTests {
     /// note's paint, which records one sample.
     @Test func anOpenThatFilesIsStillTimed() async throws {
         try await withEditorWorld { session, _ in
-            freshSpans()
+            await freshSpans()
             let box = quietBox(session)
             box.text = "a thought to open"
             box.open()
@@ -189,7 +200,7 @@ struct MobileBoxOpenTimingTests {
             // `freshSpans`, so the planted mark can fire before the Open's span
             // begins only if `freshSpans` lets it.
             AppTiming.noteRequested()  // the planted mark's witness: its paint ends this span too
-            freshSpans()
+            await freshSpans()
             let box = quietBox(session)
             box.text = "a thought to open"
             box.open()
