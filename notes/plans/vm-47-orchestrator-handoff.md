@@ -7,7 +7,22 @@ the truth for every piece); this file says what the ORCHESTRATOR was doing and w
 details that do not belong in a public repo (the session scratchpad's path and its script names, subagent ids,
 the simulator ids) are in the orchestrator's private run-state memory, `vm-47-run-state`.
 
-## UPDATE 15:45 — the newest block
+## UPDATE 2026-11-20, the final record pass — the newest block (supersedes every block below)
+
+- **Done:** all code (five batches, VM-55's re-land, the walk's two fix batches, W-A1 redone, main merged twice — through
+  `64fde83b0` at `3d55b51f6`); ladder rounds 1–4 closed, no MAJOR (round 4's one NIT, the banner, confirmed and
+  discharged); the post-merge window on the final tree green (record row W.11); all four capture sets read (walk
+  §4–§4h). Record, walk file, handoff and drafts brought to the truth; this run's canon lines and PL-80 applied on the
+  branch (`71cae0706`); QUESTIONS #281; the ticket comments posted; VM-247/248/249 filed.
+- **Left, in order:** (1) the merge gate — the whole phone target, VM-64's speed suite alone as its own leg
+  (`TEST_RUNNER_VM66_PERF=1`), the whole Mac target; (2) the PR and its merge (merge commit), then fill the slots
+  (`‹PENDING›` in the record's FOR A LATER READER, the handoff, the drafts, PL-80 in `notes/MobileSoul.md`); (3) the
+  ledgers on latest main from `notes/plans/vm-47-closeout-drafts.md` (c)–(e), then delete that file; (4) the cleanup,
+  with the captures KEPT until her sitting (in the main checkout's gitignored `notes/plans/vm-47-screens/` after the
+  merge — `final/`, `recapture/`, `e4-before/`, `final-tree/`); (5) the wave-1 phone build's preparation (this run merges last), the
+  install hers.
+
+## UPDATE 15:45
 
 - **The ladder's round 2 is CLOSED:** 0 BLOCKER, 0 MAJOR, 0 MINOR, 2 NIT (`notes/plans/vm-47-ladder-round2.md`:
   the findings, the implementer's answers, the reviewer's final calls, what changed — one doc-comment sentence in
