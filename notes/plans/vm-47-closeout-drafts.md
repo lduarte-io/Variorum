@@ -7,12 +7,12 @@ current at the final record pass (2026-11-20), after VM-64's merge reached this 
 final tree), so they merge with the PR; (c)–(e) are the ledgers, applied on latest main after the merge by the merging
 session.
 
-**The slots** — every one left is spelled `‹PENDING: …›`, so one search finds them all: the PR number · the merge
-commit · the wave-1 phone build. **Filled at the merge (2026-11-20):** PR #17 and its merge commit `226edf626`, here and
-in the files they name; the gate's call is the stage coordinator's (`nov18`, 03:34), provisional in her absence and hers
-to ratify. **Left:** the wave-1 phone build — its copies below stay as drafted; the ledgers on main carry the sentence
-"the wave-1 phone build is prepared from the merge commit by this run after this entry; its block is the top of the
-run's handoff" in its place.
+**The slots** — every one left is spelled `‹PENDING: …›`, so one search finds them all: the PR number · the merge commit
+· the wave-1 phone build. **Filled at the merge (2026-11-20):** PR #17 and its merge commit `226edf626`, here and in the
+files they name; the gate's call is the stage coordinator's (`nov18`, 03:34), provisional in her absence and hers to
+ratify. **Filled after the ledger commit:** the wave-1 phone build, in its three copies below; the ledgers on main carry
+the sentence "the wave-1 phone build is prepared from the merge commit by this run after this entry; its block is the
+top of the run's handoff" in its place.
 Filled at this pass: QUESTIONS #281 · PL-80 · VM-64's merge-in (four files, `3d55b51f6`) and its narrow read (ladder
 round 4) · the timing door's place · the targeted window and the post-merge window · the re-capture and the final-tree
 captures · `Tools/canon-size` · the screenshots, KEPT until her sitting. **Filled at the gate record pass
@@ -366,8 +366,8 @@ the phone's look in the voices bullet, the sizes-and-grounds bullet, the bottom 
 The Bookcase and books: the root's top line; Doors: the one Protection door); AppSpec, OverallModel, CoreDescription,
 SyncSpec, CastleRules, MCPSpec and CLAUDE.md unmoved by this run; QUESTIONS #199 (the hoist LANDED) and #195 MINOR 3
 (CLOSED) marked; `Tools/canon-size` 143606 total (harness limit 150000, headroom 6394). **MOBILE PARITY:** PL-80. **Release:** none; nothing in
-`/Applications`. **The wave-1 phone install:** this run, the last mobile merger, prepared ‹PENDING: the build, its
-signing check, the sync-version check and the block›; the install is hers.
+`/Applications`. **The wave-1 phone install:** this run, the last mobile merger, prepared
+the wave-1 phone build (built 2026-11-20, 03:40, from the merge commit `226edf626`; its block at the top of her handoff); the install is hers.
 
 ---
 
@@ -592,7 +592,7 @@ phone's look, sizes, inks and grounds with the painted edges, bar and Settings; 
 Protection door); QUESTIONS #199 and #195 MINOR 3 marked; `Tools/canon-size` 143606 (headroom 6394). QUESTIONS #281
 (forty-one PROVISIONAL calls and the wording pass). Born, triaged: VM-247 · VM-248 · VM-249. MOBILE PARITY: PL-80 — the
 phone takes the Mac's look at phone-right sizes, the library's voice and palette, the bar and Settings; zero schema,
-marker untouched. INSTALL: this run prepared the single wave-1 phone build ‹PENDING›; the install is hers. **Her
+marker untouched. INSTALL: this run prepared the single the wave-1 phone build (built 2026-11-20, 03:40, from the merge commit `226edf626`; its block at the top of her handoff); the install is hers. **Her
 bundle: the forty-one PROVISIONAL calls, the wording pass, typing low in a note on the phone first, the two faces no
 capture shows (the Account sheet, the timing readout), VM-249 (Settings from a pushed list), the kept screens, the
 install.**
@@ -623,4 +623,4 @@ install.**
   suite 13/1 alone, Mac 6435/1114 at main's counts (G.2, a source guard's idiom line, `e8c986cac`, green 172/33;
   VX-701's flake green alone), the phone legs again 1194/209 at main's baseline (G.1's pin green inside) + 13/1 —
   PASSED; born VM-247/248/249; bundle QUESTIONS #281; PL-80;
-  canon-size 143606 (headroom 6394); the wave-1 phone build ‹PENDING›.
+  canon-size 143606 (headroom 6394); the wave-1 phone build (built 2026-11-20, 03:40, from the merge commit `226edf626`; its block at the top of her handoff).
