@@ -160,4 +160,46 @@ struct MobileFieldPlaceholderSourceTests {
             \(offenders.joined(separator: "\n"))
             """)
     }
+
+    /// **The Account sheet's seven fields** (W-A10's remainder, the walk's
+    /// fixes batch 2): `Shared/AuthViews.swift` builds them with constructors
+    /// the Mac shares, under `.pageFieldChrome(pageStyle)` — the phone's field
+    /// on the styled arm. Each field whose chain wears that chrome is built by
+    /// a helper that gives the phone its prompt in the corrected faint
+    /// (`pagePlainField` / `pageSecureField`, or `emailField`, which builds
+    /// through `pagePlainField`) and leaves the Mac's construction as it was.
+    /// Red on old: the five raw `SecureField(` / `TextField(` sites and
+    /// `emailField`'s raw `TextField(` (the two email fields).
+    @Test func theAccountSheetsFieldsGiveTheirPlaceholderOnThePhone() throws {
+        let url = Self.phoneRoot.deletingLastPathComponent()
+            .appendingPathComponent("Shared").appendingPathComponent("AuthViews.swift")
+        let lines = try String(contentsOf: url, encoding: .utf8)
+            .split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+            .map { line -> String in
+                let trimmed = line.trimmingCharacters(in: .whitespaces)
+                return trimmed.hasPrefix("//") || trimmed.hasPrefix("*") ? "" : line
+            }
+        let helpers = ["pagePlainField(", "pageSecureField(", "emailField("]
+        var fields = 0
+        var offenders: [String] = []
+        for (index, line) in lines.enumerated() where line.contains(".pageFieldChrome(") {
+            // The field this chrome wraps: the nearest constructor above it.
+            guard let start = stride(from: index, through: max(index - 6, 0), by: -1).first(where: {
+                lines[$0].contains("Field(") || lines[$0].contains("emailField(")
+            }) else { continue }
+            fields += 1
+            if !helpers.contains(where: { lines[start].contains($0) }) {
+                offenders.append("Shared/AuthViews.swift:\(start + 1)")
+            }
+        }
+        let emailBody = lines.firstIndex { $0.contains("func emailField(") }.map { lines[$0 ..< min($0 + 3, lines.count)] }
+        let emailBuildsThroughTheHelper = emailBody?.contains { $0.contains("pagePlainField(") } ?? false
+        #expect(fields >= 7, "the Account sheet's seven fields (\(fields))")
+        #expect(emailBuildsThroughTheHelper, "emailField builds through pagePlainField (its prompt on the phone)")
+        #expect(offenders.isEmpty, """
+            An Account sheet field leaves its placeholder to iOS's grey on the phone (sheet §D, \
+            3:1). Build it with `pagePlainField` / `pageSecureField`:
+            \(offenders.joined(separator: "\n"))
+            """)
+    }
 }

@@ -283,7 +283,7 @@ struct AccountView: View {
                 .focused($focus, equals: .variorumEmail)
                 .onSubmit { focus = .variorumPassword }
                 .pageFieldChrome(pageStyle)
-            SecureField("Password", text: $variorumPassword)
+            pageSecureField("Password", text: $variorumPassword)
                 .textContentType(.password)  // AutoFill (R1-5)
                 .focused($focus, equals: .variorumPassword)
                 .onSubmit { signInVariorum() }
@@ -345,12 +345,12 @@ struct AccountView: View {
             .focused($focus, equals: .signUpEmail)
             .onSubmit { focus = .signUpPassword }
             .pageFieldChrome(pageStyle)
-        SecureField("Password", text: $signUpPassword)
+        pageSecureField("Password", text: $signUpPassword)
             .textContentType(.newPassword)
             .focused($focus, equals: .signUpPassword)
             .onSubmit { focus = .signUpConfirm }
             .pageFieldChrome(pageStyle)
-        SecureField("Confirm password", text: $signUpConfirm)
+        pageSecureField("Confirm password", text: $signUpConfirm)
             .textContentType(.newPassword)
             .focused($focus, equals: .signUpConfirm)
             .onSubmit { signUp() }
@@ -403,12 +403,12 @@ struct AccountView: View {
         }
         Text(ProtectionCopy.deleteAccountReauthLine)
             .pageCaption(pageStyle)
-        SecureField("Account password", text: $deleteAccountPassword)
+        pageSecureField("Account password", text: $deleteAccountPassword)
             .textContentType(.password)
             .pageFieldChrome(pageStyle)
         Text(ProtectionCopy.deleteAccountTypedLine)
             .pageCaption(pageStyle)
-        TextField(ProtectionCopy.deleteAccountTypedPhrase, text: $deleteConfirmationEntry)
+        pagePlainField(ProtectionCopy.deleteAccountTypedPhrase, text: $deleteConfirmationEntry)
             .autocorrectionDisabled()
             .pageFieldChrome(pageStyle)
         HStack {
@@ -442,7 +442,7 @@ struct AccountView: View {
     /// the platform type resolves per OS (UITextContentType /
     /// NSTextContentType), so no gate is needed.
     private func emailField(_ label: String, text: Binding<String>) -> some View {
-        let field = TextField(label, text: text)
+        let field = pagePlainField(label, text: text)
             .autocorrectionDisabled()
             .textContentType(.username)
         #if os(iOS)
@@ -451,6 +451,44 @@ struct AccountView: View {
             .keyboardType(.emailAddress)
         #else
         return field
+        #endif
+    }
+
+    // MARK: VM-47 (the walk's W-A10, its remainder) — the phone's placeholders
+
+    /// **A text field whose placeholder, on the phone's styled arm, is the
+    /// corrected faint** (sheet §D: a placeholder needs 3:1; iOS's own grey
+    /// read 1.72:1 on the paper). The words are the field's label as ever and,
+    /// on the styled arm only, its `prompt:`. Everywhere else — the Mac, and
+    /// the phone with no style — it is the call site's former construction,
+    /// `TextField(label, text:)`, exactly.
+    @ViewBuilder
+    private func pagePlainField(_ label: String, text: Binding<String>) -> some View {
+        #if os(iOS)
+        if let style = pageStyle {
+            TextField(label, text: text, prompt: Text(label).foregroundStyle(style.tokens.phone.faint))
+        } else {
+            TextField(label, text: text)
+        }
+        #else
+        TextField(label, text: text)
+        #endif
+    }
+
+    /// The secure twin. The title is the call site's literal as a
+    /// `LocalizedStringKey`, the very initializer `SecureField("Password",
+    /// text:)` resolved to — so the Mac's arm is the former construction,
+    /// `SecureField(titleKey, text:)`, exactly.
+    @ViewBuilder
+    private func pageSecureField(_ titleKey: LocalizedStringKey, text: Binding<String>) -> some View {
+        #if os(iOS)
+        if let style = pageStyle {
+            SecureField(titleKey, text: text, prompt: Text(titleKey).foregroundStyle(style.tokens.phone.faint))
+        } else {
+            SecureField(titleKey, text: text)
+        }
+        #else
+        SecureField(titleKey, text: text)
         #endif
     }
 }
