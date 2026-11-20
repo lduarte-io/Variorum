@@ -712,8 +712,8 @@ first combination (Study light), on the tree before part A's fixes; code traced 
 | `test20_rest`, `seaglass-study-light-default` (24) | The ★ in its own token, Cancel semibold, fields 44.6, segmented choices 45, chips 32, Book Details' Delete in the alarm, Protection's sentences 13 per the sheet, the overlays nothing under 13 — **W-C3** (headers and sentences in the faint), **W-C4** (unchosen segment words 4.44:1), **W-C5** (disabled calm button 1.65:1), **W-C6** (tag hint cut), **W-C7** (Lenses' system hairline); W-B1, W-B3, W-B4, W-B5, W-A9, W-A10, W-A13 as recorded; OR / AND and the book's two "+" doors not on screen. |
 
 **Earlier findings that show in this set, and what is new about them** (not re-filed):
-- **W-A1** (since fixed) — NEW screens: every pushed list in Terminal dark wears a #000000 strip 0–62 above its paper
-  #0F1A16 (b1, b4, b8, b12, b6, b9); Read in Study light has #FFFFFF strips round the #FAF8F3 room and its last prose line
+- **W-A1** (since fixed) — NEW screens: every pushed screen in Terminal dark wears a #000000 strip 0–62 above its
+  paper #0F1A16 (the lists b1, b4, b8, b12; the note b6; the reader b9); Read in Study light has #FFFFFF strips round the #FAF8F3 room and its last prose line
   cut at 840 (b5 / r04 / r04b); the message line's screens (m1, m2) and every pushed list in Study light show
   #FFFFFF 840–874 under the bar. On Study light's pushed lists the top strip happens to match (the paper is white).
 - **W-A9** (since fixed) — r01's "book" / "note", r03's detail lines, r05b's tag paths, r09's detail lines, b12 / r15's
@@ -882,7 +882,9 @@ meta role is 13 for explainer sentences).
 - **Tap areas** (rows ≥ 44, the Undo's 60 × 44, the wing row): drawn shapes only; the geometry pins are their evidence.
   Where rows have no separators (the wing list, the Tags sheet) even the drawn height is not measurable.
 - **r17b's lower sections:** the page did not scroll (it fits); the frame is r17's.
-- **The restoring agent in W-C2:** UIKit's or SwiftUI's focus restoration — inferred from the road (no keyboard in b8 /
-  b9, the field focused again after the pop), not traced in system source; the lookup note below states what is known.
+- **The restoring agent in W-C2:** UIKit's input-view restoration on a pop, or SwiftUI's focus — inferred from the road
+  (no keyboard in b8 / b9, the field focused again after the pop), not traced in system source; which of W-C2's two fix
+  candidates holds depends on it, so the walker confirms it first (a one-line probe: log the first responder after
+  `popToRoot(leaving, animated: false)` and again a run-loop turn later).
 - **The other two wider-pass combinations** (`seaglass-terminal-dark-default--r*`, `seaglass-study-light-ax5--r*`): the
   other reader's; my rows carry sizes and hexes to compare against.
