@@ -10,7 +10,54 @@ whole at its end.
 
 ## FOR A LATER READER
 
-*Written last, at the closeout. Until then "The orchestrator's live state" below is the current truth.*
+*Written at the closeout from the settled facts; the slots marked PENDING are filled at the merge. Below it is the
+night's working record.*
+
+**What the run was.** VM-24 as its own run after wave 1 of the mobile catch-up (her ruling, §1), with VM-243 riding
+at her word; /architect-phase, an away run on 2026-11-20, Fable orchestrating, a fresh Opus implementer per batch,
+one Fable cold review, nov18 on the stage. Two phone-only fixes in the Write editor, no `Shared/`, `Sources/`,
+`Sync/`, custody or schema line; the Mac byte-unchanged.
+
+**The mechanisms, as settled.**
+- **VM-24** — an edit that reaches the phone editor's `storageDidEdit` with no arming that describes it (an
+  unasked-about autocorrection, dictation, a marked-text commit, any programmatic input call, a typed key whose
+  arming another report spent) was routed by `fallbackVerdict` from the storage's post-fixing report; attribute
+  fixing widens that report through the paragraph's terminator, which at the end of a block with a block after it is
+  the separator, so a plain in-block edit refused and `desyncRecovery` re-rendered from the store (§4.1).
+- **VM-243** — on iOS a typed character inherits the font and ink of the character before the caret but never the
+  markdown face's own mark, and the face clears only marked runs: text typed after a marker kept the marker's faint
+  ink (and, after a heading, its font) until a write with the base attributes landed (§4.4; confirmed by its pin
+  before any fix, §12).
+
+**The fixes, one pointer each.**
+- VM-24: `MobileChangedCharactersCapture` + `MobileStorageObserver`'s `willProcessEditing` and the
+  `changedCharacters` argument of `storageDidEdit` / `fallbackVerdict`, all in `MobileEditorViewModel.swift` —
+  `a8662b81e`. The edit trace's widened · rescued · no-capture counts (`MobileEditTrace.swift`), the same commit;
+  their words shortened at the ladder (`9675f8888`, `8f5323554`).
+- VM-243: `MobileTypedFace.reset` (new file) and its one call in `storageDidEdit` before the line's restyle —
+  `efc66ee57`.
+- Pins: `MobileUnarmedEditRoutingTests` (`ea5a7a635`), `MobileChangedCharactersCaptureTests` /
+  `…ObserverTests` and the trace's (`d98d12517`), `MobileTypedTextFaceTests` (`b437305db`, reading (f)
+  `03b06f417`), `MobileTypedFaceRuleTests` / `…GateTests` (`151d98a87`). The standing pin
+  `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` is green, three cases of
+  three, its file unedited.
+
+**The rulings.** Hers: §1 (the run, the rider, the away night). The architect's: D-24-1…5 (§4.3) and D-243-1
+(§4.5), with the half-1 ruling on what VM-243's pin showed (§12). Options not built and why: §4.2, §4.5.
+
+**The evidence** (§12's three "orchestrator's stage results" sections; `notes/plans/vm-24-walk.md`; the ladder
+`notes/plans/fixes/vm-24-ladder-round1.md`). Every pin red on the old code by a build over the base files and green
+on the fix, alone and in company (371 tests in 52 suites; then 385 in 55). The walk: VM-243's bug on the BEFORE
+captures, gone on the AFTER; the simulator's keyboard asked the gate before every edit, so the walk met no unarmed
+edit — VM-24's device evidence is her phone's "before" and "after" sessions (§10). The ladder: one round,
+0 BLOCKER · 0 MAJOR · 2 MINOR · 1 NIT, all landed and confirmed. The gate: PENDING(the gate's three legs).
+
+**Canon.** TEXTKIT2_NOTES §3 (two iOS 26.2 findings and their rules); MobileSoul PL-81. No AppSpec or
+SurfaceContracts line moved.
+
+**Open items.** Her phone's two sessions (`notes/handoffs/vm-24-morning-phone-session.md`, then the "after" app);
+her five calls and the wording pass (QUESTIONS #282; `notes/handoffs/vm-24-handoff.md`); VX-1031 (the Mac's twin,
+not fixed); VX-68 closed with this merge, PROVISIONAL. PR: PENDING. Merge commit: PENDING.
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
