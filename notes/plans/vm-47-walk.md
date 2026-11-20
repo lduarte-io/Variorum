@@ -1089,3 +1089,109 @@ sync." ≈43 pt, beside doors held at ≈23.** A QUESTION FOR HER (P-47-8's role
   title); not compared against iOS's own table for the accessibility sizes.
 - **Terminal at AX5, Study dark, teal & rust on these screens:** not in this set (part A and set 1 read the core screens in
   them; the wider pass ran in three combinations only).
+
+### The re-capture, set 1 — findings
+
+Read 2026-11-19 (§4e rows E1–E19): the 80 re-captures of the core (four combinations), Settings' flows and the border flip,
+on the walk app built from `4866c7fb8` (the walk's fixes and main's merge), each against its pre-fix twin in `final/`. Code
+read at HEAD `9a39e7a97` (no app code changed since the merge — tests and records only).
+
+| Run (test, combination) | Verdict in one line |
+|---|---|
+| `test10_core`, `seaglass-study-light-default` (16) | W-A1 confirmed (the room to both edges on the roots, the room beside the keyboard's corners; the note's paper is white to the edges as before); W-A9 (filter 5.08:1; chips 5.93 empty / 15.40 set) and W-A10 (3.93:1) confirmed; the peek and the caret caught; **W-E1** (the pill over her words), **W-E3** (her prose behind the keyboard bar's cells); no unexplained difference. |
+| `test10_core`, `seaglass-terminal-dark-default` (16) | W-A1 confirmed in the note (the paper #0F1A16 0–874), the roots as before; W-A3's 2.3 pt shown; W-A9 (6.44 / 5.46:1), W-A10 (3.55:1); k1–k3 pixel-identical to the twins; **W-E1**, **W-E2** (the dark take tint 1.03:1), **W-E3**; no unexplained difference. |
+| `test10_core`, `seaglass-study-dark-default` (16) | k0–k3 and c1 pixel-identical to the twins; W-A1 confirmed in the note; W-A9 (6.30 / 5.34:1), W-A10 (3.57:1); the caret the dark accent; **W-E1**, **W-E2**, **W-E3**; no unexplained difference. |
+| `test10_core`, `seaglass-terminal-light-ax5` (10) | W-A1 confirmed (#E5F0EC / #FBFBF7 to the edges); W-A3's column ≈ 31 pt narrower but the names still "jou…", "the…", "the…" (W-A4's, VM-218); W-A9 (5.09 / 5.73:1), W-A10 (3.75:1); W-A2, W-A4, W-A6, W-A8, W-A11 as before; no unexplained difference. |
+| `test50_settings`, `seaglass-study-light-default` (16) | W-A1 confirmed (Protection's room to both edges; the dimmed room above every sheet); W-A9's sweep (s01, s12's details), **W-B3** (5.88:1) and **W-B4** (one hairline; the header back at its padding) confirmed; s06, s07, s13 pixel-identical; the Library's rows differ by the store's content only; no unexplained difference. |
+| `test30_flip`, `seaglass-study-light-default` (6) | VM-54 holds: the cards and the draft as before, and the pill's edge followed the flip (f6, by the fade's arithmetic); W-A1 under both overlays; **one unexplained difference — W-E4** (the note behind the comments overlay unscrolled). |
+
+**Earlier findings in this set, as they show now** (not re-filed): W-A1, W-A3 (its column), W-A9, W-A10, W-B3, W-B4 — fixed and
+seen (§4e E1–E14); W-B1 / W-C3 — no faint sentence in this set (E12); W-A2, W-A4, W-A5, W-A6, W-A7, W-A8, W-A11, W-A12, W-A13,
+W-B5 (s09's veil), W-C4 — as before (E19).
+
+**W-E1 — The takes pill draws over her words while it shows.** ANOTHER TICKET'S — VM-188 ("A takes badge you can see, and a
+tap on it opens a pill at the foot to swipe between takes and choose").
+- Captures: `seaglass-study-light-default--c6-note-peek-take-tint`, `seaglass-study-dark-default--c6-note-peek-take-tint`,
+  `seaglass-terminal-dark-default--c6-note-peek-take-tint`, `seaglass-study-light-default--f5-pill-light`, `--f6-pill-dark`.
+- Seen: the pill — an opaque capsule 138.7 × 27.7 pt (Terminal 154.0 × 27.7) on the card's ground (#FFFFFF / #15261F) —
+  sits at 607.3–635.0 pt (Terminal 643.3–671.0) from x 20.3, directly over the first line of the block below the peeked
+  one: "A flip is a PEEK: y" is hidden, "ou are viewing a different" showing to its right (Terminal: "you are viewing a").
+  The driver's log gives it a 2.4 s life.
+- The standard: §2 — her prose on the paper; nothing in the sheet places the pill over a line of prose. Nothing in this run
+  moved it: the record left the pill's place to VM-188 (§6 batch 2's inventory, "T53, T54 | takes pill ‹ › ✓ | LEFT — VM-188
+  (the pill at the foot)"); this run touched its edge only (VM-54).
+- Class: ANOTHER TICKET'S — VM-188. For her look: today, for its 2.4 s, the pill covers the start of the next block.
+
+**W-E2 — In dark, the peeked take's tint is a shade darker than the paper: 1.03:1.** A QUESTION FOR HER (beside W-B2 /
+P-47-35 — the same cause).
+- Captures: `seaglass-study-dark-default--c6-note-peek-take-tint`, `seaglass-terminal-dark-default--c6-note-peek-take-tint`
+  (and the fade frame `seaglass-study-light-default--f6-pill-dark`).
+- Seen: the tint #0D1713 behind the peeked take on the paper #0F1A16 — 1.03:1, a darker band the eye barely finds; what
+  marks the peek is the 2.3 pt left edge in the take line #254137 (1.60:1); her words over it read (13.91 / 12.56:1). In
+  light: #E8F2EE on #FFFFFF, 1.14:1, edge #B7D7CB 1.54:1.
+- The standard: §2's take tint is #E8F2EE / #0D1713, and the sizing sheet's own dark set pairs exactly this tint with this
+  paper (`--takeTint:#0D1713`, `--paper:#0F1A16`); §3b c6 asks for the peek "legible in light and dark". On the black room
+  the note sat on before R-47-1 the same tint read 1.15:1 lighter than its ground; P-47-16 put her prose on the hued paper,
+  as with W-B2's callout wash.
+- Options for her: (a) as built — the sheet's values, the edge as the marker; (b) the dark take tint stepped lighter than
+  the dark paper (the card's #15261F reads 1.13:1 above it), so a peek reads as a raised band as the take cards do; (c) a
+  heavier edge in dark only. Whether the Mac's editor shows the same pairing is not seen here.
+
+**W-E3 — With the keyboard up, her prose runs behind the keyboard bar's glass cells and under the keyboard's top edge.**
+ANOTHER TICKET'S — VM-137 (Umbrella: Writing — the keyboard bar), and a look for her.
+- Captures: `seaglass-study-light-default--c8-caret-1/-2/-3`, `--c9-selection`; the same in `seaglass-study-dark-default--`
+  and `seaglass-terminal-dark-default--`.
+- Seen: between and through the bar's three glass cells (Aa · ⑂ · ⋯, ≈ 487–553 pt) the callout block and her words show,
+  bent at the cells' rims ("…g. This block … ne. ··· and Cal…"); the next line, "toggles the frame, sets a leading emoji,
+  or", is cut by the keyboard's top at ≈ 540; (110, 500) reads the callout's wash (#E7F0F7 / #14202B); the keyboard's own
+  glass tints from the prose behind it. No caret sat on those lines here.
+- What it is: W-A1's fix working as its own comment says (`MobileBandClip`: "each page's ground runs to the screen's edges,
+  behind the keyboard's bar and rounded corners too") — the text view's bottom is pinned to `keyboardLayoutGuide`
+  (`Features/Write/MobileEditorTextView.swift:1123`), so it reaches the keyboard's top under a bar that floats above it,
+  and the old clip had hidden that strip as a bare band. W-A1's own record left the rest to the bar ("if c8's band behind
+  it is still bare after the re-capture, that is the bar's" — it is no longer bare: it is her text).
+- Class: ANOTHER TICKET'S — VM-137 (the bar's shape and ground); for her: whether her words may show through the bar's
+  glass (the system's own idiom) or the bar sits on a ground of its own.
+
+**W-E4 — Focusing the note at its middle no longer scrolls it; where the caret went is hidden.** CLASS PENDING ONE CAPTURE
+— THIS RUN'S DEFECT if the caret is under the keyboard (the editor seam; Fable's review class).
+- Captures: `seaglass-study-light-default--f3-comment-draft-light`, `--f4-comment-draft-dark`, `--f5-pill-light`, each
+  beside its twin in `final/`.
+- Seen: the driver's road is the same in both runs' XCTest logs (`test30_flip`: tap the editor's TextView at its hit point
+  → `kbar.block` → "Comments…" → `comments.done`, the same steps and timings). In the twins the note was scrolled **146 pt**
+  behind the comments overlay (block 3's first line at 395.3 pt, against 541.3 unscrolled) and stayed scrolled after the
+  keyboard went (twin f5); in the re-capture it is at its top in all three (behind the overlay "Takes are for trying…" at
+  ≈ 290; in f5 block 3 at 530.7). The caret itself cannot be seen: the overlay covers 451–874 pt.
+- Why it matters: a tap low in a note that the keyboard then covers must scroll the caret above the keyboard (the editor's
+  own road, `MobileEditorTextView.swift:429–442`). If the re-capture's caret sat under the keyboard bar or the keyboard,
+  that is a regression on the editor's most-used road.
+- What changed on that road between the twins' tree (`50635a674`) and this one (`4866c7fb8`), by source: W-A1's clip
+  (`Features/Shell/MobileShellView.swift` — `.clipped()` → `.clipShape(MobileBandClip())`); nothing else that I can
+  find — W-C2's `mobilePageShowing` is read by the Library's search only, main's `MobileEditorViewModel` change is the
+  observed entry-date mirror, and `MobileEditorTextView`, `MobileKeyboardBar` and `Shared/EditorBrain` are unchanged.
+  Not proved: the driver file changed between parts B and C (its tap STEPS are logged identical; its tap POINT is not
+  logged), and no frame shows the caret.
+- The standard: §3b c8 — "the caret visible on the paper"; a focused note keeps the caret in view.
+- Evidence to settle it (no fix proposed before the mechanism is traced): open the fanned lesson, tap the editor's
+  TextView at its hit point exactly as `openCommentsOverlay` does, wait for the keyboard, shoot WITHOUT the overlay, in
+  Study light — the caret must sit above the keyboard bar (≤ ≈ 487 pt); log the tap point and the text view's
+  `contentOffset` before and after. If the caret is hidden: THIS RUN'S DEFECT, traced at the clip and the text view's
+  keyboard road by an implementer (the editor seam), with a red-on-old pin; if it is visible: no finding (the twin's
+  146 pt was the old clip's or the old driver's).
+
+**What I could not judge, and why**
+- **W-E4's caret:** under the comments overlay in f3 / f4, and the keyboard gone in f5; no capture of this set shows the
+  editor focused low on the page without an overlay.
+- **The merge's observed-date road (VM-84):** the lesson in c5 has no entry date, so its chip reads "no date" on both trees;
+  a dated note's chip re-rendering is what the merge changed, and no capture in this set shows one.
+- **f6:** again a cross-fade frame (≈ 90 % of the way to dark); "no light edge left" rests on the fade's arithmetic (every
+  pill colour is the same 10 / 90 blend of its light and dark token), not on a settled dark frame.
+- **The note's ⋯ sheet with a structural undo waiting:** the twin shows the medium detent's stack overflowing by ≈ 9.2 pt
+  with the undo stack EMPTY; with an Undo / Redo row (a ≥ 44 pt menu row and its 14 pt gap) and Settings' own divider back,
+  the stack grows by ≥ 58 pt, which would push the header ≈ 27 pt up toward the grabber and the last lines past the foot —
+  inferred from the arithmetic, not captured (no capture of this sheet with an undo row exists; the hairline pin covers
+  the divider count, not the fit).
+- **Tap areas and hit points** (the pill's, the chips', the keyboard bar's cells): drawn shapes only.
+- **The keyboard-up band at AX5 in a note, Terminal light at the default size, teal & rust:** not in this set.
+- **Whether the Mac's editor pairs the same dark take tint with the same paper (W-E2):** not seen; inferred from the shared
+  tokens.
