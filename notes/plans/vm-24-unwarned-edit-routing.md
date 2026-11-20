@@ -563,12 +563,261 @@ ever edited after the fix lands, the red build is remade by the revert protocol 
 | Pins 5 (capture belts: `MobileChangedCharactersCaptureTests` + `MobileChangedCharactersObserverTests`) and 6 (trace: five new tests in `MobileEditTraceTests`) | DONE (`d98d12517`, `d4085103c`) — green PENDING the stage window |
 | Fix build `DerivedData/vm24-a` (phone) | DONE at the code of `d4085103c` — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-bft3.log`; no new warning in a touched file (the one warning in `MobileEditTraceTests.swift`, an unneeded `try` in `theRingIsBoundedWhileTheCountersStayTrue`, is the base's) |
 | Mac `DerivedData/vm24-a-mac` | DONE at the code of `d98d12517` (no Mac, `Shared/` or `Sources/` file differs from the base: `git diff --stat 4b0eaaacb HEAD -- App/Variorum/Shared Sources App/Variorum/Variorum` is empty) — `** TEST BUILD SUCCEEDED **`, log `DerivedData/logs/vm24-a-mac-bft.log` |
-| Closeout in §12 + the READY report | DONE (this commit) |
+| Closeout in §12 + the READY report | DONE (the commit after `75606a263`, whose message named it too early) |
 | The stage window (§12, "The stage window") | PENDING — the orchestrator's, from these products |
 
 ## 12. Batch closeouts, findings and dispositions
 
 *(Each implementer's closeout; the orchestrator's stage results; the ladder's dispositions.)*
+
+### Batch A · VM-24 — an unarmed report is routed from the characters that changed (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** NO test was run — every red and every green below is
+PENDING the orchestrator's stage window (the commands are at the end of this section, runnable from my built products).
+No simulator walk (L9, the orchestrator's), no device, no Debug launch. Not touched: VM-243 (batch B), the Mac (D-24-3:
+its twin is the orchestrator's ticket, L14), TEXTKIT2_NOTES §3 (L12, the orchestrator's at closeout), VX-68 (L13),
+`notes/QUESTIONS.md` and every shared ledger. No `Shared/`, `Sources/`, `Sync/`, custody or schema line.
+
+**Base** `4b0eaaacb`. **Commits:** `7fe494aee` (live status) · `ea5a7a635` (pins 1–4, base API only — the red build's
+tree) · `44db1a748` (the red build recorded) · `a8662b81e` (the fix and the trace) · `d98d12517` (pins 5 and 6, one
+fence-suite comment) · `d4085103c` (a pin reads its own recorder) · `75606a263` (the live status flipped — its message
+names a closeout it did not carry: the edit that wrote it had failed, which this commit's text corrects) · the next
+commit (this closeout).
+
+#### What shipped, file by file
+
+- `App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift` — the fix (D-24-1), and nothing else moves:
+  - `MobileStorageObserver` implements `textStorage(_:willProcessEditing:range:changeInLength:)` and holds a
+    `MobileChangedCharactersCapture`. Its `didProcessEditing` TAKES the kept value first — inside the main-actor hop,
+    before the `.editedCharacters` guard, so on every callback whatever its mask — and hands it on as the new
+    argument.
+  - `MobileChangedCharactersCapture` (new, `nonisolated` like `ArmedEdit`, at the end of the file): the pure pairing
+    rule. `willProcess` keeps `(range, delta)` only when the mask holds `.editedCharacters`, and REPLACES whatever was
+    kept (an attribute-only pass keeps nothing — design call 2); `take` returns the kept range only when its delta
+    equals the report's and its range lies inside the reported range, and leaves nothing kept either way.
+  - `storageDidEdit(_:changeInLength:changedCharacters: NSRange? = nil)` — the one optional argument; nothing but the
+    observer passes it.
+  - `fallbackVerdict(editedRange:delta:changedCharacters:)` — rebuilds the old range from the changed characters when
+    given, else from the report: with nil the arithmetic is the old line byte for byte (`changed = changedCharacters ??
+    editedRange`).
+  - An unbound edit's churn cost: `bound?.exactCost ?? changedCharacters.map { ($0.length - delta) + $0.length }` —
+    `exactCost`'s own rule (old + new lengths) over the changed characters; with neither, `recordAutosave`'s report
+    arithmetic as before.
+  - The E1 `report` call moved below the verdict (a pure append still, before any arm runs) and passes the changed
+    characters and a non-escaping `rescued` closure. `refuses(_:)` is a two-line private helper.
+  - Kept on the REPORTED range, as ruled: `restampProjection`, `MarkdownFace.restyle`, `refreshChrome(scope:)` — and
+    `markdownCaret.noteEdit` at the top (not named by the ruling; left unchanged — design call 4).
+  - The header's routing paragraph and the doc comments of `storageDidEdit`, `fallbackVerdict`, `recordAutosave` and
+    the observer say the new rule.
+- `App/Variorum/VariorumMobile/Features/Write/MobileEditTrace.swift` — the instrument (D-24-4): `Flags` widened to
+  `UInt16` (seven bits were used) with `.widened`, `.rescued`, `.noCapture`; `Event` gains `changedLocation` /
+  `changedLength` (-1 when unknown); `Summary` gains `widenedReports`, `rescuedReports`, `reportsWithoutCapture`;
+  `report(…changedCharacters:rescued:)` marks a report WIDENED when the reported length exceeds the changed length,
+  RESCUED when it is unbound and widened and `rescued()` says the report alone refuses where the changed characters
+  route, NO CAPTURE when nothing was kept; three headline lines and three per-event marks (DRAFT words, below); the
+  os_log line gains the two offsets; the header gains a "VM-24's three additions" section. Disarmed, `report` still
+  returns at its first guard, so the closure is never called and nothing is formatted.
+- `App/Variorum/VariorumMobileTests/MobileUnarmedEditRoutingTests.swift` (new) — pins 1–4, base API only.
+- `App/Variorum/VariorumMobileTests/MobileChangedCharactersCaptureTests.swift` (new) — pin 5, two suite types:
+  `MobileChangedCharactersCaptureTests` (pure) and `MobileChangedCharactersObserverTests` (the real observer + model).
+- `App/Variorum/VariorumMobileTests/MobileEditTraceTests.swift` — pin 6: five tests; one stale comment corrected (the
+  gate-less-insertion parenthetical).
+- `App/Variorum/VariorumMobileTests/MobileStructuralFlightFenceTests.swift` — ONE comment (road C's parenthetical now
+  says the non-last-block shape is VM-24's pin). No fence pin's code changed.
+
+#### Against §4, ruling by ruling
+
+| Ruling | Built |
+|---|---|
+| D-24-1 · the observer hears `willProcessEditing`, keeps `(range, delta)` when the mask holds `.editedCharacters` | yes — `MobileStorageObserver.textStorage(_:willProcessEditing:…)` → `capture.willProcess` |
+| · `didProcessEditing` takes and clears FIRST, on every callback whatever its mask | yes — `capture.take` is the first statement inside the hop, before the mask guard |
+| · accepted only when delta equals and range lies inside; else dropped | yes — `MobileChangedCharactersCapture.accepts` |
+| · `storageDidEdit` gains one optional argument defaulting to nil | yes |
+| · `fallbackVerdict` from the changed characters, else the report; no kept value ⇒ today's behaviour byte for byte | yes |
+| · unbound churn cost from the changed characters when known | yes |
+| · re-stamp, restyle, chrome keep the REPORTED range | yes (and the caret claim — design call 4) |
+| · nothing else in the routing moves (binding, four arms, refusal road, both fence belts, settle) | yes — the `switch` and everything after it is byte-unchanged; the gate is untouched |
+| D-24-2 · the five rows | row 1 is pin 1; row 2 is pin 4; row 3 is pin 2 (and the existing composed-transaction and crash pins, whose changed characters still cross); rows 4–5 — no armed path or gate line changed |
+| D-24-3 · the Mac | untouched (the empty diff in the live status); the twin is the orchestrator's ticket |
+| D-24-4 · widened · rescued · no capture; the extra verdict only armed and only unbound + widened; offsets and counts only | yes — pinned by `theRescueVerdictIsAskedOnlyArmedAndOnlyForAnUnboundWidenedReport` |
+
+#### The pins (none run yet — every column below is EXPECTED, PENDING the window)
+
+| # | Pin | Kind | Red build `vm24-a-red` | Fix build `vm24-a` |
+|---|---|---|---|---|
+| 1 | `MobileUnarmedEditRoutingTests.anUnarmedEditWhoseReportIsWidenedPastItsBlockRoutesToItsBlock(_:)` × 3 (insert at the block's end, insert mid-paragraph, replace mid-paragraph) | bug pin | RED, each case: a recorded "the editor's debug assertion fired" issue, `desyncRecoveryCount == 0` false, the index and the store without the edit | green |
+| 2 | `…anUnarmedReplaceThatTrulySpansASeparatorStillRefusesAndHeals()` | control | green | green |
+| 3 | `…aConsultedInsertWhoseArmingWasSpentRoutesToItsBlock()` (E1 #50–#52) | bug pin | RED: the second report desyncs; the comma never reaches the store | green |
+| 4 | `…anUnarmedWidenedEditInANonLastBlockDuringADivideIsWithheldAndSaid()` | bug pin (D-24-2's new fence pin) | RED: a mid-flight desync (recorded), and no sentence (the belt was never reached) | green |
+| 5 | `MobileChangedCharactersCaptureTests` (5 tests) · `MobileChangedCharactersObserverTests` (4 tests) | the new machinery's tests | not in the red build (they need the new API) | green |
+| 6 | `MobileEditTraceTests`: `aWidenedUnarmedReportIsMarkedAndItsRescueCounted`, `aBoundWidenedReportIsWidenedButNeverRescued`, `theRescueVerdictIsAskedOnlyArmedAndOnlyForAnUnboundWidenedReport`, `aReportWithNoKeptValueIsCountedAndMarked`, `armingTheTraceChangesNothingOnTheRescuedRoad` | the instrument's tests | not in the red build | green |
+| 7 | `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:)` — NOT edited | the standing pin | RED in main's shape ("hi", "hello there"; "Hello" green) | green, 3 of 3 — which also proves the delegate's first callback fires on UIKit's own replace road |
+
+**How "red on old" is shown:** by a BUILD of the pins over the base's production files without any revert —
+`vm24-a-red` is the tree at `ea5a7a635`, where the only differences from the base are the new test file and this
+record. The pins' file has not changed since, so the red build stays current; `vm24-a-red` is frozen. (Remaking it,
+should it ever be lost: a `git worktree add` at `ea5a7a635` and the same `build-for-testing`; no checkout over this
+worktree.) **Red counts only at the routing expectations:** every pin first asserts its own premise — the edit reached
+the report with no gate consult (its own armed trace recorder), the storage's pre-fixing range is exactly the change,
+and fixing widened the report through the block's terminator (both read from the storage's own notifications,
+`StorageReports`) — and those premises are TextKit's facts, true on both trees. **A red at a premise line ("before
+fixing, the storage's range…", "fixing widened the report…", "…with no gate consult", "the first report took the
+arming…") is NOT the expected red: stop and report it — it would mean the construction no longer widens.**
+
+**Why each widened report is widened every time (the construction):** every edit in pins 1, 3, 4 is a storage write
+whose new run carries a font and NO paragraph style, landing mid-paragraph or at a paragraph's end (never at its
+start), in a paragraph whose every character wears the surface's base paragraph style
+(`MobileEditorStyle.baseAttributes`, through the materializer). Fixing must write the paragraph's style over the new
+run, and iOS reports that write from the edit's location through the paragraph's terminator — TEXTKIT2 §3's iOS fixing
+finding, round 2's M12 (`{8, 9}`), VM-2's r1 window (this very write refused in a non-last block on both of its trees,
+every run), and `MobileEditTraceTests.theSpecifiedPredicateWouldFireOnEveryOrdinaryKeystroke` (green in the 49, on the
+bare storage). No earlier suite can leave the run already wearing the style object — it carries none — which is
+exactly the difference from a bare `insertText`, whose typing attributes can (TEXTKIT2 §3, VM-2: the process-state
+dependence). Pin 3's first report lands in the LAST block, whose widened report ends at the document's end, so it
+routes on any tree. The changed characters are deterministic too: a single `replaceCharacters` outside any open
+transaction is processed at once, and its pre-fixing range is the replacement's own range. Determinism is proven, as
+§5 asks, by the window running the suite ALONE and then after the editor suites in one host ((ii-a) and (ii-b)).
+
+**A macOS probe, recorded as such (2026-11-20, a scratch script run with `swift`, not a test host, no stage):** on
+macOS 27 UIFoundation's `NSTextStorage` sends the DELEGATE's `willProcessEditing` for a programmatic
+`replaceCharacters`, exact, before fixing; `didProcessEditing` widens a font-only insert through the terminator —
+insert at a paragraph's end `{11,1}` → `{11,2}`; mid-paragraph `{6,1}` → `{6,7}`; a replace `{6,2}` → `{6,4}`; a
+deletion `{6,0}` → `{6,0}`; an insert carrying its neighbour's own attributes `{6,1}` → `{6,1}`; an attribute-only edit
+reports mask 1 to both callbacks; an attribute write made inside the delegate's `didProcessEditing` triggers no nested
+callback there (it joins the pass). Evidence for the shared storage's behaviour on the Mac only — **iOS's own answer is
+the window's** (the standing pin going green is the proof that the first callback fires on UIKit's replace road;
+VM-78's window saw the `willProcessEditing` NOTIFICATION exact on that road, `{1,2}` against `{1,5}`).
+
+#### Design calls (options weighed; the built one first — none is a product decision)
+
+1. **The red build without a revert.** (a) **built:** pins 1–4 use only base API and land first, so the red build is
+   the pins commit's tree; (b) the revert protocol over the fix's production files. (a) cannot leave a half-restored
+   production file and needs no restore; (b) stays the road if a pin is ever edited after the fix.
+2. **An attribute-only `willProcessEditing` clears the kept value.** (a) **built:** every first callback REPLACES the
+   kept value (nil for an attribute-only pass); (b) leave the kept value alone on an attribute-only first callback (the
+   ruling's minimum). (a) is strictly safer — a value can only ever pair with the next second callback of the pass it
+   was kept in — and costs nothing: no attribute-only pass sits between a character pass's two callbacks.
+3. **`rescued` counts UNBOUND reports**, a rejected arming included (pin 3's E1 shape is exactly a rescue); "unarmed"
+   in D-24-4 read as "routed by the fallback". Alternative: gate-less only (no consult since the last report) — it
+   would not count the spent-arming road the fix also repairs.
+4. **The caret claim (`markdownCaret.noteEdit`) keeps the reported range** — D-24-1 names what keeps it and says
+   nothing else moves; routing it from the changed characters would change VX-296's ledger arithmetic, which is no
+   part of this unit. Recorded for batch B's reader (the face is VM-243's).
+5. **Pin 4 lives in the new suite**, with the fence suite's hold copied file-private, rather than as an eleventh pin in
+   the fence suite (whose ten pins ride every window unchanged); the fence suite's road-C comment points at it.
+6. **The trace's per-event mark shows the changed characters' offsets** ("widened — changed at 24 len 1") — offsets
+   only, so "widened" is read from the line, not inferred.
+
+#### Self-assessment against §8's review foci
+
+1. *Pairing:* taken first at every second callback, inside the hop and before the mask guard; nested attribute-only
+   passes (the re-stamp, the restyle) can neither read nor leave a value; a suppressed programmatic write's own pass
+   keeps and takes its own value and returns at `suppressEditProcessing`; one observer per storage (`attach(storage:)`
+   mints one). The residue: a CHARACTER pass whose first callback arrived between another pass's two callbacks would
+   meet a value it does not own — that needs a character edit inside fixing, which nothing does; the delta and inside
+   checks would still have to pass.
+2. *No refusal loosened:* the pre-fixing range is the union of everything the pass changed, so a change crossing a
+   separator still crosses it (pin 2); the existing cross-block pins — `aComposedTransactionWiderThanItsApprovalIsNot
+   Consumed`, the two coalesced-delete crash pins, E1's crash-shape pins — all keep their crossing changed range.
+3. *The fence:* a widened unarmed edit during a flight now reaches the storage belt (withheld, forced re-read, said);
+   nothing new is written toward the store during a flight; the gate belt and the settle are untouched.
+4. *The store:* routing now reads the storage's own pre-fixing account; no judgement path was added.
+6. *TextKit:* no TK1 API, no layout forced, no attribute write added anywhere (the capture writes nothing), the
+   canary checkpoint unchanged.
+7. *The trace:* disarmed, one guard and a return (the closure never runs — pinned);
+   `MobilePerfWalkTests.theEditTraceIsInertDisarmedAndQuietArmedAt100k` compares `Summary` to an empty one, which the
+   new zero-defaulted counters keep true (optional window item (v)).
+8. *The Mac:* no Mac, `Shared/` or `Sources/` line; the Mac build compiles.
+
+#### Words (DRAFT, for her wording pass — the edit trace's readout, Settings ▸ Diagnostics ▸ Edit trace…)
+
+Three headline lines: `widened … (ran past the characters that changed)` · `rescued … (each one a snap-back that did
+not happen)` · `no capture … (expected 0)`. Three per-event marks: `widened — changed at N len M` · `rescued` · `no
+capture`. No retired vocabulary.
+
+#### Residuals (traced, not fixed here)
+
+- `MobileEditRoutingTests.aStaleVerdictIsNotAppliedToTheNextEdit`'s doc says a widened gate-less report "can already
+  overflow its entry and take the honest recovery road" — true before VM-24, now only when no changed characters were
+  kept. A comment in a suite this batch does not otherwise touch; left for the ladder to call.
+- TEXTKIT2 §3: the window's results (whether the delegate's first callback fires on UIKit's replace road, measured by
+  the standing pin) are the orchestrator's canon line (L12).
+- Her phone: the "after" session's three new counts are what say whether some road reports with no first callback
+  (`no capture` above 0) — MobileSoul §5.2's device test.
+
+#### For QUESTIONS at the merge
+
+None new from this batch. The trace's new words are §10 item 6's (DRAFT). Design calls 2–6 above are the
+implementer's, recorded for the ladder, not hers.
+
+#### The stage window (the orchestrator's; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle 30 s, run, shut down)
+
+Products: `App/Variorum/DerivedData/vm24-a-red` (red, the tree at `ea5a7a635`, frozen), `…/vm24-a` (the fix, the
+code of `d4085103c`), `…/vm24-a-mac` (Mac, the code of `d98d12517`). Logs and bundles: `DerivedData/logs/`,
+`DerivedData/vm24-bundles/` (a bundle name is never reused). Poll for the Swift Testing verdict line, never the exit.
+
+```zsh
+cd ~/dev/variorum-vm-24/App/Variorum
+T=(xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile
+   -destination 'platform=iOS Simulator,id=<simulator-udid>' -collect-test-diagnostics never)
+
+# (i) the red build: the new suite and the caret suite
+red=(MobileUnarmedEditRoutingTests MobileMarkdownCaretTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-a-red -resultBundlePath DerivedData/vm24-bundles/a-red.xcresult \
+  ${red/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-a-red-run.log 2>&1
+
+# (ii-a) the fix build: the three new types ALONE
+alone=(MobileUnarmedEditRoutingTests MobileChangedCharactersCaptureTests MobileChangedCharactersObserverTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-a -resultBundlePath DerivedData/vm24-bundles/a-alone.xcresult \
+  ${alone/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-a-alone.log 2>&1
+
+# (ii-b) the fix build, ONE invocation: the three new types, then VM-64's 49 editor types
+tests=(MobileUnarmedEditRoutingTests MobileChangedCharactersCaptureTests MobileChangedCharactersObserverTests
+  MobileStructuralFlightFenceTests MobileStructuralTests MobileSelectionActsTests
+  MobileEditorMaterializationTests MobileCanaryTests MobileEditorRoutingTests MobileEditorCrystallizationTests
+  MobileEditorProjectionTests MobileTypewriterRoomTests MobileNoteSealTests MobileFindInNoteTests
+  MobileEditRoutingBindingTests MobileIdentityAuditSeparatorTests MobileBulkArmingTests MobileCanaryTeardownTests
+  MobileEditRoutingCrashTests MobileEditRouteArmsTests MobileWholeBlockDeleteBrainTests MobileWholeBlockDeleteTests
+  MobileCrossBlockEditBrainTests MobileCrossBlockEditTests MobileMarkdownRenderTests MobileMarkdownReturnTests
+  MobileMarkdownActsTests MobileCheckboxTapTests MobileMarkdownCaretTests MobileTakesTests MobileTakesBrowserTests
+  MobileTakesBrowserSurfaceTests MobileTakesChromeTests MobileTakeReorderTests MobileTakeToBlockTests
+  MobileTakeLockTests MobileUndoDoorTests MobileBlockMenuTests MobileCommentsTests MobileBlockDecorTests
+  MobileWalkTests MobileTrailingNewlinesTests MobileSpaceEaterTests MobileCRLFCaptureTests
+  MobileWriteScrollAuthorityTests MobileScrollAuthorityBrainTests MobileLivenessTests
+  MobileDeferredProjectionRetryTests MobileTypedOverRescueTests MobileEditTraceTests MobileKeyDoorPostureTests
+  MobileSavepointOnLeavingTests)
+"${T[@]}" -derivedDataPath DerivedData/vm24-a -resultBundlePath DerivedData/vm24-bundles/a-company.xcresult \
+  ${tests/#/-only-testing:VariorumMobileTests/} > DerivedData/logs/vm24-a-company.log 2>&1
+
+# (iv) the Mac's seven types that read every phone file (no simulator)
+mac=(DeadVocabularyTests DataSafetySearchIndexTests PaneLineMetricsScopeTests OneRefreshAuthorityCompositionTests
+  OneInputPathTests PaletteDerivationTests GlyphRainTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
+  -derivedDataPath DerivedData/vm24-a-mac -collect-test-diagnostics never \
+  -resultBundlePath DerivedData/vm24-bundles/a-mac.xcresult \
+  ${mac/#/-only-testing:VariorumTests/} > DerivedData/logs/vm24-a-mac-run.log 2>&1
+
+# (v) OPTIONAL (focus 7): the 100k trace pin alone, from the fix build — the argument quoted whole
+"${T[@]}" -derivedDataPath DerivedData/vm24-a -resultBundlePath DerivedData/vm24-bundles/a-perf-trace.xcresult \
+  '-only-testing:VariorumMobileTests/MobilePerfWalkTests/theEditTraceIsInertDisarmedAndQuietArmedAt100k()' \
+  > DerivedData/logs/vm24-a-perf-trace.log 2>&1
+```
+
+Expected (Swift Testing counts test FUNCTIONS, a parameterized one once; read the `skipped` lines):
+- **(i)** "Test run with 8 tests in 2 suites failed". Red, by name:
+  `anUnarmedEditWhoseReportIsWidenedPastItsBlockRoutesToItsBlock(_:)` (all three cases),
+  `aConsultedInsertWhoseArmingWasSpentRoutesToItsBlock()`,
+  `anUnarmedWidenedEditInANonLastBlockDuringADivideIsWithheldAndSaid()`,
+  `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:)` for "hi" and "hello there". Green:
+  `anUnarmedReplaceThatTrulySpansASeparatorStillRefusesAndHeals()`, the caret suite's other three tests and its
+  "Hello" case. No host restart (every desync is recorded, never trapped). A red at a premise line is not the
+  expected red (above).
+- **(ii-a)** "Test run with 13 tests in 3 suites passed".
+- **(ii-b)** "Test run with N tests in 52 suites passed", one host process, `Restarting after unexpected exit` = 0;
+  the caret suite 4 of 4 with the standing pin 3 of 3 cases; the fence suite 10 of 10; `MobileEditTraceTests` 13 of
+  13. Any red is named and is a finding (main's whole-target baseline after wave 1 had only the standing pin red).
+- **(iv)** "Test run with N tests in 7 suites passed".
+- **(v)** "Test run with 1 test in 1 suite passed" (heavy: the 100k worlds).
 
 ---
 
