@@ -669,3 +669,220 @@ table built it so — her look); the overlays' "+ New take" and "✓ Chosen" dra
 - **Teal & rust's token values against `PaletteDerivation`:** measured from pixels, not computed from the rule (no code
   run here); they agree with the relations §2 asks for.
 - **Whether the Mac shows W-B2 the same way:** inferred from the shared hexes and the Mac editor's paper, not seen.
+
+### Part B, set 2 — findings
+
+Read 2026-11-19 (§4c rows C1–C19): the bar's roads and VM-55's faces in Study light and Terminal dark, the wider pass's
+first combination (Study light), on the tree before part A's fixes; code traced at HEAD `1973c98b7`.
+
+**Question (a) — the one message line, and the missing m3.**
+- **The line (m1, m2), both combinations:** drawn at the foot ABOVE the bar, never over its doors — on the Library root
+  (m1) and on the Trash pushed from the Library (m2) at the same place, 721–784, its foot on the bar's hairline at 784;
+  on the room (#E5F0EC / #000000) under the palette's hairline (#CBE2D9 / #1C332A); the words 15 in the corrected muted
+  (#6A6359 5.08:1 / #8B9088 6.44:1), "Undo" 15 semibold in the accent (#3B6A59 5.31:1 / #90C1AF 10.43:1). One thing
+  is not the sheet's: the words wrap to two lines, so the line is 63 pt, not one 44 pt line (W-C1).
+- **The line was still on screen in m2** (both combinations) — its words and its Undo drawn.
+- **The driver's own XCTest timings** (`final/logs/test40_shell-*.log`, test-relative seconds) settle the rest. Study
+  light: the delete's confirm tapped at 258.81, the app idle at 259.10 (the removal is spoken here: the 6 s clock,
+  `StatusCenter.dismissAfter = .seconds(6)`, `Shared/StatusCenter.swift:217`, re-armed in `place`, :375–381, runs out
+  ≈265.1–265.5); m1 shot ≈259.8–260.2; the Trash door tapped at 262.57, idle 262.85; m2 shot ≈263.3–263.8; then
+  `button("Undo")` (`onscreen`'s `waitForExistence(2.5)`) began at 263.81 and **its predicate was SATISFIED at 264.87**
+  — the wait returned 1.4 s before its timeout and the driver counted the matches at 264.89, so the Undo WAS in the
+  app's accessibility tree, found by XCUITest inside the line's passthrough window; then `tap(_:_:timeout: 2)` began a
+  SECOND `waitForExistence` on the same element at 264.92, whose checks at 265.95 and 266.93 both FAILED (the element's
+  debug description captured each time) → `MISSING the line's Undo` at 267.0. Terminal dark, the same shape: idle after
+  the confirm at 259.22, the Undo found at 265.07, gone at 266.16. In both runs the Undo existed ≈5.8 s after the
+  removal and was gone ≈6.9 s after — the 6 s clock straddled. Every wait in these logs takes ≈1.0 s to its first check,
+  and the driver paid two back to back (the lookup's, then `tap`'s own re-wait) after m1's settle (0.7 s), the Trash
+  tap's two waits (≈2.3 s) and m2's settle (0.5 s): ≈4.6 s of the 6 were gone when the Undo lookup began, ≈5.7 s at its
+  first check, ≈6.8 s at the re-wait's first check.
+- **So the evidence supports the DRIVER'S TIMING, not an app defect:** the line was up, its Undo reachable to the
+  accessibility query in its own window, and its life simply ran out between the driver's two waits. Not proved by the
+  walk: that a synthesized tap on the door lands — the window's `hitTest` passes only the door
+  (`MobileMessageLine.swift:213–219`, `PassthroughView.hitTest` :314–320), and `MobileMessageLineHostTests` pins in
+  process that the door's centre takes the touch; a tap at an element's hit point goes through that same `hitTest`.
+- **What would settle it:** re-run m3 with the Undo tapped as soon as it is found — one `waitForExistence(timeout: 1)`
+  then `tap()` with no second wait (or tap it from m1 before the Trash push, keeping m2 for the place), within ≈4 s of
+  the confirm; then capture the Library row back and the Trash without the note.
+
+| Run (test, combination) | Verdict in one line |
+|---|---|
+| `test40_shell`, `seaglass-study-light-default` (18 + m3 absent) | The bar at the foot on every pushed list with its owning tab's word; tab taps land on roots; no bar and no lifted line on Read, a note, the reader, Protection; the wing list as P-47-8; the one line above the bar — but **W-C2** (b10: the hidden Library search's keyboard over the Bookcase), **W-C1** (the line two lines tall), m3 not captured (timing); W-A1 (#FFFFFF under the bar), W-A9, W-A10, W-B1, W-A5, W-A12 as recorded. |
+| `test40_shell`, `seaglass-terminal-dark-default` (18 + m3 absent) | The same verdicts; **W-C2** and **W-C1** both show; **W-C8** (her excerpt lowercased in Versions' rows); W-A1 as the #000000 strip above the paper on every pushed screen and the black bands round the note; W-A2, W-A3, W-B1 (3.55:1, two lines). |
+| `test20_rest`, `seaglass-study-light-default` (24) | The ★ in its own token, Cancel semibold, fields 44.6, segmented choices 45, chips 32, Book Details' Delete in the alarm, Protection's sentences 13 per the sheet, the overlays nothing under 13 — **W-C3** (headers and sentences in the faint), **W-C4** (unchosen segment words 4.44:1), **W-C5** (disabled calm button 1.65:1), **W-C6** (tag hint cut), **W-C7** (Lenses' system hairline); W-B1, W-B3, W-B4, W-B5, W-A9, W-A10, W-A13 as recorded; OR / AND and the book's two "+" doors not on screen. |
+
+**Earlier findings that show in this set, and what is new about them** (not re-filed):
+- **W-A1** (since fixed) — NEW screens: every pushed list in Terminal dark wears a #000000 strip 0–62 above its paper
+  #0F1A16 (b1, b4, b8, b12, b6, b9); Read in Study light has #FFFFFF strips round the #FAF8F3 room and its last prose line
+  cut at 840 (b5 / r04 / r04b); the message line's screens (m1, m2) and every pushed list in Study light show
+  #FFFFFF 840–874 under the bar. On Study light's pushed lists the top strip happens to match (the paper is white).
+- **W-A9** (since fixed) — r01's "book" / "note", r03's detail lines, r05b's tag paths, r09's detail lines, b12 / r15's
+  "Notes" filter word, b6's empty chips — all on its sweep or re-capture list. W-C3 is what its sweep did not reach.
+- **W-A10** (since fixed) — r05 "Name" and r06's tag hint in #C5C5C7 1.72:1 (the fix covers both sites); the Library
+  search in m1 / b2 / w2.
+- **W-B1** — the Trash's promise in b1 / r14 / r14b / m2 (Study 3.93:1; Terminal dark #6B7168 3.55:1 and wrapped to two
+  lines) and the Archive's "kept — no clock" in b12 / r15 (3.93 / 3.55:1). HEAD still faint at all three of its sites.
+- **W-B3, W-B4** — r09 is pixel-identical to s12: Delete Note… in #F23032 and the doubled hairline (both #CDE1D9).
+  Book Details (r03) shows the right ink beside it: Delete Book… in the alarm #9B3B2F.
+- **W-B5** — r11 / r12 / r13 in light: the veil #C9C8C6 over the prose from 283 pt, the masthead undimmed.
+- **W-A13** — NEW screen: the Blocks sheet's ⑂ (r07), 5.3 × 7.0 pt at x 375.
+- **W-A2, W-A3** (W-A3 since fixed) — Terminal's Bookcase line "~/home/bookcase  ·…" and names from 47.5 pt in b3, b7,
+  b10, w1, w3.
+- **W-A5, W-A7, W-A12** — the 🗑 emoji on every root's line; b11's caret the system blue; no dates on Library rows.
+- **s0 (part A, not judged there)** — b4 is NORMAL (the bar at 785–840); b10 lifts the bar to exactly s0's 484–539 with
+  a hidden field's keyboard drawn (W-C2), which makes a hidden page's live focus the likely road to s0's frame too.
+
+**W-C1 — The one message line wraps to two lines: 63 pt, not one 44 pt line.** A QUESTION FOR HER.
+- Captures: `seaglass-study-light-default--m1-line-library-root`, `…--m2-line-over-trash-bar`, and both
+  `seaglass-terminal-dark-default--m1…` / `--m2…`.
+- Seen: "Note moved to the Trash — 30 days to put it back." at 15 pt fills 21–308 pt on its first line and wraps "it
+  back." to a second (737–768.7); with Undo's column (x 315–381) the line runs 721–784 = 63 pt (Terminal's mono wraps
+  "to put it back." the same).
+- The standard: sheet §E's receipt line — "One line, 44 tall, at the foot of the screen"; P-47-8 put the words on
+  `controlInline` 15 (the sheet's own number). As built the face wraps on purpose: `MobileMessageLine.swift:159–163`
+  (`.lineLimit(4)`, `.fixedSize(horizontal: false, vertical: true)` — "one line of them is the line's 44, and several
+  keep clear of its edges"). The words are VM-61's (VM-55), and this run may change no rendered word.
+- Options for her: (a) as built — the line grows by lines (63 pt for this receipt); (b) one line, tail-truncated (cuts
+  "30 days to put it back.", the promise); (c) shorter receipt words in her wording pass, so the common receipts fit one
+  44 pt line at 15 pt with Undo.
+
+**W-C2 — A tab tapped from a pushed list over a searched Library raises the Library search's keyboard over the
+Bookcase.** THIS RUN'S DEFECT (born of P-47-19's pop of the leaving stack).
+- Captures: `seaglass-study-light-default--b10-bookcase-from-versions`, `…--b11-library-root-after`, and both
+  `seaglass-terminal-dark-default--b10…` / `--b11…`; for contrast `…--b8-versions-listing-bar`, `…--b9-versions-reader-no-bar`
+  (no keyboard).
+- Seen: the road — the Library searched ("swipe" typed, the keyboard up), its hit opened (the note pushed; the keyboard
+  goes), Note ▸ Versions… (the listing pushed, b8, no keyboard), a moment read and "‹ Versions" (b9, no keyboard), then
+  "Bookcase" tapped: b10 is the Bookcase ROOT with its box at rest (hint, no caret, no ▋) and a software keyboard up,
+  the bar lifted to 484–539 (hairline 483) — 300 pt off its foot — with nothing on the Bookcase focused; "Library"
+  tapped: b11 shows the Library's search field holding "swipe" with its caret. Both combinations, identically.
+- The standard: P-47-19 (a) — "the stack being left returns to ITS root … so a hidden stack always stands at its root
+  (the band never reveals a pushed screen)"; a page she is not on must not take the keyboard; §2 puts the bar at the
+  foot ("the room down to the home indicator") and records it riding above the keyboard only while the box or the
+  search she is on is focused (VM-73's case) — here neither is on screen.
+- Where it comes from (traced at HEAD; the restoring agent inferred, not traced in system source):
+  `App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift:713–735` — `tabSelected` calls
+  `popToRoot(leaving, animated: false)` (`libraryPath = NavigationPath()`) and then `selectPage(target)`. Popping the
+  Library's stack back to its root makes the root's search field — first responder when its hit was pushed — first
+  responder again, while that page is already sliding a screen-width away; the keyboard rises over the Bookcase and
+  every keyboard-following frame (the bar, the line) lifts with it. b8 and b9 rule out a field left focused under the
+  pushed screens: no keyboard shows there.
+- Narrowest fix proposed (not made), two candidates, the walker to pick after confirming the restoring agent: (a)
+  confined to P-47-19's road — in `tabSelected`, end editing (`UIApplication.shared.sendAction(#selector(UIResponder
+  .resignFirstResponder), to: nil, from: nil, for: nil)`) once the leaving stack's unanimated pop has settled, so a
+  responder restored on a page leaving the screen is let go before the keyboard shows (narrow in behaviour, but it races
+  the restoration's timing); (b) leave nothing to restore — end editing as a route is pushed onto a stack (the Library's
+  hit opens through `libraryPath.append`; `push(_:in:)` :650), which also stops a plain Back from re-raising the
+  keyboard on the visible Library (a behaviour change on a road she sees — her word if (b)).
+- Evidence after: re-walk b8–b11 (search, open the hit, Versions, read, "Bookcase"): b10 with no keyboard and the bar at
+  785–840; b11 with the field unfocused (or focused only by her tap). A pin in a real scene window (the line host pin's
+  shape): a focused text field in one stack's root, a route pushed, the shell's tab road to another page, assert no
+  first responder after the run loop settles (red on old: the field is first responder again).
+
+**W-C3 — The corrected faint still carries section headers and sentences W-B1's sweep does not name.** THIS RUN'S
+DEFECT (batch 1's one-for-one `tokens.faint` → `tokens.phone.faint`, W-A9 and W-B1's class).
+- Captures: `seaglass-study-light-default--r06-tags-sheet` ("Apply a tag", 13 semibold, #8B7F6A 3.37:1 on the room);
+  `…--r06b-membership-sheet` ("Add to a book", 13 semibold, 3.37:1; "Editing here edits the note everywhere it appears.",
+  13, 3.37:1); `…--r07b-blocks-leaving` (the tray's explainer, two lines, 3.37:1); `…--b8-versions-listing-bar` /
+  `…--r10-versions` (Versions' explainer, three lines, #8B7F6A 3.93:1 on the paper; Terminal dark #6B7168 3.55:1, four
+  lines); `…--b9-versions-reader-no-bar` (the moment's meta — "4 blocks · “…”", her excerpt — in the faint, 3.93 / 3.55:1,
+  while the LISTING draws the same line in the corrected muted 5.93:1).
+- The standard: sheet §D — "Words under 17 pt need 4.5:1 … Faint never carries a sentence she has to read"; the faint
+  is "glyphs, placeholders, disabled words only"; sheet §A's section-header row draws "Add to a book" itself (and names
+  "Apply a tag") in "SF Pro 13 semibold · corrected muted", and its meta row draws "Everything this note has on the
+  30-day clock." in the corrected muted.
+- Where it comes from (HEAD): `Features/Write/MobileNoteTags.swift:244` ("Apply a tag"), `:220` (a tag's path line);
+  `Features/Write/MobileMembership.swift:321` ("Add to a book"), `:252` ("Editing here…"), `:296` ("smart");
+  `Features/Write/MobileNoteTray.swift:613` (the tray's explainers), `:674` and `:701` (the tray rows' meta lines);
+  `Features/Write/MobileVersions.swift:416` (the explainer), `:479` (the reader's meta); not captured but the same class:
+  `Features/Write/MobileReferences.swift:264` (a file row's note), `Features/Shell/MobileLibraryView.swift:432` (the
+  empty store's sign-in line), `Features/Shell/MobileQuickNote.swift:1191` (the box's hold note),
+  `Features/Shell/MobileTagManager.swift:411` (a tag's path). The faint's legitimate uses stay: the box's hint and
+  dashed edge (`MobileQuickNote.swift:1292, 1303`), the ○ pick mark (`MobileBlockList.swift:500`), the disabled "Use as
+  Daily Journal" (`MobileBookDetails.swift:429`), the fields' placeholders (`PhoneControls.swift:310, 337`).
+- Narrowest fix proposed (not made): `tokens.phone.muted` at those sites, landed with W-B1's three (one sweep, one pin):
+  extend `MobileFaintOnDoorsSourceTests` to name every `phone.faint` site and the reason it may stay (glyph, placeholder,
+  disabled) — red on old: the sites above. Re-capture r06, r06b, r07b, b8 / r10, b9 and read the hex.
+
+**W-C4 — The segmented choice's unchosen words fall under 4.5:1 on the system's track.** THIS RUN'S DEFECT (batch 2's
+segmented choice, `91d406593`).
+- Captures: `seaglass-study-light-default--r05-create-book`, `…--r05b-create-book-smart`, `…--r07-blocks-sheet`,
+  `…--r07b-blocks-leaving` (the track over the room is #D7E1DE; "Journal Book", "Smart Book", "archived", "leaving" 15 in
+  #6A6359 — **4.44:1**); and, measured by this reader on part A's captures, `seaglass-study-dark-default--k1-settings-top`
+  (track #273030, "Light" / "Dark" #948C7C — **4.06:1**) and `seaglass-terminal-dark-default--k1-settings-top`
+  (#8B9088 — **4.15:1**). Settings in light clears (#EEEEEF: 5.11:1 Study, 4.93:1 Terminal per part A's track).
+- The standard: sheet §D — "Words under 17 pt need 4.5:1"; the segment words are 15 (the chip role). The track is the
+  system's translucent fill, which darkens the room and lightens the dark paper — no token.
+- Where it comes from: `App/Variorum/Shared/Theme/PhoneControls.swift:664–668` (`PhoneSegmentedControlBridge.updateUIView`:
+  the unchosen words `tokens.phone.muted`, the thumb `tokens.surface`, the track left to the system).
+- Narrowest fix proposed (not made): give the control a token track on which the corrected muted clears in every
+  appearance — the room (`control.backgroundColor = UIColor(tokens.room)`: 5.08:1 Study light, 5.09:1 Terminal light,
+  6.30 / 6.44:1 on black; the paper thumb still marks the choice), or keep the system track and set the unchosen words
+  in ink; which of the two is a look call. Verify on device that iOS 26's control honours a background colour for its
+  track. A pin in the run's rendered-ink style: the unchosen word's contrast over the control's own drawn track ≥ 4.5:1 in
+  both voices × appearances (red on old: 4.44 / 4.06 / 4.15).
+
+**W-C5 — The disabled calm button reads 1.65:1.** A QUESTION FOR HER.
+- Captures: `seaglass-study-light-default--r05-create-book`, `…--r05b-create-book-smart` ("Create Book" before a name).
+- Seen: the whole control at 35% — the fill #EEF5F3 on the room, the edge nearly gone, the word #B0C4BD: 1.65:1.
+- The standard: sheet §D lists "disabled words" among the corrected faint's uses (3.37–3.93:1) — a disabled word is
+  meant to stay readable, quieter; the build dims every phone control by the Mac's shared pages' precedent
+  (`PhoneControlMetrics.opacity` → 0.35, `App/Variorum/Shared/Theme/PhoneControls.swift:108–113`, batch 2).
+- Options for her: (a) as built — the Mac's 35% dim, one rule for every control; (b) the sheet's ink — a disabled
+  control's word in the corrected faint at full opacity, its shape kept; (c) show the act only when it can act.
+
+**W-C6 — The tag field's hint is cut mid-word at 17 pt.** A QUESTION FOR HER (P-47-6's precedent).
+- Captures: `seaglass-study-light-default--r06-tags-sheet`.
+- Seen: "type a tag — ↩ applies it (“/” nests: life/go…" — the field's prompt (`MobileNoteTags.swift:180`, "type a tag —
+  ⏎ applies it (“/” nests: life/goals)") tail-truncated at the field's end (32–362 pt) at the field's 17 pt (P-47-14).
+- The standard: P-47-6 settled the same case for the box's hint — "the longest of its own cuts that fits", no new words.
+  Options: (a) as built (tail cut); (b) P-47-6's rule here ("type a tag — ⏎ applies it"); (c) new words in her wording
+  pass.
+
+**W-C7 — The Lenses sheet's divider is the system's grey, not the palette's line.** THIS RUN'S DEFECT (small — the
+layer pass missed one divider).
+- Captures: `seaglass-study-light-default--r08-lenses`.
+- Seen: the hairline at 247.3 pt is #B4BCBB (the system separator over the room), where every other sheet's divider
+  measures the palette's line (#CBE1D9 in r03, #CDE1D9 in r09).
+- The standard: sheet §D — "the hairline 1.17:1 (1.36 on paper)", the palette's line; the run's other dividers wear
+  `Divider().overlay(tokens.line)`.
+- Where it comes from: `App/Variorum/VariorumMobile/Features/Takes/MobileLenses.swift:606` — a bare `Divider()`
+  (predates the run).
+- Narrowest fix proposed (not made): `.overlay(tokens.line)` on it; a source pin that every phone `Divider()` outside a
+  `Menu` wears the line.
+
+**W-C8 — Terminal lowercases her words in Versions' rows.** A QUESTION FOR HER (predates the run; the screen's owner
+is VM-147's umbrella, P-47-20's list).
+- Captures: `seaglass-terminal-dark-default--b8-versions-listing-bar`, `…--b9-versions-reader-no-bar`.
+- Seen: the moment's meta reads "4 blocks · “takes are for trying; choosing is deciding. the take with the ✓ ”" — her
+  note says "Takes are for trying; CHOOSING is deciding. The take with the ✓"; her capitals are gone in both the listing
+  and the reader. Study keeps them.
+- Where it comes from: `Features/Write/MobileVersions.swift:437` and `:477` —
+  `tokens.chromeLabel(MobileVersionsModel.rowMeta(item))`, and `rowMeta` quotes her preview (`:291–294`). Set 1 noted
+  the same grammar on Starred's names ("walk note"); the Mac's Terminal sidebar lowercases titles too.
+- Options for her: (a) as built — Terminal's chrome casing over the whole line; (b) the chrome pieces lowercased and her
+  quoted words left as written; (c) no excerpt in Terminal's meta.
+
+**Noted, not filed** (predates the run, recorded with an owner, or no rule to judge it by): the Archive's filter row
+starts at 28.3 pt, 8 pt inside the gutter its title holds (the shared row's own 20 pt padding inside the Archive's 8 —
+both from 2026-08-31; VM-93's row); the Trash's chip row clips at ≈392 pt, ≈10 pt short of the screen's edge; Book
+Details' detail lines sit beside their labels, not under them (her look); the system toolbar's "Details · Read" wear the
+system's label colour (#000000 / #F3F4F4), and the Versions reader stacks two back doors (P-47-20, her look); Read's
+chapter label takes Terminal's mono on the voice-independent page; the Comments overlay's empty line at x 17 and Block
+History's counts on their own lines (VM-152 / VM-41); the sheets that open full height with no grabber (VM-152); §3f's
+"Takes" Trash chip and r17b's "sentences 15" are the walk doc's slips (the Trash lists six kinds by design; the sheet's
+meta role is 13 for explainer sentences).
+
+**What I could not judge, and why**
+- **m3 — the Undo pressed:** not captured (the driver's timing, question (a)); whether the note comes back is VM-55's
+  pins' evidence, not this walk's.
+- **The OR / AND choice (r05b):** not on screen — it appears only with two or more tags picked, and the driver picked
+  none.
+- **A book's "+ New Note" / "+ New Chapter" (r02 / b4):** below the fold in the captured frame.
+- **Tap areas** (rows ≥ 44, the Undo's 60 × 44, the wing row): drawn shapes only; the geometry pins are their evidence.
+  Where rows have no separators (the wing list, the Tags sheet) even the drawn height is not measurable.
+- **r17b's lower sections:** the page did not scroll (it fits); the frame is r17's.
+- **The restoring agent in W-C2:** UIKit's or SwiftUI's focus restoration — inferred from the road (no keyboard in b8 /
+  b9, the field focused again after the pop), not traced in system source; the lookup note below states what is known.
+- **The other two wider-pass combinations** (`seaglass-terminal-dark-default--r*`, `seaglass-study-light-ax5--r*`): the
+  other reader's; my rows carry sizes and hexes to compare against.
