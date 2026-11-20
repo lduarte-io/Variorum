@@ -3441,8 +3441,8 @@ is in flight.***
 |---|---|
 | 0 — this section, the disposition table and its LIVE STATUS | DONE (`e9d509d98`) |
 | 1 — R5-N1: PL-78's still-owed list, the W-073 reconcile, the VM-212 and VM-85 owner lines, G1–G3 in the member rows | DONE (`baf510391`) — PL-78: "the guide's other stale lines and its exempt "smart" literal in the phone's word scan (VM-212) · the Today door's "smart book" note and its exempt literal (VM-85)"; the reconcile bullet names G2 as the source scan; both owner lines say to delete the entry when the literal is reworded (and carry R5-N7's fold); G1 under VM-84's pin, G2 under VM-83's, G3 under VM-21's and VM-81's; the round 1 fix pass's history line untouched. `grep -n PENDING notes/MobileSoul.md notes/SurfaceContracts.md` answers nothing |
-| 2 — R5-N2, N3, N4, N8, N9 and every round-5 slot in the record and the handoff | DONE (this commit) — R5-N2: the Closeout's Gate 2 row ("the whole Mac target", the coordinator's sizing, tier 1 and tier 2 inside it, `DeadVocabularyTests` named; the verdict slot names `noShippedWordSpeaksTheRetiredVocabulary`), FOR A LATER READER's slot, the member rows' and the AppSpecRecord draft's gate-2 slots, the handoff's STATUS and its gate-2 line — every slot still PENDING; R5-N3: the handoff's "five times, a new reviewer each round", "(the section above)", the round-5 outcome in plain words; R5-N4: to-file item 4 gains the three sites and the fourth (record and handoff); R5-N8: the orchestrator's numbered message quoted verbatim, marked as its words, in Kickoff facts, with a sentence beside her quote in "Her rulings built here" item 3 and in the AppSpecRecord draft; R5-N9: the line under VM-113, pointing at the walk's observation 1; round 5's slots: "Her rulings" item 1, the Closeout's ladder bullet, the opening paragraph's Done and Still ahead (and "the five round files"), the AppSpecRecord and finals-ledger drafts, FOR A LATER READER's slots line, evidence and open items, "Not done"'s first bullet. Also, found stale and corrected (not round 5's findings): "Not done"'s "The walk has not run" bullet (the walk ran) and the finals-ledger draft's "PENDING(the gate's three legs)" (split: the walk's result, then gates 1 and 2 PENDING) |
-| 3 — R5-N5: the master plan's closeout paragraph, the merge-moment steps, the Cast | NOT-STARTED |
+| 2 — R5-N2, N3, N4, N8, N9 and every round-5 slot in the record and the handoff | DONE (`096a942eb`) — R5-N2: the Closeout's Gate 2 row ("the whole Mac target", the coordinator's sizing, tier 1 and tier 2 inside it, `DeadVocabularyTests` named; the verdict slot names `noShippedWordSpeaksTheRetiredVocabulary`), FOR A LATER READER's slot, the member rows' and the AppSpecRecord draft's gate-2 slots, the handoff's STATUS and its gate-2 line — every slot still PENDING; R5-N3: the handoff's "five times, a new reviewer each round", "(the section above)", the round-5 outcome in plain words; R5-N4: to-file item 4 gains the three sites and the fourth (record and handoff); R5-N8: the orchestrator's numbered message quoted verbatim, marked as its words, in Kickoff facts, with a sentence beside her quote in "Her rulings built here" item 3 and in the AppSpecRecord draft; R5-N9: the line under VM-113, pointing at the walk's observation 1; round 5's slots: "Her rulings" item 1, the Closeout's ladder bullet, the opening paragraph's Done and Still ahead (and "the five round files"), the AppSpecRecord and finals-ledger drafts, FOR A LATER READER's slots line, evidence and open items, "Not done"'s first bullet. Also, found stale and corrected (not round 5's findings): "Not done"'s "The walk has not run" bullet (the walk ran) and the finals-ledger draft's "PENDING(the gate's three legs)" (split: the walk's result, then gates 1 and 2 PENDING) |
+| 3 — R5-N5: the master plan's closeout paragraph, the merge-moment steps, the Cast | DONE (this commit) — "To land on main at the merge" opens with the master plan's draft: the three merge-moment moves (the in-flight row deleted; the standing "Latest closeout" paragraph moved verbatim to the archive's head; this one in its place) and the paragraph in VX-981's shape, PL-78's MOBILE PARITY line inside it, its slots PENDING; the AppSpecRecord draft's Cast names every session (the closeout re-fit, round 4's fix pass, the second merge-in, the walk, this pass; the one orchestrator throughout); "Not done" names the master plan's draft |
 | 4 — R5-N6: FOR A LATER READER cut to about a page, from the settled text | NOT-STARTED |
 
 ## Closeout
@@ -4340,6 +4340,53 @@ This run is a mobile run's own row in `notes/MobileSoul.md` §6: **PL-78** (PL-7
 
 ### To land on main at the merge (the merging session's, on latest main — shared ledgers)
 
+**`notes/DetailedPlanForPhases.md` — the closeout paragraph and two moves (draft; round 5's R5-N5).** At the merge
+moment, on latest main: (1) the IN-FLIGHT table's VM-78 row is deleted; (2) the paragraph standing under "### Latest
+closeout" (VX-981's when this was written, or whichever run merged after it) moves VERBATIM to the head of
+`notes/PhaseCloseoutArchive.md`, directly under its title, above the newest entry already there; (3) this
+paragraph takes its place. The phase table's row 11 (the mobile catch-up) is untouched — one umbrella of wave 1
+closes, not the row. Its slots are filled from FOR A LATER READER as the last of them land:
+
+> **→ VM-78 CLOSED 2026-11-19 — RUN: FIXES TO WHAT'S THERE (the mobile catch-up's wave 1, umbrella 4; the record
+> `notes/plans/fixes/vm-78-fixes-to-whats-there.md`, FOR A LATER READER at its top; /run-phase overnight under her
+> frame — sequential merges, provisional running — nov18 coordinating; PR PENDING(the PR number), merge commit
+> PENDING(the merge SHA)).** Ten members in four batches, EIGHT shipped, pin before fix per member, no `Sync/`,
+> custody, schema or `Sources/` line, re-landed on VM-55's message line by the merge-in: the undo door's quiet press
+> speaks the shared refusal and records no way back (VM-16), its warning says "committed" (VM-20); a restore keeps
+> the words it replaces (VM-43, P-849-1's phone half); the date chip follows the date on a titled note (VM-84); the
+> Trash says nothing until its listing answers (VM-33, found real); the divide lesson teaches keep-on-top (VM-3);
+> Book Details' Finish asks with the count when notes wait at Arrivals, says what Finished means and is not drawn on
+> a gathering, and a starred archived book has its way out (VM-81); the shelf sorts a–z with starred first, its Pin
+> door is gone and a gathering is called one in every face the brief named (VM-83); the collect line names the star
+> and is honest on an archived gathering, and pickers mark "(archived)" (VM-21); the words hoisted into `Shared/`,
+> every Mac string byte-identical; VM-19's test teardown fixed (its desync did not reproduce). Traced and handed on
+> by her rulings: VM-24 — the phone editor's unarmed edits are routed from a report TextKit's attribute fixing can
+> widen past the block's terminator, so the word just entered snaps back (stored text never at risk) — its own run
+> after wave 1 (`/architect-phase vm-24`, the coordinator's launch, a measuring session on her phone first), its caret
+> pin red on main by decision; VM-17 — stray fan badges on a long note's stepped scroll, two mechanisms; a first fix
+> went clean on the scroll, failed its window on the jump road and was backed out — one run with VM-239 (the block
+> decor, measured astray) and VM-179 (`/architect-phase vm-17 vm-239 vm-179`, hers to launch). The ladder closed at
+> ROUND 5, the cap (all Fable: r1 0B/2M/6m/11n · r2 0/0/3/5 · r3 0/1/5/3 — the decor, VM-239 · r4 0/1/0/5 — the next
+> wave-1 merge's three unpinned faces, answered by three guards and a hunk map handed to the coordinator · r5
+> 0/0/0/9, wording). Windows: (2) 68/6, (1) 84/16 with the Mac's 110/17 over the hoists, (5) 75/10, F4 4/1, R2-N1
+> 11/2, each after its reds; window (3)'s matrix (the caret pin red as traced, VM-17's probe red, VM-19's pin red then
+> green); batch D's window red (the fix not proved, the decor red); five bundles lost or unreadable, their logs kept;
+> the re-land's window 44/4 red on exactly its six pins then 283/41 green; the guards' window 26/5 red on exactly its
+> four tests then 42/7 green; the simulator walk every row PASS in both voices; the merge gate PENDING(gate 1, the
+> whole phone target — VM-24's caret pin the one red by decision; gate 2, the whole Mac target). Canon:
+> SurfaceContracts ×5 (The Bookcase and books, the phone named), AppSpec §9 ×2 and OverallModel §3 ×1 (the insured
+> restore ratified, QUESTIONS #274 addendum 2), TEXTKIT2_NOTES §3 (two iOS 26.2 measurements); `Tools/canon-size`
+> PENDING(the canon-size line, at the merge). QUESTIONS PENDING(the QUESTIONS number, at the merge) (an archived
+> gathering's "(archived)" mark; F8, Diverge on a gathering's row; the wording pass). Born: VM-239; PENDING(the minted
+> ticket ids). MOBILE PARITY: PL-78 — the phone's existing faces made right (the undo door's quiet press, insured
+> restores, the date chip, the Trash's first paint, two pocket-guide lessons, the Finish confirm and the book doors,
+> a–z with one star door, "gathering", the collect line and "(archived)" marks), re-landed on VM-55's message line;
+> VM-24's snap-back and VM-17's stray fan badges traced, and each given its own run after wave 1 by her rulings
+> (VM-17's with VM-239, the callout and comment marks, and VM-179); zero schema, marker untouched. INSTALL:
+> PENDING(the single wave-1 phone install — only if this run is the last of the four mobile runs to merge).
+> **Her bundle: the two PROVISIONAL calls, the wording pass, the three SurfaceContracts lines left for her call,
+> VM-17's launch, VM-24's measuring session on her phone at that run's start.**
+
 **`notes/AppSpecRecord.md`, the dated entry (draft):**
 
 > ## 2026-11-19 — VM-78, Run: Fixes to what's there (the mobile catch-up's wave 1, umbrella 4; SurfaceContracts The Bookcase and books · MobileSoul §6 PL-78 · AppSpec §9 and OverallModel §3, the insured restore ratified · TEXTKIT2_NOTES §3; branch `vm-78-fixes-to-whats-there`, PR PENDING(the PR number), merge PENDING(the merge SHA))
@@ -4379,11 +4426,15 @@ This run is a mobile run's own row in `notes/MobileSoul.md` §6: **PL-78** (PL-7
 > run (Recommended)".
 >
 > **Cast.** Fable orchestrated (briefs, the verification windows from a throwaway checkout, adjudication, records;
-> no batch code); the one orchestrator session ran throughout — its context was compacted once at a clean seam, at the author's word, and `notes/plans/vm-78-orchestrator-handoff.md` (written in case a successor was wanted) served as its own map; a fresh `opus-implementer` per batch (B, A, C), a
-> fresh one for the round-1 fix pass, a fresh batch C window runner, for batch D a fresh one for the trace and
-> another for the build, a fresh one for the back-out and the merge-in, and documents-only closeout drafters; a
-> fresh `fable-reviewer` per ladder round (the editor seam: VM-84's view model, batch C's caret and badge test code,
-> batch D's takes chrome). nov18 coordinated the stage and the merges.
+> no batch code); the one orchestrator session ran throughout — its context was compacted once at a clean seam, at
+> the author's word, and `notes/plans/vm-78-orchestrator-handoff.md` (written in case a successor was wanted) served
+> as its own map. A fresh `opus-implementer` per batch (B, A, C); a fresh one for the round-1 fix pass; a fresh
+> batch C window runner; for batch D a fresh one for the trace and another for the build; a fresh one for the
+> back-out and the merge-in; documents-only closeout drafters, and a fresh documents-only one for the closeout
+> re-fit; a fresh one for round 4's fix pass (the three guards and its NITs); a fresh one for the second merge-in
+> (main after VX-981); a fresh one for the gate's simulator walk; and a fresh documents-only one for round 5's fix
+> pass. A fresh `fable-reviewer` per ladder round, five in all (the editor seam: VM-84's view model, batch C's caret
+> and badge test code, batch D's takes chrome). nov18 coordinated the stage and the merges.
 >
 > **The ladder.** Round 1: 0 BLOCKER, 2 MAJOR (F1 the ladder cannot close before batch C is cold-read; F2 the VM-17
 > probe's vacuous reading), 6 MINOR, 11 NIT. Round 2: 0 BLOCKER, 0 MAJOR, 3 MINOR, 5 NIT. Round 3: 0 BLOCKER,
@@ -4470,7 +4521,9 @@ This run is a mobile run's own row in `notes/MobileSoul.md` §6: **PL-78** (PL-7
   target, the whole Mac target — ladder round 5 and the gate's walk are done), the shared ledgers,
   `Tools/canon-size`, the PR and its merge.
 - No AppSpecRecord, QUESTIONS, master plan, TICKETS or finals-ledger line was written (shared ledgers, the merging
-  session's); their drafts are above.
+  session's); their drafts are above — the master plan's closeout paragraph with the in-flight row's retirement and
+  the outgoing paragraph's roll into `notes/PhaseCloseoutArchive.md` among them (`notes/TICKETS.md` is the generated
+  board snapshot, never drafted).
 - No ticket was minted from this record's "To file" list; VM-239's minting and VM-24's and VM-17's re-owning in
   Linear are the orchestrator's acts (the live state), not this document's.
 - VM-24 is NOT fixed by this run, by her ruling; its pin is red on this branch and will be red on main until its
