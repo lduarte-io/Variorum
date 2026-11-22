@@ -34,6 +34,31 @@
 sync apply, deliveries onto the page, offline, Castle, and whether the Mac has the same hole). Their hand-backs
 arrive in the session as messages. If a file is there and no hand-back came, read the file.
 
+**Update, 2026-11-22 ~16:15 (after the compaction).** The sync review landed and is in the repo:
+`notes/plans/vm-271-plan-sync-review.md` (Opus; two blockers, eight majors, nine minors, a 28-cell two-device matrix,
+seven decisions for her). Read whole by the orchestrator and spot-checked in the code, all holding: `divide` and
+`merge` take `guardedBy` and check neither the text they were planned on nor (for `merge`) the fans; the MCP door's
+`divideBlock` guards exactly that race; `Repairs.swift` treats a live unplaced block as legal; `hasPendingAutosave`
+reads only the coordinators; the Mac's seam join reads fans from the store; SyncSpec §7 accepts structural duplicates
+on the premise "structural editing is desktop-only"; every autosave writes the container row. Its cell 7 (a version
+restore racing unpushed phone typing) is the reviewer's inference and was not run. The general review was still
+running. What it changes in the positions below, pending her word:
+- *Item 3 is answered, and differently from v2.* The save-time placement check catches only saves made after the phone
+  has heard of the other device's change; the common case is words saved (and pushed) before it hears, which strand in
+  lineage in every order of arrival. The catch belongs at the delivery, in the editor that wrote the words, with a
+  store-level hint at open as the backstop. §20.1's parameter becomes optional. The Mac has the same hole today, and
+  phone Return and backspace make it more frequent on the Mac.
+- *New, and a blocker:* a structural act planned on the map's text and run on rows a sync pull just changed overwrites
+  the other device's words (v2's §10.1 adopts the operation's result as the save base). Every structural operation the
+  new editor sends carries a `WriteGuard` re-checking the texts, the fan and the adjacency it was planned on; a result
+  is adopted as `stored` only when it equals the ruled page.
+- *Item 4 (the rescue) is per cause, not one shape:* rebase her words into a merged successor when that composes
+  exactly, else a new block; a locked or deleted shown take becomes a take on the same block; a remote delete, archive
+  or move are hers to rule (the canon lets the delete win; a moved block is visible elsewhere).
+- *Hers:* the review's D1–D7 (where stranded words are caught; whether `autosave` gains the check; the rescue per
+  cause; SyncSpec §7's accepted duplicates now that the phone divides and joins; the Mac's exposure; refuse-and-undo
+  versus re-plan; words refused at a lock).
+
 **When they land.** Read each whole (reading is not delegated). Scan for private text, copy each beside the plan
 (`notes/plans/vm-271-plan-cold-review-2.md`, `notes/plans/vm-271-plan-sync-review.md`), commit. Spot-check the
 load-bearing claims in the code before accepting them. Write v3 of the plan with a disposition for every finding
@@ -321,3 +346,5 @@ In short:
 | ~14:40 | The phone-app audit and the Castle audit returned; VM-266 to VM-270 filed; VX-1030's canon lines corrected. |
 | ~15:10 | The editor design proposal page written; she chose option D. |
 | ~15:40 | VM-271 minted; the outside research and the code inventory filed; the plan's draft v1 written and sent to one adversarial cold review (Opus). |
+| ~15:55 | Plan v2 written after the first review; her broad agreement and rulings recorded; two Opus reviews of v2 started (general, sync). A context compaction followed. |
+| ~16:15 | The sync review landed, read whole, spot-checked, copied to `notes/plans/vm-271-plan-sync-review.md`. The general review still running. |
