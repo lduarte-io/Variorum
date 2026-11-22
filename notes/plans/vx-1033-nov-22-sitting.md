@@ -60,6 +60,51 @@ And, on sync, a little later: "it does eventually sync, it's just noticable that
 | 6 | VM-169 — the line after dismissing a waiting note | She picked "The Mac's line, no Undo (Recommended)". VM-169 closed. |
 | 7 | VM-15 — the library and the iPhone's own backup | OPEN. Her question back: "why can it hold an older wrapped key the app can't bring along? what does the app can't bring it along mean? I don't understand the issue fully." Explained in chat; her answer is awaited. |
 
+| 8 | The handoffs' short list (a–k), put to her in chat | "a-f I agree with your recommendtations. g - agree the mac should show that it's archived. h - agree that mac should hide it. i - might as well fix this. j - agree with your recommendation, k, agreed." The list: (a) the seven overnight merge gates confirmed; (b) VM-64 P-2-1 — a key typed while a divide or merge lands is refused and said — kept; (c) VM-64 P-71-1 — switching tabs is not leaving a note — kept (but see her first look, item on the Library tab, below: the two meet); (d) VM-55 P-55-3 — refusal lines fade by themselves — kept, judged in use; (e) VM-55 P-55-19 — a direction's colour changes from the alarm red to a neutral one; (f) VM-55 P-55-2, -14, -15, -18 — the interim wing behaviour ratified as built; (g) VM-78 call 1 — an archived gathering is marked "(archived)" on the Mac too; (h) VM-78 call 2 — the Mac stops offering Diverge on a gathering's row; (i) VX-1030 — the three stale SurfaceContracts lines are corrected; (j) VX-980 P-980-3 — option (a), the Settings row only, no automatic check; (k) VX-68 stays closed, VM-250 carries the watch. |
+| 9 | The Mac bundles (#276 VX-980's remainder, #278 VX-981) and VM-47's look calls (#281) | "agreed that we will simply handle the vx bundles later - i'm more concerned at the moment with getting the next mobile wave running and the next vx feature planned so that can be kicked off, the only deadline on going through that bundle is before the next release really (though I will do it earlier than that)." |
+| 10 | Phone sync | "i think the phone sitting open not syncing is probably why it's so slow - the mac automatically catches up, but the phone probably had a lot ot catch up on or something. let's mint a ticket for trimming the rounds and not doing cleanup off every round - it doesn't have to be done this wave, but we should fix it. also - it looks like the mac does sync, if i just open it, i see it syncing and then it says synced, whenever it's missing something." and "sync speedup can happen at a later point - it's not urgent, i do think it should be fixed, but it's less urgent than all of these editor issues." |
+| 11 | The editor | "vm-252: I want to fix these in the next wave, they're very bothersome. it seems like there is the whole problem that comes together from this wohle class of issue about page redrawing beneath in progress keyboard text, and all of those issues. what's the root level solution? we need to think deeply from a system perspective on how we can fix this and make the app performant and work correctly. do we need a separate phone editor core because of all of this random extra stuff? it really annoys me that the predictions and autocorrect are causing these issues. if we need a workaround / different approach on the phone, i don't want the phone's compromises to affect the mac editor's experience - i like where the mac is at and I'm wary of changing it to accomodate the phone. how does this impact your proposal? i'm ready for any phone 15 minute session that's needed." |
+| 12 | Castle | "you should start a new audit against the final castle rules. getting castle rules right is the MOST important part of this phoen work in many ways - that's the place where I could lose trust." (An Opus reader was started on it the same hour.) |
+
+## Her first look at the wave-1 phone app (2026-11-22, verbatim)
+
+"ok i opened it. just for starters - the bottom bar is moving when i swipe between screens, which should never happen
+(the bar should stay still and just the highlighted pill should change). I also want an option to change font size on
+the app (or maybe we just need to make the font size a bit smaller - it looks big to me). I also don't think thte Home
+* Bookcase and Home * Starred thing is necessary - it says on the bottom what area you're in. also, a kebab menu for
+settings makes less sense than just showing a settings gear. also - let's just only show the trash icon within
+library. also - clicking on library should bring me to library, not whatever note i last had open. you can mint a vm
+ticket for having another are ain the lirbary (after Scraps) that shows recently open notes, and that can work like
+the mac's recently open notes - ability to click to close all of them, or close them one by one, stays in memory,
+goes to about 20 or something (? not sure exactly where the mac caps). that would be a useful addition. also - not
+sure if the phone alreay has a ticket for showing what the preview text of a note is within lirbary in that list, but
+it should. and I should be able to choose whether I want to see preview text and a bit of the note (like how apple
+notes looks on the phone, with cards and some details (what book it's in, tags, first sentence), or just titles. that
+should be easy to switch  between. the top row should also collapse while I'm scrolling - I'm open to ideas on how
+that should happen, but right now the app just feels like it's fighting for space (the home library, then large
+searchbar, then different options to click between is a lot...) open to ideas on that, but I just don't love the
+current design. i also don't like the trash bin emoji, it looks out of place. the same trash bin icon the mac usesi s
+what we should use. new note should also be a writing icon, the way it's a writing icon on the mac app). I just want
+you to record all of this feedback and early impressions and start making plans for fixing it."
+
+On the iPhone-backup question (VM-15), in the same message: "also - hasn't this always been true for backups that you
+put in iCloud? if I put my mac backups in iCloud, or put a mac backup on a flashdrive while I was in standard (and then
+switched to castle), there's still an apple opened key on that mac backup? i thought we said that we give deleting
+keys from old backups our best attempt but can't guarantee it, and you should delete your backup. no? it wouldn't open
+your new library, right? but that backup is still openable? tell me if my read on that is right."
+
+On working between notes: "also - i'm interested in exploring more ways to work between several open notes on the
+phone (like how I told you about that recently opened area. maybe we can take some lessons from browser apps ? and
+from within that area you could be able to see your tabs or something? file a ticket for potential improvement there
+- not a needed v1 feature, but something in the long run I want to plan for."
+
+And a few minutes later: "I feel like I like the new UI less than theo ld one in many ways - it feels forgettable and
+overly crowded. it didn't get the same treatment that the mac got in many ways - the pills are rounded boxes, it looks
+like a forgettable phone UI. it used to look more distinct and principled. so I don't know what the path towards
+restoring that is, but we've got to look at it. also - why is purple the default? seaglass is the default color on the
+mac. so what's even the deal with this purple ?? did it sync from what my mac is on (dark mode purple)? and why can I
+not change the color of the phone in settings?"
+
 ## Tickets born at this sitting
 
 - **VX-1033** — the sitting itself.
