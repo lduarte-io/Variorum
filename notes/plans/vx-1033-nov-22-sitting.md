@@ -59,6 +59,44 @@ running. What it changes in the positions below, pending her word:
   cause; SyncSpec §7's accepted duplicates now that the phone divides and joins; the Mac's exposure; refuse-and-undo
   versus re-plan; words refused at a lock).
 
+**Update, 2026-11-22 ~16:50.** The general review landed and is in the repo:
+`notes/plans/vm-271-plan-cold-review-2.md` (Opus; verdict "would not approve v2 yet; the direction is right, the
+specification is not"; three blockers N1–N3, majors N4–N16, a row-by-row check of the identity table, the roads that
+bypass the doors, the saver traced, ten more probe steps). Read whole by the orchestrator and spot-checked, all
+holding: the Mac's seam join refuses on a live active fan only, read from the store, and locked takes do not refuse
+(`EditorEditRoute.swift`'s `textedSeamMerge` doc); the archived-take and comment guards are the carve's; the
+coordinator keeps the first record's base for a whole save run and has no way to drop an entry; divide, divideW,
+extract and merge copy comments to their successors; typed crystallization fires at the next paragraph's first
+character, not at Return; the phone's edit helper calls the public `insertText`; the compound's outcome carries no
+take id; the phone has no ceremony sheets and no Merge with Next; the Mac's structural door says "The store leads —
+the surface is never pre-written optimistically" and replays keys typed during a flight.
+
+**Two errors in v2 that were the orchestrator's own,** to be said to her plainly: §8.2 gave the backspace join the
+carve's refusals (an archived take, a comment, a locked take), which contradicts her ruling "backspace at block start
+joins with mac's exact rules"; and §5.3's "known without asking (one take, no comments)" is false for every block a
+divide, extract or merge produces.
+
+**Where the two reviews meet, and the orchestrator's position for v3 (hers to hear before v3 is written):** v2 is
+optimistic: it writes the ruled page from the map's copy of facts only the library holds, and lets the library answer
+afterwards. The Mac never does that. N1–N3, N9, N10, N12 of the general review and B1, M2, M4 of the sync review are
+all costs of that one choice. Position: **for structure, the library leads.** A structural gesture is caught at her
+door and held; the operation runs, guarded on the texts, the takes and the neighbours it was planned on; the page is
+then brought to the operation's result by one small edit through the text view's own calls; keys typed meanwhile are
+held and replayed, as on the Mac. That removes tokens, the hold-and-rebase, the inverse of a refused act and the
+optimistic rebase, and makes a change from another device and her own act reach the page by the same road. Its cost:
+a structural key waits for the library (a few milliseconds on an ordinary note, longer when something holds the
+writer), and it leans on the probe question v2 kept as the fallback (a key declined and re-issued on a later turn).
+The in-call door of v2 stays as the alternative if the probe shows a later-turn edit upsets the keyboard and an
+in-call edit does not; Return making an empty block may keep the in-call door for feel, since it reads no library
+fact. It supersedes, in the new editor only, VM-64's P-2-1 (a key typed while a divide or merge lands is refused and
+said), which she kept this morning: hers to say.
+
+**More that is hers, from the general review:** the open end's typed road (store what is on the page, untrimmed, as
+the idle mint does; or tidy the line above her caret while she types; or mint one paragraph late); the full list of
+shared-code changes (more than v2's two: the coordinator's per-entry refusal and a way to drop an entry, the
+session's flush roads learning about acts in flight); the first-change quiet commit of §15.5 as a new auto-commit
+occasion; more units than eight (the Write screen's chrome has none; U2 and U3a are each more than one session).
+
 **When they land.** Read each whole (reading is not delegated). Scan for private text, copy each beside the plan
 (`notes/plans/vm-271-plan-cold-review-2.md`, `notes/plans/vm-271-plan-sync-review.md`), commit. Spot-check the
 load-bearing claims in the code before accepting them. Write v3 of the plan with a disposition for every finding
@@ -348,3 +386,4 @@ In short:
 | ~15:40 | VM-271 minted; the outside research and the code inventory filed; the plan's draft v1 written and sent to one adversarial cold review (Opus). |
 | ~15:55 | Plan v2 written after the first review; her broad agreement and rulings recorded; two Opus reviews of v2 started (general, sync). A context compaction followed. |
 | ~16:15 | The sync review landed, read whole, spot-checked, copied to `notes/plans/vm-271-plan-sync-review.md`. The general review still running. |
+| ~16:50 | The general review landed, read whole, spot-checked, copied to `notes/plans/vm-271-plan-cold-review-2.md`. Both reviews put to her in chat with one position (for structure, the library leads). v3 not written: it waits for her word on that. |
