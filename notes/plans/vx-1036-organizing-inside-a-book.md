@@ -257,9 +257,40 @@ Her reply, verbatim:
 | R-1036-13 | **`#tag` in an all-wings search matches that path in every wing** — "I think so ? I don't see why not, or what the alternative is." Held with her doubt; the alternative is written at W-7. |
 | R-1036-14 | **⌘K: hers to rule on the architect's suggestion** — "i'm open to suggestions on this one." W-8 is the suggestion, drawn on the mockup. |
 
+### Round-1 mockups — delivered 2026-11-22
+
+- `notes/plans/vx-1036/mockup-1-book-and-lanes.html` (`0970134c5`) — frames 1–10, 25 sub-frames.
+- `notes/plans/vx-1036/mockup-2-wings.html` (`1c55fd78a`) — frames 1–7, drawn straight to the amended list.
+- Each file takes `?theme=dark` and `?only=f6&sub=f6a` (added for off-screen checking).
+- **Verified by the orchestrator:** both files committed and pushed; no external resource in either source (no `http`, `<link>`, `<img>`, `<script src>`, `@import`, `url(`); every frame id of §4c present; four frames rendered off-screen and looked at (file 1: frame 2 and frame 6 T-A in light, frame 3 in dark; file 2: frame 5 in light). The builder reports looking at most frames in light and a sample in dark, and names six it did not re-view after a last small edit (frame 1's window height, frame 2's foot crop, 3b and 3c in light, frame 6's "off" window, frame 9 in light, file 2's frame 6 in light).
+- The colours are the sea-glass computed by `PaletteDerivation`'s rule (the builder checked them against `PaletteDerivationTests`' pins); the metrics approximate the app's and are not a pixel spec.
+
+**What the builder had to choose** (the brief did not say; each is drawn, none is ruled):
+- *Layout:* the navigator drawn dragged to 300 pt — by `BookMastheadModeRow`'s numbers the Terminal mode row needs about 276 pt to keep the dial on its line, and at the shipped 190 pt the dial sits on a second line.
+- *Lanes:* the sample gathers `#week` with lanes `#monday`…`#friday`; a lane's "+" is a faint "+" after the navigator row's count and a muted "+ new note" at the end of the page heading; an empty lane is its heading alone with a 0; "also: thursday" rides the page card's title line only; the bottom bar's counts are as today; the note box's where-line names the lane where a chapter would stand; Move to Lane ▸ sits where Move to Chapter ▸ does, lanes in order, then unfiled.
+- *The one refusal drawn* (edge b), the builder's words: "Not moved — this note would still file under monday. #monday is what keeps it in this gathering, and monday comes before waiting." — on a variant gathering that collects the day tags themselves.
+- *Making lanes:* a "lanes" section with "edit…", "remove", "+ add lane", "a lane for each tag under… ▾"; the picker's last row "a rule…"; the lane editor titled 'Rule — "tuesday"'; the New Gathering quick path as one chip, "a lane for each tag: on".
+- *Tags:* the quiet line is leaf names in each tag's own colour, no boxes; a tagless note shows a faint ＃; T-B adds through the row's ＋; T-C is tag cards plus the masthead's ＃ door; T-D sits on the Outline's bottom bar; the switch is a chip, "tags: hidden / tags: shown", beside "expand all · collapse all".
+- *New note:* drawn with the card she was on still visible above the new one.
+- *The dial:* a gathering's menu leads with "As collected"; the receipt 'Saved the order for "this week" — created ↓.'; on a hand-ordered book, two quiet lines under the mode row and two menu rows.
+- *Read titles:* a 13 pt muted line and an 18 pt semibold heading; the switch a chip, "note titles: shown", beside Scroll · Pages.
+- *Wings:* the scope word drawn INSIDE the field's trailing end (outside it, the controls row would need about 80 pt more than it has at 1270 pt and break its one-line rule); the band's "in: home" chip retires into it; an all-wings answer is this wing first, then one headed group per other wing, band counts the totals; all-wings Starred lists this wing's rows first; Settings ▸ Wings sits after Tags, one card per wing, Home with no grip, rename, move or delete; the left-out line "Kitchen is not taking part in all-wings search."; ⌘K's row 'Search all wings for "ferry" ›' after "All matches in the Library ›".
+
+**What drawing it exposed, with the architect's disposition** (PROPOSED unless marked hers):
+1. *A move into a lane that leaves out a tag the note wears* (a `#done` note into "#tuesday and not #done"): **HERS.** Lean: refuse and say why — a move adds what the destination needs and removes only what the source lane matched on; it never removes a tag for another reason.
+2. *What the tag line leaves off:* **HERS.** Either every tag, or everything except the tags that already explain where the note sits (the gathering's own and its lane's).
+3. *T-C and T-D are nearly one place:* inside a book the block menu lives in the sidebar's note box, so her "note menu where the block menu is" IS the note box (T-C); the book's only bottom bar is the Outline's position bar (where T-D is drawn). Hers to see.
+4. *A lane's name:* a one-tag lane reads as its tag; a lane with a longer rule asks for a name when it is made, the field offering its first tag's name. PROPOSED.
+5. *"Unfiled" in a quick-path gathering* never shows (the gathering gathers exactly its lanes' tags) — it appears only where the gathering's rule is wider than its lanes. No decision.
+6. *Where the new note lands on the page:* with the note she was on kept in view above it (the minimal-reveal idiom). PROPOSED.
+7. *When the wider search scope ends:* when the field is cleared — so "all wings" may be picked on an empty field and holds for the search typed next. PROPOSED, inside R-1036-10.
+8. *⌘K's "All matches in the Library ›" pressed after widening* carries the all-wings scope with the words (the sidebar field's precedent). PROPOSED.
+9. *All-wings Starred's order:* **HERS.** Drawn as this wing first; the alternative is her one star order as she keeps it, cross-wing rows marked.
+10. *A wing with "Show in all-wings Starred" off* still shows its own stars while she stands in it — the switch governs only other wings' view. PROPOSED.
+
 ### Sitting 2 — opens on the round-1 mockups
 
-Hers to answer there: the tag option(s) by letter · D-1 as drawn · the PROPOSED lines of §4b (L-4's empty lane, L-6(e)'s undo, L-8's doors, L-10's bind, RT-1) · W-8's ⌘K row · the wings pane as drawn, and R-1036-11 and -13 confirmed or changed on sight.
+Hers to answer there: the tag option(s) by letter and item 2 · item 1 · D-1 as drawn · the PROPOSED lines of §4b (L-4's empty lane, L-6(e)'s undo, L-8's doors, L-10's bind, RT-1 and its weight) · items 4, 6, 7, 8, 10 on sight · item 9 · W-8's ⌘K row · the wings pane as drawn, and R-1036-11 and -13 confirmed or changed on sight.
 
 ---
 
