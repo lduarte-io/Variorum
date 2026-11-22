@@ -155,6 +155,14 @@ the app be stable before making more changes. "that session" will not add anythi
 won't even run it until all of the other issues / handoffs /etc. are done." So mobile wave 2 waits for VM-271, and
 this session writes today's rulings into `notes/QUESTIONS.md` at its close.
 
+**On plan v2 (2026-11-22):** her words are in the plan's §2, verbatim. In short: she agrees broadly; wants a second
+cold review and a sync-focused one (both started, Opus); ruled "backspace at block start joins with mac's exact rules
+- yes" and "return makes a block - yes, agreed"; asked for the Mac's per-note "newlines make blocks" switch on the
+phone, living in the note and not in Settings (VM-141, pulled into VM-271's U3b); agreed the probe runs in a new
+session from a kickoff; and asked what "a save checks it is still in this note" means (answered in chat: the block's
+place in the note; a block merged, divided with takes, deleted, archived or moved on another device has left it, and
+today's save writes into it anyway).
+
 Also that hour: "I started a stage coordinator named nov22 by the way - i'm going to do the ambient app fixes /
 improvements and I wanted to get that effort started."
 
