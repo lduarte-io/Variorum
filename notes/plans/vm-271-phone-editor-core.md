@@ -3,7 +3,8 @@
 **Ticket: VM-271 (team VM, Umbrella, Urgent) · Project: Mobile — the catch-up & launch · Written at the Nov 22 sitting
 (VX-1033) on branch `vx-1033-nov-22-sitting` · Status: DRAFT v2 — revised after its first cold review
 (`notes/plans/vm-271-plan-cold-review-1.md`: three blockers and fifteen majors against v1, every one dispositioned in
-§21). Awaiting her approval. Nothing here is built.**
+§21). She agrees with it broadly and has asked for a second round: one general cold review and one sync-focused.
+Nothing here is built.**
 
 *How to read this file:* §0 is the kickoff a fresh session pastes. §1 is the short version. §2 is her words. §3–§13
 are the design. §14–§16 are how it is proven, on the Mac and on her phone. §17 is the units and runs. §18–§22 are what
@@ -88,7 +89,20 @@ this and I will follow them."
 On the order: "i'll probably just wait and only run wave2 once this is done. I'd rather the core of the app be stable
 before making more changes."
 
-**Approval:** *(empty — her word on this plan goes here, verbatim, with the date.)*
+On v2 (2026-11-22): "ok - I agree with this plan broadly. I do agree that it needs a second cold review. It does make
+sense that computing the block after isn't the right approach - not what the mac does and we need it to be
+deterministic and follow a set of rules, not changing randomly with whatever non keyboard input showed up, or the
+block system wouldn't make sense to people. I agree with running the probe in a new session - you can give me the
+kickoff for that when it's time. saving checking it's still in this note - what's the exact issue here? what is still
+in this note? the block? I think that makes sense - this is where we have to plan carefully sync wise, because we've
+sidestepped a lot of issues with takes but we can't sidestep structural operations. spawn a cold review and a sync
+focused cold review. backspace at block start joins with mac's exact rules - yes. return makes a block - yes, agreed.
+not being able to type a newline within a block isn't an issue if you can press the newline button. also - will the
+phone have a "newlines make blocks" setting to toggle like the mac? that would also ease a lot of the friction -
+someone could just toggle that setting. i think that should be an option but it shouldn't be in settings, it should
+live in the note."
+
+**Approval:** *(empty — her word on this plan after its second round of reviews goes here, verbatim, with the date.)*
 
 ---
 
@@ -372,9 +386,13 @@ With Return making a block, she needs a way to type a newline inside one. The ph
 that makes Return structural adds a "new line" key to the bar above the keyboard, and a hardware ⇧⏎ is read as the
 same. Wave 3's capsule replaces the key later. A dictated "new line" does not arrive as a Return and is content.
 
-### 10.3 The segmentation switch
-The phone has no per-note switch yet (VM-141). Until it does, Return is structural unless the note's segmentation is
-"one block", which is what the Mac's switch off means.
+### 10.3 The switch in the note
+Her word (2026-11-22): the phone gets the Mac's "newlines make blocks" switch, and "it shouldn't be in settings, it
+should live in the note." The Mac's switch is per note and writes the note's own segmentation, which syncs; "off" is
+the note's segmentation set to one block. So a note switched off on the Mac is already Return-as-content in the new
+core, and the phone needs only the face: a switch inside the note that writes the same value. It is built with the
+structural gestures (U3b), which pulls VM-141 forward from wave 3. Where in the note it sits (the note's ⋯ sheet, the
+bar above the keyboard, or both) is a design step for her at U3b's start.
 
 ### 10.4 Selections
 A selection may be several ranges on iOS 26 and later. The doors treat a multi-range selection that crosses a break as
@@ -667,7 +685,7 @@ source-reading suites.
 | **1 · Probe and core** | **U1 — the probe** | §15.3's screen, both pages, both modes, the log | Her pasted log; "The probe's answers" written; the settings of §13.1, the fallbacks of §7 and §12.2, and §18 settled; her calls in §20 that depend on it put to her |
 | | **U2 — the core** | The map and its rules in the core package; the identity table as code; the saver's order model; `pageArms` | §14.2's identity oracle over every row of §8 and of the review's table; §14.3's random-change test with the adversary and kill points; §14.4; microbenchmarks at 20,000 blocks |
 | **2 · The page in her hand** | **U3a — typing** | The text view, the storage observer, the editor model, saving through the session's coordinator with the placement check and the rescue, every durability road, the open end's mint, the checks, the switch with "Chosen notes", the base look. **Return is content and a seam declines, as on today's phone** | Hosted tests on every road; the order model against the real coordinator; the simulator typing test; **her trial on scratch and chosen notes**, with the durability steps |
-| | **U3b — her doors** | Return, backspace and forward delete at a seam, edits across blocks, the "new line" key, the gate as policy, §8.6's repairs, the self-test | The identity oracle's cases driven through a hosted text view; **her self-test green on her phone**; her feel |
+| | **U3b — her doors** | Return, backspace and forward delete at a seam, edits across blocks, the "new line" key, the switch in the note (§10.3, VM-141), the gate as policy, §8.6's repairs, the self-test | The identity oracle's cases driven through a hosted text view; **her self-test green on her phone**; her feel |
 | **3 · Acts and the first features** | **U4 — the menu and the library** | The menu's structural acts; the structural undo door; changes from the library by §12.2; take swap and peek | Hosted tests; a two-device session in which the Mac makes **structural** changes to a note open on the phone with its keyboard up; her session |
 | | **U5a — the look and the tools** | The markdown look and typed-face reset, list continuation and Tab, the formatting bar, find, the tray, jump to a block, timing marks, the trace | A simulator walk of a fixture note in both editors, screen by screen |
 | **4 · Everything moves, and the old editor goes** | **U5b — takes, lenses, badges and marks** | The takes sheet and pan, lenses, the badge, pill, callout and comment marks, placed for the new core (this absorbs VM-17, VM-239 and VM-179) | The walk; her trial with the switch on "All notes" |
@@ -726,7 +744,8 @@ decides the shape of run 2.
 
 Each has a default the build follows and marks PROVISIONAL. Items 1–4 and 6 must be answered before run 2.
 
-1. **A save checks it is still in this note** (§11.3): an optional parameter on `Operations.autosave`, and on the
+1. **A save checks it is still in this note** (§11.3) — *she leans yes ("I think that makes sense - this is where we
+   have to plan carefully sync wise"), pending the sync-focused review she asked for:* an optional parameter on `Operations.autosave`, and on the
    shared coordinator's entry, that refuses a write into a block no longer placed in the note. It is additive and the
    Mac is unchanged without it, but it is a change to an operation's contract, which is hers alone. Default: **yes**.
    Without it, a block merged on the Mac while she types on the phone silently takes her words into lineage; the
@@ -736,12 +755,14 @@ Each has a default the build follows and marks PROVISIONAL. Items 1–4 and 6 mu
    "This note was sealed on another device — these words are not saved. Copy them before leaving."
 3. **The idle mint stores the text as it stands**, untrimmed, while a Return trims as the Mac does (§10.5). Default:
    as written. The alternative is trimming under her fingers when she pauses.
-4. **Backspace at a block's start joins, with the Mac's exact rules**, including its refusals. Default: yes (her
-   wave-3 ruling).
+4. **Backspace at a block's start joins, with the Mac's exact rules**, including its refusals. **RULED 2026-11-22:**
+   "backspace at block start joins with mac's exact rules - yes."
 5. **A composition is accepted at a durability moment**; a prediction's guess is discarded (§11.5). Default: as
    written.
 6. **Return makes a block**, including "a caret inside a word takes the whole word down", with a "new line" key on
-   the bar until wave 3's capsule (§10.2). Default: yes (NT-1).
+   the bar. **RULED 2026-11-22:** "return makes a block - yes, agreed. not being able to type a newline within a
+   block isn't an issue if you can press the newline button." And the per-note switch (§10.3) is hers too, living in
+   the note; where in the note is a design step at U3b.
 7. **What the phone says** for a carve, a join and a Return (§9.2). Default: her message-line rule (removals and
    refusals only), not the Mac's receipts.
 8. **The grey inline prediction** off at first. **Writing Tools and proofreading** off. **Dragging text within a
