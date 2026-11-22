@@ -134,6 +134,22 @@ phone? I want to get this issue sorted and this plan done - that's my current to
 So: option D is chosen; today's editor is not patched (the "safety fixes first" step is dropped); the effort's ticket
 is **VM-271** and its plan is `notes/plans/vm-271-phone-editor-core.md`, with one adversarial cold review beside it.
 
+**On the switch (2026-11-22):** "why are we adding the new editor behind a switch rather than just building the new
+editor?" — answered in chat: the new editor arrives in pieces and its first piece has no takes, lenses, badges or
+find, so the switch lets her hold the risky part early without losing her daily app; and the draft's dual support
+(features working with both editors, the old one living on to a separate retirement run) was more than that needs.
+Her reply: "ok I suppose a cheap switch for an early look is fine - I just want us to be strategic with the work, but
+it makes sense to me to do a cheap try first. about the shape of the work - make plans for how we're going to do this
+and I will follow them. we can do the part that we can do here, then you'll leave me with a kickoff message for the
+next part of the plan. i imagine we'll do this before wave 2? also - i'm planning that feature I mentioned in another
+window, I'll handle filing the mac bug in a different window, and I'll handle the handoffs / wave 2 questions in
+another session as well. we can fully focus on this work - is there any loose thread that I should be aware of to
+handle outside of this session?"
+
+So this session's scope narrows to the editor core (VM-271): the plan's revision after its cold review, the probe on
+her phone, the kickoff for what follows. The Mac feature, the Mac bug, the remaining handoff bundles and the wave-2
+questions are hers in other sessions.
+
 Also that hour: "I started a stage coordinator named nov22 by the way - i'm going to do the ambient app fixes /
 improvements and I wanted to get that effort started."
 
