@@ -114,6 +114,21 @@ not change the color of the phone in settings?"
 - **VX-1032** (Medium, Feature, Library & sidebar, Backlog) — hide tags in the Library view: one setting for all, and
   a per-book choice.
 
+- **VM-252** (Urgent, Bug, Confirmed, Editor) — a key typed after a refused edit and before the page's repair can
+  save the wrong text into the wrong block (the editor audit's finding 1; the gap read by the orchestrator too).
+- From her first look, under Home, wings and capture (VM-72): **VM-253** the bottom bar moves on a swipe · **VM-254**
+  text size · **VM-255** the home pages' top line (no page word, a gear, the trash door only on the Library, the
+  Mac's icons) · **VM-256** the Library tab opens the Library · **VM-265** a direction's neutral colour (P-55-19) ·
+  **VM-247** the palette row, promoted from Backlog to Todo.
+- From her first look, under The Library (VM-87): **VM-257** a Recently open area · **VM-258** cards with details or
+  titles only · **VM-259** the top rows give way while scrolling.
+- **VM-260** (High, not seated) — the phone's look, a second pass. **VM-261** (Parked, after v1) — working between
+  several open notes.
+- Sync, under Speed, second pass (VM-176): **VM-262** fewer server calls per round and the cleanup off every round ·
+  **VM-263** the phone asks for changes while it sits open · **VM-264** a failed round retried, a request timeout.
+- **VX-1034** (Low, Backlog) — the Mac's note-in-books list marks an archived gathering and stops offering Diverge on
+  a gathering's row (VM-78's two calls, ruled).
+
 ## Findings
 
 ### The text-loss recording (her phone, the build from `beb638033`, recorded 2026-11-21)
