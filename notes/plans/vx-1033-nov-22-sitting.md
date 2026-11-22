@@ -150,6 +150,11 @@ So this session's scope narrows to the editor core (VM-271): the plan's revision
 her phone, the kickoff for what follows. The Mac feature, the Mac bug, the remaining handoff bundles and the wave-2
 questions are hers in other sessions.
 
+**On the order (2026-11-22):** "i'll probably just wait and only run wave2 once this is done. I'd rather the core of
+the app be stable before making more changes. "that session" will not add anything to questions first - i probably
+won't even run it until all of the other issues / handoffs /etc. are done." So mobile wave 2 waits for VM-271, and
+this session writes today's rulings into `notes/QUESTIONS.md` at its close.
+
 Also that hour: "I started a stage coordinator named nov22 by the way - i'm going to do the ambient app fixes /
 improvements and I wanted to get that effort started."
 
