@@ -161,6 +161,15 @@ improvements and I wanted to get that effort started."
 - **VX-1034** (Low, Backlog) — the Mac's note-in-books list marks an archived gathering and stops offering Diverge on
   a gathering's row (VM-78's two calls, ruled).
 
+- From the audit of the phone app outside the editor and the Castle audit, under The lock (VM-103): **VM-266**
+  (Urgent) the library can lock after she has come back, and the lock waits behind an uncancellable sync round ·
+  **VM-267** lock and unlock made solid · **VM-270** the phone writes backup copies it never prunes or lists, and
+  three sentences name doors it lacks. Under The Library (VM-87): **VM-268** move the Library's paging and the Today
+  door to shared code first. Under Home, wings and capture (VM-72): **VM-269** double-tap guards and untrue first
+  paints.
+- **VM-271** (Urgent, Umbrella) — the phone's editor core, the page is the truth. Its plan:
+  `notes/plans/vm-271-phone-editor-core.md`.
+
 ## Findings
 
 ### The text-loss recording (her phone, the build from `beb638033`, recorded 2026-11-21)
@@ -199,3 +208,8 @@ In short:
 | ~13:30 | VM-250 filed; two Opus readers started (sync lag; the phone editor audit). |
 | ~13:40 | Her four wave-2 answers recorded; VM-251 and VX-1032 filed; VM-95 and VM-169 closed. |
 | ~13:50 | The sync reader returned; VX-1033 minted; this record opened. |
+| ~14:10 | The editor audit returned; VM-252 filed; the phone-app audit and the Castle audit started. |
+| ~14:20 | Her first look at the wave-1 app recorded verbatim; VM-253 to VM-265 and VX-1034 filed; VM-247 promoted. |
+| ~14:40 | The phone-app audit and the Castle audit returned; VM-266 to VM-270 filed; VX-1030's canon lines corrected. |
+| ~15:10 | The editor design proposal page written; she chose option D. |
+| ~15:40 | VM-271 minted; the outside research and the code inventory filed; the plan's draft v1 written and sent to one adversarial cold review (Opus). |
