@@ -7,6 +7,11 @@
 *(Kept current while the sitting runs; rewritten at its close. Last rewritten just before a context compaction,
 2026-11-22 late afternoon.)*
 
+- **The editor design has LEFT this sitting (2026-11-22, late).** After the second round of reviews she moved VM-271's
+  design to a fresh, standalone design session that starts from the ground up. Everything that session needs is in
+  **`notes/plans/vm-271-design-session-brief.md`**: her words, the problem, the three reviews' findings, the direction
+  the orchestrator recommended exactly as it was told to her, her lean against it, and the reading order. Plan v2 is
+  marked not approved. What remains of this sitting is its close (RESUME HERE, "Still owed").
 - **The sitting narrowed to one thing: the phone's editor core (VM-271).** Her other sessions take the Mac feature,
   the Mac bug, and the remaining wave-1 handoff bundles and wave-2 questions. Mobile wave 2 waits until VM-271 is
   done ("I'd rather the core of the app be stable before making more changes").
@@ -26,6 +31,20 @@
 - **Rulings so far** are in "Her rulings" below and, for the plan, in the plan's own §2 and §20.
 
 ## RESUME HERE (state at the compaction)
+
+**Read this paragraph first; it supersedes what follows where they differ (2026-11-22, ~17:20).** Both second-round
+reviews landed and were put to her, with one recommended direction ("for structure, the library goes first"). She
+leaned against it and took the design out of this sitting. Her words: "I can see from how all of this is going that
+this is very castle-esque in effort and I think that I simply need to start a new conversation and slow things down
+to the point where I understand everything and where it is really thoroughly, the trade offs thoroughly, and think
+more about what the solution should be. … I'm raising it from being an offshoot of a catch all planning session to a
+new, fresh, standalone design session. … I will say that my initial lean is that v3 is not the correct approach at
+all - a note that doesn't let you write a newline because it's waiting on sync is a broken app, honestly." Her full
+message is in `notes/plans/vm-271-design-session-brief.md` §1. So: **no v3 is to be written here; the plan is marked
+not approved; the positions listed below are history, kept for the new session's reference.** This sitting's
+remaining work is its close ("Still owed", below). The hold "nothing is merged to main until the plan is approved"
+no longer has its condition; whether this branch merges now, with the plan marked not approved, was put to her and
+is hers to say.
 
 **In flight.** Two Opus reviewers of plan v2, started 2026-11-22, each writing to the session scratchpad
 (the session-specific scratchpad folder; its full path is in the session's memory file, not here):
@@ -387,3 +406,4 @@ In short:
 | ~15:55 | Plan v2 written after the first review; her broad agreement and rulings recorded; two Opus reviews of v2 started (general, sync). A context compaction followed. |
 | ~16:15 | The sync review landed, read whole, spot-checked, copied to `notes/plans/vm-271-plan-sync-review.md`. The general review still running. |
 | ~16:50 | The general review landed, read whole, spot-checked, copied to `notes/plans/vm-271-plan-cold-review-2.md`. Both reviews put to her in chat with one position (for structure, the library leads). v3 not written: it waits for her word on that. |
+| ~17:20 | She leaned against that direction and moved VM-271's design to a fresh standalone design session. `notes/plans/vm-271-design-session-brief.md` written for it; plan v2 marked not approved; a kickoff prompt for the new session given to her in chat. |

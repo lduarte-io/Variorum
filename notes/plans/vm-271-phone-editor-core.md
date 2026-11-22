@@ -1,10 +1,19 @@
 # VM-271 — the phone's editor core: the page is the truth (the design plan)
 
+> **NOT APPROVED, AND NO LONGER THE WORKING DESIGN (2026-11-22).** The second round of reviews
+> (`notes/plans/vm-271-plan-cold-review-2.md`, `notes/plans/vm-271-plan-sync-review.md`) both said "not yet". She has
+> moved the design to a fresh, standalone design session that starts from the ground up. **Read
+> `notes/plans/vm-271-design-session-brief.md` first. Do not build from this file, and do not use §0's kickoff.** It is
+> kept whole as the record of one attempt: its vocabulary (§4), its identity table (§8) and its probe (§15.3) are
+> still useful references. Two errors in it are known and uncorrected here: §8.2 gives the backspace join the carve's
+> refusals (the Mac refuses only on more than one live take), and §5.3's "known without asking (one take, no
+> comments)" is false for blocks a divide, extract or merge produces.
+
 **Ticket: VM-271 (team VM, Umbrella, Urgent) · Project: Mobile — the catch-up & launch · Written at the Nov 22 sitting
 (VX-1033) on branch `vx-1033-nov-22-sitting` · Status: DRAFT v2 — revised after its first cold review
 (`notes/plans/vm-271-plan-cold-review-1.md`: three blockers and fifteen majors against v1, every one dispositioned in
-§21). She agrees with it broadly and has asked for a second round: one general cold review and one sync-focused.
-Nothing here is built.**
+§21). She agreed with it broadly and asked for a second round: one general cold review and one sync-focused. Both
+are in; see the note above. Nothing here is built.**
 
 *How to read this file:* §0 is the kickoff a fresh session pastes. §1 is the short version. §2 is her words. §3–§13
 are the design. §14–§16 are how it is proven, on the Mac and on her phone. §17 is the units and runs. §18–§22 are what
@@ -102,7 +111,12 @@ phone have a "newlines make blocks" setting to toggle like the mac? that would a
 someone could just toggle that setting. i think that should be an option but it shouldn't be in settings, it should
 live in the note."
 
-**Approval:** *(empty — her word on this plan after its second round of reviews goes here, verbatim, with the date.)*
+**Approval: none. Her word after the second round of reviews (2026-11-22):** "I can see from how all of this is going
+that this is very castle-esque in effort and I think that I simply need to start a new conversation and slow things
+down to the point where I understand everything and where it is really thoroughly, the trade offs thoroughly, and
+think more about what the solution should be. … I'm raising it from being an offshoot of a catch all planning session
+to a new, fresh, standalone design session." Her full message, the reviews' findings and the direction the
+orchestrator had recommended are in `notes/plans/vm-271-design-session-brief.md`.
 
 ---
 
