@@ -4,19 +4,98 @@
 
 ## FOR A LATER READER
 
-*(Kept current while the sitting runs; rewritten at its close.)*
+*(Kept current while the sitting runs; rewritten at its close. Last rewritten just before a context compaction,
+2026-11-22 late afternoon.)*
 
-- **The phone install is done.** The app built from `fe1493c16` (wave 1 + VM-24 + VM-243, equal to main's product
-  code) went onto her iPhone in place over Wi-Fi with `devicectl`, no cable, on 2026-11-22. She chose it over the
-  handoff's two-install order, so VM-24's "before" session on the wave-1 app was not run; the new app's own
-  "rescued" counter stands in for it. No safety copy was taken, at her word.
-- **The text-loss recording is VM-250 (Urgent).** Typing at a block's end while the keyboard is predicting made the
-  note redraw, lost the last letter, and let the prediction land in the wrong place; one piece of damage was saved to
-  the store. The redraw trigger is VM-24's snap-back (fixed on main, unproven against inline predictions on a
-  device). Still live on main: a whole-note redraw underneath in-progress keyboard text.
-- **Phone sync lag** — the reader's report is `notes/plans/vx-1033/phone-sync-lag-report.md`. The phone lacks none of
-  the Mac's sync speed-ups; the lag is the driver and fixed per-round costs (see "Findings" below).
-- **Rulings so far** are under "Her rulings". The bundles QUESTIONS #276–#282 are still open.
+- **The sitting narrowed to one thing: the phone's editor core (VM-271).** Her other sessions take the Mac feature,
+  the Mac bug, and the remaining wave-1 handoff bundles and wave-2 questions. Mobile wave 2 waits until VM-271 is
+  done ("I'd rather the core of the app be stable before making more changes").
+- **The phone install is done.** The app built from `fe1493c16` went onto her iPhone in place over Wi-Fi with
+  `devicectl`, no cable, no safety copy at her word. VM-24's "before" session was skipped and is no longer owed.
+- **Four audits and one research report are in `notes/plans/vx-1033/`:** phone sync lag, the phone editor, the phone
+  app outside the editor, the phone against the Castle rules, and outside facts on iOS text input; plus the code
+  inventory for the new core.
+- **Her text-loss recording is VM-250; the traced corruption window is VM-252.** Both stay open as launch gates and
+  are NOT to be patched in today's editor, at her word.
+- **The editor decision:** from the proposal page (`notes/plans/vx-1033/design/phone-editor-proposal.html`, five
+  options) she chose "the page is the truth". The plan is `notes/plans/vm-271-phone-editor-core.md`, **draft v2**.
+  v1's cold review (`notes/plans/vm-271-plan-cold-review-1.md`) found three blockers; v2 keeps accept-then-read
+  only for typing inside a block and makes every structural gesture go through her doors with the Mac's shared rules
+  deciding the result. She agrees with v2 broadly and asked for a second round: a general cold review and a
+  sync-focused one. Both were running when this was written (see RESUME HERE).
+- **Rulings so far** are in "Her rulings" below and, for the plan, in the plan's own §2 and §20.
+
+## RESUME HERE (state at the compaction)
+
+**In flight.** Two Opus reviewers of plan v2, started 2026-11-22, each writing to the session scratchpad
+(the session-specific scratchpad folder; its full path is in the session's memory file, not here):
+`vm-271-plan-cold-review-2.md` (general, adversarial: checks v2's dispositions and attacks what is new) and
+`vm-271-plan-sync-review.md` (sync only: the two-device matrix, the placement check, the rescue, tokens against a
+sync apply, deliveries onto the page, offline, Castle, and whether the Mac has the same hole). Their hand-backs
+arrive in the session as messages. If a file is there and no hand-back came, read the file.
+
+**When they land.** Read each whole (reading is not delegated). Scan for private text, copy each beside the plan
+(`notes/plans/vm-271-plan-cold-review-2.md`, `notes/plans/vm-271-plan-sync-review.md`), commit. Spot-check the
+load-bearing claims in the code before accepting them. Write v3 of the plan with a disposition for every finding
+(add to its §21). Bring her the findings and v3 together, in plain words. She wants to keep talking the sensitive
+parts through; do not rush to approval.
+
+**The sensitive parts she wants talked through** (my position on each, so it is not lost):
+1. *The doors.* v2 catches structural gestures inside the text view's `insertText`, `deleteBackward`, `cut` and
+   `paste` overrides and makes the ruled edit there, synchronously, through the text view's own calls. The phone
+   already ships one such door (Return, for list continuation) and predictions still work on her phone. The
+   fallback is decline at the gate and re-issue on the next turn (React Native's shape). Whether either upsets the
+   keyboard is the probe's first question and the plan's kill criterion K2. If both fail, a single text view cannot
+   give the Mac's results and the choice returns to her (a custom text input under the same core, or results that
+   differ from the Mac's).
+2. *Identity.* §8's table says which region is which block after every act; a token goes on every region an
+   operation may re-identify; the head (the first block's mark) is re-pointed like any mark. It must be proven by
+   an oracle that runs the real shared rules and real operations, because a text-only comparison passes a wrong
+   binding.
+3. *A save checks its block is still in this note* (§11.3, §20.1). Today `autosave` writes into a take whose block
+   has no placement (verified: `editableVariant` → `ensurePlacementUnlocked` is a no-op without a placement), so a
+   block merged on another device silently takes her words into lineage; and a refused save is held pending forever
+   (`AutosaveCoordinator` keeps the entry). The fix proposed is one optional parameter on `autosave` and on the
+   coordinator's entry. It is an operation-contract change: hers alone. She leans yes, pending the sync review. Open:
+   whether the Mac has the same hole (asked of the sync reviewer), and whether the check must also hold at apply
+   time on other devices.
+4. *The rescue* (§11.4, §20.2). v2 says: a new block at the region's place; for a note sealed elsewhere, the words
+   stay on the page with Copy. I am not settled on this. A rescue block can duplicate text that survives in a merged
+   block; a take on the successor is closer to the model's own conflict-as-variant but has no single successor after
+   a merge. The sync reviewer was asked to compare.
+5. *Normalizing.* The page is made to match the Mac's result at the gesture (a join's space, a divide's trim, the
+   cut's settle). The one adopt-the-page case is the idle mint of the open end, stored untrimmed (§20.3, hers).
+6. *Text still forming.* The marked range is cut out of what is saved. At a durability moment a prediction's guess
+   is discarded, dictation and a composition are accepted (§20.5, hers). Inline predictions start off.
+7. *Outside changes.* Facts (takes, comments, locks) update the map at once. Structural deliveries and undo for
+   regions she is not in do not wait for the keyboard; the region she is in is lowered and rebuilt. A swipe-peek
+   must not bounce the keyboard (the probe measures both ways).
+8. *Size.* Eight units in four runs. U1 is the probe on her phone, run from a FRESH session with a kickoff (she
+   agreed). Decisions gating run 2: §20.1, §20.2, §20.3; §20.4 and §20.6 are ruled.
+
+**Her rulings on the plan so far:** option D chosen · today's editor not patched · a cheap switch that only chooses
+which screen opens a note, no dual support, the old editor deleted when features move · wave 2 waits · backspace at a
+block's start joins with the Mac's exact rules · Return makes a block, with a "new line" key · the Mac's per-note
+"newlines make blocks" switch comes to the phone and lives in the note, not in Settings (VM-141, pulled into U3b) ·
+the probe runs in a new session.
+
+**Still owed at this sitting's close** (after she approves the plan): today's rulings written into
+`notes/QUESTIONS.md` as bundle addenda in her words (#277 VM-55: P-55-2/-14/-15/-18 ratified, P-55-3 kept, P-55-19 →
+neutral colour, VM-265; #279 VM-78: both marks, the Mac hides Diverge, VX-1034, VX-1030 done; #280 VM-64: P-2-1 and
+P-71-1 kept, the gates confirmed; #282 VM-24: VX-68 stays closed, the before-session skipped; #276 VX-980: P-980-3
+option (a); the rest of #276, all of #278 and #281 stay open for her other session) · an `notes/AppSpecRecord.md`
+entry for the sitting and the SurfaceContracts correction · the master plan's in-flight row for VM-271 ·
+`Tools/canon-size` · `notes/handoffs/vx-1033-handoff.md` with her checklist · the PR (`VX-1033: …`, a merge commit,
+never squash) and merge to main · VX-1033's disposition comment and Done · the board snapshot · memory · the kickoff
+message for VM-271's run 1 (`/architect-phase vm-271`, U1 the probe then U2 the core) for a fresh session.
+
+**Working rules that bit or held this session:** subagents are Opus or Sonnet only, never Fable, at most two at a
+time, always with `model` pinned · the stage goes through coordinator **nov22** (she started it for the Ambient
+work) · nothing is merged to main until the plan is approved (an unapproved plan on main reads as the plan) · her
+words go into records verbatim · no text of her notes is ever committed (the recording's frames are local only, in
+the main checkout's `notes/plans/textloss-screens/`) · pages for her are local HTML with the absolute path, never an
+Artifact, never opened for her · no time predictions; sizes are fine · the Mac's editor is not to change · the
+Castle design is frozen.
 
 ## Her opening words (2026-11-22, verbatim)
 
