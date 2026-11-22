@@ -167,12 +167,14 @@ Her instruction for this record (2026-11-22): the repo notes carry the feature a
 What stands today: the 13i sitting §9 ruled total isolation ("nothing should cross wings"); search scopes to one wing; the star LIST is already store-wide and the sidebar filters it to the standing wing (P-13id-U5-10, PROVISIONAL); the Open list already spans wings, its cross-wing rows wearing the wing indicator; wing management lives in the masthead dropdown.
 
 - **W-1** Isolation stays the default. Each crossing is a named, visible choice of hers — never a silent mix.
-- **W-2 Search across wings.** The Library's search gains a scope word beside the field: "in ‹wing› ▾" → "in all wings". Results from another wing wear the wing indicator and sit in their own group under this wing's results; opening one follows the standing rule (the app's wing follows the focused note, "Now in …"). A book's own 🔍 stays the book. The Trash and Archived stay per wing.
-- **W-3 Leaving a wing out.** A per-wing switch, on by default: "Take part in all-wings search". A wing switched off never appears in an all-wings answer.
-- **W-4 Starred across wings.** One choice: Starred shows this wing, or all wings (cross-wing rows wearing the wing indicator).
-- **W-5 Settings ▸ Wings** — a pane of its own: the wings in the switcher's order, each row with its name (rename), what it holds, the W-3 switch, Move Everything… and Delete (refusing unless empty, as today); New Wing; drag to reorder; and the two choices above. The masthead dropdown keeps its doors. VX-834 (the view a wing opens on) fits this pane.
+- **W-2 Search across wings** (R-1036-10). The Library's search gains a scope word beside the field. It ALWAYS starts as "in ‹wing›"; "in all wings" is a deliberate pick, made per search, and a new search (the field from empty to typed — the standing "fresh hunt") is back in this wing. Nothing remembers the wider scope. Results from another wing wear the wing indicator and sit in their own group under this wing's results; opening one follows the standing rule (the app's wing follows the focused note, "Now in …"). A book's own 🔍 stays the book. The Trash and Archived stay per wing. The sidebar's search field is a door into this same search and starts in this wing too.
+- **W-3 Leaving a wing out of search.** A per-wing switch, on by default: "Take part in all-wings search". A wing switched off never appears in an all-wings answer; the answer says one quiet line when a wing is not taking part.
+- **W-4 Starred across wings** (R-1036-11, held with her doubt). One choice: Starred shows this wing, or all wings (cross-wing rows wearing the wing indicator). A wing stays out of the all-wings Starred by its OWN per-wing switch — separate from W-3's — on by default: "Show in all-wings Starred".
+- **W-5 Settings ▸ Wings** — a pane of its own: the wings in the switcher's order, each row with its name (rename), what it holds, its two switches (W-3, W-4), Move Everything… and Delete (refusing unless empty, as today); New Wing; drag to reorder; and the Starred choice. The masthead dropdown keeps its doors. VX-834 (the view a wing opens on) fits this pane.
 - **W-6 What never crosses:** gatherings (they assemble within their wing), tag vocabularies, Arrivals, membership, the Trash, Archived, and the wire's reach.
-- **Open for her (sitting 2):** whether the scope is picked per search or stays where she left it; whether W-3's switch also keeps a wing out of the all-wings Starred; whether these choices sync or belong to each device; `#tag` in an all-wings search (tags are per-wing — match by path in every wing?); whether ⌘K follows the same scope. Storage is PROPOSED as `setting` keys (ids and enums only — no schema event; Home is virtual and has no row to carry a column).
+- **W-7 `#tag` in an all-wings search** (R-1036-13, held with her doubt) matches that tag PATH in every wing taking part — each wing's own tag of that path; tags stay per-wing vocabularies. The alternative, for the record: `#tag` meaning only the standing wing's tag, which would quietly narrow an all-wings search to one wing.
+- **W-8 ⌘K** (PROPOSED — her "open to suggestions"): the palette stays in this wing, and its results end with one row, "search all wings for ‹words› ›", that re-asks the same words across the wings taking part, in place; the wider scope lasts until the palette closes. The same rule as W-2: wider only by her press, never remembered.
+- **W-9 Storage** (R-1036-12 — the choices sync). PROPOSED as synced `setting` keys holding ids and enums only — the Starred choice, the wings out of search, the wings out of Starred ('' is Home, which is virtual and has no row to carry a column). No schema event: `setting` already syncs, and nothing here is prose.
 
 ---
 
@@ -200,12 +202,16 @@ What stands today: the 13i sitting §9 ruled total isolation ("nothing should cr
 9. *The order dial* (D-1): the menu on a gathering (a pick saves — the receipt), and on a hand-ordered book (the look, "Save as This Book's Order", "Back to manual order").
 10. *Titles while reading* (RT-1): Read ▸ Scroll with titles off, then the two weights on, and the switch on Read's controls.
 
-**File 2 — frames**
+**File 2 — frames** *(amended the same day for her wings answers, R-1036-10…14; the builder was told by message)*
 1. *Search in one wing, today.*
-2. *The scope word* (W-2): the field with "in ‹wing› ▾" open; an all-wings answer — this wing's results, then another wing's group, rows wearing the wing indicator.
-3. *Starred across wings* (W-4): the sidebar's Starred with cross-wing rows marked; the same list in this-wing mode.
-4. *Settings ▸ Wings* (W-5, W-3): the pane — three wings, one switched out of all-wings search, the two choices, New Wing.
-5. *A wing left out* (W-3): the same all-wings search with that wing absent, and the one quiet line that says a wing is not taking part.
+2. *The scope word* (W-2): the field with "in ‹wing› ▾" open; an all-wings answer — this wing's results, then another wing's group, rows wearing the wing indicator; and the next search, back in this wing.
+3. *`#tag` across wings* (W-7): an all-wings search on one tag — the matches under each wing that has a tag of that path.
+4. *Starred across wings* (W-4): the sidebar's Starred in this-wing mode, in all-wings mode with cross-wing rows marked, and with one wing kept out by its own switch.
+5. *Settings ▸ Wings* (W-5, W-3, W-4): the pane — three wings, each with its TWO switches (search, Starred), one wing out of search and a different one out of Starred, the Starred choice, New Wing, reorder.
+6. *A wing left out of search* (W-3): the same all-wings search with that wing absent, and the one quiet line that says a wing is not taking part.
+7. *⌘K* (W-8): the palette in this wing with its last row "search all wings for ‹words› ›", and the answer after the press.
+
+**Cast.** Drawn by a Fable subagent at her word (2026-11-22: "you can actually stop that opus-implementer and have a fable subagent make the mockups"). The Opus worker spawned first was stopped having written nothing.
 
 **Rules for the builder:** HTML only — no app code, no tests, no build, no stage. Work in `~/dev/variorum-vx-1036`; commit each file as it lands, by pathspec, with a plain message and no trailer; push after each commit. Report the two absolute paths and anything the brief left undecided that you had to choose.
 
@@ -235,9 +241,25 @@ The rulings, as read from it (each quoted where her words decide it):
 | R-1036-8 | **New notes, as proposed** ("i agree with this"): a lane's or chapter's own "+" makes the note there; the general door makes it after the note she is on; it is always shown ready to type. |
 | R-1036-9 | **Search across wings and Starred across wings are their own ticket inside this umbrella, planned fully now** — "like maybe you should be able to exclude a wing from showing up in the all library search deliberately? a wing setting / management page in settings? … I don't want it to be halfbaked". |
 
+### Sitting 1, continued — the wings questions (2026-11-22)
+
+Asked in chat: (1) is the search scope picked per search, or does it stay where she left it; (2) does a wing's "stay out" switch also keep it out of all-wings Starred; (3) do these choices sync, or belong to each device; (4) in an all-wings search, should `#tag` match that tag path in every wing; (5) should ⌘K follow the same scope.
+
+Her reply, verbatim:
+
+> 1. search scope should always default to just being within the wing. i think it should be a deliberate choice to search across all wings. 2. yeah, it should stay out of all wings starred. or maybe it should be a different setting? i think that might be best - a per wing "exclude from general starred".  3. i think they should sync. 4. I think so ? I don't see why not, or what the alternative is. 5. i'm open to suggestions on this one.
+
+| id | Ruling |
+|---|---|
+| R-1036-10 | **Search always starts in the wing; all wings is a deliberate choice** — "search scope should always default to just being within the wing. i think it should be a deliberate choice to search across all wings." Built as W-2: picked per search, never remembered. |
+| R-1036-11 | **A wing stays out of all-wings Starred by its own per-wing setting** — "or maybe it should be a different setting? i think that might be best - a per wing "exclude from general starred"." Held with her doubt; W-4. |
+| R-1036-12 | **These choices sync** — "i think they should sync." W-9. |
+| R-1036-13 | **`#tag` in an all-wings search matches that path in every wing** — "I think so ? I don't see why not, or what the alternative is." Held with her doubt; the alternative is written at W-7. |
+| R-1036-14 | **⌘K: hers to rule on the architect's suggestion** — "i'm open to suggestions on this one." W-8 is the suggestion, drawn on the mockup. |
+
 ### Sitting 2 — opens on the round-1 mockups
 
-Hers to answer there: the tag option(s) by letter · D-1 as drawn · the PROPOSED lines of §4b (L-4's empty lane, L-6(e)'s undo, L-8's doors, L-10's bind, RT-1) · the wings questions listed under W-6.
+Hers to answer there: the tag option(s) by letter · D-1 as drawn · the PROPOSED lines of §4b (L-4's empty lane, L-6(e)'s undo, L-8's doors, L-10's bind, RT-1) · W-8's ⌘K row · the wings pane as drawn, and R-1036-11 and -13 confirmed or changed on sight.
 
 ---
 
