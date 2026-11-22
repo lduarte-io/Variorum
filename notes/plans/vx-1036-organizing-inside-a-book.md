@@ -2,7 +2,7 @@
 
 **Ticket** VX-1036 (Umbrella, Books) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov22 · **Mockups** `notes/plans/vx-1036/`
 
-**STATUS — OPEN 2026-11-22: DESIGN SITTINGS. Nothing is built. No implementer has been spawned. Her word at kickoff: "we will finish the design plans together before you do any building."**
+**STATUS — OPEN 2026-11-22: DESIGN SITTINGS. Sitting 1 answered (R-1036-1…9); the round-1 mockups are being drawn for sitting 2. Nothing is built. Her word at kickoff: "we will finish the design plans together before you do any building."**
 
 ---
 
@@ -10,9 +10,9 @@
 
 *(Written whole at closeout. Until then, the state in four lines.)*
 
-- The effort is at its first design sitting. §1 holds her words, §2 what the app already does, §3 the two defects she reported as traced by reading (no pin yet), §4 the design forks as proposals, §5 the sitting's questions and her rulings as they land.
-- Nothing in §4 is ruled. Nothing is built.
-- No schema, `Sync/`, custody or editor-seam line is planned; a stored lane order is an open question for her (F2).
+- Sitting 1 is answered: §5 holds her reply and the rulings R-1036-1…9. §4b is the design as it stands (lanes L-1…L-11, tags T-A…T-D, new notes N-1…N-3, the dial D-1, Read titles RT-1, wings W-1…W-6); §4c is the round-1 mockup brief; §4 is the first read it grew from, kept as written.
+- The tickets: VX-1037 lanes · VX-1038 tags inside a book · VX-1039 the new-note defect and landing · VX-1040 the order dial · VX-1041 wings · VX-881 titles in Read — all sub-issues of VX-1036.
+- One schema event is accepted in principle (R-1036-5: the lanes column); its mirror deploy runs only at her go. Nothing is built.
 - Preflight for the BUILD is not complete (§8 says what is read and what is owed before the first spawn).
 
 ---
@@ -86,7 +86,8 @@ Her instruction for this record (2026-11-22): the repo notes carry the feature a
 
 ### 3b. "i'm not sure that changing the order of the notes (like sort by) is changing the reading order"
 
-- Not located as a defect yet. Inside one book window every mode reads the same ordered entries, so the navigator and the page cannot disagree by construction (§2, the order dial).
+- **WITHDRAWN by her at sitting 1 (R-1036-1): "I think I'm actually just wrong, and it wasn't in the wrong order, I just didn't expect the new note to be at the bottom." What follows is the reading as it stood; the dial's look-then-save grammar is what she then ruled on (R-1036-2).**
+- Not located as a defect. Inside one book window every mode reads the same ordered entries, so the navigator and the page cannot disagree by construction (§2, the order dial).
 - What reading does show: the dial's pick is a look until saved, so the Book Panel beside an open note, the Library's info panel, the phone, export and the book's next opening all keep the stored order. That alone could read as "sorted one way … but then don't follow that order".
 - Owed from her: where she saw it (which book or gathering, which mode, what she changed and with which control, and what did not follow).
 
@@ -116,33 +117,145 @@ Her instruction for this record (2026-11-22): the repo notes carry the feature a
 
 ---
 
+## 4b. The design after sitting 1 (her rulings R-1036-1…9 in §5; everything marked PROPOSED is the architect's and waits on the mockups)
+
+### Lanes — a gathering's own shape
+
+- **L-1 What a lane is.** A gathering may carry LANES: an ordered list; each lane is a rule in the gathering's own grammar (and · or · not over tags and the star) with an optional name — a one-tag lane reads as its tag. Lanes partition what the gathering SHOWS. A note files under the FIRST lane, in lane order, whose rule it matches; a note matching none trails under a last group. Nothing is stored per note; a lane is never a chapter and holds nothing. (R-1036-3/-4/-5/-6.)
+- **L-2 Storage (the architect's call inside R-1036-5).** ONE new nullable column on `reading` holding the ordered lanes as canonical JSON — the outflow's shape (R-13ic-1: one JSON column, not a join table). A lane's name is her words, so the column travels ENCRYPTED (the `arrival_provenance` class). It is one SyncSpec §12 event: the mirror column first at her go, then both Macs and the phone in one window — a build behind the marker refuses to sync until refreshed. The phone carries the column from that window; drawing lanes on the phone is a catch-up face. *Considered and not pursued:* a `reading_lane` table (chapters' twin) — it would merge two devices' offline lane edits lane by lane, at the price of `Sync/` registry, purge-family and repair work; with one column the later edit wins whole, the standing metadata class.
+- **L-3 Order inside a lane** is the gathering's order (the dial). A gathering holds no hand order; a drag WITHIN a lane is the standing teaching moment (bind into a book to arrange by hand).
+- **L-4 Where lanes show.** Everywhere the order renders, from the one order home (`Queries.assembleReading`): the Outline's page (a lane heading where a chapter heading stands), the navigator (lane rows with counts, their notes beneath), Index, Book and Read (a lane opens a section as a chapter does), the ⌘↑/⌘↓ stepper and "note N of M · ‹lane›". PROPOSED: an EMPTY lane keeps its heading in the Outline and the navigator (a week must show its empty Wednesday; it is also a drop target and a "+") and is skipped in Book and Read.
+- **L-5 Also matches.** A note that also matches a later lane wears one quiet mark on its row — "also: thursday" — naming the others (R-1036-6). It is never drawn twice.
+- **L-6 Moving a note between lanes** — a drag under another lane's heading (navigator or page), or Move to Lane ▸ on the note's menu. ONE act: apply what the destination lane's rule needs (the mint's planner, `GatheringMint.outcome` — the one authority the collect door already reads) and remove what the source lane matched on that the destination does not need; then ask the assembly's own predicate where the note files. If that is not the destination, nothing is written and the door says why. The receipt names the tags: "Moved to Tuesday — added #tuesday, removed #monday." Edges, decided on paper:
+  - (a) the destination's rule cannot be met by tagging (a legacy date term; a `not` the note breaks with a tag the gathering itself needs) → refuse in the planner's own sentence;
+  - (b) removing the source's tags would take the note out of the GATHERING → those tags stay; if the note then still files ahead of the destination, refuse and name the lane that holds it;
+  - (c) a move to the trailing group removes what the source lane matched on; if another lane then catches the note, refuse and name it;
+  - (d) the applied tag travels the one application road, so a living book that collects it hears it (seat or bell) — the standing receipts say so;
+  - (e) undo — PROPOSED: one ⌥⌘Z entry, "Move to Lane", restoring the exact applications (deleteTag's precedent; plain tag applications stay outside structural undo);
+  - (f) several notes at once — not in the first build.
+- **L-7 A new note in a lane.** Each lane carries its own "+" (its navigator row and its page heading): the note is born wearing what the gathering's rule needs AND what the lane's rule needs, lands in that lane, and is shown ready to type. Where the two cannot both hold, the door is drawn greyed and says why (the gathering mint door's idiom). The gathering's general "+ new note" makes the note in the lane of the note she is on; with none, as today.
+- **L-8 Making and changing lanes.** PROPOSED doors: the gathering's settings sheet gains a Lanes section under Collecting — the ordered list, each row "‹name› — ‹the rule as a sentence›", drag to reorder, Edit… (the rule editor), Remove; "+ add lane" (pick a tag — the quick path — or "a rule…"); and one quick start, "a lane for each tag under ‹family›". The New Gathering sheet offers the same quick path: pick tags in order → the gathering gathers any of them and gets one lane per tag. A lane heading's right-click: Rename Lane… · Edit Rule… · Move Up / Move Down · Remove Lane. Removing a lane never untags (the standing law for rules).
+- **L-9 The trailing group** reads "unfiled" (the chapter word — one vocabulary) and shows only while it holds a note.
+- **L-10 Bind into a book.** PROPOSED: binding a laned gathering turns each lane into a real chapter holding the notes it showed — nothing moves on screen (the bind's standing rule) — and intake keeps running; later arrivals seat unfiled, because a book's chapters do not collect (R-1036-4).
+- **L-11 The wire.** PROPOSED for the first build: reads say lanes (a gathering's listing in lane order, the lane named); no wire road writes lanes. `notes/MCPSpec.md` is read before this is built.
+
+### Tags inside a book — the options the mockups show (R-1036-7; Outline first, Index its twin)
+
+- **T-A** a quiet tag line on each note's card, under its title; a click on it opens the tag editor in place (chips with ✕, a field that suggests existing tags and mints a new one on ⏎).
+- **T-B** tags on the navigator's rows only; the page stays as calm as today.
+- **T-C** tags in the sidebar's "this note" box for the selected or live note — chips and the add field; nothing on the page.
+- **T-D** the note's tags in the bottom bar while she types inside a book — her "note menu where the block menu is".
+- **The switch** (all options): per book, "tags" shown or hidden, hidden by default; in a laned gathering a lane's own tag is left off its notes' lines.
+- In **Index** the same line rides each note's header row.
+
+### New notes (R-1036-8)
+
+- **N-1** Every mint door ends with the new note on the page, live, the caret in it — the navigator foot's doors included (§3a's defect).
+- **N-2** Where it is born: a chapter's own "+" → that chapter, at its end; a lane's "+" → L-7; the general doors (the navigator foot, the page foot, ⌥⌘N) → after the note she is on, in its chapter. PROPOSED: "the note she is on" is the live or selected note, else the note the navigator marks as viewed; with neither, the end. Under a stamp order the place is the order's, and the page goes there.
+- **N-3** A note born past the 300-note window widens the window to hold it.
+
+### The order dial (R-1036-2 — her words carry doubt; the mockup shows this reading)
+
+- **D-1** A pick on the dial is the book's order at once on a gathering and on a book whose order is not manual. On a HAND-ORDERED book a pick stays a look, and "Save as This Book's Order" is the visible choice beside "Back to manual order" (the hand order is kept in the rows either way). A finished book looks and cannot save, as today.
+
+### A note's title while reading (VX-881)
+
+- **RT-1** PROPOSED: a per-book switch on Read's own controls, remembered per book on this device (a way of looking). The mockup shows two weights for the title: a quiet muted line, and a small heading.
+
+### Wings — search across wings, Starred across wings, a Wings pane (R-1036-9; its own ticket in this umbrella)
+
+What stands today: the 13i sitting §9 ruled total isolation ("nothing should cross wings"); search scopes to one wing; the star LIST is already store-wide and the sidebar filters it to the standing wing (P-13id-U5-10, PROVISIONAL); the Open list already spans wings, its cross-wing rows wearing the wing indicator; wing management lives in the masthead dropdown.
+
+- **W-1** Isolation stays the default. Each crossing is a named, visible choice of hers — never a silent mix.
+- **W-2 Search across wings.** The Library's search gains a scope word beside the field: "in ‹wing› ▾" → "in all wings". Results from another wing wear the wing indicator and sit in their own group under this wing's results; opening one follows the standing rule (the app's wing follows the focused note, "Now in …"). A book's own 🔍 stays the book. The Trash and Archived stay per wing.
+- **W-3 Leaving a wing out.** A per-wing switch, on by default: "Take part in all-wings search". A wing switched off never appears in an all-wings answer.
+- **W-4 Starred across wings.** One choice: Starred shows this wing, or all wings (cross-wing rows wearing the wing indicator).
+- **W-5 Settings ▸ Wings** — a pane of its own: the wings in the switcher's order, each row with its name (rename), what it holds, the W-3 switch, Move Everything… and Delete (refusing unless empty, as today); New Wing; drag to reorder; and the two choices above. The masthead dropdown keeps its doors. VX-834 (the view a wing opens on) fits this pane.
+- **W-6 What never crosses:** gatherings (they assemble within their wing), tag vocabularies, Arrivals, membership, the Trash, Archived, and the wire's reach.
+- **Open for her (sitting 2):** whether the scope is picked per search or stays where she left it; whether W-3's switch also keeps a wing out of the all-wings Starred; whether these choices sync or belong to each device; `#tag` in an all-wings search (tags are per-wing — match by path in every wing?); whether ⌘K follows the same scope. Storage is PROPOSED as `setting` keys (ids and enums only — no schema event; Home is virtual and has no row to carry a column).
+
+---
+
+## 4c. The mockup brief (round 1)
+
+**Deliverables** — two self-contained HTML files (inline CSS and JS, no external fonts, scripts or images; they are opened from disk, offline). NEVER published as an Artifact.
+- `notes/plans/vx-1036/mockup-1-book-and-lanes.html`
+- `notes/plans/vx-1036/mockup-2-wings.html`
+
+**The design language** is the app's own, in the Terminal voice (it leads), with a light / dark switch at the top of each file. Take it from the app, not from taste: `App/Variorum/Variorum/Theme/` (the voice tokens, `VoiceControls.swift`), the book view's faces (`Features/BookView/BookView.swift`, `BookOutlineRows.swift`, `BookNoteBox.swift`, `BookMastheadModeRow.swift`, `BookIndexView.swift`), the tag cluster (`Features/Tags/MastheadTagCluster.swift`), the earlier mockups `notes/plans/mockups/13i-bookcase-shelves.html`, `notes/plans/librarywalkpolish-ui-reference.html`, `notes/plans/vx-808-arrivals-review-mockup.html`, `notes/plans/use-report-2026-09-06-mockups/ceremony-and-note-box.html`, and the screenshot `notes/plans/13o-screens/09-book.png` (an October frame of the book Outline: the sidebar with its "this note" box, the navigator column, the page of note cards — the layout to draw, updated per `notes/SurfaceContracts.md` "The Bookcase and books": the mode row with the order dial at its trailing end, the bottom bar with "note N of M · ‹chapter›"). Sentence case in every rendered word; no word capitalised for emphasis.
+
+**Sample content is invented** — a made-up week of small tasks and a made-up book; never the author's real notes, tags or titles.
+
+**Each frame is labelled** with its option letter and one plain sentence saying what it is and what it costs, so she can answer by letter. A short index at the top of each file links the frames.
+
+**File 1 — frames**
+1. *Today, for reference:* a gathering in Outline as it is now (no lanes, no tags).
+2. *Lanes in Outline* (L-1, L-4, L-5, L-9): a weekly gathering — lanes monday … friday in her order, one EMPTY lane, an "unfiled" trailing group, one note wearing "also: thursday"; the navigator with lane rows and counts; the bottom bar "note 3 of 11 · tuesday".
+3. *Moving a note* (L-6): the drag in flight under another lane's heading with the drop line, then the receipt "Moved to Tuesday — added #tuesday, removed #monday."; beside it the note menu's Move to Lane ▸; and one refusal (edge b) in its words.
+4. *A new note in a lane* (L-7, N-1): the lane's "+" on the navigator row and on the page heading; the born note live with the caret in it.
+5. *Making lanes* (L-8): the settings sheet's Lanes section; the rule editor on one lane ("#tuesday and not #done"); the New Gathering sheet's quick path.
+6. *Tags in the Outline — options T-A, T-B, T-C, T-D,* each its own frame on the same book, plus the tag editor open in place (T-A) and the per-book "tags" switch in both positions. One frame shows T-A + T-C together.
+7. *Tags in Index:* the tag line on Index's note header rows.
+8. *New note in a book* (N-1, N-2): the general door pressed with a note selected mid-book — the new note born after it, live; and a chapter's own "+".
+9. *The order dial* (D-1): the menu on a gathering (a pick saves — the receipt), and on a hand-ordered book (the look, "Save as This Book's Order", "Back to manual order").
+10. *Titles while reading* (RT-1): Read ▸ Scroll with titles off, then the two weights on, and the switch on Read's controls.
+
+**File 2 — frames**
+1. *Search in one wing, today.*
+2. *The scope word* (W-2): the field with "in ‹wing› ▾" open; an all-wings answer — this wing's results, then another wing's group, rows wearing the wing indicator.
+3. *Starred across wings* (W-4): the sidebar's Starred with cross-wing rows marked; the same list in this-wing mode.
+4. *Settings ▸ Wings* (W-5, W-3): the pane — three wings, one switched out of all-wings search, the two choices, New Wing.
+5. *A wing left out* (W-3): the same all-wings search with that wing absent, and the one quiet line that says a wing is not taking part.
+
+**Rules for the builder:** HTML only — no app code, no tests, no build, no stage. Work in `~/dev/variorum-vx-1036`; commit each file as it lands, by pathspec, with a plain message and no trailer; push after each commit. Report the two absolute paths and anything the brief left undecided that you had to choose.
+
+---
+
 ## 5. Sittings
 
-### Sitting 1 — 2026-11-22 (open)
+### Sitting 1 — 2026-11-22 (answered)
 
-Asked in chat (her answers recorded here verbatim as they land):
+The seven questions, as asked in chat: (1) where she saw the order not follow; (2) lanes on gatherings only, books getting them as a look; (3) a chosen ordered set stored on the gathering, or a family ordered per Mac; (4) one lane per note, or shown in every lane it wears; (5) which faces show tags and where the editing door lives; (6) where a new note is born; (7) starred across wings and cross-wing search — here or their own.
 
-1. §3b — where she saw the order not follow.
-2. F1 — lanes on gatherings only, with books getting them as a look.
-3. F2 — a chosen ordered set (a schema event) or a family with local order.
-4. F3 — one lane per note (first in order), or shown in every lane it wears.
-5. F6 — which faces show tags, and where the editing door lives.
-6. F7 — where a new note is born.
-7. The wave's edges: starred across wings and cross-wing search — this umbrella, or their own.
+Her reply, verbatim:
+
+> 1 - order: I think I'm actually just wrong, and it wasn't in the wrong order, I just didn't expect the new note to be at the bottom. so you can actually disregard this part of the work - I think it was my own confusion when creating a new note that it wasn't visible to me. 2. i like the idea of using lanes, that makes sense and is different from chapters. i do think that it should maybe automatically save as the book's order - i think that's what was confusing me ? maybe save as this book's order should be a choice when you're changing the manual order, I think I had thought I had changed it before. 2. I agree it can be gathering only. not sure what books getting them as a look means. 3. I think it should be a chosen, ordered set of tags stored on the gathering. a schema change seems right to me here - especially because i do want the rules to be able to support exclusion AND OR NOR like our current gathering rules do. 4 - i agree that it should be filed under the first lane in order and have it pointed out that it could match others. showing it twice is not the solution. 5. i've only been in the default book outline, i haven't been using index very much, but I might like to use it. you can mock up the options that you're imagining. i also do want to be able to add new tags from outline, if that wasn't clear. I was imagining something in the this note sidebar, but i feel like it could also be on the note more directly. i'm not sure what it would look like in index. 6. i agree with this. 7. agreed that cross wing search and starred across wings should be a different ticket than this - it can be in the same umbrella though. we should get that fully planned out now too though (like maybe you should be able to exclude a wing from showing up in the all library search deliberately? a wing setting / management page in settings? not sure what thought this needs but I don't want it to be halfbaked).
+
+The rulings, as read from it (each quoted where her words decide it):
+
+| id | Ruling |
+|---|---|
+| R-1036-1 | **The order report is withdrawn** — "I think I'm actually just wrong … you can actually disregard this part of the work". Its cause was the new note not being visible (§3a). |
+| R-1036-2 | **The order dial saves.** "i do think that it should maybe automatically save as the book's order … maybe save as this book's order should be a choice when you're changing the manual order". Held with her doubt ("maybe", "?"); the reading built into the mockup is D-1, hers to confirm there. |
+| R-1036-3 | **The word is "lanes"** — "i like the idea of using lanes, that makes sense and is different from chapters." |
+| R-1036-4 | **Lanes are a gathering's only** — "I agree it can be gathering only." Books get nothing new. ("not sure what books getting them as a look means" — answered in chat: it meant the Index's existing `group ▾`, which stays as it is.) |
+| R-1036-5 | **A lane set is chosen, ordered and stored on the gathering; a schema change is accepted; lane rules speak the gathering grammar** — "a chosen, ordered set of tags stored on the gathering. a schema change seems right to me here - especially because i do want the rules to be able to support exclusion AND OR NOR like our current gathering rules do." The mirror deploy still runs only at her explicit go. |
+| R-1036-6 | **First lane in order; the others pointed out; never twice** — "filed under the first lane in order and have it pointed out that it could match others. showing it twice is not the solution." |
+| R-1036-7 | **Tags inside a book: Outline first; mock the options; adding tags from the Outline is required** — "i also do want to be able to add new tags from outline … I was imagining something in the this note sidebar, but i feel like it could also be on the note more directly. i'm not sure what it would look like in index." |
+| R-1036-8 | **New notes, as proposed** ("i agree with this"): a lane's or chapter's own "+" makes the note there; the general door makes it after the note she is on; it is always shown ready to type. |
+| R-1036-9 | **Search across wings and Starred across wings are their own ticket inside this umbrella, planned fully now** — "like maybe you should be able to exclude a wing from showing up in the all library search deliberately? a wing setting / management page in settings? … I don't want it to be halfbaked". |
+
+### Sitting 2 — opens on the round-1 mockups
+
+Hers to answer there: the tag option(s) by letter · D-1 as drawn · the PROPOSED lines of §4b (L-4's empty lane, L-6(e)'s undo, L-8's doors, L-10's bind, RT-1) · the wings questions listed under W-6.
 
 ---
 
 ## 6. Ledger
 
-| # | Item | Status |
-|---|---|---|
-| 1 | Tags seen inside a book, with the choice not to see them | DESIGN — F6 |
-| 2 | Tags edited while working inside a book ("note menu") | DESIGN — F6 |
-| 3 | Tag lanes in gatherings | DESIGN — F1–F5 |
-| 4 | A note's name while reading a book (VX-881) | DESIGN — F9 |
-| 5 | A new note in a book is shown ready to edit | TRACED BY READING (§3a); pin owed; ticket owed at her word |
-| 6 | The order she picks vs the reading order | NOT LOCATED (§3b); her answer owed |
-| 7 | Starred across wings · cross-wing search | SCOPE QUESTION — sitting 1, Q7 |
+| # | Item | Ticket | Status |
+|---|---|---|---|
+| 1 | Tags seen inside a book, with the choice not to see them | VX-1038 | DESIGN — T-A…T-D on the mockup; her pick owed |
+| 2 | Tags added and removed from inside a book | VX-1038 | DESIGN — same |
+| 3 | Lanes in gatherings | VX-1037 | RULED (R-1036-3…6); L-1…L-11 on the mockup; the PROPOSED lines owed |
+| 4 | A note's title while reading a book | VX-881 | DESIGN — RT-1 on the mockup |
+| 5 | A new note in a book is shown ready to type, born where its door stands | VX-1039 | RULED (R-1036-8); §3a traced by reading; the pin is the build's first act |
+| 6 | The order she picks vs the reading order | — | WITHDRAWN (R-1036-1) |
+| 7 | The order dial saves as the book's order | VX-1040 | RULED WITH DOUBT (R-1036-2); D-1 on the mockup |
+| 8 | Search across wings · Starred across wings · the Wings pane | VX-1041 | DESIGN — W-1…W-6; sitting 2's questions |
+| 9 | The lanes column — the §12 event | VX-1037 | Accepted in principle (R-1036-5); the deploy at her go; `notes/SyncSpec.md` in full before the build |
+
+**Sizing, as it stands:** lanes (with their schema event) and tags-inside-a-book are each a phase-sized unit; the wings ticket is a third; the small ones (rows 4, 5, 7) are a fourth, runnable first. The guidance caps a phase at two units — the split into runs is hers to rule when the design closes.
 
 ---
 
