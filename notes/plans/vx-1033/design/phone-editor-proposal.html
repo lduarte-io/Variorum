@@ -427,7 +427,17 @@ hr{border:0;border-top:1px solid var(--line);margin:40px 0}
 <!-- ================================================================== -->
 <h2 id="others">What other apps do</h2>
 <div class="box" id="others-body">
-<p>An Opus researcher is gathering this from outside sources as this page is written: how other block and prose editors on iPhone handle selection across paragraphs, what a custom text input costs today, and how iOS delivers its grey predictions. This section is filled in when that report lands.</p>
+<p>From an Opus researcher's read of Apple's documentation, Apple engineers' forum answers and other editors' source code (22 November 2026). Each claim's source, date and confidence is in <code>notes/plans/vx-1033/ios-text-input-research.md</code>.</p>
+<ul>
+  <li><b>No native block editor on iPhone lets a selection run across blocks and be typed over.</b> Anytype, which is open source and uses one text view per block, switches to whole-block selection when a drag passes a block's edge (shipped July 2026). Notion's cross-block selection exists only in its web-view editor. Craft's documented road is block selection. So option B would have put the phone in that company.</li>
+  <li><b>Selection across several text views is not supported by iOS</b> (Apple support, August 2024). That is the wall option C leans against.</li>
+  <li><b>The "ask first" road is unreliable beyond what we measured.</b> Several kinds of change never ask (the double-space period, some prediction taps, swipe typing in one report), and some that ask describe a different change from the one made. Apple lists the single-range "ask first" call as deprecated at iOS 27.</li>
+  <li><b>The grey inline prediction is text the keyboard is still forming.</b> iOS hands it to the text view as "marked" text, and one setting turns it off for a single text view. What accepting and rejecting it write is not documented; your phone has to show us.</li>
+  <li><b>Changing text under the keyboard has a right door.</b> An Apple engineer's advice (2023): never edit the text's storage directly; go through the text view's own insert and replace calls. React Native moved to this shape in October 2026: decide in the "ask" call, apply any correction as a small replace on the next turn, and never while text is being composed. That is option D's rule for changing the page from outside.</li>
+  <li><b>System replacements can drop a custom mark</b> from the characters they replace, while keeping font and colour. D has to check its marks after every change and repair them, never trust them blindly. The plan does.</li>
+  <li><b>A custom text input has a long tail in practice.</b> Runestone, a shipping custom editor, was still adding basics in late 2026: spelling underlines built by hand, Writing Tools support, fixes for composing input. In June 2026 an Apple engineer recommended a stock text view for a new iOS 27 editor.</li>
+  <li><b>iOS 27 lets a text view draw its own surfaces beside the text.</b> That could make badges and marks beside a block easier in one text view (VM-17, VM-239), which this page had counted as a weakness of D.</li>
+</ul>
 </div>
 
 <!-- ================================================================== -->

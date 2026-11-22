@@ -123,6 +123,17 @@ it a great app, rather than a mid one."
 The page: `notes/plans/vx-1033/design/phone-editor-proposal.html`. The outside facts behind it:
 `notes/plans/vx-1033/ios-text-input-research.md`.
 
+**Her decision on the page (2026-11-22, verbatim):** "ok i read your recommendation, I think that the page is the truth
+is a good approach. make a full design plan for that, then spawn one cold review of the plan that is adversarially
+focused on where it breaks, what needs to be improved, handled, etc. that being said - i'm not that worried about the
+current editor being buggy, i don't really think that just for me we need to fix the current editor if we're going to
+change the whole thing. it's not a HUGE issue and doesn't come up that frequently, it's a HUGE issue for launch, but I
+don't think we need to build fixes for it if we're going to change the whoel thing anyway. how can we test this on my
+phone? I want to get this issue sorted and this plan done - that's my current top priority."
+
+So: option D is chosen; today's editor is not patched (the "safety fixes first" step is dropped); the effort's ticket
+is **VM-271** and its plan is `notes/plans/vm-271-phone-editor-core.md`, with one adversarial cold review beside it.
+
 Also that hour: "I started a stage coordinator named nov22 by the way - i'm going to do the ambient app fixes /
 improvements and I wanted to get that effort started."
 
