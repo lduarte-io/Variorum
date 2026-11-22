@@ -105,6 +105,27 @@ restoring that is, but we've got to look at it. also - why is purple the default
 mac. so what's even the deal with this purple ?? did it sync from what my mac is on (dark mode purple)? and why can I
 not change the color of the phone in settings?"
 
+## Her ask for the editor design proposal (2026-11-22, verbatim)
+
+After the three options were put to her in chat (keep and defend the one text view; one live block per text view; a
+fully custom text input):
+
+"hmm. i feel like B's cost is somewhat significant. should the phone default to not making new blocks on new lines? not
+being able to drag and edit across a new line is frustrating. I feel conflicted on this - it seems like the phone is
+struggling to do what the mac did at great effort (make a block based editor FEEL like a regular editor in write), and
+only the fully custom text input would really bring what the mac has - right? is my read on that wrong? I feel
+conflicted on what path to take here. I feel like a writing app where you can't select across multiple paragraphs is
+going to be difficult to use / be happy with for people. Think more deeply on this and make a deisgn proposal page for
+me with the different options and what each one costs, what each one would be good at, what problems we'll have with
+each one. this should take the most effort of anything thus far - this is the soul of the mobile app and how we make
+it a great app, rather than a mid one."
+
+The page: `notes/plans/vx-1033/design/phone-editor-proposal.html`. The outside facts behind it:
+`notes/plans/vx-1033/ios-text-input-research.md`.
+
+Also that hour: "I started a stage coordinator named nov22 by the way - i'm going to do the ambient app fixes /
+improvements and I wanted to get that effort started."
+
 ## Tickets born at this sitting
 
 - **VX-1033** — the sitting itself.
