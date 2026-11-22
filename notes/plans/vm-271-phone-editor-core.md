@@ -1,50 +1,63 @@
 # VM-271 — the phone's editor core: the page is the truth (the design plan)
 
 **Ticket: VM-271 (team VM, Umbrella, Urgent) · Project: Mobile — the catch-up & launch · Written at the Nov 22 sitting
-(VX-1033) on branch `vx-1033-nov-22-sitting` · Status: DRAFT v1 — awaiting its cold review and her approval. Nothing
-here is built.**
+(VX-1033) on branch `vx-1033-nov-22-sitting` · Status: DRAFT v2 — revised after its first cold review
+(`notes/plans/vm-271-plan-cold-review-1.md`: three blockers and fifteen majors against v1, every one dispositioned in
+§21). Awaiting her approval. Nothing here is built.**
 
-*How to read this file:* §0 is the kickoff a fresh session pastes. §1 is the short version. §2 is her words. §3–§11 are
-the design, the part a cold reviewer attacks and an implementer builds from. §12–§13 are how it is proven, on the Mac
-and on her phone. §14 is the units and runs. §15–§18 are what could stop it, what is still hers to decide, what gets
-deleted and what canon owes. Plain names used here ("page", "break", "region", "the door") are defined in §4; the
-proposed type names are suggestions for the implementer, not a contract.
+*How to read this file:* §0 is the kickoff a fresh session pastes. §1 is the short version. §2 is her words. §3–§13
+are the design. §14–§16 are how it is proven, on the Mac and on her phone. §17 is the units and runs. §18–§22 are what
+could stop it, the risks, what is hers to decide, the review's dispositions, and what is retired. Plain names used
+here ("page", "break", "region", "her doors") are defined in §4; proposed type names are suggestions for the
+implementer, not a contract.
+
+**What changed from v1, in one paragraph.** v1 let the text view decide structure and made the library follow ("the
+library follows the page"), with a put-back for anything that was not hers. The review showed that this binds text to
+the wrong block and departs from the Mac's ruled results, because which paragraph break survives a native edit is not
+which block her rules say survives, and because the rules read facts the page cannot carry (takes, comments, the
+join's space, the divide's trim). v2 keeps accept-then-read for typing **inside** a block, where it survived every
+attack, and replaces everything else: **a structural gesture is caught at the door she makes it through, the shared
+rules decide the result, and the editor brings both the page and the library to that result.** The text view is never
+left to decide structure.
 
 ---
 
 ## 0. Kickoff (for the first build session — do not start until §2's approval line is filled)
 
-`/architect-phase vm-271` — run 1 of this plan ("Probe and core": units U1 and U2 in §14).
+`/architect-phase vm-271` — the next unit of §17 not yet closed.
 
-Read, in this order: this file whole; `notes/plans/vx-1033/design/phone-editor-proposal.html` (the page she chose
-from); `notes/plans/vx-1033/phone-editor-audit.md` (what is wrong with today's editor and why);
-`notes/plans/vx-1033/ios-text-input-research.md` (outside facts, each with its source);
-`notes/plans/vx-1033/phone-editor-inventory.md` (what exists, with signatures); `notes/TEXTKIT2_NOTES.md` whole;
-`notes/MobileSoul.md` §3 and §5; then the standing preflight. This is the editor seam: every ladder round is a Fable
-cold review; the orchestrator never types editor code. The stage coordinator grants every hosted or simulator test
-window; U2's headless suites need no stage. **The Mac's editor does not change in this effort** — a diff that touches
-`App/Variorum/Variorum/Features/Editor/` or changes the behaviour of a `Shared/EditorBrain` rule the Mac calls is out
-of scope and stops the run.
+Read, in this order: this file whole; `notes/plans/vm-271-plan-cold-review-1.md` (its §3's table of Mac results and
+its §5's UIKit assumptions are working references); `notes/plans/vx-1033/phone-editor-inventory.md` (what exists, with
+signatures); `notes/plans/vx-1033/phone-editor-audit.md`; `notes/plans/vx-1033/ios-text-input-research.md`;
+`notes/plans/vx-1033/design/phone-editor-proposal.html` (the page she chose from); `notes/TEXTKIT2_NOTES.md` whole;
+`notes/MobileSoul.md` §2, §3 and §5; then the standing preflight. This is the editor seam: every ladder round is a
+Fable cold review; the orchestrator never types editor code. The stage coordinator grants every hosted or simulator
+test window and every install. **The Mac's editor does not change in this effort**: a diff that touches
+`App/Variorum/Variorum/Features/Editor/`, or changes the behaviour of anything in `Shared/` or `Sources/` that the Mac
+calls, is out of scope and stops the run. The two additive changes in §20.1 are the only shared-code changes this plan
+foresees, and they need her word first.
 
 ---
 
 ## 1. FOR A LATER READER
 
 - **What this is.** A new core for the phone's Write editor. One `UITextView`, as today, so selection and editing
-  across paragraphs stay native. The roles flip: while she types, the page is the truth and the library follows it.
+  across paragraphs stay native.
 - **Why.** Today's phone editor copies the Mac's design: approve each change first, keep a private map of which
   characters belong to which block, and redraw the page from the library when the map and the page disagree. An iPhone
   keyboard changes text without asking, keeps its own state about text it is still forming, and writes at stale
   positions when the page is redrawn underneath it. That produced lost letters and saved damage on her phone (VM-250)
   and a traced corruption window (VM-252). She chose this design over four others on 2026-11-22.
-- **The five rules** (§3): the page describes itself · every change is accepted, then read · the library follows the
-  page · the page changes from outside only through the keyboard's own door, or with the keyboard down · text the
-  keyboard is still forming is not saved until it settles.
-- **What does not change.** The Mac's editor. The schema. Sync. Every operation's meaning. Her rules for what Return,
-  backspace and an edit across blocks do (the Mac's, ruled once for both platforms).
-- **How it reaches her.** Behind a switch in Settings ▸ Diagnostics, with today's editor one flip away, first on
-  notes she chooses. Today's editor is not patched meanwhile, at her word.
-- **Where it stands.** See the status line at the top and §14's table.
+- **The six rules** (§3): the page describes itself · inside a block every change is accepted, then read · structure
+  changes only through her doors, and her rules decide the result · the page changes from outside only through the
+  text view's own calls or with the keyboard down · text still forming is never saved · a save never lands where she
+  cannot see it.
+- **What does not change.** The Mac's editor. The schema. Sync. What Return, backspace at a block's start and an edit
+  across blocks do: the Mac's results, ruled once for both platforms.
+- **How it reaches her.** Behind a cheap switch in Settings ▸ Diagnostics that only chooses which screen opens a note.
+  No feature is made to work with both editors. The old editor is deleted in the run that moves the features over.
+  Today's editor is not patched meanwhile, at her word, and mobile wave 2 waits for this effort, at her word.
+- **Where it stands.** The status line at the top and §17's table.
 
 ---
 
@@ -66,37 +79,42 @@ design plan for that, then spawn one cold review of the plan that is adversarial
 needs to be improved, handled, etc. that being said - i'm not that worried about the current editor being buggy, i
 don't really think that just for me we need to fix the current editor if we're going to change the whole thing. it's
 not a HUGE issue and doesn't come up that frequently, it's a HUGE issue for launch, but I don't think we need to build
-fixes for it if we're going to change the whoel thing anyway. how can we test this on my phone? I want to get this
-issue sorted and this plan done - that's my current top priority."
+fixes for it if we're going to change the whoel thing anyway."
 
-**Approval:** *(empty — her word on this plan after the cold review goes here, verbatim, with the date.)*
+On the switch: "ok I suppose a cheap switch for an early look is fine - I just want us to be strategic with the work,
+but it makes sense to me to do a cheap try first. about the shape of the work - make plans for how we're going to do
+this and I will follow them."
+
+On the order: "i'll probably just wait and only run wave2 once this is done. I'd rather the core of the app be stable
+before making more changes."
+
+**Approval:** *(empty — her word on this plan goes here, verbatim, with the date.)*
 
 ---
 
-## 3. The five rules
+## 3. The six rules
 
-Everything below follows from these. A build choice that breaks one is wrong even if it passes its tests.
+A build choice that breaks one of these is wrong even if it passes its tests.
 
-1. **The page describes itself.** Which block a character belongs to can be worked out from the page alone, with no
-   outside map. Each block's start is marked on the paragraph break in front of it. The editor's map of blocks is a
-   cache of what the page says, and can be rebuilt from the page at any moment without asking the library.
-2. **Every change is accepted, then read.** The editor never needs to know in advance what a change will be, who made
-   it, or whether it asked. After any change to the page's characters it re-reads the paragraphs around the change and
-   works out what the page now says. Being asked first is used for one thing only: declining a change the rules do not
-   allow (§8.6). Correctness never depends on being asked.
-3. **The library follows the page.** What is saved is what the page says. Blocks join, split, appear and disappear in
-   the library because the page already shows it. The library is never used to overrule the page while she is typing.
-4. **The page changes from outside only through the keyboard's own door, or with the keyboard down.** The editor never
-   edits the text view's storage characters directly while the text view has the keyboard. A change it must make then
-   goes through the text view's own insert and replace calls, on the next turn of the main loop, and never while text
-   is being formed. Everything else waits until the keyboard is down, when the page may be rebuilt whole.
-5. **Text still forming is not saved.** A region the keyboard is still composing in (a grey prediction, a
-   composition, a Writing Tools session) is not written to the library until it settles. At a durability moment
-   (leaving the note, backgrounding, a lock) the editor ends the composition first and then saves everything.
-
-What the rules buy: no "the map and the page disagree" state exists (rule 1), so no repair-by-redraw exists; no input
-road has to be listed (rule 2); nothing redraws under the keyboard (rules 3 and 4); a guess is never saved as her text
-(rule 5).
+1. **The page describes itself.** Each block's start is marked on the paragraph break in front of it. The first
+   block has no character in front of it, so its mark is held beside the page (the head) and is re-pointed like any
+   other mark. Which block a character belongs to is read from the marks.
+2. **Inside a block, every change is accepted, then read.** The editor does not need to know in advance what a
+   change will be, who made it, or whether it asked. After any change to a region's characters it re-reads the
+   region and saves what it says. This is the rule that makes autocorrect, predictions, dictation and every future
+   keyboard road safe, and the review could not break it.
+3. **Structure changes only through her doors, and her rules decide the result.** Joining, splitting, adding and
+   removing blocks happen only when she makes a structural gesture: Return, backspace or delete at a block's edge,
+   typing, cutting or pasting over a selection that crosses blocks, or a menu act. Each is caught where she makes it.
+   The shared rules compute the result from the state before the gesture, exactly as on the Mac. The editor then
+   brings the page and the library to that result. The text view is never left to decide which block survives.
+4. **The page changes from outside only through the text view's own calls, or with the keyboard down.** The editor
+   never edits the storage's characters directly while the text view has the keyboard. It checks again after every
+   wait: a change planned before a wait is abandoned if the page, the keyboard or the text being formed has changed.
+5. **Text still forming is never saved.** A grey prediction or a composition is cut out of what is saved. Nothing of
+   it reaches the library until the keyboard commits it.
+6. **A save never lands where she cannot see it.** Every save checks that its block is still in this note. A save the
+   library will not take is rescued to where her words are on the page, and said. Nothing is held pending forever.
 
 ---
 
@@ -105,530 +123,681 @@ road has to be listed (rule 2); nothing redraws under the keyboard (rules 3 and 
 | Plain name | Meaning | Proposed type |
 |---|---|---|
 | The page | The text view's storage: one string, UTF-16 offsets | — |
-| A break | A `"\n"` on the page that carries the block-start mark. Every other `"\n"` is content inside a block (I4) | `PageMark` (the attribute key and its value) |
-| A region | The text between two breaks, or from the page's start to the first break, or from the last break to the end. One region is one block's text, or text that has no block yet | `PageRegion` |
-| A reference | What a region is bound to: a minted block and the take being shown, a pending act that will mint one, or nothing yet (unminted) | `PageRef` |
-| The map | The ordered list of regions with their offsets, references and flags. A cache of the page | `PageMap` |
-| A reading | A region's text as last read while settled. The base for the next save and for a put-back | held in the map |
-| Settled | Nothing is being formed in the region: no marked text, no Writing Tools session, no put-back owed | a flag on the region |
-| The door | The text view's own text-input calls, `replace(_:withText:)` and `insertText(_:)`, which is how the keyboard itself edits | `PageDoor` |
-| The writer | The one serial queue that turns what the page says into operations, in order | `PageWriter` |
-| The reconciler | The pure rule that, given the map and one change, says what the page now says and what the library owes | `PageReconciler` (Core, headless) |
-| The gate | The text view's "should this change happen" call. Policy only (§8.6) | — |
+| A break | A `"\n"` on the page that carries the block-start mark. Every other `"\n"` is content inside a block (I4) | `PageMark` |
+| The head | The first block's mark, held beside the page because no character precedes it | part of `PageMap` |
+| A region | The text between two breaks, from the page's start to the first break, or from the last break to the end | `PageRegion` |
+| A binding | What a region is bound to: a block and the take being shown, a token for an act still landing, or nothing yet (the open end) | `PageBinding` |
+| The map | The ordered regions with offsets, bindings, flags and the two texts below. Kept in step by every change. It is also the `BlockRangeIndex` and the aligned slots the shared rules read | `PageMap` |
+| The stored text | What the library holds for a region's take, as far as this editor knows. The compare-and-set base of the next save | `stored` |
+| The settled text | The region's page text the last time nothing was forming in it. What a save sends | `settled` |
+| Her doors | The places a structural gesture is caught: the text view's `insertText`, `deleteBackward`, `cut` and `paste`, and the menu's acts | `PageDoors` |
+| The text view's own calls | `insertText(_:)` and `replace(_:withText:)`, which is how the keyboard itself edits | — |
+| The gate | The text view's "should this change happen" question. Policy only (§9.1) | — |
+| The saver | The note's one save queue: the session's existing coordinator, plus the editor's one task that runs acts in order | §11 |
+
+(v1 called the two texts "a reading". That word is the codebase's name for a book, and the review showed one value
+cannot do both jobs.)
 
 ---
 
 ## 5. The page's shape
 
-### 5.1 Breaks carry the marks
+### 5.1 Marks
 The page is what today's `EditorDocument.materializeCore` builds: the blocks' texts in order, joined by a single
-`"\n"`. Today that separator carries no block attribute and belongs to neither neighbour, and every character of a
-block carries `blockIDAttribute`. The new core changes only the attributes:
+`"\n"`. The new core changes only the attributes, in a phone-only materialization:
 
-- **Each separator carries the mark**, a new attribute key (proposed `io.lduarte.variorum.blockStart`), whose value is
-  the reference of the block that begins after it.
-- **The first region has no character in front of it**, so its reference is held by the map's head. Nothing on the
-  page can lose it.
-- **Characters inside a block carry no identity attribute.** iOS never gives a newly typed character a custom
-  attribute (measured, `notes/TEXTKIT2_NOTES.md` §3, VM-24), and system replacements drop custom keys from the
-  characters they replace (research §8). An identity that rides every character would be wrong after every keystroke
-  and would need the re-stamp today's editor does. A mark on one character per block is touched only when a block
-  boundary is.
-- **An empty block is two breaks in a row** (or the head followed at once by a break). Today's design needs the
-  outside map for this case, because a zero-length range cannot carry an attribute; here the breaks around it say it.
-- **A `"\n"` with no mark is content.** A block may hold several paragraphs; her rule that a newline inside a block is
-  content (I4) is exactly "an unmarked newline".
+- **Each separator carries the mark**, a new attribute key (proposed `io.lduarte.variorum.blockStart`), whose value
+  is the binding of the region that begins after it.
+- **The head** holds the first region's binding.
+- **Characters inside a block carry no identity.** iOS never gives a typed character a custom attribute (measured,
+  `notes/TEXTKIT2_NOTES.md` §3, VM-24) and system replacements drop custom keys (research §8), so an identity that
+  rides every character is wrong after every keystroke. A mark on one character per block is touched only when a
+  block boundary is.
+- **An empty block is two breaks in a row**, or the head followed at once by a break.
+- **A `"\n"` with no mark is content** (I4).
 
-This is a phone-only materialization. `EditorDocument.materializeCore`, `BlockRangeIndex` and the separator doctrine
-stay as they are for the Mac.
+`EditorDocument.materializeCore`, `BlockRangeIndex` and the Mac's separator doctrine stay as they are.
 
-### 5.2 Two witnesses for every break
-A break is known two ways: the mark on its character, and the map's record of its offset. After every change both are
-checked for the breaks next to the change:
+### 5.2 Rules for marks (each is an invariant the tests hold)
+- A mark is honoured only on a `"\n"`. A mark found on any other character is stripped.
+- No two breaks carry the same binding. A second one that a change introduces (an undo restoring old attributes, a
+  paste) is stripped and its newline is content.
+- The map is the second witness. After every change the breaks next to it are checked. A break whose `"\n"` is still
+  at the map's offset but has lost its mark is **re-marked from the map**, an attribute-only write, and counted.
+- **The map is never rebuilt from the page.** (v1 said it could be; the review showed that a dropped mark would then
+  silently join two blocks' text.) A mark the page has and the map does not is stripped. A break the map has whose
+  character is gone is a struck break, handled by §8.
+- The open end, text with no block yet, is allowed only as the last region (§10.5). The shared rules assume it.
 
-- the character is there and marked: nothing to do;
-- the character is there, untouched by the change, but its mark is gone (a system road rewrote attributes): the mark is
-  put back from the map, an attribute-only write, and counted;
-- the character was replaced or removed by the change: §6 decides what that means.
+### 5.3 What the map holds for each region
+Its offset and length; its binding (block id and shown take id, or a token); the stored text and the settled text;
+whether anything is forming in it; and the facts the shared rules read: how many live takes the block has, whether it
+carries text she cannot see on the page (archived takes, comments), whether the shown take is locked, whether it is a
+gap slot. For a block this editor minted, those facts are known without asking (one take, no comments).
 
-On idle, and when a note is left, the whole page's marks are walked and compared with the map. A difference with no
-change to explain it rebuilds the map from the page and is counted and traced (§11). The map never overrules the page's
-characters.
+**These facts are kept fresh while the keyboard is up.** A delivery from the library updates them at once. That is
+metadata and writes nothing to the page. (v1 froze them, which made an accidental Return followed by backspace
+refuse.)
 
-### 5.3 Regions without a block yet
-New text may have no block for a moment: the first words in an empty note, a paragraph just opened by Return, the far
-side of a divide that is still landing. Its region carries a pending or unminted reference. Its saves wait in the
-writer until the act that mints its block returns the ids (§7.4). Text in such a region is never lost by this wait:
-it is on the page, and every durability moment flushes the writer.
+The map serves the shared rules directly: it yields a `BlockRangeIndex` and the aligned
+`[Queries.RenderedBlock]`-shaped slots they take, maintained incrementally so that a keystroke never builds them from
+scratch (P1).
 
 ### 5.4 Regions she cannot edit
-A locked take, a gap slot (a block whose text has not arrived by sync), and every region of a sealed note are
-read-only. For a sealed, stood-down or deleted note the text view is not editable at all. For a single read-only
-region the gate declines changes that touch it, and a change that reaches it anyway is put back (§6.4).
+A locked take's region and a gap slot's region are read-only: the gate declines changes inside them, and a change
+that reaches one anyway is undone (§8). A Return or a new-block act **next to** one is allowed, as on the Mac: it
+mints a neighbour and touches nothing of theirs. For a sealed, stood-down or deleted note the editor keeps today's
+face: the page shows a caret and the gate declines with the existing sentence.
 
 ---
 
-## 6. Reading a change (the reconciler)
+## 6. Typing inside a region (rule 2)
 
-A pure function in the core package, with no UIKit and no database: given the map and one change, it returns the new
-map and a list of effects. It is total: it has an answer for every possible change, and it never refuses.
+After each pass of the storage that changed characters, the editor is told the range that changed and the change in
+length by the storage's first notice (`willProcessEditing`; the second notice's range is sometimes stretched and is
+not used). One pass may hold several edits; the union is enough, because the editor re-reads.
 
-### 6.1 What it is told
-- **The change:** the range that changed, in the page's new offsets, and the change in length. This comes from the
-  storage's first notice (`willProcessEditing`), which carries the exact characters on every road measured so far; the
-  second notice's range is sometimes stretched to the paragraph's end and is not used. One pass may hold several
-  separate edits (iOS 26 selections can be several ranges); the reconciler treats the reported range as "something in
-  here changed" and re-reads, so it does not need them apart.
-- **What the page now holds there:** the characters of the changed range, and where the marks are inside it.
-- **What is forming:** the marked-text range, if any; whether a Writing Tools session is open.
-- **Whose it was** (§6.3): whether the gate was asked about exactly this change, and the caret or selection just
-  before it.
+For a change that strikes no break:
 
-### 6.2 What it does
-1. **Old range.** From the new range and the length change it works out which old offsets were replaced.
-2. **Breaks.** A break whose old offset was inside the old range was struck. A break after it shifts by the length
-   change. Inside the new range it looks for marked characters: a struck break that is still there, marked, survives
-   (for example a system undo that puts back exactly what was removed).
-3. **No break lost** (nearly every keystroke): the regions touching the range are re-read. One that has text forming
-   is flagged unsettled. Otherwise its text is compared with its reading, and a difference becomes a save effect.
-4. **New unmarked newlines** are content, unless something claims them: the Return act (§8.1), bulk entry at an
-   unminted end (§8.5). A claim stamps the mark and adds its effect.
-5. **A break lost** is classified by §6.3 and becomes a join, a deletion, a compound (§8), or a put-back (§6.4).
+1. The offsets of everything after the change shift by the length change.
+2. The regions touching the range are re-read from the page.
+3. **The forming range is cut out.** The marked-text range is read after the pass, not during the question, because
+   it is not yet current then (research §1). The region's settled text is its page text minus the marked range.
+4. If the settled text differs from what was last queued for saving, a save is queued **by value**: the text is
+   captured now, not read again when the save fires.
 
-Cost: the regions next to the change, plus shifting the offsets after it. Nothing reads the whole note. This keeps
-P1.
+Settling is also checked when no character changes: at `textViewDidChange`, at a selection change, and at the
+dictation hooks. Accepting a prediction may commit text without a character edit.
 
-### 6.3 Whose change was it
-The page is the truth about text. But a lost break changes structure, and structure changes only when she means it
-(I4). So a lost break is hers only when one of these holds:
+Input that never marks its forming text (Korean) is saved as it changes. That is harmless: each save replaces the
+last, and commits are covered by §11.5.
 
-- **It was asked and approved:** the gate was asked about exactly this change (same range, same replacement length,
-  same page length), found that its range was her selection or the break next to her caret, and the shared rule
-  allowed it (§8.6).
-- **Its shape is unmistakably hers:** the change removed exactly the one break next to her caret and nothing else
-  (a backspace at a block's start, or a forward delete at its end), or its old range is exactly the selection she had.
-  This covers keyboards and roads that do not ask (a hardware keyboard, a held delete key).
-
-Anything else that removes a break is the keyboard's doing, not hers.
-
-### 6.4 The put-back
-A break lost to a change that was not hers is repaired so that, for her, nothing happened:
-
-1. **Re-mark.** If the replacement text has a `"\n"` at the same place the break stood, measured from the start or
-   from the end of the replaced range, that newline is the break. Stamp it. An attribute-only write. No character
-   changes, nothing to say.
-2. **Put back.** Otherwise the regions on both sides are restored from their readings: on the next turn of the main
-   loop, once nothing is forming, the damaged span is replaced through the door with the two readings and their break,
-   and the mark is stamped. The message line says so once. The affected regions are unsettled, and nothing of them is
-   saved, until the put-back lands.
-
-The same put-back answers a change that reached a read-only region, and a structural keystroke the library then
-refused (§8.7). It is the only place the new core discards something the keyboard did, and it is counted and traced
-every time (§11). In ordinary writing the count is expected to be zero; the probe and the trial measure it.
-
-### 6.5 What it guarantees (the invariants the tests hold it to)
-- After every change, the page's regions and the map agree in number, order and offsets.
-- Applying the returned effects to a model library makes the library's blocks, joined by breaks, equal to the page,
-  except for regions flagged unsettled or pending.
-- A region the change did not touch produces no effect.
-- A break is never lost without a join, a deletion, a compound or a put-back in the effects.
-- Rebuilding the map from the page's marks alone gives the same map.
-- The same change read twice gives the same result; a change that changes nothing gives none.
+Cost: the touched regions and an offset shift. Nothing reads the whole note.
 
 ---
 
-## 7. Saving
+## 7. Her doors (rule 3)
 
-### 7.1 One writer, in order
-All of a note's writes go through one serial writer that owns the bindings from references to block and take ids. The
-order of effects is the order the page changed. A save for a region is debounced as today (the existing half-second
-pause) and always flushed ahead of any structural effect that names that region, so an operation that reads a block's
-text from the library finds what the page said.
+Her structural gestures arrive at a small number of places, all of which a `UITextView` subclass can catch. The phone
+already catches Return this way for list continuation, and it works on her phone today.
 
-### 7.2 What a save is
-`Operations.autosave(variantID, text:, charDelta:, expectedText:)` with `expectedText` set to the region's reading,
-compared as the library stores text (`StoredText`). If the row no longer holds that text because another writer got
-there first, the operation already rescues: her text keeps the row and the other text becomes a "conflict" take
-(S5, VX-849). The new core adds nothing here and removes nothing.
+| Door | What arrives | Caught when |
+|---|---|---|
+| `insertText(_:)` | A typed character, Return, a paste from some keyboards | The text is `"\n"` (Return), or the selection crosses a break |
+| `deleteBackward()` | Backspace | The caret is at a region's start, or the selection crosses a break |
+| forward delete | A hardware keyboard's ⌦ | The caret is at a region's end, or the selection crosses a break. *Which call carries it is the probe's to find (§15.3)* |
+| `cut(_:)`, `paste(_:)` | The edit menu and ⌘X, ⌘V | The selection crosses a break, or a paste lands at the open end (bulk entry) |
+| The menu's acts | Divide, Merge, Extract, Make Block, New Block Below, Delete, Archive | Always |
 
-### 7.3 Settling
-A region with text forming is not saved (rule 5). The signal is the marked-text range: iOS delivers its grey inline
-prediction as marked text (research §2), and compositions are marked. When the range clears, the region is read and
-its save queued. Two cautions the research found:
+Everything else that reaches these calls is ordinary typing and goes straight to the text view (`super`).
 
-- **Some input never marks** (Korean composes without it). For such input the forming text is saved as it changes.
-  This is harmless: each save replaces the last, and only a commit freezes text, which §7.5 covers.
-- **Writing Tools** rewrites the page over several steps. Saving is held from its "will begin" to its "did end".
-  The starting policy is that Writing Tools is off in this text view (§10).
+At a caught gesture the editor does four things, synchronously, inside the call the keyboard itself made:
 
-### 7.4 Pending regions
-A structural effect (a mint, a divide, a join, a compound) is sent to the writer with a token; the region on the page
-carries the token as its reference from the instant the page shows the result. The operation returns the new block
-and take synchronously to the writer, which binds the token. Saves for a pending region wait behind its act. If the
-act is refused (§8.7), the writer says so and the page is put right; no text is dropped.
+1. **Ask the shared rule** what the gesture is, with the map's index and slots as they stand before the change:
+   `TypedReturn.act` for Return, `EditorEditRoute.route` for a deletion or replacement, the planners for the menu.
+   The new core passes its own arm list (proposed `pageArms`: the Mac's arms, with the phone's gap fence). It does not
+   edit `phoneArms`, which the old editor still uses and a Mac suite pins.
+2. **If the rule refuses**, nothing changes and the rule's sentence is said. This is where a backspace beside a fan,
+   an archived take, a comment or a locked take is refused, from facts the map keeps fresh.
+3. **Otherwise make the ruled page**, through the text view's own calls: the exact characters the rule's result has,
+   with the marks §8's table gives. Because the edit is made inside the keyboard's own call, by the same calls the
+   keyboard uses, the keyboard sees one ordinary edit.
+4. **Queue the operation**, with a token on every region whose identity the operation may change (§8), and clear the
+   text view's own undo (§12.3).
 
-### 7.5 Durability moments
-Leaving the note, backgrounding, a lock, sealing the note, and every door that makes a commit (⌘S on a hardware
-keyboard, the commit button, the leaving commit) do the same three things in order: end any composition
-(`unmarkText()`, which accepts it), read every unsettled region, and flush the writer. Only then do they go on to
-what today's code does next (the quiet commits through `closeAutoCommit(_:takes:)`, the sync round, the lock). So a
-commit never freezes a guess, and the end of a note being dictated is never left unsaved (the audit's findings 3
-and 4).
+Because step 1 computes the result with the Mac's rules and step 3 writes exactly that result, the page equals the
+Mac's page by construction, including the cases the review listed: the space a backspace-join puts between two
+texts, the whitespace a divide trims at the cut, the cut's settle, a word carried down whole, a selection edge on a
+boundary keeping the boundary, two ends that do not join when either sits at a paragraph break or either block has
+takes.
+
+**If a door proves unreliable on her phone** (the probe finds a gesture that does not arrive at its call), that
+gesture falls back to the gate: the gate declines it, and the editor makes the ruled change through the text view's
+own calls on the next turn of the main loop, after checking that the page has not changed and nothing is forming.
+That is the shape React Native's text input adopted in October 2026 (research §3). Whether a declined key re-issued
+this way upsets the keyboard is a probe question (§15.3, A8).
 
 ---
 
-## 8. Structure from the page
+## 8. Identity: which region is which block after each act
 
-Her rules for what these keys do are the Mac's, ruled once for both platforms and encoded in the shared rules
-(`TypedReturn`, `EditorEditRoute` and its arms, `CrossBlockCompound`, `MergeJoinRule`, `BoundarySnapping`). The new
-core changes how the phone arrives at the same results. Where the phone runs fewer arms than the Mac today (it has no
-seam arms: a backspace at a block's start is refused with a sentence), this plan adopts the Mac's arms; that is her
-standing ruling for wave 3 ("Return makes a new block and backspace joins blocks … as on the Mac", VM-137, NT-1), and
-§17 lists it for her confirmation.
+The review's first blocker: v1 had no rule for this, and a wrong binding sends her next words silently into a block
+that has left the note. This table is the rule. It is checked by the identity oracle (§14.2) against the real shared
+rules and the real operations; **where this table and their code differ, the code wins and the table is corrected.**
 
-Two shapes cover every case:
+Notation: `P` and `N` are the blocks before and after a seam. A token is a binding that waits for an operation's
+result. "Re-point" changes which binding a break or the head carries; it is an attribute-only write.
 
-- **Follow.** Where what the text view does by itself is already the ruled result, the editor lets it happen and makes
-  the library agree.
-- **Decline and re-issue.** Where the ruled result differs from what the text view would do, the gate declines the
-  change and the editor makes the ruled change through the door on the next turn, after checking the page has not
-  changed meanwhile. (React Native's text input moved to this shape in October 2026; research §3.)
+### 8.1 Return (`TypedReturn.act`)
+| The rule's answer | The page | Marks and tokens | The operation |
+|---|---|---|---|
+| `.content` (segmentation off, a selection, inside a list line, text in the open end) | The newline as typed. List continuation and the list exit run first, as on the Mac | None | None (the open end's own rule: §10.5) |
+| `.emptyBlock(.below)` at block A | A `"\n"` inserted at the **end of A's region** (after any trailing whitespace) | The new `"\n"` carries token T. A keeps its mark | `newBlock(in:text:"",at:.after(A))` binds T |
+| `.emptyBlock(.below, closingEmptyTail: true)` | Nothing inserted | The open end's break is re-pointed to token T | `newBlock` after the last block binds T |
+| `.emptyBlock(.above)` at block A | A `"\n"` inserted at the **start of A's region** | A's old break (or the head) is re-pointed to token T; the new `"\n"` carries A | `newBlock(…, at:.before(A))` binds T |
+| `.divideAtCaret` / `.divideAtWordStart`, A has one take | The whitespace at the cut is replaced by one `"\n"`, as `BoundarySnapping.seamTrimmedHalves` gives; at a run of newlines the run stays and its **last** newline is the break | The break carries token C. A keeps its mark | `divide(A, cut:)`; its result binds C. Both regions' stored texts become the halves the operation stored |
+| The same, A has several takes | The same page | **Both** regions take tokens: A's break (or the head) is re-pointed to token B, the new break carries token C | Keep-on-top: `KeepOnTopDivide.compose` then `divideW` inside one undo entry. A is released; the result binds B and C, each showing the displayed take |
 
-### 8.1 Return
-With the note's segmentation switch on, Return is a structural key (`TypedReturn.act`): at a block's end, an empty
-block below; inside its text, a divide at the caret, where a caret inside a word divides at that word's start so the
-whole word goes down; at its start, an empty block above; in an empty block, another below. With the switch off,
-Return is a newline inside the block.
+### 8.2 Backspace at a region's start, forward delete at its end (`EditorEditRoute`: the seam arms)
+| The rule's answer | The page | Marks and tokens | The operation |
+|---|---|---|---|
+| Carve an empty block (`emptyBlockCarve` → carved, survivor) | One `"\n"` is removed: **the carved block's own break**. If the carved block is the first region, the survivor's break is removed and the head is re-pointed to the survivor | The survivor keeps its binding | `deleteBlock(carved, requiring: .emptyWithNothingUnshown(variantID:))` |
+| Join two texted blocks, neither with takes or unshown text | N's break is replaced by the delete join (`MergeJoinRule.deleteKeystroke`: a space, or nothing when an edge is already whitespace or a side is empty) | P's break (or the head) is re-pointed to token M | `merge(P, N, joining: .deleteKeystroke)` binds M |
+| Refuse (a fan, an archived take, a comment, a locked take, a gap) | Nothing | — | None; the sentence from `CrossBlockRefusal` |
 
-The phone already catches Return in the text view's `insertText` (the list-continuation door), which is the one place
-the software keyboard, a hardware keyboard and a test all arrive. The new core keeps that single catch: it asks
-`TypedReturn` for the act, moves the caret if the rule says so (the word's start), lets the newline be inserted by the
-text view itself, and claims that newline as a break (§6.2 step 4) with a pending reference. The effect is the mint or
-the divide. A fanned block divides keep-on-top, as ruled. A list line still continues its list after the newline, as
-today. Nothing is redrawn: the only write is one attribute.
+### 8.3 A deletion or replacement whose selection crosses a break
+| The rule's answer | The page | Marks and tokens | The operation |
+|---|---|---|---|
+| Delete whole blocks (`.deleteWholeBlocks`) | Each deleted block's text **and its own break** are removed. A deleted first region takes the following break with it and the head is re-pointed to the first survivor. If none survive the page is empty and the head is the open end | Survivors keep their bindings | `deleteBlock` for each, as the Mac's executor groups them |
+| The clamp (`.editInBlock`) | The in-block edit only; the break stands | None | An ordinary save |
+| The compound (`.editAcrossBlocks(plan)`), ends join | The span is replaced so the page reads the leading edge's new text followed at once by the trailing edge's new text. Covered blocks and their breaks are gone | The leading break (or the head) is re-pointed to token M | `CrossBlockCompound.apply` in one turn of the runner (it insures the takes, deletes the covered blocks, edits and merges). M is bound from its outcome |
+| The compound, ends do not join (a cut at a paragraph break, or a fan on either end, read from the map) | The same, with one `"\n"` kept or inserted between the two edges | That `"\n"` carries the trailing block's binding. The leading edge keeps its own. If the first block is wholly covered and nothing was typed, it is deleted and the head (or its break) is re-pointed to the trailing block | The same call |
+| Refuse, or refuse awaiting sync | Nothing | — | None; the sentence |
 
-### 8.2 Backspace at a block's start, forward delete at its end
-The text view deletes the break's character itself. The page then reads as one region, which is what a join looks
-like. The effect is the shared rule's: the empty-block carve (`deleteBlock` with its "empty with nothing unshown"
-precondition) or the seam merge, with the delete roads' own join. Where the rule refuses (the Mac's cases), the gate
-declines before anything changes and the sentence is said; a join that arrives without asking and is refused is put
-back (§8.7).
-
-### 8.3 Typing, cutting or pasting over a selection that crosses blocks
-The text view replaces the selection as any editor does: the first block's head, the new text, the last block's tail,
-on one line. That is the Mac's compound result. The effect is the existing compound (whole blocks inside the selection
-go to the tray, the edges are edited and joined, the takes it edits are insured with quiet commits, one undo entry),
-run by the executor the phone already has. After it returns, the joined region's text on the page is compared with
-what the compound produced; if they differ, the page wins and a save follows.
-
-A selection whose ruled result is narrower than what the text view would do (the clamp: an edit that only brushes a
-break) is declined and re-issued as the in-block edit.
+The phone's existing compound executor ends in a redraw from the library and is not used; the new core calls
+`CrossBlockCompound.apply` itself.
 
 ### 8.4 The menu's acts
-Divide, Merge with Previous, Merge with Next, Extract, Make Block, New Block Below, Delete Block, Archive Block.
-Each computes its plan from the page and the shared planner as today, then:
+| Act | The page | Marks and tokens |
+|---|---|---|
+| Divide | As Return's divide, with the planner's cut | As §8.1 |
+| Divide choosing takes, Merge choosing takes | The sheets lower the keyboard; the page is rebuilt when they close (§12) | — |
+| Merge with Previous / Next | **No character changes**: every merge door uses the rendering join, so the `"\n"` stays as content | N's break loses its mark; P's break (or the head) is re-pointed to token M |
+| Extract, Make Block | Breaks inserted or stamped at the span's edges, as the planner's plan gives | A token on each new region; the source keeps its mark where the operation keeps its identity |
+| New Block Below | As `.emptyBlock(.below)` | As §8.1 |
+| Delete Block, Archive Block | The block's text and its own break are removed; the head is re-pointed if it was first | Survivors keep their bindings |
 
-- **changes the page through the door** if it needs a character (a new break's newline, a removed break, a removed
-  block's text), or by one attribute if it does not (a divide at an existing newline is only a stamp);
-- **queues its operation** with a token, like a keystroke's.
+### 8.5 The rule for tokens
+A token goes on **every** region whose identity the operation might change, not only on new text: both halves of a
+fanned divide, the survivor of a join, the joined span of a compound. A region with a token is not saved until the
+operation's result binds it; its saves wait in order behind the operation. If the operation's outcome differs from
+what the map expected (a race: another device added a take a moment ago, so a join is suppressed), the page is brought
+to the outcome by inverting only the difference (§8.6), and it is said.
 
-The landing no longer ends in a redraw from the library, so the keystroke fence around it (VM-2) has nothing to
-protect: a key typed while the operation is in flight lands on a page that already shows the result, and its save
-waits behind the operation in the writer.
+Doors that need a block's id (the takes button, the comments sheet, jump to a block, the ⋯ menu's block acts) are
+unavailable on a region whose token is still unbound, for the moment the operation takes.
 
-If the probe shows the door is not safe at some moment (§15, K2), these acts lower the keyboard first, change the
-page, and raise it again with the caret where the plan puts it.
+### 8.6 A struck break that did not come through her doors
+Something removed a break without passing through §7: a keyboard proposal from a stale position, or a gesture
+arriving by a call the doors do not catch.
 
-### 8.5 The end of a note, and bulk entry
-Her rules for when fresh text becomes blocks stay the shared planner's (`CrystallizationPlanner`, the note's
-segmentation). What changes is that a paragraph becoming a block is one attribute: the newline that ended it is
-stamped, and the mint is queued without registering undo, as crystallization does today. The idle mint and the
-leaving mint become "flush the writer". A paste at an unminted end segments by the same planner; a paste inside a
-block is content.
+1. **Whose was it?** It is hers only if its old range is exactly the selection she had, or it removed exactly the one
+   break at her caret. Keyboard deletes always act at the text view's own selection, so this test does not admit a
+   keyboard accident (the review tried and could not make one pass).
+2. **If hers**, the shared rule is asked about the old range and the replacement, as if it had come through a door,
+   and the page is brought from where the native edit left it to the ruled page, on the next turn, with §8's marks.
+   The clamp's answer keeps the in-block part of her edit and puts the break back. A refusal undoes only the
+   structure.
+3. **If not hers**, or the rule refuses: **only the offending change is inverted.** The struck break is re-inserted
+   at its position, tracked through any later edits, with its mark. Text typed since stays where it is. If a later
+   edit has itself crossed that position, all the text stays in the surviving region and the line says so. Nothing is
+   ever restored from saved text (v1 did that, and would have thrown away what she typed in the meantime).
+4. The text view's own undo is cleared, so a shake cannot replay the damage.
 
-### 8.6 The gate, as policy only
-The gate answers the text view's question for these reasons and no others:
-
-1. the note is sealed, stood down or gone (today's three belts, unchanged);
-2. the change touches a read-only region (§5.4);
-3. the change would strike a break and is not hers by §6.3's first test, or the shared rule refuses it: declined, and
-   said where the rule has a sentence;
-4. the change is one of the decline-and-re-issue cases.
-
-Otherwise it says yes and remembers what it was asked (range, replacement length, page length, selection), so the
-reconciler can tell an asked change from an unasked one. It arms nothing and routes nothing. It uses the multi-range
-form of the call (the single-range form is deprecated at iOS 27).
-
-### 8.7 When the library refuses after the page has changed
-A race can make an operation refuse a change the page already shows (another device sealed the note; the block changed
-under the plan). The page is then put right so that it matches the library, with no text lost:
-
-- a refused mint or divide: the pending break loses its mark and its newline becomes content of the block before it,
-  which is then saved normally; the refusal is said;
-- a refused join or compound: the regions are put back from their readings through the door (§6.4), and the refusal is
-  said.
-
-### 8.8 Undo
-Two stacks that never interleave, as on the Mac (OverallModel §3). The structural undo door stays the road back from
-a join, a divide, a compound or a delete. The text view's own undo (shake, three-finger swipe, ⌘Z) covers typing
-inside blocks; it is cleared at every structural change, the Mac's rule, so it can never replay across a break that
-has since moved. A structural undo changes the page through the door, or with the keyboard down, like any outside
-change (§9).
+Every such repair is counted and traced (§13). In ordinary writing the count is expected to be zero.
 
 ---
 
-## 9. Changing the page from outside
+## 9. The gate, and what is said
 
-Three ways, and nothing else writes the page:
+### 9.1 The gate is policy only
+It answers the text view's question for these reasons and no others:
 
+1. the note is sealed, stood down or gone (today's three belts and sentences, unchanged);
+2. the change falls inside a read-only region (§5.4), unless it is a Return or new-block act beside one;
+3. the change would strike a break and is not shaped like hers (§8.6's test): declined, counted;
+4. a gesture that has fallen back from its door (§7's last paragraph).
+
+Otherwise it says yes. It arms nothing and routes nothing. It uses the multi-range form of the call (the single-range
+form is deprecated at iOS 27) and treats a multi-range ask as one change over the union.
+
+### 9.2 What the phone says
+Her rule for the phone's message line stands: a line with Undo when something leaves the page, a line for a refusal,
+nothing for ordinary acts. So a carved empty block and a block deleted by a selection get the removal line with Undo;
+a refusal gets its sentence; a join and a Return say nothing. The Mac's receipts ("Blocks joined — ⌥⌘Z undoes it.")
+are not copied. *(§20.7: hers to confirm.)*
+
+---
+
+## 10. More rules the page follows
+
+### 10.1 Normalizing
+Where an operation stores different text from what was typed (a divide trims the cut; a join adds a space), the page
+is made to match **at the gesture**, inside the door, as §7 step 3 says. After every operation returns, each touched
+region's stored text is set from the operation's result. So the next save's compare-and-set base is right and no
+"conflict" take is minted by the editor's own act (the review's M2 and M3).
+
+### 10.2 Return's in-block twin
+With Return making a block, she needs a way to type a newline inside one. The phone has none today. The first build
+that makes Return structural adds a "new line" key to the bar above the keyboard, and a hardware ⇧⏎ is read as the
+same. Wave 3's capsule replaces the key later. A dictated "new line" does not arrive as a Return and is content.
+
+### 10.3 The segmentation switch
+The phone has no per-note switch yet (VM-141). Until it does, Return is structural unless the note's segmentation is
+"one block", which is what the Mac's switch off means.
+
+### 10.4 Selections
+A selection may be several ranges on iOS 26 and later. The doors treat a multi-range selection that crosses a break as
+the rule treats its union.
+
+### 10.5 The open end
+New text at the end of a note has no block until it is minted. It is only ever the last region.
+
+- **At a Return in it**, the shared planner (`CrystallizationPlanner`) says which completed paragraphs become
+  blocks, with its trim. The page is normalized inside the door and the mints are queued, without registering undo,
+  as today.
+- **A paste there** is bulk entry: the paste door inserts the planner's pieces and stamps their breaks.
+- **When she pauses**, the open end is minted on the same two-second idle clock today's editor uses, and at every
+  durability moment (§11.5). The idle mint stores the text **exactly as it stands on the page**, with no trim, so
+  nothing moves under her fingers. *(§20.3: hers to confirm.)*
+
+---
+
+## 11. Saving (rules 5 and 6)
+
+### 11.1 One saver
+The note's saves keep going through the session's existing `AutosaveCoordinator` for that note. Every flush road in
+the app already goes there: sync's flush before a round, version saves, the copy family, note deletion, the leaving
+commit, the lock's teardown, the takes sheet's card editor. A second writer would reopen the hole VX-683 closed.
+
+Structural acts are run by **one task** owned by the editor, which for each queued act flushes **every** pending save
+and then runs the operation on the session's runner. Swift gives no order across tasks, so everything else (the
+debounce, the doors, deliveries, durability moments) only enqueues to that task. Every flush road also waits for acts
+in flight. The liveness registry that today names the old editor's type learns to hold either editor.
+
+### 11.2 What a save is
+`Operations.autosave(variantID, text:, charDelta:, expectedText:)`, the text by value, `expectedText` the region's
+stored text, compared as the library stores text. A landed save sets the stored text. If another writer changed the
+row first, the operation already rescues the other text as a "conflict" take (S5, VX-849).
+
+A delivery read while a save is in flight is a snapshot from before her words; the coordinator's existing
+"unlanded" fence is honoured.
+
+### 11.3 A save checks it is still in this note
+Today `autosave` accepts a write into a take whose block has left the note (released by a merge on another device),
+silently. And a save the library refuses (a remote seal, a locked take, a deleted block) is held pending forever, so
+the words exist only on the page and are gone when she leaves. v1 inherited both.
+
+The new core's saves carry the note's id, and the operation refuses when the take's block is not placed in that note.
+This is one additive, optional parameter on `autosave` and on the coordinator's entry; without it everything behaves
+as today, so the Mac is unchanged. **It is a change to an operation's contract and needs her word (§20.1).**
+
+### 11.4 A save the library will not take is rescued
+When a save is refused, or its block is gone from the note:
+
+- **The block left the note** (merged, deleted or moved elsewhere): the region's text is kept as a new block at the
+  region's place, the region is rebound to it, and the line says so.
+- **The take was locked elsewhere**: the same, a new block beside it.
+- **The note was sealed elsewhere**: nothing in the note can take text. The words stay on the page, typing stops,
+  and the line says they are not saved and offers Copy. *(§20.2: the rescue's shape and words are hers.)*
+
+Nothing stays pending without her knowing.
+
+### 11.5 Durability moments
+Leaving the note, backgrounding, a lock, sealing, and every door that makes a commit do the same things in order:
+settle what is forming **by its kind**, mint the open end, flush the saver, wait for acts in flight. Only then do they
+go on to what today's code does next.
+
+| What is forming | At a durability moment |
+|---|---|
+| A grey inline prediction | Its marked suffix is discarded. It was never hers |
+| Dictation | Accepted |
+| A composition (Japanese, Chinese) | Accepted. *(§20.5: hers to confirm.)* |
+
+v1 called `unmarkText()` for all three, which would have frozen a prediction's guess into a commit. Telling the kinds
+apart, and what each call really does, are probe questions (§15.3).
+
+### 11.6 What a kill can lose, stated plainly
+If iOS ends the app without warning: up to the half-second debounce in an ordinary region; whatever was typed in a
+region whose operation had not yet returned (measured in milliseconds on an ordinary note, longer on a very long one:
+§14.5 measures it); the open end since the last idle mint (at most two seconds of typing). v1's "never lost by this
+wait" was too strong.
+
+---
+
+## 12. Changing the page from outside (rule 4)
+
+### 12.1 Three ways, and nothing else writes the page
 | Way | When | Used for |
 |---|---|---|
-| **An attribute-only write** | Any time, but never over text that is forming | Stamping or repairing a mark; the markdown look; the typed-face reset |
-| **The door** | The text view has the keyboard; next turn of the main loop; nothing forming; the page unchanged since the plan was made | A structural act's character change; a put-back; list continuation and the formatting acts (as today) |
-| **A whole rebuild** | The text view does not have the keyboard | Opening a note; applying everything that waited |
+| An attribute-only write | Any time except over text that is forming | Marks; the markdown look; the typed-face reset; decor reservations |
+| The text view's own calls | The text view has the keyboard. Inside her door's call, or on the next turn with nothing forming and the page unchanged since the plan | Her gestures; §8.6's repairs; changes from the library to regions she is not in |
+| A whole rebuild | The text view does not have the keyboard | Opening a note; closing a sheet |
 
-**Changes from the library** (a sync from another device, a take chosen in the sheet, a lens, a structural undo):
-the delivered projection is compared with the page region by region.
+### 12.2 Changes from the library
+The delivered projection is compared with the map, by block ids in order and by stored texts, not by reading the page.
 
-- A region with unsaved typing is never overwritten. If the library's text for it has moved, her next save rescues
-  the other text as a take (§7.2).
-- The editor's own saves coming back change nothing.
-- Everything else is a list of small changes (replace this region's text, add this region, remove that one). They
-  wait while anything is forming. Whether they then go through the door at once or wait for the keyboard to go down is
-  decided by the probe (§12.3, question 3); the plan's default until then is **wait for the keyboard to go down**,
-  except a change she asked for on the block she is in (a take swap), which lowers the keyboard, changes the page and
-  raises it again.
+- **Facts** (takes, comments, locks, gaps) update the map at once (§5.3).
+- **A region with unsaved typing is never overwritten.** If the library's text for it has moved, her next save
+  rescues the other text as a take.
+- **Text changes to other regions, and structural changes** (a block added, removed, merged or moved on another
+  device; a structural undo or redo she asked for) are applied without waiting for the keyboard to go down, through
+  the text view's own calls, with nothing forming. If the change touches the region her caret is in, the keyboard is
+  lowered, the page rebuilt, and the keyboard raised with the caret where it belongs. (v1 made all of these wait for
+  the keyboard, which the review showed would let a whole typing session's saves land in a block that had left the
+  note.)
+- If the probe shows the text view's own calls are not safe while she is typing elsewhere (§18, K2), structural
+  changes fall back to lower-rebuild-raise, and plain text changes to other regions wait.
 
-**The caret** is never set by raw offset after an outside change. It is kept by (region, offset in region), and when
-the door is used above it the shift is applied to the selection explicitly.
+**The caret** is kept by (region, offset in region), never by raw offset.
 
-**Showing another take** (a peek, a swap, a lens) rebinds the region to that take and replaces its text by one of the
-ways above. The page stays the truth about text; the map says whose text it is. Typing during a peek saves into the
-take being shown, exactly as the page says. *(To confirm against the inventory: what today's peek saves.)*
+### 12.3 Undo
+Two stacks that never interleave, as on the Mac. The structural undo door is the road back from a join, a divide, a
+compound or a delete; its result reaches the page by §12.2. The text view's own undo covers typing inside regions and
+is cleared after every structural change, every repair and every change made through the text view's own calls. It
+is the responder chain's shared manager, so the clearing is scoped to this text view's actions.
+
+### 12.4 Showing another take
+A peek, a swap or a lens rebinds the region to that take and replaces its text. The map says whose text it is, and
+typing during a peek saves into the take being shown, as today. A shown take that is locked makes the region
+read-only. A divide in such a region passes the displayed take to the operation.
+
+A swipe-peek is her native takes gesture and happens with the keyboard up. Doing it by lowering and raising the
+keyboard would be a visible bounce on every peek, which is a cost to feel. The probe measures a peek done both ways
+(§15.3), and "the keyboard never bounces on a peek" is part of her gate.
 
 ---
 
-## 10. The text view's settings at the start
+## 13. Settings at the start, and the checks that run in the shipped app
 
-Each is a conservative starting point. The probe (§12.3) is what earns loosening one; each is listed for her in §17.
-
+### 13.1 The text view's settings
 | Setting | Start | Why |
 |---|---|---|
-| Inline predictions (`inlinePredictionType`) | Off; the bar above the keyboard stays | The grey guess is marked text in the page. Rule 5 handles it, but what accepting and rejecting it write is undocumented. On after the probe shows it clean |
-| Writing Tools (`writingToolsBehavior`) | Off | Rewrites the page in steps, may cross breaks, may add attributes. Her policy call (the audit's finding 8) |
-| Text drag within the note | Off | A drag-move is a delete in one place and an insert in another; across a break it is a structural act with no ruled meaning |
+| Inline predictions (`inlinePredictionType`) | Off; the bar above the keyboard stays | The grey guess is marked text in the page. Rule 5 handles it, but what accepting and rejecting write is undocumented. On after the probe shows it clean |
+| Writing Tools (`writingToolsBehavior`) and iOS 27's automatic proofreading | Off, if the setting silences both (a probe question) | They rewrite the page in steps and may cross breaks. Saving is held across a session if one can still start |
+| Text drag within the note | Off | A drag-move across a break is a structural act with no ruled meaning |
 | Image glyphs and attachments | Off; paste is plain text | Blocks hold text |
-| Autocorrect, the prediction bar, dictation, swipe typing, text replacements, spelling, smart punctuation | On, as the system has them | Ordinary in-region changes; rule 2 does not care how they arrive |
-| TextKit 2 | Required; the canary stays | TextKit 1 has an iOS 27 bug that hides text during proofreading, and loses multi-range selection |
-| Find (`isFindInteractionEnabled`) | As today, until U5 | The system's find-and-replace changes the page through the door, which the new core reads like any change; adopting it is U5's question |
+| Autocorrect, the prediction bar, dictation, swipe typing, text replacements, spelling, smart punctuation | On | Ordinary in-region changes; rule 2 does not care how they arrive |
+| TextKit 2 | Required; the canary stays | TextKit 1 has an iOS 27 bug that hides text during proofreading |
+
+### 13.2 The checks
+| Check | When | If it fails |
+|---|---|---|
+| The breaks next to a change are where the map says, marked, unique | Every change | Re-mark from the map, or strip the stray; count |
+| **The page against the note's projection, in order** | On leaving a note after the flush; on demand in Diagnostics; during the trial also a few seconds after typing stops | Count and trace with block ids and lengths, never words. During the trial the line says a mismatch was found |
+| A repair (§8.6) or a rescue (§11.4) happened | Every time | Count; trace; the line |
+
+The page-against-projection check compares the sequence of block ids and their texts from `Queries.takesProjection`
+with the map's bindings and the page's regions, with shown takes mapped. It leaves out regions with a token, text
+that is forming, and the open end. Because the page is normalized at the gesture (§10.1) it expects no differences;
+the one deliberate difference, the idle mint's untrimmed text, is not one, because that text is what was stored.
+(v1's check compared each region with its own take, which a wrong binding passes.)
+
+The edit trace gains the new core's counters. Copy still gives plain text with no words in it.
 
 ---
 
-## 11. Checks that run in the shipped app
+## 14. Proving it on the Mac
 
-Her trust is the point, so the app checks itself and says what it finds. None of these reads the whole note on a
-keystroke.
+### 14.1 Where the code lives, and what that costs
+The shared rules (`TypedReturn`, `EditorEditRoute`, `CrossBlockCompound`, the planners, `BlockRangeIndex`) are
+compiled into the two apps, not into the core package, and their tests run in an app target under a stage claim. The
+new core depends on them. So:
 
-| Check | When | Cost | If it fails |
-|---|---|---|---|
-| The breaks next to a change are where the map says, and marked | Every change | The neighbours of the change | Repair the mark or rebuild the map from the page; count |
-| The whole page's marks against the map | On idle; on leaving | One walk of the marks | Rebuild from the page; count; trace |
-| The page against the library, region by region | On leaving a note, after the flush; on demand in Diagnostics; during the trial also a few seconds after typing stops | One read of the note, off the main thread | Count and trace with block ids and lengths, never words. During the trial the message line says a mismatch was found and where to look |
-| A put-back happened | Every time | — | Count; trace; the message line, once |
+- **The geometry** (the map, the offset shift, marks' rules, the forming range, §8.6's tracking of a struck break)
+  is pure, takes plain values, and lives in the core package's Domain, where `swift test` reaches it with no stage.
+- **The composition** (the doors, the identity table, the saver's ordering) lives with the phone and is tested in
+  the phone's test target, under stage claims. With wave 2 waiting, the stage is not contended.
 
-The edit trace (`MobileEditTrace`) gains the new core's counters: changes read; breaks struck, kept, re-marked, put
-back; joins, divides, mints and compounds by keystroke; saves held for forming text; outside changes waited and
-applied; every check's failures. Copy still gives plain text with no words in it.
+Moving the shared rules into a package would let everything run headless, but it touches files the Mac compiles and
+is not proposed here.
 
----
+### 14.2 The identity oracle (U2)
+The test that v1 lacked. For each step it runs the **real** shared rule and the **real** operations on an in-memory
+library, from the same starting state as the editor's model, and asserts that afterwards **the sequence of block ids
+with their texts in the library equals the editor's bindings with the page's regions.** A text-only comparison passes
+every wrong binding; this one does not. Every row of §8 and every row of the review's table of Mac results (its §3) is
+a named case.
 
-## 12. Proving it
+### 14.3 The random-change test (U2)
+Seeded runs of arbitrary changes against the real operations: typing, any range replaced with any text, her gestures
+at every position, changes that strike breaks without being hers, text forming, several edits in one pass. Interleaved
+with an **adversary** that changes the library as another device would (text, structure, locks, seals, deletes), with
+refusals, and with **kill points**. After every step: the identity assertion; no text older than the debounce lost at
+a kill; every refusal ends in a rescue or a sentence. A failing seed is kept as a named test. Each invariant is shown
+red by a deliberately broken rule before it counts.
 
-### 12.1 On the Mac, with no phone and no simulator (U2)
-The reconciler and the writer's ordering are pure and live where `swift test` reaches them, so they need no stage.
+### 14.4 Order (U2 and U3a)
+A model of the saver with injected delays (a slow runner, a debounce firing in the middle of an act, a flush road
+arriving mid-act) asserts that saves and acts reach the library in the order the page changed.
 
-- **State-transition tests** for every case in §6 and §8: each structural keystroke at each position, each
-  classification, each put-back, pending regions, refusals.
-- **The random-change test.** A model page and a model library. Thousands of seeded runs of arbitrary changes: any
-  range replaced with any text, with and without being asked, with breaks inside, at the page's ends, in empty
-  regions, with text forming, several edits in one pass. After every step the invariants of §6.5 are asserted. A
-  failing seed is kept as a named test. This is the test that stands in for "we cannot list what the keyboard does".
-- **It has to be able to fail:** each invariant is shown red by a deliberately broken rule before it counts.
+### 14.5 Her performance bar (every unit)
+MobileSoul §2's 100,000-word spot-check is part of every unit's evidence: reconciler microbenchmarks at 20,000 blocks
+in U2 (the shape of `EditorSeamCostTests`); typing latency, scroll, open time and memory on the long fixture in U3a
+onward; `MobileHerPathsPerfTests` as its own leg; and the time an operation takes to return on the long fixture, which
+is §11.6's exposure.
 
-### 12.2 In a hosted text view and the simulator (U3 onward)
-Real `UITextView`, driven every way: ask-then-insert (the keyboard's road), `replace(_:withText:)` and `insertText`
-without asking, direct storage changes (the worst case), `setMarkedText` and `unmarkText`, a selection replaced
-across breaks, Return and backspace at every position. After each, the page-against-library check must pass. One
-simulator UI test types a scripted passage across several blocks with the real software keyboard and checks the
-library.
-
-The simulator's keyboard asks before every key and has no predictions or dictation (recorded at VM-24). So the hosted
-tests prove the core is indifferent to how a change arrives; they cannot show what her keyboard does. That is the
-phone's job.
-
-### 12.3 The probe, on her phone, first (U1)
-A throwaway screen in Settings ▸ Diagnostics ▸ "Keyboard probe": a plain text view with four short paragraphs and
-marked breaks, none of the editor attached, and a log of everything that happens underneath. The log holds kinds,
-positions, lengths and flags. It never holds her words, so it can be pasted into a session and kept in the record.
-
-She follows a script of about a dozen steps (typing, autocorrect, the prediction bar, the grey prediction accepted and
-rejected, dictation, the spelling menu, a text replacement, swipe typing, paste, a held delete across a break, shake
-to undo, and typing while the probe changes another paragraph), pressing Copy at the end. The questions it answers:
-
-1. **Do the marks survive?** After each road: is every break still marked; do new characters ever carry the mark; does
-   any road replace a paragraph break with a fresh one.
-2. **What is the grey prediction, exactly?** Is it marked text in the page; what do accepting and rejecting write; is
-   the gate asked.
-3. **Is the door safe, and when?** While she types, dictates, or has a prediction showing, the probe changes another
-   paragraph three ways (a direct storage change, the door at once, the door on the next turn) and stamps an attribute
-   on the paragraph she is in. For each: any lost or doubled letter, a correction applied at an old position, a killed
-   dictation, a moved caret?
-4. **Which roads ask first**, and does what they ask match what they do.
-5. **Dictation:** is its forming text marked; is there a signal that it has ended.
-6. **System undo:** what it replaces after a break was added or removed; whether it restores attributes.
-7. **A held delete:** does it ask at each step; what arrives when it crosses a break.
-8. **Is Writing Tools offered on her phone**, and what does a rewrite do to the page.
-9. **Typing attributes:** what a new character inherits after a tap, next to a break.
-10. **The long-note caret bug** (a tap after a fast scroll landing far away, FB15241823): does it show at her note
-    lengths.
-
-Its answers go into `notes/TEXTKIT2_NOTES.md` §3 and into this file under a new "The probe's answers" heading, and
-they settle §10's starting settings, §9's default, and the kill criteria in §15.
-
-### 12.4 The trial, on her phone (U3's gate and U5's gate)
-See §13.
+### 14.6 Hosted and simulator tests (U3a onward)
+A real `UITextView`, driven every way: ask-then-insert (the keyboard's road), the text view's own calls without
+asking, direct storage changes (the worst case), `setMarkedText` and `unmarkText`, every door at every position. Each
+test says which configuration it runs in, because the simulator's keyboard asks before every key and has no
+predictions or dictation, and a connected hardware keyboard changes which calls are asked. The Mac's suites that read
+the phone's source run at every run's first batch.
 
 ---
 
-## 13. On her phone
+## 15. Proving it on her phone
 
-**How it gets there.** The same app, installed in place over Wi-Fi with `devicectl` as on 2026-11-22
-(`notes/plans/vm-44/plans/vm-45-install-runbook.md`; no cable was needed). Each build is made from a named commit
-into its own DerivedData folder, and the stage coordinator grants the install.
+### 15.1 Installs
+The same app, installed in place over Wi-Fi with `devicectl` as on 2026-11-22
+(`notes/plans/vm-44/plans/vm-45-install-runbook.md`). The stage coordinator grants each install. Before each one she
+is asked two things, as the runbook asks: whether to take the safety copy, and the build's version label, which she
+names.
 
-**The switch.** Settings ▸ Diagnostics ▸ "New editor", stored on the device, not in the library:
+### 15.2 The switch
+Settings ▸ Diagnostics ▸ "New editor", stored on the device: **Off** (today's editor, the default until her gate) ·
+**Chosen notes** (a note opens in the new editor after she picks "Open in the new editor" in its ⋯ menu) · **All
+notes**. It only chooses which screen opens a note. Both editors read and write the same library through the same
+operations.
 
-- **Off** — today's editor everywhere (the default until her gate).
-- **Chosen notes** — a note opens in the new editor only after she picks "Open in the new editor" in that note's ⋯
-  menu. The choice is remembered per note on the device.
-- **All notes.**
+### 15.3 The probe (U1)
+A throwaway screen in Settings ▸ Diagnostics ▸ "Keyboard probe". Two pages: four short paragraphs with marked breaks,
+and a long fixture of 50,000 words or more. The probe's text is a fixture and scripted input, not her notes, so it
+logs **characters** as well as positions: that is the only way to tell a prediction from a composition. Before and
+after every pass it snapshots the whole page and logs the true difference beside what the storage reported.
 
-Both editors read and write the same library through the same operations, so a note is the same note in either, and
-flipping back needs no conversion. One difference is expected and is hers by ruling: the new editor's Return makes
-blocks, so a note written in it has more blocks than the old phone editor would have made, as on the Mac.
+A second mode attaches the real editor's attribute writers (the markdown look, the typed-face reset, the paragraph
+reservations that run on every layout).
 
-**The safety net during the trial.**
-- The first time the new editor changes a take in a session, it first keeps a quiet commit of that take as it was
-  (`insureTakes`, deduped). There is always a road back.
-- §11's checks run, and during the trial a mismatch is said on the message line.
+She follows a script and presses Copy. What it settles:
+
+| # | Question | Decides |
+|---|---|---|
+| 1 | Do marks survive every road? Does a character typed right after a break, or a `"\n"` typed there, ever inherit the mark? | §5 (K1) |
+| 2 | Does the storage's first notice match the true change on every device road? | §6 |
+| 3 | When is the marked range current: at the question, at each notice, at `textViewDidChange`, on the next turn? | §6 step 3 |
+| 4 | The grey prediction: is it marked text; what do showing, accepting and rejecting write | §13.1 |
+| 5 | What `unmarkText()` does with a prediction showing, while dictating, and mid-composition. Dictate, background, kill, reopen | §11.5 |
+| 6 | **Her doors:** does every Return (software, hardware) reach `insertText`, with any autocorrection already applied? Does backspace reach `deleteBackward`? Which call carries forward delete, a held delete and a word delete, and with what ranges? | §7 |
+| 7 | An edit made inside a door's call through the text view's own calls: are the bytes exact (no smart spacing), is the selection where it was put, does the keyboard carry on correctly when she types fast after it | §7 (K2) |
+| 8 | A key **declined** at the gate and re-issued on the next turn: any lost following key, re-applied correction, or shift glitch (the review's A8) | §7's fallback |
+| 9 | A change through the text view's own calls in **another** paragraph while she types, dictates or has a prediction showing; and a direct storage change, for contrast | §12.2 |
+| 10 | Attribute-only writes during composition, dictation and predictions, including the real editor's writers | §12.1 |
+| 11 | A peek done through the text view's own calls, and done by lowering and raising the keyboard: time and feel | §12.4 |
+| 12 | Shake to undo after a door's edit, after a repair, after a break was added or removed | §12.3 |
+| 13 | What a triple tap and the menu's Select select: is the trailing `"\n"` included | §8.3 |
+| 14 | Copy across a break and paste elsewhere in the note: do marks come along | §5.2 |
+| 15 | Is Writing Tools offered; does switching it off silence iOS 27's proofreading; what does accepting an underline write | §13.1 |
+| 16 | On the long page: a tap after a fast scroll (FB15241823); typing latency | §14.5 |
+| 17 | VoiceOver's text-editing rotor: which calls its edits arrive by | §7 |
+
+Its answers go into `notes/TEXTKIT2_NOTES.md` §3 and into this file under a new "The probe's answers" heading. The
+probe screen stays in Diagnostics afterwards: it is the tool for the session owed after every iOS update.
+
+### 15.4 The trial builds
+Each build of the new editor carries a **scripted self-test** in a scratch note: she performs a fixed sequence
+(Return between words, Return in a block with takes, backspace at a seam, a paragraph deleted with its newline, select
+all and retype, typing over a selection that starts at a paragraph's start), and the app compares the library's
+resulting blocks with the Mac's expected result and shows pass or fail for each step. Then real writing, in notes she
+chooses, for as long as she wants before trusting it. The trial also includes the durability steps: type the last
+paragraph and kill the app; dictate, background, kill, reopen.
+
+### 15.5 The safety net
+- The first time the new editor changes a take in a session it keeps a quiet commit of that take as it was
+  (`insureTakes`, deduped).
+- §13.2's checks run, and a mismatch is said.
 - Today's editor is one flip away.
 
-**What she does.** First the probe (about ten minutes, once). Then, when U3's build arrives: the switch on "Chosen
-notes", a scratch note, a short script (the recording's own scenario among its steps: type at the end of a block that
-has a block below, wait for a prediction, keep typing; select across three paragraphs and type; backspace at the
-start of a block; Return in the middle of a paragraph), then real writing in notes she chooses, for as long as she
-wants before trusting it. Edit trace ▸ Copy gives the session's counts. A screen recording of anything odd is the
-best evidence there is.
-
-**Her gate** is passed when, over real writing: no lost letter, no jump, no page-against-library mismatch, no
-put-back she did not cause, and selecting, typing over, Return and backspace across paragraphs feel right to her.
-Feel is hers alone to judge.
+### 15.6 Her gate
+Passed when, over real writing: no lost letter; no jump; no page-against-projection mismatch; no repair or rescue she
+did not cause; the self-test all green; the keyboard never bounces on a peek; and selecting, typing over, Return and
+backspace across paragraphs feel right to her. Feel is hers alone to judge.
 
 ---
 
-## 14. Units and runs
+## 16. What her phone keeps meanwhile
 
-Per the sizing guidance: one acceptance unit per implementer session, at most two phase-sized units per run, a unit
-closes on evidence of its own kind. Cast for every run: Fable orchestrates and cold-reviews (the editor seam), Opus
-implements, both at xhigh; a fresh implementer per unit, a fresh reviewer per round.
+Stated plainly, as the review asked. Until the new editor is her editor, her phone keeps today's: the traced window
+in which a key typed after a refused edit can save wrong text (VM-252), dictation's guesses saved into a block and
+possibly into a commit, and the open end unsaved if the app dies mid-dictation. That is her ruling: "it's not a HUGE
+issue and doesn't come up that frequently, it's a HUGE issue for launch". VM-250 and VM-252 stay open as launch gates
+and close when the old editor is deleted.
+
+---
+
+## 17. Units and runs
+
+One acceptance unit per implementer session, at most two units per run, each closed on evidence of its own kind.
+Cast for every run: Fable orchestrates and cold-reviews (the editor seam), Opus implements; a fresh implementer per
+unit, a fresh reviewer per round. Every unit's evidence includes §14.5's performance leg and the Mac's
+source-reading suites.
 
 | Run | Unit | What is built | Evidence that closes it |
 |---|---|---|---|
-| **1 · Probe and core** | **U1 — the probe** | The Diagnostics probe screen and its log; a build on her phone | Her pasted log; "The probe's answers" written; §10, §9's default and §15 settled in her words where they are her calls |
-| | **U2 — the core, headless** | `PageMap`, `PageReconciler`, the effect list, the writer's ordering model, in the core package | The state-transition suites and the random-change test green; each invariant shown red by a broken rule; no stage used |
-| **2 · The page in her hand** | **U3 — typing** | The text view, the storage observer, the editor model, the writer on real operations; open, type, save, leave; Return, backspace and cross-block edits; the gate as policy; the put-back; §11's checks; the switch with "Chosen notes"; the base look | Hosted tests on every road of §12.2; the simulator typing test; then **her trial on scratch notes and chosen notes** |
-| | **U4 — acts and outside changes** | The menu's structural acts through the door; the structural undo door; changes from the library; take swap | Hosted tests; a two-device session (the Mac edits a note open on the phone); her session |
-| **3 · Everything moves over** | **U5 — the features** | The markdown look and typed-face reset, list continuation and Tab, the formatting bar, takes (peek, pan, sheet), lenses, badges and marks, find, the tray, jump to a block, timing marks, the trace | A simulator walk of a fixture note in both editors, screen by screen; her trial with the switch on "All notes" |
-| | **U6 — her gate** | Nothing | §13's gate, in her words |
-| **4 · Retirement** (with wave 3's Writing) | **U7** | The switch's default flips; the old editor and its tests are removed; wave 3's members are re-scoped onto the new core | The whole phone target and the Mac's source-reading suites green; canon deltas (§18) |
+| **1 · Probe and core** | **U1 — the probe** | §15.3's screen, both pages, both modes, the log | Her pasted log; "The probe's answers" written; the settings of §13.1, the fallbacks of §7 and §12.2, and §18 settled; her calls in §20 that depend on it put to her |
+| | **U2 — the core** | The map and its rules in the core package; the identity table as code; the saver's order model; `pageArms` | §14.2's identity oracle over every row of §8 and of the review's table; §14.3's random-change test with the adversary and kill points; §14.4; microbenchmarks at 20,000 blocks |
+| **2 · The page in her hand** | **U3a — typing** | The text view, the storage observer, the editor model, saving through the session's coordinator with the placement check and the rescue, every durability road, the open end's mint, the checks, the switch with "Chosen notes", the base look. **Return is content and a seam declines, as on today's phone** | Hosted tests on every road; the order model against the real coordinator; the simulator typing test; **her trial on scratch and chosen notes**, with the durability steps |
+| | **U3b — her doors** | Return, backspace and forward delete at a seam, edits across blocks, the "new line" key, the gate as policy, §8.6's repairs, the self-test | The identity oracle's cases driven through a hosted text view; **her self-test green on her phone**; her feel |
+| **3 · Acts and the first features** | **U4 — the menu and the library** | The menu's structural acts; the structural undo door; changes from the library by §12.2; take swap and peek | Hosted tests; a two-device session in which the Mac makes **structural** changes to a note open on the phone with its keyboard up; her session |
+| | **U5a — the look and the tools** | The markdown look and typed-face reset, list continuation and Tab, the formatting bar, find, the tray, jump to a block, timing marks, the trace | A simulator walk of a fixture note in both editors, screen by screen |
+| **4 · Everything moves, and the old editor goes** | **U5b — takes, lenses, badges and marks** | The takes sheet and pan, lenses, the badge, pill, callout and comment marks, placed for the new core (this absorbs VM-17, VM-239 and VM-179) | The walk; her trial with the switch on "All notes" |
+| | **U6 — her gate, then retirement** | After §15.6 in her words: the old editor, its tests and the switch are deleted; wave 3's Writing members are re-scoped | The whole phone target and the Mac's source-reading suites green; canon deltas (§22) |
 
-U1 and U2 do not depend on each other and may run in either order inside run 1; U1's phone session should not wait
-for U2. Run 2 does not start until the probe's answers are in, because they decide U3's settings.
+**Decisions that must be settled before run 2 starts** (the review's M15): her answers to §20.1 (the save's placement
+check), §20.2 (the rescue), §20.3 (the idle mint), §20.4 and §20.6 (backspace joins; Return makes a block), and the
+probe's answers. U2 does not need them.
 
-**This plan is larger than two units**, which the sizing guidance asks to be said to her plainly: it is four runs.
-It is presented as one umbrella with its runs in order, not split silently.
+**This is four runs and eight units**, which the sizing guidance asks to be said plainly. It is one umbrella with
+its runs in order.
 
-**What each run touches** (for the in-flight table and the coordinator): run 1 adds a Diagnostics screen under the
-phone's Shell/Settings and new files in the core package's Domain; runs 2 and 3 add new files under the phone's
-`Features/Write/` and touch `MobileWriteView` and the features' call sites; none touches `Sources/VariorumCore/Sync/`,
-custody code, the schema, or the Mac's editor. The badge-and-marks run (VM-17, VM-239, VM-179) works in the same
-feature files as U5 and must not run beside it.
+**What each run touches:** run 1 adds a Diagnostics screen and new files in the core package's Domain; run 2 adds
+new files under the phone's `Features/Write/`, a branch in `MobileWriteView`, and (with her word) the two additive
+parameters of §20.1 in `Sources/VariorumCore/Operations` and `Shared/AutosaveCoordinator.swift`; runs 3 and 4 move the
+phone's features. None touches `Sources/VariorumCore/Sync/`, custody code, the schema, or the Mac's editor. The lock
+umbrella (VM-103, wave 2) later rewrites the leaving moment this core plugs into; it starts after this effort.
 
 ---
 
-## 15. What would stop it
+## 18. What would stop it
 
 | | What we would see | Then |
 |---|---|---|
-| **K1 — marks do not survive** | The probe shows ordinary roads replacing paragraph breaks with fresh, unmarked ones often enough that re-marking and put-backs are routine | Rework §5: identity from the map's offsets with the page's newlines as the only witness. If that cannot be made safe either, the single text view is not viable and the choice returns to her |
-| **K2 — the door is not safe while the keyboard is up** | The probe shows a change through the door disturbing the keyboard even on the next turn with nothing forming | The design stands; §8.4's acts and §9's changes lower the keyboard first. Ordinary typing, Return, backspace and cross-block edits use no programmatic character change and are unaffected |
-| **K3 — the page itself goes wrong** | With no outside change at all, the trial shows a lost letter or a page-against-library mismatch | Trace it. If the cause is ours, fix it. If the text view misbehaves by itself on a plain page, only a custom text input (the proposal's option E) removes it, and the core built here goes under it |
-| **K4 — it does not feel right** | Her judgment in the trial: carets, scroll, the keyboard dropping, selection | Fix what is fixable; what is not is hers to weigh against the alternatives |
+| **K1 — marks do not survive** | The probe shows ordinary roads replacing paragraph breaks with fresh, unmarked ones, or typed characters inheriting marks, often enough that re-marking is routine | Rework §5 so the map's offsets are the only identity and the page's newlines only a witness. If that cannot be made safe, the single text view is not viable and the choice returns to her |
+| **K2 — her doors cannot edit safely** | The probe shows an edit made inside a door's call disturbing the keyboard (a lost following key, a correction applied at an old position), **and** the decline-and-re-issue fallback doing the same | The single text view cannot produce the Mac's results for Return and backspace without upsetting the keyboard. The choice returns to her: a custom text input (the proposal's option E) under this core, or results that differ from the Mac's |
+| **K3 — the page goes wrong by itself** | With no outside change, the trial shows a lost letter or a mismatch | Trace it. If the text view misbehaves on a plain page, only a custom text input removes it |
+| **K4 — it does not feel right** | Her judgment: carets, scroll, a keyboard bounce on a peek, selection | Fix what is fixable; the rest is hers to weigh |
+
+K2 is the question v1 wrongly said the frequent keystrokes avoided. It is the first thing the probe answers, and it
+decides the shape of run 2.
 
 ---
 
-## 16. Risks
+## 19. Risks
 
-1. **An unknown system road that damages a break in a way the put-back handles badly** (a visible flicker at the
-   caret). Mitigation: the probe's road matrix; the count in the trace; the random-change test for the rule itself.
-2. **Two editors in one app for several runs.** The features must work with both. Mitigation: U3 ships the new editor
-   with a small feature set on chosen notes, so nothing of the old editor's is changed until U5; U5 moves features
-   over behind a narrow interface, and the old editor's tests keep running until U7.
-3. **The Mac's tests that read the phone's source** (133 files at VM-47's count) meeting new phone files.
-   Mitigation: every run runs those suites at its first batch (the lesson of VM-64's gate).
-4. **Readings are copies of her text in memory**, which the architecture rules warn against for view models.
-   They are the editor's sanctioned exception today (the ledger) and are kept only for regions touched in the session.
-5. **The put-back discards something the keyboard did.** It is the one lossy act. It is said, counted and traced, and
-   it only ever discards a change that crossed a block boundary without being hers.
-6. **A phone session is needed after every iOS update**, as for the Mac's editor (TEXTKIT2_NOTES §5). The probe screen
-   stays in Diagnostics for that.
-7. **The long-note caret bug in TextKit 2** is independent of this design and exists in today's editor too. The probe
+1. **The doors are the design's hinge** (K2). Mitigation: they are the first probe questions, and the phone already
+   ships one (Return, for lists).
+2. **The identity table is wrong somewhere.** Mitigation: the oracle against the real rules and operations, every row
+   a named case; the self-test on her phone.
+3. **Two shared-code changes** (§20.1) reach files the Mac compiles. Mitigation: both are optional parameters whose
+   absence is today's behaviour; the Mac's suites run.
+4. **Two editors in one app for three runs.** Mitigation: the switch only chooses a screen; no feature is made to
+   work with both; the old editor's files are not edited until U6 deletes them.
+5. **Copies of her text in memory** (the stored and settled texts), which the architecture rules warn against for view
+   models. They are the editor's sanctioned exception today (the ledger), kept for regions touched in the session.
+6. **A phone session is owed after every iOS update**, as for the Mac's editor. The probe screen stays for it.
+7. **The long-note caret bug in TextKit 2** (FB15241823) is independent of this design and exists today. The probe
    measures it.
+8. **Runner contention.** The saver shares the session's one runner with every surface; a long turn elsewhere
+   stretches the moment a token stays unbound. Measured in §14.5.
 
 ---
 
-## 17. Hers to decide
+## 20. Hers to decide
 
-Each is built at the default and marked PROVISIONAL until she rules; none gates run 1.
+Each has a default the build follows and marks PROVISIONAL. Items 1–4 and 6 must be answered before run 2.
 
-1. **Backspace at a block's start joins, with the Mac's exact rules**, including the cases where the Mac refuses.
-   Default: yes (her wave-3 ruling).
-2. **Return makes a block**, including "a caret inside a word takes the whole word down". Default: yes (NT-1), behind
-   the note's segmentation switch as on the Mac.
-3. **The grey inline prediction** off at first, on after the probe shows it clean. Default: as written.
-4. **Writing Tools** off in the editor. Default: off until she rules how it should behave.
-5. **Shake to undo** covers typing inside blocks and is cleared at every structural change. Default: the Mac's rule.
-6. **Dragging text within a note** off. Default: off.
-7. **Changes from another device while the keyboard is up** wait until it goes down, unless the probe shows the door
-   safe. Default: wait.
-8. **The put-back's sentence** on the message line. Draft: "The keyboard changed two blocks at once — nothing was
-   changed." Her wording.
-9. **The trial's order:** scratch notes, then chosen notes, then all. Default: as written.
+1. **A save checks it is still in this note** (§11.3): an optional parameter on `Operations.autosave`, and on the
+   shared coordinator's entry, that refuses a write into a block no longer placed in the note. It is additive and the
+   Mac is unchanged without it, but it is a change to an operation's contract, which is hers alone. Default: **yes**.
+   Without it, a block merged on the Mac while she types on the phone silently takes her words into lineage; the
+   alternative is a check a moment before the write, which leaves a millisecond's gap.
+2. **The rescue** (§11.4): the shape (a new block at the place; for a sealed note, words kept on the page with Copy)
+   and its sentences. Drafts: "This paragraph changed on another device — your words were kept as a new block." ·
+   "This note was sealed on another device — these words are not saved. Copy them before leaving."
+3. **The idle mint stores the text as it stands**, untrimmed, while a Return trims as the Mac does (§10.5). Default:
+   as written. The alternative is trimming under her fingers when she pauses.
+4. **Backspace at a block's start joins, with the Mac's exact rules**, including its refusals. Default: yes (her
+   wave-3 ruling).
+5. **A composition is accepted at a durability moment**; a prediction's guess is discarded (§11.5). Default: as
+   written.
+6. **Return makes a block**, including "a caret inside a word takes the whole word down", with a "new line" key on
+   the bar until wave 3's capsule (§10.2). Default: yes (NT-1).
+7. **What the phone says** for a carve, a join and a Return (§9.2). Default: her message-line rule (removals and
+   refusals only), not the Mac's receipts.
+8. **The grey inline prediction** off at first. **Writing Tools and proofreading** off. **Dragging text within a
+   note** off. Defaults: as written, each revisited after the probe.
+9. **Shake to undo** covers typing inside regions and is cleared at every structural change. Default: the Mac's rule.
+10. **The repair's sentence** (§8.6). Draft: "The keyboard changed two blocks at once — the break was put back."
+11. **The trial's order:** scratch notes, then chosen notes, then all. And the safety copy and version label at each
+    install, asked each time.
+12. **A second cold review of this v2.** The first found blockers, which by her ladder rule earns another round. She
+    asked for one review; a second is recommended and waits for her word.
 
 ---
 
-## 18. What is retired, and what canon owes
+## 21. The first cold review, dispositioned
 
-**Retired at U7, on the phone only:** the approve-first arming and binding, the fallback verdict, the desync repair,
-the forced full render and the differential render under the keyboard, the keystroke fence, the per-character
-re-stamp, the phone's use of `BlockRangeIndex` as the authority. The Mac keeps all of its own.
+`notes/plans/vm-271-plan-cold-review-1.md` (Opus, adversarial, 2026-11-22). The orchestrator read it whole and
+spot-checked its load-bearing claims in the code (a save into a block with no placement passes `editableVariant`; a
+refused save stays pending; `phoneArms` is pinned by a Mac suite).
 
-**Tickets this closes by replacement:** VM-250, VM-252, VM-226, VM-236, the class VX-68 watched. **Re-scoped:** wave
-3's Writing (VM-137): VM-140 and VM-143 become "done by the core"; the rest are faces on it. **Unaffected:** VM-17,
-VM-239 (badges and marks beside a block) stay their own run.
+| Finding | Disposition |
+|---|---|
+| **B1** no identity rule | **Accepted.** §8 is the table; the head is re-pointed like any mark (§3 rule 1); tokens on every re-identifiable region (§8.5); the identity oracle (§14.2) |
+| **B2** the text view's type-over is not the Mac's compound; "the page wins" duplicates text | **Accepted.** "The page wins" is gone. The compound is computed at the door and the ruled page is written (§7, §8.3) |
+| **B3** no road for a refused or diverted save; waiting for the keyboard widens it | **Accepted.** §11.3 (the placement check, her call §20.1), §11.4 (the rescue), §12.2 (structural deliveries and undo do not wait) |
+| **M1** a seam backspace cannot follow | **Accepted, in a different shape from the one proposed.** The review proposes declining at the gate and re-issuing on the next turn. v2 catches the gesture in `deleteBackward`, inside the keyboard's own call, and makes the ruled edit there, with the map's fresh facts (§7). The review's shape is kept as the fallback, and its A8 is in the probe |
+| **M2** operations normalize; stale compare-and-set bases mint conflict takes | **Accepted.** §10.1: the page is normalized at the gesture; stored texts come from the operation's result. The idle mint is the one adopt-the-page case, listed for her (§20.3) |
+| **M3** "a reading" does two jobs | **Accepted.** Two fields, `stored` and `settled` (§4, §5.3); the word is retired |
+| **M4** repairs throw away later typing | **Accepted.** §8.6: only the offending change is inverted; nothing is restored from saved text |
+| **M5** slots and fresh flags | **Accepted.** §5.3 |
+| **M6** the reconciler cannot be both headless and composed with the shared rules | **Accepted: the split** (§14.1), option (c). A new arm list `pageArms`; `phoneArms` untouched |
+| **M7** the writer is not wired into the session | **Accepted.** §11.1: the session's coordinator stays the one saver; one task runs acts; every flush road waits |
+| **M8** rule 5 widens a loss window; `unmarkText()` would save a guess | **Accepted.** Rule 5 is "the marked range is never saved" (§6 step 3); per-kind handling (§11.5) |
+| **M9** nothing mints the open end | **Accepted.** §10.5 |
+| **M10** the idle rebuild merges blocks | **Accepted.** §5.2: re-mark from the map; never rebuild from the page |
+| **M11** the in-app check is blind and cries wolf | **Accepted.** §13.2: against the projection in order, with exclusions |
+| **M12** unasked changes judged by a test narrower than the route | **Accepted.** §8.6 step 2 routes hers through the shared rule |
+| **M13** lowering the keyboard as a routine tool | **Accepted.** §12.4; the probe's question 11; her gate |
+| **M14** her performance bar missing | **Accepted.** §14.5, in every unit |
+| **M15** unscheduled decisions; U3 too large | **Accepted.** U3 is split; the decisions gate run 2 (§17, §20) |
+| MINORs | **Accepted:** the menu merge is an unmark (§8.4); which newline a divide stamps (§8.1); list order (§8.1); Returns beside locked and gap regions (§5.4); the sealed note's face kept (§5.4); unique bindings (§5.2); undo cleared after repairs and door edits (§12.3); the rebuild invariant restated (§5.2); multi-range asks (§9.1, §10.4); settle triggers and the marked range's timing (§6); proofreading (§13.1, the probe); the phone's own compound executor not reused (§8.3); re-check after every wait (rule 4); runner contention (§19.8); the old editor's files not edited (§19.4); receipts (§9.2, §20.7); dictated and hardware Returns (§10.2); the safety copy and label per install (§15.1); VoiceOver (the probe's question 17). **The re-mark tie-break of v1's put-back no longer exists**: v2 never re-marks from a replacement's text |
+| NITs | **Accepted:** the peek's open line is closed (§12.4); §20 says which items gate run 2; the long-note question has its own probe page |
+| The review's §9: "D, narrowed" | **Adopted as the design.** Its second concern is §16 |
+| The review's §7: use the real operations, an adversary, kill points, a scripted self-test | **Accepted.** §14.2–§14.4, §15.4 |
 
-**Canon deltas owed at ship** (applied in place, the narrative in `notes/AppSpecRecord.md`): AppSpec §7's sentence
-"The phone's Return model is its own" and the editor paragraphs of §4 and §12 where the phone now differs in
-mechanism; `notes/SurfaceContracts.md`, The note (the phone passages); `notes/MobileSoul.md` §5 and a parity row;
-`notes/TEXTKIT2_NOTES.md` §3 (the probe's findings) and §5 (the phone's row in the per-version matrix). No schema, no
-sync marker, no operation's contract.
+---
+
+## 22. What is retired, and what canon owes
+
+**Deleted at U6, on the phone only:** the approve-first arming and binding, the fallback verdict, the desync repair,
+the forced and differential renders under the keyboard, the keystroke fence, the per-character re-stamp, the phone's
+copies of the edit route's executors, and the old editor's suites. The Mac keeps all of its own.
+
+**Tickets this closes by replacement:** VM-250, VM-252, VM-226, VM-236, the class VX-68 watched. **Absorbed:** VM-17,
+VM-239, VM-179 (U5b); VM-140 and VM-143 of wave 3's Writing (U3b). **Re-scoped at U6:** the rest of VM-137.
+
+**Canon deltas owed at ship** (in place, the narrative in `notes/AppSpecRecord.md`): AppSpec §7's sentence "The
+phone's Return model is its own"; §9's `autosave` entry if §20.1 is approved; `notes/SurfaceContracts.md`, The note
+(the phone passages); `notes/MobileSoul.md` §5 and a parity row in §6; `notes/TEXTKIT2_NOTES.md` §3 (the probe's
+findings) and §5 (the phone's row). No schema and no sync marker.
