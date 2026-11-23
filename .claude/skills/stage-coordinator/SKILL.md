@@ -213,7 +213,8 @@ hard-stopped), make sure it cleaned up, and finish what it missed:
 
 ## Ambient, the stage ambient (VX-458, VX-997)
 `Tools/ambient on|off|status|next|log` puts Ambient on the built-in screen while you hold the stage and
-nobody is READY: seventeen living pixel scenes, black and white and colour, rotating with a dissolve.
+nobody is READY: twenty-four living pixel scenes, black and white and colour, playing in a set order
+with a dissolve.
 `Tools/ambient` is a thin door to the Ambient app's own command (`~/dev/ambient/bin/ambient`, or
 `$AMBIENT_HOME`); the source, rails, keys and scenes are that repo's README. It is yours alone; sessions
 never touch it.
@@ -221,13 +222,15 @@ never touch it.
   someone is using the Mac (HID idle under 2 minutes). It returns once the window is up, and running it
   again while it's up is harmless. It runs the installed `/Applications/Ambient.app` — the bundle her
   icon opens — when that is there, and builds from `~/dev/ambient` only when nothing is installed (that
-  first `on` takes about a minute) (PROVISIONAL P-997-4).
-- It no longer goes at her touch (R-997-2): of her keys only Esc ends it. Space is the next scene, `⌘,`
-  opens its settings pane over the show, and brightness, volume, the mouse and every other key leave it
-  up. It still goes by itself on any non-HOLD claim: `Tools/stage claim` stops it before the claim
+  first `on` takes about a minute) (P-997-4). So a change to Ambient shows on this road only after
+  `~/dev/ambient/bin/ambient install` has run (VX-1008).
+- It no longer goes at her touch (R-997-2): of her keys only Esc ends it. Space or → is the next scene
+  in its order, ← the one before, ↑ and ↓ change its speed, Tab or `⌘,` opens its panel over the show,
+  and brightness, volume, the mouse and every other key leave it up. It still goes by itself on any non-HOLD claim: `Tools/stage claim` stops it before the claim
   returns, and the app also quits itself within about 0.3 s. It also goes when another app takes the
   keyboard (⌘Tab). She may open it herself from its icon; that show has the same process NAME,
-  `Ambient`, and the same rules, and goes the same way. So read `Tools/ambient status` (always exit 0:
+  `Ambient`, and the same rules, and goes the same way. Opened from its icon while a claim forbids it,
+  it shows one alert that takes Return or Esc and leaves by itself after about twenty seconds (VX-1035). So read `Tools/ambient status` (always exit 0:
   `RUNNING …` or `OFF`) rather than assuming it's up. `Tools/ambient log` (`~/.variorum/ambient.log`)
   says why it went.
 - Its process is `Ambient` (`pgrep -x Ambient`), never `Variorum`. It posts no input and takes no
