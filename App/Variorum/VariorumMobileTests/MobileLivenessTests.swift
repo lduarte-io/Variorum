@@ -1060,7 +1060,9 @@ struct MobileLivenessTests {
             let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
             window.addSubview(surface)
             window.makeKeyAndVisible()
-            defer { window.isHidden = true }
+            // VM-19 (round 1 N5): the teardown is certain on every exit; the
+            // explicit call below is where its expectation reads it.
+            defer { Self.leave(window) }
             model.attach(textView: surface.textView)
 
             // The screen's exact wiring order: arrive first, loops after.
@@ -1076,19 +1078,40 @@ struct MobileLivenessTests {
             }
             arrival.cancel()
             #expect(rose, "arrival raises the keyboard — two taps to typing")
+
+            // VM-19 (PIN — red on the teardown that only hides the window):
+            // no first responder outlives this test. A text view left first
+            // responder in a hidden window keeps the keyboard's input
+            // session, and a later suite's editor then desyncs on an
+            // `insertText` of a run in that posture (VX-282 C-1's decider;
+            // not reproduced on VM-78's toolchain by its trace instrument,
+            // `MobileStaleResponderTraceTests`, now in history at
+            // `fec0e478b` — the pin stands as test hygiene).
+            Self.leave(window)
+            #expect(!surface.textView.isFirstResponder,
+                    "VM-19: the raised surface lets go of the keyboard before its window hides")
         }
+    }
+
+    /// The window-hosted tests' teardown (VM-19): whatever holds the
+    /// keyboard inside the window lets go BEFORE the window hides — hiding
+    /// alone never resigns a first responder.
+    private static func leave(_ window: UIWindow) {
+        window.endEditing(true)
+        window.isHidden = true
     }
 
     // MARK: MINOR 2 — the voice flip reaches every registered editor
 
+    /// VM-51: the flip is the LIBRARY's look landing (`adoptLanded` — the
+    /// router's one landing seam, whichever device wrote the value); the
+    /// discipline is the same — synchronous end to end.
     @Test func aVoiceFlipReachesEveryRegisteredEditor() async throws {
         try await withEditorWorld { session, _ in
-            let suite = "MobileLivenessTests-voice-\(UUID().uuidString)"
-            let defaults = try #require(UserDefaults(suiteName: suite))
-            defer {
-                defaults.removePersistentDomain(forName: suite)
-                MobileEditorStyle.voice = .terminal
-            }
+            defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
+            var study = Queries.ThemeSettings()
+            study.voice = .study
+            let terminal = Queries.ThemeSettings()
             let postA = try await session.runner.run { ops in
                 try ops.createPost(title: "voiced A", profile: .blog)
             }
@@ -1103,7 +1126,7 @@ struct MobileLivenessTests {
             }
             let (a, storageA) = makeEditor(session, postID: postA.id)
             let (b, storageB) = makeEditor(session, postID: postB.id)
-            let router = MobileShellRouter(defaults: defaults)
+            let router = MobileShellRouter()
             await router.editors.register(a, tab: .shelf)
             await a.loadOnce()
             await router.editors.register(b, tab: .library)
@@ -1112,13 +1135,13 @@ struct MobileLivenessTests {
 
             // The flip window: synchronous end to end (the S1 MINOR-2
             // discipline — no suspension point between flip and asserts).
-            router.setVoice(.study)
+            router.adoptLanded(study)
             let fontA = storageA.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             let fontB = storageB.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             #expect(fontA == MobileEditorStyle.studyFace.body,
                     "the STOOD-DOWN editor's storage follows the flip too")
             #expect(fontB == MobileEditorStyle.studyFace.body)
-            router.setVoice(.terminal)
+            router.adoptLanded(terminal)
             let backA = storageA.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             let backB = storageB.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             #expect(backA == MobileEditorStyle.terminalFace.body)

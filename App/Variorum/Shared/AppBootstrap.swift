@@ -494,19 +494,20 @@ final class AppBootstrap {
                 installed = true
             }
             let readySession = AppSession(database: view, storeVariant: storeVariant)
-            #if os(macOS)
-            // 13i-d U5: the Mac stands in the wing it was last in (a LOCAL
+            // 13i-d U5: the app stands in the wing it was last in (a LOCAL
             // memory); a wing that died meanwhile returns it to Home.
+            // VM-56: both platforms — the phone remembers its wing too.
             readySession.wing.attachMemory(.standard)
             Task { @MainActor [view] in
                 let live = Set((try? await view.read { try Queries.wings($0).map(\.id) }) ?? [])
                 readySession.wing.revalidate { $0.isEmpty || live.contains($0) }
             }
-            #endif
             state = .ready(readySession)
             // pre-13x 2a: the idle clock starts at ready (decision 18 —
             // time since Variorum was last used).
             protection.noteActivity()
+            // VM-65: the timing layer's "library open" (inert on the Mac — `AppTiming`).
+            AppTiming.libraryOpened()
         case .libraryMissing(let storeURL):
             state = .libraryMissing(makeMissingLobby(storeURL: storeURL))
         case .failed(let error):
@@ -595,7 +596,11 @@ final class AppBootstrap {
             refreshRoad: {
                 await Task.detached(priority: .userInitiated) { ProtectionOpenRoad.lobbyFacts(ctx) }.value
             },
-            opened: { [weak self] session in self?.beginOpening(roadOpened: session) },
+            opened: { [weak self] session in
+                // VM-65: Face ID or the passphrase was accepted (inert on the Mac — `AppTiming`).
+                AppTiming.unlockAccepted()
+                self?.beginOpening(roadOpened: session)
+            },
             recordMissing: { [weak self] in
                 guard let self else { return }
                 self.state = .libraryMissing(self.makeMissingLobby(storeURL: self.liveStoreURL))

@@ -88,9 +88,14 @@ struct MobileArchiveView: View {
             }
             .padding(.horizontal, 8)
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51 (R-47-1, "prose should not be on the tint"): her archived notes
+        // on the paper (its answers speak on the shell's one line, VM-61).
+        .background(tokens.surface.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the page's paper at both edges (the bar's room at its foot is the
+        // shell's to paint while the bar stands there).
+        .mobileEdgeGrounds(top: tokens.surface, bottom: tokens.surface)
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) { reportLine }
         .task { await model.start() }
     }
 
@@ -99,11 +104,11 @@ struct MobileArchiveView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(tokens.path([RecoveryCopy.archivedSection]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.screenTitle, tokens)
+                .foregroundStyle(tokens.phone.muted)
             Text(tokens.chromeLabel(RecoveryCopy.archivedForever))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -118,39 +123,20 @@ struct MobileArchiveView: View {
     /// *"showing the first 200."* is chrome leaking into speech.
     private func line(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
             .accessibilityLabel(text)
     }
 
-    /// Receipts and refusals, pinned to the bottom so an act's answer is
-    /// readable wherever she is scrolled (the Trash room's own shape).
-    @ViewBuilder
-    private var reportLine: some View {
-        if model.receipt != nil || model.lastError != nil {
-            VStack(alignment: .leading, spacing: 2) {
-                if let receipt = model.receipt {
-                    Text(tokens.chromeLabel(receipt))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                }
-                if let error = model.lastError {
-                    Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
-            .background(tokens.room)
-        }
-    }
+    // VM-61: this room's receipts and refusals speak on the shell's one
+    // line (`MobileMessageLine`), never in a slot of its own.
 
     private func row(_ item: Queries.TimelineItem) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(MobileLibraryViewModel.rowTitle(item))
-                .font(tokens.body)
+                .phoneType(.rowTitle, tokens)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
             HStack(spacing: 18) {
@@ -159,19 +145,15 @@ struct MobileArchiveView: View {
                     Task { await model.unarchive(item) }
                 } label: {
                     Text(tokens.chromeLabel(Self.unarchiveVerb))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel(Self.unarchiveVerb)
                 Button {
                     onOpen(item.postID)
                 } label: {
                     Text(tokens.chromeLabel("Open note"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel("Open note")
                 Spacer(minLength: 0)
             }

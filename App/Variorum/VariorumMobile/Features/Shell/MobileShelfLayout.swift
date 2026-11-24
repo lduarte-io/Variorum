@@ -92,25 +92,47 @@ nonisolated enum MobileShelfLayout {
     /// books region yields further instead — the small-phone,
     /// large-Dynamic-Type and keyboard-up cases her sentence did not have
     /// to name.
+    ///
+    /// **In LINES of the box's own text, at its own size** (VM-48): the box
+    /// types in the note body, which grows with Dynamic Type, so the shelf
+    /// hands in the box's line at the current text size and six of THOSE
+    /// are what the floor keeps.
+    static func minimumWritingHeight(lineHeight: CGFloat) -> CGFloat {
+        CGFloat(guaranteedWritingLines) * lineHeight + writingBoxChromeHeight
+    }
+
+    /// The floor at the default text size.
     static var minimumWritingHeight: CGFloat {
-        CGFloat(guaranteedWritingLines) * smallLineHeight + writingBoxChromeHeight
+        minimumWritingHeight(lineHeight: quickEntryLineHeight)
     }
 
     // MARK: - Row metrics (estimates — see the header)
 
-    /// `bookRow`: `tokens.body` (14 pt) with 11 pt of vertical padding a
-    /// side. Also stands in for the trailing `+ new book` row and the
-    /// Today fallback row, which carry the same padding at `tokens.small`.
-    static let bookRowHeight: CGFloat = 42
-    /// The quick-note box's own chrome inside the writing region — the
-    /// status row, the box's padding, and the spacing between them. What
-    /// is left is the FIELD.
-    static let writingBoxChromeHeight: CGFloat = 56
+    // **VM-48 (W-024): these are re-derived from the phone layer's roles**
+    // rather than from the Mac's 11.5 pt caption, which the whole shelf
+    // used to be set in.
 
-    /// One rendered line of `tokens.small` (11.5 pt, both voices).
-    /// Measured, not assumed — `MobileShelfLayoutTests` pins it against
-    /// the real fonts both voices resolve to.
-    static let smallLineHeight: CGFloat = 14
+    /// One line of the quick-entry box at the default text size — the
+    /// sizing sheet's 24 pt line for the box's note-body type ("Resting
+    /// height 48: 11 · one 24 pt line · 11"). The box draws its text on this
+    /// pitch. Measured against the real fonts by `MobileShelfLayoutTests`.
+    static let quickEntryLineHeight: CGFloat = 24
+
+    /// One meta line at the default text size (the sheet's 13 / 18) — the
+    /// box's status row ("✓ saved" and the `open ↵` door).
+    static let metaLineHeight: CGFloat = 18
+
+    /// `bookRow`: the row title's line (`rowTitle`, the sheet's 17 / 22)
+    /// with 11 pt of vertical padding a side. Also stands in for the
+    /// trailing `+ new book` row and the Today fallback row, which carry
+    /// the same padding at the control size.
+    static let bookRowHeight: CGFloat = 22 + 2 * 11
+
+    /// The quick-note box's own chrome inside the writing region — the
+    /// box's padding (10 a side), the gap to the status row (6), the status
+    /// row (one meta line), the box's bottom margin (8) and 8 pt of air.
+    /// What is left is the FIELD.
+    static let writingBoxChromeHeight: CGFloat = 2 * 10 + 6 + metaLineHeight + 8 + 8
 
     /// The field never caps below this, however cramped the room —
     /// a three-line box is still a box.
@@ -140,8 +162,13 @@ nonisolated enum MobileShelfLayout {
     /// The collapsed box's whole region — one line plus the box's chrome
     /// (its border padding, and the saved-indicator row that appears the
     /// moment there is text to be honest about).
+    static func collapsedWritingHeight(lineHeight: CGFloat) -> CGFloat {
+        lineHeight + writingBoxChromeHeight
+    }
+
+    /// The collapsed box at the default text size.
     static var collapsedWritingHeight: CGFloat {
-        smallLineHeight + writingBoxChromeHeight
+        collapsedWritingHeight(lineHeight: quickEntryLineHeight)
     }
 
     // MARK: - The split
@@ -175,9 +202,14 @@ nonisolated enum MobileShelfLayout {
     /// `region` is the real height available to books + writing together.
     /// The result always partitions it exactly (`books + writing == region`
     /// for any non-negative region), so nothing can fall off the bottom.
+    ///
+    /// `lineHeight` is one line of the box's text at the current text size
+    /// (VM-48 — the box types in the note body, which scales); the default
+    /// is the default size's.
     static func split(
         region: CGFloat, bookRows: Int, extraRows: Int,
-        writing state: WritingState = .expanded
+        writing state: WritingState = .expanded,
+        lineHeight: CGFloat = quickEntryLineHeight
     ) -> Split {
         guard region > 0 else { return Split(booksHeight: 0, writingHeight: 0) }
 
@@ -185,7 +217,7 @@ nonisolated enum MobileShelfLayout {
         // books take everything else. No cap here — capping the books
         // against a collapsed box would only mint dead air above it.
         if state == .collapsed {
-            let box = min(region, collapsedWritingHeight)
+            let box = min(region, collapsedWritingHeight(lineHeight: lineHeight))
             return Split(booksHeight: region - box, writingHeight: box)
         }
 
@@ -199,7 +231,8 @@ nonisolated enum MobileShelfLayout {
         // The writing area is the residual, floored — and the floor wins,
         // because a books list that scrolls is a smaller loss than a box
         // she cannot write in.
-        let writing = max(region - wanted, min(region, minimumWritingHeight))
+        let writing = max(
+            region - wanted, min(region, minimumWritingHeight(lineHeight: lineHeight)))
         return Split(
             booksHeight: max(0, region - writing), writingHeight: writing)
     }
@@ -212,7 +245,7 @@ nonisolated enum MobileShelfLayout {
     /// rather than staying a single line. ⏎ is unchanged"* — so this is
     /// about WRAPPING, never about holding several paragraphs.)
     static func writingLineCap(
-        writingHeight: CGFloat, lineHeight: CGFloat = smallLineHeight
+        writingHeight: CGFloat, lineHeight: CGFloat = quickEntryLineHeight
     ) -> Int {
         guard lineHeight > 0 else { return minimumWritingLines }
         let fieldHeight = writingHeight - writingBoxChromeHeight

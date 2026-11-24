@@ -14,15 +14,19 @@
 //    most recently registered one; `onDisappear` never fires on whole-app
 //    backgrounding — the Phase 8 review-round-2 finding, carried).
 //
-//  · **The live voice** (LK2's preference, applied app-wide): the shell is
-//    the ONE voice authority — Settings flips it here, and the flip
-//    reaches the stored preference, `MobileEditorStyle`, every observing
-//    chrome surface (shelf, library, tab bar, masthead), and EVERY
-//    registered editor surface through the liveness authority (MINOR 2 —
-//    a stood-down editor restyles too, so no mixed-voice storage survives
-//    a flip). The S1 masthead switch door RETIRED with this batch (P11's
-//    placement lands: Settings is the home; two doors for one preference
-//    was clutter — recorded).
+//  · **The library's look** (VM-51 — her LK-1/LK-2: "follow the library but
+//    if the phone has dark mode on, that shouldn't change what your mac is
+//    like"): the router holds the open library's THEME STORE (the Mac's,
+//    hoisted to `Shared/`), and every chrome surface (shelf, library, tab
+//    bar, masthead, Settings) resolves its tokens here through the ONE
+//    settings → tokens road. Where the library's settings LAND, they reach
+//    `MobileEditorStyle` and EVERY registered editor surface through the
+//    liveness authority (MINOR 2 — a stood-down editor restyles too, so no
+//    mixed-voice storage survives a flip), whether the change was made here
+//    or on the Mac. Light or dark is the device's (the system's appearance).
+//    The phone-local voice preference (LK2's old switch) RETIRED with VM-51:
+//    Settings' two voice rows write the LIBRARY's voice (R-47-2), the Mac's
+//    own write. The S1 masthead switch door retired at S3 batch 1 (P11).
 //
 
 import Foundation
@@ -53,25 +57,99 @@ final class MobileShellRouter {
     /// tab stacks share. The type and every rule live in the Write feature.
     @ObservationIgnored let writePlaces = MobileWritePlaces()
 
-    /// The live phone voice — the shell's one authority (LK2).
-    private(set) var voice: ThemeVoice
+    /// **The open library's theme** (VM-51) — the hoisted `ThemeStore`, bound
+    /// per open library (`bindTheme(session:)`) and started by the shell.
+    /// `@ObservationIgnored` for the `quickNote` reason: it is bound from the
+    /// shell's initializer, which must never write observed state; a reader
+    /// observes the STORE's own `settings`. Nil before the shell binds one
+    /// (harness and preview use): `settings` says what governs then.
+    @ObservationIgnored private(set) var theme: ThemeStore?
+    /// Which session `theme` serves — the shell's initializer re-runs on
+    /// every parent render, and a bind for the same session keeps its store.
+    @ObservationIgnored private var themeSession: ObjectIdentifier?
 
-    @ObservationIgnored private let defaults: UserDefaults
+    /// **This phone's light · dark · follow-the-system choice** (VM-53 — her
+    /// LK-2: light or dark stays each device's own). The DEVICE's half of the
+    /// look, beside the library's (`theme`): app-lived like the router, so the
+    /// lobby wears it before any library opens. A reader observes the
+    /// controller's own `choice`. Its owner rule and why it writes the windows
+    /// are `MobileAppearance.swift`'s.
+    @ObservationIgnored let appearance: MobileAppearanceController
 
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        let stored = MobileVoicePreference.current(defaults)
-        voice = stored
-        MobileEditorStyle.voice = stored
+    init(appearance: MobileAppearanceController = MobileAppearanceController()) {
+        self.appearance = appearance
     }
 
-    /// The ONE voice flip: preference + style + every registered surface.
+    /// **What the phone wears before a library has answered** — the lobby
+    /// (no library open) and the shell's first frame before its store's
+    /// first emission: what a library that has chosen NOTHING reads, Study
+    /// under the sea-glass (`Queries.ThemeSettings.unsetStoreVoice` /
+    /// `.unsetStorePalette`, AppSpec §12). PROVISIONAL P-47-15 — the Mac's
+    /// storeless placeholder is R1's Terminal in the voice's own colours
+    /// (`VoiceTokens.fallback`); on the phone that would flash the wrong
+    /// voice for a frame at every launch and unlock of a Study library.
+    static var placeholder: Queries.ThemeSettings {
+        var settings = Queries.ThemeSettings()
+        settings.voice = Queries.ThemeSettings.unsetStoreVoice
+        settings.palette = Queries.ThemeSettings.unsetStorePalette
+        return settings
+    }
+
+    /// The library's landed settings — the phone's look (LK-1). A bound store
+    /// holds the placeholder until its first landing. With no library bound
+    /// (harness and preview use only — the shell binds before its first read)
+    /// it is the editor face's own look, so a hosted masthead and the editor
+    /// below it agree.
+    var settings: Queries.ThemeSettings { theme?.settings ?? MobileEditorStyle.settings }
+
+    /// The library's voice (R-47-2's rows read it).
+    var voice: ThemeVoice { settings.voice }
+
+    /// The chrome's tokens: the library's voice and palette through the ONE
+    /// settings → tokens road, in THIS device's appearance (LK-2).
+    func tokens(dark: Bool) -> VoiceTokens {
+        VoiceTokens.resolve(settings: settings, dark: dark)
+    }
+
+    /// Bind the open library's theme (the shell's initializer — idempotent per
+    /// session, so a re-render keeps the running store). The store's landing
+    /// seam is this router's `adoptLanded`, so a value the store lands reaches
+    /// the editors whichever device wrote it. The bind is per SESSION but the
+    /// store is STARTED by the shell's `.task`, once per shell identity: today
+    /// every new session reaches the shell through a non-ready bootstrap state
+    /// (`AppBootstrap.beginOpening` writes `.opening` before its awaited open),
+    /// which remounts the shell. A road that swapped sessions WITHOUT leaving
+    /// `.ready` would leave the new store unstarted — and every `@State` model
+    /// the shell built from the old session — so it must key the shell on its
+    /// session (VM-47 ladder round 1, R1-m1).
+    func bindTheme(session: AppSession) {
+        let id = ObjectIdentifier(session)
+        guard themeSession != id else { return }
+        let store = ThemeStore(session: session, placeholder: Self.placeholder)
+        store.onLanded = { [weak self] settings in self?.adoptLanded(settings) }
+        theme = store
+        themeSession = id
+    }
+
+    /// **Where the library's look LANDS on the phone** (the Mac's rule: a
+    /// settings value is adopted where it lands). The UIKit face takes it
+    /// (`MobileEditorStyle.adopt` — its one app writer), and when the face
+    /// moved, EVERY registered editor restyles — the LK2 flip's road, now
+    /// reached by a change made on either device.
+    func adoptLanded(_ settings: Queries.ThemeSettings) {
+        if MobileEditorStyle.adopt(settings) {
+            editors.applyVoiceChangeEverywhere()
+        }
+    }
+
+    /// **The voice door (R-47-2):** write the LIBRARY's voice, through the
+    /// Mac's Settings' own write (`ThemeStore.setVoice` →
+    /// `Operations.setThemeVoice`). Nothing changes here at the press: the
+    /// write lands through the store's observation (`adoptLanded`), exactly
+    /// as one made on the Mac does. No store (harness use) writes nothing.
     func setVoice(_ next: ThemeVoice) {
         guard next != voice else { return }
-        voice = next
-        MobileVoicePreference.set(next, defaults)
-        MobileEditorStyle.voice = next
-        editors.applyVoiceChangeEverywhere()
+        theme?.setVoice(next)
     }
 }
 

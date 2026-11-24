@@ -5,8 +5,10 @@ import VariorumCore
 
 /// **`unlink_versions` — one version link taken back by its edge id** (VX-943,
 /// the VX-915 run's batch 6; her relay: "an unlink_versions that takes the ID
-/// link_versions already returns, at the same permission level"; the record
-/// `notes/plans/fixes/vx-915-recents-sweep.md` BATCH 6). A thin projection of
+/// link_versions already returns"; the record
+/// `notes/plans/fixes/vx-915-recents-sweep.md` BATCH 6 — and VX-977, the VX-981
+/// run's batch 2, `notes/plans/fixes/vx-981-mcp-door-followups.md`: the rung is
+/// EDIT on both notes, her ruling on P-915-B6-1). A thin projection of
 /// `Operations.unlinkVersionForClient` (the link's tombstone through the one
 /// statement link_versions' own undo writes, ONE client-named undo entry).
 ///
@@ -18,9 +20,10 @@ import VariorumCore
 ///    client cannot read answers the one shape, byte-identical to an id naming
 ///    nothing: a store without the hidden note has no such link at all, so a
 ///    readable side's rung refusal (or any of the act's own refusals) would
-///    tell the client the far side exists. The unreadable side's write-new ask
-///    is raised silently, as `link_versions` raises one on a named note it
-///    cannot reach (the answer stays the one shape). A SAVED VERSION's link is
+///    tell the client the far side exists. The unreadable side's ask (at the
+///    act's rung, edit) is raised silently, as `link_versions` raises one on a
+///    named note it cannot reach (the answer stays the one shape). A SAVED
+///    VERSION's link is
 ///    reached through its NOTE alone (`read_note`'s `version_id` posture: the
 ///    version rides its note's read);
 /// 3. the act's own facts, before any rung — no grant could make either land,
@@ -29,11 +32,14 @@ import VariorumCore
 ///    wire never bare-unlinks one, which would declassify the version), and a
 ///    link already gone refuses in words (P-915-B6-3 — `remove_tag`'s not-worn
 ///    precedent);
-/// 4. **WRITE NEW on both notes** (the agent's ask she relayed — R-VX187-1's
-///    rung, an OPEN choice for her: PROVISIONAL P-915-B6-1; the VX-915
-///    ladder's F-3), in the link's stored order: the first short side speaks
-///    `rungTooLow` + the asked sentence and raises ITS ask;
-/// 5. the act, behind a guard that decides both notes again at write new on
+/// 4. **EDIT on both notes** (VX-977 — her ruling on P-915-B6-1: "i imagine
+///    with edit to both, they should also be able to unlink something a user
+///    made. I don't think AI links are stored differently."; VX-943 built it
+///    at write new, the agent's relayed ask), in the link's stored order: the
+///    first short side speaks `rungTooLow` + the asked sentence and raises ITS
+///    ask — a write-new holder hears "may only read, suggest and write new",
+///    as every past-its-rung arm of the door speaks;
+/// 5. the act, behind a guard that decides both notes again at edit on
 ///    ONE standing read inside its own transaction and spends their once
 ///    grants there as one union — both spend or neither.
 ///
@@ -42,6 +48,12 @@ import VariorumCore
 /// refused row of this act with no target (`MCPOwnActivity.hidesTarget` — the
 /// logged note is resolved, not sent).
 extension MCPWriteTools {
+    /// **VX-977 — the act's ONE rung** (her ruling on P-915-B6-1): decided on
+    /// both notes in step 4, re-decided by the act's guard, named by every ask
+    /// it raises — read from the catalog's declaration, so the listing, the
+    /// decision and the asks can never say two rungs.
+    static var unlinkRung: MCPGrantRule.Rung { MCPToolCatalog.unlinkVersions.rung }
+
     /// P-915-B6-2's sentence (PROVISIONAL — her words pass).
     static let savedVersionLinkWords =
         "That link ties a note to one of its saved versions, so only the author can remove it: in Compare, "
@@ -73,13 +85,15 @@ extension MCPWriteTools {
             try log(clientName, job.tool, "note", noteID, noteID.flatMap { titles[$0] }, allowed: false)
             return .failure(Refused(outcome: outcome))
         }
+        // VX-977: the act's rung — every ask it raises names it.
+        let rung = Self.unlinkRung
         func ask(_ noteID: String) -> MCPAsk? {
             facts[noteID].map { MCPAsk(clientName: clientName, scopeKind: .note, scopeID: noteID,
-                                       title: titles[noteID] ?? "", rung: .writeNew, fence: $0.fence) }
+                                       title: titles[noteID] ?? "", rung: rung, fence: $0.fence) }
         }
         // 1. An id naming no link between two notes' placed blocks.
         guard let ends else {
-            let missing = MCPGrantAuthority.decide(standing, note: nil, rung: .writeNew, consumes: true)
+            let missing = MCPGrantAuthority.decide(standing, note: nil, rung: rung, consumes: true)
             return try refuse(nil, asking.refusal(missing, .note, standing: standing, ask: nil))
         }
         // The notes the link reaches: its two ends (once, for a link inside
@@ -89,7 +103,7 @@ extension MCPWriteTools {
         // 2. Both readable before anything else is said. READ is the lowest
         // rung, so its refusal is never `rungTooLow` — the words are the one
         // shape (or the client's own pending/denied state); the ask, raised
-        // silently, is the act's (write new).
+        // silently, is the act's (edit — VX-977).
         for noteID in reached {
             let read = MCPGrantAuthority.decide(standing, note: facts[noteID], rung: .read, consumes: false)
             guard read.isAllowed else {
@@ -100,9 +114,9 @@ extension MCPWriteTools {
         // 3. The act's own facts — no grant could make either land.
         if let versionNote { return try refuse(versionNote, Outcome(text: Self.savedVersionLinkWords, isError: true)) }
         guard ends.live else { return try refuse(ends.noteIDs[0], Outcome(text: Self.linkAlreadyGoneWords, isError: true)) }
-        // 4. Write new on each note, the first short side speaking.
+        // 4. Edit on each note (VX-977), the first short side speaking.
         for noteID in reached {
-            let decision = MCPGrantAuthority.decide(standing, note: facts[noteID], rung: .writeNew, consumes: true)
+            let decision = MCPGrantAuthority.decide(standing, note: facts[noteID], rung: rung, consumes: true)
             guard decision.isAllowed else {
                 return try refuse(noteID, asking.refusal(decision, .note, standing: standing, ask: ask(noteID)))
             }
@@ -114,7 +128,7 @@ extension MCPWriteTools {
             do {
                 unlink = try ops.unlinkVersionForClient(
                     edgeID, undoLabel: Operations.MCPWriteAct.versionUnlink.undoLabel(client: clientName),
-                    guardedBy: guardNotes(clientName, rung: .writeNew) { db in
+                    guardedBy: guardNotes(clientName, rung: rung) { db in
                         try Queries.mcpVersionLinkEnds(db, edgeID: edgeID)?.noteIDs.map(Optional.some) ?? [nil]
                     })
             } catch let refusal as Operations.MCPVersionUnlinkRefusal {

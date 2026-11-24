@@ -582,12 +582,17 @@ final class AppServices {
     /// arrived unowned from a not-yet-updated device. Failure surfaces on
     /// the account state; sign-out/in or a relaunch retries.
     private func runOwnerAdoption() async -> Bool {
+        // VM-65: timed, with the rows it stamped (a count) — inert on the Mac
+        // (`AppTiming`). The wait it costs is the wait, refused or not.
+        let timing = AppTiming.ownerAdoptionStarted()
         do {
-            try await session.runner.run { ops in
-                _ = try ops.adoptOwnerID()
+            let report = try await session.runner.run { ops in
+                try ops.adoptOwnerID()
             }
+            AppTiming.ownerAdoptionEnded(timing, rows: report.total)
             return true
         } catch {
+            AppTiming.ownerAdoptionEnded(timing, rows: nil)
             account.lastError =
                 "Owner adoption failed: \(error) — sync held; sign out and back in (or relaunch) to retry"
             return false

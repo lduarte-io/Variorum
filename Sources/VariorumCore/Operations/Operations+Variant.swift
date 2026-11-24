@@ -319,6 +319,63 @@ extension Operations {
         }
     }
 
+    /// **`closeAutoCommit` for exactly the takes a read found owed** (VM-71 —
+    /// the VM-64 run, batch 7; the record
+    /// `notes/plans/fixes/vm-64-timing-and-lags.md`). The SAME occasion, the
+    /// same rule, the same rows: the note's two quiet no-ops (gone or sealed
+    /// answers `[]`), the cadence gate, then one `kind: .auto` savepoint per
+    /// listed take that is STILL a live, unlocked take under one of the note's
+    /// live placements and STILL differs from its last savepoint — each
+    /// re-checked here, inside this one transaction, on one clock read, in id
+    /// order. So when `variantIDs` covers the note's dirty takes AT THE TURN
+    /// (what `Queries.leavingSavepointCandidates` read, when nothing has
+    /// dirtied another take since), the rows written are exactly
+    /// `closeAutoCommit(_:)`'s; a listed take that has since become clean,
+    /// moved out, been locked or tombstoned is skipped, never committed. A take
+    /// ANOTHER writer dirtied after the read (a sync apply) is not listed, so
+    /// it is not written here: it stays owed and is the next ask's (the VM-64
+    /// ladder, round 1, finding 1 — the one-ask gap, accepted; the phone
+    /// caller's comment in `AppSession.savepointOnLeaving` says what bounds it).
+    ///
+    /// **Why a second form:** the phone's leaving road reads the owed takes
+    /// on a READER first, so its one runner turn is O(the takes she changed)
+    /// instead of O(the note) — the capture box's first save no longer
+    /// queues behind a long note's whole-note decode (audit F 1D). The Mac
+    /// keeps `closeAutoCommit(_:)`; nothing here changes it.
+    @discardableResult
+    public func closeAutoCommit(
+        _ containerID: String, takes variantIDs: [String]
+    ) throws -> [CommitPoint] {
+        guard !variantIDs.isEmpty else { return [] }
+        return try database.write { db in
+            guard let container = try Container.fetchOne(db, key: containerID),
+                  container.deletedAt == nil,
+                  !container.locked
+            else { return [] }
+            guard try Queries.savepointCadence(db).savesOnLeaving else { return [] }
+            let now = date.now
+            var committed: [CommitPoint] = []
+            for variantID in Set(variantIDs).sorted() {
+                guard let variant = try Variant.fetchOne(
+                    db,
+                    sql: """
+                        SELECT v.* FROM variant v
+                        JOIN container_block cb
+                          ON cb.block_id = v.block_id
+                         AND cb.container_id = ?
+                         AND cb.deleted_at IS NULL
+                        WHERE v.id = ? AND v.deleted_at IS NULL AND v.locked = 0
+                        """,
+                    arguments: [containerID, variantID]),
+                      try isDirty(db, variant)
+                else { continue }
+                committed.append(
+                    try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now))
+            }
+            return committed
+        }
+    }
+
     /// **THE SEVENTH QUIET AUTO-COMMIT OCCASION** — the author's own
     /// insurance idea, adopted into item 5's design sketch verbatim: *"a
     /// quiet auto-commit of the affected takes' state RIGHT BEFORE a

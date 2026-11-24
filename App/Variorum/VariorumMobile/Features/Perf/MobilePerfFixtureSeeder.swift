@@ -138,6 +138,47 @@ enum MobilePerfFixtureSeeder {
         "field journal vol. v", "field journal vol. vi",
     ]
 
+    // MARK: The wing shape (VM-66 — the VM-64 run, batch 3)
+
+    /// How the corpus is spread over WINGS. Her library has nine (the VM-44
+    /// audit's reading of it; the work list's W-254: "the 100k fixture is …
+    /// one wing"), and the shape decides what the phone's listings walk —
+    /// the Library and the Pool read every wing today, and the Pool tests
+    /// every note against every gathering's rule.
+    ///
+    /// · `.oneWing` — the fixture as it has always been, BYTE FOR BYTE: the
+    ///   same operations in the same order, so every pin over it (and every
+    ///   id a `.incrementing` world mints) is unchanged. The default.
+    /// · `.nineWings` — Home plus the eight `extraWingNames`. The corpus
+    ///   notes are dealt round-robin (note n → wing n % 9; each note's prose
+    ///   is the same generator stream as in `.oneWing`), and EACH wing seeds:
+    ///   its own `perf fixture` tag (a legal per-wing twin) worn by every
+    ///   note in it · a `gathered` tag worn by every third note · TWO books
+    ///   (`"<wing> notebook i"` / `"… ii"`) · ONE gathering (`"<wing>
+    ///   gathered"`, rule: the wing's `gathered` tag) · and every fourth note
+    ///   BOOKLESS (a Pool note, her quick-note shape — some of them gathered,
+    ///   so the Pool's gathering test has rows to exclude). The fixture book
+    ///   and its control (and mega, when asked for) posts stay in Home,
+    ///   exactly as in `.oneWing`.
+    nonisolated enum WingShape: Sendable, Equatable {
+        case oneWing
+        case nineWings
+    }
+
+    /// The eight wings beside Home in `.nineWings` (Home is virtual — `''`,
+    /// R-13ia-2 — so it is never minted). Plain names; nothing reads them but
+    /// a person looking at the dev store.
+    nonisolated static let extraWingNames = [
+        "Work", "Fiction", "Research", "Family", "Travel", "Ideas", "Letters", "Garden",
+    ]
+
+    /// Per wing in `.nineWings`: how many books (the gathering is extra), and
+    /// which notes are bookless / gathered (by the note's index inside its
+    /// wing).
+    nonisolated static let booksPerWing = 2
+    nonisolated static func isBookless(indexInWing k: Int) -> Bool { k % 4 == 3 }
+    nonisolated static func isGathered(indexInWing k: Int) -> Bool { k % 3 == 0 }
+
     // MARK: Full scale (the door's scale; tests may pass smaller)
 
     nonisolated static let fullCorpusNoteCount = 300
@@ -271,17 +312,30 @@ enum MobilePerfFixtureSeeder {
         var controlBlockCount = 0
         var corpusNoteCount = 0
         var corpusBlockCount = 0
+        // — The wing shape's facts (VM-66). `.oneWing`: 1 wing, no gatherings,
+        //   nothing bookless — the fixture as it always was.
+        var wingCount = 1
+        /// The wings that hold corpus notes, Home (`""`) first.
+        var wingIDs: [String] = [""]
+        var corpusBookCount = 0
+        var gatheringCount = 0
+        var booklessNoteCount = 0
+        var gatheredNoteCount = 0
     }
 
     /// Mints the whole fixture. `includeMegaPost: false` is the SMALL
     /// control world's shape (the corpus-flatness pins' other side):
     /// same six books, same control post bytes, a fraction of the notes.
+    /// `wings` (VM-66): `.oneWing` (the default) is that fixture unchanged;
+    /// `.nineWings` spreads the same corpus over her nine wings
+    /// (`WingShape` says what each wing seeds).
     nonisolated static func seed(
         ops: Operations,
         corpusNotes: Int = fullCorpusNoteCount,
         megaWords: Int = megaTargetWords,
         includeMegaPost: Bool = true,
-        existingTagID: String? = nil
+        existingTagID: String? = nil,
+        wings: WingShape = .oneWing
     ) throws -> SeedResult {
         let tagID: String
         if let existingTagID {
@@ -293,40 +347,30 @@ enum MobilePerfFixtureSeeder {
         let fixtureBook = try ops.createReading(
             name: fixtureBookName, kind: .book, profile: "collection")
 
-        // — The corpus: notes spread evenly across six books (the book
-        //   COUNT is constant in every world — corpus size is the axis,
-        //   never corpus shape).
-        var corpusBooks: [Reading] = []
-        for name in corpusBookNames {
-            corpusBooks.append(
-                try ops.createReading(name: name, kind: .book, profile: "collection"))
-        }
+        var shape = SeedResult(fixtureBookID: fixtureBook.id, controlPostID: "")
         var corpusBlocks = 0
-        for n in 0..<max(0, corpusNotes) {
-            var gen = PerfProse(seed: noteSeedBase &+ UInt64(n))
-            let book = corpusBooks[n % corpusBooks.count]
-            let post = try ops.newPostInReading(
-                book.id, title: "corpus note \(n + 1)", profile: .generic)
-            _ = try ops.applyTag(tagID, toPost: post.id)
-            let blockCount = 4 + Int(gen.probe(5))
-            var firstBlock: Operations.NewBlockResult?
-            for _ in 0..<blockCount {
-                let text = gen.paragraph().text
-                let minted = try ops.newBlock(in: post.id, text: text, at: .end)
-                if firstBlock == nil { firstBlock = minted }
-                corpusBlocks += 1
+        switch wings {
+        case .oneWing:
+            // — The corpus: notes spread evenly across six books (the book
+            //   COUNT is constant in every world — corpus size is the axis,
+            //   never corpus shape).
+            var corpusBooks: [Reading] = []
+            for name in corpusBookNames {
+                corpusBooks.append(
+                    try ops.createReading(name: name, kind: .book, profile: "collection"))
             }
-            // A sprinkling of chrome in the corpus too (real libraries
-            // carry fans and comments; the shell's lists render them).
-            if n % 10 == 4, let first = firstBlock {
-                let take = try ops.branchVariant(first.block.id, from: first.variant.id)
-                let alt = gen.paragraph().text
-                try ops.autosave(take.id, text: alt, charDelta: alt.count)
+            shape.corpusBookCount = corpusBooks.count
+            for n in 0..<max(0, corpusNotes) {
+                var gen = PerfProse(seed: noteSeedBase &+ UInt64(n))
+                let book = corpusBooks[n % corpusBooks.count]
+                let post = try ops.newPostInReading(
+                    book.id, title: "corpus note \(n + 1)", profile: .generic)
+                _ = try ops.applyTag(tagID, toPost: post.id)
+                corpusBlocks += try seedCorpusBody(ops: ops, postID: post.id, note: n, gen: &gen)
             }
-            if n % 15 == 7, let first = firstBlock {
-                _ = try ops.addBlockComment(
-                    to: first.block.id, text: "corpus margin note \(n + 1)")
-            }
+        case .nineWings:
+            corpusBlocks = try seedNineWingCorpus(
+                ops: ops, corpusNotes: corpusNotes, homeTagID: tagID, shape: &shape)
         }
 
         // — The control post (the flatness pins' small fixture): its own
@@ -337,8 +381,8 @@ enum MobilePerfFixtureSeeder {
         let control = try ops.newPostInReading(
             fixtureBook.id, title: controlPostTitle, profile: .generic)
         _ = try ops.applyTag(tagID, toPost: control.id)
-        var result = SeedResult(
-            fixtureBookID: fixtureBook.id, megaPostID: nil, controlPostID: control.id)
+        var result = shape
+        result.controlPostID = control.id
         var controlTakes = PerfProse(seed: controlTakeSeed)
         for (i, block) in controlProse(targetWords: controlTargetWords).enumerated() {
             let minted = try ops.newBlock(in: control.id, text: block.text, at: .end)
@@ -398,5 +442,95 @@ enum MobilePerfFixtureSeeder {
         result.corpusNoteCount = max(0, corpusNotes)
         result.corpusBlockCount = corpusBlocks
         return result
+    }
+
+    /// One corpus note's body — its paragraphs and its sprinkling of chrome.
+    /// The SAME operations in the same order for both wing shapes (it is the
+    /// body `.oneWing` always ran, lifted out unchanged), so note n reads the
+    /// same in every shape. Returns the blocks it minted.
+    private nonisolated static func seedCorpusBody(
+        ops: Operations, postID: String, note n: Int, gen: inout PerfProse
+    ) throws -> Int {
+        let blockCount = 4 + Int(gen.probe(5))
+        var firstBlock: Operations.NewBlockResult?
+        for _ in 0..<blockCount {
+            let text = gen.paragraph().text
+            let minted = try ops.newBlock(in: postID, text: text, at: .end)
+            if firstBlock == nil { firstBlock = minted }
+        }
+        // A sprinkling of chrome in the corpus too (real libraries
+        // carry fans and comments; the shell's lists render them).
+        if n % 10 == 4, let first = firstBlock {
+            let take = try ops.branchVariant(first.block.id, from: first.variant.id)
+            let alt = gen.paragraph().text
+            try ops.autosave(take.id, text: alt, charDelta: alt.count)
+        }
+        if n % 15 == 7, let first = firstBlock {
+            _ = try ops.addBlockComment(
+                to: first.block.id, text: "corpus margin note \(n + 1)")
+        }
+        return blockCount
+    }
+
+    /// `.nineWings`' corpus (`WingShape` carries the per-wing contract): Home
+    /// plus eight minted wings, each with its own tags, two books, one
+    /// gathering, and its share of the notes dealt round-robin. Home's
+    /// `perf fixture` tag is the caller's (`homeTagID`); every other wing
+    /// mints its own twin. Returns the blocks it minted.
+    private nonisolated static func seedNineWingCorpus(
+        ops: Operations, corpusNotes: Int, homeTagID: String, shape: inout SeedResult
+    ) throws -> Int {
+        struct WingKit {
+            let id: String
+            let fixtureTagID: String
+            let gatheredTagID: String
+            let books: [String]
+        }
+        var kits: [WingKit] = []
+        for index in 0...extraWingNames.count {
+            let name = index == 0 ? "Home" : extraWingNames[index - 1]
+            let wingID = index == 0 ? "" : try ops.createWing(name: name).id
+            let fixtureTag = index == 0
+                ? homeTagID : try ops.createTag(name: tagName, wingID: wingID).id
+            let gatheredTag = try ops.createTag(name: "gathered", wingID: wingID).id
+            var books: [String] = []
+            for b in 0..<booksPerWing {
+                books.append(try ops.createReading(
+                    name: "\(name) notebook \(b == 0 ? "i" : "ii")", kind: .book,
+                    profile: "collection", wingId: wingID).id)
+            }
+            _ = try ops.createReading(
+                name: "\(name) gathered", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.tag(gatheredTag)), wingId: wingID)
+            kits.append(WingKit(
+                id: wingID, fixtureTagID: fixtureTag, gatheredTagID: gatheredTag, books: books))
+        }
+        shape.wingCount = kits.count
+        shape.wingIDs = kits.map(\.id)
+        shape.corpusBookCount = kits.count * booksPerWing
+        shape.gatheringCount = kits.count
+
+        var blocks = 0
+        for n in 0..<max(0, corpusNotes) {
+            var gen = PerfProse(seed: noteSeedBase &+ UInt64(n))
+            let kit = kits[n % kits.count]
+            let k = n / kits.count
+            let title = "corpus note \(n + 1)"
+            let post: Container
+            if isBookless(indexInWing: k) {
+                post = try ops.createPost(title: title, profile: .generic, wingId: kit.id)
+                shape.booklessNoteCount += 1
+            } else {
+                post = try ops.newPostInReading(
+                    kit.books[k % kit.books.count], title: title, profile: .generic)
+            }
+            _ = try ops.applyTag(kit.fixtureTagID, toPost: post.id)
+            if isGathered(indexInWing: k) {
+                _ = try ops.applyTag(kit.gatheredTagID, toPost: post.id)
+                shape.gatheredNoteCount += 1
+            }
+            blocks += try seedCorpusBody(ops: ops, postID: post.id, note: n, gen: &gen)
+        }
+        return blocks
     }
 }

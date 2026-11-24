@@ -385,18 +385,24 @@ struct MobileProtectionCompositionTests {
         #expect(shell.contains("MobileProtectionScreen(standing: bootstrap?.roadStanding, services: services, tokens: tokens)"))
     }
 
-    /// The Settings row and the sync row's *Protection…* door (VX-486's, given its phone home) both open the screen, and
-    /// only where it can act (the shell's road, the app's services — ladder L1's NIT-2 — AND an account section on the open
-    /// library — P-2).
+    /// The Settings row opens the screen, and only where it can act (the shell's road, the app's services — ladder L1's
+    /// NIT-2 — AND an account section on the open library — P-2).
+    /// MOVED at VM-27 (the VM-47 run, batch 5 — her "file the double protections as a bug"): this pin used to hold the
+    /// sync row's own *Protection…* door injected beside the row — the very door that doubled the word on the sheet. The
+    /// standing row is now the sheet's ONE Protection door and the sync row is handed none (`MobileSettingsProtection
+    /// DoorTests` mounts it); the gate is unchanged.
     @Test func settingsOpensTheScreenOnlyWhereItCanAct() throws {
         let settings = try Self.code("VariorumMobile/Features/Shell/MobileSettingsView.swift")
         #expect(settings.contains(
             "guard let onOpenProtection, services != nil, bootstrap?.roadStanding?.account != nil else { return nil }"))
-        #expect(settings.contains(".environment(\\.protectionPaneDoor, protectionDoor.map { open in ProtectionPaneDoor { open() } })"))
+        #expect(settings.contains(".environment(\\.protectionPaneDoor, nil)"), "the sync row gets no door of its own")
+        #expect(!settings.contains("ProtectionPaneDoor {"), "no Protection door is handed to the sync row")
         #expect(settings.contains("if let protectionDoor {"))
         let shell = try Self.code("VariorumMobile/Features/Shell/MobileShellView.swift")
         #expect(shell.contains("onOpenProtection: { openProtection() }"))
-        #expect(shell.contains("leavingShelf { shelfPath.append(MobileRoute.protection) }"))
+        // MOVED at VM-53 (batch 5): Settings opens from every root and a note now, so the screen is pushed on the
+        // VISIBLE stack (P-47-23) — it was the shelf's when Settings was the shelf's own door.
+        #expect(shell.contains("leavingShelf { push(.protection, in: here) }"))
     }
 
     /// **Ladder round 1's NIT-2 — RED ON THE PRE-L1 TREE:** before the app's services are composed (the `.ready` arm's
@@ -423,9 +429,8 @@ struct MobileProtectionCompositionTests {
                 return
             }
             #expect(bootstrap.roadStanding?.account != nil, "precondition: the account section stands")
-            let store = U2Faces.Defaults()
             let settings = MobileSettingsView(
-                session: session, router: MobileShellRouter(defaults: store.defaults), services: nil,
+                session: session, router: MobileShellRouter(), services: nil,
                 bootstrap: bootstrap, onOpenProtection: {})
             await withHostedSurface(settings) { surface in
                 await surface.settle(30)

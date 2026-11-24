@@ -72,6 +72,15 @@ struct MobileTrashView: View {
     static let allFilterWord = "All"
     static let emptyTrashLine = "Nothing in the Trash."
 
+    /// **The empty line, or nil while there is nothing true to say** (VM-33 —
+    /// the Mac's `RecoveryViewModel.trashEmptyStateLine` rule). Before the
+    /// listing's first value it is nil, never the false "Nothing in the
+    /// Trash." — the face draws nothing in its place (calm, no spinner).
+    static func emptyStateLine(_ model: MobileTrashModel) -> String? {
+        guard model.trashListingLoaded, model.trash.isEmpty else { return nil }
+        return emptyTrashLine
+    }
+
     static func truncationMarker(shown: Int) -> String {
         "Showing the first \(shown) — narrow the filter to see more."
     }
@@ -81,8 +90,8 @@ struct MobileTrashView: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 trashHeader
                 filterRow
-                if model.trash.isEmpty {
-                    emptyLine(Self.emptyTrashLine)
+                if let line = Self.emptyStateLine(model) {
+                    emptyLine(line)
                 } else {
                     ForEach(model.trash, id: \.id) { item in
                         trashRow(item)
@@ -94,9 +103,14 @@ struct MobileTrashView: View {
             }
             .padding(.horizontal, 8)
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51 (R-47-1, "prose should not be on the tint"): the Trash's rows
+        // on the paper (its answers speak on the shell's one line, VM-61).
+        .background(tokens.surface.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the page's paper at both edges (the bar's room at its foot is the
+        // shell's to paint while the bar stands there).
+        .mobileEdgeGrounds(top: tokens.surface, bottom: tokens.surface)
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) { reportLine }
         // The filter and the sort are applied IN SQL, so a change restarts
         // the observation rather than re-sorting a window of the wrong set.
         .task(id: model.restartToken) { await model.startTrash() }
@@ -133,8 +147,8 @@ struct MobileTrashView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
                 Text(tokens.path([RecoveryCopy.trashSection]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.screenTitle, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                 Spacer()
                 sortDoor
                 if !model.trash.isEmpty {
@@ -143,16 +157,15 @@ struct MobileTrashView: View {
                         Task { await model.requestEmptyTrash() }
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.emptyTrashVerb))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.alarm)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(
+                        tokens: tokens, tone: .alarm, role: .control, alignment: .leading))
                     .accessibilityLabel(RecoveryCopy.emptyTrashVerb)
                 }
             }
             Text(tokens.chromeLabel(RecoveryCopy.windowNote))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
         }
         .padding(.horizontal, 12)
         .padding(.top, 12)
@@ -165,10 +178,8 @@ struct MobileTrashView: View {
             model.setOldestFirst(!model.oldestFirst)
         } label: {
             Text(tokens.chromeLabel(model.oldestFirst ? "oldest first" : "newest first"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
         .accessibilityLabel("Sort")
     }
 
@@ -176,17 +187,18 @@ struct MobileTrashView: View {
     /// row's grammar), never a `Menu`: a door a pin can drive.
     private var filterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
+            // VM-50: filter chips (seven words do not share a segmented
+            // choice at phone width; the sheet's chip is "filters … one row
+            // that scrolls sideways") — P-47-11.
+            HStack(spacing: PhoneMetrics.Space.s8) {
                 ForEach(Array(Self.filterKinds.enumerated()), id: \.offset) { _, kind in
                     let word = kind.map(RecoveryCopy.kindLabel) ?? Self.allFilterWord
                     Button {
                         model.setKindFilter(kind)
                     } label: {
                         Text(tokens.chromeLabel(word))
-                            .font(tokens.small)
-                            .foregroundStyle(model.kindFilter == kind ? tokens.ink : tokens.faint)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneChipStyle(tokens: tokens, selected: model.kindFilter == kind))
                     .accessibilityLabel(word)
                     .accessibilityAddTraits(model.kindFilter == kind ? .isSelected : [])
                 }
@@ -204,46 +216,27 @@ struct MobileTrashView: View {
     /// marker pin.
     private func emptyLine(_ text: String) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .padding(.horizontal, 12)
             .padding(.vertical, 16)
             .accessibilityLabel(text)
     }
 
-    /// The receipts and refusals, pinned to the bottom so an act's answer
-    /// is readable wherever she is scrolled.
-    @ViewBuilder
-    private var reportLine: some View {
-        if model.receipt != nil || model.lastError != nil {
-            VStack(alignment: .leading, spacing: 2) {
-                if let receipt = model.receipt {
-                    Text(tokens.chromeLabel(receipt))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                }
-                if let error = model.lastError {
-                    Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
-            .background(tokens.room)
-        }
-    }
+    // VM-61: this room's receipts and refusals speak on the shell's one
+    // line (`MobileMessageLine`), never in a slot of its own.
 
     // MARK: - Rows
 
     private func trashRow(_ item: Queries.TrashItem) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(Self.rowTitle(item))
-                .font(tokens.body)
+                .phoneType(.rowTitle, tokens)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(2)
             Text(tokens.chromeLabel(rowMeta(item)))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .lineLimit(2)
             HStack(spacing: 18) {
                 Button {
@@ -251,10 +244,8 @@ struct MobileTrashView: View {
                     Task { await model.putBack(item) }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel("\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(item))")
                 // **Delete Now lives HERE and nowhere else** (her round-3
                 // rider: never a full delete from inside a note). A
@@ -265,10 +256,8 @@ struct MobileTrashView: View {
                         model.requestDeleteNow(item)
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.deleteNowVerb))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.alarm)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .alarm))
                     .accessibilityLabel(
                         "\(RecoveryCopy.deleteNowVerb) \(RecoveryCopy.rowKind(item))")
                 }
@@ -278,10 +267,8 @@ struct MobileTrashView: View {
                         onOpen(noteID)
                     } label: {
                         Text(tokens.chromeLabel("Open note"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.accent)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                     .accessibilityLabel("Open note")
                 }
                 Spacer(minLength: 0)
@@ -298,7 +285,12 @@ struct MobileTrashView: View {
     static func rowTitle(_ item: Queries.TrashItem) -> String {
         if let title = item.title, !title.isEmpty { return title }
         if let text = item.text, !text.isEmpty { return text }
-        return "(empty \(RecoveryCopy.rowKind(item.kind)))"
+        // VM-83 (W-073): an untitled GATHERING is named by its own kind word
+        // (VX-611's rule — the row's kind word already was), never "(empty
+        // book)". Round 1, N2: the ITEM overload, the shared file's rule
+        // wherever the row is in hand — so an untitled saved version is
+        // named as one too, as its meta line already says.
+        return "(empty \(RecoveryCopy.rowKind(item)))"
     }
 
     /// The row's second line: what it is · where it came from · and the

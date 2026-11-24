@@ -10,7 +10,9 @@
 //  `nothingWas` verb, the book's name); everything else the table has words
 //  for, the phone now says in those words; and where the table has NO words,
 //  each site keeps its OWN fallback — so the collapse can only turn a raw
-//  enum dump into a sentence, never a sentence into a dump.
+//  enum dump into a sentence, never a sentence into a dump. (VM-62 retired
+//  the last clause: every such fallback was a dump, and every site now ends
+//  in the shared table's ONE plain fallback.)
 //
 //  The first and last tests are RED on the hoist-only tree (the dumps and the
 //  crystallizer's raw error voice); the middle ones are GUARDS that hold on
@@ -61,22 +63,33 @@ struct MobileRefusalTableTests {
         }
     }
 
-    /// GUARD: where the table has no words, each site keeps the fallback it had.
+    /// Where the table has no words, every site speaks the ONE plain fallback.
     ///
     /// *A justified edit (VX-362 — the VX-336 run record's U9):* this guard's
     /// unworded sample was `containerNotFound`, which the wire's sweep words in
     /// the shared table now (the next test). The guard keeps its meaning on a
     /// case that stays unworded — `referenceNotFound`, which the sweep proved
     /// no wire road reaches and no table words.
-    @Test func eachSiteKeepsItsOwnFallbackWhereTheTableHasNoWords() {
+    ///
+    /// *A second justified edit (VM-62, umbrella VM-55 batch 2b):* this guard
+    /// held each site's OWN fallback — and every one of those fallbacks was a
+    /// dump (`String(describing:)`, "Refused: …", `DeletionRefusal.fallback`'s
+    /// "That couldn't be done — ‹the case›."), which is exactly what VM-62
+    /// retires. The guard now holds the ruled replacement: the one plain
+    /// fallback, with no case name.
+    @Test func eachSiteSpeaksThePlainFallbackWhereTheTableHasNoWords() {
         let unworded = OperationError.referenceNotFound(id: "f")
-        #expect(MobileBlockMenuController.refusalMessage(unworded, act: "name the block")
-                == DeletionRefusal.fallback(unworded))
-        #expect(MobileUndoDoor.refusal(unworded) == String(describing: unworded))
-        #expect(MobileCommentsController.refusalMessage(unworded) == String(describing: unworded))
-        #expect(MobileStructuralController.refusalMessage(unworded, act: "divide the block")
-                == String(describing: unworded))
-        #expect(MobileMembershipModel.refusal(unworded, bookName: nil) == "Refused: \(unworded)")
+        let lines = [
+            MobileBlockMenuController.refusalMessage(unworded, act: "name the block"),
+            MobileUndoDoor.refusal(unworded),
+            MobileCommentsController.refusalMessage(unworded),
+            MobileStructuralController.refusalMessage(unworded, act: "divide the block"),
+            MobileMembershipModel.refusal(unworded, bookName: nil),
+        ]
+        for line in lines {
+            #expect(line == OpsRefusalCopy.unexpectedFailure, "\(line)")
+            #expect(!line.contains("referenceNotFound"), "\(line)")
+        }
     }
 
     /// **VX-362 (VX-336 U9) — MOBILE PARITY: the sweep's new shared words reach
@@ -139,7 +152,8 @@ struct MobileRefusalTableTests {
 
     /// Ruling V: the crystallizer's error voice (U2's host member, the phone's
     /// conformance) speaks the table instead of dumping the error — and a
-    /// non-operation error keeps its description.
+    /// non-operation error speaks the one plain fallback (VM-62's justified
+    /// edit: it used to keep its description, a dump).
     @Test func theCrystallizersErrorVoiceSpeaksTheTable() async throws {
         try await withEditorWorld { session, _ in
             let post = try session.operations.createPost(title: "T")
@@ -149,7 +163,7 @@ struct MobileRefusalTableTests {
             model.reportOperationError(OperationError.lockedPost(id: post.id))
             #expect(model.statusMessage == "This note is locked — unlock it first.")
             model.reportOperationError(NotAnOperationError())
-            #expect(model.statusMessage == String(describing: NotAnOperationError()))
+            #expect(model.statusMessage == OpsRefusalCopy.unexpectedFailure)
         }
     }
 }

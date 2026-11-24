@@ -41,9 +41,9 @@ private func withShellSession<T>(
 @Suite("Shelf ordering & quick entry (Phase 13, B2)")
 struct ShelfModelTests {
     /// 13i-d U1 — AN HONEST TEST EDIT (the SUBJECT changed by her ruling;
-    /// no assertion weakened): R38's pins-then-journals-then-name order is
-    /// still the PHONE's (`ShelfOrder.ordered`, pinned by the mobile suites
-    /// and untouched this phase), but the Mac's Bookcase orders by §24 —
+    /// no assertion weakened): R38's pins-then-journals-then-name order was
+    /// still the PHONE's then (`ShelfOrder.ordered` — retired at VM-83, when
+    /// the phone took this rule too), but the Mac's Bookcase orders by §24 —
     /// A–Z by default, STARRED floating first, and the journal books no
     /// longer a group of their own (a journal is a book on a shelf like any
     /// other). The same fixture, read under the ruled rule.

@@ -54,6 +54,18 @@ enum MobileQuickNoteCopy {
     /// The Mac bar's hint, phone-worded (its `⏎ opens it` grammar is
     /// A5-1's, and it is the reason no newline can be typed here).
     static let hint = "new note — just start typing · ⏎ opens it"
+
+    /// **The hint's fit rule** (VM-48, W-024): at the note body's size the
+    /// whole hint no longer fits one line on every phone, so the box shows
+    /// the longest of these that fits — the hint itself, then its own first
+    /// clause, then its first words. No new words: each is the hint cut at
+    /// one of its own separators. PROVISIONAL (P-47-6): her wording pass,
+    /// and the capture box's rebuild (SW-3/SW-4), may replace the hint.
+    static let hintFits: [String] = [
+        hint,
+        String(hint.components(separatedBy: " · ")[0]),
+        String(hint.components(separatedBy: " — ")[0]),
+    ]
     /// The visible door A5-1 requires beside ⏎ ("press a button to go into
     /// the particular note for it" — her sentence names both).
     static let openDoor = "open ↵"
@@ -229,7 +241,12 @@ final class MobileQuickNoteModel {
     /// rather than opening it. The row now goes with the text.
     var visibleState: SaveState { mints ? saveState : .idle }
 
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); the box no longer
+    /// draws it — her words stay in the box either way.
+    private(set) var lastError: String? {
+        didSet { if let session { MobileLine.refuse(lastError, session: session) } }
+    }
     /// The box holding at a boundary it cannot cross (Q1) — a quiet note,
     /// never the red error slot: nothing failed, and nothing was lost.
     /// Cleared by the next change the box CAN take, and by a reset.
@@ -708,13 +725,17 @@ final class MobileQuickNoteModel {
         cancelMintClock()
         let snapshot = text
         let undoLabel = MobileQuickNoteCopy.undoLabel
+        // VM-58 — her SW-5: a quick note lands in the CURRENT wing, in its
+        // Pool (the Bookcase entry bar's rule on the Mac).
+        let wing = session.wing.currentID
         saveState = .saving
         let task = Task<String?, Never> { [weak self] in
             do {
                 let result = try await session.runner.run { ops in
                     // A5-2: `importPost`, not `newBlock` — the paste that
                     // arrived before the mint segments correctly for free.
-                    try ops.importPost(title: nil, text: snapshot, undoLabel: undoLabel)
+                    try ops.importPost(
+                        title: nil, text: snapshot, undoLabel: undoLabel, wingId: wing)
                 }
                 // Act 0 (R-pre13u-1): the first-write signal — the box is
                 // the phone's fastest capture path, so it is also the
@@ -880,9 +901,14 @@ final class MobileQuickNoteModel {
     /// nothing navigates onto a note whose words are still in the box.
     /// `file()` carries the whole rule.)*
     func open() {
+        AppTiming.boxOpenPressed() // VM-65: the press her lag 2 is measured from
         Task { [weak self] in
             guard let self else { return }
-            if let id = await self.file() { self.pendingOpen = id }
+            if let id = await self.file() {
+                self.pendingOpen = id
+            } else {
+                AppTiming.boxOpenFiledNothing() // VM-64 ladder round 2, finding 8: no Open to time
+            }
         }
     }
 
@@ -928,6 +954,12 @@ final class MobileQuickNoteModel {
     /// itself. **A leaving that fails keeps her text and says why.**
     @discardableResult
     private func file() async -> String? {
+        // VM-65: a filing is timed only when it completes — the box let go of
+        // a note it filed (the `minted` road's end); every other road out
+        // discards the timing.
+        let timing = AppTiming.boxFilingStarted()
+        var filed = false
+        defer { AppTiming.boxFilingEnded(timing, filed: filed) }
         guard postID != nil || mints else {
             // An empty (or whitespace-only) box that never minted: there
             // is nothing to keep and nothing to file.
@@ -1050,6 +1082,7 @@ final class MobileQuickNoteModel {
         }
         reset()
         handOffCount += 1
+        filed = true
         return minted
     }
 
@@ -1141,6 +1174,8 @@ final class MobileQuickNoteModel {
 struct MobileQuickNoteBox: View {
     @Bindable var model: MobileQuickNoteModel
     let tokens: VoiceTokens
+    /// VM-48: the box types in the note body, which follows the text size.
+    @Environment(\.dynamicTypeSize) private var typeSize
     /// The ruled writing region (`MobileShelfLayout.split`). `nil` keeps
     /// the compact five-line box — the shape every other host would get.
     var writingHeight: CGFloat?
@@ -1164,23 +1199,20 @@ struct MobileQuickNoteBox: View {
                 // nothing failed and nothing was lost — the box simply
                 // cannot restructure a real note.
                 Text(tokens.chromeLabel(note))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(3)
                     .accessibilityLabel(note)
             }
-            if let error = model.lastError {
-                // `lineLimit` beside a growing chrome text is standing law
-                // (P-8, the b6dae25 class).
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
-                    .lineLimit(3)
-            }
+            // VM-61: a refused filing speaks on the shell's one line; her
+            // words stay in the box.
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 8)
         .onChange(of: focused) { _, isFocused in
+            // VM-65: the timing layer's "tap the box" — waiting for a keyboard
+            // only when one is not already up.
+            if isFocused { AppTiming.boxFocused(keyboardAlreadyUp: MobileTiming.keyboardIsUp) }
             // Her 2026-08-30 ruling needs the SHELF to know: the two
             // regions are sized from this, so focus has to leave the box.
             model.setFocused(isFocused)
@@ -1212,7 +1244,10 @@ struct MobileQuickNoteBox: View {
     private var lineCap: Int {
         if collapsed { return 1 }
         guard let writingHeight else { return 5 }
-        return MobileShelfLayout.writingLineCap(writingHeight: writingHeight)
+        return MobileShelfLayout.writingLineCap(
+            writingHeight: writingHeight,
+            lineHeight: MobileShelfLayout.quickEntryLineHeight(
+                voice: tokens.voice, typeSize: typeSize))
     }
 
     /// Her ruling: *"the box should be one line until you click into it."*
@@ -1228,19 +1263,20 @@ struct MobileQuickNoteBox: View {
     private var field: some View {
         ZStack(alignment: .topLeading) {
             if model.text.isEmpty {
-                HStack(spacing: 6) {
-                    Text(tokens.chromeLabel(MobileQuickNoteCopy.hint))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
-                    if tokens.showsBlockCursor && !focused {
-                        BlinkingCursorBlock(color: tokens.accent)
-                    }
+                // The hint's fit rule (W-024): the longest of its own
+                // cuts that fits the box's line.
+                ViewThatFits(in: .horizontal) {
+                    hintLine(MobileQuickNoteCopy.hintFits[0])
+                    hintLine(MobileQuickNoteCopy.hintFits[1])
+                    hintLine(MobileQuickNoteCopy.hintFits[2])
                 }
                 .allowsHitTesting(false)
             }
             TextField("", text: $model.text, axis: .vertical)
                 .textFieldStyle(.plain)
-                .font(tokens.small)
+                // VM-48: the typed text is the note body, on the box's own
+                // 24 pt line (sheet §E).
+                .phoneType(.noteBody, tokens, linePitch: MobileShelfLayout.quickEntryLineHeight)
                 .foregroundStyle(tokens.ink)
                 .focused($focused)
                 .lineLimit(1...lineCap)
@@ -1268,9 +1304,23 @@ struct MobileQuickNoteBox: View {
         .padding(.vertical, 10)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+                .stroke(tokens.phone.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
         .contentShape(Rectangle())
         .onTapGesture { focused = true }
+    }
+
+    /// One cut of the hint, in the box's type, with Terminal's resting
+    /// cursor beside it.
+    private func hintLine(_ phrase: String) -> some View {
+        HStack(spacing: 6) {
+            Text(tokens.chromeLabel(phrase))
+                .phoneType(.noteBody, tokens, linePitch: MobileShelfLayout.quickEntryLineHeight)
+                .foregroundStyle(tokens.phone.faint)
+                .lineLimit(1)
+            if tokens.showsBlockCursor && !focused {
+                BlinkingCursorBlock(color: tokens.accent)
+            }
+        }
     }
 
     /// What the box's own chrome leaves for the field. `nil` at rest —
@@ -1283,8 +1333,8 @@ struct MobileQuickNoteBox: View {
     private func statusRow(_ indicator: String) -> some View {
         HStack(spacing: 12) {
             Text(tokens.chromeLabel(indicator))
-                .font(tokens.small)
-                .foregroundStyle(model.visibleState == .saved ? tokens.accent : tokens.faint)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(model.visibleState == .saved ? tokens.accent : tokens.phone.muted)
                 .accessibilityLabel(
                     MobileQuickNoteCopy.spokenIndicator(model.visibleState) ?? "")
             Spacer()
@@ -1294,12 +1344,25 @@ struct MobileQuickNoteBox: View {
                 model.open()
             } label: {
                 Text(tokens.chromeLabel(MobileQuickNoteCopy.openDoor))
-                    .font(tokens.small)
+                    .phoneType(.controlInline, tokens)
                     .foregroundStyle(tokens.accent)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(MobileQuickNoteCopy.openDoorSpoken)
         }
         .padding(.horizontal, 2)
+    }
+}
+
+// MARK: - The box's line at the current text size (VM-48, W-024)
+
+extension MobileShelfLayout {
+    /// One line of the box's text at a text size: the sheet's 24 pt line,
+    /// scaled as the note body scales (exact at the default size).
+    @MainActor
+    static func quickEntryLineHeight(voice: ThemeVoice, typeSize: DynamicTypeSize) -> CGFloat {
+        let spec = PhoneType.spec(.noteBody, voice: voice)
+        let size = PhoneType.resolved(.noteBody, voice: voice, at: typeSize.phoneCategory).pointSize
+        return quickEntryLineHeight * size / spec.size
     }
 }

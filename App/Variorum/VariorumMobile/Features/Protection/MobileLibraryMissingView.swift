@@ -23,14 +23,14 @@ struct MobileLibraryMissingView: View {
             VStack(spacing: 18) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 30, weight: .light))
-                    .foregroundStyle(tokens.muted)
+                    .foregroundStyle(tokens.phone.muted)
                 Text(tokens.chromeLabel(ProtectionCopy.libraryMissingTitle))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .multilineTextAlignment(.center)
                 Text(ProtectionCopy.libraryMissingBody)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.rowPreview, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -39,39 +39,30 @@ struct MobileLibraryMissingView: View {
                         Task { await lobby.startNewLibrary() }
                     } label: {
                         Text(tokens.chromeLabel(ProtectionCopy.libraryMissingStartDoor))
-                            .font(tokens.body)
-                            .foregroundStyle(tokens.accent)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(tokens.surface)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(tokens.line, lineWidth: 1)))
                     }
-                    .buttonStyle(.plain)
+                    // VM-50: THE calm button (was its own build).
+                    .buttonStyle(PhoneCalmButtonStyle(tokens: tokens))
                     .disabled(lobby.busy || lobby.storeURL == nil)
                     .accessibilityLabel(ProtectionCopy.libraryMissingStartDoor)
                     Text(ProtectionCopy.libraryMissingStartSubline)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .multilineTextAlignment(.center)
                 }
 
                 if let error = lobby.lastError {
                     Text(error)
-                        .font(tokens.small)
+                        .phoneType(.meta, tokens)
                         .foregroundStyle(tokens.alarm)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if lobby.busy {
                     HStack(spacing: 6) {
-                        TravellingDotsIndicator(ink: tokens.muted)
+                        TravellingDotsIndicator(ink: tokens.phone.muted)
                         Text(tokens.chromeLabel("Starting…"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                 }
             }

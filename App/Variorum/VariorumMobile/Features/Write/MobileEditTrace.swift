@@ -84,6 +84,31 @@
 //  (`MobilePerfWalkTests.theEditTraceIsInertDisarmedAndQuietArmedAt100k`)
 //  rather than argued.
 //
+//  ## VM-24's three additions (the "after" session's count)
+//
+//  VM-24 routes an unarmed report from the characters that changed — the
+//  range the storage's FIRST callback reported, before attribute fixing
+//  widened it (`MobileChangedCharactersCapture`). So the readout can count
+//  what that did on her phone, each storage edit also records the changed
+//  characters, and three counters outlive the ring:
+//
+//  · **widened** — the report ran past the characters that changed (the
+//    widening this file's carve-out below reasons about, now MEASURED, not
+//    inferred from `length - delta` — measured against the storage's
+//    accumulated pre-fixing range, which also holds any attribute write made
+//    in the same transaction, so a transaction that bundles a wider
+//    attribute write reads as not widened and its changed length overstates
+//    the change: the instrument under-counts, the routing is unaffected);
+//  · **rescued** — unbound (no arming described it), widened, and the
+//    report ALONE would have refused where the changed characters route:
+//    each one is a snap-back that did not happen. That second verdict is
+//    computed only while the trace is armed, and only for an unbound,
+//    widened report;
+//  · **no capture** — a storage edit that arrived with no changed
+//    characters kept (the first callback did not fire, or its value did not
+//    belong to the report). Expected zero: anything else means some road
+//    reports without the first callback, and the capture needs another home.
+//
 //  ## The discipline this instrument owes
 //
 //  · **ZERO behaviour change.** Every entry point is a pure append. No
@@ -126,7 +151,7 @@ enum MobileEditTrace {
 
     /// Bounded by construction (MobileSoul §2). 300 events is ~40 gestures'
     /// worth of gate/report pairs — far more than one walk produces, and
-    /// ~19 KB of `Event`s.
+    /// ~22 KB of `Event`s (VM-24's two offsets included).
     static let ringCapacity = 300
 
     private static let log = Logger(
@@ -203,7 +228,8 @@ enum MobileEditTrace {
     // MARK: The event
 
     struct Flags: OptionSet, Sendable {
-        let rawValue: UInt8
+        /// Ten flags since VM-24 (a byte held seven).
+        let rawValue: UInt16
         /// Consult: this consult armed a verdict (returned `true` with an
         /// `ArmedEdit` parked).
         static let armed = Flags(rawValue: 1 << 0)
@@ -225,6 +251,17 @@ enum MobileEditTrace {
         /// Bookkeeping, never a finding; deliberately not rendered per
         /// event (it would mark nearly every keystroke), only counted.
         static let overrunNotTestable = Flags(rawValue: 1 << 6)
+        /// VM-24 — report: the reported range is longer than the characters
+        /// that changed (attribute fixing widened it). Measured, never a
+        /// finding on its own.
+        static let widened = Flags(rawValue: 1 << 7)
+        /// VM-24 — report: unbound, widened, and the reported range alone
+        /// would have refused where the changed characters route — one
+        /// snap-back that did not happen.
+        static let rescued = Flags(rawValue: 1 << 8)
+        /// VM-24 — report: no changed characters were kept for it, so it was
+        /// routed from the report alone, as before VM-24.
+        static let noCapture = Flags(rawValue: 1 << 9)
 
         /// Any of the three ways a report can fail to describe the consult
         /// that preceded it. A gate-less report is NOT a mismatch — it had
@@ -256,6 +293,11 @@ enum MobileEditTrace {
         /// report: gate consults since the previous report.
         var consultsBefore: Int
         var flags: Flags
+        /// VM-24 — report: the changed characters' location and length (the
+        /// storage's pre-fixing range), or **-1** for both when none was
+        /// kept · every other kind: -1.
+        var changedLocation: Int = -1
+        var changedLength: Int = -1
     }
 
     // MARK: Counters (monotonic — they outlive the ring's wrap)
@@ -277,6 +319,15 @@ enum MobileEditTrace {
         /// Reports failing ANY of the three predicates.
         var mismatches = 0
         var desyncRecoveries = 0
+        /// VM-24 — reports whose range ran past the characters that changed.
+        var widenedReports = 0
+        /// VM-24 — unbound widened reports the report alone would have
+        /// refused and the changed characters routed: snap-backs that did not
+        /// happen.
+        var rescuedReports = 0
+        /// VM-24 — reports that arrived with no changed characters kept.
+        /// Expected zero (the header says what anything else means).
+        var reportsWithoutCapture = 0
         /// The largest number of gate consults seen before a single report.
         /// `> 1` is M1's fingerprint on its own.
         var maxConsultsBeforeAReport = 0
@@ -315,17 +366,32 @@ enum MobileEditTrace {
         r.ring[last].flags.insert(.armed)
     }
 
-    /// `MobileEditorViewModel.storageDidEdit`, after the binding is
-    /// computed. `hadArming` = a verdict was parked; `bound` = it survived
-    /// `ArmedEdit.describes`.
+    /// `MobileEditorViewModel.storageDidEdit`, after the binding and the
+    /// verdict are computed. `hadArming` = a verdict was parked; `bound` = it
+    /// survived `ArmedEdit.describes`. **VM-24:** `changedCharacters` = the
+    /// storage's pre-fixing range of the same pass (nil when none was kept);
+    /// `rescued` answers whether the report ALONE would have refused where the
+    /// changed characters route — asked ONLY here, past the arming guard, and
+    /// only for an unbound, widened report (a non-escaping closure: nothing is
+    /// allocated or computed for it otherwise).
     static func report(
-        editedRange: NSRange, delta: Int, hadArming: Bool, bound: Bool
+        editedRange: NSRange, delta: Int, hadArming: Bool, bound: Bool,
+        changedCharacters: NSRange?, rescued: () -> Bool
     ) {
         let r = current
         guard r.armed else { return }
         let consults = r.consultsSinceReport
         var flags: Flags = []
         if hadArming, !bound { flags.insert(.armingRejected) }
+        // VM-24 — what routing from the changed characters did.
+        if let changed = changedCharacters {
+            if editedRange.length > changed.length {
+                flags.insert(.widened)
+                if !bound, rescued() { flags.insert(.rescued) }
+            }
+        } else {
+            flags.insert(.noCapture)
+        }
         if consults == 0 {
             flags.insert(.gateless)
         } else {
@@ -374,6 +440,9 @@ enum MobileEditTrace {
             r.summary.overrunTestable += 1
         }
         if !flags.isDisjoint(with: .mismatch) { r.summary.mismatches += 1 }
+        if flags.contains(.widened) { r.summary.widenedReports += 1 }
+        if flags.contains(.rescued) { r.summary.rescuedReports += 1 }
+        if flags.contains(.noCapture) { r.summary.reportsWithoutCapture += 1 }
         r.summary.maxConsultsBeforeAReport =
             max(r.summary.maxConsultsBeforeAReport, consults)
         r.consultsSinceReport = 0
@@ -382,9 +451,11 @@ enum MobileEditTrace {
             into: r,
             kind: .report, location: editedRange.location,
             length: editedRange.length, value: delta,
-            consultsBefore: consults, flags: flags)
+            consultsBefore: consults, flags: flags,
+            changedLocation: changedCharacters?.location ?? -1,
+            changedLength: changedCharacters?.length ?? -1)
         log.notice(
-            "EDIT loc=\(editedRange.location, privacy: .public) len=\(editedRange.length, privacy: .public) delta=\(delta, privacy: .public) consults=\(consults, privacy: .public) flags=\(flags.rawValue, privacy: .public)")
+            "EDIT loc=\(editedRange.location, privacy: .public) len=\(editedRange.length, privacy: .public) delta=\(delta, privacy: .public) consults=\(consults, privacy: .public) flags=\(flags.rawValue, privacy: .public) changedLoc=\(changedCharacters?.location ?? -1, privacy: .public) changedLen=\(changedCharacters?.length ?? -1, privacy: .public)")
     }
 
     /// A storage edit taken under `suppressEditProcessing` (programmatic).
@@ -416,12 +487,14 @@ enum MobileEditTrace {
     private static func append(
         into r: Recorder,
         kind: Event.Kind, location: Int, length: Int, value: Int,
-        consultsBefore: Int, flags: Flags
+        consultsBefore: Int, flags: Flags,
+        changedLocation: Int = -1, changedLength: Int = -1
     ) {
         r.sequence += 1
         let event = Event(
             seq: r.sequence, kind: kind, location: location, length: length,
-            value: value, consultsBefore: consultsBefore, flags: flags)
+            value: value, consultsBefore: consultsBefore, flags: flags,
+            changedLocation: changedLocation, changedLength: changedLength)
         if r.ring.count < ringCapacity {
             // Reserved once, so these appends never reallocate after the
             // first — and after `ringCapacity` there are no appends at all.
@@ -479,6 +552,10 @@ enum MobileEditTrace {
         out += "storage edits       \(s.reports)\n"
         out += "  gate-less         \(s.gatelessReports)   (autocorrect/dictation — expected)\n"
         out += "  arming rejected   \(s.armingsRejected)\n"
+        // VM-24 — DRAFT words, hers to word (the record §10 item 6).
+        out += "  widened           \(s.widenedReports)   (past the change)\n"
+        out += "  rescued           \(s.rescuedReports)   (snap-backs avoided)\n"
+        out += "  no capture        \(s.reportsWithoutCapture)   (expected 0)\n"
         out += "  most gate calls before one edit: \(s.maxConsultsBeforeAReport)\n"
         out += "\n"
         out += "SUSPECT SIGNATURE   \(s.mismatches)\n"
@@ -505,6 +582,12 @@ enum MobileEditTrace {
             if event.flags.contains(.netMismatch) { marks.append("net≠") }
             if event.flags.contains(.armingRejected) { marks.append("arming rejected") }
             if event.flags.contains(.gateless) { marks.append("gate-less") }
+            // VM-24 — DRAFT words, hers to word.
+            if event.flags.contains(.widened) {
+                marks.append("widened — changed at \(event.changedLocation) len \(event.changedLength)")
+            }
+            if event.flags.contains(.rescued) { marks.append("rescued") }
+            if event.flags.contains(.noCapture) { marks.append("no capture") }
             let tail = marks.isEmpty ? "" : "  ⚠ " + marks.joined(separator: " · ")
             let delta = event.value >= 0 ? "+\(event.value)" : "\(event.value)"
             return "#\(event.seq) EDIT  at \(event.location) len \(event.length)  Δ\(delta)  after \(event.consultsBefore) gate\(event.consultsBefore == 1 ? "" : "s")\(tail)"
@@ -539,27 +622,17 @@ struct MobileEditTraceView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tokens.path(["Settings", "edit-trace"]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                Spacer()
-                Button { dismiss() } label: {
-                    Text(tokens.chromeLabel("Done"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 12)
+            PhoneSheetHeader(
+                tokens.path(["Settings", "edit-trace"]), tokens: tokens,
+                titleInk: tokens.phone.muted
+            ) { dismiss() }
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.top, PhoneMetrics.Space.s8)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(headline)
-                        .font(.system(.footnote, design: .monospaced))
+                        .phoneType(.meta, tokens)
                         .foregroundStyle(tokens.ink)
                         .textSelection(.enabled)
 
@@ -568,15 +641,15 @@ struct MobileEditTraceView: View {
                     if snapshot.isEmpty {
                         Text(tokens.chromeLabel(
                             "Nothing recorded yet. Arm the trace, type in a note, then come back."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                     ForEach(snapshot.reversed(), id: \.seq) { event in
                         Text(MobileEditTrace.line(for: event))
-                            .font(.system(.caption2, design: .monospaced))
+                            .phoneType(.meta, tokens)
                             .foregroundStyle(
                                 event.flags.isDisjoint(with: MobileEditTrace.Flags.mismatch)
-                                    ? tokens.muted : tokens.accent)
+                                    ? tokens.phone.muted : tokens.accent)
                             .textSelection(.enabled)
                     }
                 }
@@ -592,19 +665,17 @@ struct MobileEditTraceView: View {
                     copied = true
                 } label: {
                     Text(tokens.chromeLabel(copied ? "Copied" : "Copy"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 .accessibilityLabel("Copy the edit trace")
                 Button {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel("Refresh"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 Spacer()
                 Button {
                     MobileEditTrace.clear()
@@ -612,10 +683,9 @@ struct MobileEditTraceView: View {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel("Clear"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .muted, role: .control, alignment: .leading))
                 .accessibilityLabel("Clear the edit trace")
             }
             .padding(.horizontal, 20)

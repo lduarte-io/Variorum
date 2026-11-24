@@ -51,7 +51,7 @@ struct MigrationTests {
         "sync_pull_stage",
     ]
 
-    static let expectedIndexes: Set<String> = [
+    static let expectedIndexes: Set<String> = Set<String>([
         "idx_block_last_container",
         "idx_variant_block", "idx_variant_parent",
         "idx_commit_variant",
@@ -111,6 +111,18 @@ struct MigrationTests {
         // insert, O(N²) (the deferred-FK child scan; the U1b record).
         // LOCAL only, no §12 event, marker 14.
         "idx_block_default_variant", "idx_cblock_chosen_variant",
+    ]).union(Self.ownerAdoptionIndexes)
+
+    /// VM-67 (A JUSTIFIED EDIT, the ritual — the VM-64 run, batch 4): v1_38's
+    /// eleven partial indexes on the rows still lacking an owner, one per
+    /// owner-carrying synced table — owner adoption seeks them instead of
+    /// scanning every owner table at each launch and unlock. LOCAL only, no
+    /// §12 event, marker 15.
+    static let ownerAdoptionIndexes: Set<String> = [
+        "idx_container_unowned", "idx_block_unowned", "idx_tag_unowned",
+        "idx_wing_unowned", "idx_shelf_unowned", "idx_reading_unowned",
+        "idx_reference_unowned", "idx_canvas_layout_unowned", "idx_lens_unowned",
+        "idx_block_comment_unowned", "idx_purge_intent_unowned",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -189,8 +201,9 @@ struct MigrationTests {
         // JUSTIFIED EDIT, the ritual): v1_28's two. VX-393 (A JUSTIFIED EDIT,
         // the ritual — VX-348 U5): v1_30's one. VX-647 (A JUSTIFIED EDIT, the
         // ritual — VX-648 batch 1): v1_34's one. VX-720 (A JUSTIFIED EDIT,
-        // the ritual — VX-500 U4): v1_36's two.
-        #expect(after.subtracting(before) == [
+        // the ritual — VX-500 U4): v1_36's two. VM-67 (A JUSTIFIED EDIT, the
+        // ritual — the VM-64 run, batch 4): v1_38's eleven.
+        #expect(after.subtracting(before) == Set([
             "idx_commit_created", "idx_shelf_wing",
             "uq_search_doc_src", "idx_container_undated_created",
             "uq_mcp_client_name", "idx_mcp_grant_client",
@@ -199,7 +212,8 @@ struct MigrationTests {
             "uq_mcp_grant_standing_place",
             "idx_cblock_dead_block",
             "idx_block_default_variant", "idx_cblock_chosen_variant",
-        ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 + v1_30 + v1_34 + v1_36 add exactly these indexes")
+        ]).union(Self.ownerAdoptionIndexes),
+        "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 + v1_30 + v1_34 + v1_36 + v1_38 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
     }
 
@@ -226,10 +240,12 @@ struct MigrationTests {
         // VX-720 (A JUSTIFIED EDIT, the ritual — VX-500 U4): the full chain
         // past v1_33 now also adds v1_36's two FK child indexes; v1_34's
         // claim is unchanged — it adds exactly `idx_cblock_dead_block`.
-        #expect(try indexes().subtracting(before) == [
+        // VM-67 (A JUSTIFIED EDIT, the ritual — the VM-64 run, batch 4): and
+        // v1_38's eleven unowned-row indexes.
+        #expect(try indexes().subtracting(before) == Set([
             "idx_cblock_dead_block",
             "idx_block_default_variant", "idx_cblock_chosen_variant",
-        ], "v1_34 + v1_36 add exactly these indexes")
+        ]).union(Self.ownerAdoptionIndexes), "v1_34 + v1_36 + v1_38 add exactly these indexes")
         let sql = try queue.read { db in
             try String.fetchOne(
                 db, sql: "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_cblock_dead_block'")
@@ -260,7 +276,10 @@ struct MigrationTests {
                 && !before.contains("idx_cblock_chosen_variant"),
                 "a v1_35 store pays the deferred-FK child scan")
         try AppDatabase.migrator.migrate(queue)
-        #expect(try indexes().subtracting(before)
+        // VM-67 (A JUSTIFIED EDIT, the ritual — the VM-64 run, batch 4): the
+        // full chain past v1_35 now also adds v1_38's eleven; v1_36's claim
+        // is unchanged — it adds exactly the two.
+        #expect(try indexes().subtracting(before).subtracting(Self.ownerAdoptionIndexes)
                 == ["idx_block_default_variant", "idx_cblock_chosen_variant"],
                 "v1_36 adds exactly the two indexes")
         let shapes = try queue.read { db in
@@ -280,6 +299,44 @@ struct MigrationTests {
             }
             #expect(!sql.contains("WHERE"), "plain, not partial — the measured shape: \(sql)")
         }
+    }
+
+    /// **VM-67 — v1_38's unowned-row indexes** (the VM-64 run, batch 4). A
+    /// store that ran every migration up to v1_37 has none; the next migration
+    /// adds exactly eleven, one per OWNER-CARRYING synced table (the set is
+    /// derived here from the registry and the live DDL, never listed by hand
+    /// — so a future owner-carrying table without its index turns this red),
+    /// each on `(owner_id)` PARTIAL on `owner_id IS NULL`. Red on the pre-fix
+    /// tree by construction: no such migration existed. The behavioural
+    /// red-on-old is `OwnerAdoptionTests` (no table scanned, no write
+    /// transaction when nothing is unowned).
+    @Test func theOwnerAdoptionIndexesArriveForAnOlderStoreOnePerOwnerTable() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_37_arrival_provenance_and_pin")
+        func unownedIndexes() throws -> [String: String] {
+            try queue.read { db in
+                Dictionary(uniqueKeysWithValues: try Row.fetchAll(db, sql: """
+                    SELECT tbl_name, sql FROM sqlite_master
+                    WHERE type = 'index' AND sql LIKE '%WHERE owner_id IS NULL%'
+                    """).map { ($0["tbl_name"] as String, $0["sql"] as String) })
+            }
+        }
+        #expect(try unownedIndexes().isEmpty, "a v1_37 store scans every owner table to adopt")
+        try AppDatabase.migrator.migrate(queue)
+        let ownerTables = try queue.read { db in
+            Set(try SyncSchema.tables.map(\.name).filter { table in
+                try Row.fetchAll(db, sql: "PRAGMA table_info(\(table))")
+                    .contains { ($0["name"] as String) == "owner_id" }
+            })
+        }
+        #expect(ownerTables.count == 11, "the owner-carrying synced tables as v1_38 lands: \(ownerTables.sorted())")
+        let indexes = try unownedIndexes()
+        #expect(Set(indexes.keys) == ownerTables, "one unowned-row index per owner-carrying table, and no other")
+        for (table, sql) in indexes {
+            #expect(sql.contains("idx_\(table)_unowned ON \(table)(owner_id)"), "the shape: \(sql)")
+            #expect(sql.hasSuffix("WHERE owner_id IS NULL"), "partial on the unowned rows: \(sql)")
+        }
+        #expect(Set(indexes.keys.map { "idx_\($0)_unowned" }) == Self.ownerAdoptionIndexes)
     }
 
     /// **13o — v1_22's BACKFILL** (the rebuild engine run once inside the

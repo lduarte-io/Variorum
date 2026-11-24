@@ -5,7 +5,9 @@
 //  macOS `DisclosureGroup`'s label is not a control — only its chevron presses — so a bare `Text` label reads as a door
 //  and does nothing (W-13: AXPress opened it at once, three synthetic clicks across the label's own geometry did not).
 //  The fix puts the label INSIDE a press target whose action toggles the words road; the phone's arm already does (a
-//  whole-label `.plain` Button) and has no bug — its GUARD keeps it so.
+//  Button over the whole label — `.plain` when this fix was made, the phone's inline act since VM-47's one set of
+//  controls: a `ButtonStyle` whose body is the configuration's whole label, answering across at least 44 × 44) and has
+//  no bug — its GUARD keeps it so.
 //
 //  A SOURCE pin, SELF-CONTAINED by design (file reads only, no app import — it runs in a minimal SwiftPM package as well
 //  as the Mac target; `#filePath`'s symlinks are resolved). It reads CODE lines (line comments dropped — vx-488 RM3-4: a
@@ -86,13 +88,17 @@ struct LobbyWordsDoorPressTargetTests {
         #expect(arm.contains("$showsWords") || arm.contains("if showsWords"), "the field unfolds on the words road's state")
     }
 
-    /// GUARD (green on both sides): the phone's disclosure arm keeps its whole-label `.plain` Button toggling the words
-    /// road — the idiom the Mac's fix follows; the phone has no bug and its code is not this fix's.
+    /// GUARD (green on both sides): the phone's disclosure arm keeps its whole-label Button toggling the words road —
+    /// the idiom the Mac's fix follows; the phone has no bug and its code is not this fix's. The Button's style is
+    /// `.plain` or the phone's inline act (`PhoneInlineActStyle`, VM-47's controls — a `ButtonStyle` over the
+    /// configuration's whole label with the one hit-area helper, so the whole label presses, across at least 44 × 44):
+    /// either way a Button, never a `DisclosureGroup` label.
     @Test func thePhonesWordsDoorKeepsItsWholeLabelButton() throws {
         let arm = try Self.disclosureArm(try Self.code("VariorumMobile/Features/Protection/MobileRoadFaces.swift"))
         let why = Self.whyNotAPressTarget(label: "Text(tokens.chromeLabel(ProtectionWords.wordsDoor))", in: arm)
         #expect(why == nil, "the phone's words door: \(why ?? "")")
-        #expect(arm.contains(".buttonStyle(.plain)"), "the phone's door is a plain Button")
+        #expect(arm.contains(".buttonStyle(.plain)") || arm.contains(".buttonStyle(PhoneInlineActStyle("),
+                "the phone's door is a whole-label Button: plain, or the phone's inline act")
         #expect(arm.contains("if showsWords { wordsField }"), "the phone's field unfolds beneath")
     }
 }

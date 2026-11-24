@@ -287,7 +287,8 @@ One ladder per stage/phase over the combined diff: fresh cold reviewer
 running `notes/REVIEW_PROMPT.md` VERBATIM with zero framing; findings
 recorded repo-first before any fix session sees them; fixes in a fresh
 session with trace + revert-verified pins; round 2 re-reviews (fresh
-reviewer); new BLOCKER/MAJOR ⇒ round 3; hard cap three rounds;
+reviewer); each round's new BLOCKER/MAJOR ⇒ the next round; hard cap
+five rounds (author, 2026-11-19);
 disputes adjudicated by you against the canonical docs — the spec
 outranks both agents; every finding gets a written disposition.
 Cross-model (a Fable reviewer, an Opus implementer): the reviewer makes

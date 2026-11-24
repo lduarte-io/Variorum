@@ -107,8 +107,8 @@ struct MobileWriteScreen: View {
     /// leavings). Everything else here reaches the store through the models
     /// built from it at init.
     private let session: AppSession
-    /// The shell's voice authority; nil in harness/preview use, where the
-    /// stored preference read at init governs.
+    /// The shell's theme authority (VM-51); nil in harness/preview use, where
+    /// the editor face's own look governs.
     private let router: MobileShellRouter?
     private let beginEditing: Bool
     /// The OWNING tab stack (S3 ladder BLOCKER): liveness registration
@@ -130,7 +130,6 @@ struct MobileWriteScreen: View {
     /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note… +
     /// batch 6c's two time controls).
     @State private var noteActionsPresented = false
-    private let fallbackVoice: ThemeVoice
     @Environment(\.colorScheme) private var scheme
 
     /// `editor` is a TEST SEAM and nothing else: production passes nothing
@@ -149,6 +148,9 @@ struct MobileWriteScreen: View {
         onOpenVersions: (() -> Void)? = nil,
         editor injected: MobileEditorViewModel? = nil
     ) {
+        // VM-65: the timing layer's "a note screen requested" (a rebuild of the
+        // same screen restarts the span — `AppTiming.noteRequested`).
+        AppTiming.noteRequested()
         let editor = injected ?? MobileEditorViewModel(session: session, postID: postID)
         _model = State(initialValue: editor)
         _membership = State(initialValue: MobileMembershipModel(session: session, postID: postID))
@@ -165,25 +167,32 @@ struct MobileWriteScreen: View {
         self.onOpenNote = onOpenNote
         self.onDeleted = onDeleted
         self.onOpenVersions = onOpenVersions
-        // The live phone voice governs from the first materialization —
-        // set BEFORE the surface exists (makeUIView runs later). With a
-        // router the value is already authoritative (idempotent).
-        let stored = router?.voice ?? MobileVoicePreference.current()
-        MobileEditorStyle.voice = stored
-        fallbackVoice = stored
+        // (VM-51: this initializer no longer writes the editor's voice — the
+        // library's look reaches `MobileEditorStyle` where it LANDS, through
+        // the router's theme seam, its one app writer; QUESTIONS #195 MINOR 3.)
     }
 
-    /// The SwiftUI chrome's tokens — dark rides the system scheme (R51's
-    /// black rooms come from the token layer's own dark values). Reading
-    /// `router.voice` keeps the masthead live under a Settings flip.
+    /// The SwiftUI chrome's tokens — the LIBRARY's voice and palette (VM-51,
+    /// LK-1) through the router's one settings → tokens road; dark rides the
+    /// system scheme (LK-2; R51's black rooms are the token layer's own).
+    /// Harness use (no router) wears the editor face's own look, so the
+    /// masthead and the page below it always agree.
     private var tokens: VoiceTokens {
-        .resolve(voice: router?.voice ?? fallbackVoice, dark: scheme == .dark)
+        router?.tokens(dark: scheme == .dark)
+            ?? .resolve(settings: MobileEditorStyle.settings, dark: scheme == .dark)
     }
 
     var body: some View {
         MobileWriteView(model: model)
             .ignoresSafeArea(.keyboard) // the container's keyboardLayoutGuide owns avoidance
-            .background(tokens.room.ignoresSafeArea())
+            // VM-51 (R-47-1; the VM-47 run's piece 3.10, P-47-16): the page's
+            // ground is the editor's own — the paper (`MobileEditorStyle.Face
+            // .paper`, the Mac's editor and note masthead on `tokens.surface`).
+            .background(tokens.surface.ignoresSafeArea())
+            // VM-47 (the walk's W-A1, redone): the strips beyond the shell's
+            // band — the paper at both edges, so with the keyboard up the
+            // keyboard and its bar sit over her paper, never the bare window.
+            .mobileEdgeGrounds(top: tokens.surface, bottom: tokens.surface)
             .safeAreaInset(edge: .top) { masthead }
             .task {
                 // Wiring COMPLETES before the infinite observation loops
@@ -195,6 +204,11 @@ struct MobileWriteScreen: View {
                 // focus raise — a sealed note's gate still refuses and
                 // speaks; raising focus never bypasses the police), then
                 // the loops, last, forever.
+                AppTiming.noteArrived() // VM-65: this open's reads are counted from here
+                // VM-70: the arrival counts itself and, for a screen shown again
+                // whose leaving gave its coordinator back, takes it again —
+                // before the liveness grant flushes it.
+                await model.takeAutosaveHold()
                 if let router {
                     await router.editors.register(model, tab: tab)
                 }
@@ -206,6 +220,9 @@ struct MobileWriteScreen: View {
             .onDisappear {
                 let model = model
                 let session = session
+                // VM-61: a line still offering this note's structural Undo is
+                // taken back — that door goes with the note.
+                MobileLine.withdrawNoteLine(of: model.undoDoor, session: session)
                 router?.editors.deregister(model)
                 // **PR7 — the OTHER leaving road** (round 2 batch 4). The
                 // note is popped or replaced: land what is pending, then
@@ -219,9 +236,17 @@ struct MobileWriteScreen: View {
                 // `savepointOnLeaving` never throws (a leaving is not a
                 // moment to refuse at) and its own flush is a no-op on the
                 // coordinator teardown just drained.
+                let leaving = AppTiming.noteLeaving() // VM-65: timed, its savepoint tries counted
+                // VM-70: which arrival this leaving belongs to — a screen shown
+                // again before the work below ends keeps its coordinator.
+                let shown = model.arrivalCount
                 Task {
                     await model.teardown()
                     await session.savepointOnLeaving(model.postID)
+                    // VM-70: the leaving's LAST act — the flush and the
+                    // savepoint have landed; the coordinator goes back.
+                    model.releaseAutosaveHold(ifNotShownSince: shown)
+                    AppTiming.noteLeft(leaving)
                 }
             }
     }
@@ -242,9 +267,10 @@ struct MobileWriteScreen: View {
                     renamePresented = true
                 } label: {
                     Text(model.displayTitle ?? "")
-                        .font(tokens.title)
+                        .phoneType(.noteTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
+                        .phoneHitArea(alignment: .leading)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Rename Note")
@@ -252,7 +278,8 @@ struct MobileWriteScreen: View {
                 // The note-tool corner (M3 ≡ R6 joins it): copy · find ·
                 // seal, spaced so three small glyphs stay three separate
                 // taps.
-                HStack(spacing: 14) {
+                // VM-50: icon buttons — 44 × 44 hit areas that touch.
+                HStack(spacing: 0) {
                     copyDoor
                     findDoor
                     sealDoor
@@ -267,15 +294,21 @@ struct MobileWriteScreen: View {
             // no door hides; calm at rest, five bare words fit one
             // line. PROVISIONAL for her sitting).
             membershipChip
-            MobileChipFlow(hSpacing: 12, vSpacing: 4) {
+            // VM-49: each chip answers 44 tall, its hit area reaching 6
+            // into the 12 pt gap on each side (so neighbours' areas touch
+            // and the words keep their places — the flow is shifted back by
+            // the same 6). The capsule look and one sideways row are
+            // VM-148's masthead.
+            MobileChipFlow(hSpacing: 0, vSpacing: 0) {
                 dateChip
                 tagsChip
                 moreInfoChip
                 blocksChip
                 lensChip
             }
+            .padding(.horizontal, -Self.chipHitReach)
             if let canary = model.canaryMessage {
-                Text(canary).font(tokens.small).foregroundStyle(.red)  // CANARY: deliberately not the voice's alarm
+                Text(canary).phoneType(.meta, tokens).foregroundStyle(.red)  // CANARY: deliberately not the voice's alarm
             }
             if model.isSealed {
                 // The state line pairs with its door (the 13b fire-and-DO
@@ -285,42 +318,24 @@ struct MobileWriteScreen: View {
                 // render voice-cased (P26/P43 — PA1-1 resolved).
                 HStack(spacing: 10) {
                     Text(tokens.chromeLabel(Self.sealedStateLine))
-                        .font(tokens.small).foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens).foregroundStyle(tokens.phone.muted)
                     Button {
                         let model = model
                         Task { await model.unlockNote() }
                     } label: {
                         Text(tokens.chromeLabel(Self.unlockDoorTitle))
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens))
                     .accessibilityLabel("Unlock Note")
                 }
             }
-            // **THE RECEIPT, and since round 2 batch 4 its ACTION** (M20 ≡
-            // her R10): *"the phone ALREADY shows a receipt after a
-            // structural act … and an Undo action on that receipt is the
-            // standard iOS shape."*
-            //
-            // The row renders for EITHER half. Several structural acts —
-            // divide, merge, Make Block, the cross-block edit — deliberately
-            // say nothing (the text rearranging on screen is the report),
-            // and they now carry a BARE Undo: the way back with no new
-            // chatter, which is both the calmer surface and the reason every
-            // shipped "this act says nothing" pin stays true.
-            //
-            // The button's WORDS come from the live stack, so it can never
-            // name an entry that has since moved, and it renders only while
-            // the stack really holds that end (P-2).
-            if model.statusMessage != nil || model.statusAction != nil {
-                HStack(spacing: 10) {
-                    if let status = model.statusMessage {
-                        Text(status).font(tokens.small).foregroundStyle(tokens.muted)
-                    }
-                    receiptAction
-                }
-            }
+            // **THE RECEIPT LEFT THE MASTHEAD** (VM-61 — her VM-44 ruling and
+            // the note-write mockup's D4/D4b: "It never enters the masthead and
+            // never moves the prose"). What this row drew — a refusal, a
+            // receipt, a removal's Undo — speaks on the shell's ONE line
+            // (`MobileMessageLine`); the structural Undo rides that line over
+            // the same door (`MobileUndoDoor.beginUndo(from: .receipt)`), and
+            // A12's warning still presents from this masthead's alert host.
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         // The A3 spacing floor: the canon's masthead frame (`.notetitle
@@ -330,7 +345,7 @@ struct MobileWriteScreen: View {
         .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 8)
-        .background(tokens.room)
+        .background(tokens.surface)  // VM-51: her title shares the page's ground (P-47-17)
         .alert("Rename Note", isPresented: $renamePresented) {
             TextField("Title", text: $renameField)
             Button("Rename") {
@@ -454,17 +469,28 @@ struct MobileWriteScreen: View {
     /// identity line — the date is note identity exactly as membership
     /// is, and the alert-confirmed chip is the rename door's own grammar.
     private var dateChip: some View {
-        Button {
-            dateField = model.header?.entryDate ?? ""
+        let day = Self.dateChipDay(model)
+        return Button {
+            dateField = Self.dateChipDay(model) ?? ""
             datePresented = true
         } label: {
-            Text(model.header?.entryDate ?? tokens.chromeLabel("no date"))
-                .font(tokens.small)
-                .foregroundStyle(model.header?.entryDate != nil ? tokens.muted : tokens.faint)
+            Text(day ?? tokens.chromeLabel("no date"))
+                .phoneType(.chip, tokens)
+                .foregroundStyle(day != nil ? tokens.ink : tokens.phone.muted)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Entry Date")
+    }
+
+    /// **The date chip's one fact** (VM-84): the day it shows, read in ONE
+    /// place — the chip's words, its ink and the alert's seed — so what the
+    /// chip OBSERVES is exactly what a pin can hold. It reads the model's
+    /// OBSERVED `entryDate`, never `header` (deliberately unobserved), so a
+    /// date change re-renders the chip whether or not the title moved.
+    static func dateChipDay(_ model: MobileEditorViewModel) -> String? {
+        model.entryDate
     }
 
     /// The tags chip (parity C3 — "tag posts", the LK5 expansion's "full
@@ -477,13 +503,16 @@ struct MobileWriteScreen: View {
             tagsPresented = true
         } label: {
             Text(tokens.chromeLabel(noteTags.chipLine ?? "tags"))
-                .font(tokens.small)
-                .foregroundStyle(noteTags.chipLine != nil ? tokens.muted : tokens.faint)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(noteTags.chipLine != nil ? tokens.ink : tokens.phone.muted)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Tags")
-        .task(id: model.postID) { await noteTags.refresh() }
+        // VM-69: the chip's own read — this note's tags, never the vocabulary
+        // (the sheet reads that on appear).
+        .task(id: model.postID) { await noteTags.refreshChip() }
     }
 
     /// The "more info" chip (parity C3 — her own name for the surface):
@@ -495,9 +524,10 @@ struct MobileWriteScreen: View {
         } label: {
             Text(tokens.chromeLabel(
                 MobileReferencesModel.chipLabel(count: references.references.count)))
-                .font(tokens.small)
-                .foregroundStyle(references.references.isEmpty ? tokens.faint : tokens.muted)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(references.references.isEmpty ? tokens.phone.muted : tokens.ink)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("More Info")
@@ -512,13 +542,16 @@ struct MobileWriteScreen: View {
             membershipPresented = true
         } label: {
             Text(tokens.chromeLabel(chipLabel))
-                .font(tokens.small)
-                .foregroundStyle(membership.books.count > 1 ? tokens.accent : tokens.muted)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(membership.books.count > 1 ? tokens.accent : tokens.phone.muted)
                 .lineLimit(1)
+                .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Books holding this note")
-        .task(id: model.postID) { await membership.refresh() }
+        // VM-69: the chip's own read — the books holding this note, never
+        // every book (the sheet reads those on appear).
+        .task(id: model.postID) { await membership.refreshChip() }
     }
 
     private var chipLabel: String {
@@ -540,9 +573,10 @@ struct MobileWriteScreen: View {
             blocksPresented = true
         } label: {
             Text(tokens.chromeLabel(MobileBlockListModel.chipWord))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.chip, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Blocks")
@@ -566,12 +600,13 @@ struct MobileWriteScreen: View {
             // region names WHICH block and offers the way back.
             Text(tokens.chromeLabel(
                 lenses.chipLabel + (lenses.activeLensHasFallback ? " \u{26A0}" : "")))
-                .font(tokens.small)
+                .phoneType(.chip, tokens)
                 .foregroundStyle(
                     lenses.activeLensHasFallback
                         ? tokens.alarm
-                        : (lenses.activeLensID != nil ? tokens.accent : tokens.faint))
+                        : (lenses.activeLensID != nil ? tokens.accent : tokens.phone.muted))
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(lenses.activeLensHasFallback ? Self.lensFallbackChipLabel : "Lenses")
@@ -580,6 +615,10 @@ struct MobileWriteScreen: View {
     /// The chip's spoken label while the active lens has a fallback — a
     /// glyph is not a sentence, and VoiceOver reads words.
     static let lensFallbackChipLabel = "Lenses — a pick fell back"
+
+    /// How far a masthead chip's hit area reaches into the flow's old 12 pt
+    /// gap on each side (VM-49): half of it, so neighbours' areas touch.
+    static let chipHitReach: CGFloat = 6
 
     /// Copy the whole note (round 2 batch 2 — M3 ≡ R6; her ask: *"a button
     /// added at the top that allows me to copy everything i've written in a
@@ -595,50 +634,9 @@ struct MobileWriteScreen: View {
             Task { await model.copyNote() }
         } label: {
             Image(systemName: "doc.on.doc")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel("Copy Note")
-    }
-
-    /// **The receipt's action** (M20). It offers the direction the last
-    /// act left available: Undo after a structural act, Redo right after an
-    /// undo (the ping-pong her R10 asked for). Rendered only when the stack
-    /// really holds that end — a receipt can outlive its entry, and a
-    /// button that would pop somebody else's act is worse than no button.
-    @ViewBuilder
-    private var receiptAction: some View {
-        switch model.statusAction {
-        case .undo:
-            if let label = model.undoDoor.undoLabel {
-                Button {
-                    let door = model.undoDoor
-                    Task { await door.beginUndo(from: .receipt) }
-                } label: {
-                    Text(tokens.chromeLabel("Undo"))
-                }
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-                .buttonStyle(.plain)
-                .accessibilityLabel(StructuralUndoCopy.undoDoorTitle(label))
-            }
-        case .redo:
-            if let label = model.undoDoor.redoLabel {
-                Button {
-                    let door = model.undoDoor
-                    Task { await door.redo() }
-                } label: {
-                    Text(tokens.chromeLabel("Redo"))
-                }
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-                .buttonStyle(.plain)
-                .accessibilityLabel(StructuralUndoCopy.redoDoorTitle(label))
-            }
-        case nil:
-            EmptyView()
-        }
     }
 
     /// The note's ⋯ (round 2 batch 4): the note-scale acts sheet — M20's
@@ -650,10 +648,8 @@ struct MobileWriteScreen: View {
             noteActionsPresented = true
         } label: {
             Image(systemName: "ellipsis")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel(MobileNoteActionsSheet.doorLabel)
     }
 
@@ -669,10 +665,8 @@ struct MobileWriteScreen: View {
             model.presentFind()
         } label: {
             Image(systemName: "magnifyingglass")
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel("Find in Note")
     }
 
@@ -696,10 +690,19 @@ struct MobileWriteScreen: View {
             }
         } label: {
             Image(systemName: model.isSealed ? "lock.fill" : "lock.open")
-                .font(tokens.small)
-                .foregroundStyle(model.isSealed ? tokens.accent : tokens.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: model.isSealed ? .accent : .ink))
         .accessibilityLabel(model.isSealed ? Self.unlockDoorTitle : Self.lockDoorTitle)
+    }
+}
+
+private extension View {
+    /// A masthead chip's hit area (VM-49): 44 tall, reaching
+    /// `chipHitReach` past the word on each side, the word drawn where it
+    /// was.
+    func mastheadChipHitArea() -> some View {
+        padding(.horizontal, MobileWriteScreen.chipHitReach)
+            .frame(minHeight: PhoneMetrics.touchMinimum)
+            .contentShape(Rectangle())
     }
 }

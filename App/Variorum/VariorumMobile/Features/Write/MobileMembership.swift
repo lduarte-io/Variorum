@@ -20,9 +20,10 @@
 //    remove, and a door that can never act isn't rendered (P-2).
 //  · DIVERGE FOR THIS BOOK (W23) through the SHARED flush-first entry
 //    (`AppSession.divergeForBook` — the R1-4 class: the copy carries
-//    what she just typed). A smart row's diverge refuses honestly and
-//    names the tag road (her ruled shape — silence where the row looks
-//    actionable is the confusion).
+//    what she just typed). VM-81 (W-110, the catch-up plan): a gathering's
+//    row no longer draws it — the op refuses a gathering, and P-2 says a
+//    door that can never act is not drawn. (The Mac's chip still draws it
+//    and refuses, the older 13f W23 shape; the model keeps that refusal.)
 //
 //  Phone wording deltas from the Mac, deliberate and recorded: no
 //  "⌥⌘Z undoes it" tail (the phone has no structural undo — the
@@ -49,6 +50,16 @@ final class MobileMembershipModel {
     private(set) var addableBooks: [Reading] = []
     private(set) var addableSmartBooks: [Reading] = []
     private(set) var status: String?
+
+    /// VM-61: the slot speaks on the phone's one line with the class its door
+    /// gives it — joining, leaving a book and diverging are ordinary acts (no
+    /// line — her ruling; leaving a book takes a pointer away, never the
+    /// note: PROVISIONAL P-55-4); a refusal always speaks, and so does a
+    /// gathering's collect-by-tagging, a direction (PROVISIONAL P-55-11).
+    private func say(_ text: String, as line: MobileLine.Class) {
+        status = text
+        MobileLine.say(text, as: line, session: session)
+    }
     /// The last diverge's landing (R67: the copy is one tap away).
     private(set) var divergedCopyID: String?
     private(set) var divergedBookName: String?
@@ -85,14 +96,58 @@ final class MobileMembershipModel {
         reading.kind == .book
     }
 
+    /// **Whether a row carries Diverge** (VM-81, W-110): a BOOK row only. A
+    /// gathering has no membership row to swap — `divergePostForReading`
+    /// refuses it (`wrongReadingKind`) — and P-2 says a door that can never
+    /// act is not drawn. (`divergeRefusal`'s gathering arm stays as the
+    /// model's honest answer should anything else reach it.)
+    nonisolated static func rowCarriesDiverge(_ reading: Reading) -> Bool {
+        reading.kind == .book
+    }
+
+    /// The small kind word a membership row wears after its name (VM-83,
+    /// W-073 — "gathering", never "smart"; the shelf row's word), or nil for
+    /// a book.
+    nonisolated static func kindMark(for reading: Reading) -> String? {
+        reading.kind == .gathering ? MobileShelfFaces.gatheringWord : nil
+    }
+
+    /// A membership row's name (VM-21, F5): the name with the finished state,
+    /// and an ARCHIVED book marked in the shared words — "Name (archived)",
+    /// `BookArchiveCopy` (SurfaceContracts: "The pickers, chips and Book Panel
+    /// mark '(archived)'"; the Mac chip's own membership rows).
+    nonisolated static func memberRowName(for reading: Reading) -> String {
+        BookArchiveCopy.name(
+            MobileShelfFaces.name(for: reading), archived: reading.archivedAt != nil)
+    }
+
+    /// An "Add to a book" row's label, before the face's "+ " (VM-21, F5): the
+    /// list is `Queries.readings` (the note's own wing's — VM-59), archived
+    /// books included (explicit adds stay
+    /// open — 13i-e), and an archived one was listed bare. A book by its name,
+    /// marked "(archived)" when it is; a gathering by its name and the R98
+    /// road ("by tagging", the Mac's word), marked too when archived —
+    /// PROVISIONAL (the Mac chip's picker marks only books; the run record
+    /// lists the options).
+    nonisolated static func addRowLabel(for reading: Reading) -> String {
+        let name = BookArchiveCopy.name(reading)
+        return reading.kind == .gathering ? "\(name) (\(AddToBookCopy.byTagging))" : name
+    }
+
     // MARK: - Reads
 
+    ///
+    /// VM-59: what the sheet OFFERS is the note's own wing's books and
+    /// gatherings — a book never spans wings, so another wing's book could
+    /// only refuse (`crossWingMembership`); the note's own wing, never the
+    /// app's current one.
     func refresh() async {
         do {
             let postID = postID
             let (membership, all) = try await session.database.read { db in
-                (try Queries.readingsContaining(db, postID: postID),
-                 try Queries.readings(db))
+                let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                return (try Queries.readingsContaining(db, postID: postID),
+                        try Queries.readings(db, wingID: wing))
             }
             books = Self.ordered(membership)
             let memberIDs = Set(membership.map(\.id))
@@ -103,7 +158,30 @@ final class MobileMembershipModel {
                 $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id)
             }
         } catch {
-            status = String(describing: error)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
+        }
+    }
+
+    /// **The masthead chip's read** (VM-69 — the open's chips read only what
+    /// they show). The chip shows the books holding this note and nothing
+    /// else, so it reads exactly that — `Queries.readingsContaining`, the Mac
+    /// chip's own feed, ordered by the same `ordered` as `refresh()`, so the
+    /// chip's rows are `refresh()`'s rows. The every-book listing behind the
+    /// sheet's "Add to a book" is the SHEET's to read, and it does on appear
+    /// (`MobileMembershipSheet`'s `.task`). A failure falls back to the full
+    /// read, which speaks as it always has (a cancellation — the screen gone —
+    /// says nothing).
+    func refreshChip() async {
+        do {
+            let postID = postID
+            let membership = try await session.database.read { db in
+                try Queries.readingsContaining(db, postID: postID)
+            }
+            books = Self.ordered(membership)
+        } catch is CancellationError {
+            // The screen left before the chip answered: nothing to show.
+        } catch {
+            await refresh()
         }
     }
 
@@ -114,30 +192,43 @@ final class MobileMembershipModel {
             _ = try await session.runner.run { [postID] ops in
                 try ops.addPostToReading(postID, to: book.id)
             }
-            status = "Added to “\(book.name)”."
+            say("Added to “\(book.name)”.", as: .ordinary)
         } catch {
-            status = Self.refusal(error, bookName: book.name)
+            say(Self.refusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
 
-    /// R98 — a smart book accepts by TAGGING (apply-and-report).
+    /// R98 — a gathering accepts by TAGGING (apply-and-report).
+    ///
+    /// VM-21 (F4): the receipt is the Mac chip's own composer
+    /// (`AddToBookCopy.collected`, hoisted to `Shared/`), so it is TRUE —
+    /// a collect that set the star names it ("Starred — the gathering shows
+    /// it now." / "Tagged #x and starred — …"), and an ARCHIVED gathering,
+    /// which shows nothing anywhere, says when it will ("…the gathering shows
+    /// it once it's unarchived."). The op's in-transaction facts decide
+    /// (`SmartCollectResult.starred` / `.gatheringArchived`). Kept and made
+    /// true by her ruling (2026-11-19); whether the phone keeps this line at
+    /// all is on her wording-pass list.
     func collect(into book: Reading) async {
         do {
             let result = try await session.runner.run { [postID] ops in
                 try ops.collectPostIntoSmartReading(postID, into: book.id)
             }
-            status = result.alreadyMatched
-                ? "Already collected — it matches “\(book.name)”'s filter."
-                : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
+            // VM-61 / P-55-11: both of the collect's outcomes speak as a
+            // REFUSAL-class line — already matching did nothing (a door that
+            // did nothing says so); a tagging that seats it applied tags (or
+            // the star) she did not ask for by name — a direction, in P-55-7's
+            // class. VM-21: the words are the shared composer's, whichever arm.
+            say(AddToBookCopy.collected(result, gatheringName: book.name), as: .refusal)
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
-                status = "“\(book.name)” can't take this note: \(reason)"
+                say("“\(book.name)” can't take this note: \(reason)", as: .refusal)
             } else {
-                status = Self.refusal(error, bookName: book.name)
+                say(Self.refusal(error, bookName: book.name), as: .refusal)
             }
         } catch {
-            status = String(describing: error)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
         await refresh()
     }
@@ -147,9 +238,9 @@ final class MobileMembershipModel {
             try await session.runner.run { [postID] ops in
                 try ops.removePostFromReading(postID, from: book.id)
             }
-            status = "Removed from “\(book.name)” — the note itself is untouched."
+            say("Removed from “\(book.name)” — the note itself is untouched.", as: .ordinary)
         } catch {
-            status = Self.refusal(error, bookName: book.name)
+            say(Self.refusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -162,9 +253,9 @@ final class MobileMembershipModel {
             let result = try await session.divergeForBook(postID, in: book.id)
             divergedCopyID = result.copy.post.id
             divergedBookName = book.name
-            status = "Diverged — “\(book.name)” holds the copy now, in the same place; the original is untouched elsewhere."
+            say("Diverged — “\(book.name)” holds the copy now, in the same place; the original is untouched elsewhere.", as: .ordinary)
         } catch {
-            status = Self.divergeRefusal(error, bookName: book.name)
+            say(Self.divergeRefusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -174,10 +265,12 @@ final class MobileMembershipModel {
     /// The four book arms stay HERE because they carry the book's NAME, a
     /// context the shared table has no slot for (18m U3's collapse rule);
     /// everything else the table has words for, it says (18m U3 — this arm
-    /// used to dump "Refused: …"), and where it has none this door keeps its
-    /// own fallback.
+    /// used to dump "Refused: …"), and where it has none the one plain
+    /// fallback speaks (VM-62 — never the case name).
     nonisolated static func refusal(_ error: Error, bookName: String?) -> String {
-        guard let error = error as? OperationError else { return String(describing: error) }
+        guard let error = error as? OperationError else {
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
+        }
         let book = bookName.map { "“\($0)”" } ?? "that book"
         switch error {
         case .lockedReading:
@@ -189,7 +282,7 @@ final class MobileMembershipModel {
         case .postNotInReading:
             return "This note isn't in \(book)."
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? "Refused: \(error)"
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -215,16 +308,7 @@ struct MobileMembershipSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Books"))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Books"), tokens: tokens) { dismiss() }
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     membershipSection
@@ -234,26 +318,19 @@ struct MobileMembershipSheet: View {
                         // (the L17 conditioning).
                         Text(tokens.chromeLabel(
                             "Editing here edits the note everywhere it appears."))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    if let status = model.status {
-                        Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                     if let copy = model.divergedCopyID, let onOpenNote {
                         Button {
                             dismiss()
                             onOpenNote(copy)
                         } label: {
                             Text(tokens.chromeLabel(openCopyLabel))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.accent)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                     }
                 }
             }
@@ -273,35 +350,33 @@ struct MobileMembershipSheet: View {
         if model.books.isEmpty {
             Text(tokens.chromeLabel(
                 "This note is in no book yet — it lives in the Library's bookless filter."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             ForEach(model.books, id: \.id) { book in
                 HStack(spacing: 10) {
-                    Text(tokens.chromeLabel(MobileShelfFaces.name(for: book)))
-                        .font(tokens.body)
+                    Text(tokens.chromeLabel(MobileMembershipModel.memberRowName(for: book)))
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
-                    if book.kind == .gathering {
-                        Text(tokens.chromeLabel("smart"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                    if let mark = MobileMembershipModel.kindMark(for: book) {
+                        Text(tokens.chromeLabel(mark))
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                     }
                     Spacer()
-                    Button(tokens.chromeLabel("diverge")) {
-                        Task { await model.diverge(for: book) }
+                    if MobileMembershipModel.rowCarriesDiverge(book) {
+                        Button(tokens.chromeLabel("diverge")) {
+                            Task { await model.diverge(for: book) }
+                        }
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .buttonStyle(.plain)
                     if MobileMembershipModel.rowCarriesRemove(book) {
                         Button(tokens.chromeLabel("remove")) {
                             Task { await model.remove(from: book) }
                         }
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     }
                 }
                 .padding(.vertical, 4)
@@ -314,16 +389,20 @@ struct MobileMembershipSheet: View {
         if !model.addableBooks.isEmpty || !model.addableSmartBooks.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel("Add to a book"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.sectionHeader, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.top, 6)
                 ForEach(model.addableBooks, id: \.id) { book in
-                    addRow(book.name) { await model.add(to: book) }
+                    addRow(MobileMembershipModel.addRowLabel(for: book)) {
+                        await model.add(to: book)
+                    }
                 }
                 // R98: smart books collect by filter — adding IS tagging,
                 // and the door says so.
                 ForEach(model.addableSmartBooks, id: \.id) { book in
-                    addRow("\(book.name) (by tagging)") { await model.collect(into: book) }
+                    addRow(MobileMembershipModel.addRowLabel(for: book)) {
+                        await model.collect(into: book)
+                    }
                 }
             }
         }
@@ -337,13 +416,13 @@ struct MobileMembershipSheet: View {
         } label: {
             HStack {
                 Text(tokens.chromeLabel("+ \(label)"))
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
                 Spacer()
             }
             .padding(.vertical, 4)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
     }

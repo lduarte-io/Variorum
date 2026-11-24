@@ -51,7 +51,21 @@ final class MobileTrashModel {
 
     private(set) var trash: [Queries.TrashItem] = []
     private(set) var trashTruncated = false
-    private(set) var lastError: String?
+    /// **HAS THE LISTING ANSWERED YET?** (VM-33 — the Mac's VX-678 rule,
+    /// VX-670's honesty bar: `RecoveryViewModel.trashListingLoaded`.) `trash`
+    /// starts as `[]`, and an empty array cannot say "not yet" and "nothing"
+    /// at once — the view drew "Nothing in the Trash." on the first paint of
+    /// a Trash holding things, until the first value landed. Lowered whenever
+    /// the listing's query restarts (a filter, a sort, a new wing — VM-57's
+    /// per-wing run), raised by the value that answers it; a failed listing
+    /// never raises it (the one line speaks the refusal instead, and the
+    /// empty line stays unsaid rather than guess).
+    private(set) var trashListingLoaded = false
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
     /// A landed act's own words — kept apart from `lastError` so a success
     /// is never rendered in the red slot.
     private(set) var receipt: String?
@@ -88,18 +102,31 @@ final class MobileTrashModel {
     /// row 11 — her D1 revision: takes never row in a global Trash, on either
     /// platform). One decision, one adoption line; the phone's FACE (its
     /// chip row and its two lists) is mobile's own round to reshape.
+    ///
+    /// VM-57: the Trash of the wing the phone stands in (per wing, as on the
+    /// Mac) — the same wing `TrashPurge`'s Empty Trash counts and takes
+    /// through `WingState.readScope`, so the door takes exactly what this
+    /// room shows. Re-read for each wing.
     func startTrash() async {
         let kinds = TrashScope.kinds(filter: kindFilter)
-        do {
-            for try await value in session.database.observeTrash(
-                now: session.now, kinds: kinds, oldestFirst: oldestFirst,
-                limit: window + 1
-            ) {
-                (trash, trashTruncated) = TrashListing.windowed(value, window: window)
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            // VM-33: a new query has not answered yet — on the first run AND
+            // on each wing's re-run (VM-57) — so whatever rows the last one
+            // left stay drawn, but no empty sentence speaks for it (the Mac's
+            // rule).
+            trashListingLoaded = false
+            do {
+                for try await value in session.database.observeTrash(
+                    now: session.now, kinds: kinds, oldestFirst: oldestFirst,
+                    limit: window + 1, wingID: wing
+                ) {
+                    (trash, trashTruncated) = TrashListing.windowed(value, window: window)
+                    trashListingLoaded = true
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = DeletionRefusal.plainFallback(error, roads: .phone)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -120,19 +147,26 @@ final class MobileTrashModel {
         lastError = nil
         receipt = nil
         do {
-            receipt = try await TrashPutBack.run(session: session, item: item)
+            let answer = try await TrashPutBack.answer(session: session, item: item)
+            receipt = answer.receipt
+            // VM-61: a Put back is a restoration — an ordinary act, no line
+            // (PROVISIONAL P-55-4); the row leaving the Trash is the answer.
+            // P-55-11: unless it landed somewhere other than where she would
+            // look (the end of the note, set aside, among the archived takes)
+            // — a direction keeps its line, in P-55-7's class.
+            MobileLine.say(receipt, as: answer.isDirection ? .refusal : .ordinary, session: session)
         } catch let error as OperationError {
             // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
             // 6c cold review's n5 retired the one-line forward — the Archive
             // room grew a byte-identical twin of it at the split, and two
             // call sites that must change together is the drift shape the
             // shared home exists to end).
-            lastError = DeletionRefusal.words(error, act: .putBack)
+            lastError = DeletionRefusal.sentence(error, act: .putBack, roads: .phone)
         } catch {
             // Includes `RecoveryRefusal` — nothing was attempted, so it is a
             // refusal and never the `putBackUnplaced` RECEIPT the shipped
             // code put in the red slot (§49's MINOR).
-            lastError = DeletionRefusal.fallback(error)
+            lastError = DeletionRefusal.plainFallback(error, roads: .phone)
         }
     }
 
@@ -195,11 +229,14 @@ final class MobileTrashModel {
             guard let confirm = try await TrashPurge.emptyTrashConfirm(session: session)
             else {
                 receipt = RecoveryCopy.emptyTrashConfirm([:])
+                // VM-61: the door did nothing — a refusal (the contract's
+                // "a door that did nothing speaks a refusal").
+                MobileLine.say(receipt, as: .refusal, session: session)
                 return
             }
             pendingConfirm = confirm
         } catch {
-            lastError = DeletionRefusal.fallback(error)
+            lastError = DeletionRefusal.plainFallback(error, roads: .phone)
         }
     }
 
@@ -220,10 +257,14 @@ final class MobileTrashModel {
         receipt = nil
         do {
             receipt = try await TrashPurge.confirm(session: session, confirm)
+            // VM-61: something left the page for good — the line, with no
+            // Undo (a purge has no road back; her 13j receipt says the truth
+            // of the now/janitor split).
+            MobileLine.say(receipt, as: .removal(nil), session: session)
         } catch {
             // A PURGE refusal, never a put-back one — the seal's way out
             // differs by act, which is why `Act` is a parameter (A1-18).
-            lastError = DeletionRefusal.words(error, act: .delete)
+            lastError = DeletionRefusal.sentence(error, act: .delete, roads: .phone)
         }
     }
 

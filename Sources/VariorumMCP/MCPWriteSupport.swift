@@ -102,6 +102,12 @@ public struct MCPWriteReceipt: Sendable, Equatable {
     public var runKey: String?
     /// VX-812: `replace_tag`'s new tag path (`detail` carries the old one).
     public var replacementPath: String?
+    /// **VX-133 — the undo entry this act registered** (its `UndoStack`
+    /// token, stamped by `MCPWriteTools.call` from the stack it ran on): how
+    /// the app's receipt run knows which of its acts an undo walked back. nil
+    /// for an act that registered none (a commit) or where the stamp could not
+    /// be paired (the count fallback stays as it was).
+    public var undoEntryID: Int?
 
     public init(
         clientName: String, act: Operations.MCPWriteAct, targetID: String?, targetTitle: String?,

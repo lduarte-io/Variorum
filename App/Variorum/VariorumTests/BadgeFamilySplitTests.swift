@@ -174,7 +174,11 @@ struct BadgeFamilySplitTests {
                 let text = try String(contentsOf: app.appendingPathComponent(window), encoding: .utf8)
                 #expect(text.contains("aiMarksOn: theme.settings.aiMarks,"), "\(window) hands the switch to its road")
             }
-            let store = try String(contentsOf: app.appendingPathComponent("Theme/ThemeStore.swift"), encoding: .utf8)
+            // The theme store lives in `Shared/Theme/` since VM-51's hoist (the VM-47
+            // run, batch 3 — the phone wears the library's look through it too).
+            let shared = app.deletingLastPathComponent().appendingPathComponent("Shared")
+            let store = try String(
+                contentsOf: shared.appendingPathComponent("Theme/ThemeStore.swift"), encoding: .utf8)
             #expect(store.contains("try Queries.themeSettings(db)") && store.contains("settings = value"),
                     "the theme store lands the one settings read whole")
         }
@@ -343,7 +347,9 @@ struct BadgeFamilySplitTests {
         // to it): the badge family's switch cannot reach the eye any more.
         let face = try source("Core/Views/PrivateMarkView.swift")
         #expect(face.contains("static func note(_ fact: Queries.PrivateMark?) -> Mark? {"))
-        #expect(face.contains("static func book(marked: Bool) -> Mark? {"))
+        // VX-1007 (A JUSTIFIED EDIT): the book rule takes the book's keyed
+        // fact (own stamp · the daily Journal) — still no switch.
+        #expect(face.contains("static func book(_ fact: Queries.PrivateBookMark?) -> Mark? {"))
         #expect(!face.contains("badgesOn"), "the eye's face names no badge switch")
 
         let files = try #require(FileManager.default.enumerator(at: app, includingPropertiesForKeys: nil))

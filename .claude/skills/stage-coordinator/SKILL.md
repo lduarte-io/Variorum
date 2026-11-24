@@ -152,7 +152,14 @@ the merge SHA alone only when a waiting run can start its merge-in early.
 
 ## Cleanup duty (her ruling 2026-10-13: never hit 99% storage again)
 Watch `df -h` through the window and warn every session if free space drops under
-~25 GiB. At the window's end, for every effort that CLOSED under your oversight (merged,
+~25 GiB. **When free space falls and the worktrees, DerivedData and simulators don't explain it,
+suspect macOS's symbol cache first** (VX-1011): `/System/Library/Caches/com.apple.coresymbolicationd/data`,
+one root-only file a session can neither read nor size (it held 61 GiB on 2026-11-19). It grows with every
+freshly built binary that a crash report, trace or sample touches, so nights of parallel builds feed it.
+Clearing it needs her hands: `sudo rm` that file, then `sudo killall coresymbolicationd`. Ask her, and in an
+away run hold the ask for her next sitting. Two readings that mislead: `du` counts Chrome's
+`code_sign_clone` temp folder at many times what deleting it frees, and it counts the mounted simulator
+runtimes under `/Library/Developer/CoreSimulator/Volumes` on top of their real files. At the window's end, for every effort that CLOSED under your oversight (merged,
 hard-stopped), make sure it cleaned up, and finish what it missed:
 - its worktree(s) and pinned test checkouts removed (`git worktree remove`, `prune`);
 - its branch deleted, local and origin, once `--is-ancestor` of main is confirmed;

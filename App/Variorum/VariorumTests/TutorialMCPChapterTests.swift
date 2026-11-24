@@ -503,14 +503,19 @@ struct TutorialMCPChapterTests {
             // words, her bundle): the link's opposite joins the sentence ("…which
             // paragraphs match, or remove a link it made.") and unlink_versions joins
             // the truth loop. RED ON OLD by absence.
+            // VX-977 (the VX-981 run, batch 2 — A JUSTIFIED EDIT, the ritual; her ruling on
+            // P-915-B6-1, PROVISIONAL words): unlink_versions is an EDIT act now, so the
+            // clause leaves this card (it moves to the Edit card below) and the tool leaves
+            // this truth loop for the edit one. RED ON OLD: the card still said it here.
             #expect(text.contains("Write new: it can also make new notes, books, gatherings, chapters and tags, file "
                                   + "notes into books and chapters, and give a book a rule that collects notes by tag. "
                                   + "A note it makes can wear its tags from the start. It can add blocks at the end of "
                                   + "a note, duplicate a note to work on a copy, and link two notes as versions by "
-                                  + "naming which paragraphs match, or remove a link it made."))
+                                  + "naming which paragraphs match."))
+            #expect(!text.contains("or remove a link it made"), "the write-new card no longer teaches the unlink")
             for name in ["create_note", "create_book", "create_section", "apply_tag", "add_note_to_book",
                          "file_note_in_chapter", "set_book_rule", "insert_blocks", "duplicate_note", "link_versions",
-                         "unlink_versions", "create_gathering"] {
+                         "create_gathering"] {
                 #expect(MCPToolFacts.rung(of: name) == .writeNew, "\(name) is a write-new act")
             }
             // A JUSTIFIED EDIT (the VX-915 ladder's F-3): the description no longer
@@ -544,13 +549,17 @@ struct TutorialMCPChapterTests {
             // one by one, each joining the truth loop (lock_take/unlock_take,
             // rename_commit, delete_lens, set_block_name, put_back, set_entry_date,
             // restore_comment, remove_note_from_book); and VX-639's gatherings.
+            // VX-977 (the VX-981 run, batch 2 — A JUSTIFIED EDIT, the ritual; PROVISIONAL
+            // words): "unlink two notes as versions" joins the library's list, and
+            // unlink_versions the truth loop below. RED ON OLD by absence.
             let editStep = """
                 Edit: it can also do most of what you can do at the keyboard. In a note, it can change, choose, \
                 commit, lock or unlock, archive or delete takes, restore a commit or rename it, make a lens the note \
                 or delete a lens, add blocks anywhere, divide, merge, move, name or delete blocks, put a deleted \
                 block or take back from the note's tray, set the note's date, and edit, delete or restore any \
                 comment. Across the library, it can take a tag off a note or swap one tag for another across a \
-                wing, take a note out of a book, star, unstar, rename, archive or delete notes, books and gatherings, \
+                wing, unlink two notes as versions, take a note out of a book, star, unstar, rename, archive or delete \
+                notes, books and gatherings, \
                 finish or reopen a book, set a book's order, reorder a book's notes and chapters, rename or delete a \
                 chapter, and move a whole book to another wing.
                 """
@@ -565,7 +574,10 @@ struct TutorialMCPChapterTests {
                          "set_entry_date", "restore_comment", "remove_note_from_book",
                          // VX-846 (the VX-809 run, batch 5 — A JUSTIFIED EDIT, the ritual): this
                          // run's edit-rung acts, named in the library's list (VX-812 · VX-813 · VX-807).
-                         "replace_tag", "set_book_order", "move_book_to_wing"] {
+                         "replace_tag", "set_book_order", "move_book_to_wing",
+                         // VX-977 (the VX-981 run, batch 2 — A JUSTIFIED EDIT, the ritual): the
+                         // unlink, named in the library's list ("unlink two notes as versions").
+                         "unlink_versions"] {
                 #expect(MCPToolFacts.rung(of: name) == .edit, "\(name) is an edit-rung act")
             }
             #expect(try tool("insert_blocks").description.contains("Placing them anywhere else needs edit"),

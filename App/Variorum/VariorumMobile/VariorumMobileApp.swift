@@ -26,10 +26,10 @@ import VariorumCore
 @main
 struct VariorumMobileApp: App {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var bootstrap = AppBootstrap()
+    @State private var bootstrap: AppBootstrap
     @State private var services: AppServices?
     /// The shell's shared routing state: the active editor (for the
-    /// background flush) + the one voice authority (LK2).
+    /// background flush) + the open library's theme (VM-51, LK-1/LK-2).
     @State private var shellRouter = MobileShellRouter()
     /// 13p Batch 4 (item g): the phone's re-lock coordinator — the open
     /// library's relock policy read the phone's way (lock on leaving · lock
@@ -51,10 +51,24 @@ struct VariorumMobileApp: App {
         return rule27SaidFor != ObjectIdentifier(standing)
     }
 
-    /// The lobby's voice comes from the DEVICE preference, not the store —
-    /// the store is exactly what is not open yet.
+    /// VM-65: the timing layer turns on FIRST — before the bootstrap is built,
+    /// because building it begins opening the store, and the open's own marks
+    /// must land (`MobileTiming.start`).
+    init() {
+        MobileTiming.start()
+        _bootstrap = State(initialValue: AppBootstrap())
+    }
+
+    /// The lobby's look: no library is open to ask (that is what a lobby is),
+    /// so it wears what a library that has chosen nothing reads — the shell's
+    /// own placeholder (VM-51, PROVISIONAL P-47-15). The phone keeps no voice
+    /// of its own (the device preference retired with VM-51).
     private var lockedTokens: VoiceTokens {
-        .resolve(voice: MobileVoicePreference.current(), dark: scheme == .dark)
+        // VM-53: this phone's light/dark choice — resolved here at the app's
+        // root, where the windows' override is not seen (`isDark(system:)`).
+        .resolve(
+            settings: MobileShellRouter.placeholder,
+            dark: shellRouter.appearance.choice.isDark(system: scheme == .dark))
     }
 
     var body: some Scene {
@@ -249,10 +263,21 @@ struct VariorumMobileApp: App {
             if case .ready(let session) = bootstrap.state {
                 savepoint = { postID in await session.savepointOnLeaving(postID) }
             }
-            mobileScenePhaseChanged(
+            // VM-65: a leaving of the app — counted (its savepoint tries are
+            // tallied) and the timing record saved NOW (off the main thread),
+            // then again once the leaving's work is done, so a kill in the
+            // background loses nothing the leaving measured.
+            if phase == .background { MobileTiming.appLeaving() }
+            let leaving = mobileScenePhaseChanged(
                 phase, editors: shellRouter.editors, sync: services?.sync,
                 quickNote: shellRouter.quickNote, savepoint: savepoint,
                 relock: relockCoordinator())
+            if phase == .background, let leaving {
+                Task {
+                    await leaving.value
+                    MobileTiming.saveNow()
+                }
+            }
         }
     }
 

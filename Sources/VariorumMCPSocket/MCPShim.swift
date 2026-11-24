@@ -122,18 +122,26 @@ public enum MCPShim {
     /// its notifications skipped, bounded), then answer the frame that ends
     /// it — the `initialize` — with the refusal. A connection that ends or
     /// overruns the line limit first hears the refusal on `id: null` (the
-    /// pre-VX-181 shim's answer to an unreadable first line).
+    /// pre-VX-181 shim's answer to an unreadable first line). VX-952: read in
+    /// chunks; what the reader read past the frame is dropped — the shim
+    /// answers and exits, and nothing reads the client's input after it.
     static func respondToFirstRequest(input: Int32, output: Int32, message: String) {
+        var reader = MCPOpeningWindow.Reader(input)
         let frame: Data
-        switch MCPOpeningWindow.read(from: input, answeringOn: output) {
+        switch MCPOpeningWindow.read(from: &reader, answeringOn: output) {
         case .frame(let opening): frame = opening
         case .ended, .overLimit: frame = Data()
         }
         writeAll(output, refusalResponse(toFirstLine: frame, message: message))
     }
 
-    /// Public besides the shim's own use: the app's over-cap refusal (round 1
-    /// F7) reads a refused connection's first request the same bounded way.
+    /// The byte-at-a-time first-line reader the tests use as their raw client's
+    /// reader (one byte per `read`, so nothing past the line's newline is ever
+    /// consumed — a raw client reads exactly one answer). No product road calls
+    /// it since VX-181: the app's over-cap refusal reads a refused connection's
+    /// first request through the handshake (`MCPServerHost.refuseOverCap`), and
+    /// since VX-952 every opening read is the buffered `MCPOpeningWindow.Reader`.
+    /// Public for the two test targets (the core package's and the app's).
     public static func readFirstLine(_ fd: Int32, limit: Int) -> Data {
         var line = Data()
         var byte: UInt8 = 0

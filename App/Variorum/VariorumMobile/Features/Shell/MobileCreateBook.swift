@@ -37,6 +37,12 @@ final class MobileCreateBookModel {
     }
 
     @ObservationIgnored private let session: AppSession
+    /// **VM-58 — the wing this sheet mints in**, read ONCE when the sheet
+    /// opens: the wing the phone stands in. One snapshot names the wing for
+    /// the per-wing name guard (VX-816) and the mint — the Mac's VX-889 rule
+    /// for its own gathering mint ("one snapshot names the wing for the name
+    /// guard, the mint and the rule's tag vocabulary").
+    @ObservationIgnored let wingID: String
 
     var name = ""
     var kind: BookKind = .notes
@@ -45,21 +51,31 @@ final class MobileCreateBookModel {
     /// AND vs OR when several tags are picked (the Mac's radio pair).
     var joinAll = false
     private(set) var tags: [Tag] = []
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession) {
         self.session = session
+        self.wingID = session.wing.currentID
     }
 
     /// One-shot: the taxonomy for the smart picker (author-scale rows).
     /// One flight at a time — this sheet's only write is the mint.
     let latch = MobileWriteLatch()
 
+    ///
+    /// VM-59: the BOOK's own wing's vocabulary — the sheet's one snapshot,
+    /// the wing the mint lands in, where Core resolves the rule's paths. A
+    /// path from another wing would have become a dead term.
     func loadTags() async {
         do {
-            tags = try await session.database.read { try Queries.allTags($0) }
+            let wing = wingID
+            tags = try await session.database.read { try Queries.allTags($0, wingID: wing) }
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -80,6 +96,41 @@ final class MobileCreateBookModel {
         if kind == .smartFromTags { return selectedTagCount > 0 }
         return true
     }
+
+    // MARK: - The sheet's words (VM-83, W-073 — pure, so they are pinned)
+    //
+    // "gathering", never "smart" (retired app-wide at 13i-d). The kind word
+    // is the Mac's ("Create Gathering…" on its New Book sheet); the two
+    // gathering sentences are DRAFTS for her wording pass, built from the
+    // Mac's own (`BookcaseCopy.newBookMessage`: "a gathering shows every note
+    // its rule matches and holds none of them") — the run record lists them.
+    // The enum case keeps the model's older spelling (code is out of scope).
+
+    /// The kind door's word.
+    nonisolated static func kindLabel(_ kind: BookKind) -> String {
+        switch kind {
+        case .notes: return "Book"
+        case .journal: return "Journal Book"
+        case .smartFromTags: return "Gathering"
+        }
+    }
+
+    /// The caption under the kind row — what the chosen kind makes.
+    nonisolated static func caption(for kind: BookKind) -> String {
+        switch kind {
+        case .notes:
+            return "A book holds a hand-picked, ordered note list."
+        case .journal:
+            return "A journal book holds dated entries, one after another."
+        case .smartFromTags:
+            return "A gathering shows every note these tags match and holds none of them — "
+                + "the tags stay on the notes."
+        }
+    }
+
+    /// The tag picker's empty state.
+    nonisolated static let noTagsLine =
+        "No tags yet — notes get tags first; a gathering shows the notes that match them."
 
     /// The spec construction IS the promotion (the Mac
     /// `PromoteTagsSheet.spec`'s exact rule, mirrored): OR → `tags`,
@@ -124,32 +175,34 @@ final class MobileCreateBookModel {
     private func createOnce() async -> String? {
         guard canCreate else { return nil }
         let bookName = name.trimmingCharacters(in: .whitespaces)
+        // VM-58: the sheet's one wing snapshot — the guard and the mint agree.
+        let wing = wingID
         do {
             let id: String
             switch kind {
             case .notes:
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
-                    return try ops.createReading(name: bookName, kind: .book)
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
+                    return try ops.createReading(name: bookName, kind: .book, wingId: wing)
                 }.id
             case .journal:
                 // The Mac create alert's journal shape, byte-mirrored:
                 // curated, profile 'journal', dated order ascending.
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
                     return try ops.createReading(
                         name: bookName, kind: .book,
                         profile: Queries.journalTraitProfile,
-                        sortField: .entryDate, sortDir: .desc)
+                        sortField: .entryDate, sortDir: .desc, wingId: wing)
                 }.id
             case .smartFromTags:
                 let paths = selectedTagPaths.sorted()
                 let all = joinAll && paths.count > 1
                 let json = try Self.spec(paths: paths, joinAll: all).encodedJSON()
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
                     return try ops.createReading(
-                        name: bookName, kind: .gathering, querySpec: json)
+                        name: bookName, kind: .gathering, querySpec: json, wingId: wing)
                 }.id
             }
             lastError = nil
@@ -168,7 +221,7 @@ final class MobileCreateBookModel {
             lastError = BookNameCopy.refusal(existing: existing)
             return nil
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }
@@ -198,40 +251,23 @@ struct MobileCreateBookSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(tokens.chromeLabel("New Book"))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Cancel")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
-            TextField(tokens.chromeLabel("Name"), text: $model.name)
+            PhoneSheetHeader(
+                tokens.chromeLabel("New Book"), tokens: tokens, doneWord: "Cancel"
+            ) { dismiss() }
+            TextField(phonePlaceholder: tokens.chromeLabel("Name"), text: $model.name, tokens: tokens)
                 .textFieldStyle(.plain)
-                .font(tokens.body)
-                .foregroundStyle(tokens.ink)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(tokens.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(tokens.line, lineWidth: 1)))
+                .phoneField(tokens)
             kindRow
             Text(tokens.chromeLabel(caption))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
             if model.kind == .smartFromTags {
                 tagPicker
             }
             Spacer(minLength: 0)
-            if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-            }
+            // VM-61: a refusal (a taken name, a store error) speaks on the
+            // shell's one line, which draws above this sheet.
             Button {
                 Task {
                     if let id = await model.create() {
@@ -241,18 +277,9 @@ struct MobileCreateBookSheet: View {
                 }
             } label: {
                 Text(tokens.chromeLabel("Create Book"))
-                    .font(tokens.body)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(tokens.surface)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(tokens.line, lineWidth: 1)))
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(model.canCreate ? tokens.accent : tokens.faint)
+            // VM-50: the one calm button, spanning the sheet.
+            .buttonStyle(PhoneCalmButtonStyle(tokens: tokens, fullWidth: true))
             .disabled(!model.canCreate)
         }
         .padding(20)
@@ -261,43 +288,22 @@ struct MobileCreateBookSheet: View {
     }
 
     private var caption: String {
-        switch model.kind {
-        case .notes:
-            return "A book holds a hand-picked, ordered note list."
-        case .journal:
-            return "A journal book holds dated entries, one after another."
-        case .smartFromTags:
-            return "A smart book collects notes by these tags — the tags stay on the notes."
-        }
+        MobileCreateBookModel.caption(for: model.kind)
     }
 
+    /// VM-50: the kind is the system's segmented choice (was three words).
     private var kindRow: some View {
-        HStack(spacing: 18) {
-            kindDoor("Book", .notes)
-            kindDoor("Journal Book", .journal)
-            kindDoor("Smart Book", .smartFromTags)
-            Spacer()
-        }
-    }
-
-    private func kindDoor(_ label: String, _ target: MobileCreateBookModel.BookKind) -> some View {
-        Button {
-            model.kind = target
-        } label: {
-            Text(tokens.chromeLabel(label))
-                .font(tokens.small)
-                .foregroundStyle(model.kind == target ? tokens.ink : tokens.faint)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(model.kind == target ? .isSelected : [])
+        PhoneSegmentedChoice(
+            MobileCreateBookModel.BookKind.allCases, selection: model.kind,
+            tokens: tokens, word: MobileCreateBookModel.kindLabel, select: { model.kind = $0 })
     }
 
     private var tagPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             if model.tags.isEmpty {
-                Text(tokens.chromeLabel("No tags yet — notes get tags first; a smart book collects by them."))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                Text(tokens.chromeLabel(MobileCreateBookModel.noTagsLine))
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
@@ -308,12 +314,11 @@ struct MobileCreateBookSheet: View {
                 }
                 .frame(maxHeight: 220)
                 if model.selectedTagPaths.count > 1 {
-                    // The Mac's radio pair, as two text doors.
-                    HStack(spacing: 18) {
-                        joinDoor("any of these (OR)", false)
-                        joinDoor("all of these (AND)", true)
-                        Spacer()
-                    }
+                    // The Mac's radio pair, as the segmented choice (VM-50).
+                    PhoneSegmentedChoice(
+                        [false, true], selection: model.joinAll, tokens: tokens,
+                        word: { $0 ? "all of these (AND)" : "any of these (OR)" },
+                        select: { model.joinAll = $0 })
                 }
             }
         }
@@ -330,34 +335,23 @@ struct MobileCreateBookSheet: View {
         } label: {
             HStack(spacing: 8) {
                 Text(selected ? "✓" : " ")
-                    .font(tokens.small)
+                    .phoneType(.meta, tokens)
                     .foregroundStyle(tokens.accent)
                     .frame(width: 14, alignment: .leading)
                 Text("#\(MobileShelfFaces.leaf(tag.path))")
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Text(tag.path)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(1)
                 Spacer()
             }
             .padding(.vertical, 8)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    private func joinDoor(_ label: String, _ target: Bool) -> some View {
-        Button {
-            model.joinAll = target
-        } label: {
-            Text(tokens.chromeLabel(label))
-                .font(tokens.small)
-                .foregroundStyle(model.joinAll == target ? tokens.ink : tokens.faint)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(model.joinAll == target ? .isSelected : [])
-    }
 }

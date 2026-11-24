@@ -308,6 +308,125 @@ struct MobileNoteEntryDateTests {
         }
     }
 
+    /// **VM-84 — the date chip follows the date when the title does not move.**
+    /// The chip read `header?.entryDate`, and `header` is `@ObservationIgnored`
+    /// (editor internals, never observed), so the masthead re-rendered on a
+    /// date change ONLY when the title changed in the same pass — an untitled
+    /// note's displayed title IS its date. On a TITLED note nothing the chip
+    /// observed changed, so it kept the old day.
+    ///
+    /// The pin holds exactly what the chip observes (`dateChipDay`, its one
+    /// read) under `withObservationTracking` — SwiftUI's own mechanism for
+    /// re-rendering a body — through both roads: the model's own door, and
+    /// the op from elsewhere (the day shift) followed by the header door's
+    /// store re-read. **Red on old:** neither change wakes the chip.
+    ///
+    /// This pin holds the SEAM; `noPhoneFaceReadsTheEditorsUnobservedHeaderDate`
+    /// below holds the FACE — that the chip's body reads nothing else
+    /// (VM-78 ladder round 4, G1).
+    @Test func theDateChipFollowsTheDateWhenTheTitleDoesNot() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "Kept title")
+                try ops.setEntryDate(post.id, entryDate: "2026-08-09")
+                return post.id
+            }
+            let (model, _) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(MobileWriteScreen.dateChipDay(model) == "2026-08-09")
+            #expect(model.displayTitle == "Kept title")
+
+            // Road 1: the chip's own door (Set in the date alert).
+            let wokeByDoor = LockIsolated(false)
+            withObservationTracking {
+                _ = MobileWriteScreen.dateChipDay(model)
+            } onChange: {
+                wokeByDoor.setValue(true)
+            }
+            await model.setEntryDate("2026-08-10")
+            #expect(wokeByDoor.value, "a date change must wake the chip")
+            #expect(MobileWriteScreen.dateChipDay(model) == "2026-08-10")
+            #expect(model.displayTitle == "Kept title", "the title never moved")
+
+            // Road 2: the op from elsewhere (the day shift), then the header
+            // door's store re-read — the road a sync delivery also takes.
+            let wokeByShift = LockIsolated(false)
+            withObservationTracking {
+                _ = MobileWriteScreen.dateChipDay(model)
+            } onChange: {
+                wokeByShift.setValue(true)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.shiftEntryDate(postID, byDays: 1)
+            }
+            await model.confirmNoteStillLive()
+            #expect(wokeByShift.value, "a shifted date must wake the chip")
+            #expect(MobileWriteScreen.dateChipDay(model) == "2026-08-11")
+
+            // P3's half (green on both sides): a header refresh that changes
+            // nothing the chip shows wakes nothing — the chip does not
+            // re-render the masthead on every header delivery.
+            let wokeByNothing = LockIsolated(false)
+            withObservationTracking {
+                _ = MobileWriteScreen.dateChipDay(model)
+            } onChange: {
+                wokeByNothing.setValue(true)
+            }
+            await model.confirmNoteStillLive()
+            #expect(!wokeByNothing.value, "an unchanged header wakes nothing")
+        }
+    }
+
+    /// **The date chip's FACE — a source guard** (VM-78 ladder round 4,
+    /// R4-F1, G1). The pin above holds the seam (`dateChipDay`); nothing
+    /// there sees whether the chip's body reads it. The next wave-1 merge
+    /// conflicts on the chip's label lines, and the other side of that hunk
+    /// is the face from before VM-84 — `model.header?.entryDate`, where
+    /// `header` is `@ObservationIgnored`. This walk of the phone's product
+    /// sources forbids that read everywhere outside the model itself: a
+    /// MEMBER ACCESS `.header?.entryDate` / `.header!.entryDate` /
+    /// `.header.entryDate`, on comment-stripped lines.
+    ///
+    /// Deliberately narrow: a local named `header` is not matched
+    /// (`MobileStars`' `header.entryDate` reads a fetched row), and the
+    /// other `.header?.` reads are not forbidden (the rename door's
+    /// tap-time seed, `renameField = model.header?.title`, is legitimate).
+    /// Red on `e48ef2f30` (three lines), on `2d66e9a30` (one), and on main
+    /// and VM-47's tip (three each); green on the fix.
+    @Test func noPhoneFaceReadsTheEditorsUnobservedHeaderDate() throws {
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumMobileTests
+            .deletingLastPathComponent()  // App/Variorum
+        let root = appRoot.appendingPathComponent("VariorumMobile", isDirectory: true)
+        #expect(FileManager.default.fileExists(atPath: root.path), "the sweep root is missing")
+        let walk = try #require(FileManager.default.enumerator(
+            at: root, includingPropertiesForKeys: nil))
+        // The model's own file is the one place `header` may be read: it is
+        // where `adoptHeader` mirrors the day into the observed `entryDate`.
+        let modelFile = "/Features/Write/MobileEditorViewModel.swift"
+        let unobservedRead = /\.header[?!]?\.entryDate\b/
+        var walked = 0
+        var offenders: [String] = []
+        for case let url as URL in walk where url.pathExtension == "swift" {
+            guard !url.path.hasSuffix(modelFile) else { continue }
+            walked += 1
+            let source = try String(contentsOf: url, encoding: .utf8)
+            for (number, line) in MobileNoRawErrorPinTests.strippingComments(source).enumerated()
+            where line.contains(unobservedRead) {
+                offenders.append(
+                    "\(url.lastPathComponent):\(number + 1) \(line.trimmingCharacters(in: .whitespaces))")
+            }
+        }
+        #expect(walked > 60, "the walk must reach the phone's sources (walked \(walked))")
+        #expect(offenders.isEmpty, """
+            A phone face reads the editor's UNOBSERVED `header` for the entry date. \
+            Read `MobileWriteScreen.dateChipDay(model)` (the model's observed \
+            `entryDate`) instead — `header` is `@ObservationIgnored`, so a face that \
+            reads it waits for the title to change (VM-84):
+            \(offenders.joined(separator: "\n"))
+            """)
+    }
+
     /// C2 ladder R1-2 (red-on-old): an untitled, UNDATED note's masthead
     /// falls back to its created DAY through the SAME DisplayTitle chain
     /// the Library row reads — two surfaces must never disagree on one

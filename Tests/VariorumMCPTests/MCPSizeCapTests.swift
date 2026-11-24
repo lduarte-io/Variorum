@@ -155,7 +155,12 @@ struct MCPSizeCapTests {
         #expect(answer?["id"] is NSNull, "the overrun message's id cannot be read: \(String(describing: answer))")
         #expect(errorOf(answer).code == MCPShim.refusalCode)
         #expect(errorOf(answer).message?.contains("16 MiB") == true, "\(String(describing: errorOf(answer).message))")
-        #expect(await socket.isHungUp(), "then the connection closes")
+        // Round 1's F1 (the VX-981 ladder): this connection was APPROVED, and an
+        // approval owes it 0 or 1 `tools/list_changed` that nothing orders against
+        // the over-cap answer — so "closed" here is the hang-up with nothing but the
+        // door's own notices before it (`readToHangUp`), never "the very next byte".
+        let after = await socket.readToHangUp()
+        #expect(after.isOnlyNoticesThenEOF, "then the connection closes — \(after)")
     }
 
     /// The cap is EXACT whatever the chunking: a line one byte over is over

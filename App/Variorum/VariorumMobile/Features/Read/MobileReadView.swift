@@ -58,20 +58,18 @@ struct MobileReadView: View {
                 LazyVStack(spacing: 26) {
                     if let reading = model.reading {
                         Text(MobileShelfFaces.name(for: reading))
-                            .font(page.serifTitle)
+                            .phoneReading(.bookTitle)
                             .foregroundStyle(page.ink)
                             .padding(.top, 40)
                     }
-                    if let error = model.lastError {
-                        Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-                    }
+                    // VM-61: a store-read error speaks on the shell's one line.
                     ForEach(
                         Array(MobileReadPage.assemble(model.groupedRows).enumerated()),
                         id: \.offset
                     ) { _, chapter in
                         if let caption = chapter.caption {
                             Text(caption)
-                                .font(.system(size: 11.5, weight: .medium))
+                                .phoneType(.sectionHeader, tokens)
                                 .tracking(2.5)
                                 .foregroundStyle(page.chapterInk)
                                 .padding(.top, 18)
@@ -80,13 +78,13 @@ struct MobileReadView: View {
                             MobileReadNoteView(
                                 session: session, slot: slot,
                                 total: model.entries.count,
-                                truncated: model.truncated, page: page,
+                                truncated: model.truncated, page: page, tokens: tokens,
                                 onOpen: { onOpen(slot.entry.postID) })
                         }
                     }
                     if model.entries.isEmpty {
                         Text("Nothing to read yet — this book has no notes.")
-                            .font(page.serif)
+                            .phoneReading(.body)
                             .foregroundStyle(page.pageMeta)
                             .padding(.vertical, 40)
                     }
@@ -94,12 +92,12 @@ struct MobileReadView: View {
                         // The bounded-window marker (never a silent cut;
                         // P32's neutral reword — one shared sentence).
                         Text(MobileBookViewModel.truncationMarker(shown: model.entries.count))
-                            .font(.system(size: 11.5))
+                            .phoneType(.meta, tokens)
                             .foregroundStyle(page.pageMeta)
                             .padding(.vertical, 12)
                     }
                     Text("· · ·")
-                        .font(page.serif)
+                        .phoneReading(.body)
                         .foregroundStyle(page.pageMeta)
                         .padding(.vertical, 32)
                 }
@@ -112,7 +110,18 @@ struct MobileReadView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .background(tokens.room.ignoresSafeArea())
+        // VM-51: the room around the cream page is the VOICE's own, never the
+        // palette's — the Mac's rule (R-13u-10, her "leave that white so that
+        // the cream read page isn't on a colorful background"; R2: only the
+        // room follows the voice), now that the phone wears a palette.
+        .background(ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark).ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // this room at both edges. The cream page is the scroll's content, so
+        // it ends at the band's foot (the band's clip) and the room runs on
+        // below it to the home indicator.
+        .mobileEdgeGrounds(
+            top: ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark),
+            bottom: ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark))
         .navigationBarTitleDisplayMode(.inline)
         .task { await model.start() }
     }
@@ -128,6 +137,8 @@ private struct MobileReadNoteView: View {
     /// says so (S4 ladder NIT 2).
     let truncated: Bool
     let page: ReadingPageTokens
+    /// The voice's tokens, for the page meta's role (VM-48).
+    let tokens: VoiceTokens
     let onOpen: () -> Void
 
     @State private var paragraphs: [MobileReadPage.Paragraph] = []
@@ -135,24 +146,23 @@ private struct MobileReadNoteView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(slot.entry.displayTitle)
-                .font(.system(size: 21, weight: .semibold, design: .serif))
+                .phoneReading(.noteTitle)
                 .foregroundStyle(page.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
                 Text(paragraph.text)
-                    .font(paragraph.font(page))
+                    .phoneReading(size: paragraph.readingSize, weight: paragraph.readingWeight, pitch: paragraph.readingPitch)
                     .foregroundStyle(page.ink)
-                    .lineSpacing(6)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, paragraph.indent)
             }
             if paragraphs.isEmpty {
-                Text(" ").font(page.serif)
+                Text(" ").phoneReading(.body)
             }
             Text(MobileReadPage.pageMeta(
                 ordinal: slot.ordinal, total: total,
                 chapterIndex: slot.chapterIndex, truncated: truncated))
-                .font(.system(size: 11))
+                .phoneType(.meta, tokens)
                 .foregroundStyle(page.pageMeta)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 4)

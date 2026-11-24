@@ -189,7 +189,9 @@ struct MobileNavigationTests {
         func selection(
             _ surface: HostedSurface<MobileShellView>, _ label: String
         ) -> (copies: Int, allSelected: Bool, noneSelected: Bool) {
-            let doors = surface.visibleElements.filter { $0.accessibilityLabel == label }
+            let doors = surface.visibleElements.filter {
+                $0.accessibilityLabel == label && $0.accessibilityTraits.contains(.button)
+            }
             let selected = doors.filter { $0.accessibilityTraits.contains(.selected) }
             return (doors.count, !doors.isEmpty && selected.count == doors.count,
                     selected.isEmpty)
@@ -202,7 +204,10 @@ struct MobileNavigationTests {
             ) { surface in
                 await surface.settle(30)
                 // The three doors exist, and the band's own page is on screen.
-                for door in ["Starred", "Shelf", "Library"] {
+                // (VM-52 MOVED this pin's middle word: the Shelf's door is
+                // "Bookcase" — SW-1, the Mac's name — spoken and drawn; the
+                // page is still `.shelf`.)
+                for door in ["Starred", "Bookcase", "Library"] {
                     #expect(surface.element(labeled: door) != nil,
                             "labels were \(surface.visibleLabels)")
                 }
@@ -210,7 +215,7 @@ struct MobileNavigationTests {
                         "the starred page's root really rendered; labels were \(surface.visibleLabels)")
 
                 // HOME.
-                #expect(selection(surface, "Shelf").allSelected, "the shelf is home")
+                #expect(selection(surface, "Bookcase").allSelected, "the Bookcase is home")
                 #expect(selection(surface, "Starred").noneSelected)
                 #expect(selection(surface, "Library").noneSelected)
 
@@ -220,7 +225,7 @@ struct MobileNavigationTests {
                 await surface.settle(30)
                 #expect(selection(surface, "Starred").allSelected,
                         "the door moved the band")
-                #expect(selection(surface, "Shelf").noneSelected)
+                #expect(selection(surface, "Bookcase").noneSelected)
 
                 // And all the way RIGHT, across home.
                 #expect(surface.activate("Library"),
@@ -231,7 +236,7 @@ struct MobileNavigationTests {
 
                 // Every root wears the bar, so the doors come in threes —
                 // stated rather than left as a surprise for the next reader.
-                #expect(selection(surface, "Shelf").copies == MobileShellBand.pages.count)
+                #expect(selection(surface, "Bookcase").copies == MobileShellBand.pages.count)
             }
         }
     }
@@ -372,8 +377,7 @@ struct MobileNavigationTests {
                 MobileShelfView(
                     model: shelf, stars: stars, quickNote: MobileQuickNoteModel(),
                     tokens: .terminalLight, tabBar: { EmptyView() },
-                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onSettings: {})
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
                 await surface.settle(30)
                 let labels = surface.visibleLabels
@@ -541,8 +545,16 @@ struct MobileNavigationTests {
     /// real door is activated through UIKit's own dispatch, and the sentence
     /// is measured against the door's own frame.
     ///
-    /// RED-ON-OLD: render the refusal only in `header` (the shipped shape)
-    /// and the sentence lands ~500 pt ABOVE the door instead of beneath it.
+    /// RED-ON-OLD (as shipped at batch 10): render the refusal only in
+    /// `header` and the sentence landed ~500 pt ABOVE the door.
+    ///
+    /// **VM-61 (2026-11-19): the refusal speaks on the shell's ONE line** —
+    /// always at the screen's foot, above the tab bar or the keyboard, so it is
+    /// never a screen away from the door whatever the book's length (the line's
+    /// placement is `MobileMessageLineHostTests`' pin). This pin now asserts the
+    /// door's refusal reached the one seam as a refusal, and that the book's
+    /// page keeps no slot of its own for it. **A regression trips it:** a door
+    /// refusal that never reached the seam leaves `current` nil.
     @Test func aRefusedBookDoorSpeaksBesideTheDoorSheTapped() async throws {
         try await withEditorWorld { session, _ in
             let bookID = try await session.runner.run { ops -> String in
@@ -569,21 +581,14 @@ struct MobileNavigationTests {
                         "labels were \(surface.visibleLabels)")
                 #expect(surface.activate(MobileBookView.newNoteDoorTitle),
                         "labels were \(surface.visibleLabels)")
-                for _ in 0..<200 where !surface.visibleLabels.contains(sentence) {
+                for _ in 0..<200 where session.status.current == nil {
                     await surface.settle(1)
                 }
-                let door = try #require(
-                    surface.element(labeled: MobileBookView.newNoteDoorTitle))
-                let voice = try #require(
-                    surface.element(labeled: sentence),
-                    "the refusal must be ON SCREEN; labels were \(surface.visibleLabels)")
-                let doorFrame = door.accessibilityFrame
-                let voiceFrame = voice.accessibilityFrame
-                #expect(voiceFrame.height > 0, "the sentence has a real frame: \(voiceFrame)")
-                #expect(voiceFrame.minY >= doorFrame.minY,
-                        "the refusal renders BENEATH the door that fired it — door \(doorFrame), refusal \(voiceFrame)")
-                #expect(voiceFrame.minY - doorFrame.maxY < 80,
-                        "and immediately beneath it, not a screen away — door \(doorFrame), refusal \(voiceFrame)")
+                let line = try #require(session.status.current, "the one line speaks it")
+                #expect(line.kind == .refusal)
+                #expect(line.text == sentence)
+                #expect(!surface.visibleLabels.contains(sentence),
+                        "the book's page keeps no slot of its own — labels were \(surface.visibleLabels)")
             }
         }
     }

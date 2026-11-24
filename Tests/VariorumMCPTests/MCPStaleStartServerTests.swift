@@ -24,6 +24,11 @@ import Testing
 // the publish). RED ON OLD (the behavioural revert — the fix commit's
 // `MCPServerHost.swift` from its parent): the three marked pins.
 
+// VX-773 (the VX-981 run, batch 4): DEBUG-only — the start-step gate and every pin that
+// holds a start through the host's `startStepProbe` (its `StartStep` too). The
+// release-configuration test build compiles this target where that seam does not
+// exist; the guard pin needs none and runs in both configurations.
+#if DEBUG
 /// A start held at one step: the FIRST call to reach `step` waits there until
 /// `open()` (later calls pass) — on the start's own thread, never the pool.
 private final class StepGate: @unchecked Sendable {
@@ -46,6 +51,7 @@ private final class StepGate: @unchecked Sendable {
 
     func open() { release.signal() }
 }
+#endif
 
 /// A start on its own thread (the door runs it detached, off the main actor),
 /// its outcome kept for the pin.
@@ -116,6 +122,7 @@ private struct TwoHosts {
 
 @Suite("VX-613 — a stopped start never binds; a host started twice never faults itself", .serialized)
 struct MCPStaleStartServerTests {
+    #if DEBUG
     /// **RED ON OLD.** Her OFF lands while the first start waits in its sweep: the
     /// stopped start must not bind — and the fresh host then starts. Old: the
     /// stopped host bound the path and published `.running` (a host the door had
@@ -190,6 +197,7 @@ struct MCPStaleStartServerTests {
         #expect(world.stale.state == .running, "RED ON OLD: the serving host is never faulted by its own listener")
         #expect(world.served)
     }
+    #endif
 
     /// GUARD (green on both sides): a stop belongs to the start it interrupts,
     /// never to the host's whole life — a host stopped and started again starts.

@@ -46,6 +46,12 @@ struct MobileStarredView<TabBar: View>: View {
     /// star door (the Mac StarDoor's one-value discipline).
     @Bindable var stars: MobileStarsModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     /// A row's destination, through the model's own route brain — the
     /// Library's callback shape.
@@ -58,8 +64,8 @@ struct MobileStarredView<TabBar: View>: View {
                 LazyVStack(spacing: 0) {
                     if stars.items.isEmpty {
                         Text(tokens.chromeLabel(MobileStarsModel.emptyLine))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .multilineTextAlignment(.center)
                             .padding(.vertical, 32)
                             .padding(.horizontal, 24)
@@ -71,35 +77,38 @@ struct MobileStarredView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
-            if let error = stars.error(on: .starred) {
-                // D2's rule: a refusal speaks at ITS OWN door's root. An
-                // un-star fired from this page reports here, and a homeless
-                // (store-read) error reports on every root including this one.
-                Text(tokens.chromeLabel(error))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-51 (R-47-1, "prose should not be on the tint"): her list on
+            // the paper; the path line and the tab bar stay on the room.
+            .background(tokens.surface)
+            // VM-61: a star refusal speaks on the shell's one line
+            // (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the path line's room above, the bar's room below.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
     }
 
-    /// "~/starred" (terminal) / "Starred" (study) — the two sibling roots'
-    /// own path-line shape. No doors trail it: nothing is minted here, and
-    /// the P38 crowding lesson says a strip earns its doors.
+    /// "~/home/starred" (terminal) / "Home · Starred" (study) — the wing's name
+    /// leading (VM-56) and the wing door (VM-225, `MobileWingPath`); the two
+    /// sibling roots' own path-line shape. Nothing is minted here (P38: a
+    /// strip earns its doors), so the one door trailing it is the roots' ⋯
+    /// menu (VM-53).
     private var pathLine: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path([MobileStarsModel.pageName]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+        // VM-50: the same 44 pt line as its two siblings' (whose doors are
+        // 44 pt hit areas), so the three roots' content starts level as the
+        // band pages between them.
+        HStack(alignment: .center, spacing: 16) {
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: MobileStarsModel.pageName,
+                onDoor: onWingDoor)
             Spacer()
+            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .frame(minHeight: PhoneMetrics.touchMinimum)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     /// One starred row — **the retired shelf section's row, MOVED, not
@@ -113,20 +122,23 @@ struct MobileStarredView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("★")
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
+                    .phoneType(.meta, tokens)
+                    // VM-51: the star's OWN token ("i like the blue star" —
+                    // blue in every voice, `VoiceTokens.star`), never the accent
+                    // (green in Terminal, the palette's hue under a palette).
+                    .foregroundStyle(tokens.star)
                 Text(tokens.chromeLabel(stars.displayName(item)))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 Text(tokens.chromeLabel(item.target.kind == .reading ? "book" : "note"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // The row's own act, in the phone's established row grammar (the

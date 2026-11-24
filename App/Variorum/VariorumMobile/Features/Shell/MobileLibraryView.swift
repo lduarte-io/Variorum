@@ -25,7 +25,7 @@ struct MobileLibraryView<TabBar: View>: View {
     /// themselves as openable rows"*).
     ///
     /// It is the SAME instance the Shelf holds, deliberately: `bookshelf` +
-    /// `shelfPins` + the daily designation ride one held observation there
+    /// the daily designation ride one held observation there
     /// and both tab stacks stay alive by design (`MobileLivenessAuthority` —
     /// *"nothing about visibility ever fires `onDisappear`"*), so a second
     /// model would be a second observation over rows the app is already
@@ -48,6 +48,12 @@ struct MobileLibraryView<TabBar: View>: View {
     /// `MobileShelfPerfTests` reads.
     let books: MobileShelfViewModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
     /// **The Two-rooms doors** (batch 6c — her QUESTIONS #84 ruling). Batch
@@ -57,10 +63,27 @@ struct MobileLibraryView<TabBar: View>: View {
     /// in harness/preview use.
     var onOpenTrash: (() -> Void)?
     var onOpenArchive: (() -> Void)?
+    /// **VM-68 — the Library is ON SCREEN** (the shell's fact: drawn at all —
+    /// the current page, or revealed by a band drag — with its stack at its
+    /// root). Its listings are HELD only while this is true; hidden, nothing
+    /// is read on a write, and becoming true re-asks. True by default, so a
+    /// harness that mounts this view alone gets the shown Library it mounted.
+    var isOnScreen: Bool = true
 
     @State private var query = ""
+    /// VM-47 (the walk's W-C2): whether the search field holds the keyboard —
+    /// so a page she is not on can give it back (`pageShowing`).
+    @FocusState private var searchFocused: Bool
+    /// Whether this root's page is the one on screen (the shell's band; true
+    /// outside a shell).
+    @Environment(\.mobilePageShowing) private var pageShowing
 
     var body: some View {
+        // VM-68: the listings' one task key (the shown question, and whether
+        // the Library is on screen) and the scraps' — both stand down while
+        // the Library is hidden.
+        let hold = model.hold(onScreen: isOnScreen)
+        let holdsScraps = isOnScreen && model.filter == .scraps
         VStack(spacing: 0) {
             pathLine
             searchField
@@ -96,48 +119,35 @@ struct MobileLibraryView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
-            if let error = model.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let receipt = model.receipt {
-                // A landed act's own words, in the muted slot — never the
-                // red one (the Mac recovery model's split).
-                Text(tokens.chromeLabel(receipt))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let starsError = stars.error(on: .library) {
-                // A star refusal fired HERE (D2 — one home per refusal,
-                // clearing after a beat; "spoken where the door fired"
-                // is now structurally true, not hoped).
-                Text(tokens.chromeLabel(starsError))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-51 (R-47-1, "prose should not be on the tint"): her rows,
+            // previews and search passages on the paper; the path line, the
+            // field, the filter row and the tab bar stay on the room.
+            .background(tokens.surface)
+            // VM-61: the Library's error, its delete line and a star refusal
+            // speak on the shell's one line (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
-        // The listing observation restarts when the sort flips (parity
-        // C3 — a way of looking; nothing is written).
-        .task(id: model.sort) { await model.startAll() }
-        .task { await model.startBookless() }
+        // VM-47 (the walk's W-A1, redone): the strips beyond the shell's band —
+        // the path line's room above, the bar's room below.
+        .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
+        // VM-68: ONE task holds the listing the filter shows, and only while
+        // the Library is on screen; it restarts when the question changes —
+        // the sort (parity C3 — a way of looking; nothing is written), the
+        // filter, the wing — or the Library comes back on screen, whose first
+        // fetch is the return's re-ask (`MobileLibraryViewModel.hold(_:)`).
+        .task(id: hold) { await model.hold(hold) }
         // The scraps observation's lifecycle lives HERE (FIX-C3c): the
         // section's body is flat lazy-row content now, so its task
         // moved to stable chrome — it runs while the Scraps filter
         // shows and cancels when the filter leaves, exactly the old
-        // section-task lifecycle.
-        .task(id: model.filter) {
-            if model.filter == .scraps { await scraps.start() }
+        // section-task lifecycle. VM-68: and while the Library is on
+        // screen — hidden, it stands down with the note listings.
+        .task(id: holdsScraps) {
+            if holdsScraps { await scraps.start() }
         }
-        .task(id: query) { await model.search(query) }
+        // VM-57: a standing query re-asks when the wing changes.
+        .task(id: [model.wingID, query]) { await model.search(query) }
         // PR1's confirm — a real `@Bindable` projection (§15's trap (a))
         // AND `presenting:`, which is the half batch 4 was missing: without
         // it the note to delete was read back AFTER SwiftUI's dismissal had
@@ -176,13 +186,13 @@ struct MobileLibraryView<TabBar: View>: View {
             Button(action: onOpenArchive) {
                 HStack {
                     Text(tokens.chromeLabel(MobileRecoveryDoors.archiveLabel))
-                        .font(tokens.small)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                     Spacer()
                 }
                 .padding(.vertical, 11)
                 .padding(.horizontal, 12)
-                .contentShape(Rectangle())
+                .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(MobileRecoveryDoors.archiveLabel)
@@ -198,11 +208,13 @@ struct MobileLibraryView<TabBar: View>: View {
     private var pathLine: some View {
         // `spacing: 16` — the Shelf path line's own value, adopted now that
         // this strip carries two trailing doors instead of one.
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path(["Library"]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-            Spacer()
+        // VM-50: the Bookcase's twin — the same controls, the same one line
+        // (🗑 an icon button, + New Note an inline act, hit areas touching).
+        // VM-225: the path text is the wing door's line (`MobileWingPath`).
+        HStack(alignment: .center, spacing: 0) {
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: "Library", onDoor: onWingDoor)
+            Spacer(minLength: PhoneMetrics.Space.s16)
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
             }
@@ -215,32 +227,34 @@ struct MobileLibraryView<TabBar: View>: View {
             } label: {
                 // The ONE door word (P33: the shelf's twin reads it too).
                 Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens))
             .accessibilityLabel("New Note")
+            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     private var searchField: some View {
-        TextField(tokens.chromeLabel("Search notes, books…"), text: $query)
+        TextField(phonePlaceholder: tokens.chromeLabel("Search notes, books…"), text: $query, tokens: tokens)
             .textFieldStyle(.plain)
-            .font(tokens.small)
-            .foregroundStyle(tokens.ink)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(tokens.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(tokens.line, lineWidth: 1)))
+            .phoneField(tokens)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
+            // VM-47 (the walk's W-C2): a page that is not on screen never holds
+            // the keyboard. When the tab road pops this stack back to its root
+            // while the page slides away (P-47-19), the framework hands the
+            // field it covered back its first responder; the field gives it up
+            // at once while hidden, and on leaving the screen. On the screen —
+            // a Back from her hit — that restoration stands, as before.
+            .focused($searchFocused)
+            .onChange(of: searchFocused) { _, focused in
+                if focused && !pageShowing { searchFocused = false }
+            }
+            .onChange(of: pageShowing) { _, showing in
+                if !showing { searchFocused = false }
+            }
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
     }
@@ -253,8 +267,8 @@ struct MobileLibraryView<TabBar: View>: View {
     /// The sort rides the trailing slot as a GLYPH (#92(b) — *"the width
     /// budget gives at the SORT"*), and its **availability rule is
     /// unchanged**: `.all` only. Bookless keeps the core query's own order,
-    /// scraps are pointer-ordered, books order as the SHELF orders (pins
-    /// first, then journals, then names — `MobileShelfFaces.ordered`), and
+    /// scraps are pointer-ordered, books order as the SHELF orders (starred
+    /// first, then a–z — `MobileShelfViewModel.orderedBooks`, VM-83), and
     /// `.notes` shows the note HALF of `.all`'s union in `.all`'s own order,
     /// so a sort door on any of them could not mean what it says.
     /// *(PROVISIONAL, logged: `.notes` is ordered by the sort `.all` is set
@@ -295,8 +309,12 @@ struct MobileLibraryView<TabBar: View>: View {
             }
         } label: {
             Image(systemName: MobileSortDoor.symbol)
-                .font(tokens.small)
+                .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.accent)
+                // VM-49: 44 tall; its width stays the glyph's (#92(b)'s
+                // budget — the full 44 × 44 is the Library's sort, VM-90).
+                .frame(minHeight: PhoneMetrics.touchMinimum)
+                .contentShape(Rectangle())
         }
         .accessibilityLabel(
             MobileSortDoor.label(
@@ -311,7 +329,7 @@ struct MobileLibraryView<TabBar: View>: View {
     /// second row-rendering rule: `rowName` is `MobileShelfFaces.name` (the
     /// stored name plus the finished " ✓" state) and `rowMeta` is
     /// `MobileShelfFaces.meta` (LK5's order — count · tags · daily). The order
-    /// is `MobileShelfFaces.ordered`, so a book sits where the Shelf puts it.
+    /// is `MobileShelfViewModel.orderedBooks`, so a book sits where the Shelf puts it.
     /// A row opens the book's CONTENTS, which is exactly what the Shelf's row
     /// does (P35's ruled inversion).
     ///
@@ -324,8 +342,8 @@ struct MobileLibraryView<TabBar: View>: View {
         let windowed = model.windowedBooks(books.orderedBooks)
         if windowed.rows.isEmpty {
             Text(tokens.chromeLabel(MobileListingFilter.noBooksLine))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
                 .accessibilityLabel(MobileListingFilter.noBooksLine)
         }
@@ -353,19 +371,19 @@ struct MobileLibraryView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(tokens.chromeLabel(name))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(
                         book.reading.locked ? tokens.accent : tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 Text(tokens.chromeLabel(meta))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .lineLimit(1)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // Plain, and it carries the META as well as the name — an
@@ -394,8 +412,8 @@ struct MobileLibraryView<TabBar: View>: View {
             let marker = MobileRoomListing.truncationMarker(
                 shown: windowed.rows.count, of: books.orderedBooks.count)
             Text(tokens.chromeLabel(marker))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 12)
                 .accessibilityLabel(marker)
@@ -416,10 +434,11 @@ struct MobileLibraryView<TabBar: View>: View {
     /// truncation sentence rides the union too — a book that is not loaded is
     /// not loaded under either door.
     ///
-    /// *(The NOTE half carries no marker at all, and that is PRE-EXISTING
-    /// rather than this batch's: `observeLibrary`'s `limit:` cuts silently.
-    /// Its home is the standing "Bounded view windows show markers, not more"
-    /// row in `KnownIssuesAndTechDebt.md`, owner 12.)*
+    /// **VM-68 — the NOTE half is a page, never a cap** (it used to cut
+    /// silently at 200): a note row coming on screen near the end of what is
+    /// listed asks for the next page (`rowAppeared`), so every note is
+    /// reachable by scrolling. No marker and no button — the rows simply
+    /// continue, the Mac Library's own precedent.
     @ViewBuilder
     private var listingRows: some View {
         let shelved: (rows: [Queries.ShelfBook], truncated: Bool) =
@@ -447,10 +466,10 @@ struct MobileLibraryView<TabBar: View>: View {
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotes))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
-                    .foregroundStyle(tokens.faint)
+                    .foregroundStyle(tokens.phone.muted)
             }
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
@@ -459,8 +478,8 @@ struct MobileLibraryView<TabBar: View>: View {
             // The books listing's empty-line shape (`bookRows`), and its
             // accessibility rule: the plain sentence, never voice-cased.
             Text(tokens.chromeLabel(MobileListingFilter.noBooklessLine))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
                 .accessibilityLabel(MobileListingFilter.noBooklessLine)
         case nil:
@@ -481,21 +500,25 @@ struct MobileLibraryView<TabBar: View>: View {
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(MobileLibraryViewModel.rowTitle(item))
-                    .font(tokens.body)
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                 Spacer(minLength: 12)
                 if let day = item.entryDate {
                     Text(day)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.meta, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                 }
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
+        // VM-68: near the end of what is listed, the next page is asked for.
+        .onAppear {
+            if let listing = model.shownListing { model.rowAppeared(item.postID, in: listing) }
+        }
         // Star (parity C3, her ruling 10): the note row's long-press
         // — the Mac's own row-menu placement, the phone's grammar.
         .contextMenu {
@@ -503,7 +526,13 @@ struct MobileLibraryView<TabBar: View>: View {
             Button(tokens.chromeLabel(
                 MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
                 let stars = stars
-                Task { await stars.toggle(target, from: .library) }
+                let model = model
+                Task {
+                    await stars.toggle(target, from: .library)
+                    // VM-64 ladder round 2, finding 1: a ★ can move a Bookless
+                    // row past the first page out of (or into) the loose class.
+                    model.rowStarLanded()
+                }
             }
             // Delete the note (round 2 batch 4 — PR1): the row's
             // long-press, beside Star, the phone's established
@@ -521,8 +550,8 @@ struct MobileLibraryView<TabBar: View>: View {
     private func hitRows(_ hits: [Queries.CatalogHit]) -> some View {
         if hits.isEmpty {
             Text(tokens.chromeLabel("Nothing found."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .padding(.vertical, 24)
         }
         ForEach(Array(hits.enumerated()), id: \.offset) { _, hit in
@@ -532,18 +561,18 @@ struct MobileLibraryView<TabBar: View>: View {
                 } label: {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(hit.title)
-                            .font(tokens.body)
+                            .phoneType(.rowTitle, tokens)
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
                         Spacer(minLength: 12)
                         Text(tokens.chromeLabel(hitDetail(hit)))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .lineLimit(1)
                     }
                     .padding(.vertical, 10)
                     .padding(.horizontal, 12)
-                    .contentShape(Rectangle())
+                    .phoneHitArea(alignment: .leading)
                 }
                 .buttonStyle(.plain)
             }

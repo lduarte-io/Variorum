@@ -223,8 +223,13 @@ struct MobileDeletionTests {
     /// refusal vocabulary already names: the note is **already gone**, which
     /// is exactly what a second tab's delete leaves behind.
     ///
-    /// **Red on old:** remove the sheet's `reportLine` and the refusal is
-    /// nowhere in the sheet's tree.
+    /// **VM-61 (2026-11-19): the refusal speaks on the shell's ONE line now,
+    /// which draws ABOVE the sheet** (its own overlay window — the layering is
+    /// `MobileMessageLineHostTests`' pin). So the sheet keeps no slot of its
+    /// own, and this pin reads the one seam: the refusal reached it as a
+    /// refusal, while the sheet stayed up. **A regression trips it:** a sheet
+    /// act whose refusal never reached the seam (or reached it as a receipt the
+    /// phone drops) leaves `current` nil or wrongly classed.
     @Test func aRefusedDeleteIsSpokenOnTheSheetThatRaisedIt() async throws {
         try await withEditorWorld { session, _ in
             let postID = try await makePost(session, blocks: ["Already gone."])
@@ -252,8 +257,11 @@ struct MobileDeletionTests {
                         "the sheet stayed up — labels were \(labels)")
                 let message = try #require(model.statusMessage, "the act refused in words")
                 #expect(message == "That note is already gone.")
-                #expect(labels.contains { $0.contains(message) },
-                        "the refusal is ON the sheet — labels were \(labels)")
+                let line = try #require(session.status.current, "the one line speaks it")
+                #expect(line.kind == .refusal)
+                #expect(line.text == message, "the refusal is ON the line, above the sheet")
+                #expect(!labels.contains { $0.contains(message) },
+                        "and the sheet keeps no slot of its own — labels were \(labels)")
             }
         }
     }
@@ -322,7 +330,6 @@ struct MobileDeletionTests {
                     model: shelf, stars: stars, quickNote: quick,
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onSettings: {},
                     onOpenTrash: { opened.value = true })
             ) { surface in
                 await surface.settle(20)
@@ -418,8 +425,7 @@ struct MobileDeletionTests {
                     model: shelf, stars: MobileStarsModel(session: session),
                     quickNote: MobileQuickNoteModel(), tokens: .terminalLight,
                     tabBar: { EmptyView() },
-                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onSettings: {})
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
                 shelf.requestDeleteBook(book)
                 await surface.settle(40)
@@ -456,12 +462,12 @@ struct MobileDeletionTests {
                     session: session, readingID: readingID, tokens: .terminalLight)
             ) { surface in
                 await surface.settle(30)
-                #expect(surface.activate(MobileShelfFaces.deleteBookDoorTitle),
+                #expect(surface.activate(MobileShelfFaces.deleteDoorTitle(for: .book)),
                         "labels were \(surface.visibleLabels)")
                 await surface.settle(40)
                 let alert = try #require(surface.presentedAlert,
                                          "the confirm must actually present")
-                #expect(alert.title == MobileShelfFaces.deleteBookConfirmTitle)
+                #expect(alert.title == MobileShelfFaces.deleteConfirmTitle(for: .book))
                 #expect(alert.message?.contains("Field Notes") == true,
                         "the confirm names what it destroys (principle M-E)")
                 #expect(alert.message?.contains(
@@ -498,13 +504,12 @@ struct MobileDeletionTests {
                 MobileShelfView(
                     model: shelf, stars: stars, quickNote: quickNote,
                     tokens: .terminalLight, tabBar: { EmptyView() },
-                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onSettings: {})
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
                 shelf.requestDeleteBook(book)
                 await surface.settle(40)
                 let alert = try #require(surface.presentedAlert)
-                #expect(alert.title == MobileShelfFaces.deleteBookConfirmTitle)
+                #expect(alert.title == MobileShelfFaces.deleteConfirmTitle(for: .book))
                 #expect(alert.message?.contains("Shelf Book") == true)
             }
         }
@@ -517,7 +522,7 @@ struct MobileDeletionTests {
             .contains(RecoveryCopy.deleteBookKeepsItsNotes))
         #expect(MobileShelfFaces.deleteBookConfirmDetail(name: nil)
             .hasPrefix("The book goes"))
-        #expect(MobileShelfFaces.deleteBookDoorTitle == "Delete Book…")
+        #expect(MobileShelfFaces.deleteDoorTitle(for: .book) == "Delete Book…")
     }
 }
 

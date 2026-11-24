@@ -48,18 +48,18 @@ final class MobileTakesBrowserView: UIView {
     private let dimView = UIView()
     private let sheetView = UIView()
     private let headerLabel = UILabel()
-    private let doneButton = UIButton(type: .custom)
+    private let doneButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let cardsScroll = UIScrollView()
     private let footerLabel = UILabel()
-    private let branchButton = UIButton(type: .custom)
-    private let blankButton = UIButton(type: .custom)
+    private let branchButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
+    private let blankButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     /// **BATCH 7 — the sheet's ACTIONS ROW** (PL-10(d), E6b's one door).
     /// A block-scoped act among take-scoped ones, so it gets its own line
     /// above the mint footer rather than a fourth word crowding it, and it
     /// renders ONLY while a fan exists (P-2: `canTurnTakesIntoBlocks`) — so
     /// the calm one-take sheet is byte-identical to the one that shipped and
     /// gives up no card height. PROVISIONAL placement, recorded.
-    private let takesToBlocksButton = UIButton(type: .custom)
+    private let takesToBlocksButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
 
     /// THE one live card editor (P3): a single instance that moves onto
     /// whichever card is being edited.
@@ -298,27 +298,27 @@ final class MobileTakesBrowserView: UIView {
             width: bounds.width, height: max(bounds.height - Self.sheetTop, 0))
         sheetView.backgroundColor = face.surface
 
-        let chrome = face.chrome.withSize(13)
+        let chrome = face.font(.controlInline)
         if let (k, n) = browser.headerOrdinal() {
             headerLabel.text = chromeCase("Takes · block \(k) of \(n)")
         } else {
             headerLabel.text = chromeCase("Takes")
         }
-        headerLabel.font = chrome
+        headerLabel.font = face.font(.screenTitle)
         headerLabel.textColor = face.muted
         headerLabel.sizeToFit()
         headerLabel.frame.origin = CGPoint(x: 20, y: 14)
 
         doneButton.setTitle(chromeCase("Done"), for: .normal)
         doneButton.setTitleColor(face.accent, for: .normal)
-        doneButton.titleLabel?.font = face.chrome.withSize(12.5)
+        doneButton.titleLabel?.font = face.font(.control)
         doneButton.sizeToFit()
         doneButton.frame = CGRect(
             x: sheetView.bounds.width - doneButton.bounds.width - 20, y: 10,
             width: doneButton.bounds.width, height: 24)
 
         footerLabel.text = chromeCase("+ New take")
-        footerLabel.font = chrome
+        footerLabel.font = face.font(.sectionHeader)
         footerLabel.textColor = face.muted
         footerLabel.sizeToFit()
         branchButton.setTitle(chromeCase("Branch this one ⧉"), for: .normal)
@@ -435,7 +435,7 @@ final class MobileTakesBrowserView: UIView {
         } else {
             archivedHeader.isHidden = false
             archivedHeader.text = chromeCase("Archived · \(archivedCards.count)")
-            archivedHeader.font = face.chrome.withSize(12)
+            archivedHeader.font = face.font(.sectionHeader)
             archivedHeader.textColor = face.muted
             archivedHeader.sizeToFit()
             y += 6
@@ -615,11 +615,13 @@ final class MobileTakesCardView: UIView {
     let variantID: String
     private let stateLabel = UILabel()
     private let takeLabel = UILabel()
-    private let chooseButton = UIButton(type: .custom)
-    private let menuButton = UIButton(type: .custom)
+    private let chooseButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
+    private let menuButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let bodyLabel = UILabel()
     private let edgeBar = UIView()
     private var editorHost: UIView?
+    /// VM-54: the card's edge, re-resolved at every light/dark change.
+    private lazy var border = MobileTraitBorder(self)
     private let onEdit: () -> Void
     private let onArchive: () -> Void
     private let onDelete: () -> Void
@@ -706,11 +708,12 @@ final class MobileTakesCardView: UIView {
         fanned: Bool = false
     ) {
         backgroundColor = card.isPeeked ? face.takeTint : face.card
-        layer.borderColor = (card.isChosen ? face.chosenMark : face.line)
-            .resolvedColor(with: traitCollection).cgColor
+        // VM-54: the DYNAMIC colour, kept — a CGColor resolved here alone
+        // stayed in the old appearance after a light/dark flip.
+        border.set(card.isChosen ? face.chosenMark : face.line)
         edgeBar.backgroundColor = card.isPeeked ? face.takeLine : .clear
 
-        let chrome = face.chrome.withSize(12)
+        let chrome = face.font(.meta)
         let state: String
         if card.isChosen {
             state = chromeCase("✓ Chosen")
@@ -736,7 +739,7 @@ final class MobileTakesCardView: UIView {
         chooseButton.titleLabel?.font = chrome
 
         menuButton.setTitleColor(face.muted, for: .normal)
-        menuButton.titleLabel?.font = face.chrome.withSize(14)
+        menuButton.titleLabel?.font = face.font(.control)
         // Rebuilt per apply, so the lock row MIRRORS the take's state
         // (parity C4a — the seal glyph's one-reversible-tap grammar,
         // menu-rowed) and a voice flip reaches an already-built card.
@@ -856,8 +859,10 @@ final class MobileArchivedTakeCardView: UIView {
     let variantID: String
     private let stateLabel = UILabel()
     private let takeLabel = UILabel()
-    private let menuButton = UIButton(type: .custom)
+    private let menuButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let bodyLabel = UILabel()
+    /// VM-54: the card's edge, re-resolved at every light/dark change.
+    private lazy var border = MobileTraitBorder(self)
     private let onUnarchive: () -> Void
     private let onDelete: () -> Void
     private let onLabel: () -> Void
@@ -901,9 +906,9 @@ final class MobileArchivedTakeCardView: UIView {
         chromeCase: (String) -> String
     ) {
         backgroundColor = face.card
-        layer.borderColor = face.line.resolvedColor(with: traitCollection).cgColor
+        border.set(face.line)  // VM-54: follows a light/dark flip
 
-        let chrome = face.chrome.withSize(12)
+        let chrome = face.font(.meta)
         stateLabel.text = chromeCase("Archived")
         stateLabel.font = chrome
         stateLabel.textColor = face.muted
@@ -914,7 +919,7 @@ final class MobileArchivedTakeCardView: UIView {
         takeLabel.isHidden = (card.label ?? "").isEmpty
 
         menuButton.setTitleColor(face.muted, for: .normal)
-        menuButton.titleLabel?.font = face.chrome.withSize(14)
+        menuButton.titleLabel?.font = face.font(.control)
         // **NO `Block History…` ROW HERE, and the absence is deliberate**
         // (batch 9). Her letter says *"each take"*, and an archived take is
         // one — but the door's whole gain over the retired block-⋯ row is

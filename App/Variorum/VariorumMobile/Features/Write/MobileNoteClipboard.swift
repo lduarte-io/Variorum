@@ -104,6 +104,20 @@ enum MobileNoteClipboard {
                 return "Copy failed: \(detail)"
             }
         }
+
+        /// **VM-61 — the outcome's class on the one line**, decided here
+        /// where the outcome is: a plain copy is an ordinary act (her ruling:
+        /// no line — the copy follows what is on screen and says nothing
+        /// after); the copy that did NOT follow the screen is a direction she
+        /// must see (the Mac `StatusCenter.direct`'s class — the batch-7
+        /// reason it speaks at all); nothing to copy and a failure are
+        /// refusals.
+        var line: MobileLine.Class {
+            switch self {
+            case .copied: return .ordinary
+            case .copiedSavedTakes, .nothingToCopy, .failed: return .refusal
+            }
+        }
     }
 
     /// What a projection came back as: the text, and the ONE thing about it

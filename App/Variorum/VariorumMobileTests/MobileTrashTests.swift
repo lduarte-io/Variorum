@@ -157,6 +157,74 @@ struct MobileTrashTests {
         }
     }
 
+    // MARK: - VM-33: the first paint never says "empty" before it has looked
+
+    /// **VM-33 — the Mac's VX-670 empty flash, phone side (Suspected → the
+    /// check is this pin).** `MobileTrashModel.trash` starts `[]` and the
+    /// listing fills only when `observeTrash`'s first value arrives, which
+    /// the view's `.task` starts AFTER the first render; the view drew its
+    /// empty line on `model.trash.isEmpty`. So a non-empty Trash's first paint
+    /// said "Nothing in the Trash." until the value landed.
+    ///
+    /// **The observation is held back by construction:** the surface is
+    /// built and laid out with no `await` in between, so the `.task` that
+    /// starts the observation cannot run (this test holds the main actor) —
+    /// exactly the frame she sees first. The "Sort" door is the control: the
+    /// tree really painted, so the empty line's absence is a reading, not a
+    /// dead tree.
+    ///
+    /// **Red on old:** the first paint carried "Nothing in the Trash." over a
+    /// Trash holding a note.
+    @Test func theFirstPaintSaysNothingBeforeTheListingAnswers() async throws {
+        try await withEditorWorld { session, _ in
+            let gone = try await seedDeletedNote(session, title: "Waiting in the Trash")
+            let model = MobileTrashModel(session: session)
+            let surface = HostedSurface(
+                MobileTrashView(model: model, tokens: .terminalLight, onOpen: { _ in }))
+            defer {
+                surface.checkAccessibilityTreeWasAlive(sourceLocation: #_sourceLocation)
+                surface.tearDown()
+            }
+            // `settle`'s own load-bearing layout passes (the lazy stack
+            // materializes only after its scroll view has laid out) — run
+            // synchronously, so still no await.
+            for _ in 0..<3 {
+                surface.host.view.setNeedsLayout()
+                surface.host.view.layoutIfNeeded()
+            }
+            let firstPaint = surface.visibleLabels
+            #expect(firstPaint.contains("Sort"),
+                    "the control: the surface really painted — labels were \(firstPaint)")
+            #expect(model.trash.isEmpty,
+                    "the premise: the listing has not answered at the first paint")
+            #expect(!firstPaint.contains(MobileTrashView.emptyTrashLine),
+                    "the first paint must not say the Trash is empty before it has looked")
+
+            // The listing answers: the note rows, and still no empty line.
+            await surface.settle(40)
+            #expect(model.trash.contains { $0.id == gone })
+            #expect(!surface.visibleLabels.contains(MobileTrashView.emptyTrashLine),
+                    "labels were \(surface.visibleLabels)")
+        }
+    }
+
+    /// The control (green on both sides): a Trash that IS empty still says so
+    /// once the listing has answered — the fix withholds the sentence only
+    /// until it is true.
+    @Test func anEmptyTrashSaysSoOnceTheListingAnswers() async throws {
+        try await withEditorWorld { session, _ in
+            let model = MobileTrashModel(session: session)
+            try await withHostedSurface(
+                MobileTrashView(model: model, tokens: .terminalLight, onOpen: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(model.trash.isEmpty)
+                #expect(surface.visibleLabels.contains(MobileTrashView.emptyTrashLine),
+                        "labels were \(surface.visibleLabels)")
+            }
+        }
+    }
+
     /// The kind filter is applied IN SQL and restarts the observation — a
     /// window applied before a filter would window the wrong set. Driven on
     /// the real filter buttons.

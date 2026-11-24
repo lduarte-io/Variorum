@@ -4,7 +4,7 @@
 //
 //  Mobile Stage 3, batch 1 — the shelf home's model (M7: shelf-first).
 //  Mirrors the Mac `ShelfViewModel`'s cost tiers exactly (the P1
-//  discipline the core query documents): the book list + pins + the daily
+//  discipline the core query documents): the book list + the daily
 //  designation ride ONE held observation (author-scale rows); the tags
 //  column is a ONE-SHOT load on appearance/refresh — corpus-adjacent
 //  aggregates never re-run at autosave rate. Word counts (the Mac's other
@@ -27,13 +27,18 @@ final class MobileShelfViewModel {
     @ObservationIgnored let session: AppSession
 
     private(set) var books: [Queries.ShelfBook] = []
-    private(set) var pins: [String] = []
     private(set) var dailyBookID: String?
     private(set) var bookTags: [String: [String]] = [:]
     /// 13i-a: gatherings' rule tags as live paths (rules hold IDs now).
     private(set) var ruleTags: [String: [String]] = [:]
-    private(set) var lastError: String?
-    /// The Today door's shelving note (not an error — rendered muted).
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
+    /// The Today door's shelving note (not an error — rendered muted), and
+    /// the book doors' receipts. VM-61: each write below speaks on the one
+    /// line with its own class.
     private(set) var lastReport: String?
 
     /// How many values the HELD books observation has delivered. Test
@@ -54,27 +59,32 @@ final class MobileShelfViewModel {
     /// inside the observation).
     nonisolated struct Snapshot: Equatable, Sendable {
         var books: [Queries.ShelfBook]
-        var pins: [String]
         var dailyBookID: String?
     }
 
-    /// The held half: books + pins + the daily designation (all tiny).
+    /// The held half: books + the daily designation (all tiny). VM-83: the
+    /// pin list left with the Pin door — each `ShelfBook` carries the UNION
+    /// star (`starred`), which is what the order floats.
+    ///
+    /// VM-57: the books of the wing the phone stands in (the Shelf AND the
+    /// Library's Books filter, which wears this same model), re-read for
+    /// each wing.
     func start() async {
-        do {
-            for try await value in session.database.observe({ db in
-                Snapshot(
-                    books: try Queries.bookshelf(db),
-                    pins: try Queries.shelfPins(db),
-                    dailyBookID: try Queries.dailyJournalBookID(db))
-            }) {
-                observationTicks += 1
-                books = value.books
-                pins = value.pins
-                dailyBookID = value.dailyBookID
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await value in session.database.observe({ db in
+                    Snapshot(
+                        books: try Queries.bookshelf(db, wingID: wing),
+                        dailyBookID: try Queries.dailyJournalBookID(db))
+                }) {
+                    observationTicks += 1
+                    books = value.books
+                    dailyBookID = value.dailyBookID
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
         }
     }
 
@@ -86,13 +96,21 @@ final class MobileShelfViewModel {
                 (try Queries.shelfBookTags($0), try Queries.ruleTagPaths($0))
             }
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
-    /// Shelf order — the Mac semantics via the pure face brain.
+    /// **Shelf order — the Mac Bookcase's own rule** (VM-83, W-068; her
+    /// ruling 2026-11-19: "book order - that's fine to leave it for wave 3"):
+    /// the shared `BookcaseBoard.ordered` — STARRED books float first, then
+    /// a–z by Finder's comparison (case-blind, digit-aware: "apple" before
+    /// "Zebra", "Book 2" before "Book 10"), journal books among the rest. The
+    /// retired `ShelfOrder` rule (pins, then journal-trait books, then
+    /// case-sensitive `<`) is gone. A–Z only: the visible "a–z or last
+    /// edited" choice is the Bookcase's real chrome, wave 3 (VM-113). The
+    /// Library's book rows read this order too.
     var orderedBooks: [Queries.ShelfBook] {
-        MobileShelfFaces.ordered(books: books, pins: pins)
+        BookcaseBoard.ordered(books, mode: .alphabetical, lastEdited: [:])
     }
 
     /// One row's faces (LK5): name-with-state, and the meta line.
@@ -115,20 +133,22 @@ final class MobileShelfViewModel {
             isDaily: showingDailyMarker && book.reading.id == dailyBookID)
     }
 
-    /// Pin / unpin (parity C2 — the [B1] record's deliberately-deferred
-    /// ACT; the phone has RENDERED pin order since S3): one reversible
-    /// toggle through the core's own `setShelfPinned` (append-to-pin-order
-    /// semantics, idempotent both ways — R38's letter).
-    func setPinned(_ readingID: String, pinned: Bool) async {
-        do {
-            try await session.runner.run { ops in
-                try ops.setShelfPinned(readingID, pinned: pinned)
-            }
-            lastError = nil
-        } catch {
-            lastError = String(describing: error)
-        }
+    /// **The row's long-press menu, as data** (VM-83, W-071): the acts in the
+    /// order the view draws them. `starred` is the stars model's answer (the
+    /// Star door's own state source).
+    func rowActs(for book: Queries.ShelfBook, starred: Bool) -> [MobileShelfRowAct] {
+        [
+            .star(starred: starred),
+            MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading)
+                ? .archiveDailyJournal : .delete(book.reading.kind),
+        ]
     }
+
+    // (VM-83, W-071: `setPinned` — the row's "Pin to Shelf Top" — RETIRED.
+    // Since 13i-d `setShelfPinned` IS `setStarred`, so Pin and Star were two
+    // doors writing one star, and pressing Pin flipped Star's label too. The
+    // Star door is the one door, as on the Mac: SurfaceContracts, The
+    // Bookcase — "the Mac's Pin door is retired into Star".)
 
     /// + New Note (P33, parity A3 — Library's twin through the ONE
     /// shared mint): a nameless bookless note, opened for writing.
@@ -136,7 +156,7 @@ final class MobileShelfViewModel {
         do {
             return try await MobileNewNoteDoor.mint(session: session)
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }
@@ -191,14 +211,18 @@ final class MobileShelfViewModel {
                 try ops.deleteReading(book.reading.id)
             }
             lastError = nil
-            lastReport = RecoveryCopy.movedToTrashReceipt(.book)
+            // VM-83 (W-073): a gathering's receipt names a gathering.
+            lastReport = RecoveryCopy.movedToTrashReceipt(
+                .book, isGathering: book.reading.kind == .gathering)
+            MobileLine.say(
+                lastReport, as: .removal(.putBackBook(book.reading.id)), session: session)
             return true
         } catch {
             lastReport = nil
             // The ONE deletion-refusal home (A1-18) — this door used to
             // borrow the book-details table, which covered a different subset
             // of `OperationError` than the Trash's did.
-            lastError = DeletionRefusal.words(error)
+            lastError = DeletionRefusal.sentence(error, roads: .phone)
             return false
         }
     }
@@ -211,9 +235,11 @@ final class MobileShelfViewModel {
             try await session.runner.run { ops in try ops.archiveReading(book.reading.id) }
             lastError = nil
             lastReport = MobileShelfFaces.archivedDailyJournalReceipt(name: book.reading.name)
+            MobileLine.say(
+                lastReport, as: .removal(.unarchiveBook(book.reading.id)), session: session)
         } catch {
             lastReport = nil
-            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
+            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.sentence(error, roads: .phone)
         }
     }
 
@@ -224,9 +250,12 @@ final class MobileShelfViewModel {
         do {
             let outcome = try await MobileTodayDoor.open(session: session, day: day)
             lastReport = outcome.note
+            // The entry opened but was NOT filed — a direction she must see
+            // (the Mac ⌘J door's own class: `status.refuse(note)`).
+            MobileLine.say(outcome.note, as: .refusal, session: session)
             return outcome.postID
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }

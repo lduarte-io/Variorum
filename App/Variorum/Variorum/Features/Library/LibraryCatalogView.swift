@@ -1274,7 +1274,7 @@ struct LibraryCatalogView: View {
 
     /// VX-831: a listed BOOK's own Private mark (a gathering never wears it).
     private func privateBookDoor(_ hit: Queries.CatalogHit) -> PrivateMarkDoor? {
-        PrivateMarkFace.book(marked: model.privateBookIDs.contains(hit.id))
+        PrivateMarkFace.book(model.privateBookMarks[hit.id])
             .map { PrivateMarkDoor(mark: $0, subjectID: hit.id, subjectName: hit.title, session: session) }
     }
 

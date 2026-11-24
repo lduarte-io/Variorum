@@ -134,7 +134,7 @@ final class MobileCommentsController {
             deleted = value.deleted
             onChanged?()
         } catch {
-            model?.report(String(describing: error))
+            model?.report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -283,17 +283,17 @@ final class MobileCommentsController {
     /// seal speaks the ONE stem in the phone's door words with this door's
     /// act; "A comment needs some text." is the shared refusal table's now
     /// (both platforms' comment faces already said it byte-for-byte); the
-    /// rest is the table's words where it has them, and the operations
-    /// layer's own description where it has none.
+    /// rest is the table's words where it has them, and the one plain
+    /// fallback where it has none (VM-62 — never the case name).
     static func refusalMessage(_ error: Error) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
             return SealedNoteCopy.sentence(act: "change comments", words: .phone)
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

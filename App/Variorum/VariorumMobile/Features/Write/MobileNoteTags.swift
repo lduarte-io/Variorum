@@ -36,7 +36,12 @@ final class MobileNoteTagsModel {
 
     private(set) var applied: [Tag] = []
     private(set) var allTags: [Tag] = []
-    private(set) var status: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); the sheet no longer
+    /// draws it.
+    private(set) var status: String? {
+        didSet { MobileLine.refuse(status, session: session) }
+    }
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -68,16 +73,45 @@ final class MobileNoteTagsModel {
 
     // MARK: - Reads
 
+    ///
+    /// VM-59: the suggestions are the NOTE's own wing's vocabulary (the wing
+    /// `TypedTagPath.apply` resolves a tapped path in) — never every wing's,
+    /// where a tap on another wing's path minted a same-path twin here, and
+    /// never the app's current wing, which differs while a note from another
+    /// wing is open.
     func refresh() async {
         do {
             let postID = postID
             let (mine, all) = try await session.database.read { db in
-                (try Queries.postTags(db, postID: postID), try Queries.allTags(db))
+                let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                return (try Queries.postTags(db, postID: postID),
+                        try Queries.allTags(db, wingID: wing))
             }
             applied = mine
             allTags = all
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
+        }
+    }
+
+    /// **The masthead chip's read** (VM-69 — the open's chips read only what
+    /// they show). The chip shows this note's own tags, so it reads exactly
+    /// those — `Queries.postTags`, `refresh()`'s own read of them, so the
+    /// chip's line is `refresh()`'s line. The vocabulary behind the sheet's
+    /// suggestions is the SHEET's to read, and it does on appear
+    /// (`MobileNoteTagsSheet`'s `.task`). A failure falls back to the full
+    /// read, which speaks as it always has (a cancellation — the screen gone —
+    /// says nothing).
+    func refreshChip() async {
+        do {
+            let postID = postID
+            applied = try await session.database.read { db in
+                try Queries.postTags(db, postID: postID)
+            }
+        } catch is CancellationError {
+            // The screen left before the chip answered: nothing to show.
+        } catch {
+            await refresh()
         }
     }
 
@@ -147,27 +181,13 @@ struct MobileNoteTagsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Tags"))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Tags"), tokens: tokens) { dismiss() }
             typeField
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     appliedSection
                     suggestionSection
-                    if let status = model.status {
-                        Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                 }
             }
         }
@@ -178,20 +198,11 @@ struct MobileNoteTagsSheet: View {
 
     private var typeField: some View {
         TextField(
-            tokens.chromeLabel("type a tag — ⏎ applies it (“/” nests: life/goals)"),
-            text: $typed
+            phonePlaceholder: tokens.chromeLabel("type a tag — ⏎ applies it (“/” nests: life/goals)"),
+            text: $typed, tokens: tokens
         )
         .textFieldStyle(.plain)
-        .font(tokens.small)
-        .foregroundStyle(tokens.ink)
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(tokens.surface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(tokens.line, lineWidth: 1)))
+        .phoneField(tokens)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .focused($typedFocused)
@@ -212,8 +223,8 @@ struct MobileNoteTagsSheet: View {
         if model.applied.isEmpty {
             Text(tokens.chromeLabel(
                 "This note wears no tags yet — type one above, or tap a suggestion."))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             ForEach(model.applied, id: \.id) { tag in
@@ -221,13 +232,13 @@ struct MobileNoteTagsSheet: View {
                     // The chip says the LEAF (K3); the row beside it says
                     // the whole path (hierarchy stays surfaced, R45).
                     Text("#\(MobileShelfFaces.leaf(tag.path))")
-                        .font(tokens.body)
+                        .phoneType(.rowTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
                     if tag.path.contains("/") {
                         Text(tag.path)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
+                            .phoneType(.meta, tokens)
+                            .foregroundStyle(tokens.phone.muted)
                             .lineLimit(1)
                     }
                     Spacer()
@@ -235,9 +246,7 @@ struct MobileNoteTagsSheet: View {
                         let model = model
                         Task { await model.remove(tag) }
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     .accessibilityLabel("Remove tag \(tag.path)")
                 }
                 .padding(.vertical, 4)
@@ -252,8 +261,8 @@ struct MobileNoteTagsSheet: View {
         if !suggestions.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tokens.chromeLabel("Apply a tag"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
+                    .phoneType(.sectionHeader, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .padding(.top, 6)
                 ForEach(suggestions, id: \.id) { tag in
                     Button {
@@ -266,13 +275,13 @@ struct MobileNoteTagsSheet: View {
                     } label: {
                         HStack {
                             Text(tokens.chromeLabel("+ #\(tag.path)"))
-                                .font(tokens.body)
+                                .phoneType(.control, tokens)
                                 .foregroundStyle(tokens.accent)
                                 .lineLimit(1)
                             Spacer()
                         }
                         .padding(.vertical, 4)
-                        .contentShape(Rectangle())
+                        .phoneHitArea(alignment: .leading)
                     }
                     .buttonStyle(.plain)
                 }

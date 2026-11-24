@@ -1,6 +1,7 @@
 import Darwin
 import Dependencies
 import Foundation
+import MCP
 import Testing
 
 @testable import VariorumCore
@@ -274,6 +275,10 @@ struct MCPStalledReaderPoolTests {
         close(pair[1])
     }
 
+    // VX-773 (the VX-981 run, batch 4): DEBUG-only — it tries the close line inside the gap through the transport's
+    // `setMidFrameProbeForTesting`. The release-
+    // configuration test build compiles this target where that seam does not exist.
+    #if DEBUG
     /// The close line never lands INSIDE a frame (VX-762's invariant, kept by
     /// the fast road): a frame to a client that stopped reading goes out in
     /// part at once, and its rest waits on the writer — the write lock is free
@@ -316,6 +321,7 @@ struct MCPStalledReaderPoolTests {
         await transport.disconnect()
         close(pair[0])
     }
+    #endif
 
     /// The close line NEVER WAITS (VX-762's contract; VX-933's face of it): a
     /// stop says it from the stopping thread — the main thread at her switch —
@@ -324,6 +330,13 @@ struct MCPStalledReaderPoolTests {
     /// once, never sent into a buffer that cannot take it. `MSG_DONTWAIT` does
     /// not stop such a send from waiting on a Unix-domain socket here, so the
     /// old line blocked its caller until the client read.
+    ///
+    /// VX-944's riders (the VX-981 run, batch 3): the call goes through
+    /// `sayClosingBounded` (this pin's own shape, once — it was written out
+    /// here a second time), and the DROP path is held to the mark's restore as
+    /// the sending path is (`aCloseLineGoesWholeWheneverTheSocketHasRoomForIt`):
+    /// the line raised the socket's send low-water mark for its one try, and a
+    /// mark left there would change every later fast-road step.
     @Test func aCloseLineToAClientThatStoppedReadingNeverWaits() async throws {
         var pair: [Int32] = [-1, -1]
         try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
@@ -334,34 +347,18 @@ struct MCPStalledReaderPoolTests {
         // A whole frame the client never reads, leaving the buffer FEWER free
         // bytes than the line holds (a send of the line then waits — the
         // socket also polls not-writable: less room than its low-water mark).
-        var capacity: Int32 = 0
-        var size = socklen_t(MemoryLayout<Int32>.size)
-        try #require(getsockopt(pair[0], SOL_SOCKET, SO_SNDBUF, &capacity, &size) == 0 && capacity > 64)
+        let capacity = try #require(Self.option(pair[0], SO_SNDBUF))
+        try #require(capacity > 64)
+        let mark = try #require(Self.option(pair[0], SO_SNDLOWAT))
         let closeLine = try #require(MCPCloseLine.line("Variorum closed this connection."))
-        let filler = Data(repeating: UInt8(ascii: "f"), count: Int(capacity) - 1 - 8)  // 8 bytes left free
+        let filler = Data(repeating: UInt8(ascii: "f"), count: capacity - 1 - 8)  // 8 bytes left free
         try await transport.send(filler)
         #expect(!Self.writable(pair[0]), "premise: the client's buffer holds less room than a write needs to go at once")
-        let outcome: Bool? = await withCheckedContinuation { continuation in
-            let said = LockIsolated<Bool?>(nil)
-            let returned = DispatchSemaphore(value: 0)
-            Thread {
-                said.setValue(transport.sayClosing(closeLine))
-                returned.signal()
-            }.start()
-            Thread {
-                let inTime = returned.wait(timeout: .now() + 5) == .success
-                if !inTime {
-                    // The line is stuck in a send: let the client read, so the
-                    // stuck caller is let go (and this pin reports, not hangs).
-                    var sink = [UInt8](repeating: 0, count: 64 * 1024)
-                    _ = Darwin.read(client, &sink, sink.count)
-                    _ = returned.wait(timeout: .now() + 5)
-                }
-                continuation.resume(returning: inTime ? said.value : nil)
-            }.start()
-        }
+        let outcome = await Self.sayClosingBounded(transport, closeLine, client: client)
         #expect(outcome != nil, "the close line returned at once — it never waited on a client that stopped reading")
         #expect(outcome == false, "a buffer that cannot take the line whole drops it (\(String(describing: outcome)))")
+        #expect(Self.option(pair[0], SO_SNDLOWAT) == mark,
+                "the drop path restores the low-water mark the fast road steps by, as the sending path does")
         close(client)
         for try await _ in await transport.receive() {}
         await transport.disconnect()
@@ -409,6 +406,104 @@ struct MCPStalledReaderPoolTests {
         for try await _ in await transport.receive() {}
         await transport.disconnect()
         close(pair[0])
+    }
+
+    // MARK: - VX-963 (the VX-981 run, batch 4): the two roads the arms above do not drive
+
+    /// **GUARD — THE SDK's RESPONSE PATH** (VX-963; green since VX-933 —
+    /// `396bd0cfe` + `bbf4f6729`). The ticket's stall sample was
+    /// `Server.handleRequest → MCPSocketTransport.send` holding a pool thread;
+    /// the frames arm above calls `send` itself, so this one drives the SDK:
+    /// real SDK servers over the door's transport, more of them than the pool
+    /// has threads, each asked a `ping` whose id is 64 KiB — the SDK echoes it,
+    /// so its answer is four times the pair's buffers — by a client that then
+    /// never reads. Red only under R-963-T (the answer written blocking on the
+    /// transport's actor — the pre-VX-933 shape).
+    @Test func theSDKsAnswersToClientsThatStoppedReadingHoldNoPoolThread() async throws {
+        let count = stalledCount
+        let id = String(repeating: "p", count: 64 * 1024)
+        let ping = Data((#"{"jsonrpc":"2.0","id":"\#(id)","method":"ping"}"# + "\n").utf8)
+        var servers: [Server] = []
+        var ends: [Int32] = []
+        var clients: [Int32] = []
+        for _ in 0..<count {
+            var pair: [Int32] = [-1, -1]
+            try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+            noSigPipe(pair[0])
+            noSigPipe(pair[1])
+            let server = Server(name: "vx963", version: "test")
+            try await server.start(transport: MCPSocketTransport(fd: pair[0]))
+            let client = pair[1]
+            Thread { _ = MCPShim.writeAll(client, ping) }.start()  // then it never reads
+            servers.append(server)
+            ends.append(pair[0])
+            clients.append(client)
+        }
+        let stopping = ends
+        let watch = await watchThePool(clients: clients) {
+            for fd in stopping { _ = shutdown(fd, SHUT_RDWR) }  // the server's stop (`hangUp`)
+        }
+        for server in servers {
+            // The stop's `shutdown` ended each reader's `read`, so each SDK loop
+            // ends BY ITSELF once its last read has returned (VX-318's order).
+            await server.waitUntilCompleted()
+            await server.stop()
+        }
+        for fd in ends + clients { close(fd) }
+
+        #expect(watch.begun == count,
+                "every one of the \(count) SDK answers was being written at once (\(watch.begun) were) — none waited for a thread")
+        #expect(watch.poolRan,
+                "a task the pool must run ran while \(count) SDK answers were stuck on clients that stopped reading")
+    }
+
+    /// **GUARD — THE PRE-INITIALIZE WINDOW's ANSWERS** (VX-963). The window
+    /// (VX-180) writes its `-32601` on the probe's own id before the next read —
+    /// a door write, and the one the arms above never stall. It runs on the
+    /// handshake's own thread (`MCPHandshake.openingOutcome`, since VX-168), the
+    /// session suspended on it; nothing held it there. More sessions than the
+    /// pool has threads, each sent a probe whose id is 64 KiB by a client that
+    /// then never reads: the pool still runs. Red only under R-963-W (the
+    /// opening read run on the session's own pool thread).
+    @Test func aWindowAnswerToAClientThatStoppedReadingHoldsNoPoolThread() async throws {
+        let count = stalledCount
+        let database = try AppDatabase.inMemory()
+        let operations = withDependencies {
+            $0.database = database
+            $0.date = DateGenerator { Date() }
+            $0.uuid = UUIDGenerator { UUID() }
+        } operation: { Operations() }
+        let id = String(repeating: "w", count: 64 * 1024)
+        let probe = Data((#"{"jsonrpc":"2.0","id":"\#(id)","method":"server/discover"}"# + "\n").utf8)
+        var sessions: [MCPSession] = []
+        var runs: [Task<Void, Never>] = []
+        var clients: [Int32] = []
+        for _ in 0..<count {
+            var pair: [Int32] = [-1, -1]
+            try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+            noSigPipe(pair[0])
+            noSigPipe(pair[1])
+            let session = MCPSession(
+                fd: pair[0], database: database, operations: operations, version: "test",
+                executor: MCPSerialExecutor(operations: operations), hooks: MCPHostHooks())
+            let client = pair[1]
+            Thread { _ = MCPShim.writeAll(client, probe) }.start()  // then it never reads
+            sessions.append(session)
+            runs.append(Task.detached { await session.run() })
+            clients.append(client)
+        }
+        let stopping = sessions
+        let watch = await watchThePool(clients: clients) {
+            for session in stopping { session.hangUp() }  // the server's stop
+        }
+        for run in runs { await run.value }
+        for session in sessions { session.closeConnection() }
+        for fd in clients { close(fd) }
+
+        #expect(watch.begun == count,
+                "every one of the \(count) window answers was being written at once (\(watch.begun) were)")
+        #expect(watch.poolRan,
+                "a task the pool must run ran while \(count) window answers were stuck on clients that stopped reading")
     }
 
     /// `sayClosing` from a thread of its own, bounded 5 s off the pool (the

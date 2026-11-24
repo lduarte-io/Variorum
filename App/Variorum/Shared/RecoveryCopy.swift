@@ -942,7 +942,15 @@ nonisolated enum RecoveryCopy {
         "Its notes stay in the library."
 
     static func movedToTrashReceipt(_ kind: Queries.TrashItem.Kind) -> String {
-        "\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) moved to the "
+        movedToTrashReceipt(kind, isGathering: false)
+    }
+
+    /// …and naming a GATHERING a gathering (VX-611's rule, VM-83 — the phone
+    /// shelf's delete receipt): "Gathering moved to the Trash — 30 days to put
+    /// it back." Every other kind reads byte-for-byte as above.
+    static func movedToTrashReceipt(_ kind: Queries.TrashItem.Kind, isGathering: Bool) -> String {
+        let word = rowKind(kind, isGathering: isGathering)
+        return "\(word.prefix(1).uppercased())\(word.dropFirst()) moved to the "
             + "\(trashSection) — \(TrashWindow.days) days to put it back."
     }
 
@@ -1099,6 +1107,26 @@ nonisolated enum RecoveryCopy {
     /// class the 4.5b hoist exists to kill.
     static func takeRestoredReceipt(_ status: VariantStatus) -> String {
         status == .archived ? takeRestoredArchived : putBackReceipt(.take)
+    }
+
+    /// **P-55-11 (VM-55 batch 2b) — which put-back answers are DIRECTIONS.**
+    /// A block back in its own place is just back; one at the END of its note,
+    /// or set aside because its note is gone, landed somewhere other than where
+    /// she would look — the receipt is a direction she must see. Read beside
+    /// `landingReceipt`, from the same answer, so the words and the class can
+    /// never disagree.
+    static func isDirection(_ landing: Operations.BlockRestoreLanding) -> Bool {
+        switch landing {
+        case .itsOldPlace: return false
+        case .endOfNote, .unplaced: return true
+        }
+    }
+
+    /// The take's twin (P-55-11): a take back among the ARCHIVED takes rather
+    /// than in the fan (the exact flip, #68(b)) is a direction; one back in
+    /// the fan is just back. Read beside `takeRestoredReceipt`.
+    static func isDirection(_ status: VariantStatus) -> Bool {
+        status == .archived
     }
 
     /// The archived edition. Its two siblings word the same fact for the

@@ -19,6 +19,24 @@ import VariorumCore
 /// badges, the group's road, the archived facet's words. One home, so the
 /// Library's sheet and the book's never speak a passage two ways.
 nonisolated enum SearchAnswerCopy {
+    /// **Why the answer is empty, when the field says why** (her R-980-5 —
+    /// the VX-980 run, ruling P-980-1, her pick "Say why"): a field holding
+    /// ONLY punctuation or symbols and no tag asks the index nothing it keeps
+    /// a token of, so its empty answer says so in place of the sheet's own
+    /// silence. PROVISIONAL wording — hers to pass ("provisional wording is
+    /// fine for now", R-980-4).
+    static let nothingSearchable = "Search looks for words and numbers, so punctuation on its own can't be found."
+
+    /// **The empty answer's sentence** — the ONE decision every answer sheet
+    /// reads (the Library's, the book's): the field's reason when it holds
+    /// nothing searchable (`SearchComposer.holdsNothingSearchable`, core's one
+    /// reading of the text half), else the sheet's own `silence` ("Nothing
+    /// matches." · "Nothing in this book matches."), exactly as before.
+    static func emptyAnswer(for question: SearchQuery?, otherwise silence: String) -> String {
+        guard let question, SearchComposer.holdsNothingSearchable(question) else { return silence }
+        return nothingSearchable
+    }
+
     /// The query's echo — the words, as typed, in quotes (the mockup's
     /// `“dream”`).
     static func echo(_ words: String) -> String {

@@ -363,3 +363,16 @@ build at her word under her label; name installs by build number against the app
 "install refresh" steps after a walk or closeout are retired, and run-phase's stage line says "install". This
 supersedes R-13r-7's hand-copied-tip convention (`notes/plans/phase-13r-distribution.md`) for everything but an
 interim build she asks for. Build 11840 stays installed until the wave's release, at her word.
+
+## 2026-11-19 — the review ladder's cap moves from three rounds to five
+
+**What happened:** during the overnight window that started the mobile catch-up's first wave, she told the VM-64
+orchestrator: "up to 5 review rounds as long as a major is found." Asked whether that was the night's rule or the
+standing one, she said: "honestly, just update the standing rule too."
+
+**What changed:** CLAUDE.md's "Phase execution" ladder line ("a new BLOCKER/MAJOR earns round 3; hard cap three")
+now reads "each round that finds a new BLOCKER/MAJOR earns the next; hard cap five", and both phase skills' ladder
+text say the same. Everything else about the ladder stands: a fresh cold reviewer per round running
+`notes/REVIEW_PROMPT.md` verbatim, dispositions landed repo-first before the next round, a final round's fixes
+checked line by line by the orchestrator. Reading a BLOCKER as earning the next round too is the orchestrator's
+(the old line already paired the two); her words name a major.

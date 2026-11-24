@@ -64,7 +64,33 @@ final class MobileStructuralController {
     weak var model: MobileEditorViewModel?
 
     /// One structural flight at a time (the Mac's latch, the same copy).
-    private(set) var structuralInFlight = false
+    ///
+    /// **VM-2 — the latch also raises the page's keystroke fence.** Every
+    /// door below suspends between its flush and its settle while the page
+    /// still shows the note as it was; the fence (`StructuralFlightFence`,
+    /// the model's `structuralFlightChanged`) refuses every edit the gate is
+    /// asked about and keeps every gate-less edit off the store for exactly
+    /// that window. Hooked HERE, at the one latch, so no door can fly
+    /// unfenced — the one exemption is declared below.
+    private(set) var structuralInFlight = false {
+        didSet {
+            guard structuralInFlight != oldValue else { return }
+            model?.structuralFlightChanged()
+        }
+    }
+
+    /// **VM-2 — Insert Below's flight raises no fence** (PROVISIONAL, the
+    /// orchestrator's call at the r2 iteration; hers at the merge — the
+    /// alternative is to fence it like every door). `newBlock` rewrites no
+    /// existing text, so a key typed into the block above while it lands
+    /// records that block's CURRENT text — never stale (its store pin is green
+    /// on the pre-fix tree too); refusing it would cost her a key for no data
+    /// reason. The door sets this false for its own flight only.
+    private var flightFencesTyping = true
+
+    /// The fact the model's fence reads: a structural flight is up AND it is
+    /// one that fences typing.
+    var holdsFencingFlight: Bool { structuralInFlight && flightFencesTyping }
 
     init(session: AppSession) {
         self.session = session
@@ -137,7 +163,7 @@ final class MobileStructuralController {
                 try Queries.blockFan(db, blockID: blockID)
             }
         } catch {
-            model.report(String(describing: error))
+            model.report(OpsRefusalCopy.sentence(for: error, roads: .phone))
             return
         }
         let active = fan.filter { $0.deletedAt == nil && $0.status == .active }
@@ -196,7 +222,7 @@ final class MobileStructuralController {
             // receipt slot carries the bare Undo and no new chatter — the
             // calmest shape, and it leaves every shipped "says nothing"
             // pin true.
-            model.report(nil, action: .undo)
+            model.report(nil, action: .undo, line: .ordinary)
             await model.refreshTakesFromStore()
             if let range = model.rangeOfBlock(landingBlockID) {
                 model.textView?.selectedRange = NSRange(location: range.location, length: 0)
@@ -278,7 +304,7 @@ final class MobileStructuralController {
                 return (try active(leadingID), try active(trailingID))
             }
         } catch {
-            model.report(String(describing: error))
+            model.report(OpsRefusalCopy.sentence(for: error, roads: .phone))
             return
         }
 
@@ -317,7 +343,7 @@ final class MobileStructuralController {
         }
         do {
             let mergedBlockID = try await session.runner.run(body)
-            model.report(nil, action: .undo)  // the bare Undo — see divide
+            model.report(nil, action: .undo, line: .removal(.structural))  // the bare Undo — see divide
             await model.refreshTakesFromStore()
             // Caret at the join: right where the trailing half begins
             // (the Mac's instant-merge caret rule; the carry-all's chosen
@@ -391,7 +417,7 @@ final class MobileStructuralController {
                 // status line, its transient face. PROVISIONAL).
                 model.report(
                     otherTakes > 0 ? Self.fannedExtractHint(otherTakes) : nil,
-                    action: .undo)
+                    action: .undo, line: .ordinary)
                 await model.refreshTakesFromStore()
                 if let landing = model.rangeOfBlock(result.block.id) {
                     model.textView?.selectedRange = NSRange(
@@ -419,7 +445,7 @@ final class MobileStructuralController {
                         return first.block.id
                     }
                 }
-                model.report(nil, action: .undo)  // the bare Undo — see divide
+                model.report(nil, action: .undo, line: .ordinary)  // the bare Undo — see divide
                 await model.refreshTakesFromStore()
                 if let landing = model.rangeOfBlock(middleID) {
                     model.textView?.selectedRange = NSRange(
@@ -521,8 +547,9 @@ final class MobileStructuralController {
             model.report("Another structural change is still landing.")
             return
         }
+        flightFencesTyping = false  // VM-2: exempt — see `flightFencesTyping`
         structuralInFlight = true
-        defer { structuralInFlight = false }
+        defer { structuralInFlight = false; flightFencesTyping = true }
 
         if model.isSealed {
             model.report("This note is locked — unlock it to add a block.")
@@ -533,7 +560,7 @@ final class MobileStructuralController {
             let result = try await session.runner.run { [postID = model.postID] ops in
                 try ops.newBlock(in: postID, text: "", at: .after(blockID))
             }
-            model.report(Self.blockInsertedStatus)
+            model.report(Self.blockInsertedStatus, line: .ordinary)
             await model.refreshTakesFromStore()
             if let range = model.rangeOfBlock(result.block.id) {
                 model.textView?.selectedRange = NSRange(location: range.location, length: 0)
@@ -587,7 +614,7 @@ final class MobileStructuralController {
             model.report(
                 Self.blockDeletedStatus
                     + (await strandedOriginalsNote(blockIDs: [blockID]) ?? ""),
-                action: .undo)
+                action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret(landing)
         } catch {
@@ -643,7 +670,7 @@ final class MobileStructuralController {
             try await session.runner.run { ops in
                 try ops.archiveBlock(blockID)
             }
-            model.report(Self.blockArchivedStatus, action: .undo)
+            model.report(Self.blockArchivedStatus, action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret(landing)
         } catch {
@@ -738,7 +765,7 @@ final class MobileStructuralController {
             model.report(
                 Self.blocksDeletedStatus(blockIDs.count)
                     + (await strandedOriginalsNote(blockIDs: blockIDs) ?? ""),
-                action: .undo)
+                action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret(landing)
             return true
@@ -839,7 +866,7 @@ final class MobileStructuralController {
             // WORDLESS — this fires at keystroke rate, from ⌫ or from typing
             // over a selection, so a sentence would be noise — and the bare
             // Undo is the whole affordance.
-            model.report(nil, action: .undo)
+            model.report(nil, action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret((blockID: outcome.caretBlockID, offset: outcome.caretOffset))
         } catch {
@@ -962,7 +989,7 @@ final class MobileStructuralController {
         _ error: Error, act: String, nothingWas: String = "changed"
     ) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
@@ -1011,7 +1038,7 @@ final class MobileStructuralController {
                 + "arrived yet, or one that landed since you selected. "
                 + "Nothing was \(nothingWas)."
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

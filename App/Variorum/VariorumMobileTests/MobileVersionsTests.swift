@@ -597,10 +597,7 @@ struct MobileVersionsTests {
     /// sheet dismissed and no room pushed.
     @Test func theVersionsRowOpensTheRoomThroughTheWholeShell() async throws {
         try await withEditorWorld { session, _ in
-            let suite = "versions-shell-\(UUID().uuidString)"
-            let defaults = try #require(UserDefaults(suiteName: suite))
-            defer { defaults.removePersistentDomain(forName: suite) }
-            let router = MobileShellRouter(defaults: defaults)
+            let router = MobileShellRouter()
 
             try await withHostedSurface(
                 MobileShellView(session: session, services: nil, router: router)
