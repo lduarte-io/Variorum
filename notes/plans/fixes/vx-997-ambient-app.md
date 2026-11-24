@@ -9,6 +9,15 @@ R-997-12 the coordinator trials it from the worktree first and the merge is hers
 **History note:** the branch was rewritten once, on 2026-11-19 at the author's word, to reword one line of
 `Tools/ambient` in its early commits; every commit id cited in this record is the rewritten one.
 
+**MERGED 2026-11-24, at the author's word** ("I also want to get the new ambient PR merged - I'm pleased
+with the ambient app improvements."): PR #8, a merge commit. Main was merged into the branch first (no
+conflict) and the in-flight row retired in the same PR. Before the merge, checked on the Pro: `~/dev/ambient`
+on its main and level with its origin, `/Applications/Ambient.app` at build 525, the branch's `Tools/ambient
+status` answering `OFF` through the thin door, both scripts parsing. P-997-4 was ruled on 2026-11-19 ("i
+guess that's fine, if it's in the coordinator skill"); the skill's line saying an Ambient change shows only
+after its install is this branch's last commit before the merge of main. The "Not merged" sentence above
+and the "awaiting her word" on P-997-4 below describe the branch as it stood before this date.
+
 ## FOR A LATER READER
 
 **The mechanism as settled.** The stage ambient grew into Ambient, its own app in its own repo (R-997-1);
