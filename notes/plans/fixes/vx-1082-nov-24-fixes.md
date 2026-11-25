@@ -244,13 +244,13 @@ Either ruling is a small follow-on piece for this session (resume me) — the Li
 | Member | Batch | Status |
 |---|---|---|
 | VX-1076 ⌥⌫ cross-line word delete | E | **DONE pending ladder** (fix 74bd0a399; green pass 6627e7401 — 404 tests / 47 types, 0 failed, the capture harness's skip by design; revert 23f00e61b — 19/19 red by name, guards green, restored 43/43; window released 23:27, nov24 verified). P-1076-1 adjudicated (a) |
-| VX-1074 chapter search results | S | Library half BUILT (c0a6cd8aa) + the book's own 🔍 BUILT (876353038, D-1082-S1); green pass + both revert cycles as predicted (rows 7, 9); ⌘K → VX-1089 (D-1082-S2) |
-| VX-1069 the dash in the band | S | BUILT (ed1f0512d); green pass + revert cycle as predicted (rows 7, 9) |
-| VX-1014 narrow-column field overflow | S | TRACED REAL (not hollow) and BUILT (8077255ec); pins re-oracled (D-1082-S3) and green; revert cycle red as predicted by test, 2 Terminal cases hollow (row 9); the 1-pt Terminal tabs → VX-1091; P-1014-1 |
-| VX-1077 delete without a confirm | D | NOT-STARTED |
-| VX-1070 toast vs the cards band | D | NOT-STARTED |
-| VX-409 the hint collision | D | NOT-STARTED |
-| VX-1016 the Trash's one-frame empty | D | NOT-STARTED (pin first; green ⇒ not real) |
+| VX-1074 chapter search results | S | **DONE pending ladder** — Library half BUILT (c0a6cd8aa) + the book's own 🔍 BUILT (876353038, D-1082-S1); green pass + both revert cycles as predicted (rows 7, 9); ⌘K → VX-1089 (D-1082-S2) |
+| VX-1069 the dash in the band | S | **DONE pending ladder** — BUILT (ed1f0512d); green pass + revert cycle as predicted (rows 7, 9) |
+| VX-1014 narrow-column field overflow | S | **DONE pending ladder** — TRACED REAL (not hollow) and BUILT (8077255ec); pins re-oracled (D-1082-S3) and green; revert cycle red as predicted by test, 2 Terminal cases hollow (row 9); the 1-pt Terminal tabs → VX-1091; P-1014-1 |
+| VX-1077 delete without a confirm | D | IN-PROGRESS — batch D spawned |
+| VX-1070 toast vs the cards band | D | IN-PROGRESS — batch D spawned |
+| VX-409 the hint collision | D | IN-PROGRESS — batch D spawned |
+| VX-1016 the Trash's one-frame empty | D | IN-PROGRESS — batch D spawned (pin first; green ⇒ not real) |
 | VX-1075 the shared mark | B | NOT-STARTED |
 | VX-1034 the books list's two calls | B | NOT-STARTED |
 | VX-1027 the ticked Journal row | B | NOT-STARTED |
