@@ -287,7 +287,18 @@ install and the #281 dispositions.
 - **THE AWAY RULING (2026-11-25, ~03:3x, her words verbatim as relayed by the stage coordinator nov24):** "I'm
   going to sleep overnight, everyone should rule provisionally." From here this is an away run: undefined
   product behavior takes the most spec-defensible option, marked PROVISIONAL and logged for QUESTIONS at the
-  merge; anything needing her hands (a phone install included) is HELD and bundled for her morning sitting.
+  merge; anything needing her hands is HELD and bundled for her morning sitting.
+- **R-260-7 — THE MORNING INSTALL (her words, 2026-11-25, in session, verbatim):** "I want to have a fresh
+  build installed on my phone in the morning though, so leave instructions for that on your handoff." So: the
+  handoff's FIRST block is the install — the exact tree it builds from (the merged main tip if the run closed
+  overnight, else the branch tip, named by SHA, an interim at her word — the VX-1033 devicectl precedent), a
+  device .app PRE-BUILT overnight (headless, no stage) so her morning is install-only, the devicectl steps
+  self-contained, and "what to try first" (a note with the keyboard up — her screenshot's frame; the
+  Bookcase→Library swipe; a refusal's short line, its ✕ and its reason card; typing low in a note with the
+  keyboard up, the standing vm-47 first-try). No schema or migration rides this run, so the install is
+  posture-safe either way. On VM-259 she asked tonight whether the drawn options were ready; answered:
+  deliberately not — they draw on batch 2's corrected sizes and join the morning bundle if batch 2 lands
+  overnight.
 
 ## Adjudications (the orchestrator's, repo-first)
 
