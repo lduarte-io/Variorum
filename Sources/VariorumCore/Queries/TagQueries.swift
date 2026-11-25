@@ -182,6 +182,70 @@ extension Queries {
         return answer
     }
 
+    /// **Many notes' own live tags at once, as rows** (VX-1038 — the book
+    /// Outline's card pills): `wornTags`' shape with whole `Tag` rows, because
+    /// a pill is drawn from the row (its colour from its path, its × naming
+    /// the tag). Each note's tags by path, then id; a note wearing none is
+    /// absent. ∝ the notes' own applications (`idx_post_tag_post`) — the
+    /// caller hands the notes its window shows, never the book.
+    public static func wornTagRows(_ db: Database, noteIDs: [String]) throws -> [String: [Tag]] {
+        guard !noteIDs.isEmpty else { return [:] }
+        var answer: [String: [Tag]] = [:]
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT pt.post_id AS worn_by, t.* FROM json_each(?) j
+                JOIN post_tag pt ON pt.post_id = j.value AND pt.deleted_at IS NULL
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                ORDER BY pt.post_id, t.path, t.id
+                """,
+            arguments: [String(decoding: try JSONEncoder().encode(noteIDs), as: UTF8.self)])
+        for row in rows {
+            answer[row["worn_by"], default: []].append(try Tag(row: row))
+        }
+        return answer
+    }
+
+    /// **Live tag rows by id** (VX-1038): the tags a gathering's rule names,
+    /// for the pure placing-tags rule's subtree match (`NotePlacingTags`).
+    /// Missing and tombstoned ids are simply absent (a dead term matches
+    /// nothing). ∝ the ids named.
+    public static func liveTags(_ db: Database, ids: [String]) throws -> [Tag] {
+        guard !ids.isEmpty else { return [] }
+        return try Tag.fetchAll(
+            db,
+            sql: """
+                SELECT t.* FROM json_each(?) j
+                JOIN tag t ON t.id = j.value AND t.deleted_at IS NULL
+                ORDER BY t.path, t.id
+                """,
+            arguments: [String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)])
+    }
+
+    /// **How many live notes wear each tag of a wing** (VX-576 — "tag pickers
+    /// list most-used first", the rider seated in VX-1036 batch 2): the
+    /// suggest brain's order key. Direct applications on live notes (archived
+    /// notes count — still worn); a tag no live note wears is absent (0).
+    /// ∝ the wing's tag applications — read ONCE when a tag field opens, never
+    /// inside a held observation.
+    public static func tagUseCounts(_ db: Database, wingID: String) throws -> [String: Int] {
+        let scope = wingScope(column: "t.wing_id", wingID: wingID)
+        var answer: [String: Int] = [:]
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT pt.tag_id AS tag_id, COUNT(*) AS uses FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                JOIN container c ON c.id = pt.post_id AND c.deleted_at IS NULL
+                WHERE pt.deleted_at IS NULL AND \(scope.sql)
+                GROUP BY pt.tag_id
+                """,
+            arguments: StatementArguments(scope.arguments)) {
+            answer[row["tag_id"]] = row["uses"]
+        }
+        return answer
+    }
+
     /// **The live tags at exactly one PATH** (VX-827 U2 — VX-810): in ONE wing
     /// as surfaces read it, or, `wingID` nil, in every wing. VX-892: the wings
     /// compare through THE dangling-wing rule (`effectiveWingID` — a dead wing,
