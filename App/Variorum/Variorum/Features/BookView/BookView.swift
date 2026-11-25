@@ -161,6 +161,9 @@ struct BookView: View {
     /// window's notes' pills and the "+" field. Its own model (P-9).
     /// Injectable for `model`'s reason (a pin drives `adopt` by hand).
     @State private var cardTags: BookCardTagsModel
+    /// VX-881 — the per-book note-titles switch on Read's controls (P-9, its
+    /// own model; `BookReadTitles.swift`).
+    @State private var readTitles: BookReadTitlesModel
     /// VX-1080 (T-2) — the book's one title arbiter (P-9, its own model).
     @State private var titleTicker = BookTitleTickerModel()
     /// VX-1084 — the List mode's rows' edited stamps (P-9, its own model; its
@@ -198,7 +201,8 @@ struct BookView: View {
         bookSearch: BookSearchModel? = nil,
         onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil,
         noteRoads: BookNoteRoads = BookNoteRoads(),
-        cardTags: BookCardTagsModel? = nil
+        cardTags: BookCardTagsModel? = nil,
+        readTitles: BookReadTitlesModel? = nil
     ) {
         self.session = session
         self.readingID = readingID
@@ -238,6 +242,7 @@ struct BookView: View {
         _bookSearch = State(
             initialValue: bookSearch ?? BookSearchModel(session: session, readingID: readingID))
         _cardTags = State(initialValue: cardTags ?? BookCardTagsModel(readingID: readingID))
+        _readTitles = State(initialValue: readTitles ?? BookReadTitlesModel(readingID: readingID))
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -474,7 +479,10 @@ struct BookView: View {
                         extentsCache: model.flowExtents,
                         // VX-645: what the page shows — the navigator's
                         // follow-highlight and ⌘↑/⌘↓'s seam read it.
-                        onViewed: { model.noteFlowViewed($0) })
+                        onViewed: { model.noteFlowViewed($0) },
+                        // VX-881: each note's quiet title line, behind the
+                        // per-book switch beside Scroll · Pages.
+                        noteTitles: readTitles.shown)
                     // WA-1: the receipt at the page's foot, trailing.
                     .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                     .overlay { contentOverlay }
@@ -880,17 +888,29 @@ struct BookView: View {
         // faces (the flow) is a vertical scroll and carries no bottom
         // chrome at all — the A6 argument. Surface-local, so
         // recorded rather than declared (Stage 4 lesson 10).
+        //
+        // VX-881 (RT-1, R-1036-21/-40): beside it, in Scroll, the per-book
+        // note-titles switch (the round-1 mockup's frame 10d) — one layout
+        // over the two, the switch under the picker when the navigator is too
+        // narrow for both at their stable widths (`BookReadControlsRow`).
+        // Pages draws no switch: each note already starts under its title.
         if structure.mode == .read {
-            Picker("", selection: Binding(
-                get: { structure.readForm },
-                set: { switchReadForm(to: $0) })) {
-                Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
-                Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
+            BookReadControlsRow {
+                Picker("", selection: Binding(
+                    get: { structure.readForm },
+                    set: { switchReadForm(to: $0) })) {
+                    Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
+                    Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
+                }
+                .pickerStyle(.segmented)
+                .controlSize(.small)
+                .help("Read the book as one continuous scroll, or as real pages "
+                    + "with the text flowing across them")
+                if structure.readForm == .flow {
+                    BookReadTitlesSwitch(
+                        tokens: tokens, shown: readTitles.shown, toggle: { readTitles.toggle() })
+                }
             }
-            .pickerStyle(.segmented)
-            .controlSize(.small)
-            .help("Read the book as one continuous scroll, or as real pages "
-                + "with the text flowing across them")
         }
         // 13i-d U3 — THE GROUPED-BY CONTROL (the sitting record §17(f), ruled:
         // "the Index masthead"): drawn only while the Index is the mode.

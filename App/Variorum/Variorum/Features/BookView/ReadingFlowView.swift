@@ -72,6 +72,10 @@ struct ReadingFlowView: View {
     /// rule and follower. nil (every pre-VX-645 call site, the test hosts) ⇒
     /// the flow follows nothing.
     var onViewed: ((BookOutlineViewed.Pair) -> Void)? = nil
+    /// **VX-881 — the book shows each note's title as a quiet line** (the
+    /// per-book switch on Read's controls, `BookReadTitlesModel`). false (every
+    /// pre-VX-881 call site, the test hosts) ⇒ today's page, byte for byte.
+    var noteTitles: Bool = false
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -300,7 +304,8 @@ struct ReadingFlowView: View {
                                 onWake: { blockID in onWake(entry.postID, blockID) },
                                 onNear: { near in landing.rowNear(entry.postID, near) },
                                 onSettled: { storySettled(entry.postID) },
-                                onLoaded: { })
+                                onLoaded: { },
+                                title: FlowNoteTitle.line(for: entry, shown: noteTitles))
                                 .id(segment.id)
                                 .flowAnchor(segment.id) { top, height in
                                     // A story's own measured height needs no
@@ -432,9 +437,12 @@ struct ReadingFlowView: View {
             case .post(let entry):
                 // 18l-b U4 (D1): the SAME input the row stands on
                 // (`FlowStoryRow.honestHeight`) — one brain, two askings.
+                // VX-881: plus the title line's lead while the book shows
+                // titles — the row's own far height, the same one brain.
                 FlowHeightEstimate.storyInput(
                     id: row.id, remembered: memory.size(entry.postID),
-                    columnWidth: width, estimate: estimate(for: entry.postID))
+                    columnWidth: width, estimate: estimate(for: entry.postID),
+                    lead: FlowNoteTitle.lead(for: entry, shown: noteTitles))
             }
         }
         return BookHeightManifest(
@@ -981,15 +989,33 @@ nonisolated enum FlowHeightEstimate {
     /// and the Index's shape: `outlineRowInput` / `indexPaneRowInput`). The
     /// remembered arm is offered only at THIS width (R2-1); the derived arm is
     /// the estimate at this width.
+    ///
+    /// **VX-881 — `lead`** (the VX-1036 run, batch 4): what the story's ROW
+    /// carries above its measured prose — the note's quiet title line while
+    /// the book shows titles (`FlowNoteTitle.lead`), else 0. It rides BOTH
+    /// arms, so the row's height is the lead plus whichever arm answers, and a
+    /// remembered size keeps meaning the prose alone (the title stands outside
+    /// the measured surface — toggling the switch stales no memory). 0, the
+    /// default, is every pre-VX-881 asking, byte for byte.
     static func storyInput(
-        id: String, remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat
+        id: String, remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat,
+        lead: CGFloat = 0
     ) -> BookHeightManifest.Input {
-        BookHeightManifest.Input(
+        let prose = BookHeightManifest.Input(
             id: id,
             remembered: remembered.flatMap {
                 Self.remembered($0, appliesAt: columnWidth) ? $0.height : nil
             },
             derived: estimate)
+        guard lead != 0 else { return prose }
+        // The lead rides whichever arm `resolve` would take, and only that
+        // choice: an arm it would skip stays skipped (a non-positive or
+        // non-finite remembered height), and the derived arm is its resolved
+        // value — so resolving this is exactly the lead plus resolving `prose`.
+        let usable = prose.remembered.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
+        let derived = prose.derived.isFinite ? max(0, prose.derived) : 0
+        return BookHeightManifest.Input(
+            id: id, remembered: usable.map { $0 + lead }, derived: derived + lead)
     }
 
     /// The height a story STANDS at before its text is measured here — as
@@ -1002,10 +1028,17 @@ nonisolated enum FlowHeightEstimate {
     /// `ReadingFlowEstimateTests` (R2-1, the width gate) and
     /// `FlowStoryHeightOneBrainTests` (this == the column's `storyInput`
     /// resolved, for every input).
-    static func honestHeight(remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat) -> CGFloat {
+    ///
+    /// VX-881: `lead` as `storyInput`'s — the far placeholder stands at the
+    /// lead plus the prose; the surface's reservation asks with none (the
+    /// title line stands outside the surface).
+    static func honestHeight(
+        remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat, lead: CGFloat = 0
+    ) -> CGFloat {
         // `resolve` reads no id (the manifest's row carries `FlowRows.anchor`).
         BookHeightManifest.resolve(storyInput(
-            id: "", remembered: remembered, columnWidth: columnWidth, estimate: estimate)).0
+            id: "", remembered: remembered, columnWidth: columnWidth, estimate: estimate,
+            lead: lead)).0
     }
 
     /// What a story's surface RESERVES from its first frame: the honest
@@ -1147,6 +1180,29 @@ final class FlowRowHeights {
     static let end: CGFloat = 99
 }
 
+// MARK: - VX-881 — a note's title while reading (RT-1, R-1036-21 / R-1036-40)
+
+/// **The quiet title line** (the VX-1036 run, batch 4). Her words at sitting 2,
+/// on the round-1 mockup's frame 10: *"the title note switching looks good"*
+/// (R-1036-21); her pick at sitting 3: "A quiet line" (R-1036-40) — each note's
+/// title as one small muted line above its first paragraph in Read ▸ Scroll,
+/// behind a per-book switch (`BookReadTitles.swift`). Read ▸ Pages already
+/// starts each note on a fresh page under its title, so only Scroll changes.
+///
+/// **Where it lives, and why there:** INSIDE the note's story row, above its
+/// prose and outside the prose's measured surface — never a small row of the
+/// column. The column's small rows are not lazy (13u2b UNIT 2: "they simply all
+/// exist"), so a title row per note would exist for every note of the book; in
+/// the story row it is realized only while the story is near the viewport (the
+/// story's own virtualization — P1/P3), it lands WITH its note (a landing puts
+/// the row's top, the title, at the page's top), and it stands at ONE constant
+/// height (`lead`) that the far placeholder and the column's manifest add
+/// (`FlowHeightEstimate.storyInput(lead:)`) — so every story's geometry stays
+/// honest, and a remembered story size keeps meaning the prose alone.
+// (The pure rule — `FlowNoteTitle`: the words, the box and the lead — and the
+// line's face, `FlowNoteTitleLine`, live in `BookReadTitles.swift` beside the
+// switch, so both are pinned and drawn without the flow.)
+
 /// The book's block extents for the flow's estimate, cached for the BOOK
 /// (ladder R2-4 — `BookViewModel.flowExtents`): `Queries.blockExtents` is
 /// one lengths-only statement per 400 entries, but its work is `LENGTH()`
@@ -1260,6 +1316,10 @@ private extension View {
 @MainActor
 enum ReadingFlowMaterialization {
     static var count = 0
+    /// VX-881: how many note TITLE LINES were realized — they ride inside
+    /// their story rows, so the pin holds them to the realized stories (∝ the
+    /// viewport, never the book).
+    static var titleLines = 0
 }
 #endif
 
@@ -1285,6 +1345,11 @@ private struct FlowStoryRow: View {
     /// The surface settled (R2-2) — the landing's "this row is done moving".
     let onSettled: () -> Void
     let onLoaded: () -> Void
+    /// VX-881: the note's quiet title line, or nil for none
+    /// (`FlowNoteTitle.line` — the book hides titles, or the note is
+    /// untitled). Drawn above the surface while near; its constant height
+    /// rides the far placeholder.
+    var title: String? = nil
 
     @State private var near = false
     /// R2-9: the read came back with nothing to render — the reservation is
@@ -1302,28 +1367,41 @@ private struct FlowStoryRow: View {
     var body: some View {
         Group {
             if near {
-                StableSurface(
-                    known: known, followsShrinks: false,
-                    settleInterval: ReadingFlowView.surfaceSettleInterval,
-                    settled: settledHere,
-                    remember: { memory.remember(entry.postID, $0) }
-                ) {
-                    FlowPostView(
-                        session: session, entry: entry, page: page,
-                        onWake: onWake,
-                        onLoaded: { isEmpty in
-                            onLoaded()
-                            guard isEmpty else { return }
-                            loadedEmpty = true
-                            memory.remember(
-                                entry.postID,
-                                CGSize(width: width, height: FlowHeightEstimate.emptyNoteHeight))
-                            settledHere()
-                        })
+                // VX-881: the title line stands OUTSIDE the measured surface —
+                // the surface remembers the prose alone, so a remembered size
+                // means the same thing whether the book shows titles or not.
+                VStack(alignment: .leading, spacing: 0) {
+                    if let title {
+                        FlowNoteTitleLine(
+                            title: title, page: page, onWake: { onWake(nil) },
+                            onRealized: { titleLineRealized() })
+                    }
+                    StableSurface(
+                        known: known, followsShrinks: false,
+                        settleInterval: ReadingFlowView.surfaceSettleInterval,
+                        settled: settledHere,
+                        remember: { memory.remember(entry.postID, $0) }
+                    ) {
+                        FlowPostView(
+                            session: session, entry: entry, page: page,
+                            onWake: onWake,
+                            onLoaded: { isEmpty in
+                                onLoaded()
+                                guard isEmpty else { return }
+                                loadedEmpty = true
+                                memory.remember(
+                                    entry.postID,
+                                    CGSize(width: width, height: FlowHeightEstimate.emptyNoteHeight))
+                                settledHere()
+                            })
+                    }
                 }
                 .onAppear { materialized() }
             } else {
-                Color.clear.frame(height: honestHeight)
+                // VX-881: the far placeholder stands at the title line's lead
+                // plus the prose — the column's manifest asks the same brain
+                // with the same lead, so a landing aims by this exact height.
+                Color.clear.frame(height: rowHeight)
             }
         }
         .modifier(NearViewportObserver(
@@ -1361,6 +1439,14 @@ private struct FlowStoryRow: View {
             remembered: memory.size(entry.postID), columnWidth: width, estimate: estimate)
     }
 
+    /// VX-881: the whole row's height while far — the title line's lead (0
+    /// with no line) plus the prose, through the same one brain.
+    private var rowHeight: CGFloat {
+        FlowHeightEstimate.honestHeight(
+            remembered: memory.size(entry.postID), columnWidth: width, estimate: estimate,
+            lead: title == nil ? 0 : FlowNoteTitle.lead)
+    }
+
     /// What the surface reserves from its first frame — the honest height
     /// at the column's width (`StableSurface` compares the width against
     /// the surface's first real report, so a resize between the two frames
@@ -1374,6 +1460,14 @@ private struct FlowStoryRow: View {
     private func materialized() {
         #if DEBUG
         ReadingFlowMaterialization.count += 1
+        #endif
+    }
+
+    /// VX-881: the DEBUG counter's title arm (the pin holds title lines to
+    /// the realized stories).
+    private func titleLineRealized() {
+        #if DEBUG
+        ReadingFlowMaterialization.titleLines += 1
         #endif
     }
 }
