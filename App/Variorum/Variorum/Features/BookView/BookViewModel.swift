@@ -179,12 +179,97 @@ final class BookViewModel {
         // anchoring above, a spread-focused post can only leave the spread
         // by leaving the book (or the window), which is exactly this test.
         releaseFocusIfItLeftTheBook()
+        // VX-1039: a note made here lands once the entries hold it.
+        takeArrivalIfDelivered()
     }
 
     private func releaseFocusIfItLeftTheBook() {
         guard let focused = focusedPostID,
+              // VX-1039: a note just made here is not "gone" — its entries
+              // have not arrived yet (a delivery read before the write can
+              // land after the mint's own turn).
+              focused != pendingArrival,
               !entries.contains(where: { $0.postID == focused }) else { return }
         focus(nil)
+    }
+
+    // MARK: - VX-1039 — a note made here ARRIVES on the page (N-1, N-3)
+
+    /// **The note a mint door just made, on its way onto the page** (VX-1039,
+    /// the VX-1036 run's N-1 — her report: "it's made at the bottom of a long
+    /// list sometimes and then you can't actually see the new note ready to be
+    /// edited"). The act FOCUSES it at once (the keyboard leaves the note she
+    /// was in, as it always did) and parks its landing HERE until the entries
+    /// hold it. The design record's §3a traced why: the act used to ask for the
+    /// reveal in the turn the mint returned, while the entries — published only
+    /// after the write's re-fetch and the card-preview prime read — still held
+    /// the book as it was, so the Outline's landing found the note missing from
+    /// a non-empty list, dropped the reveal as foreign, and the entries' arrival
+    /// found nothing parked (pinned: `BookMintLandingTests`). Asking only once
+    /// the note is delivered serves every mode's landing at once (the Outline,
+    /// the spread, Read and the Index each land a reveal their own way), and
+    /// none of them has to learn a second parking rule.
+    ///
+    /// A later navigation lets it go — another reveal, landing or chapter
+    /// landing, a focus elsewhere (a click-out included), a collapse of the
+    /// note, a mode carry, collapse-all — so a slow delivery never yanks the
+    /// page from where she has since gone. Not observed: no view draws it.
+    @ObservationIgnored private(set) var pendingArrival: String?
+
+    /// **The mint's landing** (every door's — the navigator foot's, the page
+    /// foot's, a chapter's own "+", ⌥⌘N's): focus the new note now, land it
+    /// when the entries deliver it, and — N-3 — widen the window to hold a
+    /// note born past it.
+    ///
+    /// The window question is answered by ONE read of the book as this view
+    /// reads it (its look, its filter — `assembleReading`'s one ORDER BY),
+    /// and only where the answer is not already known: the filter may hide the
+    /// note, or the window is full (a note born past it would never be
+    /// delivered). Otherwise the note is surely delivered — a member is never
+    /// archived at birth and a gathering's mint wears what its rule needs (the
+    /// planner's belt) — and nothing is read. The read is ∝ the book, never
+    /// the corpus, and only for a book already as long as the window: the
+    /// widened observation then reads that many rows itself (P1's deliberate
+    /// widening — "show more ›"'s class, asked for by her mint).
+    func arrive(at postID: String) async {
+        focus(postID)
+        pendingArrival = postID   // after the focus: a focus elsewhere lets an arrival go
+        if viewFilter != nil || truncated || entries.count + 1 > window {
+            let order = viewOrder, filter = viewFilter, readingID = readingID
+            do {
+                let index = try await session.database.read { db in
+                    try Queries.assembleReading(db, readingID: readingID, order: order, filter: filter)
+                        .firstIndex { $0.postID == postID }
+                }
+                guard pendingArrival == postID else { return }   // she has gone elsewhere meanwhile
+                guard let index else {
+                    // This view does not show the note (the Index's filter
+                    // hides it): nothing to land, nothing to keep focused.
+                    pendingArrival = nil
+                    releaseFocusIfItLeftTheBook()
+                    return
+                }
+                window = Self.window(holding: index, current: window)
+            } catch {
+                // The read failed: the arrival still waits for the entries.
+            }
+        }
+        takeArrivalIfDelivered()
+    }
+
+    /// N-3 — the window that holds the entry at `index` (0-based): the one in
+    /// hand when it already does, else widened by whole windows — "show more
+    /// ›"'s own step, so a later "show more" continues the same grid.
+    nonisolated static func window(holding index: Int, current: Int) -> Int {
+        guard index >= current else { return current }
+        return (index / entryWindow + 1) * entryWindow
+    }
+
+    private func takeArrivalIfDelivered() {
+        guard let arriving = pendingArrival,
+              entries.contains(where: { $0.postID == arriving }) else { return }
+        pendingArrival = nil
+        requestReveal(arriving)
     }
 
     // MARK: - 13u2 UNIT A2 — THE CARDS' PREVIEWS, PRIMED WITH THE ENTRIES
@@ -1017,6 +1102,9 @@ final class BookViewModel {
         // One line covers all twelve call sites — the reason this rides the
         // model rather than being threaded through the views.
         if postID != nil, !paneFocused { onPaneFocusRequest?() }
+        // VX-1039: a focus anywhere else is a later navigation — a note on its
+        // way onto the page no longer lands.
+        if postID != pendingArrival { pendingArrival = nil }
         caretSeed = postID == nil ? nil : (caret ?? 0)
         caretSeedIsHers = postID != nil && caret != nil
         caretBlockSeed = nil
@@ -1062,6 +1150,7 @@ final class BookViewModel {
     func collapse(_ postID: String) {
         expandedPosts.remove(postID)
         if pendingOutlineBlockLanding?.postID == postID { pendingOutlineBlockLanding = nil }
+        if pendingArrival == postID { pendingArrival = nil }   // VX-1039
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
@@ -1081,6 +1170,7 @@ final class BookViewModel {
         let wereOpen = Array(expandedPosts)
         expandedPosts.removeAll()
         pendingOutlineBlockLanding = nil
+        pendingArrival = nil   // VX-1039
         focusedPostID = nil
         caretSeed = nil
         caretSeedIsHers = false
@@ -1268,6 +1358,7 @@ final class BookViewModel {
         place.liveBlockID = liveBlockID
         guard let target = BookAnchor.landing(mode: mode, readForm: readForm, place: place)
         else { return }
+        pendingArrival = nil   // VX-1039: the carry is a later navigation
         standingAnchorPostID = target.postID
         pendingReveal = target.postID
         // VX-304: leaving Outline with her caret live in the carried note, the
@@ -1311,6 +1402,7 @@ final class BookViewModel {
         pendingReveal = postID
         pendingLanding = nil
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
+        pendingArrival = nil               // VX-1039: a new navigation (or the arrival's own landing)
     }
 
     /// The arriving surface took the landing. Idempotent. A block-precise
@@ -1336,6 +1428,7 @@ final class BookViewModel {
         pendingReveal = target.postID
         pendingLanding = target
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
+        pendingArrival = nil               // VX-1039: a new navigation
     }
 
     // MARK: - Outline's CHAPTER landing (the Act 10 correction round, rows
@@ -1353,6 +1446,7 @@ final class BookViewModel {
     func requestChapterReveal(_ sectionID: String) {
         pendingChapterReveal = sectionID
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
+        pendingArrival = nil               // VX-1039: a new navigation
     }
 
     /// Outline took the chapter landing. Idempotent.

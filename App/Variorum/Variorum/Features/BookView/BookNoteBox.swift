@@ -141,6 +141,18 @@ nonisolated enum BookNoteBox {
         }
     }
 
+    /// **VX-1039 (N-2) — the note a general mint door makes its note BESIDE**
+    /// ("after the note she is on, in its chapter" — the navigator foot, the
+    /// page foot, ⌥⌘N): the note the caret is in, else the note the box calls
+    /// selected (its two facts, this mode's own — `livePost`, `selectedPost`),
+    /// else the note the navigator marks as viewed (VX-562/VX-645's pair); with
+    /// none of them, nil — the end. PROVISIONAL, named in the design record's
+    /// §4f ("the note she is on" is the live or selected note, else the
+    /// navigator's viewed note; with neither, the end).
+    static func mintNeighbour(live: String?, selected: String?, viewed: String?) -> String? {
+        live ?? selected ?? viewed
+    }
+
     /// The note the caret is IN, or nil.
     ///
     /// Outline and the spread mount the one full-document editor through the

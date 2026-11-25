@@ -94,6 +94,16 @@ public struct Operations: Sendable {
         case end
         case after(String)
         case before(String)
+
+        /// A new book note's place, as the pure rule answers it
+        /// (`BookMintPlacement` — VX-1039).
+        public init(_ anchor: BookMintPlacement.Anchor) {
+            switch anchor {
+            case .end: self = .end
+            case .after(let id): self = .after(id)
+            case .before(let id): self = .before(id)
+            }
+        }
     }
 
     /// **An injected precondition, run FIRST inside an operation's own write

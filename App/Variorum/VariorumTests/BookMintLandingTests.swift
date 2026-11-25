@@ -208,4 +208,69 @@ struct BookMintLandingTests {
                     "the new note is live and holds the caret (editing: \(session.editorRouter.editing?.postID ?? "nothing"))")
         }
     }
+
+    /// **N-1 + N-2, end to end, with the book's REAL observations running**
+    /// (the app's own timing, not a hand-ordered delivery). A chaptered book,
+    /// a note live mid-book: the general door (⌥⌘N — the very act and the very
+    /// door the navigator foot and the page foot run) makes the note right
+    /// AFTER the note she is on, in its chapter, and it ends on the page, live,
+    /// with the caret in it. A feature test (the placement is new), not a pin.
+    @Test func theGeneralDoorMakesTheNoteAfterTheNoteSheIsOnAndItArrivesLive() async throws {
+        try await withMintLandingBook(posts: 30, chapters: 3) { session, db, readingID, postIDs, sectionIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await entries(db, readingID))
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            structure.adopt(try await snapshot(db, readingID))
+            // The hosted harness never fires a view's `.task`: run the two
+            // observations the view would.
+            let observing = Task { await model.start() }
+            let structuring = Task { await structure.start() }
+            defer {
+                observing.cancel()
+                structuring.cancel()
+            }
+            BookOutlineGeometry.forgetAnchorTops()
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: Self.windowWidth, height: Self.windowHeight),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let theme = ThemeStore(session: session)
+            @MainActor func view(_ token: UUID?) -> some View {
+                BookView(
+                    session: session, readingID: readingID, model: model, structure: structure,
+                    mintRequest: token, onMintRequestConsumed: {})
+                    .environment(theme)
+            }
+            let hosting = NSHostingView(rootView: AnyView(view(nil)))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { anchorTop(postIDs[0]) != nil })
+
+            // She is in the middle chapter's fifth note.
+            let on = postIDs[14]
+            model.focus(on)
+            model.requestReveal(on)
+            await settle(window, hosting, until: { liveWithTheCaret(on, session: session, window: window) })
+            #expect(liveWithTheCaret(on, session: session, window: window), "the premise: she is in the note")
+
+            hosting.rootView = AnyView(view(UUID()))
+            await settle(window, hosting, until: {
+                guard let minted = model.focusedPostID, minted != on else { return false }
+                return onThePage(minted) && liveWithTheCaret(minted, session: session, window: window)
+            }, maxTurns: 240)
+            let minted = try #require(model.focusedPostID)
+            #expect(minted != on && !postIDs.contains(minted), "a new note was made")
+            let chapter = try await entries(db, readingID).filter { $0.sectionID == sectionIDs[1] }.map(\.postID)
+            #expect(chapter == Array(postIDs[10...14]) + [minted] + Array(postIDs[15...19]),
+                    "born right after the note she was on, in its chapter")
+            #expect(onThePage(minted), "on the page: top \(anchorTop(minted) ?? -1)")
+            #expect(liveWithTheCaret(minted, session: session, window: window),
+                    "live, with the caret in it (editing: \(session.editorRouter.editing?.postID ?? "nothing"))")
+        }
+    }
 }

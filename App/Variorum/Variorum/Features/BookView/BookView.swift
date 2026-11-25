@@ -44,6 +44,8 @@ struct BookView: View {
         // same two places) — ⌥⌘N's act, its `.surface` renderers, declared at
         // last (they were undeclared since Sitting 9).
         + [.newNoteInBook]
+        // VX-1039 — a chapter's own "+" on the outline page's chapter heading.
+        + [.newNoteInChapter]
         // VX-563 — ⌘↑ / ⌘↓: the book's key monitor is the step's one door
         // (`BookNoteStepKeyMonitor`).
         + [.previousNoteInBook, .nextNoteInBook]
@@ -1159,7 +1161,7 @@ struct BookView: View {
                                 tokens: tokens, word: GatheringNoteDoorCopy.navigatorWord,
                                 face: structure.gatheringMint
                             ) {
-                                mint(.gathering, reveal: false)
+                                mint(.gathering, door: generalMintDoor)
                             }
                         }
                     }
@@ -1491,7 +1493,7 @@ struct BookView: View {
             // the model's in-closure gate covers the concurrent-lock race the
             // hidden button can't; `BookFootDoors` drops it when finished).
             Button(tokens.chromeLabel("+ new entry")) {
-                mint(.entry, reveal: false)
+                mint(.entry, door: generalMintDoor)
             }
             .buttonStyle(.borderless)
             .font(tokens.small)
@@ -1500,7 +1502,7 @@ struct BookView: View {
             // Sitting 9 (R62/R75): "it needs to be easy to make a post inside
             // of a book" — the non-journal door.
             Button(tokens.chromeLabel("+ new note")) {
-                mint(.note, reveal: false)
+                mint(.note, door: generalMintDoor)
             }
             .buttonStyle(.borderless)
             .font(tokens.small)
@@ -1535,32 +1537,75 @@ struct BookView: View {
     }
 
     /// **The act behind every mint door this book draws** — the navigator
-    /// foot's, the Outline flow's, and ⌥⌘N's: the structure model's mint (one
-    /// transaction; refusals mint no stray and land on the model's own
-    /// line, the operations layer's words), then the new note focused —
-    /// revealed where the door sits in the flow or the key asked.
-    private func mint(_ kind: FootMint, reveal: Bool) {
+    /// foot's, the Outline flow's, a chapter heading's own "+", and ⌥⌘N's: the
+    /// structure model's mint (one transaction; refusals mint no stray and land
+    /// on the model's own line, the operations layer's words), born where its
+    /// door stands (N-2 — `BookMintPlacement`, over the page as she sees it at
+    /// the press), then the note ARRIVES: focused, landed on the page once the
+    /// entries hold it, the window widened to hold it (N-1, N-3 —
+    /// `BookViewModel.arrive`).
+    ///
+    /// **VX-1039 — every door lands its note; no door can ask it not to.** The
+    /// navigator foot's three doors passed `reveal: false` (the design record's
+    /// §3a): the note was minted and focused, and the page never went to it —
+    /// her "you can't actually see the new note ready to be edited". The
+    /// switch is gone (pinned at the source: `BookMintDoorsLandSourceTests`).
+    private func mint(_ kind: FootMint, door: BookMintPlacement.Door) {
+        // Read at the press — the page as she sees it — never after the write.
+        let placement = mintPlacement(door)
         Task {
             let id: String?
             switch kind {
-            case .note: id = await structure.newPost()
-            case .entry: id = await structure.newEntry()
+            case .note: id = await structure.newPost(placedAt: placement)
+            case .entry: id = await structure.newEntry(placedAt: placement)
+            // A gathering has no hand order and no chapters: the place is
+            // the order's (its planner mints the note; N-2's stamp-order arm).
             case .gathering: id = await structure.newPostInGathering()
             }
             guard let id else { return }
-            model.focus(id)
-            if reveal { model.requestReveal(id) }
+            await model.arrive(at: id)
         }
     }
 
-    /// ⌥⌘N's request, taken ONCE: the book's own foot act, revealed. The
-    /// shell hands it only to a book the focused pane already shows; one that
-    /// lands before the book's first observation (no row to choose the act
-    /// by yet) waits, and the row's arrival re-asks.
+    /// N-2 — where the door's note is born, by the pure rule, over the notes
+    /// the page shows (each one's chapter and pin, in the order drawn) and
+    /// whether that order IS the hand order (no stamp order stored, no look).
+    private func mintPlacement(_ door: BookMintPlacement.Door) -> BookMintPlacement.Placement {
+        let field = model.viewOrder?.field ?? structure.reading?.sortField ?? .manual
+        return BookMintPlacement.placement(
+            for: door,
+            shown: model.entries.map {
+                BookMintPlacement.Shown(postID: $0.postID, sectionID: $0.sectionID, pinned: $0.pinned)
+            },
+            manualOrder: field == .manual)
+    }
+
+    /// N-2's general doors (the navigator foot, the page foot, ⌥⌘N): beside
+    /// the note she is on — this mode's live or selected note, else the note
+    /// the navigator marks as viewed (`BookNoteBox.mintNeighbour`, PROVISIONAL).
+    private var generalMintDoor: BookMintPlacement.Door {
+        let mode = structure.mode
+        return .general(onNote: BookNoteBox.mintNeighbour(
+            live: BookNoteBox.livePost(
+                mode: mode, liveFocusedPostID: model.liveFocusedPostID,
+                indexLivePostID: model.indexLivePostID),
+            selected: BookNoteBox.selectedPost(
+                mode: mode, focusedPostID: model.focusedPostID,
+                spreadPostIDs: model.spreadEntries.map(\.postID),
+                indexPostID: model.indexSelectedPostID),
+            viewed: model.navigatorViewedPair(
+                mode: mode, readForm: structure.readForm,
+                chapterOf: { structure.chapterID(of: $0) }).postID))
+    }
+
+    /// ⌥⌘N's request, taken ONCE: the book's own foot act. The shell hands it
+    /// only to a book the focused pane already shows; one that lands before
+    /// the book's first observation (no row to choose the act by yet) waits,
+    /// and the row's arrival re-asks.
     private func takeMintRequest() {
         guard mintRequest != nil, let reading = structure.reading else { return }
         onMintRequestConsumed?()
-        mint(Self.footMint(for: reading), reveal: true)
+        mint(Self.footMint(for: reading), door: generalMintDoor)
     }
 
     // MARK: - W21 — the mode click-over CARRIES your place
@@ -2433,7 +2478,7 @@ struct BookView: View {
                     if structure.reading?.locked != true {
                         if Queries.hasJournalTrait(structure.reading?.profile) {
                             Button(tokens.chromeLabel("+ new entry")) {
-                                mint(.entry, reveal: true)
+                                mint(.entry, door: generalMintDoor)
                             }
                             .buttonStyle(.borderless)
                             .font(tokens.small)
@@ -2441,7 +2486,7 @@ struct BookView: View {
                             .padding(.top, 12)
                         } else if structure.reading?.kind == .book {
                             Button(tokens.chromeLabel("+ new note in this book")) {
-                                mint(.note, reveal: true)
+                                mint(.note, door: generalMintDoor)
                             }
                             .buttonStyle(.borderless)
                             .font(tokens.small)
@@ -2459,7 +2504,7 @@ struct BookView: View {
                             tokens: tokens, word: GatheringNoteDoorCopy.flowWord,
                             face: structure.gatheringMint
                         ) {
-                            mint(.gathering, reveal: true)
+                            mint(.gathering, door: generalMintDoor)
                         }
                         .padding(.top, 12)
                     }
@@ -2761,16 +2806,23 @@ struct BookView: View {
             // even TRYING to navigate"): the heading is a DOOR too — a
             // click puts the chapter at the top of the page, exactly as the
             // navigator's row does; the drag handle stays a handle.
-            Button {
-                navigateToChapter(section)
-            } label: {
-                Text(tokens.chromeLabel(section.name))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.accent)
-                    .contentShape(Rectangle())
+            // VX-1039 (N-2): the heading's own "+" stands on the title's
+            // baseline at the line's trailing end (the round-1 mockup's frame
+            // 8b); the grip keeps its place beside the pair.
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Button {
+                    navigateToChapter(section)
+                } label: {
+                    Text(tokens.chromeLabel(section.name))
+                        .font(tokens.title)
+                        .foregroundStyle(tokens.accent)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Put this chapter at the top of the page")
+                Spacer(minLength: 12)
+                chapterMintDoor(section)
             }
-            .buttonStyle(.plain)
-            .help("Put this chapter at the top of the page")
         }
         .padding(.top, 28)
         // The drop indicator rides as an overlay rather than a sibling row,
@@ -2802,6 +2854,30 @@ struct BookView: View {
             } else if bodyChapterDropTarget == section.id {
                 bodyChapterDropTarget = nil
             }
+        }
+    }
+
+    /// **VX-1039 (N-2, her R-1036-8) — a chapter's own "+"**: a new note made
+    /// in THIS chapter, at its end, and landed on the page live with the caret
+    /// in it — the book's one mint act (`.newNoteInChapter`, declared once in
+    /// the registry). The book's own foot word ("+ new entry" on a
+    /// journal-trait book, which mints an entry, as its foot does). Drawn only
+    /// where it can act (P-2): a FINISHED book draws no mint door anywhere
+    /// (the foot's rule); a refusal it can still meet (a full book, a chapter
+    /// deleted meanwhile) is the operations layer's words on the book's line.
+    @ViewBuilder
+    private func chapterMintDoor(_ section: ReadingSection) -> some View {
+        if let reading = structure.reading, reading.kind == .book, !reading.locked {
+            let kind = Self.footMint(for: reading)
+            Button(tokens.chromeLabel(kind == .entry ? "+ new entry" : "+ new note")) {
+                mint(kind, door: .chapter(section.id))
+            }
+            .buttonStyle(.borderless)
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .lineLimit(1)
+            .fixedSize()
+            .help(ChapterMintDoorCopy.help)
         }
     }
 
@@ -4382,4 +4458,18 @@ nonisolated enum BookFootDoors {
     static func gathering() -> [BookFootDoor] {
         [.newNote]
     }
+}
+
+// MARK: - VX-1039 — a chapter's own "+" (N-2)
+
+/// **The chapter door's words** (VX-1039, her R-1036-8): the registry's verb
+/// and refusal note (`.newNoteInChapter`, P-1) and the heading door's hover.
+/// Its refusals while drawn are the operations layer's own (a full book, a
+/// chapter deleted meanwhile — `ReadingsViewModel.message`, the book's line);
+/// a finished book draws no mint door at all.
+nonisolated enum ChapterMintDoorCopy {
+    static let verb = "New Note in This Chapter"
+    static let unavailableNote =
+        "A note is made in a chapter from the \u{201C}+ new note\u{201D} on its heading, in a book that isn\u{2019}t finished."
+    static let help = "A new note at the end of this chapter"
 }

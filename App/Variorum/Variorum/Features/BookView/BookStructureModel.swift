@@ -818,7 +818,15 @@ final class BookStructureModel {
     /// strand a stray `.generic` post in the Pool — and its refusal speaks
     /// through the message table (the raw `String(describing:)` retired with
     /// it). VX-797 brings the DAILY branch under the same doctrine (above).
-    func newEntry(day: String? = nil) async -> String? {
+    ///
+    /// VX-1039 (N-2): an entry in an OTHER journal book is born where its
+    /// door stands (`placement`, as `newPost`'s). THE daily Journal's entry
+    /// files through ⌘J's own gate (`newJournalEntry` →
+    /// `shelveInDailyJournalBook`), untouched — its order is the entry date,
+    /// so the place is the order's (PROVISIONAL, recorded in the batch record).
+    func newEntry(
+        day: String? = nil, placedAt placement: BookMintPlacement.Placement = .end
+    ) async -> String? {
         let entryDay = day ?? JournalDay.dayString(from: Date())
         let database = session.database
         // VX-435's standing wing — only decides when no Journal lives (the
@@ -871,7 +879,7 @@ final class BookStructureModel {
                 // createPost → addPostToReading) minted in wing '' under a
                 // non-Home book.
                 let post = try ops.newPostInReading(
-                    readingID, profile: .generic, entryDate: entryDay)
+                    readingID, placedAt: placement, profile: .generic, entryDate: entryDay)
                 return (post.id, nil, nil, nil)
             }
             if let refused = outcome.refused {
@@ -898,11 +906,15 @@ final class BookStructureModel {
     /// Sitting 9 (R62/R75): a NEW POST born INSIDE this book — one
     /// transaction (post + membership; refusals mint no stray), the
     /// non-journal sibling of "+ new entry".
-    func newPost() async -> String? {
+    ///
+    /// VX-1039 (N-2): born where its door stands — `placement` is the pure
+    /// rule's answer (`BookMintPlacement`, read by the door at the press);
+    /// `.end` (the default) is the place every door used before it.
+    func newPost(placedAt placement: BookMintPlacement.Placement = .end) async -> String? {
         do {
             let readingID = readingID
             let post = try await session.runner.run { ops in
-                try ops.newPostInReading(readingID)
+                try ops.newPostInReading(readingID, placedAt: placement)
             }
             lastError = nil
             return post.id

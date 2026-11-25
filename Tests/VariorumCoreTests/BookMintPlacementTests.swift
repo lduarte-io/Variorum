@@ -207,4 +207,31 @@ struct BookMintPlacementTests {
                     "a refused placement leaves no stray note (one transaction)")
         }
     }
+
+    /// The doors' overload (`newPostInReading(_:placedAt:)`): an anchor that
+    /// left the book between the page's read and the write is not a refusal —
+    /// the note is born at the end of the same chapter (every door's place
+    /// before the rule). A chapter that died meanwhile still refuses.
+    @Test func aDoorWhoseNeighbourLeftTheBookStillMakesItsNote() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "the allotment year", kind: .book)
+            let one = try ops.createSection(in: book.id, name: "spring")
+            let a = try ops.createPost(title: "A")
+            let b = try ops.createPost(title: "B")
+            for post in [a, b] { try ops.addPostToReading(post.id, to: book.id) }
+            try ops.assignPostToSection(a.id, in: book.id, section: one.id)
+            let placement = BookMintPlacement.placement(
+                for: .general(onNote: a.id), shown: try shown(db, book.id), manualOrder: true)
+            #expect(placement == .init(anchor: .after(a.id), sectionID: one.id))
+            _ = try ops.removePostFromReading(a.id, from: book.id)   // her neighbour leaves meanwhile
+            let minted = try ops.newPostInReading(book.id, placedAt: placement, title: "new").id
+            #expect(try order(db, book.id).filter { $0.sectionID == one.id }.map(\.postID) == [minted],
+                    "born in the same chapter, at its end")
+
+            try ops.deleteSection(one.id)
+            #expect(throws: OperationError.sectionNotFound(id: one.id)) {
+                _ = try ops.newPostInReading(book.id, placedAt: placement, title: "orphan?")
+            }
+        }
+    }
 }

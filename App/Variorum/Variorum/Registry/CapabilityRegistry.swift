@@ -2431,6 +2431,19 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "New Note in This Book makes a note inside the book you have open "
                 + "\u{2014} open a book first.",
             availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable }),
+        // VX-1039 (the VX-1036 run, batch 1 — N-2): a chapter's own "+" on the
+        // outline page's chapter heading (`.surface` — `BookView`'s
+        // `chapterMintDoor`), the book's one mint act at that chapter's end,
+        // landed live. `always` for `.newNoteInGathering`'s reason — the
+        // renderer carries its book and its chapter, and is drawn only where it
+        // can act (a finished book draws no mint door — P-2); what it can still
+        // meet (a full book, the chapter deleted meanwhile) is the operations
+        // layer's refusal, spoken on the book's line.
+        Capability(
+            id: .newNoteInChapter, verb: ChapterMintDoorCopy.verb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ChapterMintDoorCopy.unavailableNote, availability: always),
         // VX-563 (her kickoff ruling — "⌘↑/⌘↓ step between notes while
         // reading, document start/end while editing"; A-648-6): the book's
         // key monitor is the ONE door (`.surface` — `BookView` renders it,

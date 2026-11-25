@@ -937,6 +937,29 @@ extension Operations {
         }
     }
 
+    /// **`newPostInReading` at a door's place** (VX-1039): the pure rule's
+    /// answer (`BookMintPlacement`) handed to the op — its anchor in the
+    /// book's one position list and its chapter. A door whose anchor left the
+    /// book between the page's read and the write (another device, an undo)
+    /// is not refused for it: the note is born at the end of the same
+    /// chapter, which is where every door made it before the rule (a chapter
+    /// that died meanwhile still refuses in the op's own words).
+    @discardableResult
+    public func newPostInReading(
+        _ readingID: String, placedAt placement: BookMintPlacement.Placement,
+        title: String? = nil, profile: Profile? = nil, entryDate: String? = nil
+    ) throws -> Container {
+        do {
+            return try newPostInReading(
+                readingID, section: placement.sectionID, title: title, profile: profile,
+                entryDate: entryDate, at: InsertPosition(placement.anchor))
+        } catch OperationError.postNotInReading where placement.anchor != .end {
+            return try newPostInReading(
+                readingID, section: placement.sectionID, title: title, profile: profile,
+                entryDate: entryDate, at: .end)
+        }
+    }
+
     /// The `addPostToReading` GATE without a post (Phase 13, round 3): a
     /// door that MINTS a post destined for a reading can refuse BEFORE
     /// minting, inside one serialized runner closure (the
