@@ -24,9 +24,10 @@
 //  system's own bars behave. Nothing on the phone is set below 13 pt.
 //
 //  THE TERMINAL VOICE takes the same roles in SF Mono, its prose roles two
-//  points under Study's as on the Mac (15 · 18 · 18 for body, note title,
-//  screen title) — the "two under" applied to the line pitch as well, so a
-//  Terminal line keeps Study's leading (PROVISIONAL, §5 of the run record).
+//  points under Study's as on the Mac (14 · 18 · 17 for body, note title,
+//  screen title since VM-254) — the "two under" applied to the line pitch as
+//  well, so a Terminal line keeps Study's leading, and never under the floor
+//  (PROVISIONAL, §5 of the run record).
 //
 //  THE STEP-DOWN (VM-273 · VM-272, the VM-260 run's batch 2 — her words:
 //  "everything being too big", "ridiculously oversized icons"): the chrome
@@ -35,6 +36,18 @@
 //  title steps to 20; the bar's words keep LK-5's ruled 17, the floor's two
 //  roles their 13, her other words their sizes (batch 3's, R-260-2).
 //  PROVISIONAL as a set (P-260-2a; `notes/plans/fixes/vm-260-phone-look.md`).
+//
+//  HER WORDS ONE NOTCH SMALLER, AND HERS TO SIZE (VM-254, the VM-260 run's
+//  batch 3 — her pick R-260-2, "Setting + smaller default"): the table's
+//  her-words roles sit one notch under wave 1's set by default — the note's
+//  body 16 (the pre-wave-1 phone's and the Mac's Iowan 16), a screen's title
+//  19, a row's title 16, its preview 14, the note's title keeping the 20 its
+//  notch already took (VM-272) — and a text-size setting on the device scales
+//  exactly those roles (`followsTextSize`) by its words scale, carried to the
+//  SwiftUI form by the environment (`phoneWordsScale`) and to the UIKit forms by
+//  their caller; the chrome, the twelve words and the 13 pt floor never move
+//  with it. Terminal's prose stays two under, never under the floor.
+//  PROVISIONAL as a set (P-260-3a/3b).
 //
 //  The pure table is platform-neutral (the Mac compiles it and never reads
 //  it); the scaling and the UIKit forms sit behind `os(iOS)`, the folder's
@@ -76,6 +89,19 @@ nonisolated enum PhoneTypeRole: String, CaseIterable, Sendable {
     case tab
     /// The twelve words she must copy exactly.
     case mono
+
+    /// **VM-254 — the roles her text-size setting scales**: her words — the
+    /// note's body, a note's and a screen's title, a row's title and its preview.
+    /// Not the chrome (batch 2's, fixed), and not the twelve words (`mono`: the
+    /// Protection screen's words to copy exactly, sized by their own role).
+    var followsTextSize: Bool {
+        switch self {
+        case .noteBody, .noteTitle, .screenTitle, .rowTitle, .rowPreview:
+            return true
+        case .meta, .sectionHeader, .chip, .controlInline, .control, .tab, .mono:
+            return false
+        }
+    }
 
     /// Her words scale across the whole range; chrome holds at xxxLarge.
     var scaling: PhoneTypeSpec.Scaling {
@@ -140,26 +166,54 @@ nonisolated enum PhoneType {
     /// gives SwiftUI on both platforms.
     static let studyProseFamily = "Iowan Old Style"
 
-    /// **The table — Study's numbers are the sheet's, as drawn.**
-    static func spec(_ role: PhoneTypeRole, voice: ThemeVoice) -> PhoneTypeSpec {
+    /// **The table — Study's numbers are the sheet's, as drawn** (the chrome
+    /// stepped down by VM-273, her words by VM-254), at a words scale — 1, the
+    /// default, unless her text-size setting says otherwise (VM-254). A scale
+    /// reaches only the roles that follow the text size (`followsTextSize`),
+    /// size and pitch alike, never under the floor.
+    static func spec(
+        _ role: PhoneTypeRole, voice: ThemeVoice, wordsScale: CGFloat = 1
+    ) -> PhoneTypeSpec {
+        let table = voiceSpec(role, voice: voice)
+        guard wordsScale != 1, role.followsTextSize else { return table }
+        let size = max(floorSize, table.size * wordsScale)
+        return PhoneTypeSpec(
+            family: table.family,
+            weight: table.weight,
+            size: size,
+            lineHeight: table.lineHeight * size / table.size,
+            anchor: table.anchor,
+            scaling: table.scaling)
+    }
+
+    /// One voice's table at the default words scale.
+    private static func voiceSpec(_ role: PhoneTypeRole, voice: ThemeVoice) -> PhoneTypeSpec {
         let study = studySpec(role)
         guard voice == .terminal else { return study }
         // Terminal: every role in SF Mono; the prose roles two points under
-        // Study's, size and pitch alike (the Mac's own rule for its prose).
+        // Study's, size and pitch alike (the Mac's own rule for its prose) —
+        // NEVER UNDER THE FLOOR (VM-254: a row's preview, 14 in Study, holds 13
+        // here, its pitch moving with its size).
         let isProse = study.family == .prose
+        let size = isProse ? max(floorSize, study.size - 2) : study.size
         return PhoneTypeSpec(
             family: .mono,
             weight: study.weight,
-            size: isProse ? study.size - 2 : study.size,
-            lineHeight: isProse ? study.lineHeight - 2 : study.lineHeight,
+            size: size,
+            lineHeight: study.lineHeight - (study.size - size),
             anchor: study.anchor,
             scaling: study.scaling)
     }
 
     private static func studySpec(_ role: PhoneTypeRole) -> PhoneTypeSpec {
         switch role {
+        // VM-254 (the VM-260 run, batch 3 — her R-260-2, "Setting + smaller
+        // default"): HER WORDS ONE NOTCH UNDER WAVE 1's SET — 17 · 20 · 17 · 15
+        // became 16 · 19 · 16 · 14, each pitch with its size; the note's title
+        // keeps the 20 its notch already took (VM-272). The note's body is the
+        // pre-wave-1 phone's Iowan 16, the Mac's own. PROVISIONAL (P-260-3a).
         case .noteBody:
-            return PhoneTypeSpec(family: .prose, weight: .regular, size: 17, lineHeight: 27,
+            return PhoneTypeSpec(family: .prose, weight: .regular, size: 16, lineHeight: 25,
                                  anchor: .body, scaling: role.scaling)
         case .noteTitle:
             // VM-272 (the VM-260 run, batch 2): the note's title steps down to
@@ -169,13 +223,13 @@ nonisolated enum PhoneType {
             return PhoneTypeSpec(family: .prose, weight: .semibold, size: 20, lineHeight: 25,
                                  anchor: .title3, scaling: role.scaling)
         case .screenTitle:
-            return PhoneTypeSpec(family: .prose, weight: .semibold, size: 20, lineHeight: 25,
+            return PhoneTypeSpec(family: .prose, weight: .semibold, size: 19, lineHeight: 24,
                                  anchor: .title3, scaling: role.scaling)
         case .rowTitle:
-            return PhoneTypeSpec(family: .prose, weight: .semibold, size: 17, lineHeight: 22,
+            return PhoneTypeSpec(family: .prose, weight: .semibold, size: 16, lineHeight: 21,
                                  anchor: .headline, scaling: role.scaling)
         case .rowPreview:
-            return PhoneTypeSpec(family: .prose, weight: .regular, size: 15, lineHeight: 20,
+            return PhoneTypeSpec(family: .prose, weight: .regular, size: 14, lineHeight: 19,
                                  anchor: .subheadline, scaling: role.scaling)
         case .meta:
             return PhoneTypeSpec(family: .chrome, weight: .regular, size: 13, lineHeight: 18,
@@ -365,9 +419,10 @@ extension PhoneType {
     /// setting today stops following it.
     static func uiFont(
         _ role: PhoneTypeRole, voice: ThemeVoice,
-        compatibleWith traits: UITraitCollection? = nil
+        compatibleWith traits: UITraitCollection? = nil,
+        wordsScale: CGFloat = 1
     ) -> UIFont {
-        let spec = spec(role, voice: voice)
+        let spec = spec(role, voice: voice, wordsScale: wordsScale)
         let scaled = scaledUIFont(spec, voice: voice, compatibleWith: traits)
         guard scaled.pointSize < floorSize else { return scaled }
         return baseUIFont(spec, voice: voice, pointSize: floorSize)
@@ -420,11 +475,12 @@ extension PhoneType {
 
     @MainActor
     static func resolved(
-        _ role: PhoneTypeRole, voice: ThemeVoice, at category: UIContentSizeCategory
+        _ role: PhoneTypeRole, voice: ThemeVoice, at category: UIContentSizeCategory,
+        wordsScale: CGFloat = 1
     ) -> Resolved {
-        let key = "\(role.rawValue)·\(voice.rawValue)·\(category.rawValue)"
+        let key = "\(role.rawValue)·\(voice.rawValue)·\(category.rawValue)·\(wordsScale)"
         if let hit = cache[key] { return hit }
-        let spec = spec(role, voice: voice)
+        let spec = spec(role, voice: voice, wordsScale: wordsScale)
         let size = pointSize(spec, at: category)
         let resolved = Resolved(
             pointSize: size,
@@ -480,12 +536,15 @@ struct PhoneTypeModifier: ViewModifier {
     /// the size, family and scaling stay the role's.
     var weight: PhoneTypeSpec.Weight?
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// VM-254: her text-size setting's words scale (1 — the default — wherever
+    /// the phone's shell has not set it; never set on the Mac).
+    @Environment(\.phoneWordsScale) private var wordsScale
 
     /// The role at this environment's text size: font, line spacing, size.
     private var face: (font: Font, lineSpacing: CGFloat, pointSize: CGFloat) {
         let base = rawFace
         guard let weight else { return base }
-        let spec = PhoneType.spec(role, voice: voice)
+        let spec = PhoneType.spec(role, voice: voice, wordsScale: wordsScale)
         let reweighted = PhoneTypeSpec(
             family: spec.family, weight: weight, size: spec.size,
             lineHeight: spec.lineHeight, anchor: spec.anchor, scaling: spec.scaling)
@@ -495,9 +554,10 @@ struct PhoneTypeModifier: ViewModifier {
 
     private var rawFace: (font: Font, lineSpacing: CGFloat, pointSize: CGFloat) {
         #if os(iOS)
-        let resolved = PhoneType.resolved(role, voice: voice, at: typeSize.phoneCategory)
+        let resolved = PhoneType.resolved(
+            role, voice: voice, at: typeSize.phoneCategory, wordsScale: wordsScale)
         if let linePitch {
-            let spec = PhoneType.spec(role, voice: voice)
+            let spec = PhoneType.spec(role, voice: voice, wordsScale: wordsScale)
             let natural = PhoneType.baseUIFont(
                 spec, voice: voice, pointSize: resolved.pointSize).lineHeight
             let pitch = linePitch * resolved.pointSize / spec.size
@@ -524,6 +584,16 @@ struct PhoneTypeModifier: ViewModifier {
                 .lineSpacing(face.lineSpacing)
         }
     }
+}
+
+extension EnvironmentValues {
+    /// **VM-254 — her text-size setting, as the type layer reads it**: the
+    /// factor the roles that follow the text size (`PhoneTypeRole
+    /// .followsTextSize`) take on top of the system's text size. 1 — the
+    /// default — wherever nothing set it (every hosted surface, the Mac); the
+    /// phone's shell and lobby set the device's choice at their roots, and every
+    /// sheet they present inherits it.
+    @Entry var phoneWordsScale: CGFloat = 1
 }
 
 extension View {
@@ -595,11 +665,15 @@ struct PhoneReadingModifier: ViewModifier {
     /// The line pitch at the default size, or nil for the font's own line.
     let pitch: CGFloat?
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// VM-254: her text-size setting reaches the Read page's words too — her
+    /// words on a calm page are still hers to size; its own table (R2's page) is
+    /// NOT stepped down by default (PROVISIONAL P-260-3b).
+    @Environment(\.phoneWordsScale) private var wordsScale
 
     func body(content: Content) -> some View {
         let metrics = UIFontMetrics(forTextStyle: anchor.textStyle)
         let scaled = max(PhoneType.floorSize, metrics.scaledValue(
-            for: size,
+            for: size * wordsScale,
             compatibleWith: UITraitCollection(preferredContentSizeCategory: typeSize.phoneCategory)))
         let font = Font.system(size: scaled, weight: weight.swiftUI, design: .serif)
         let system = UIFont.systemFont(ofSize: scaled, weight: weight.uiKit)

@@ -1509,7 +1509,7 @@ phone's Look; the Mac's sources untouched; no canon edited (the deltas are draft
 | 1. The pins on the pre-fix tree — VM-247's fence (a Look change writes no row; a library's look moves the phone nothing) and VM-254's default (her words one notch under today's, the editor's body with them) | DONE (`2e03a6811` — **that commit IS the red-on-old tree**; two new files, only symbols both trees declare: `MobilePhoneOwnLookFenceTests`, `MobileHerWordsDefaultTests`) |
 | 2. The red-on-old tree built headless (`DerivedData/vm260-3-rol`, an APFS clone of `vm260-2`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `2e03a6811` |
 | 3. VM-247 — this phone's own look (voice · palette · background · appearance on the device; the router's overlay; the editor face's ground; Settings ▸ Look's rows) | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-3`, an APFS clone of `vm260-3-rol`, incremental, `nice -n 15`); the suites PENDING; the pins it moves are piece 5's |
-| 4. VM-254 — the text-size row and the smaller default (the type layer's table and its words scale; the editor face's body; the environment at the roots) | NOT STARTED |
+| 4. VM-254 — the text-size row and the smaller default (the type layer's table and its words scale; the editor face's body; the environment at the roots) | DONE (this commit) — phone `build-for-testing` green on it (`vm260-3`, incremental, `nice -n 15`); the suites PENDING; the pins it moves are piece 5's |
 | 5. Pins MOVED with the rulings + the tip's new pins | NOT STARTED |
 | 6. Tip bundles (`vm260-3`, `vm260-3-mac`, `vm260-3-ui`) and READY-FOR-TESTS | NOT STARTED |
 | 7. The window — red-on-old, the whole phone target, the Mac legs, the keyboard-reveal UI test, the captures | PENDING (the GO) |
@@ -1563,3 +1563,41 @@ phone's choice moved the Mac. The lobby wore a fixed placeholder (P-47-15). Appe
 - **The lobby** wears the phone's look (`lockedTokens` → the router's tokens) — no library needed to ask.
 - **The walk's palette seam** (`MobileWalkLaunch`, DEBUG) now chooses the phone's palette through the controller — the
   library's palette is no longer worn, so writing it would show nothing.
+
+### VM-254 — the traced mechanism: "the phone's text looks big to her"
+
+Every type site on the phone reads one of twelve roles from one table (`Shared/Theme/PhoneType.swift`, VM-48) through
+`phoneType(_:_:)` (SwiftUI) or `PhoneType.uiFont` (UIKit); her words' roles were the sizing sheet's as drawn — the
+note's body Iowan 17 on 27 (Terminal 15), a screen's title 20, a row's title 17, its preview 15 — a notch above the
+pre-wave-1 phone, whose note body was the Mac's own Iowan 16 (`VoiceTokens.studyLight.body`; Terminal 14). The editor's
+face builds the note's body from the same table's `noteBody` (`MobileEditorStyle.Face.init`, once per voice). Batch 2
+stepped the chrome a notch under those words and the note's title 24 → 20 (VM-272); nothing let her choose a size: the
+only lever was the system's text size, which moves the chrome too.
+
+### VM-254 — as built (P-260-3a/3b, PROVISIONAL as a set)
+
+- **The smaller default lives in the table** (`PhoneType.studySpec`): her words one notch under wave 1's set — the
+  note's body **16 / 25**, a screen's title **19 / 24**, a row's title **16 / 21**, its preview **14 / 19**; the
+  note's title keeps the **20 / 25** its notch already took (VM-272, the batch-2 flag); each pitch moved with its size
+  (×16/17, rounded). Terminal stays two under — **14 / 23, 18 / 23, 17 / 22, 14 / 19** — and **never under the floor**:
+  a row's preview, which two-under would put at 12, holds **13 / 18** (wave 1's Terminal value), its pitch moving with
+  its size. The chrome is batch 2's, untouched, still one notch under her words in Study (control 15 < body 16; chip 13
+  < preview 14). The twelve words (`mono`, 17) are not hers to size.
+- **The setting** — five steps on this device (`MobileTextSize`, kept beside the look's other choices under
+  `phoneLookTextSize`): **Smaller · Small · Default · Large · Larger** = the note's body in Study at the system's default
+  size **14 · 15 · 16 · 17 · 18** — a words scale of 14/16 · 15/16 · 1 · 17/16 · 18/16; "Large" is wave 1's set back.
+  It scales exactly the roles that follow the text size (`PhoneTypeRole.followsTextSize`: the note's body, both titles,
+  a row's title and preview), size and pitch alike, on top of the system's text size, never under the floor
+  (`PhoneType.spec(_:voice:wordsScale:)`, one function every form reads).
+- **How it reaches every surface** — SwiftUI: one environment value, `EnvironmentValues.phoneWordsScale` (an `@Entry`
+  in the type layer's own file, `PhoneControls.phoneFieldPrompt`'s precedent; 1 wherever nothing set it — every hosted
+  surface and the Mac), read by `PhoneTypeModifier` and set by the shell at its outermost (`MobileShellView` — both
+  pages, every pushed screen and every sheet it presents) and by the app around the lobby (`VariorumMobileApp`; that
+  file's diff is the wrapping `Group` and one line — `git diff -w`). UIKit: the editor face carries the scale
+  (`MobileEditorStyle.Face.scaled` rebuilds only the note's body; `font(_:)` hands it to every UIKit role site — the
+  comments sheet's draft field, the take browser's and History's titles), adopted with the look by the router's one
+  `wear` (`adopt(_:ground:wordsScale:)`), and an open note re-bases its font through the existing flip road
+  (`applyVoiceChangeEverywhere` — attributes only, O(open note), at a deliberate Settings press; nothing in the editor
+  seam). A book's Read page follows the setting too (`PhoneReadingModifier`) but keeps its own table at the default
+  (P-260-3b).
+- **Settings ▸ Look ▸ Text size** — the five words as the system segmented control (every Settings choice's control).

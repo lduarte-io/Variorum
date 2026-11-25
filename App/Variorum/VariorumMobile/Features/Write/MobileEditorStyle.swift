@@ -21,7 +21,7 @@
 //  Concurrency (QUESTIONS #195 MINOR 3, closed at VM-51): the live look is
 //  MAIN-ACTOR state — the compiler now enforces what the old comment only
 //  claimed ("main-thread written, main-thread read") — and the app has ONE
-//  writer, `adopt(_:ground:)`, called by the shell router where the library's
+//  writer, `adopt(_:ground:wordsScale:)`, called by the shell router where the library's
 //  settings LAND and where the phone's own look MOVES (VM-247). The two other writers (the Write screen's init and
 //  the router's init) are gone. `voice`'s setter survives as the harness
 //  door the suites drive one voice through. The per-voice faces are cached
@@ -31,7 +31,8 @@
 //  cost per keystroke).
 //
 //  Typography values are the phone layer's `noteBody` role (VM-48: study
-//  Iowan Old Style 17 / terminal mono 15 — the sizing sheet's note body),
+//  Iowan Old Style 17 / terminal mono 15 — the sizing sheet's note body;
+//  VM-254: 16 / 14 by default, at her text-size setting's words scale),
 //  wrapped in `UIFontMetrics(.body)` so Dynamic Type scales them
 //  (identity at the default content size, so byte/attribute tests stay
 //  deterministic). PROVISIONAL sizes like everything visual: the mockup's
@@ -52,12 +53,15 @@ nonisolated enum MobileEditorStyle {
     // MARK: - The live look (the phone's own — VM-247)
 
     /// The look as the editor wears it — voice, palette and the custom seeds —
-    /// the last value `adopt(_:ground:)` took (before anything has landed: R1's
+    /// the last value `adopt(_:ground:wordsScale:)` took (before anything has landed: R1's
     /// placeholder, Terminal in the voice's own colours, which is what the
     /// suites' editor worlds assume). MAIN-ACTOR state (MINOR 3).
     @MainActor private static var stored = Queries.ThemeSettings()
     /// The note's ground the editor wears (VM-247 — the paper, or the cream).
     @MainActor private static var storedGround: MobileNoteGround = .paper
+    /// Her words' size the editor wears (VM-254 — her text-size setting's words
+    /// scale; 1 is the default).
+    @MainActor private static var storedScale: CGFloat = 1
     /// The face `stored` names, rebuilt only when the look moves.
     @MainActor private static var current: Face = terminalFace
 
@@ -79,23 +83,28 @@ nonisolated enum MobileEditorStyle {
         }
     }
 
-    /// **THE ONE APP WRITER** (VM-51; VM-247): the look the phone wears —
-    /// the settings the shell router composed (the library's, under this
-    /// phone's voice and palette) and the note's ground — adopted where the
-    /// library's settings land and where the phone's look moves. Answers whether
-    /// the FACE moved — the voice, the palette, the custom seeds or the ground —
-    /// so the caller restyles the open editors only when there is something to
-    /// restyle. A caller that names no ground (the suites' resets) adopts the
-    /// paper.
+    /// **THE ONE APP WRITER** (VM-51; VM-247; VM-254): the look the phone
+    /// wears — the settings the shell router composed (the library's, under this
+    /// phone's voice and palette), the note's ground and her words' scale —
+    /// adopted where the library's settings land and where the phone's look
+    /// moves. Answers whether the FACE moved — the voice, the palette, the custom
+    /// seeds, the ground or the words' size — so the caller restyles the open
+    /// editors only when there is something to restyle. A caller that names
+    /// neither (the suites' resets) adopts the paper at the default size.
     @MainActor
     @discardableResult
-    static func adopt(_ settings: Queries.ThemeSettings, ground: MobileNoteGround = .paper) -> Bool {
+    static func adopt(
+        _ settings: Queries.ThemeSettings, ground: MobileNoteGround = .paper,
+        wordsScale: CGFloat = 1
+    ) -> Bool {
         let moved = settings.voice != stored.voice
             || settings.palette != stored.palette
             || PaletteTint(settings) != PaletteTint(stored)
             || ground != storedGround
+            || wordsScale != storedScale
         stored = settings
         storedGround = ground
+        storedScale = wordsScale
         if moved { current = makeFace(settings) }
         return moved
     }
@@ -110,6 +119,7 @@ nonisolated enum MobileEditorStyle {
         return voiceFace
             .applying(palette: settings.palette, tint: PaletteTint(settings))
             .grounded(storedGround)
+            .scaled(storedScale)
     }
 
     // MARK: - One voice's resolved editor face
@@ -121,7 +131,12 @@ nonisolated enum MobileEditorStyle {
     struct Face {
         /// Which voice this face is (VM-48: its type roles resolve from it).
         let voice: ThemeVoice
-        let body: UIFont
+        /// The note's body — the `noteBody` role at this face's words scale
+        /// (VM-254), scaling with the system's text size.
+        private(set) var body: UIFont
+        /// Her words' size this face draws (VM-254 — 1, the default, for the
+        /// cached voice faces).
+        private(set) var wordsScale: CGFloat = 1
         /// Chrome type (the keyboard bar's act titles): mono in the
         /// terminal voice, the system sans in study — the mockups' own
         /// chrome rule (`.s .chrome` is sans even though study prose is
@@ -187,30 +202,15 @@ nonisolated enum MobileEditorStyle {
                         dark: traits.userInterfaceStyle == .dark)[keyPath: key])
                 }
             }
-            let metrics = UIFontMetrics(forTextStyle: .body)
             // VM-48: the note body is the phone layer's `noteBody` role —
-            // Study Iowan 17, Terminal SF Mono 15 (two under) — still
-            // through `UIFontMetrics(.body)`, so it scales across the whole
-            // range and is exact at the default size.
-            let size = PhoneType.spec(.noteBody, voice: voice).size
+            // since VM-254 Study Iowan 16, Terminal SF Mono 14 (two under) —
+            // still through `UIFontMetrics(.body)`, so it scales across the
+            // whole range and is exact at the default size.
+            body = Self.bodyFont(voice: voice, size: PhoneType.spec(.noteBody, voice: voice).size)
             switch voice {
             case .terminal:
-                body = metrics.scaledFont(
-                    for: .monospacedSystemFont(ofSize: size, weight: .regular))
                 chrome = .monospacedSystemFont(ofSize: 14, weight: .regular)
             case .study:
-                // Iowan Old Style ships on iOS (pinned by
-                // `MobileVoiceTests`); the serif system design is the
-                // never-reached safety net — the Mac resolver's exact
-                // posture (R49: nothing bundled).
-                let serif = UIFont(name: "IowanOldStyle-Roman", size: size)
-                    ?? UIFont(name: "Iowan Old Style", size: size)
-                    ?? UIFont(
-                        descriptor: UIFont.systemFont(ofSize: size).fontDescriptor
-                            .withDesign(.serif)
-                            ?? UIFont.systemFont(ofSize: size).fontDescriptor,
-                        size: size)
-                body = metrics.scaledFont(for: serif)
                 chrome = .systemFont(ofSize: 14)
             }
             ink = dynamic(\.ink)
@@ -266,12 +266,49 @@ nonisolated enum MobileEditorStyle {
             return face
         }
 
+        /// **This face at her words' size** (VM-254) — itself at the scale it
+        /// already draws. Only the note's body is rebuilt (the `noteBody` role at
+        /// the scale, never under the floor); every colour object and the chrome
+        /// type are this face's own, so attribute equality holds across sizes, and
+        /// `font(_:)` hands the UIKit roles that follow the text size the same
+        /// scale.
+        func scaled(_ wordsScale: CGFloat) -> Face {
+            guard wordsScale != self.wordsScale else { return self }
+            var face = self
+            face.wordsScale = wordsScale
+            face.body = Self.bodyFont(
+                voice: voice,
+                size: PhoneType.spec(.noteBody, voice: voice, wordsScale: wordsScale).size)
+            return face
+        }
+
+        /// The note's body at a size — Iowan Old Style in Study (it ships on iOS,
+        /// pinned by `MobileVoiceTests`; the serif system design is the
+        /// never-reached safety net — the Mac resolver's exact posture, R49:
+        /// nothing bundled), SF Mono in Terminal — through `UIFontMetrics(.body)`.
+        static func bodyFont(voice: ThemeVoice, size: CGFloat) -> UIFont {
+            let metrics = UIFontMetrics(forTextStyle: .body)
+            switch voice {
+            case .terminal:
+                return metrics.scaledFont(for: .monospacedSystemFont(ofSize: size, weight: .regular))
+            case .study:
+                let serif = UIFont(name: "IowanOldStyle-Roman", size: size)
+                    ?? UIFont(name: "Iowan Old Style", size: size)
+                    ?? UIFont(
+                        descriptor: UIFont.systemFont(ofSize: size).fontDescriptor
+                            .withDesign(.serif)
+                            ?? UIFont.systemFont(ofSize: size).fontDescriptor,
+                        size: size)
+                return metrics.scaledFont(for: serif)
+            }
+        }
+
         /// VM-48: the phone layer's UIKit type — a role in this face's voice
         /// (`PhoneType.uiFont`: scaled with the text size, chrome held at
         /// xxxLarge). The UIKit chrome reads its type through here.
         @MainActor
         func font(_ role: PhoneTypeRole) -> UIFont {
-            PhoneType.uiFont(role, voice: voice)
+            PhoneType.uiFont(role, voice: voice, wordsScale: wordsScale)
         }
 
         /// **This voice's face under a palette** (VM-51): the seven palette
@@ -319,7 +356,7 @@ nonisolated enum MobileEditorStyle {
     static let studyFace = Face(voice: .study)
 
     /// The face the editor wears now — this phone's voice under its palette,
-    /// on its ground (`adopt(_:ground:)`).
+    /// on its ground, at her words' size (`adopt(_:ground:wordsScale:)`).
     @MainActor static var face: Face { current }
 
     /// P26/P43 (parity A3, her ruled flip — "the phone's menus

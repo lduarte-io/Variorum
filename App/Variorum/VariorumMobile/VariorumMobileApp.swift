@@ -72,158 +72,163 @@ struct VariorumMobileApp: App {
 
     var body: some Scene {
         WindowGroup {
-            switch bootstrap.state {
-            case .ready(let session):
-                MobileShellView(
-                    session: session, services: services,
-                    router: shellRouter, bootstrap: bootstrap)
-                    // The app-switcher snapshot cover (SnapshotPrivacy —
-                    // PROVISIONAL, pre-Stage-A): redacts exactly the
-                    // privacySensitive spans (the 12 words, phrase entries)
-                    // while the scene is not active. Environment reaches
-                    // presented sheets, so the words are covered wherever
-                    // they render.
-                    .redacted(reason: SnapshotPrivacy.redactionReasons(for: scenePhase))
-                    // VX-510 D-A3 (VX-506): whether the OPEN library has joined an account — the sync row's keys refusal
-                    // over a library that has not reads a not-yet, never "locked" (VM-8 unit 1: its *Protection…* door is
-                    // the phone's Settings ▸ Protection screen).
-                    .environment(\.librarySyncsWithAnAccount, bootstrap.roadStanding?.syncsWithAnAccount)
-                    // VX-306 U3: rule 27 after a quiet open — §7c (3)'s sentence, a sheet once per open.
-                    .sheet(isPresented: Binding(
-                        get: { roadRule27Owed },
-                        set: { if !$0, let standing = bootstrap.roadStanding { rule27SaidFor = ObjectIdentifier(standing) } })
-                    ) {
-                        MobileNoKeyFileSheet(
-                            accountRoad: bootstrap.roadStanding?.faces.noKeyFileAnywhere?.accountRoad ?? false,
-                            tokens: lockedTokens,
-                            close: {
-                                if let standing = bootstrap.roadStanding { rule27SaidFor = ObjectIdentifier(standing) }
-                            })
-                    }
-                    .task {
-                        guard services == nil else { return }
-                        let fresh = AppServices(
-                            session: session,
-                            storeVariant: bootstrap.storeVariant,
-                            backupEnabled: false,
-                            // VX-423: the process's one refresh authority — the vault leaf rides the same one.
-                            auth: bootstrap.auth,
-                            // VX-329 U1 — PROVISIONAL P-VX329-U1-5: the engine's keys from the protection core's
-                            // custody and the account-binding gate — the Mac's composition (today's device-key
-                            // provider over today's sync custody left with today's road).
-                            makeSyncKeyProvider: { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys },
-                            boundAccountRead: { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in
-                                newRoadSyncKeys.boundAccount
-                            },
-                            // The retired-credential sweep — REQUIRED at the
-                            // seam (pre-13x 1a); production names the real one.
-                            legacyCleanup: { LegacyPasteInCleanup.clear() })
-                        services = fresh
-                        // VM-8 unit 1 — THE SERVICES-HELD ROADS, wired in the bootstrap's ONE function (VX-510 D-A1, the
-                        // Mac's composition): the Account sheet's Delete Account runs the protection half (rule 16's local
-                        // leave — P-VX308-U1-F1); the account section's *Sign out…* signs out through this one session; an
-                        // account act that lands on the open session runs its FIRST ROUND through these services
-                        // (VX-498/VX-507); and a RE-KEYING act's round waits for the reopen's fresh services (D-B0 — the
-                        // services generation this call bumps). BEFORE `start()`, so a re-keying act's round rides the
-                        // chain the start composes. (Until VM-8 the phone wired only the deletion hook, inline — it had no
-                        // account section.)
-                        bootstrap.attach(services: fresh)
-                        // Phase 13p ladder R1-M2: the phone's lock road
-                        // used to skip the ruled teardown entirely —
-                        // `onWillLock` was wired ONLY on the Mac, so Lock
-                        // Now closed the pool under pending keystrokes and
-                        // left this stale `services` object alive through
-                        // the locked window AND past the next `.ready`'s
-                        // guard above. The factory mirrors the Mac's
-                        // closure: flush + leaving savepoints, then stop
-                        // AND nil the services (the next unlock composes
-                        // fresh ones over the fresh session — the
-                        // deferred-starts rule).
-                        bootstrap.onWillLock = mobileWillLock(
-                            session: session, editors: shellRouter.editors,
-                            stopServices: {
-                                services?.stop()
-                                services = nil
-                                // Act 0: the occasion belongs to the
-                                // session it was primed against. A lock
-                                // ends that session, so the next unlock
-                                // primes a fresh one against the fresh
-                                // store rather than spending a verdict
-                                // taken before the store was closed.
-                                firstWrite = nil
-                            })
-                        await fresh.start()
-                        // Pre-13u Act 0 — R-pre13u-1: **NOTHING IS SEEDED
-                        // HERE ANY MORE.** The launch used to mint the
-                        // starter Journal (R27b, batch 5) behind a sync
-                        // gate and a 20-second bounded wait; her ruling
-                        // moved the MINT to her first WRITE and deleted the
-                        // wait, because the sign-in door lives inside the
-                        // shell — so at launch on a fresh install the
-                        // account question has no answer to read, and no
-                        // amount of waiting gives it one. What launch does
-                        // now is take ONE cheap local reading (`prime`) and
-                        // hand the write doors a signal to announce to.
-                        //
-                        // Composed here rather than on a view for the
-                        // batch-5 reason that still holds: the shell is
-                        // hosted alone by several suites, and furniture
-                        // must never appear in a pin's world.
-                        let furniture = MobileFirstWriteFurniture(
-                            session: session,
-                            storeVariant: bootstrap.storeVariant,
-                            // Two ACCOUNT facts, and only account facts. The
-                            // A4 fence — a store that can never sync has no
-                            // corpus on its way, so it must never wait for
-                            // one — lives at `seedIfNeeded`, beside the
-                            // store variant it is a fact about (R2-3).
-                            // Composing it in here instead restated
-                            // `storeVariant` through a fourth closure and
-                            // let the unsafe pair be built.
+            // VM-254: her text-size setting reaches the lobby's words too (the shell sets it
+            // again for itself and its sheets — `MobileShellView`).
+            Group {
+                switch bootstrap.state {
+                case .ready(let session):
+                    MobileShellView(
+                        session: session, services: services,
+                        router: shellRouter, bootstrap: bootstrap)
+                        // The app-switcher snapshot cover (SnapshotPrivacy —
+                        // PROVISIONAL, pre-Stage-A): redacts exactly the
+                        // privacySensitive spans (the 12 words, phrase entries)
+                        // while the scene is not active. Environment reaches
+                        // presented sheets, so the words are covered wherever
+                        // they render.
+                        .redacted(reason: SnapshotPrivacy.redactionReasons(for: scenePhase))
+                        // VX-510 D-A3 (VX-506): whether the OPEN library has joined an account — the sync row's keys refusal
+                        // over a library that has not reads a not-yet, never "locked" (VM-8 unit 1: its *Protection…* door is
+                        // the phone's Settings ▸ Protection screen).
+                        .environment(\.librarySyncsWithAnAccount, bootstrap.roadStanding?.syncsWithAnAccount)
+                        // VX-306 U3: rule 27 after a quiet open — §7c (3)'s sentence, a sheet once per open.
+                        .sheet(isPresented: Binding(
+                            get: { roadRule27Owed },
+                            set: { if !$0, let standing = bootstrap.roadStanding { rule27SaidFor = ObjectIdentifier(standing) } })
+                        ) {
+                            MobileNoKeyFileSheet(
+                                accountRoad: bootstrap.roadStanding?.faces.noKeyFileAnywhere?.accountRoad ?? false,
+                                tokens: lockedTokens,
+                                close: {
+                                    if let standing = bootstrap.roadStanding { rule27SaidFor = ObjectIdentifier(standing) }
+                                })
+                        }
+                        .task {
+                            guard services == nil else { return }
+                            let fresh = AppServices(
+                                session: session,
+                                storeVariant: bootstrap.storeVariant,
+                                backupEnabled: false,
+                                // VX-423: the process's one refresh authority — the vault leaf rides the same one.
+                                auth: bootstrap.auth,
+                                // VX-329 U1 — PROVISIONAL P-VX329-U1-5: the engine's keys from the protection core's
+                                // custody and the account-binding gate — the Mac's composition (today's device-key
+                                // provider over today's sync custody left with today's road).
+                                makeSyncKeyProvider: { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys },
+                                boundAccountRead: { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in
+                                    newRoadSyncKeys.boundAccount
+                                },
+                                // The retired-credential sweep — REQUIRED at the
+                                // seam (pre-13x 1a); production names the real one.
+                                legacyCleanup: { LegacyPasteInCleanup.clear() })
+                            services = fresh
+                            // VM-8 unit 1 — THE SERVICES-HELD ROADS, wired in the bootstrap's ONE function (VX-510 D-A1, the
+                            // Mac's composition): the Account sheet's Delete Account runs the protection half (rule 16's local
+                            // leave — P-VX308-U1-F1); the account section's *Sign out…* signs out through this one session; an
+                            // account act that lands on the open session runs its FIRST ROUND through these services
+                            // (VX-498/VX-507); and a RE-KEYING act's round waits for the reopen's fresh services (D-B0 — the
+                            // services generation this call bumps). BEFORE `start()`, so a re-keying act's round rides the
+                            // chain the start composes. (Until VM-8 the phone wired only the deletion hook, inline — it had no
+                            // account section.)
+                            bootstrap.attach(services: fresh)
+                            // Phase 13p ladder R1-M2: the phone's lock road
+                            // used to skip the ruled teardown entirely —
+                            // `onWillLock` was wired ONLY on the Mac, so Lock
+                            // Now closed the pool under pending keystrokes and
+                            // left this stale `services` object alive through
+                            // the locked window AND past the next `.ready`'s
+                            // guard above. The factory mirrors the Mac's
+                            // closure: flush + leaving savepoints, then stop
+                            // AND nil the services (the next unlock composes
+                            // fresh ones over the fresh session — the
+                            // deferred-starts rule).
+                            bootstrap.onWillLock = mobileWillLock(
+                                session: session, editors: shellRouter.editors,
+                                stopServices: {
+                                    services?.stop()
+                                    services = nil
+                                    // Act 0: the occasion belongs to the
+                                    // session it was primed against. A lock
+                                    // ends that session, so the next unlock
+                                    // primes a fresh one against the fresh
+                                    // store rather than spending a verdict
+                                    // taken before the store was closed.
+                                    firstWrite = nil
+                                })
+                            await fresh.start()
+                            // Pre-13u Act 0 — R-pre13u-1: **NOTHING IS SEEDED
+                            // HERE ANY MORE.** The launch used to mint the
+                            // starter Journal (R27b, batch 5) behind a sync
+                            // gate and a 20-second bounded wait; her ruling
+                            // moved the MINT to her first WRITE and deleted the
+                            // wait, because the sign-in door lives inside the
+                            // shell — so at launch on a fresh install the
+                            // account question has no answer to read, and no
+                            // amount of waiting gives it one. What launch does
+                            // now is take ONE cheap local reading (`prime`) and
+                            // hand the write doors a signal to announce to.
                             //
-                            // Captured STRONGLY, deliberately: the closures
-                            // outlive nothing (the seed is awaited right
-                            // here), and a nil'd weak reference would read as
-                            // "no account", which is the unsafe direction.
-                            gate: MobileStarterJournal.SyncGate(
-                                belongsToAnAccount: {
-                                    fresh.sync.isConfigured
-                                        || fresh.account.variorum != nil
-                                }))
-                        firstWrite = furniture
-                        session.onFirstWrite = { furniture.noteFirstWrite() }
-                        await furniture.prime()
+                            // Composed here rather than on a view for the
+                            // batch-5 reason that still holds: the shell is
+                            // hosted alone by several suites, and furniture
+                            // must never appear in a pin's world.
+                            let furniture = MobileFirstWriteFurniture(
+                                session: session,
+                                storeVariant: bootstrap.storeVariant,
+                                // Two ACCOUNT facts, and only account facts. The
+                                // A4 fence — a store that can never sync has no
+                                // corpus on its way, so it must never wait for
+                                // one — lives at `seedIfNeeded`, beside the
+                                // store variant it is a fact about (R2-3).
+                                // Composing it in here instead restated
+                                // `storeVariant` through a fourth closure and
+                                // let the unsafe pair be built.
+                                //
+                                // Captured STRONGLY, deliberately: the closures
+                                // outlive nothing (the seed is awaited right
+                                // here), and a nil'd weak reference would read as
+                                // "no account", which is the unsafe direction.
+                                gate: MobileStarterJournal.SyncGate(
+                                    belongsToAnAccount: {
+                                        fresh.sync.isConfigured
+                                            || fresh.account.variorum != nil
+                                    }))
+                            firstWrite = furniture
+                            session.onFirstWrite = { furniture.noteFirstWrite() }
+                            await furniture.prime()
+                        }
+                case .opening:
+                    // 13l L-c: the store opens off the main thread now, so there
+                    // is a first frame with no session. Quiet by design — a
+                    // spinner announcing 50 ms of work is worse than the calm
+                    // ground the app opens onto anyway.
+                    MobileStoreOpeningView()
+                case .libraryMissing(let lobby):
+                    // pre-13x 1a (§3.7): the three-door face — the lock stays.
+                    MobileLibraryMissingView(lobby: lobby, tokens: lockedTokens)
+                case .failed(let error):
+                    MobileStoreFailureView(error: error) {
+                        bootstrap.retry()
                     }
-            case .opening:
-                // 13l L-c: the store opens off the main thread now, so there
-                // is a first frame with no session. Quiet by design — a
-                // spinner announcing 50 ms of work is worse than the calm
-                // ground the app opens onto anyway.
-                MobileStoreOpeningView()
-            case .libraryMissing(let lobby):
-                // pre-13x 1a (§3.7): the three-door face — the lock stays.
-                MobileLibraryMissingView(lobby: lobby, tokens: lockedTokens)
-            case .failed(let error):
-                MobileStoreFailureView(error: error) {
-                    bootstrap.retry()
+                case .roadLobby(let lobby):
+                    // VX-306 U3: the road's lobby. While this renders there is no session, no services, no open store — and
+                    // therefore no capture surface of any kind (the quick-note box lives inside `MobileShellView`, which
+                    // exists only in `.ready` — 13p Batch 4 item (i)'s structural half).
+                    MobileRoadLockView(lobby: lobby, tokens: lockedTokens)
+                case .newLibraryWords(let card):
+                    // VX-306 U3: the once-shown words card of a library just created (rule 2).
+                    MobileLibraryWordsCard(model: card, tokens: lockedTokens)
+                case .roadInterlude(let interlude):
+                    // VX-306 U3: rule 21's notice, then the key-file offer — once, before the library shows.
+                    MobileRoadInterludeCard(model: interlude, tokens: lockedTokens)
+                case .hostingTests:
+                    // VX-604: this process is a test runner's host — the shared bootstrap opened nothing
+                    // (`AppBootstrap.Launch`); the suites mount their own worlds.
+                    Text(AppBootstrap.Launch.hostFace)
+                        .padding(24)
                 }
-            case .roadLobby(let lobby):
-                // VX-306 U3: the road's lobby. While this renders there is no session, no services, no open store — and
-                // therefore no capture surface of any kind (the quick-note box lives inside `MobileShellView`, which
-                // exists only in `.ready` — 13p Batch 4 item (i)'s structural half).
-                MobileRoadLockView(lobby: lobby, tokens: lockedTokens)
-            case .newLibraryWords(let card):
-                // VX-306 U3: the once-shown words card of a library just created (rule 2).
-                MobileLibraryWordsCard(model: card, tokens: lockedTokens)
-            case .roadInterlude(let interlude):
-                // VX-306 U3: rule 21's notice, then the key-file offer — once, before the library shows.
-                MobileRoadInterludeCard(model: interlude, tokens: lockedTokens)
-            case .hostingTests:
-                // VX-604: this process is a test runner's host — the shared bootstrap opened nothing
-                // (`AppBootstrap.Launch`); the suites mount their own worlds.
-                Text(AppBootstrap.Launch.hostFace)
-                    .padding(24)
             }
+            .environment(\.phoneWordsScale, shellRouter.look.choice.textSize.wordsScale)
         }
         .onChange(of: scenePhase) { _, phase in
             // The routing lives in `mobileScenePhaseChanged` (round 2, M5)

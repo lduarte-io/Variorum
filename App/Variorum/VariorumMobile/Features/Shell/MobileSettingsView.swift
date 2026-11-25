@@ -121,6 +121,8 @@ struct MobileSettingsView: View {
     /// VM-247: her own word ("the cream background color option") — DRAFT for
     /// her wording pass, with its two words below.
     static let groundLabel = "Background"
+    /// VM-254: the text-size row's label — DRAFT (her wording pass).
+    static let textSizeLabel = "Text size"
 
     /// The voice choice's two words — the two rows' own, kept (R-47-2).
     static func voiceWord(_ voice: ThemeVoice) -> String {
@@ -188,6 +190,18 @@ struct MobileSettingsView: View {
         switch ground {
         case .paper: "Paper"
         case .cream: "Cream"
+        }
+    }
+
+    /// VM-254 — the five steps' words. DRAFT (her wording pass); short enough
+    /// that five share the row at 402 pt in Terminal at the default size.
+    static func textSizeWord(_ size: MobileTextSize) -> String {
+        switch size {
+        case .smaller: "Smaller"
+        case .small: "Small"
+        case .standard: "Default"
+        case .large: "Large"
+        case .larger: "Larger"
         }
     }
 
@@ -343,8 +357,9 @@ struct MobileSettingsView: View {
     /// **The look — all of it THIS PHONE's own** (VM-247; her words: "I don't like
     /// that the theme syncs between mac and phone either it's annoying" · "the
     /// voice should also be per device"): the voice, the colour palette, the
-    /// note's background (her "cream background color option") and light · dark
-    /// · follow the system (VM-53) — each kept in this device's defaults
+    /// note's background (her "cream background color option"), light · dark ·
+    /// follow the system (VM-53) and her words' size (VM-254) — each kept in this
+    /// device's defaults
     /// (`MobileLookController`, `MobileAppearanceController`), never the synced
     /// `setting` table; a look chosen on the Mac moves nothing here.
     private var lookGroup: some View {
@@ -364,6 +379,13 @@ struct MobileSettingsView: View {
                 PhoneSegmentedChoice(
                     AppearanceChoice.allCases, selection: router.appearance.choice, tokens: tokens,
                     word: Self.appearanceWord, select: { router.appearance.set($0) })
+            }
+            // VM-254 (her R-260-2): her words' size on this phone — the five
+            // steps scale her words only; the chrome around them holds.
+            choiceRow(Self.textSizeLabel) {
+                PhoneSegmentedChoice(
+                    MobileTextSize.allCases, selection: router.look.choice.textSize, tokens: tokens,
+                    word: Self.textSizeWord, select: { router.look.setTextSize($0) })
             }
         }
     }

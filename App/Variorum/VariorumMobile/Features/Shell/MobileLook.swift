@@ -7,7 +7,8 @@
 //  "the voice should also be per device." · "I also did like the cream background
 //  color option. that should stay as an option for the phone". So the whole of
 //  Settings ▸ Look is the device's — the voice, the colour palette, the note's
-//  background and (VM-53, unchanged) light · dark · follow the system — kept in
+//  background, her words' size (VM-254) and (VM-53, unchanged) light · dark ·
+//  follow the system — kept in
 //  THIS device's defaults the way the appearance already is
 //  (`AppearanceChoiceRule`'s road: one key per choice, a strange value reads as the
 //  default), never the synced `setting` table. The phone stops taking its look from
@@ -56,6 +57,35 @@ nonisolated enum MobileNoteGround: String, CaseIterable, Sendable {
     }
 }
 
+// MARK: - Her words' size
+
+/// **VM-254 — her words' size on this phone** (her pick R-260-2, "Setting +
+/// smaller default"): five steps around the default, scaling her words only —
+/// the note's body, the titles, a row's title and its preview (`PhoneTypeRole
+/// .followsTextSize`) — on top of the system's text size; the chrome, the twelve
+/// words and the 13 pt floor never move with it. The steps are the note's body
+/// in Study at the system's default size, 14 · 15 · 16 · 17 · 18: the default is
+/// the type table itself (one notch under wave 1's set), "Large" is wave 1's set
+/// back (17), each step one point on the body. PROVISIONAL as a set (P-260-3a).
+nonisolated enum MobileTextSize: String, CaseIterable, Sendable {
+    case smaller
+    case small
+    case standard = "default"
+    case large
+    case larger
+
+    /// The factor her words' roles take at this step (the default: 1).
+    var wordsScale: CGFloat {
+        switch self {
+        case .smaller: 14.0 / 16
+        case .small: 15.0 / 16
+        case .standard: 1
+        case .large: 17.0 / 16
+        case .larger: 18.0 / 16
+        }
+    }
+}
+
 // MARK: - The choice
 
 /// **What Settings ▸ Look holds on this phone** (the appearance — light, dark,
@@ -64,14 +94,18 @@ nonisolated struct MobileLookChoice: Equatable, Sendable {
     var voice: ThemeVoice
     var palette: ThemePalette
     var ground: MobileNoteGround
+    /// VM-254 — her words' size.
+    var textSize: MobileTextSize
 
     /// **Her R-260-3** — a phone that has chosen nothing: Study under the
     /// sea-glass (the unset library's own read — the same constants, so the two
-    /// can never drift), on the paper.
+    /// can never drift), on the paper, her words at the default size (R-260-2's
+    /// smaller default is the type table itself).
     static let fresh = MobileLookChoice(
         voice: Queries.ThemeSettings.unsetStoreVoice,
         palette: Queries.ThemeSettings.unsetStorePalette,
-        ground: .paper)
+        ground: .paper,
+        textSize: .standard)
 
     /// **The palettes the phone offers**: every preset the Mac's swatch strip
     /// offers but her own hex — `custom` needs the seed fields the phone does not
@@ -85,6 +119,7 @@ nonisolated struct MobileLookChoice: Equatable, Sendable {
         static let voice = "phoneLookVoice"
         static let palette = "phoneLookPalette"
         static let ground = "phoneLookBackground"
+        static let textSize = "phoneLookTextSize"
     }
 
     /// The remembered choice — `AppearanceChoice.remembered`'s posture: a value
@@ -104,6 +139,9 @@ nonisolated struct MobileLookChoice: Equatable, Sendable {
         if let ground = defaults.string(forKey: Key.ground).flatMap(MobileNoteGround.init(rawValue:)) {
             choice.ground = ground
         }
+        if let size = defaults.string(forKey: Key.textSize).flatMap(MobileTextSize.init(rawValue:)) {
+            choice.textSize = size
+        }
         return choice
     }
 
@@ -113,6 +151,7 @@ nonisolated struct MobileLookChoice: Equatable, Sendable {
         defaults.set(voice.rawValue, forKey: Key.voice)
         defaults.set(palette.rawValue, forKey: Key.palette)
         defaults.set(ground.rawValue, forKey: Key.ground)
+        defaults.set(textSize.rawValue, forKey: Key.textSize)
     }
 
     /// **THE OVERLAY** — the library's landed settings with this phone's look in
@@ -172,6 +211,8 @@ final class MobileLookController {
     }
 
     func setGround(_ ground: MobileNoteGround) { update { $0.ground = ground } }
+
+    func setTextSize(_ size: MobileTextSize) { update { $0.textSize = size } }
 
     /// One write: the choice, remembered, then the router told — only when
     /// something moved.

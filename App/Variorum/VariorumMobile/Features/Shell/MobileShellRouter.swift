@@ -168,11 +168,14 @@ final class MobileShellRouter {
     }
 
     /// The face takes the library's settings under this phone's look — voice,
-    /// palette, the note's background — and the open editors restyle only when
-    /// the face moved.
+    /// palette, the note's background, her words' size (VM-254) — and the open
+    /// editors restyle only when the face moved (a size change re-bases the open
+    /// note's font through the same flip road as a voice change: attributes
+    /// only, at a deliberate Settings press).
     private func wear(_ library: Queries.ThemeSettings) {
         let choice = look.choice
-        if MobileEditorStyle.adopt(choice.over(library), ground: choice.ground) {
+        if MobileEditorStyle.adopt(
+            choice.over(library), ground: choice.ground, wordsScale: choice.textSize.wordsScale) {
             editors.applyVoiceChangeEverywhere()
         }
     }

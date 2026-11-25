@@ -437,6 +437,11 @@ struct MobileShellView: View {
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
         #endif
+        // VM-254: her text-size setting reaches every her-words role under the
+        // shell — both pages, every pushed screen, and every sheet presented
+        // above (they inherit their presenter's environment) — through the type
+        // layer's one environment value. Outermost, so every sheet is inside it.
+        .environment(\.phoneWordsScale, router.look.choice.textSize.wordsScale)
     }
 
     /// The Settings sheet. FIX-B4 (fire-and-DO): the DEBUG "Open the
