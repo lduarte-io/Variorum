@@ -401,9 +401,9 @@ chip=(AddToBookMintTests AscentDoorTests AscentRoutingTests BookAnchorTests Book
 
 ## THE LADDER
 
-*(One ladder over the run's whole diff; fresh `fable-reviewer` per round running `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings repo-first here before any fix session sees them; hard cap five rounds while a round finds a major.)*
+*(One ladder over the run's whole diff; fresh `fable-reviewer` per round running `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings repo-first before any fix session sees them; hard cap five rounds while a round finds a major.)*
 
-PENDING.
+**ROUND 1 (Fable, 2026-11-25 ~05:00; findings `notes/plans/fixes/vx-1082-ladder-round1.md`, commit 85b90aecc): 0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NITs.** No new blocker/major ⇒ no round 2 is earned; the ladder closes at this round once the three NITs are dispositioned through the cross-model flow (findings to the implementer verbatim → agree/dispute → the reviewer's final call → the implementer applies → the orchestrator's line-by-line check, since no later round reads the fixes). The reviewer's clean-bill read of the editor-seam class (WordDelete at every edge, the seam predicate = the carves' own geometry, one input door, no TK1, cost ∝ the line) is in the findings file. Every speculative suspicion it raised traced to no mechanism and was dropped, named in the file. The walk-owed evidence rows stand apart from the ladder (the gate walk's).
 
 ## CLOSEOUT
 
