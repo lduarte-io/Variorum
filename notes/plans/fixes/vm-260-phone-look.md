@@ -740,6 +740,39 @@ present):**
 | Ladder · gate · walk | LADDER ROUND 1 RUNNING 2026-11-25 (a fresh `opus-reviewer`, R-260-10; `notes/REVIEW_PROMPT.md` verbatim with {PHASE} filled by the run's locator and the record as the plan; over the whole diff at code tip `af449326a`). VM-282 holds the owed Fable round. The gate follows the last round, queued with nov24 behind VX-1036 |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
 
+## THE LADDER — round 1 (2026-11-25; a fresh `opus-reviewer`, REVIEW_PROMPT verbatim, over the whole diff at code tip `af449326a`)
+
+The reviewer named the scope honestly: the diff is inside Fable's classes (VM-281's editor lines; the
+default's-meaning changes of VM-247/254 and batch 2), run on Opus under her R-260-10, with **VM-282** holding the
+Fable round; its own line-by-line read of VM-281 does not stand in for it. **Same-model round (Opus reviews,
+Opus implements): the orchestrator arbitrates against the spec.** One MAJOR, so round 2 is earned.
+
+| # | Finding (reviewer's severity) | Disposition (the orchestrator's) |
+|---|---|---|
+| R1-1 | **MAJOR** — the note title's give-way can undo itself: removing the title grows the text view by the title row's height h (≥ 52), so for any page whose reach R is 24 < R ≤ h + 8 the flip makes its own "gone" false; the tracker re-reads only on `contentOffset` KVO. Clamp branch (SPECULATIVE): the title returns and her text jumps h; no-clamp branch: the page stays overscrolled. Every note typed with the keyboard up passes through that band — her standing first-try, exactly A-260-17's focus | **ACCEPTED — FIX.** The mechanism is traced in code (`MobileNoteTop.swift:60-64, 88-104`; `MobileWriteView.swift:225, 310`) and either UIKit branch is wrong. Pin first, the reviewer's mounted shape (402 × 874, content ≈ 40 pt over the at-rest viewport, offset to max, three settles: the title's state stable AND the offset ≤ the grown viewport's max + 0.5), red on `af449326a`; plus the pure pin `gone(false, travel: 40, reachAfter: 40 − 52) == false`. Fix: decide the leave on POST-flip geometry — the rule takes the measured title-row height and leaves only when travel > 24 AND the reach after the flip stays > 8. 4a is untouched (its spacer design never had the hazard) |
+| R1-2 | MINOR — the one bar draws over the note it's leaving on every Back (`barOnScreen` reads the path's new last at the pop's start; the overlay sits above the band; ~0.35 s) | **WALK DECIDES.** A closing-walk stop (Back from a note, mid-pop capture); if it reads wrong to the orchestrator's eye, the fix is a transition on the overlay or gating on the settled stack — a later ticket, not this merge |
+| R1-3 | MINOR — the guide's lesson still says "+ new note" for the Bookcase's top-line door, which VM-255 made the writing glyph (`MobileTutorialSeeder.swift:292`) | **ACCEPTED — FIX** (words DRAFT for her pass): name the pencil glyph, as the empty-Library line does |
+| R1-4 | MINOR — the lens state no longer reads in WORDS on the page (the chip drew the lens's name and "⚠" on a fallback; now a tint on the stack glyph, the words in the accessibility value and the popover row) | **ACCEPTED — RECORD, no code:** a consequence of her merge pick (R-260-13), so the closeout's "rulings reconciled" duty: into her capture bundle and QUESTIONS at the merge; walk stop 6 shows it |
+| R1-5 | MINOR — the keyboard floor stays with no road on which it was ever seen to act (its own pin's road hollow; the reproduced road's guide carried the stale 52 too); it costs a probe view, six observers, a shell body evaluation per keyboard show/hide, a test seam in the production init | **DEFERRED TO THE GATE, then decided:** if VM-281's walk-road pin is green on the tip, the floor guards a hypothetical class — a follow-up ticket (Debt) retires it or names and pins the sequence it guards; if VM-281 is red (model P), the floor's value is re-read with that evidence. Not churned before the evidence exists |
+| R1-6 | MINOR — the refusal-slot pattern copied 13 times, in two spellings (the triple vs String-only; a headline-less `lastError = Self.refusal(...)` beside `lastRefusal = refusalWords(...)`): F-0's drift class | **TICKET** (Debt, Low): one small phone helper holding the rule once at next touch (the Mac's `StatusForwarder` precedent). Not this merge — thirteen models' churn for no behavioral change |
+| R1-7 | MINOR — an OPENED reason card raised on a root stays up indefinitely (A-260-4(d) lists ✕, flick, leaving the note, a newer message — a root has no "leaving") | **HERS — product silence:** into her bundle and QUESTIONS; no code until she rules |
+| R1-8 | NIT — stale comments the step-down falsified (`MobileMessageLine.swift:32, 35` SF 15 / 15 semibold; `Shared/SyncStatusViews.swift:513` inline acts at 17; `MobileShellView.swift:228` the library's look) | **FIX** (comments only) |
+| R1-9 | NIT — "Terminal's prose stays two under" fails at the Larger step for the note title (Study 23 vs Terminal 20: three under) | **FIX THE CODE TO THE CLAIM:** round Terminal FROM Study's rounded size (Study − 2 after rounding), so the stated rule holds at every step; a pure pin over every step × role |
+| R1-10 | NIT — `refusalWords` runs the switch twice on the unworded path | **RECORD, no change** (pure, harmless) |
+| R1-11 | NIT — Write depends on Shell for a pure rule and a constant (`MobileTopGiveWay`, `MobileTabBarMetrics.hairline`) | **RECORD:** legal (no view-model crossing); hoisting to a shared phone home rides R1-6's ticket at next touch |
+
+**Clean bill (the reviewer's, verified items):** no `Sources/` change; the Mac untouched with the VM61 scan
+extended; the refusal table's 109 sentence literals byte-identical (checked mechanically); VM-247's fence
+(no `setThemeVoice`/`setThemePalette` on the phone; every token road through `MobileLookChoice.over`; the fence
+pins assert no `setting` and no `sync_outbox` row); every changed control keeps a 44-pt target; the pop law
+through `selectPage`, the Protection road read; the message line's kinds at the doors, no string matching;
+VM-281's lines (the spike focus moot: a plain `UITextView`); `MobileEditorStyle` look-only; VM-254's rounding
+and cache key; 4a's spacer and VM-68's three tasks. **Not certifiable yet:** batches 3b/4a/4b's tests are the
+gate's.
+
+**Round 1's fixes** (R1-1, R1-3, R1-8, R1-9) go to ONE fresh implementer, briefed by this section, after main's
+PR #31 merges at this boundary. Round 2 (a fresh `opus-reviewer`) re-reads them.
+
 ## THE CONSOLIDATED WINDOW — results (2026-11-25, claim `vm-260` 04:55–06:01:14; the GO device `vm260-suites` iOS 26.2, DELETED at close; the UI legs on `vm260-walk`)
 
 One window ran batches 1b and 2's full evidence, F-1a-W1's re-evidence, and (added mid-window; nov24 cut it at the
