@@ -1,0 +1,145 @@
+# VX-1082 — Run: fixes from her Nov 24 use
+
+**STATUS: OPEN 2026-11-24 (/architect-phase; away run; the stage coordinator is nov24 — every xcodebuild test run takes its GO).**
+Run ticket: VX-1082 (Umbrella · High) · Branch: `vx-1082-nov-24-fixes` · Worktree: `~/dev/variorum-vx-1082` (Pro).
+**Members (the sub-issue roster, listed via the Linear MCP at kickoff per the VX-548 rule — eleven, matching the description):** VX-1074 · VX-1075 · VX-1076 · VX-1077 (the four she reported) + VX-409 · VX-1014 · VX-1016 · VX-1027 · VX-1034 · VX-1069 · VX-1070 (the riders, each chosen by her at the Nov 24 sitting).
+Required reading for every session on this record: this file top to bottom; `notes/SurfaceContracts.md` sections The app · The Library · The Bookcase and books · The note; `notes/TEXTKIT2_NOTES.md` IN FULL for batch E; `notes/SessionResiliencyProtocol.md`.
+
+## FOR A LATER READER
+
+*(Written at closeout; until then the sections below are the working record.)*
+
+- **The mechanisms as settled:** PENDING.
+- **The fixes as built:** PENDING (one pointer per member).
+- **Her rulings:** the load-bearing ones were hers BEFORE kickoff, on the tickets (VX-1077's four rulings, VX-1069's option (b), VX-1034's two calls, VX-1027's "already ticked", VX-1076's High). The run's own PROVISIONALs are bundled below (HER BUNDLE) — away run.
+- **The evidence lines:** PENDING.
+- **Open items:** PENDING.
+
+## THE CONSTITUTION (the 13b P-1…P-9, binding per /architect-phase; carried verbatim)
+
+- **P-1 — One capability registry.** Every user-facing act is declared exactly once: verb, scope (block/take/post/book), per-mode availability rule, its doors (menu / context / bar / shortcut / palette), and its refusal copy. Surfaces render their doors FROM the registry; gating is data, never per-view if-statements. A registry-walk test asserts every declared door exists and every rendered door is declared. This kills the D3/D4 class structurally — the capability matrix stays green by construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act — including any mode-switch choreography, done visibly for the user — or delivers the operations layer's real refusal. A door that can never act in its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface component (live + read modes; one measurement brain — the width-gated remeasure; the shared canary) that every pane composes; the live editor core's identity machinery (`BlockRangeIndex`, crystallization) becomes its live mode, not a sibling implementation. "What text does this pane show, and is it live" is answered by ONE pure, unit-tested authority (`PaneTextAuthority`); views never re-derive it. Its invariants stated as code: exactly one live pane; the live pane is buffer-authoritative; read panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter may announce that something happened (mode changed, post opened); no listener derives business state or availability from a broadcast, and no flow's correctness depends on broadcast ordering. Cross-feature flows route through composition. (Stage 0's survey enumerates today's notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule marks an under-architected feature. The response is never another patch: write the feature's DESIGN MEMO — intended behavior whole, edge cases enumerated on paper, refusal wordings, undo story — get the author's rulings on the product-flavored edges, then build to the memo. Happy path ships first, but the edges are *decided at design time*, not discovered by the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial flow is the contract for every happy path. It stays green — automated where the harness allows, screenshot-walked otherwise — and any change that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive harness: the ops-layer soaks (exist), the board/view-model invariant soak (Stage 1), the registry walk (P-1), the per-batch scripted screenshot walkthrough. Red-on-old stays absolute: no bug-class fix without a pin that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind the rebuilt layer exactly as they bind the substrate (invalidation ∝ realized rows; one live editor; virtualized long views). Overlays, never rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit` (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary. Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing board layout, text authority, and gesture routing splits by concern (`TakesViewModel` at 890 lines is the standing counterexample). Same hygiene rule as the substrate, applied where it was being waived.
+
+## KICKOFF (2026-11-24/25)
+
+**Resolution.** VX-1082 is an Umbrella with eleven seated sub-issues — a RUN; its number names the one branch and PR. Record = this file. Pin-before-fix binds PER MEMBER; the cold review covers the run's whole diff.
+
+**Cast (the standing default; no Sync/ or custody line anywhere in scope).** Fable orchestrates and cold-reviews; Opus implements every batch (`opus-implementer`, xhigh), one fresh implementer per batch, strictly sequential. **The ladder's reviewer is Fable (`fable-reviewer`) — mandatory: batch E is editor-seam.** Any batch that would touch `Sources/VariorumCore/Sync/`, custody/keychain or schema STOPS and reports — none is expected to.
+
+**Preflight (read by the orchestrator, none delegated):** CLAUDE.md + auto-loaded canon · the master plan's in-flight table and latest closeout · `notes/plans/workflow-transition-2026-10-06.md` · `notes/TICKETS.md` (the bout-start snapshot, committed and pushed) · `notes/QUESTIONS.md` #276 (+ addenda — P-980-B1-1 ruled (b) at the Nov 24 sitting) and #279 (+ addendum — VX-1034's two calls) · `notes/SessionResiliencyProtocol.md` · `notes/SurfaceContracts.md` The app / The Library / The Bookcase and books / The note (+ Doors skimmed for the badge/MCP adjacency) · `notes/TEXTKIT2_NOTES.md` IN FULL (batch E) · the Linear tickets' full descriptions and comments (her rulings verbatim) · the pointed records: `notes/plans/fixes/vx-980-search-fixes.md` (P-980-B1-1, batch-1 fix anchors, the Trash token observation, gate 1 probe 4) · `notes/handoffs/vx-981-handoff.md` (What the closing walk saw).
+
+**Surfaces (declared in the in-flight row on main at `43f0c8ef3`):** the Library's search answer (`Sources/VariorumCore/Queries/SearchQueries.swift`, `Domain/SearchComposer.swift` consumers, `Features/Library/LibrarySearchSheet.swift`, `Core/Views/SearchAnswerFaces.swift`); the book view's badge and menus (`Core/Views/OwnershipBadge.swift`, `BookRowMenu.swift`, the membership chip); the note-deletion door set (`Features/Library/NoteDeletion.swift`); the status seam (`Registry/StatusToast.swift`, `Core/Views/QuietReceiptLine.swift`, the bottom-bar hint hosts); the Trash view model (`Features/Library/RecoveryView.swift`); **the EDITOR SEAM** (`EditorTextView` + the pane text view — VX-1076 only). No `Sync/`, no custody, no schema, no MCP tool change expected.
+
+**Overlap (the in-flight table at kickoff):** VX-1013 (custody — Protection/, disjoint); VX-1036 (design-only, same book-view AREA, nothing built there yet — no file conflict); VX-216 (hers — the book settings sheet; this run touches the book ROW menu only). Closeouts serialize; whoever merges second rebases and re-proves.
+
+**The stage:** HELD by nov24 (coordinator queue). Headless `swift build` / `swift test` on the core package run freely. EVERY `xcodebuild test` run and any walk/screenshot act takes nov24's GO, arranged by the orchestrator per window; implementers never claim the stage themselves in this run — they build and run headless suites, then return for their app-suite window and finish under it when the orchestrator relays the GO.
+
+**The rider pass:** not re-run — the umbrella IS her rider composition, minted at the Nov 24 sitting hours before this kickoff ("yeah go ahead and add those four" · "should be fixed … those are both quick" · "ok then add that too").
+
+**Away-run posture:** PROVISIONAL-and-continue; every taste call lands in HER BUNDLE below and in the handoff; nothing waits on her unless it gates a member's core (none does). The phone is LEFT OUT of VX-1077 at her word; batch S's Core changes owe a phone leg at the gate (the VX-980 lesson).
+
+**Mobile parity (expected):** nothing mobile-visible except batch S's shared Core reads (phone leg at the gate proves no drift); the VX-1077 phone exception is hers, recorded, no VM ticket filed (her word).
+
+## THE BATCHES (four, strictly sequential; one fresh Opus implementer each; pin-before-fix per member)
+
+### BATCH E — VX-1076: ⌥⌫ never takes a word from another line (EDITOR SEAM)
+
+**Required reading for the implementer:** CLAUDE.md + canon · this file's CONSTITUTION, KICKOFF, BATCH E and ENVIRONMENT & TRAPS · `notes/TEXTKIT2_NOTES.md` IN FULL (§3 "Word-deletion range logic only behaves at end-of-word" is this bug's family; §4's defensive practices bind) · `notes/SurfaceContracts.md` The note (the editor language) · `notes/SessionResiliencyProtocol.md` (the checkpoint protocol binds from the first commit).
+
+**The bug (hers, 2026-11-24; mechanism traced and probed — the ticket's description is the trace).** The editor has no word-delete code of its own, so ⌥⌫ is the system's: it walks backward over everything that is not a word (spaces, punctuation, a list marker, a line break) and then takes a whole word — so whenever no word lies between the caret and the start of its line (an empty list item `- [ ] |`, an empty line, a line of only punctuation), the press crosses the line break and takes the last word of the line ABOVE (probe-proven on macOS 27.0.1, plain `NSTextView`, TK1 and TK2 alike). That is why it read as intermittent for weeks.
+
+**The rule (PROVISIONAL — put to her as the default and not ruled either way; her comment on the ticket):** a press never takes a word from another line; with only a marker or spaces before the caret on its line it removes those; at a line's start it removes the line break alone.
+
+**Build:** override the word-deletion road in the ONE shared place both editors consult — the `Surface/CaretPress.swift` precedent (one shared rule; both `PaneTextView` and `EditorTextView` wire it). Implement as a pure, unit-testable range rule (given the line's text before the caret, what does this press delete) + thin text-view wiring; the system's behavior is kept wherever a word DOES lie between the caret and its line start (the ordinary case stays the system's exact range where possible).
+**Must check while there (the ticket's list):** ⌥⌫ at the very start of a BLOCK (does the press reach across the block seam — block boundaries are structural, I4; a press at a block's start must not silently join blocks through this road); ⌥⌦ (deleteWordForward — the mirror: never takes a word from the line below; fix it to the mirrored rule if it has the twin fault, else record provably-unaffected); the panes (Takes, Read ▸ edit — `PaneTextView`) which use their own text view; ⇧⏎-made in-block newlines and real paragraph newlines behave alike (both are in-block content, I4).
+**Pins:** red-on-old per the probe's four cases (empty list item, `- ` only, empty line, the ordinary mid-word case staying system-identical), the block-seam case, the pane twin. Behavioral revert verified. The undo story: one press = one undoable text edit, as the system's.
+**Acceptance evidence:** the pin suite + the probe cases re-run through the real key path (`doCommand(by:)`/responder chain, not just the pure rule); her recording-1 scenario reproduced in a test (checklist block, four presses: the fourth removes only the marker, the word count's fourth step never touches the line above).
+
+### BATCH S — search: VX-1074 (chapter results) · VX-1069 (the dash in the band) · VX-1014 (the narrow-column field)
+
+**Required reading:** CLAUDE.md + canon · this file's CONSTITUTION, KICKOFF, BATCH S and ENVIRONMENT & TRAPS · `notes/SurfaceContracts.md` The Library (the search bullet WHOLE) and The Bookcase and books (the masthead 🔍 sentence; the mode-row/controls-row stable-width law) · `notes/plans/fixes/vx-980-search-fixes.md` FOR A LATER READER + batch 1's section (SearchComposer, the band echo, `SearchAnswerCopy`) · `notes/SessionResiliencyProtocol.md`.
+
+**VX-1074 (High, Confirmed, her report).** Chapter names ARE indexed and matched (`Persistence/SearchIndex.swift`, kind `chapter` over `reading_section.name`) but a chapter hit is counted and drawn as its BOOK (`SearchCounts.Kinds.books` in `Queries/SearchQueries.swift`; `Features/Library/LibrarySearchSheet.swift` lists "every book a book or chapter hit names") — so to her it reads as chapters not searched. **Build (PROVISIONAL shape, A-1082-2 in HER BUNDLE):** a chapter found by its name gets its OWN row in the answer's Books section — the chapter's name leading, the kind label "chapter" (already in `Core/Views/SearchAnswerFaces.swift:73`), "in ‹book›" — and opening it lands in the book's OUTLINE scrolled to that chapter (the mode where chapters render; the book's own landing roads are the vehicle — trace where a book row's click lands today first, as the ticket says it is untraced). ⌘K and a book's own 🔍 share the engine — trace both; a book's own band searching its own chapters should land the same way. The band's counts stay honest: whatever the implementer finds cheapest that keeps "the band counts what the facet lists" true is proposed BEFORE building that half (the in-batch design fork rule) — the default: chapter rows list under Books and ride the books count as today, no new facet.
+**VX-1069 (Low, RULED — P-980-B1-1 option (b), #276 addendum 2).** Words that fold to nothing drop out of the band's quote when a tag is there: `— #tag` reads as `#tag` alone on the band; the answer already does (VX-954's `SearchComposer.asksWords`). The echo's home is the band face (follow vx-980 batch 1's anchors). The tagless punctuation-only field keeps R-980-5's says-why sentence, untouched.
+**VX-1014 (Low, Suspected, seen once).** The masthead (title · field · 🔍 · gear) on a gathering in a NARROW navigator column became wider than the column when the field expanded — content shifted over the sidebar's edge, the 🔍 clipped, the gear left the row. Trace the expansion's width source; the fix shape per the controls-row law: the expanded field's width clamps to the column's available room at whole points, never pushing the masthead past the column. Pin by a layout test if feasible; else the mechanism stated + a walk check at the gate (it is Suspected — if the trace finds no overflow road, record it hollow, don't fix blind).
+**Pins:** per member, red-on-old (VX-1069's: the band string for `— #tag` on old vs new; VX-1074's: the answer's rows for a chapter-name query). Core suites headless; the sheet faces via app suites at the window.
+**Acceptance evidence:** her exact scenario — a book with chapter "Oct 9 batch (V01–V49)", searching `oct 9 batch` shows the chapter row and opens the book at it; the phone leg at the gate (Core changed).
+
+### BATCH D — doors & the status seam: VX-1077 (delete without a confirm) · VX-1070 (toast vs the cards band) · VX-409 (the hint collision) · VX-1016 (the Trash's one-frame empty)
+
+**Required reading:** CLAUDE.md + canon · this file's CONSTITUTION, KICKOFF, BATCH D and ENVIRONMENT & TRAPS · `notes/SurfaceContracts.md` The app (the status-seam bullet WHOLE; the first-open/cards-band bullet; the Open list bullet's Delete Note… placement) and The Bookcase and books (the Delete bullet; the Trash sentences) · `notes/plans/fixes/vx-980-search-fixes.md` (the round-1 Trash observation at THE LADDER's foot) · `notes/SessionResiliencyProtocol.md`.
+
+**VX-1077 (High, RULED — her words verbatim on the ticket and its comment).** Today every Delete Note… door asks first (`Features/Library/NoteDeletion.swift`, the one door set). The change, exactly as ruled:
+- The SINGLE-note delete loses its confirm, everywhere the door set fires for one note (the note ▾ menus, the Library's and Pool's note rows, the sidebar's rows, Archived). **A multi-select delete of many notes keeps its confirm** (key the confirm on count > 1).
+- The delete speaks an OFFER (offers always toast, whatever `receipt_style`) with **Undo**: one press brings the note back — wired to the existing Put back road (`restoreContainer`) for exactly the note just deleted. **⌥⌘Z does not undo a note delete** (the standing posture: her note delete registers no structural-undo entry; the toast's Undo and the Trash are the roads back).
+- **Saved versions:** the warning line moves INTO the toast — her shape: "note deleted - its saved versions are also deleted" (final copy per the app's sentence-case voice; wording PROVISIONAL, listed for her pass).
+- **The phone is left as it is** (her word; no VM ticket).
+- Books are untouched (Delete asks on every book — SurfaceContracts, unchanged). Canon to change in place at closeout: SurfaceContracts (the note's deletion doors).
+**VX-1070 (Low, Confirmed).** A toast on the Bookcase or the Library lands on top of the cards band (the welcome/twelve-words cards above the quick entry), hiding the card's sentence and click target. The quick-entry band already has the rule ("a toast never covers it" — the shared `QuickEntryBar` mark); extend the same mechanism to the cards band: while a card shows, the toast sits ABOVE the cards band. Matters doubly now: VX-1077's undo toast lands on exactly these screens.
+**VX-409 (High, Confirmed, from VX-306's U2 walk).** A long receipt at the bottom bar's trailing end overlaps the `⌘J today · ⌘N new note` hint. **Build (PROVISIONAL, A-1082-3):** the hint YIELDS (hides) while a message line shows; if the message alone still overflows its room it truncates tail-wise with the whole sentence on hover (the whole-fact hover law; P-8's lineLimit rule binds — chrome `fixedSize` texts carry a `lineLimit`). Sweep every host of the hint + message pair (the Bookcase/Library bottom bars, the Pool's foot, the book page foot) — the sweep-table closing form if more than one host has the collision.
+**VX-1016 (Low, Suspected — PIN FIRST, her word: "a test that makes it happen comes first, and if none can, it closes as not real").** The Trash VM's kind-filter and order `didSet`s restart the listing without lowering the loaded flag or moving the question token, so one frame of "The Trash is empty." can draw over a full Trash. Build the red pin FIRST (the VX-980 search field's token discipline is the fix shape and the test shape); red confirms → fix the enumerated restart doors (both `didSet`s AND the wing switch's restart — enumerate every restart door in the VM, verdict each); green on old → record-only, close the ticket as not real with the pin kept as proof.
+**Pins:** per member red-on-old; VX-1077's: the single delete fires with no confirm + the toast's Undo restores the exact note (state-transition test on the door's road), the multi-select confirm still asks.
+**Acceptance evidence:** the door set walked at the gate window (single delete → toast → Undo → the note back whole; versions line; multi-select still confirms); toast-over-cards verified visually at the gate.
+
+### BATCH B — the book faces: VX-1075 (the shared mark) · VX-1034 (the books list's two calls) · VX-1027 (the ticked Journal row)
+
+**Required reading:** CLAUDE.md + canon · this file's CONSTITUTION, KICKOFF, BATCH B and ENVIRONMENT & TRAPS · `notes/SurfaceContracts.md` The Bookcase and books (the badge family bullet; the book-row-menu one-table rule; the Book Panel) · QUESTIONS #279 + addendum (VX-1034's provenance) · `notes/SessionResiliencyProtocol.md`.
+
+**VX-1075 (Medium, her ask: "ticket it being given its own symbol and making a click list the other books").** Today (`Core/Views/OwnershipBadge.swift`): the shared mark is `square.on.square` at 9 pt faint — reads as Snippets; not a button; its sentence only in a hover that is unreliable on the Outline. **Build:** (1) its own symbol — PROVISIONAL default `books.vertical` (A-1082-1; reads as "books", distinct from Snippets' glyph; same 9 pt faint ink, measure untouched — the badge never moves the prose); (2) the mark becomes a DOOR: a click opens a small popover listing the OTHER books holding the note, each row opening that book at the note (the owned-by badge's click-through road is the precedent and the vehicle); (3) the hover carries the sentence ON THE MARK itself on every host — trace the unfolded-Outline no-hover case (her second screenshot; "not traced" on the ticket) and fix it; on the folded card the mark's own hover must answer, not only the card's second line. The `ownership_badges` switch still hides the family; draw-cost ∝ rows drawn (the badge family's P1 law).
+**VX-1034 (Low, RULED — #279 addendum, her words):** in a note's list of books (the membership chip / Book Panel): (1) an archived GATHERING says "(archived)" as archived books already do ("g - agree the mac should show that it's archived"); (2) Diverge is NOT offered on a gathering's row ("h - agree that mac should hide it") — today it offers then refuses (`MembershipChip` ~136–145); P-2 (fire-and-DO: a door that can never act isn't rendered) is the law being applied; a gathering always refuses a diverge (`divergePostForReading` is curated books only, AppSpec §9).
+**VX-1027 (Low, RULED — "it should show use as daily journal already ticked"):** `Core/Views/BookRowMenu.swift` ~246 offers "Use as Daily Journal" on every journal-trait book with no check for the designated one. On the book `Queries.dailyJournalBookID` names, the row stays and reads TICKED — so the menu says which book is the Journal — and (PROVISIONAL A-1082-4, the session's reading on the ticket, the Private-row precedent: ticked and locked) the ticked row is not pressable, since pressing it changes nothing. The second face (Library book rows, Starred, Archived books) is DERIVED from the one table, so one fix covers both — keep it derived, never a drift-copy.
+**Pins:** per member red-on-old (VX-1027's: the menu model's row state for the designated book; VX-1034's: the chip's row set for a gathering; VX-1075's: the badge's symbol/door model where testable — faces by the gate walk).
+**Acceptance evidence:** the gate walk — her Outline scenario: the mark wears the new symbol, hover answers on folded AND unfolded rows, the click lists the other books and a row lands in that book at the note.
+
+## HER BUNDLE (the held asks — away run; each built to the PROVISIONAL default, flipped at her word)
+
+- **A-1082-1 — VX-1075's symbol.** Default built: `books.vertical`. Alternatives: `square.stack` (still boxy), `rectangle.on.rectangle` (near the old glyph), a tiny count chip ("in 2 books" — words not a glyph).
+- **A-1082-2 — VX-1074's result shape.** Default built: a chapter row under Books (chapter name · "chapter" · in ‹book›), opening the book's Outline at the chapter; the books count carries chapter hits as today (no new facet). Alternatives: keep one book row and subtitle it with the matched chapter; or chapters as their own answer section with their own count.
+- **A-1082-3 — VX-409's collision rule.** Default built: the hint yields while a message shows; the message truncates only as a last resort, whole sentence on hover. Alternative: the message truncates and the hint always stands.
+- **A-1082-4 — VX-1027's ticked row.** Default built: ticked and NOT pressable (the Private-row precedent). Alternative: pressable no-op with a receipt saying it already is the Journal.
+- **The VX-1076 rule** (never cross a line; marker-only removes the marker; at a line's start the break alone) — PROVISIONAL per her ticket comment.
+- **The wording pass:** every new rendered sentence (VX-1077's toast lines first) listed at closeout for her pass; provisional wording is fine (her standing R-981-4 posture).
+
+## LIVE LEDGER (flipped per piece, same commit)
+
+| Member | Batch | Status |
+|---|---|---|
+| VX-1076 ⌥⌫ cross-line word delete | E | NOT-STARTED |
+| VX-1074 chapter search results | S | NOT-STARTED |
+| VX-1069 the dash in the band | S | NOT-STARTED |
+| VX-1014 narrow-column field overflow | S | NOT-STARTED |
+| VX-1077 delete without a confirm | D | NOT-STARTED |
+| VX-1070 toast vs the cards band | D | NOT-STARTED |
+| VX-409 the hint collision | D | NOT-STARTED |
+| VX-1016 the Trash's one-frame empty | D | NOT-STARTED (pin first; green ⇒ not real) |
+| VX-1075 the shared mark | B | NOT-STARTED |
+| VX-1034 the books list's two calls | B | NOT-STARTED |
+| VX-1027 the ticked Journal row | B | NOT-STARTED |
+
+## ENVIRONMENT & TRAPS (carried verbatim into every batch brief)
+
+- Work ONLY in `~/dev/variorum-vx-1082` (branch `vx-1082-nov-24-fixes`); never the main checkout. Commit per coherent piece, push after every commit; LIVE STATUS flips ride the same commit. Synchronous foreground waits only (poll with `grep -q '<EXIT LINE>' <log> && break; sleep 5` loops — `tail -f | grep -m1` hangs on an already-landed line). Never spawn subagents. No attribution trailers on commits.
+- **The stage is HELD by the nov24 coordinator.** Headless `swift build` / `swift test` (core package) run freely, any time. EVERY `xcodebuild test` run (Mac app or simulator) is a stage act: do NOT claim or run one yourself — build headless, write the record, and return asking for the app-suite window; the orchestrator relays nov24's GO and you finish under it.
+- Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test host matches mid-run). Real-store instances are treated by STORE, never quit or killed. No Release builds or `/Applications` installs — ever, this run (releases only, VX-931).
+- Mac tests from `App/Variorum/`: `xcodebuild -scheme Variorum -destination 'platform=macOS' test` with suite-level `-only-testing` only; confirm the "Test run with N tests" line (skipped tests count toward N — read the `skipped:` lines); zsh `pipestatus`. NEVER add a custom build configuration (anything not named exactly "Debug" builds the packages Release and strips the DEBUG oracles).
+- Tests run at the END of a step, never the full suite at session start. The closeout's Mac run covers the suites exercising every changed SOURCE file, not only changed test files (grep the tests for the changed types).
+- Never `git checkout` over uncommitted work; commit before any behavioral revert; pre-revert copies inside the worktree in a uniquely named gitignored dir, never the scratchpad.
+- Screenshots in gitignored `*-screens` dirs. The repo is PUBLIC: every commit message and record line is public copy; placeholder vocabulary for identifiers; the pre-push guard's refusal is fixed in the commits, never bypassed.
+- The hallucination guard: no fix without a self-traced concrete mechanism; every bug-class fix lands with a red-on-old pin verified by behavioral revert; a pin green on both sides exposes the finding as hollow — record it, don't fix it.
+
+## THE LADDER
+
+*(One ladder over the run's whole diff; fresh `fable-reviewer` per round running `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings repo-first here before any fix session sees them; hard cap five rounds while a round finds a major.)*
+
+PENDING.
+
+## CLOSEOUT
+
+PENDING.
