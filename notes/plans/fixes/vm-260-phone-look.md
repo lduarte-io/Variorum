@@ -785,7 +785,7 @@ FIX rows (R1-2, R1-4…R1-7, R1-10, R1-11 untouched); no line in `Sources/`, `Sy
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, this ladder table, BATCH 4b's record whole, BATCH 4a's record whole, BATCH 3's RECONCILE; the resiliency protocol; the code: `MobileNoteTop.swift`, `MobileRootTop.swift`, `MobileWriteView.swift`'s masthead, `MobileEditorTextView`'s layout/room/scroll-authority lines READ ONLY, `PhoneType.swift`, the three comment sites, the guide's lesson) | DONE (this commit) |
-| 1. The pins on the pre-fix tree — R1-1's mounted pin, R1-9's two-under pin and the step pin it moves — **that commit IS the red-on-old tree** | NOT-STARTED |
+| 1. The pins on the pre-fix tree — R1-1's mounted pin, R1-9's two-under pin and the step pin it moves — **that commit IS the red-on-old tree** | DONE (this commit — only symbols both trees declare); the build is piece 2 |
 | 2. The red-on-old bundle `vm260-r1-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT-STARTED |
 | 3. R1-1's fix — the leave decided on post-flip geometry (the measured title row) + its tip-only pins | NOT-STARTED |
 | 4. R1-9's fix — Terminal's prose roles derive from Study's rounded step | NOT-STARTED |

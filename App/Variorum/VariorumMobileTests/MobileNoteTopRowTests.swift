@@ -32,7 +32,11 @@
 //  · the seal and the date head the Note sheet, side by side above its rows,
 //    each its old act (RED ON OLD: neither is in the sheet);
 //  · the book door is grey while the note is in no book (RED ON OLD: the
-//    membership line read the same muted words either way).
+//    membership line read the same muted words either way);
+//  · (ladder round 1, R1-1 — landed on its own red-on-old tree, the commit
+//    that adds it) a short page at its foot never undoes its own top: the
+//    title's leave never moves her page or flips back by itself (RED ON OLD
+//    where UIKit clamps the offset as the frame grows — the pin's own note).
 //  The six doors' one row is `MobileNoteTopTests` (the four tools' guard,
 //  moved with the ruling).
 //
@@ -47,19 +51,21 @@ import UIKit
 import VariorumCore
 @testable import VariorumMobile
 
-/// Seeds one note: a title, `paragraphs` blocks of plain words, the tags it
-/// wears and the book that holds it (if any).
+/// Seeds one note: a title, `paragraphs` blocks of plain words (or of `text`,
+/// when a pin needs a block of its own words), the tags it wears and the book
+/// that holds it (if any).
 @MainActor
 private func seedNote(
     _ session: AppSession, title: String = "Harbor notes", paragraphs: Int = 3,
-    tags: [String] = [], inBook: String? = nil
+    text: String? = nil, tags: [String] = [], inBook: String? = nil
 ) async throws -> String {
     try await session.runner.run { ops -> String in
         let post = try ops.createPost(title: title, profile: .blog)
         for index in 1...max(paragraphs, 1) {
             _ = try ops.newBlock(
                 in: post.id,
-                text: "Paragraph \(index) carries enough plain words to wrap across a couple of lines on a phone page.",
+                text: text
+                    ?? "Paragraph \(index) carries enough plain words to wrap across a couple of lines on a phone page.",
                 at: .end, registeringUndo: false)
         }
         for name in tags {
@@ -95,7 +101,7 @@ struct MobileNoteTopRowTests {
 
     /// The app's Write screen over a seeded note, in one voice, at the phone's width.
     private func mounted(
-        _ voice: ThemeVoice, title: String = "Harbor notes", paragraphs: Int = 3,
+        _ voice: ThemeVoice, title: String = "Harbor notes", paragraphs: Int = 3, text: String? = nil,
         tags: [String] = [], inBook: String? = nil,
         _ body: @MainActor (MobileEditorViewModel, HostedSurface<MobileWriteScreen>) async throws -> Void
     ) async throws {
@@ -103,7 +109,7 @@ struct MobileNoteTopRowTests {
             MobileEditorStyle.voice = voice
             defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
             let postID = try await seedNote(
-                session, title: title, paragraphs: paragraphs, tags: tags, inBook: inBook)
+                session, title: title, paragraphs: paragraphs, text: text, tags: tags, inBook: inBook)
             let model = MobileEditorViewModel(session: session, postID: postID)
             let surface = HostedSurface(
                 MobileWriteScreen(session: session, postID: postID, editor: model),
@@ -169,6 +175,120 @@ struct MobileNoteTopRowTests {
             #expect(abs(back.accessibilityFrame.minY - title.minY) <= 0.5,
                     "\(voice): the title is back where it stood (\(back.accessibilityFrame) · \(title))")
             #expect(abs(chrome() - rest) <= 0.5, "\(voice): back at the top, the top is as it was (\(chrome()) · \(rest))")
+        }
+    }
+
+    // MARK: - The title's leave never undoes itself (ladder round 1, R1-1)
+
+    /// **R1-1 — ladder round 1's MAJOR: "the note title's give-way can undo
+    /// itself".** The title leaving grows the text view by the title's row (h),
+    /// so a page whose reach R is just over the leave (24 < R ≤ h + 8) could
+    /// flip its own "gone" false once the viewport grew: UIKit clamping the
+    /// offset into the grown range (the title back, her page jumped), or the page
+    /// left past its range. The reviewer's mounted shape: the app's Write screen
+    /// at 402 × 874 over a page whose content exceeds its viewport by 40 pt, the
+    /// offset set to its maximum, three settles — the title's state the same at
+    /// every settle, the offset inside the range as it stands — and, added here
+    /// because either UIKit branch is a jump of her page, the offset still where
+    /// she set it and the top flipped at most once (a self-undo is two flips with
+    /// no hand on the page).
+    ///
+    /// **The reach is set exactly**, by the scroll view's own bottom inset over a
+    /// one-line note: on this surface the reach does not depend on the viewport
+    /// (the typewriter room is a page less one line, re-derived from the live
+    /// height in the text view's own layout), so a note's text alone lands it
+    /// only to within a line's pitch; the rule and UIKit's clamp read the RANGE,
+    /// never where it comes from, and no line of the editor writes
+    /// `contentInset`. RED ON OLD when UIKit clamps the offset as the frame grows
+    /// (before the text view's own layout regrows the room): the title leaves, the
+    /// offset clamps to 0, the title returns — the page moved and the top flipped
+    /// twice. On a tree where UIKit does not clamp there, the room absorbs the
+    /// flip and this pin is GREEN ON OLD — the finding hollow in that branch; the
+    /// printed trace names which branch ran.
+    @Test(arguments: [ThemeVoice.study, .terminal])
+    func aShortPageAtItsFootNeverUndoesItsOwnTop(voice: ThemeVoice) async throws {
+        try await mounted(voice, paragraphs: 1, text: "Harbor light.") { model, surface in
+            let tv = try #require(model.textView, "the editor is up")
+            let safeTop = surface.host.view.safeAreaInsets.top
+            struct Sample: Equatable {
+                var title: Bool
+                var chrome: CGFloat
+                var offset: CGFloat
+                var maxOffset: CGFloat
+                var content: CGFloat
+                var height: CGFloat
+            }
+            @MainActor func reach() -> CGFloat {
+                tv.contentSize.height + tv.adjustedContentInset.top + tv.adjustedContentInset.bottom - tv.bounds.height
+            }
+            @MainActor func sample() -> Sample {
+                Sample(
+                    title: surface.element(labeled: "Rename Note") != nil,
+                    chrome: tv.convert(tv.bounds, to: nil).minY - safeTop,
+                    offset: tv.contentOffset.y,
+                    maxOffset: max(-tv.adjustedContentInset.top,
+                                   tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.height),
+                    content: tv.contentSize.height,
+                    height: tv.bounds.height)
+            }
+
+            // What the top gives back when the title leaves: the title's row
+            // (its own 8 above included) — the chrome at rest less the row and
+            // the 4 below it.
+            let rest = sample()
+            #expect(rest.title, "\(voice): at rest the title stands: \(surface.visibleLabels)")
+            let titleRow = rest.chrome - PhoneMetrics.touchMinimum - MobileWriteScreen.mastheadBottom
+            let target: CGFloat = 40
+            try #require(target > MobileNoteTitleGiveWay.leave + 4 && target <= titleRow + MobileNoteTitleGiveWay.rest - 4,
+                         "\(voice): 40 lies inside the band 24 < R ≤ h + 8 (h = \(titleRow))")
+            let natural = reach()
+            try #require(natural < target - 1, "\(voice): a one-line note's own reach sits under 40 (\(natural))")
+            tv.contentInset.bottom += target - natural
+            await surface.settle(10)
+            try #require(abs(reach() - target) <= 0.5, "\(voice): the page's reach is 40 (\(reach()))")
+            try #require(sample().title && abs(sample().offset) <= 0.5, "\(voice): still at rest, the title up")
+
+            // Her page at its very foot.
+            let foot = sample().maxOffset
+            tv.setContentOffset(CGPoint(x: 0, y: foot), animated: false)
+
+            // Settle one: turn by turn, the trace kept.
+            var previous = sample()
+            var trace: [Sample] = [previous]
+            var flips = 0
+            for _ in 0..<60 {
+                await surface.settle(1)
+                let now = sample()
+                if abs(now.chrome - previous.chrome) > titleRow / 2 { flips += 1 }
+                if now.title != previous.title || abs(now.chrome - previous.chrome) > 0.25
+                    || abs(now.offset - previous.offset) > 0.25 || abs(now.content - previous.content) > 0.25
+                    || abs(now.height - previous.height) > 0.25 {
+                    trace.append(now)
+                }
+                previous = now
+            }
+            var settles: [Sample] = [sample()]
+            // Settles two and three.
+            for _ in 0..<2 {
+                await surface.settle(40)
+                settles.append(sample())
+            }
+            print("PERF[sim] VM-260 R1-1 \(voice): h \(titleRow), reach \(target) (natural \(natural)), foot \(foot), "
+                  + "flips \(flips); trace "
+                  + trace.map { "[title \($0.title) chrome \($0.chrome) offset \($0.offset) max \($0.maxOffset) "
+                                + "content \($0.content) height \($0.height)]" }.joined(separator: " → ")
+                  + "; settles " + settles.map { "[title \($0.title) offset \($0.offset) max \($0.maxOffset)]" }
+                .joined(separator: " · "))
+
+            #expect(settles.allSatisfy { $0.title == settles[0].title },
+                    "\(voice): the title's state is the same at every settle (\(settles.map(\.title)))")
+            for (index, settled) in settles.enumerated() {
+                #expect(settled.offset <= settled.maxOffset + 0.5,
+                        "\(voice) settle \(index + 1): the page stands inside its range (\(settled.offset) > \(settled.maxOffset))")
+                #expect(abs(settled.offset - foot) <= 0.5,
+                        "\(voice) settle \(index + 1): her page stays where she set it (\(settled.offset), set \(foot))")
+            }
+            #expect(flips <= 1, "\(voice): the top flipped back by itself — \(flips) flips with no hand on the page")
         }
     }
 

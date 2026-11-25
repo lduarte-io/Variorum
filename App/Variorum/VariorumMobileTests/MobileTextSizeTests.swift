@@ -9,8 +9,9 @@
 //  setting itself — new behaviour, so GUARDS on the tip (the symbols are new):
 //  · the five steps scale exactly the roles that follow the text size, size and
 //    pitch alike, and nothing else; the note's body in Study reads 14 · 15 · 16 ·
-//    17 · 18; nothing anywhere under 13, at any step, any system text size, in
-//    either voice and either form;
+//    17 · 18; Terminal's prose two under Study's at every step (ladder round 1,
+//    R1-9 — red on its own old tree, the commit that adds it); nothing anywhere
+//    under 13, at any step, any system text size, in either voice and either form;
 //  · the step reaches a mounted her-words line through the environment, and a
 //    chrome line beside it does not move;
 //  · the editor face takes the step on the note's body and its UIKit roles,
@@ -37,10 +38,13 @@ struct MobileTextSizeTests {
     ]
 
     /// **The five steps, her words only.** At each step a role that follows the
-    /// text size takes the step's scale on its size — rounded to a whole point
+    /// text size takes the step's scale on Study's size — rounded to a whole point
     /// (MOVED with the batch-3 reconcile: UIKit's scaled fonts do not keep a
     /// fraction) — and its pitch moves with the size (never under the floor);
-    /// every other role — the chrome, the twelve words — is its table spec
+    /// Terminal's is Study's step two under, size and pitch alike, never under the
+    /// floor (MOVED with ladder round 1's R1-9: Terminal derives FROM Study's
+    /// rounded step, so its own table scaled and rounded no longer stands in for
+    /// it); every other role — the chrome, the twelve words — is its table spec
     /// exactly. The note's body in Study: 14 · 15 · 16 · 17 · 18; "Large" is wave
     /// 1's 17 back.
     @Test func theFiveStepsScaleHerWordsOnly() {
@@ -61,10 +65,16 @@ struct MobileTextSizeTests {
                     let table = PhoneType.spec(role, voice: voice)
                     let scaled = PhoneType.spec(role, voice: voice, wordsScale: step.wordsScale)
                     if role.followsTextSize {
-                        let size = max(PhoneType.floorSize, (table.size * step.wordsScale).rounded())
+                        // Study's step: its table × the step, a whole point, the floor under it.
+                        let studyTable = PhoneType.spec(role, voice: .study)
+                        let studySize = max(PhoneType.floorSize, (studyTable.size * step.wordsScale).rounded())
+                        let studyPitch = studyTable.lineHeight * studySize / studyTable.size
+                        // Terminal's: that step two under, the pitch with it (the default's own rule).
+                        let size = voice == .terminal ? max(PhoneType.floorSize, studySize - 2) : studySize
+                        let pitch = studyPitch - (studySize - size)
                         #expect(abs(scaled.size - size) < 0.001, "\(role) \(voice) at \(step): \(scaled.size)")
-                        #expect(abs(scaled.lineHeight - table.lineHeight * size / table.size) < 0.001,
-                                "\(role) \(voice) at \(step): pitch \(scaled.lineHeight)")
+                        #expect(abs(scaled.lineHeight - pitch) < 0.001,
+                                "\(role) \(voice) at \(step): pitch \(scaled.lineHeight), not \(pitch)")
                         #expect(scaled.family == table.family && scaled.anchor == table.anchor
                                 && scaled.scaling == table.scaling && scaled.weight == table.weight)
                     } else {
@@ -73,6 +83,29 @@ struct MobileTextSizeTests {
                 }
             }
         }
+    }
+
+    /// **R1-9 (ladder round 1) — Terminal's prose stays two under Study's at
+    /// every step**, the floor still binding: the type layer's own claim ("its
+    /// prose roles two points under Study's … never under the floor"), held at
+    /// every step and every role that follows the text size — not only at the
+    /// default. RED ON OLD (Terminal's own table scaled and rounded drifted off
+    /// Study's rounded step): the note's title at Larger (Study 23, Terminal 20 —
+    /// three under), and the row's preview at Large and Larger (Study 15 · 16,
+    /// Terminal 14 · 15 — one under; the floor holds it at 13 · 14).
+    @Test func terminalsProseStaysTwoUnderStudysAtEveryStep() {
+        var off: [String] = []
+        for step in MobileTextSize.allCases {
+            for role in PhoneTypeRole.allCases where role.followsTextSize {
+                let study = PhoneType.spec(role, voice: .study, wordsScale: step.wordsScale).size
+                let terminal = PhoneType.spec(role, voice: .terminal, wordsScale: step.wordsScale).size
+                let twoUnder = max(PhoneType.floorSize, study - 2)
+                if terminal != twoUnder { off.append("\(role) \(step) Study \(study) Terminal \(terminal)") }
+                #expect(terminal == twoUnder,
+                        "\(role) at \(step): Terminal \(terminal), two under Study's \(study) is \(twoUnder)")
+            }
+        }
+        print("PERF[sim] VM-260 R1-9 Terminal off two-under — \(off.count): \(off.joined(separator: " · "))")
     }
 
     /// **Nothing under 13, at any step** — in the SwiftUI rule and the UIKit
