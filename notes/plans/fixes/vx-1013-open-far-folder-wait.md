@@ -113,7 +113,12 @@ in flight.*
   kept) ⇒ the no-theater pin RED alone; restored, `git status` clean, the harness `✔ 210 tests in 35 suites passed`.
 
 **BATCH 1 STATE — built and verified (commits `006072617` → HEAD, all pushed):**
-- Core suite (full `swift test`, after the load window cleared): PENDING — running now.
+- Core suite (full `swift test`, after the load window cleared): GREEN — `✔ 746 tests in 139 suites`, `━ 4204 tests in
+  579 suites passed … with 5 known issues` (the VX-529 suites' own `withKnownIssue`s, untouched; 4204 = the earlier 4203 +
+  R-1013-A1's pin), `✔ 32 tests in 4 suites`; `EXIT 0`. Machinery honesty: the first post-window run, made beside this
+  session's own parallel Mac and phone builds, met VX-978 (`PurgeSweepTeardownTests.aLockLandingMidSweepClosesOnlyAfterTheHeldReadEnds`
+  failed its `#require` under load and the run then hung on the held read — the ticket's exact shape); this session stopped
+  its own hung test helper and re-ran the suite alone — the green line above.
 - Mac target (after piece 6): `build-for-testing` → `** TEST BUILD SUCCEEDED **` (app + test bundle), no warning in a
   touched file. Phone target (`VariorumMobile`, `generic/platform=iOS Simulator`, a build — no simulator booted):
   `** BUILD SUCCEEDED **`.
