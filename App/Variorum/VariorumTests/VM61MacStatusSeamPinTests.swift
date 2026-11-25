@@ -14,7 +14,8 @@
 //    and a removal said on the Mac routes exactly as a receipt;
 //  · the slots behave as shipped (toast · quiet · off, one message at a time,
 //    the 6 s clock, the standing offer on the quiet line);
-//  · no Mac door says `removal`, `withdraw`s, or sets the placement.
+//  · no Mac door says `removal`, `withdraw`s, or sets the placement — nor reads
+//    the phone face's direction fact (VM-265, `Item.isDirection`).
 //
 //  **How a regression trips it:** a Mac build defaulting to the phone's
 //  placement reds the first pin and the slot pins (a quiet receipt would be
@@ -70,6 +71,19 @@ struct VM61MacStatusSeamPinTests {
         status.refuse("Refused.")
         #expect(status.current?.kind == .refusal)
         #expect(status.quietLine == nil, "a new message clears the other slot")
+
+        // VM-265 (the VM-260 run, batch 1b): `direct` builds its own item now
+        // (to mark it a direction for the PHONE's face) — on the Mac it still
+        // lands exactly as before: the toast, the refusal's class, trimmed,
+        // and nothing for blank words.
+        status.receipt("Quiet first.")
+        status.direct("  Finish the ceremony, then run this again.  ")
+        #expect(status.current?.kind == .refusal)
+        #expect(status.current?.text == "Finish the ceremony, then run this again.")
+        #expect(status.quietLine == nil, "a direction clears the quiet slot, as a refusal does")
+        let shown = status.current?.id
+        status.direct("   ")
+        #expect(status.current?.id == shown, "blank words say nothing")
 
         status.receiptStyle = .toast
         status.receipt("Landed.")
@@ -134,7 +148,10 @@ struct VM61MacStatusSeamPinTests {
                     "the hoisted brain is where this pin reads it: \(name)")
             files.append(file)
         }
-        let forbidden = ["status.removal(", ".withdraw(owner:", "status.placement =", ".phoneLine"]
+        // VM-265: `isDirection` is the phone face's fact — no Mac face reads it.
+        let forbidden = [
+            "status.removal(", ".withdraw(owner:", "status.placement =", ".phoneLine", "isDirection",
+        ]
         var hits: [String] = []
         for file in files {
             let text = try String(contentsOf: file, encoding: .utf8)
