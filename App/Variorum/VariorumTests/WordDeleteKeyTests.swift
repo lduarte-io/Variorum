@@ -218,6 +218,7 @@ struct WordDeleteInEditorTests {
     /// having touched the line above, and undoing to the end restores her
     /// note exactly.
     @Test func herRecordingOneTheFourthPressTakesOnlyTheMarker() async throws {
+        await HostLaunchSettle.wait()  // this pin pumps — never into the host's launch
         try await withEditor(seedBlocks: [F.checklist]) { h in
             let window = try Rig.mount(h)
             defer { Rig.close(window) }
@@ -331,6 +332,7 @@ struct WordDeleteSeamAndForwardTests {
     /// `organize.`); the second press, now at that block's start, does
     /// nothing.
     @Test func aTwoBlockChecklistLosesTheMarkerAndThenStops() async throws {
+        await HostLaunchSettle.wait()  // this pin pumps — never into the host's launch
         try await withEditor(seedBlocks: [F.above, "- [ ] "]) { h in
             let window = try Rig.mount(h)
             defer { Rig.close(window) }
