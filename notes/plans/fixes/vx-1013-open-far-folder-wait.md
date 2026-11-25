@@ -409,10 +409,20 @@ part that may want a face word. No pin owed (the behavior is the ruled design).
 - *Record discipline:* LIVE STATUS leads with what was NOT done; the VX-978 flake disclosed with its re-run; commits
   per piece, pushed; the Mac-target suites correctly left to the orchestrator's gate.
 
+### ROUND 1 ROUTING (the orchestrator, 2026-11-25 — the cross-model flow)
+
+Findings go VERBATIM to the batch-2 implementer for agree/dispute; the round-1 reviewer makes the final call on each;
+the implementer then applies the confirmed fixes (red-on-old pins), and round 2's fresh reviewer re-checks them with
+the VX-524 rider. The orchestrator's scope call the reviewer asked for, F-R1-3: ATTEMPT IN-LADDER with the one seam the
+reviewer named (a far folder PICKED — `BackupDestination.isSet` — that fails to resolve reads as UNREAD far, never as
+`.noFarFolder`'s whole listing; the per-open cache keeps whichever it saw); if the trace shows more than that one seam,
+it becomes its own ticket instead, and the finding's disposition says so. F-R1-5 asks no code change and lands in the
+sitting bundle below.
+
 ## HELD FOR HER SITTING (the away-run bundle)
 
 - P-1013-1 (the lobby may gain roads/rule 27's banner after it draws, when the deferred far walk lands) — PROVISIONAL, built.
-- P-1013-2 (a press that would refuse joins the in-flight far walk before refusing) — PROVISIONAL, built.
+- P-1013-2 (a press that would refuse joins the in-flight far walk before refusing) — PROVISIONAL, built. The round-1 reviewer's F-R1-5 rides this item: the join has no bound and no words — the lobby's controls stay disabled, silent, for as long as the folder blocks (strictly better than the pre-fix blank window, and exactly the ruled wait, but the bundle review should see the unbounded silent disable).
 - P-1013-3 (a quiet road the far walk reveals opens the standing lobby as a successful press would) — PROVISIONAL, built.
 - Whether the blank `StoreOpeningView` should carry a quiet "Opening your library…" line after a grace delay — NOT built (taste; Settings' `.opening` arm already says those words).
 - Rider candidates noticed at kickoff, not taken (single-ticket effort): VX-1015 (the "different library" notice at the vx-980 gate — its suspected cause already doubted in the ticket), VX-524 (copy-count vs restore-list row mismatch — same catalogue family).
