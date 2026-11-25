@@ -132,6 +132,8 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 | 11 | RIDER VX-96 — the reveal's title-over-blank beat (hold the pre-mount arm for the landing's lifetime) | 1 | BUILT (batch 1) — Pin C + its hosted twin PENDING the stage |
 | 12 | RIDER VX-576 — tag pickers list most-used first (the "+" field) | 2 | SEATED 2026-11-25 |
 | 13 | RIDER VX-1091 — Terminal's mode tabs overflow the 190-pt navigator floor by ~1 pt (`BookModeTabLabel`, 168 pt in a 166-pt room — VX-1082's filing) | 3 | SEATED 2026-11-25 |
+| 14 | ADJUDICATION (batch 1 close): the navigator chapter ROW's "+" (mockup frame 8b's second door — the batch-1 brief named only the page heading, the orchestrator's wording gap) — a one-line second renderer of the declared `.newNoteInChapter` | 3 | ASSIGNED to batch 3 (it builds chapter headings anyway) |
+| 15 | ADJUDICATION (batch 1 close): a mint door pressed in the book's READ mode switches the book to Outline and lands the note LIVE, caret in — P-1036-B1-2's recorded ALTERNATIVE, ruled by the architect against N-1's letter ("every mint door ends with the new note on the page, live") + P-2's fire-and-DO mode choreography; Read itself stays read-only. The built (a) arm (shown, not live) is superseded | 2 | ASSIGNED to batch 2 (a small carried correction, fully specified) |
 
 ## 8. Batch records
 
