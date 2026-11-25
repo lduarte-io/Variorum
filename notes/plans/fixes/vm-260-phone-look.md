@@ -328,7 +328,51 @@ kinds are untouched everywhere — ink, clearing and anatomy are the FACE's.
 - Evidence: her pick recorded verbatim; scroll captures before/after; the paging law untouched (the listing's
   re-ask discipline, VM-68's contract).
 
-Order: 1a → 1b → 2 → 3 → 4. Batch 4's mockups may be drawn (by the orchestrator, as sitting material, or a
+### Batch 4a — the roots' tops give way (VM-259 option B, R-260-12; R-260-11) — written 2026-11-25 after her picks
+
+- **The Library:** her pick B, as drawn in `notes/plans/vm-260/vm-259-options.html` §B. At rest the full top
+  (the wing line with trash · New Note · gear, the search field, the filter row). Scrolling DOWN past a real
+  scroll (not a wobble), the three rows condense into ONE pinned 44-pt slim line: the wing's name small, the
+  standing filter as a word ("· All"), a search glyph, the New Note glyph. Any upward nudge, or the slim
+  line's search glyph, re-opens the full top (the search glyph also focuses the field). Every door stays
+  reachable in both states; every target 44 × 44.
+- **Bookcase and Starred:** the same slim line on scroll (their name and their own doors); the Bookcase's
+  count line under the wing's name is REMOVED (R-260-11 — no count until shelves; VM-113 carries the
+  per-shelf count).
+- **Laws that bind:** the paging law and VM-68's listing re-ask discipline untouched (the slim line is
+  chrome, never a listing change); one bar, never moving (VM-253); the keyboard floor untouched; the search
+  field's VM-47 focus rules intact; no state lives in the view beyond the scroll's own (the slim/full flag is
+  derived from scroll offset and direction, P-4).
+- **Pins:** the slim line's appearance on a scroll past the threshold and the full top's return on an upward
+  nudge (mounted, driven by the scroll position), every door ≥ 44 × 44 in both states, the Bookcase shows no
+  count line (red on old), the listing's ask count unchanged by condensing (P1/VM-68). Captures at the gate:
+  each root at rest and scrolled, both voices.
+
+### Batch 4b — the note's top (R-260-13; VM-272's continuation) — written 2026-11-25 after her pick
+
+- **As picked** (`notes/plans/vm-260/note-top-options.html`, the "A, as picked" frame): the title on its own
+  row on top, more room, CENTRED, wrapping (never truncated); under it ONE row of six icon doors with NO
+  separator: copy · find · book · # · the blocks/lens/more-info door · ⋯. **Only that row stays** as she
+  scrolls; the title rides away with her text.
+- **book:** greyed when the note is in no book; tap opens adding it to a book (today's membership line's
+  act); in a book, the same door opens what the line opened. **#:** toggles the note's tags OPEN in place
+  (a strip under the row, travelling with it while open — C-13-2) and the same # CLOSES them; adding a tag
+  stays reachable from the strip. **The stack door:** a three-item menu, Blocks · Lens · More info (C-13-3),
+  each opening what its chip opened. **⋯:** the Note sheet, now headed by TWO easy-tap icons — Seal (the
+  seal's act, its accent state when sealed) and the date (the "no date" chip's act; the day when set) —
+  above its existing rows (Save a Version, Versions…, Undo/Redo, Delete Note).
+- **Laws that bind:** VM-272's chrome-only fence (zero lines in `MobileEditorTextView` or the text-input
+  path; the text view keeps riding its own keyboard guide); every door 44 × 44; the sealed note's state still
+  reads (the seal moves, its STATE line stays visible where it is today); the rename door on the title
+  stays (VM-148's rename-in-place is NOT built here); P-1's capability vocabulary — every moved door keeps
+  its registry identity and accessibility name.
+- **Pins:** the sticky row (mounted: after a scroll the icon row's frame stays at the top while the title's
+  leaves), the title never truncates (a long title wraps — red on old), six doors × 44 in one row without a
+  separator, # toggles the strip open and closed, Seal and Date reachable from the Note sheet's head, the
+  keyboard-reveal UI test re-run (the Write screen's layout changes). Captures at the gate: at rest, scrolled,
+  tags open, the Note sheet — both voices.
+
+Order: 1a → 1b → 2 → 3 → 3b → 4a → 4b. Batch 4's mockups may be drawn (by the orchestrator, as sitting material, or a
 design-only implementer) while an earlier batch builds, so her pick is ready when its build slot arrives — but
 only one implementer session runs at a time. VM-254's text-size row waits for batch 2's chrome step-down to
 land first, so its "one notch smaller" default is judged against the corrected chrome.
