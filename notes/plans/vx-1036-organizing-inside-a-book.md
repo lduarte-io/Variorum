@@ -2,7 +2,7 @@
 
 **Ticket** VX-1036 (Umbrella, Books) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov22 · **Mockups** `notes/plans/vx-1036/`
 
-**STATUS — OPEN 2026-11-22: DESIGN SITTINGS. Sitting 1 answered (R-1036-1…9); the round-1 mockups are being drawn for sitting 2. Nothing is built. Her word at kickoff: "we will finish the design plans together before you do any building."**
+**STATUS — OPEN: DESIGN SITTINGS. Sitting 2 (2026-11-24) answered in part — rulings through R-1036-28; §4d holds what changed, §4e the round-2 mockup brief. Nothing is built. Her word at kickoff: "we will finish the design plans together before you do any building."**
 
 ---
 
@@ -217,6 +217,95 @@ What stands today: the 13i sitting §9 ruled total isolation ("nothing should cr
 
 ---
 
+## 4d. Sitting 2's amendments (2026-11-24) — where these differ from §4b, these stand (rulings R-1036-15…27 in §5)
+
+### The lane move, in plain words (L-6 restated — the architect's answer to her question; HER CONFIRM OWED)
+
+Her question: "wouldn't tags have to be exclusive of each other or something? what would the rule of drag a note tagged variorum, todo, and tuesday to monday, how would the app know to delete the tuesday tag and add the monday tag?"
+
+- **The app knows because the lanes say so.** Every lane is a rule that names tags. The note sits under "tuesday" because tuesday's rule asks for `#tuesday` and the note wears it.
+- **The move, four steps, one act:**
+  1. ON go the tags the destination lane's rule asks for that the note lacks.
+  2. OFF come the tags the lane it is leaving asks for — unless the destination's rule, or the gathering's own rule, asks for them too.
+  3. Nothing else is touched.
+  4. The app asks where the note files now. If that is not the lane she dropped it on, nothing is written and it says why.
+- **Her example** — variorum · todo · tuesday, dragged to monday: `#monday` on (monday asks for it), `#tuesday` off (tuesday asked for it; monday does not), `#variorum` and `#todo` untouched (no lane names them). The receipt: "Moved to monday — added #monday, removed #tuesday."
+- **Tags need not be exclusive.** Only the DRAG is a swap. A note she tags `#monday` and `#tuesday` by hand keeps both, files under the first lane in order and wears "also: tuesday" (R-1036-6). Making lane tags exclusive everywhere would mean tagging in one place silently removes a tag in another — not proposed.
+- **Lanes with longer rules, same four steps:**
+  - *any of* (`#mon or #monday`): leaving takes off whichever it wears; arriving adds the first.
+  - *all of* (`#work and #urgent`): leaving takes off both, except one the destination or the gathering needs; arriving adds what is missing.
+  - *a "not" in the destination* (`#tuesday and not #done`, the note wears `#done`): REFUSE, in words — "tuesday leaves out #done." A move never takes a tag off only because a lane excludes it. (HERS — §5's item 1.)
+  - *a lane whose rule asks for the star*: not a drag target or source; the star means more than a lane. PROPOSED.
+- **The drop lights only where the move can work** — the app's standing false-offer rule — so a refusal is rare and step 4 is the belt.
+
+### Tags inside a book — T-A, as she amended it (R-1036-18; replaces T-A…T-D)
+
+- **T-1** A note's tags are PILLS in its header: on the title line, at its trailing side beside "open ↗"; they wrap onto a second line when there are many. When the title fills the line, the pills take their own row directly under it — a fixed place, never floating. Always pills (the note masthead's pill; the search rows' form is her model), each with its × centred (VX-1081).
+- **T-2** A title too long for its line scrolls like a radio display instead of wrapping or cutting (VX-1080 — the wing name's idiom, `WingToolbarLabel`). PROPOSED: it moves only under the pointer and on the live note; at rest it is one line, cut clean with no "…"; never under Reduce Motion.
+- **T-3** A small "+" follows the pills and adds a tag (the field suggests existing tags and mints a new one on ⏎). A note with no tags shows the "+" alone — only while the book shows tags.
+- **T-4** A keyboard shortcut adds a tag to the note she is on (in a book and in Write). The chord is picked at the build from the registry's free chords and brought to her.
+- **T-5** The per-book switch stands: tags shown or hidden, hidden by default.
+- **T-6** STILL HERS: in a laned gathering, whether a note's pills leave off the tags that already explain where it sits (the gathering's own and its lane's).
+
+### The Library's list, inside a book (R-1036-28 — her idea mid-sitting, asked as a question; HERS on the mockup)
+
+Her words: "the library already has a nice setup for looking what what notes are present and being able to add tags. maybe we just need to bring this library esque view into book somehow?"
+
+What stands today: the Library's List row already carries a note's title, its date, its tags as pills with ×, a "+" to add a tag, and the edited stamp. No book mode shows that row.
+
+- **BL-1** PROPOSED: a book and a gathering gain a **List** mode beside Outline · Index · Book · Read — the Library's own row (one shared row, never a copy), scoped to the book, in the book's order, with chapters (a book) or lanes (a gathering) as its headings. It is the managing face: many notes on a page, tags seen and changed in place, a row dragged between lanes.
+- **BL-2** What it does NOT take from the Library: the search field (the book's 🔍 stays), the scope and view pickers, and the Library's own sort (the book's order dial governs).
+- **BL-3** A row's click selects the note (the sidebar's note box), a double-click or ⏎ opens it — the Library's own acts. A lane's and a chapter's "+" make a note there (N-2, L-7).
+- **BL-4** The choice it puts to her, drawn both ways: **A** — List is where tags live inside a book, and the Outline stays as calm as today; **B** — List, and the Outline's headers also wear the pills (T-1) behind the same per-book switch.
+- **BL-5** Open at the build: its place and chord in the mode row (⌘1–⌘4 are the book's four today); the phone's twin.
+
+### A note's title while reading (R-1036-21)
+
+- **RT-1** stands as drawn — "the title note switching looks good". The weight (quiet line or small heading) is still to pick.
+
+### Tags on a quick note (R-1036-15; VX-1078)
+
+- **Q-1** PROPOSED: the capture doors gain the same door — pills and a small "+" — beside the typed form (`{#tag/path}`), which stays. Drawn on both the new-note box and the quick note pad for her to say which she meant.
+
+### The wire (R-1036-16; VX-1079, VX-1026 — replaces L-11)
+
+- **M-1** Agents make and organize gatherings. Standing today: `create_gathering`, `set_book_rule`, `set_book_order`, `apply_tag`, `remove_tag`, `replace_tag`, `list_books`, `list_notes`.
+- **M-2** PROPOSED additions: lanes on `create_gathering`; one tool that replaces a gathering's lanes whole (the stored shape — L-2); reads that say lanes (a gathering's listing in lane order, each note's lane and its "also" lanes named); and the lane move as the SAME operation her drag runs, so the rule above is one rule by hand and on the wire.
+- **M-3** The door's standing law binds each: one operation, the grant check inside its transaction, one ⌥⌘Z entry naming the client, her pending typing landed first. `notes/MCPSpec.md` is read in full before the build.
+- **M-4** VX-1026 (a book's listing in the order she sees) rides with it.
+
+### Wings, as she amended them (R-1036-22…27; replaces W-2's scope word and W-3's line)
+
+- **W-2′ All wings is a wing option.** The wing dropdown gains a last entry, "all wings". Picking it shows an ALL WINGS LIBRARY: the notes of every wing taking part as one library — scrolled, sorted, filtered and searched like any Library, as many searches as she likes. It is not a wing she stands in. PROPOSED: it is the Library's view only — the app's standing wing does not change, so new notes, the Bookcase, the Pool, tags and the capture doors stay where she was; Move to Wing lists never offer it; each row wears its wing's colour mark. `#tag` there matches that path in every wing taking part (R-1036-13). R-1036-10's per-search scope word is superseded: the Library opens in her wing, and All wings is the deliberate pick that stays until she picks a wing.
+- **W-3′** A wing switched out of all-wings search is simply absent. No line says so (R-1036-26).
+- **W-4′ Starred across wings by colour.** The standing wing's stars keep the normal star colour; another wing's stars wear that wing's colour; no wing name on a starred row (R-1036-25). The this-wing / all-wings choice and the per-wing "Show in all-wings Starred" switch stand (R-1036-11). PROPOSED: the list keeps her one star order.
+- **W-5′ Settings ▸ Wings.** Reorder the wings — the order is the switcher's, ⌘1–⌘9's and the cycling's — and choose a colour for each, beside the two switches, rename, Move Everything…, Delete and New Wing (R-1036-24). PROPOSED: Home takes a colour and may be reordered like the rest; a colour is one of a fixed set of theme tokens, never a literal.
+- **W-8** ⌘K's row stands as drawn (R-1036-27).
+- **W-9′ Storage.** Still synced `setting` keys, ids and token names only — the colours and Home's place included; no schema event.
+- **W-10** The Library's line "everything — sortable, searchable" is removed (R-1036-23; `LibraryCatalogView.swift:697`).
+
+---
+
+## 4e. The mockup brief (round 2)
+
+**Deliverable** — ONE new self-contained file, `notes/plans/vx-1036/mockup-3-round-2.html`, holding only what changed. Same rules as §4c (inline everything, never an Artifact, invented sample content, a light / dark switch, every frame labelled with one plain sentence, a linked index). **Copy the look from the two round-1 files exactly** — their CSS variables, window chrome, cards, pills and type are the approved baseline; do not restyle. The tag pill is the note masthead's (`Features/Tags/MastheadTagCluster.swift`), with its × centred on the text. This file MAY animate where a frame is about motion (the title scroll, CSS only).
+
+**Frames**
+1. *Tags in the header* (T-1, T-3): one book, five states — (a) a short title with two pills on the title line beside "open ↗"; (b) many pills wrapping to a second line; (c) a title that fills the line, the pills in their own row under it; (d) a note with no tags showing the "+" alone; (e) the "+" pressed — the field open in place, a suggestion list, a new tag being typed. Show both a collapsed card and an open (live) note's header. One crop shows the pill at 3× with the × centred.
+2. *The long title* (T-2): the card and the open header at rest (one line, cut clean, no "…") and moving (animated on hover; one copy animated continuously so the motion is seen without the pointer), with the pills row beneath.
+3. *Pills in a laned gathering* (T-6): the same lane twice — A, every pill shown; B, the gathering's and the lane's own tags left off.
+4. *The lane move, as a rule* (§4d): the example note before and after (three pills; the one that comes off and the one that goes on marked), the drop targets lit and unlit during a drag, and the refusal for a lane that leaves a tag out.
+5. *All wings as a wing option* (W-2′, W-3′, W-10): the wing dropdown open with "all wings" last; the Library in All wings — rows from three wings with their colour marks, sorted by edited; a search typed there; no scope word, no left-out line, and the masthead without the removed line.
+6. *Starred by colour* (W-4′): the sidebar's Starred standing in one wing — its stars normal, two other wings' stars in their colours, no wing names; the same list standing in another wing.
+7. *Settings ▸ Wings* (W-5′): each wing a row with its grip, its ⌘-number, its colour swatch (the picker open on one), the two switches, rename, Move Everything…, Delete; the Starred choice; New Wing.
+8. *Tags on a quick note* (Q-1): the new-note box with pills and "+"; the quick note pad with the same.
+9. *The book's List mode* (BL-1…BL-3) — **drawn FIRST in the file, ahead of frame 1**: (a) the weekly gathering in List — the mode row reading outline · list · index · book · read, lane headings with counts and their "+", compact rows each with title, date, tag pills with ×, the "+", and the edited stamp at the trailing edge, one row wearing "also: thursday", an empty lane, the bottom bar; (b) the same with a row in flight between two lane headings; (c) a chaptered book in List. The row is the Library's List row — read `Features/Library/` for its real face (the List view's note row, its tag pills and "+", the stamp) and draw that, not a new design.
+10. *The choice* (BL-4): the same book's Outline as today (A) beside the Outline with header pills (B) — small, side by side, so the two answers are seen together.
+
+**Cast.** An Opus worker — the standing rule; her word for Fable named the round-1 mockups.
+
+---
+
 ## 5. Sittings
 
 ### Sitting 1 — 2026-11-22 (answered)
@@ -288,9 +377,34 @@ Her reply, verbatim:
 9. *All-wings Starred's order:* **HERS.** Drawn as this wing first; the alternative is her one star order as she keeps it, cross-wing rows marked.
 10. *A wing with "Show in all-wings Starred" off* still shows its own stars while she stands in it — the switch governs only other wings' view. PROPOSED.
 
-### Sitting 2 — opens on the round-1 mockups
+### Sitting 2 — 2026-11-24 (answered in part)
 
-Hers to answer there: the tag option(s) by letter and item 2 · item 1 · D-1 as drawn · the PROPOSED lines of §4b (L-4's empty lane, L-6(e)'s undo, L-8's doors, L-10's bind, RT-1 and its weight) · items 4, 6, 7, 8, 10 on sight · item 9 · W-8's ⌘K row · the wings pane as drawn, and R-1036-11 and -13 confirmed or changed on sight.
+Her reply to the round-1 mockups, verbatim (the feature passages; the four screenshots she attached show her own notes and are not in this repo):
+
+> I also want to add something to this general tag improvement umbrella - ability to add tags from the quick note creation. also - please look on linear. I had a ticket fixing a bug on the mcp added here where book order was always given as the manual order rather than the order the user has actually saved. also - the MCP part of this should also be included in the wave / phase. I want agents to be able to make and organize my gatherings for me, that's an important part. I looked at the mockups. I think that being able to move between lanes is good, but it's unclear to me what the rules are going to be exactly for dragging between things. wouldn't tags have to be exclusive of each other or something? what would the rule of drag a note tagged variorum, todo, and tuesday to monday, how would the app know to delete the tuesday tag and add the monday tag? what would that rule look like? I think TA was the best option I saw overall, but I think I'd rather that the tags start out by being on the line next to open and then go down to a second line if there are too many of them, rather than starting on a lower line. that way they're still part of the header. while trying to choose a solution for this I discovered that what happens to a title that is too long is already ugly - i think it might be better if it did the radio style scroll when it's too long. I do think if the title is taking up the full length the tags can be on the next line down, but I think that they should be in a deliberate area and always show as a pill. also, the x on the tag pill is not centered with the text, which should be fixed. i also think a shortcut for adding tags would be nice. I also think that there should be a small + for if you want to add tags on a new note, if showing tags is on for the book. the title note switching looks good. the way tags show in library search is honestly a pretty good example already. also - for the search, i think that it should just be a Wing option (like where you select the home dropdown, it should provide a view of your All Wings library. that way you can scroll through what you're searching and see it as a library, even though it's not a normal wing that the picker will choose. then you can search several times in all wings and it's not taking up any extra space. let's remove this text while we're at it - we don't need it: everything — sortable, searchable. about starred across wings - there should be a new wing managment pane in settings, as part of this (I think I mentioned this before but wasn't so clear). in that wing settings panel you should be able to reorder your wings (which also changes the default keyboard shortcut for each and lets cycling through be more natural), and choose a color per wing. then for starred, whatever wing you're in can have the normal star color, and other wings can just have other color stars to show they're in a different wing. if it's your starred item I feel like saying what wing it's in, is less necessary than it is for the typical open items. also - remove the line saying what wing isn't present in the all wings search. it's a deliberate choice to exclude it, made for privacy. command K looks good.
+
+And, sent while the reply was being worked:
+
+> honestly, more of what i'm realizing is also that the library already has a nice setup for looking what what notes are present and being able to add tags. maybe we just need to bring this library esque view into book somehow?
+
+| id | Ruling |
+|---|---|
+| R-1036-15 | **Tags on a quick note join the umbrella** — "ability to add tags from the quick note creation." VX-1078; Q-1. |
+| R-1036-16 | **The wire is in the wave** — "the MCP part of this should also be included in the wave / phase. I want agents to be able to make and organize my gatherings for me, that's an important part." VX-1079; VX-1026 (which she had already seated here) rides. M-1…M-4. |
+| R-1036-17 | **Moving between lanes is wanted; its rule is NOT yet ruled** — "being able to move between lanes is good, but it's unclear to me what the rules are going to be exactly". The answer is §4d's first block; her confirm is owed. |
+| R-1036-18 | **Tags inside a book: T-A, as pills in the header** — "I'd rather that the tags start out by being on the line next to open and then go down to a second line if there are too many of them … that way they're still part of the header"; "if the title is taking up the full length the tags can be on the next line down, but I think that they should be in a deliberate area and always show as a pill"; "a small + for if you want to add tags on a new note, if showing tags is on for the book"; "a shortcut for adding tags would be nice". T-1…T-5. |
+| R-1036-19 | **A too-long title scrolls radio-style** — "it might be better if it did the radio style scroll when it's too long." VX-1080; T-2. |
+| R-1036-20 | **The pill's × is centred** — "the x on the tag pill is not centered with the text, which should be fixed." VX-1081. |
+| R-1036-21 | **Titles while reading, as drawn** — "the title note switching looks good." |
+| R-1036-22 | **All wings is a wing option showing an All Wings Library** — "it should just be a Wing option (like where you select the home dropdown, it should provide a view of your All Wings library … even though it's not a normal wing that the picker will choose. then you can search several times in all wings and it's not taking up any extra space." Supersedes R-1036-10's scope word. W-2′. |
+| R-1036-23 | **The Library's line goes** — "let's remove this text while we're at it - we don't need it: everything — sortable, searchable." W-10. |
+| R-1036-24 | **Settings ▸ Wings reorders the wings and colours them** — "you should be able to reorder your wings (which also changes the default keyboard shortcut for each and lets cycling through be more natural), and choose a color per wing." W-5′. |
+| R-1036-25 | **Starred across wings by star colour, no wing name** — "whatever wing you're in can have the normal star color, and other wings can just have other color stars … saying what wing it's in, is less necessary than it is for the typical open items." W-4′. |
+| R-1036-26 | **No line names a left-out wing** — "it's a deliberate choice to exclude it, made for privacy." W-3′. |
+| R-1036-27 | **⌘K as drawn** — "command K looks good." |
+| R-1036-28 | **A Library-like view inside a book — asked, not ruled** — "maybe we just need to bring this library esque view into book somehow?" BL-1…BL-5, drawn on round 2 with the choice A / B. |
+
+**Still hers after this reply:** the lane-move rule (confirm §4d's four steps; the "not" refusal) · BL-4's A or B · T-6 (which pills a laned gathering leaves off) · T-2's when-it-moves · RT-1's weight · the order dial D-1 as drawn · all-wings Starred's order · whether Home can be reordered · which capture doors Q-1 means · the PROPOSED lines of §4b she has not spoken to (the empty lane, the move's undo, lane doors, bind → chapters).
 
 ---
 
@@ -308,7 +422,15 @@ Hers to answer there: the tag option(s) by letter and item 2 · item 1 · D-1 as
 | 8 | Search across wings · Starred across wings · the Wings pane | VX-1041 | DESIGN — W-1…W-6; sitting 2's questions |
 | 9 | The lanes column — the §12 event | VX-1037 | Accepted in principle (R-1036-5); the deploy at her go; `notes/SyncSpec.md` in full before the build |
 
-**Sizing, as it stands:** lanes (with their schema event) and tags-inside-a-book are each a phase-sized unit; the wings ticket is a third; the small ones (rows 4, 5, 7) are a fourth, runnable first. The guidance caps a phase at two units — the split into runs is hers to rule when the design closes.
+| 10 | Tags added while making a quick note | VX-1078 | DESIGN — Q-1 on round 2 |
+| 11 | Agents make and organize gatherings on the wire; a book's listing in her order | VX-1079 · VX-1026 | RULED IN (R-1036-16); M-1…M-4 PROPOSED; MCPSpec in full before the build |
+| 12 | A too-long title scrolls | VX-1080 | RULED (R-1036-19); when it moves is hers |
+| 13 | The tag pill's × centred | VX-1081 | RULED (R-1036-20) |
+| 14 | A List mode for the book | — (no ticket until she rules it) | ASKED (R-1036-28); BL-1…BL-5 on round 2 |
+
+*(Rows 1–2 are now T-1…T-6; row 8 is W-2′…W-10.)*
+
+**Sizing, as it stands (2026-11-24):** the umbrella now holds more than one run. A likely cut, hers to rule when the design closes: **(1)** the small book fixes — VX-1039, VX-1040, VX-881, VX-1080, VX-1081, VX-1026; **(2)** tags inside a book — VX-1038, VX-1078, and the List mode if ruled in; **(3)** lanes, their schema event and the wire — VX-1037, VX-1079; **(4)** wings — VX-1041.
 
 ---
 
