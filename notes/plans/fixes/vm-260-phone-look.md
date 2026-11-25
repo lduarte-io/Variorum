@@ -2661,8 +2661,8 @@ Products/TK2SpikeUITests_TK2SpikeUITests_iphonesimulator27.1-arm64-x86_64.xctest
 - Predicted RED, exactly: `aRealScrollCondensesTheTopAndANudgeReopensIt` (study, terminal) 1 + 1;
   `theSlimLinesSearchGlyphReopensTheTopAndFocusesTheField` 1; `condensingAsksTheListingNothing` 1 (the premise; its
   four counts green); `theLineIsTheWingsNameAloneOnEveryRoot` 1; `theShelfRootsDoor` 1;
-  `theBookcaseLineIsTheWingsNameAndTwoDoors` 4; `thePickingDoorsSpokenNameHoldsTheWordItDraws` 2 — **13 issues in 8
-  test cases**. Everything else in those five suites GREEN. A GREEN among the predicted reds means that pin is hollow
+  `theBookcaseLineIsTheWingsNameAndTwoDoors` 4; `thePickingDoorsSpokenNameHoldsTheWordItDraws` 2 — **12 issues in 8
+  test cases** (2 + 1 + 1 + 1 + 1 + 4 + 2; the record commit `a48f194a6`'s message says 13 — a miscount, corrected here). Everything else in those five suites GREEN. A GREEN among the predicted reds means that pin is hollow
   on old — record it, never claim it. A count expectation RED on old in `condensingAsksTheListingNothing` means
   something else in the process asked the listing during the scroll — a finding about the harness, report it.
 
