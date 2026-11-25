@@ -419,6 +419,28 @@ And, sent while the reply was being worked:
   4. *One switch or two for All wings:* the "take part in all-wings search" switch is read as also deciding who is in the All Wings Library. HERS to confirm.
   5. *The search band's wing chip* reading "in: all wings" — kept as drawn; hers on sight.
 
+### Sitting 3 — 2026-11-24 (on the round-2 mockup; in progress)
+
+Her reply, verbatim:
+
+> hmm i like the idea of list mode. it would be nice if list mode could also show show cards (like how the library can). I feel like there are a lot of options there... but i'm not really sure which one I would remove. 5 is a lot of options I suppose... any thoughts? I do think that this could solve the issue of showing tags on the existing outline I suppose. I like showing the tags that aren't part of the rule of where it is as an option, to minimize visual clutter. at the same time, what keeps a note tagged monday and thursday in monday? where is that choice made? how is it reversed? is it by dragging and then you have to retag the one that you removed? I imagine so based on what's written on the website. that said, I do like the proposition of removing the tags from the lane it was in and adding the tags of the lane it was dragged into, as long as that's not the rule it was in the gathering by. can you use the question tool to ask me questions that are still outstanding? and tell me what words to search on the mockup website. title scroll - only under the pointer and on the live note, otherwise just ... - and only one at a time scrolling. 5. agreed. 6. i think there should be a tag adding button where it suggests the title so you can add things from there and file it if you'd like, and on the quick note capture that lives on the macos menu bar too.
+
+Then the question dialog, batch 1 (her picks; one answer typed in her own words):
+
+| id | Ruling |
+|---|---|
+| R-1036-29 | **List is a fifth mode of the book** — "i like the idea of list mode"; the dialog's pick: "List as a fifth mode" (over a list · cards switch inside outline, and over list taking index's place). Her wish that list "could also show cards (like how the library can)" is still open — asked in batch 2. BL-1 stands as drawn. |
+| R-1036-30 | **The cards wear pills too: every card, behind the per-book switch** — the dialog's pick, "Every card, behind the switch". T-1 stands; BL-4 is B. |
+| R-1036-31 | **The lane move's rule is confirmed** — "I do like the proposition of removing the tags from the lane it was in and adding the tags of the lane it was dragged into, as long as that's not the rule it was in the gathering by." §4d's four steps. |
+| R-1036-32 | **A move into a lane that leaves out a tag the note wears: "confirm and allow"** (typed by her in place of the two offered answers). Read as: the app asks first, naming the tag, and on her yes the move goes through and takes that tag off; on no, nothing changes. Supersedes §4d's refusal. |
+| R-1036-33 | **The order dial as drawn** — the dialog's pick. D-1 is confirmed: a pick saves at once on a gathering and on a book whose order is not manual; on a hand-ordered book it is a look, with "Save as This Book's Order" and "Back to manual order" shown. |
+| R-1036-34 | **Leaving off the tags that place a note, as an option** — "I like showing the tags that aren't part of the rule of where it is as an option, to minimize visual clutter." How the option is offered is asked in batch 2. |
+| R-1036-35 | **The title scrolls only under the pointer and on the live note; at rest it is cut with "…"; one title moves at a time** — "only under the pointer and on the live note, otherwise just ... - and only one at a time scrolling." Architect's fill: the title under the pointer moves and the live note's waits. Supersedes T-2's "cut clean, no …". |
+| R-1036-36 | **One switch decides both** — "5. agreed": a wing switched out of all-wings search is also absent from the All Wings Library. |
+| R-1036-37 | **Tags on a new note: a tag button where the new-note box suggests the title, and on the menu-bar quick note** — "there should be a tag adding button where it suggests the title so you can add things from there and file it if you'd like, and on the quick note capture that lives on the macos menu bar too." Q-1 is both doors; the button sits with the title suggestion. |
+
+**Her question, answered in chat:** what keeps a note tagged monday and thursday under monday is the LANE ORDER (first lane in order wins — R-1036-6); the order is set in the gathering's lanes list. It is reversed by dragging the note to thursday (which takes #monday off) or taking #monday off by its ×; putting #monday back files it under monday again. Nothing is stored per note.
+
 ---
 
 ## 6. Ledger
