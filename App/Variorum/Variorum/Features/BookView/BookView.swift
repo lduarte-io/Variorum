@@ -46,6 +46,9 @@ struct BookView: View {
         + [.newNoteInBook]
         // VX-1039 — a chapter's own "+" on the outline page's chapter heading.
         + [.newNoteInChapter]
+        // VX-1040 — the order dial's save (a saving pick, the Save row, the
+        // hand-ordered look's masthead door).
+        + [.saveBookOrder]
         // VX-563 — ⌘↑ / ⌘↓: the book's key monitor is the step's one door
         // (`BookNoteStepKeyMonitor`).
         + [.previousNoteInBook, .nextNoteInBook]
@@ -802,6 +805,9 @@ struct BookView: View {
                 }
                 orderControl
             }
+            // VX-1040: a hand-ordered book's look keeps Save and Back in
+            // plain sight, under the row (two short lines while a look is on).
+            lookDoors
         }
         // 13c 2C: READ's pair of faces (her direction — "the
         // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
@@ -1682,24 +1688,57 @@ struct BookView: View {
     /// order alone ("Manual order ▾" — the doubled "order" gone). The acts
     /// are the book view's, unchanged: a pick sets the view order, the adopt
     /// door saves it and drops the override.
+    ///
+    /// **VX-1040 (D-1, her R-1036-33 — "the order dial as drawn"):** what a
+    /// pick MEANS is the book's (`BookOrderDial.Grammar.of` over the pure
+    /// `BookOrderPick`): on a gathering and on a book whose order is not
+    /// manual a pick IS the book's order at once (`setReadingSort` — the
+    /// wire's `set_book_order` road, unchanged); on a hand-ordered book it
+    /// stays a look with Save and Back in plain sight (`lookDoors`); a
+    /// finished book looks and cannot save, as before. Every landed save
+    /// speaks the receipt kind; a refusal is the structure model's line.
     private var orderControl: some View {
+        let reading = structure.reading
         let dial = BookOrderDial(
             tokens: tokens,
-            stored: BookOrderChoices.storedLabel(for: structure.reading),
+            stored: BookOrderChoices.storedLabel(for: reading),
             viewOrder: model.viewOrder,
-            canSave: structure.reading?.locked != true,
+            canSave: reading?.locked != true,
             onLook: { model.viewOrder = $0 },
-            onSave: { order in
-                Task {
-                    await structure.saveOrder(order)
-                    // Saved IS the book's order now — drop the override
-                    // so the menu stops claiming a separate way of
-                    // looking (and every other reader agrees).
-                    model.viewOrder = nil
-                }
-            })
+            onSave: { saveOrder($0) },
+            grammar: BookOrderDial.Grammar.of(reading),
+            storedOrder: reading.map { Queries.ReadingOrder(field: $0.sortField, direction: $0.sortDir) },
+            gathering: reading?.kind == .gathering)
         return dial
             .bookOrderDialProbe(readingID, face: BookOrderDial.face(tokens, order: dial.shownOrder))
+    }
+
+    /// The one save every dial road runs (a pick that saves, the Save row,
+    /// the masthead's "save as this book's order").
+    private func saveOrder(_ order: Queries.ReadingOrder) {
+        let name = bookName
+        let gathering = structure.reading?.kind == .gathering
+        Task {
+            guard await structure.saveOrder(order) else { return }
+            // Saved IS the book's order now — drop the override so the menu
+            // stops claiming a separate way of looking (and every other
+            // reader agrees).
+            model.viewOrder = nil
+            session.status.receipt(BookOrderChoices.savedReceipt(
+                bookName: name, order: order, gathering: gathering))
+        }
+    }
+
+    /// **VX-1040 — the hand-ordered book's look, its two doors in plain
+    /// sight** under the mode row (mockup frame 9b), only while a look is on
+    /// and the book can save.
+    @ViewBuilder private var lookDoors: some View {
+        if BookOrderDial.Grammar.of(structure.reading) == .handOrdered, let look = model.viewOrder {
+            BookOrderLookDoors(
+                tokens: tokens,
+                onSave: { saveOrder(look) },
+                onBack: { model.viewOrder = nil })
+        }
     }
 
     // MARK: - Outline's landing (the Act 10 correction round, rows 9/12/14/44/47 — and row 53)

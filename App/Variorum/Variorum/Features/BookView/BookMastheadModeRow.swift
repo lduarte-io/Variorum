@@ -348,6 +348,128 @@ struct BookOrderDial: View {
     let onLook: (Queries.ReadingOrder?) -> Void
     /// The adopt door.
     let onSave: (Queries.ReadingOrder) -> Void
+    /// **VX-1040 (D-1, R-1036-33) — what a pick means on this book**
+    /// (`Grammar.of`, over the pure `BookOrderPick`). Defaulted to the
+    /// browse grammar that stood before it (a book whose row has not landed).
+    var grammar: Grammar = .browse
+    /// The book's own stored order — the check on a menu whose picks save.
+    var storedOrder: Queries.ReadingOrder? = nil
+    /// A gathering's dial: its `manual` reads "As collected" (it has no hand
+    /// order — `BookOrderChoices.storedLabel`'s rule).
+    var gathering: Bool = false
+
+    /// **VX-1040 — the dial's three grammars.**
+    enum Grammar: Equatable, Sendable {
+        /// A pick is a look; "Save as This Book's Order" draws where the book
+        /// can save — the A31 grammar as it stood, kept for a FINISHED book
+        /// (which looks and can never save) and a book not yet loaded.
+        case browse
+        /// A pick IS the book's order, saved at once (a gathering; a book
+        /// whose stored order is not manual) — the receipt says so.
+        case pickSaves
+        /// A HAND-ORDERED book: a pick stays a look, and while one is on,
+        /// "Save as This Book's Order" and "Back to manual order" both stand in
+        /// plain sight — in the menu and under the mode row.
+        case handOrdered
+
+        static func of(_ reading: Reading?) -> Grammar {
+            guard let reading else { return .browse }
+            switch BookOrderPick.meaning(for: reading) {
+            case .save: return .pickSaves
+            case .look: return reading.locked ? .browse : .handOrdered
+            }
+        }
+    }
+
+    /// What one menu row does.
+    enum Act: Equatable, Sendable {
+        /// Look through this order (nil: the book's own).
+        case look(Queries.ReadingOrder?)
+        /// Save this order as the book's own.
+        case save(Queries.ReadingOrder)
+    }
+
+    /// One row of the dial's menu, as the menu draws it.
+    enum MenuItem: Equatable, Sendable {
+        case item(label: String, checked: Bool, act: Act)
+        case divider
+    }
+
+    /// The words the hand-ordered grammar's two doors speak (the menu's and
+    /// the masthead's quiet pair under the mode row — mockup frame 9b).
+    static let saveVerb = BookOrderDialCopy.saveVerb
+    static let backToManual = BookOrderDialCopy.backToManual
+
+    /// **The menu, pure** — the rows `body` draws, in order, so a pin reads
+    /// each book kind's menu without opening one.
+    static func menu(
+        grammar: Grammar, stored: String, storedOrder: Queries.ReadingOrder?,
+        viewOrder: Queries.ReadingOrder?, canSave: Bool, gathering: Bool
+    ) -> [MenuItem] {
+        let ownRow = "This book's order (\(stored))"
+        switch grammar {
+        case .browse:
+            var rows: [MenuItem] = [.item(label: ownRow, checked: viewOrder == nil, act: .look(nil)), .divider]
+            rows += BookOrderChoices.all.map {
+                .item(label: $0.label, checked: viewOrder == $0.order, act: .look($0.order))
+            }
+            if let viewOrder, canSave {
+                rows += [.divider, .item(label: saveVerb, checked: false, act: .save(viewOrder))]
+            }
+            return rows
+        case .pickSaves:
+            var rows: [MenuItem] = []
+            let shown = viewOrder ?? storedOrder
+            // A look left standing (the stored order changed under it — a save
+            // elsewhere, or sync) is let go from here; an UNLISTED stored order
+            // (the wire may store any pair) is named so it can be seen.
+            if viewOrder != nil {
+                rows += [.item(label: ownRow, checked: false, act: .look(nil)), .divider]
+            } else if let storedOrder, !BookOrderChoices.all.contains(where: { $0.order == storedOrder }) {
+                rows += [.item(label: ownRow, checked: true, act: .look(nil)), .divider]
+            }
+            rows += BookOrderChoices.all.map { choice in
+                let label = gathering && choice.order.field == .manual
+                    ? BookOrderChoices.asCollectedLabel : choice.label
+                // The book's own order is no pick to save: it lets a look go.
+                let act: Act = choice.order == storedOrder ? .look(nil) : .save(choice.order)
+                return .item(label: label, checked: shown == choice.order, act: act)
+            }
+            return rows
+        case .handOrdered:
+            var rows: [MenuItem] = [
+                viewOrder == nil
+                    ? .item(label: ownRow, checked: true, act: .look(nil))
+                    : .item(label: backToManual, checked: false, act: .look(nil)),
+                .divider,
+            ]
+            // Manual is the book's own order — its row leads; the list offers
+            // the looks.
+            rows += BookOrderChoices.all.filter { $0.order.field != .manual }.map {
+                .item(label: $0.label, checked: viewOrder == $0.order, act: .look($0.order))
+            }
+            if let viewOrder, canSave {
+                rows += [.divider, .item(label: saveVerb, checked: false, act: .save(viewOrder))]
+            }
+            return rows
+        }
+    }
+
+    /// The hover, by grammar.
+    static func help(_ grammar: Grammar, gathering: Bool) -> String {
+        switch grammar {
+        case .browse:
+            return "Look at this book in a different order \u{2014} nothing is written until "
+                + "you save it as the book\u{2019}s own order."
+        case .pickSaves:
+            return gathering
+                ? "Choose the order this gathering reads in \u{2014} your pick is saved as its order."
+                : "Choose this book\u{2019}s order \u{2014} your pick is saved as the book\u{2019}s order."
+        case .handOrdered:
+            return "Look at this book in a different order \u{2014} your hand order stays until "
+                + "you save the look as the book\u{2019}s order."
+        }
+    }
 
     /// **The dial's face for an order's name** — the ONE spelling the dial
     /// draws and the stable width measures.
@@ -367,30 +489,27 @@ struct BookOrderDial: View {
 
     var body: some View {
         Menu {
-            Button {
-                onLook(nil)
-            } label: {
-                if viewOrder == nil {
-                    Label("This book's order (\(stored))", systemImage: "checkmark")
-                } else {
-                    Text("This book's order (\(stored))")
-                }
-            }
-            Divider()
-            ForEach(BookOrderChoices.all) { choice in
-                Button {
-                    onLook(choice.order)
-                } label: {
-                    if viewOrder == choice.order {
-                        Label(choice.label, systemImage: "checkmark")
-                    } else {
-                        Text(choice.label)
+            let items = Self.menu(
+                grammar: grammar, stored: stored, storedOrder: storedOrder,
+                viewOrder: viewOrder, canSave: canSave, gathering: gathering)
+            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                switch item {
+                case .divider:
+                    Divider()
+                case .item(let label, let checked, let act):
+                    Button {
+                        switch act {
+                        case .look(let order): onLook(order)
+                        case .save(let order): onSave(order)
+                        }
+                    } label: {
+                        if checked {
+                            Label(label, systemImage: "checkmark")
+                        } else {
+                            Text(label)
+                        }
                     }
                 }
-            }
-            if let order = viewOrder, canSave {
-                Divider()
-                Button("Save as This Book's Order") { onSave(order) }
             }
         } label: {
             Text(Self.face(tokens, order: shownOrder))
@@ -402,8 +521,43 @@ struct BookOrderDial: View {
         .menuStyle(.button)
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
-        .help("Look at this book in a different order — nothing is written until "
-            + "you save it as the book's own order.")
+        .help(Self.help(grammar, gathering: gathering))
+    }
+}
+
+/// **VX-1040 — the order dial's words** (nonisolated, so the registry's
+/// declaration reads the very words the dial draws — `.saveBookOrder`).
+nonisolated enum BookOrderDialCopy {
+    static let saveVerb = "Save as This Book's Order"
+    static let backToManual = "Back to manual order"
+    static let unavailableNote =
+        "A finished book\u{2019}s order can\u{2019}t be saved \u{2014} reopen the book to change its order."
+}
+
+/// **VX-1040 — the hand-ordered book's two doors in plain sight** (D-1 as
+/// drawn — the round-1 mockup's frame 9b): while a look is on, under the mode
+/// row at its trailing edge, "save as this book's order" (the accent) over
+/// "back to manual order" (muted) — the menu's two rows, the same acts. Drawn
+/// only in the hand-ordered grammar with a look on and a book that can save;
+/// "it costs two short lines on the masthead while a look is on".
+struct BookOrderLookDoors: View {
+    let tokens: VoiceTokens
+    let onSave: () -> Void
+    let onBack: () -> Void
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 3) {
+            Button(tokens.chromeLabel("Save as this book's order"), action: onSave)
+                .foregroundStyle(tokens.accent)
+                .help("Save this look as the order every reader of the book sees")
+            Button(tokens.chromeLabel(BookOrderDial.backToManual), action: onBack)
+                .foregroundStyle(tokens.muted)
+                .help("Back to the order you set by hand \u{2014} it was kept all along")
+        }
+        .buttonStyle(.borderless)
+        .font(tokens.small)
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }
 

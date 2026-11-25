@@ -715,11 +715,15 @@ final class BookStructureModel {
     /// half — the lens grammar's "adopt": look freely, keep it when you
     /// like it). `setReadingSort` has existed since Phase 2 and lost its
     /// only door at Phase 13's IA rework; this is where it lives now.
-    func saveOrder(_ order: Queries.ReadingOrder) async {
+    /// Returns whether the save landed (VX-1040: the dial's receipt speaks
+    /// only for a save that did — a refusal is on this model's line).
+    @discardableResult
+    func saveOrder(_ order: Queries.ReadingOrder) async -> Bool {
         await run {
             try $0.setReadingSort(
                 self.readingID, field: order.field, direction: order.direction)
         }
+        return lastError == nil
     }
 
     // MARK: - Bind into a book (13i-b U3; the door 13c 2D shipped as "convert")

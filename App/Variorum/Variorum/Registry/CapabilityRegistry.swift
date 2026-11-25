@@ -2444,6 +2444,17 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: ChapterMintDoorCopy.unavailableNote, availability: always),
+        // VX-1040 (D-1) — the book's order saved (`setReadingSort`): the dial's
+        // saving picks (a gathering, a non-manual book), its Save row and the
+        // hand-ordered look's masthead door (`.surface` — `BookView`'s
+        // `orderControl` / `lookDoors`). `always`: the renderer carries its
+        // book, and a FINISHED book draws no save at all (its dial only looks —
+        // `BookOrderPick`); the op's refusal speaks on the book's line.
+        Capability(
+            id: .saveBookOrder, verb: BookOrderDialCopy.saveVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookOrderDialCopy.unavailableNote, availability: always),
         // VX-563 (her kickoff ruling — "⌘↑/⌘↓ step between notes while
         // reading, document start/end while editing"; A-648-6): the book's
         // key monitor is the ONE door (`.surface` — `BookView` renders it,
