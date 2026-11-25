@@ -223,11 +223,25 @@ struct ShelfView: View {
             // main column's full width. The tour offer's card on top (PROVISIONAL P-292-13 — the band's top card is
             // the one whose leaving moves nothing under it: the listing above takes its height), the words card under
             // it, the quick entry under both.
-            if let offerCard {
-                offerCard
-            }
-            if let wordsBand {
-                wordsBand
+            //
+            // VX-1070: the band is one a status toast never covers — the
+            // quick entry's own mark (VX-121's `statusToastKeepClear`), so the
+            // shell's toast lifts above whichever card is showing instead of
+            // landing on its sentence and its doors. Marked HERE, around both
+            // cards, so the band marks itself as one (a card's own view is
+            // never touched); a band whose cards have nothing to say lays out
+            // at zero height and asks for nothing (`StatusToastPlacement
+            // .keepClearTops`).
+            if offerCard != nil || wordsBand != nil {
+                VStack(spacing: 0) {
+                    if let offerCard {
+                        offerCard
+                    }
+                    if let wordsBand {
+                        wordsBand
+                    }
+                }
+                .statusToastKeepClear()
             }
             entryBar
                 #if DEBUG

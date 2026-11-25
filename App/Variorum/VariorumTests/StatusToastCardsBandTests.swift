@@ -207,3 +207,24 @@ struct StatusToastCardsBandTests {
         }
     }
 }
+
+// MARK: - The empty band, pure
+
+@Suite("VX-1070 — a band laid out at zero height asks for no clearance")
+struct StatusToastEmptyBandRuleTests {
+    /// The cards band keeps its container while no card has anything to say
+    /// (the offer card's persistent stack — its arrival and leaving animate),
+    /// so it lays out at zero height: it covers nothing and lifts nothing.
+    /// (Fails if an empty band's top joins the tops the toast clears.)
+    @Test func aZeroHeightBandAsksNothingAndARealOneIsKept() {
+        let quickEntry = CGRect(x: 0, y: 700, width: 900, height: 64)
+        let emptyCards = CGRect(x: 0, y: 700, width: 900, height: 0)
+        let cards = CGRect(x: 0, y: 620, width: 900, height: 80)
+        #expect(StatusToastPlacement.keepClearTops([quickEntry, emptyCards]) == [700])
+        #expect(StatusToastPlacement.keepClearTops([cards, quickEntry]) == [620, 700])
+        #expect(StatusToastPlacement.keepClearTops([]) == [])
+        #expect(StatusToastPlacement.bottomInset(
+            hostHeight: 800, keepClearTops: StatusToastPlacement.keepClearTops([cards, quickEntry]))
+            == 180 + StatusToastPlacement.clearance, "above the cards, the highest band")
+    }
+}
