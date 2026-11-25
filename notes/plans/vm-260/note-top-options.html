@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The note's top — two options</title>
+<style>
+  /* Local sitting material for R-260-8 (the note's top). Drawn at the run's
+     corrected sizes: title 20 (it may wrap now), glyphs 17 in 44-pt targets,
+     the Mac's corners. Study voice, sea-glass, light. Each phone scrolls —
+     scroll the note down, then back up. Approximate fonts; the captures under
+     notes/plans/vm-260-screens/ are the ground truth for the look. */
+  :root {
+    --band: #E7F0E9; --paper: #FBFDFB; --ink: #1D2A24; --door: #3F5F50;
+    --muted: #6A7A71; --faint: #A9B8AF; --hairline: #D4E2D8; --accent: #3F7460;
+  }
+  body { background: #F2F1EC; color: var(--ink); margin: 0;
+         font: 15px/1.5 -apple-system, system-ui, sans-serif; padding: 24px 16px 60px; }
+  header.page { max-width: 1100px; margin: 0 auto 8px; }
+  header.page h1 { font-size: 22px; margin: 0 0 6px; }
+  header.page p { margin: 4px 0; max-width: 74ch; color: #3c4a42; }
+  .row { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center;
+         max-width: 1200px; margin: 24px auto 0; align-items: flex-start; }
+  .option { width: 404px; }
+  .option h2 { font-size: 17px; margin: 0 0 2px; }
+  .option p.sub { margin: 0 0 10px; font-size: 13px; color: #4c5a52; min-height: 76px; }
+  .toggles { font-size: 12px; color: #4c5a52; margin: 0 0 8px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .toggles label { cursor: pointer; }
+  .phone { width: 402px; height: 760px; border-radius: 36px; border: 1px solid #c9c9c2;
+           background: var(--paper); overflow: hidden; position: relative;
+           box-shadow: 0 6px 24px rgba(40,60,50,.10); }
+  .statusbar { position: absolute; top: 0; left: 0; right: 0; height: 44px; z-index: 5;
+               display: flex; align-items: center; justify-content: space-between;
+               padding: 0 30px; font-size: 14px; font-weight: 600; background: var(--paper); }
+  /* The system bar: back on the left; option B's tools arrive on its right. */
+  .navbar { position: absolute; top: 44px; left: 0; right: 0; height: 52px; z-index: 5;
+            display: flex; align-items: center; padding: 0 12px; gap: 0; background: var(--paper);
+            transition: box-shadow .2s; }
+  .navbar.edge { box-shadow: 0 1px 0 var(--hairline); }
+  .back { width: 44px; height: 44px; border-radius: 22px; background: #fff;
+          box-shadow: 0 1px 6px rgba(0,0,0,.08); display: flex; align-items: center; justify-content: center; }
+  .back svg { width: 18px; height: 18px; stroke: var(--ink); stroke-width: 2.2; fill: none; }
+  .navtools { margin-left: auto; display: flex; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .navtools.show { opacity: 1; }
+  .scroller { position: absolute; top: 96px; left: 0; right: 0; bottom: 0; overflow-y: auto; }
+
+  /* 44-pt targets, 17-pt glyphs */
+  .t { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .t svg { width: 19px; height: 19px; stroke: var(--door); fill: none; stroke-width: 1.6;
+           stroke-linecap: round; stroke-linejoin: round; }
+  .t.off svg { stroke: var(--faint); }
+  .t.sep { width: 1px; height: 22px; background: var(--hairline); margin: 0 4px; }
+
+  /* Option A */
+  .titleA { font: 600 22px/1.25 ui-serif, Georgia, "Iowan Old Style", serif; text-align: center;
+            padding: 14px 28px 12px; }
+  .iconrow { position: sticky; top: 0; z-index: 3; background: var(--paper);
+             display: flex; justify-content: center; padding: 0 9px; }
+  .iconrow.edge { box-shadow: 0 1px 0 var(--hairline); }
+
+  /* Option B */
+  .titlerowB { display: flex; align-items: center; padding: 0 9px 0 20px; min-height: 44px; }
+  .titleB { font: 600 20px/1.25 ui-serif, Georgia, serif; flex: 1; min-width: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rowB2 { display: flex; padding: 0 9px 0 9px; }
+
+  .body { font: 17px/1.55 ui-serif, Georgia, serif; padding: 14px 20px 60px; }
+  .body p { margin: 0 0 14px; }
+  .legend { font-size: 12px; color: #55635b; margin-top: 10px; line-height: 1.6; }
+  .legend b { color: var(--ink); font-weight: 600; }
+  .menu { position: absolute; z-index: 9; background: #fff; border-radius: 8px; width: 190px;
+          box-shadow: 0 8px 30px rgba(0,0,0,.18); font-size: 15px; display: none; }
+  .menu.show { display: block; }
+  .menu div { padding: 11px 14px; border-bottom: 1px solid #eef2ef; }
+  .menu div:last-child { border-bottom: 0; }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <h1>The note's top — two options (R-260-8)</h1>
+  <p>Her words: <em>"maybe it would be best for the title to get more space on top and then there's one row of
+  icons, and just that row of icons is what stays with you as you scroll. i think that might be best… i do
+  actually like the current four icons on the upper right though, it looks clean, so i'll have to see how the
+  icon bar looks."</em></p>
+  <p>Both use the same doors: the four tools she likes (copy · find · seal · ⋯), then <b>book</b> (tap to add
+  the note to a book; greyed when it's in none), <b>#</b> (tags), <b>calendar</b> (the date), and <b>one door for
+  blocks · lens · more info</b>. <strong>Scroll each phone</strong>; tap the stack icon to see its menu. The
+  toggles flip a long title and a note in a book.</p>
+</header>
+
+<div class="row">
+
+  <!-- ================= OPTION A ================= -->
+  <section class="option" id="A">
+    <h2>A — the title on top, one icon row that stays (her leading idea)</h2>
+    <p class="sub">The title gets the whole width, centred, wrapping instead of cutting off. Under it, ONE row of
+    eight 44-pt doors. Scrolling, the title rides away with the text and <b>only the icon row stays</b>, pinned
+    under the back button. Nothing else is sticky.</p>
+    <div class="toggles">
+      <label><input type="checkbox" class="longT"> long title</label>
+      <label><input type="checkbox" class="inBook"> note in a book</label>
+    </div>
+    <div class="phone">
+      <div class="statusbar"><span>10:37</span><span>▪▪▪ ᯤ ▮</span></div>
+      <div class="navbar"><div class="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div></div>
+      <div class="scroller">
+        <div class="titleA">2026-11-25</div>
+        <div class="iconrow">
+          <div class="t" title="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="13" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h8"/></svg></div>
+          <div class="t" title="find"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></div>
+          <div class="t" title="seal"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="11" height="9" rx="2"/><path d="M12 11V7a4 4 0 0 1 8 0v1"/></svg></div>
+          <div class="t" title="the note's menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></div>
+          <div class="t sep"></div>
+          <div class="t book off" title="book"><svg viewBox="0 0 24 24"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/></svg></div>
+          <div class="t" title="tags"><svg viewBox="0 0 24 24"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg></div>
+          <div class="t" title="date"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+          <div class="t stack" title="blocks · lens · more info"><svg viewBox="0 0 24 24"><path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16l8 4 8-4"/></svg></div>
+        </div>
+        <div class="body"></div>
+      </div>
+      <div class="menu"><div>Blocks</div><div>Lens</div><div>More info</div></div>
+    </div>
+    <p class="legend">At rest: back · the title (centred, wraps) · <b>the icon row</b> · her text.
+    Scrolled: back · <b>the icon row</b> · her text. The row is 44 pt, about a third of today's top.</p>
+  </section>
+
+  <!-- ================= OPTION B ================= -->
+  <section class="option" id="B">
+    <h2>B — today's title row kept, four more icons beneath</h2>
+    <p class="sub">The title row she likes stays as it is: the title on the left, the four tools on the right.
+    A second row of four (book · # · calendar · the stack) replaces the words. Scrolling, both rows ride away
+    and <b>the four tools step up into the top bar</b> beside the back button. The title still cuts off when
+    it's long.</p>
+    <div class="toggles">
+      <label><input type="checkbox" class="longT"> long title</label>
+      <label><input type="checkbox" class="inBook"> note in a book</label>
+    </div>
+    <div class="phone">
+      <div class="statusbar"><span>10:37</span><span>▪▪▪ ᯤ ▮</span></div>
+      <div class="navbar">
+        <div class="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+        <div class="navtools">
+          <div class="t"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="13" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h8"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="11" height="9" rx="2"/><path d="M12 11V7a4 4 0 0 1 8 0v1"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></div>
+        </div>
+      </div>
+      <div class="scroller">
+        <div class="titlerowB">
+          <div class="titleB">2026-11-25</div>
+          <div class="t"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="13" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h8"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="11" height="9" rx="2"/><path d="M12 11V7a4 4 0 0 1 8 0v1"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></div>
+        </div>
+        <div class="rowB2">
+          <div class="t book off"><svg viewBox="0 0 24 24"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg></div>
+          <div class="t"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+          <div class="t stack"><svg viewBox="0 0 24 24"><path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16l8 4 8-4"/></svg></div>
+        </div>
+        <div class="body"></div>
+      </div>
+      <div class="menu"><div>Blocks</div><div>Lens</div><div>More info</div></div>
+    </div>
+    <p class="legend">At rest: back · title + the four tools · <b>book · # · calendar · stack</b> · her text.
+    Scrolled: back + the four tools in the top bar · her text. The book, tags and date doors scroll away.</p>
+  </section>
+
+</div>
+
+<script>
+  const prose = [
+    "The choice of servants is of no little importance to a prince, and they are good or not according to the discrimination of the prince.",
+    "And the first opinion which one forms of a prince, and of his understanding, is by observing the men he has around him; and when they are capable and faithful he may always be considered wise.",
+    "But when they are otherwise one cannot form a good opinion of him, for the prime error which he made was in choosing them.",
+    "There were none who knew Messer Antonio da Venafro as the servant of Pandolfo Petrucci, Prince of Siena, who would not consider Pandolfo to be a very clever man in having Venafro for his servant.",
+    "Because there are three classes of intellects: one which comprehends by itself; another which appreciates what others comprehend; and a third which neither comprehends by itself nor by the showing of others.",
+    "The first is the most excellent, the second is good, the third is useless.",
+    "Therefore, it follows necessarily that, if Pandolfo was not in the first rank, he was in the second.",
+    "For whenever one has judgment to know good and bad when it is said and done, although he himself may not have the initiative, yet he can recognize the good and the bad in his servant."
+  ];
+  document.querySelectorAll('.body').forEach(b => b.innerHTML = prose.map(p => `<p>${p}</p>`).join(''));
+
+  const SHORT = "2026-11-25";
+  const LONG = "XXII. Concerning the secretaries of princes, and how they should be chosen";
+
+  document.querySelectorAll('.option').forEach(opt => {
+    const mode = opt.id;
+    const sc = opt.querySelector('.scroller');
+    const nav = opt.querySelector('.navbar');
+    const navtools = opt.querySelector('.navtools');
+    const iconrow = opt.querySelector('.iconrow');
+    const title = opt.querySelector(mode === 'A' ? '.titleA' : '.titleB');
+    const menu = opt.querySelector('.menu');
+
+    sc.addEventListener('scroll', () => {
+      const y = sc.scrollTop;
+      if (mode === 'A') {
+        const stuck = y >= title.offsetHeight - 1;
+        iconrow.classList.toggle('edge', stuck);
+      } else {
+        const gone = y > 80;
+        navtools.classList.toggle('show', gone);
+        nav.classList.toggle('edge', gone);
+      }
+      menu.classList.remove('show');
+    }, { passive: true });
+
+    opt.querySelector('.longT').addEventListener('change', e => {
+      title.textContent = e.target.checked ? LONG : SHORT;
+    });
+    opt.querySelector('.inBook').addEventListener('change', e => {
+      opt.querySelectorAll('.book').forEach(b => b.classList.toggle('off', !e.target.checked));
+    });
+    opt.querySelectorAll('.stack').forEach(s => s.addEventListener('click', ev => {
+      const phone = opt.querySelector('.phone').getBoundingClientRect();
+      const r = s.getBoundingClientRect();
+      menu.style.left = Math.min(r.left - phone.left - 70, 402 - 200) + 'px';
+      menu.style.top = (r.bottom - phone.top + 4) + 'px';
+      menu.classList.toggle('show');
+      ev.stopPropagation();
+    }));
+    document.addEventListener('click', () => menu.classList.remove('show'));
+  });
+</script>
+</body>
+</html>
