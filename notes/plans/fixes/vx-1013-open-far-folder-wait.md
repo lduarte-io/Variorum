@@ -37,13 +37,14 @@ Required reading for every session on this record: `notes/CastleRules.md` IN FUL
 - **The evidence lines:** 14 new pins in three new test files (zero existing tests edited — the parity proof), each
   bug-class pin red-on-old by behavioral revert with counts in the batch LIVE STATUS sections; the old road read the
   far folder 3–8× per open against 1 now; full core suite green (746 + 4204 + 32, exit 0); the headless harness 215
-  tests / 36 suites green; Mac build-for-testing and the phone target green. THE GATE: PENDING (the 154-suite Mac
-  run and the dev-store launch walk under `vx1013-gate`).
+  tests / 36 suites green; Mac build-for-testing and the phone target green. THE GATE: GREEN, 2026-11-25 — 767/767 in 148 suites, 0 failed; the launch walk's open in ~2 s over the 155-file far
+  folder against the ticket's ~9 minutes (THE GATE below).
 - **The ladder:** two rounds, closed. Round 1 — 1 MAJOR (a refresh race that could narrow the landed lobby facts;
   fixed, three pins) · 2 MINOR (dead scope code, deleted; the unreachable-folder conflation → VX-1090, Needs
   Lillian) · 2 NIT. Round 2 — fresh reviewer, everything HOLDING, no new BLOCKER/MAJOR.
 - **Open items:** VX-1090 (hers — the unreachable picked folder's three face options); the sitting bundle below;
-  MERGE: PENDING (PR, closeout deltas, the in-flight row's retirement).
+  MERGE: the PR named in the closeout deltas (this record's last state rides it); the in-flight row retired at the
+  merge; VX-1090 and the sitting bundle remain hers.
 
 ## THE MECHANISM (traced 2026-11-24, orchestrator's own read; the field evidence is `notes/plans/fixes/vx-980-search-fixes.md` GATE 1 and GATE 2)
 
@@ -797,6 +798,33 @@ sends to P-1013-2's sitting review. No pin owed.
 
 **Verdict: no new BLOCKER or MAJOR — round 2 earns no round 3 under the ladder rule.** The two NITs are bundle
 lines (dispositions above), not code this ladder orders.
+
+## THE GATE (claim `vx1013-gate`, 2026-11-25 01:45–01:53, nov24's GO; released at 01:53:22 — ~8 of the 55 minutes): GREEN
+
+**The tree under test.** The gate snapshot `~/dev/variorum-vx-1013-gate`, detached at `4c136c95c` (= the branch head at the
+ladder's close, main `ba42ddc53` merged in), `build-for-testing` done there ("** TEST BUILD SUCCEEDED **"). The branch moved
+NOTES ONLY after the snapshot.
+
+**Act 1 — the suites (test-without-building, 154 TYPE names: every @Suite in `VariorumTests/Protection` plus the 26
+non-Protection suites referencing changed types, `TutorialWalkTests` riding as the spine).** Swift Testing: **"Test run
+with 767 tests in 148 suites passed after 219.011 seconds"** — 0 failed, zero ✘ lines. XCTest "Executed 0 tests, with 0
+failures"; "** TEST EXECUTE SUCCEEDED **"; xcodebuild exit 0. Skips: exactly 2, the standing opt-in Apple-keys round-trip
+pair (env-gated, pre-existing). The 154-names-vs-148-suites delta: every name accepted (no unmatched-name warning);
+the delta is names holding no runnable top-level suite of their own. The effort's own pins confirmed run-and-green by
+name in the log.
+
+**Act 2 — the launch walk (the snapshot's Debug product, the DEV store, the orchestrator's hands; captures local and
+deleted at the merge).** Launched 01:50:53; the road's one-line open summary logged at 01:50:55 — **about two seconds to
+open with the picked second folder standing at its 155 files** (the ticket's class: ~9 minutes cold); the Bookcase drew
+normally (shelves, books, the quick entry). One dialog first: rule 21's "This is a different library than the one this
+Mac last had open" — VX-1015's known class; OK pressed (a notice, no secret); the Act 1 test-host run's planted opens
+explain it and the evidence went to VX-1015 as a comment. No What's New sheet. The log-read lesson re-learned: zsh's
+`log` builtin shadows `/usr/bin/log` (the walk-lessons memory's "log shadowing") — the first reads came back empty.
+
+**The dev store, as found and as left (nothing of its posture or content changed):** not locked (no lock screen met;
+dev-castle.env unused); signed out ("Sync off (dev store)"); the restore-hold banner standing, Resume Sync never
+pressed; the words band card showing, untouched. Nothing typed or filed. Zero instances after the quit by identity
+(both strict pgrep forms), Problem Reporter not running, zero new `Variorum-*.ips` since 01:44.
 
 ## HELD FOR HER SITTING (the away-run bundle)
 
