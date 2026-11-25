@@ -203,17 +203,27 @@ final class BookCardTagsModel {
     }
 
     /// The field's ⏎ or a suggestion's click: adopt-or-mint the typed path in
-    /// the NOTE's wing and apply it through the ONE application road
-    /// (`TagAssignmentViewModel.applyTypedPath` → `TypedTagPath` →
-    /// `Operations.applyTag`), so a living book that collects it hears it —
-    /// seat or bell, as when she tags anywhere else. The field closes after
-    /// (the masthead's row-40 rule: the "+" is right there for the next one).
+    /// the NOTE's wing and apply it through the ONE application road (the
+    /// Shared `TypedTagPath.apply` → `Operations.applyTag`), so a living book
+    /// that collects it hears it — seat or bell, as when she tags anywhere
+    /// else. The field closes after (the masthead's row-40 rule: the "+" is
+    /// right there for the next one). A refusal speaks the Mac's own words for
+    /// the road (`TypedTagPath.emptyMessage`, `TagsViewModel.message` — static).
+    ///
+    /// The VX-1036 ladder's R1-5: this used to construct the Tags feature's
+    /// `TagAssignmentViewModel` to reach the same road — a feature never
+    /// constructs a sibling's view model (CLAUDE.md); the road is Shared, so it
+    /// is called directly, with the refusal mapping that model applied.
     func apply(_ path: String, to postID: String, session: AppSession) {
         fieldPostID = nil
-        let door = TagAssignmentViewModel(session: session, postID: postID)
         Task {
-            if await door.applyTypedPath(path) == nil, let error = door.lastError {
-                session.status.refuse(error)
+            switch await TypedTagPath.apply(path, toPost: postID, session: session) {
+            case .applied:
+                break
+            case .nothingTyped:
+                session.status.refuse(TypedTagPath.emptyMessage)
+            case .refused(let error):
+                session.status.refuse(TagsViewModel.message(error))
             }
         }
     }
