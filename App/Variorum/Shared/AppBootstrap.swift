@@ -1513,8 +1513,9 @@ final class AppBootstrap {
         newRoadSyncKeys.attach(nil)
         let lobby = await Task.detached(priority: .userInitiated) { () -> (facts: RoadLobbyFacts, ctx: RoadContext) in
             binding.lock()
-            // The context off the main actor: it reads the sign-in (a Keychain read).
-            let ctx = road.context()
+            // The context off the main actor: it reads the sign-in (a Keychain read). VX-1013 (R-1013-A2): with its own
+            // far-folder walk — the lobby draws from the container and the walk lands on it (`finish`'s far landing).
+            let ctx = ProtectionRoadLock.lobbyContext(road)
             return (ProtectionRoadLock.lobby(ctx), ctx)
         }.value
         session.endAct()

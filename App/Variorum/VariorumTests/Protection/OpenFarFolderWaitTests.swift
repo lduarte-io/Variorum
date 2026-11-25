@@ -82,6 +82,11 @@ final class FarWalkRoad {
         return ctx
     }
 
+    /// The road a lock's lobby is composed over (the bootstrap's `roadInputs.compose()`, planted).
+    func composed() -> ComposedRoad {
+        ComposedRoad(system: system(), sessionFact: { .signedOut }, writes: true, open: nil)
+    }
+
     func created() async throws -> (session: ProtectionRoadSession, words: [String]) {
         guard case .created(let session, let words) = await ProtectionOpenRoad.route(context()) else {
             throw FarWalkRoadError.notCreated
@@ -286,6 +291,56 @@ struct OpenFarFolderWaitTests {
         #expect(road.slot.reads.count == 0, "the probe read the far folder \(road.slot.reads.count) time(s) inside an open")
         _ = probe()
         #expect(road.slot.reads.count == 1, "every other caller's probe walks both roots, as before")
+    }
+
+    // MARK: - The lock's lobby (R-1013-A2 — piece 6; red on the pre-piece road)
+
+    /// THE RELOCK PIN: the lobby a lock lands in (Lock Now, the idle and sleep monitors — `AppBootstrap.lockOnNewRoad`
+    /// composes its context through `ProtectionRoadLock.lobbyContext`) reads the CONTAINER's facts with no far read, begins
+    /// its own far walk behind it, and the landing refreshes its roads — the far key file's passphrase road appears —
+    /// with ONE far read in all. RED BEFORE PIECE 6: the lock's lobby read both roots before it drew.
+    @Test func aLocksLobbyReadsNoFarFolderAndItsLandingRefreshesItsRoads() async throws {
+        let road = FarWalkRoad()
+        let (created, _) = try await road.created()
+        let wordsOnly = try road.liveKeyFile()
+        #expect(await ProtectionOpenRoad.setFirstPassphrase(session: created, new: "a far-folder passphrase") == .set)
+        try road.plantFarPair(try road.liveKeyFile(), deviceID: created.library.section.deviceID)
+        try road.writeLiveKeyFile(wordsOnly)
+        road.forgetEveryQuietRoad()
+        road.slot.reads.reset()
+        let ctx = ProtectionRoadLock.lobbyContext(road.composed())
+        let drawn = ProtectionRoadLock.lobby(ctx)
+        #expect(drawn.facts?.catalog.unreadPlaces == [.farFolder], "the lock's lobby drew from the container's facts")
+        #expect(drawn.offeredTyped == [.words], "drawn from the container: \(drawn.offeredTyped)")
+        #expect(ctx.far?.hasBegun == true, "the far walk begins behind the lock's lobby")
+        guard case .lobby(let landed) = await ProtectionOpenRoad.landTheFarWalk(ctx) else {
+            Issue.record("a lock's landing keeps the lobby")
+            return
+        }
+        #expect(landed.offeredTyped == [.words, .passphrase], "the landing refreshed the roads: \(landed.offeredTyped)")
+        #expect(road.slot.reads.count == 1, "one lock, one far walk — read \(road.slot.reads.count) time(s)")
+    }
+
+    /// A lock is never theater: the quiet roads are not tried at a lock, and the far walk's landing on a lock's lobby
+    /// keeps it so — a far key file's Apple wrap that WOULD open the library (the launch road's landing opens through it,
+    /// `aQuietRoadTheFarFolderRevealsOpensTheLobby`) leaves the lock's lobby standing. RED BEFORE PIECE 6 (the lock's
+    /// context carried no far walk and its landing, reached over it, would try the quiet roads like the launch's).
+    @Test func aLocksLobbyNeverTriesTheQuietRoadsWhenItsWalkLands() async throws {
+        let road = FarWalkRoad()
+        let (created, _) = try await road.created()
+        let live = try road.liveKeyFile()
+        try road.plantFarPair(live, deviceID: created.library.section.deviceID)
+        var bare = live
+        bare.apple = nil
+        try road.writeLiveKeyFile(bare)
+        road.custody.items = [:]
+        road.memory.items = [:]
+        let ctx = ProtectionRoadLock.lobbyContext(road.composed())
+        _ = ProtectionRoadLock.lobby(ctx)
+        guard case .lobby = await ProtectionOpenRoad.landTheFarWalk(ctx) else {
+            Issue.record("a lock's landing never opens the library by a quiet road")
+            return
+        }
     }
 
     // MARK: - The lobby model: the landing never runs beside a press

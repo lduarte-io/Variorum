@@ -347,6 +347,11 @@ nonisolated struct RoadContext: Sendable {
     /// (`AppBootstrap.beginOpening`). nil — every other context (a face's door, the relock's lobby, a copy door's) —
     /// reads both roots at each read, exactly as before.
     var far: FarFolderWalk? = nil
+    /// **VX-1013 — whether the far walk's landing tries the quiet roads once more** with the far folder's key files in hand
+    /// (P-1013-3). true on the launch road, whose route tried them with the container's; false on a LOCK's lobby
+    /// (`ProtectionRoadLock.lobbyContext`, R-1013-A2): the quiet roads are never tried at a lock (a lock is never theater),
+    /// so its landing only refreshes the lobby's facts.
+    var farLandingTriesQuietRoads = true
 
     /// The catalogue state this context's reads take (`.everything` with no far walk).
     var catalogRead: CatalogRead { far.map(CatalogRead.thisOpen) ?? .everything }
@@ -367,6 +372,14 @@ nonisolated struct RoadContext: Sendable {
         ProtectionOpenRoad.log("road: a press found no opener among the container's key files — it joins the far walk")
         let entries = await far.read()
         return !Catalog.build(entries).keyFiles.isEmpty
+    }
+
+    /// A lobby drew from the container's facts: BEGIN the far folder's one walk, off the launch path, when it is picked and
+    /// unread (the route's lobby and a lock's — R-1013-A2). Returns at once; nothing without a far walk.
+    func beginTheFarWalkBehindTheLobby() {
+        guard let far, far.isUnread else { return }
+        ProtectionOpenRoad.log("road: the lobby draws from the container's facts; the far folder is read once, off the launch path")
+        far.begin()
     }
 
     /// Run `body` with every custody listing in it probing under this context's catalogue state (`CatalogRead.probing`)
@@ -393,10 +406,7 @@ nonisolated enum ProtectionOpenRoad {
     static func route(_ ctx: RoadContext, keyInHand: StoreKey? = nil) async -> RoadRoute {
         await ctx.scoped {
             let routed = await routeOnce(ctx, keyInHand: keyInHand)
-            if case .lobby = routed, let far = ctx.far, far.isUnread {
-                log("road: the lobby draws from the container's facts; the far folder is read once, off the launch path")
-                far.begin()
-            }
+            if case .lobby = routed { ctx.beginTheFarWalkBehindTheLobby() }
             return routed
         }
     }
@@ -459,12 +469,14 @@ nonisolated enum ProtectionOpenRoad {
     /// them (a store from before this design, or one no longer in the lobby's state, is tried by nothing): one that opens
     /// the slot answers `.opened` (PROVISIONAL P-1013-3). Otherwise the full facts, for the standing lobby to take
     /// (PROVISIONAL P-1013-1). The caller serializes it against the lobby's presses (`ProtectionLobbyModel
-    /// .farWalkLanded`). Over a context with no far walk it is a plain re-read.
+    /// .farWalkLanded`). Over a context with no far walk it is a plain re-read. A lock's lobby
+    /// (`farLandingTriesQuietRoads` false — R-1013-A2) only re-reads: the quiet roads are never tried at a lock.
     static func landTheFarWalk(_ ctx: RoadContext) async -> RoadFarLanding {
         await ctx.scoped {
             await ctx.far?.read()
             var lobby = lobbyFacts(ctx)
-            guard let facts = lobby.facts, facts.catalog.keyFiles.contains(where: { $0.place == .farFolder }) else {
+            guard ctx.farLandingTriesQuietRoads, let facts = lobby.facts,
+                  facts.catalog.keyFiles.contains(where: { $0.place == .farFolder }) else {
                 return .lobby(lobby)
             }
             switch assess(facts).launch {

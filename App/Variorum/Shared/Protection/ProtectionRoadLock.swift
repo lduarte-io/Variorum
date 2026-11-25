@@ -17,6 +17,10 @@
 //    - THE LOBBY IT LANDS IN — the open road's own (`ProtectionOpenRoad.lobbyFacts`): the typed roads over every key file
 //      this Mac holds, the Touch ID button and its one auto-ask where this Mac's item stands. The quiet roads are NOT tried
 //      at a lock (a lock is never theater — today's lock lands in its lobby the same way).
+//    - VX-1013 (R-1013-A2, `notes/plans/fixes/vx-1013-open-far-folder-wait.md` piece 6): the lobby a lock lands in is read
+//      on the launch road's plumbing — its own far-folder walk (`lobbyContext`), the CONTAINER's facts at once, the far
+//      folder walked once behind it and landed on the lobby still standing (a refresh only: its landing never tries the
+//      quiet roads), so a lock never waits on her picked backup folder.
 //
 
 import Foundation
@@ -63,8 +67,21 @@ nonisolated enum ProtectionRoadLock {
         session.system.leaves.syncKeys.holdInSession(nil, accountID: account)
     }
 
-    /// The lobby a lock lands in: the open road's own, read now over `ctx` (a freshly composed road — a READ).
+    /// VX-1013 (R-1013-A2) — the context a lock's lobby reads and presses through: a freshly composed road's, carrying
+    /// its OWN far-folder walk (one per lock, as one per open), whose landing only refreshes (never the quiet roads).
+    static func lobbyContext(_ road: ComposedRoad) -> RoadContext {
+        var ctx = road.context()
+        ctx.far = FarFolderWalk(places: road.system.places)
+        ctx.farLandingTriesQuietRoads = false
+        return ctx
+    }
+
+    /// The lobby a lock lands in: the open road's own, read now over `ctx` (a freshly composed road — a READ). VX-1013: over
+    /// a lock's context (`lobbyContext`) the container's facts, the far folder's one walk begun behind it; over any other
+    /// context, as before.
     static func lobby(_ ctx: RoadContext) -> RoadLobbyFacts {
-        ProtectionOpenRoad.lobbyFacts(ctx)
+        let lobby = ProtectionOpenRoad.lobbyFacts(ctx)
+        ctx.beginTheFarWalkBehindTheLobby()
+        return lobby
     }
 }
