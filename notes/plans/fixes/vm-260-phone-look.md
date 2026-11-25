@@ -4,9 +4,69 @@
 Ticket VM-260 (team VM, project "Mobile — the catch-up & launch") · branch `vm-260-phone-look` ·
 worktree `~/dev/variorum-vm-260` · PR: — (opens at the ladder).
 
+## RESUME HERE (state at the 2026-11-25 ~04:0x compaction; her ask: "prepare for compaction … I'll compact you since you still have batches and a ladder")
+
+**Where the run stands.** Batches 1a and 1b are BUILT: 1a's suites green, its UI test green on the walk device,
+its walk run and read — every stop PASS in both voices except **F-1a-W1 (MAJOR, OPEN)**, the bar under the
+Library-search keyboard; 1b is READY-FOR-TESTS awaiting its one window (A-260-7). Batch 2's implementer is LIVE
+in this worktree, headless (the coordinator's nice-mode was never formally lifted — keep `nice -n 15` on heavy
+jobs until nov24 says cleared). Batches 3 and 4 NOT STARTED. Ladder NOT STARTED. Away mode (THE AWAY RULING)
+and R-260-7 (the morning install) govern the night.
+
+**Owed at batch 2's boundary, in order:** (1) merge `origin/main` at `1a7b0d444` (PR #28, notes; it contains
+`5ca093319`, PR #27 — the run's FINAL gate legs must run on a tree containing #27); (2) the F-1a-W1 fix by
+batch 1a's implementer — ONE writer per tree, never two implementers at once; its re-evidence (a contract pin
+red on the current tree, the s9 capture re-taken, the keyboard-reveal UI test) folds into the next window;
+(3) batch 3 spawns (VM-247 · VM-254 — the Batch 3 section is the brief); (4) the VM-259 options drawn at batch
+2's corrected sizes (two or three local HTML mockups under `notes/plans/vm-260/`, committed, NEVER published as
+Artifacts) for her morning pick; batch 4 builds only after that pick.
+
+**The stage (nov24):** 1b's full window is queued after VX-1082's revert cycles and VX-1036's window; claim
+name `vm-260`; the full protocol is under "What binds every batch". The walk DEVICE is named `vm260-walk` —
+recover its UDID with `xcrun simctl list devices | grep vm260-walk`, NEVER commit the id; shut it down between
+windows; DELETE it at closeout (`xcrun simctl delete`) and say so to nov24. The walk WORKTREE is
+`~/dev/variorum-vm260-walk` (DETACHED at `19b31c4c3`): it holds the UNCOMMITTED throwaway driver
+`App/Variorum/VariorumMobileUITests/VM260WalkDriver1a.swift` (the 1b line-walk driver adapts it; the swipe-burst
+sync polls `/tmp/vm260-walk-go`) and `DerivedData/vm260-walk1a` — keep until closeout, then
+`git worktree remove --force` it. Captures: `notes/plans/vm-260-screens/batch-1a/` (gitignored, KEPT for her
+sitting; `s5-note-bar-gone…png` is batch 2's "before" at the note top; `swipe-burst/f04.png` is the mid-swipe
+money shot).
+
+**Session-local agent handles** (meaningful only inside this session's continuation; a FRESH session spawns
+narrow continuations briefed from this record instead): batch 2's implementer `a0ec19b54b0cfa201` (LIVE),
+batch 1a's `a04567e8a4ed418a1` (owes the F-1a-W1 fix), batch 1b's `a6eb5f3c3d1dca464` (done, pending window).
+
+**Then, in order:** the remaining windows via nov24 · the ladder (a FRESH `fable-reviewer` per round,
+`notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over the run's whole diff; cap five, a further round only
+while the last found a BLOCKER/MAJOR; the cross-model flow — the reviewer makes the final call, the implementer
+applies confirmed fixes red-on-old, the next fresh reviewer re-checks; a final round's fixes get the
+orchestrator's line-by-line read) · the run MERGE GATE on a tree containing PR #27 (the whole phone target in
+one launch read against main's known reds; the gated speed suite ALONE — a skip is never a pass; the Mac suites
+covering EVERY changed source file; the keyboard-reveal UI test; the closing walk) · the morning bundle and the
+handoff `notes/handoffs/vm-260-handoff.md` with R-260-7's INSTALL BLOCK FIRST (the device .app PRE-BUILT
+overnight, headless, no stage; the exact SHA named; the devicectl steps self-contained; the what-to-try-first
+list) · closeout per CLAUDE.md and the architect skill: canon deltas (AppSpec §12 — the phone's look
+per-device, VM-247 the pointer; SurfaceContracts — the phone-look bullets, the bar's keyboard line, the card,
+VM-255's top line, P-55-3's refusal arm and P-47-31/-36 supersessions; `notes/MobileSoul.md`);
+`notes/AppSpecRecord.md` dated entry; QUESTIONS at the merge — the #281 dispositions (what stands returns
+there), the #277 addendum, #280's P-71-1 retirement (R-260-5), the new PROVISIONALs (P-260-1a, C-275-1, the
+size/radii set, the card shape, the draft words and headlines); the MOBILE PARITY line; every ticket the effort
+FILED triaged (VM-279 so far); the in-flight row retired; worktrees removed, the walk device deleted, the
+branch deleted after the merge; `Tools/canon-size`; her tickets-filed checklist as the session's very last
+message.
+
+**The post-compaction kickoff (paste-ready):** *"You are the VM-260 run's orchestrator (architect shape,
+session vm-260), resuming after compaction. Before anything: re-read
+`notes/plans/fixes/vm-260-phone-look.md` — RESUME HERE and LIVE STATUS first, then the sections a step needs.
+The standing rules: you never implement (small ruled adjudication fixes only, never on the editor seam); one
+implementer at a time, `opus-implementer` per batch, fresh per batch; every `xcodebuild test` and walk only
+inside a GO'd stage window from nov24, claim `vm-260`; rule provisionally (her away ruling) and bundle
+her-hands items for the morning sitting; the morning install leads the handoff (R-260-7). Pick up at: the
+batch-2 hand-back (adjudicate its size/radii set), then the boundary order RESUME HERE names."*
+
 ## FOR A LATER READER
 
-*(Written at closeout from the settled facts. Until then, the LIVE STATUS table below is the state.)*
+*(Written at closeout from the settled facts. Until then, RESUME HERE and the LIVE STATUS table are the state.)*
 
 ## What this run is
 
@@ -1143,3 +1203,29 @@ Each moved because the ruled change moved what it holds (batch 1a's pattern); no
   `control` when control was 17). With control at 15 the rule found one site: `MobileBookDetails`' designated "Use as
   Daily Journal" read in the faint — **C-273-1: it now reads in the corrected muted** (a 15-pt word needs 4.5:1; still
   apart from the live accent, the "daily ✓" beside it).
+
+### Calls made in the batch (for the record and the merge's QUESTIONS; none gates the core)
+
+- **P-260-2a — the step-down as a set** (the tables above): chrome one notch under her words; the drawings inside their
+  targets (glyph 17, chip 24 near-square, boxes 36); the Mac's two corners (4, 8). Alternatives: (b) the glyphs and
+  shapes alone, the chrome words at the sheet's 17 / 15 (smaller drawings, the same loud words); (c) two notches for
+  the chrome (control 13 — then every chrome word sits at the floor, and a text button reads like a stamp).
+- **P-260-2b — the note title at 20** (VM-272; Terminal 18): the scale's own step, equal by value to a sheet's title.
+  Alternatives: 22 (Terminal 20 — off the five-size scale); leave 24 for batch 3's one-notch drop to take.
+- **P-260-2c — the bar keeps LK-5's 17-pt words and its chip's padding**; only its corner moves (4). Her ruling holds
+  the words; whether the chip itself should tighten is hers at the captures.
+- **P-260-2d — the boxes draw 36** (field, calm button): the iOS search field's own height; the frame stays 44.
+  Alternative: keep the boxes 44 (a field is a writing surface) with only the corner moving.
+- **C-273-1 — the designated daily row reads in the corrected muted** (above).
+- **C-272-1 — the masthead's air retires into its rows' 44s** (0 above, 0 between, 4 below). Alternative: keep 4 above
+  under the system bar (140 pt).
+
+### For a later reader of the whole run (not this batch's to do)
+
+- **The note's top is now its targets:** three rows of 44. More room is VM-148's road — the tools in the top row beside
+  the back button and the chips in one sideways row, as the note-write mockup draws (P-47-20's description) — or a
+  membership line folded into the chip flow (D2's "reads alone" is PROVISIONAL for her sitting).
+- **SUSPECTED, not verified (no touch-injection pin exists for it):** a SwiftUI `TextField` answers a touch across its
+  own text frame, not its padded box, so `phoneField`'s "at least 44 tall" has been a drawn 44 since wave 1, not an
+  answering one; the step-down neither widens nor narrows what answers. If confirmed (a pointer-injection tap 4 pt
+  inside the box's top edge), it is a 44-pt-law ticket for every field (focus on a tap anywhere in the frame).
