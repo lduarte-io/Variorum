@@ -12,7 +12,9 @@
 //  reach: the pure rule (`MobileKeyboardFloor.lift`), and the shell answering a
 //  keyboard reading handed in through its test seam (`heldKeyboard`) — the bar
 //  and the pages rise to it together while the top line stays put. Guards: the
-//  types are the fix's, so neither is a red-on-old claim.
+//  types are the fix's, so neither is a red-on-old claim — save the shell
+//  suite's third mount, MOVED at the VM-260 merge gate's G-3 (a band at rest
+//  under a keyboard SwiftUI never avoided rides to it) on its own pre-fix tree.
 //
 
 import Foundation
@@ -31,43 +33,86 @@ struct MobileKeyboardFloorRuleTests {
 
     /// No keyboard up: nothing to meet.
     @Test func noKeyboardNoLift() {
-        #expect(MobileKeyboardFloor.lift(bandFoot: 840, reading: nil, noteShowing: false) == 0)
+        for saw in [false, true] {
+            #expect(MobileKeyboardFloor.lift(bandFoot: 840, reading: nil, noteShowing: false, avoidanceSawKeyboard: saw) == 0)
+        }
     }
 
     /// The walk's s9: the band's foot on the keys (591), the keyboard's top at
     /// the glass (539) — the band rises the 52.
     @Test func aShortAvoidanceRisesByItsShortfall() {
-        #expect(MobileKeyboardFloor.lift(bandFoot: 591, reading: Self.reading(539), noteShowing: false) == 52)
+        #expect(MobileKeyboardFloor.lift(
+            bandFoot: 591, reading: Self.reading(539), noteShowing: false, avoidanceSawKeyboard: true) == 52)
     }
 
     /// SwiftUI's avoidance already reaching the keyboard (every other case) —
     /// or standing above it — moves nothing: the floor never lowers the band.
     @Test func anAvoidanceThatReachesTheKeyboardMovesNothing() {
-        #expect(MobileKeyboardFloor.lift(bandFoot: 539, reading: Self.reading(539), noteShowing: false) == 0)
-        #expect(MobileKeyboardFloor.lift(bandFoot: 487, reading: Self.reading(539), noteShowing: false) == 0)
+        #expect(MobileKeyboardFloor.lift(
+            bandFoot: 539, reading: Self.reading(539), noteShowing: false, avoidanceSawKeyboard: true) == 0)
+        #expect(MobileKeyboardFloor.lift(
+            bandFoot: 487, reading: Self.reading(539), noteShowing: false, avoidanceSawKeyboard: true) == 0)
     }
 
-    /// A keyboard LEAVING: SwiftUI's avoidance drops first — the band back at
-    /// its resting foot — while the probe's reading still stands at the old
-    /// top for a turn. The band must follow its own avoidance down, never be
-    /// held at the old keyboard.
+    /// A keyboard LEAVING: SwiftUI's avoidance had met it, then drops first —
+    /// the band back at its resting foot — while the probe's reading still
+    /// stands at the old top for a turn. The band must follow its own avoidance
+    /// down, never be held at the old keyboard. (MOVED at the merge gate's G-3
+    /// with the rule: "at rest" alone no longer means leaving — the memory that
+    /// SwiftUI had met the keyboard does.)
     @Test func aBandAtRestMeetsNoFloor() {
-        #expect(MobileKeyboardFloor.lift(bandFoot: 840, reading: Self.reading(539), noteShowing: false) == 0)
+        #expect(MobileKeyboardFloor.lift(
+            bandFoot: 840, reading: Self.reading(539), noteShowing: false, avoidanceSawKeyboard: true) == 0)
         #expect(MobileKeyboardFloor.lift(bandFoot: 840 - MobileKeyboardFloor.tolerance,
-                                         reading: Self.reading(539), noteShowing: false) == 0)
+                                         reading: Self.reading(539), noteShowing: false,
+                                         avoidanceSawKeyboard: true) == 0)
+    }
+
+    /// **G-3 — a keyboard SwiftUI NEVER avoided** (the Library's search taking
+    /// its keyboard back while its page returns in a pop): the band's foot
+    /// stands at rest under the keys and the floor lifts it the whole way — at
+    /// rest, and at rest within the tolerance.
+    @Test func aKeyboardSwiftUINeverAvoidedLiftsTheBandFromRest() {
+        #expect(MobileKeyboardFloor.lift(
+            bandFoot: 840, reading: Self.reading(539), noteShowing: false, avoidanceSawKeyboard: false) == 301)
+        #expect(MobileKeyboardFloor.lift(bandFoot: 840 - MobileKeyboardFloor.tolerance,
+                                         reading: Self.reading(539), noteShowing: false,
+                                         avoidanceSawKeyboard: false) == 301 - MobileKeyboardFloor.tolerance)
+    }
+
+    /// **G-3 — the memory**: it is set once the band's foot stands above rest
+    /// while a reading stands (SwiftUI has met the keyboard), holds while that
+    /// reading stands — through the foot's return to rest, the keyboard leaving
+    /// — and is forgotten with the reading; a foot at rest (or within the
+    /// tolerance of it) never sets it.
+    @Test func theMemoryOfSwiftUIsAvoidanceLastsTheReading() {
+        let tolerance = MobileKeyboardFloor.tolerance
+        #expect(!MobileKeyboardFloor.sawAvoidance(false, bandFoot: 840, reading: Self.reading(539)))
+        #expect(!MobileKeyboardFloor.sawAvoidance(false, bandFoot: 840 - tolerance, reading: Self.reading(539)))
+        #expect(MobileKeyboardFloor.sawAvoidance(false, bandFoot: 591, reading: Self.reading(539)))
+        #expect(MobileKeyboardFloor.sawAvoidance(true, bandFoot: 840, reading: Self.reading(539)))
+        #expect(!MobileKeyboardFloor.sawAvoidance(true, bandFoot: 840, reading: nil))
+        #expect(!MobileKeyboardFloor.sawAvoidance(false, bandFoot: 591, reading: nil))
     }
 
     /// Rounding between the two readings is not a shortfall.
     @Test func roundingIsNotAShortfall() {
         let tolerance = MobileKeyboardFloor.tolerance
-        #expect(MobileKeyboardFloor.lift(bandFoot: 539 + tolerance, reading: Self.reading(539), noteShowing: false) == 0)
-        #expect(MobileKeyboardFloor.lift(bandFoot: 539 + tolerance + 1, reading: Self.reading(539), noteShowing: false)
+        #expect(MobileKeyboardFloor.lift(
+            bandFoot: 539 + tolerance, reading: Self.reading(539), noteShowing: false, avoidanceSawKeyboard: true) == 0)
+        #expect(MobileKeyboardFloor.lift(
+            bandFoot: 539 + tolerance + 1, reading: Self.reading(539), noteShowing: false, avoidanceSawKeyboard: true)
                 == tolerance + 1)
     }
 
     /// A note is left alone — its text view rides the keyboard guide itself.
     @Test func aNoteIsLeftAlone() {
-        #expect(MobileKeyboardFloor.lift(bandFoot: 591, reading: Self.reading(539), noteShowing: true) == 0)
+        for saw in [false, true] {
+            #expect(MobileKeyboardFloor.lift(
+                bandFoot: 591, reading: Self.reading(539), noteShowing: true, avoidanceSawKeyboard: saw) == 0)
+            #expect(MobileKeyboardFloor.lift(
+                bandFoot: 840, reading: Self.reading(539), noteShowing: true, avoidanceSawKeyboard: saw) == 0)
+        }
     }
 }
 

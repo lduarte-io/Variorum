@@ -23,11 +23,15 @@
 //  foot stands below the guide's top (`MobileKeyboardFloor.lift`). Wherever
 //  SwiftUI's avoidance already reaches the keyboard — every case but the
 //  short one — the lift is zero and nothing moves, so this corrects only a
-//  shortfall and never lowers the band; and only while SwiftUI's avoidance
-//  still sees a keyboard (the band's foot above its resting foot), so a
+//  shortfall and never lowers the band; and once SwiftUI's avoidance has met a
+//  keyboard, a band back at its resting foot is that keyboard LEAVING, so a
 //  keyboard's ordinary going never meets a floor the probe has not yet
-//  cleared. A NOTE is left alone: its text view rides the same guide itself
-//  (`MobileWriteSurfaceView`) and its screen ignores the keyboard region.
+//  cleared. A keyboard SwiftUI never avoided at all is a shortfall like any
+//  other (the merge gate's G-3: the Library's search taking its keyboard back
+//  while its page returns in a pop — the band's foot stayed at rest under the
+//  keys, and the old at-rest gate gave it nothing). A NOTE is left alone: its
+//  text view rides the same guide itself (`MobileWriteSurfaceView`) and its
+//  screen ignores the keyboard region.
 //
 //  P-4: the keyboard's notifications are SIGNALS here — "re-read the guide",
 //  "the keyboard is leaving" — never the measurement; the measurement is the
@@ -51,17 +55,41 @@ nonisolated enum MobileKeyboardFloor {
     }
 
     /// **How far the band rises** so its foot meets the keyboard. Zero with no
-    /// keyboard up (no reading); zero while SwiftUI's own avoidance sees no
-    /// keyboard — the band's foot at rest — so a keyboard LEAVING (its avoidance
+    /// keyboard up (no reading); zero with the foot back at rest AFTER SwiftUI's
+    /// own avoidance had met this keyboard — a keyboard LEAVING (its avoidance
     /// drops first, the probe's nil a turn later) never meets the old floor;
     /// zero with the foot already at or above the keyboard (the floor never
     /// lowers the band) or within the tolerance; zero while a note shows (its
-    /// text view rides the guide itself). Else the shortfall.
-    static func lift(bandFoot: CGFloat, reading: Reading?, noteShowing: Bool) -> CGFloat {
+    /// text view rides the guide itself). Else the shortfall — and that holds
+    /// for a band whose avoidance NEVER met the keyboard at all (the merge
+    /// gate's G-3: a keyboard the Library's search field takes back while its
+    /// page returns in a pop is not avoided by SwiftUI, so the band's foot
+    /// stays at rest under it; before G-3 the at-rest gate read that band as a
+    /// keyboard leaving and gave it nothing).
+    static func lift(
+        bandFoot: CGFloat, reading: Reading?, noteShowing: Bool, avoidanceSawKeyboard: Bool
+    ) -> CGFloat {
         guard !noteShowing, let reading else { return 0 }
-        guard bandFoot < reading.restingFoot - tolerance else { return 0 }
+        if avoidanceSawKeyboard && bandFoot >= reading.restingFoot - tolerance { return 0 }
         let shortfall = bandFoot - reading.top
         return shortfall > tolerance ? shortfall : 0
+    }
+
+    /// **Whether SwiftUI's own avoidance has met the keyboard the probe reads**
+    /// (G-3) — the memory that tells a keyboard leaving (it had: the band's foot
+    /// stood above rest while the reading stood) from a keyboard SwiftUI never
+    /// avoided (it had not). It holds while the reading stands and is forgotten
+    /// with it, so each keyboard session is judged on its own.
+    static func sawAvoidance(_ was: Bool, bandFoot: CGFloat, reading: Reading?) -> Bool {
+        guard let reading else { return false }
+        return was || bandFoot < reading.restingFoot - tolerance
+    }
+
+    /// The two facts the memory follows, as one value for the shell's change
+    /// observation.
+    struct Sighting: Equatable {
+        var bandFoot: CGFloat
+        var reading: Reading?
     }
 }
 
@@ -82,8 +110,14 @@ struct MobileKeyboardFloorProbe: UIViewRepresentable {
     }
 
     func updateUIView(_ probe: Probe, context: Context) {
+        let wasActive = probe.active
         probe.report = report
         probe.active = active
+        // G-3: a keyboard that settled while a note still showed (its reading
+        // withheld) is read again the moment the probe may hand it on — a pop
+        // that returns a root with a keyboard already up needs no new keyboard
+        // event to be read.
+        if active && !wasActive { probe.reread() }
     }
 
     final class Probe: UIView {
@@ -163,6 +197,14 @@ struct MobileKeyboardFloorProbe: UIViewRepresentable {
         private func keyboardLeft() {
             keyboardUp = false
             DispatchQueue.main.async { [weak self] in self?.readTheGuide() }
+        }
+
+        /// The guide read again a turn later (the probe became active).
+        func reread() {
+            DispatchQueue.main.async { [weak self] in
+                self?.layoutIfNeeded()
+                self?.readTheGuide()
+            }
         }
 
         /// The guide's top and the window's resting foot, in window points,

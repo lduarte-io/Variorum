@@ -140,6 +140,12 @@ struct MobileShellView: View {
     /// (`MobileKeyboardFloorProbe`). The band's foot is never left below it
     /// (`MobileKeyboardFloor.lift`).
     @State private var keyboardReading: MobileKeyboardFloor.Reading?
+    /// VM-260 G-3 — **whether SwiftUI's own avoidance has met the keyboard the
+    /// probe reads** (`MobileKeyboardFloor.sawAvoidance`): the memory that tells
+    /// a keyboard leaving (the floor gives a band at rest nothing) from one
+    /// SwiftUI never avoided (the floor lifts the band to it). Forgotten with
+    /// the reading.
+    @State private var avoidanceSawKeyboard = false
     /// **A keyboard reading HELD — a TEST SEAM and nothing else** (`heldDrag`'s
     /// precedent): the app passes nil, so the probe's reading stands; a pin
     /// hands one in to see the band answer a keyboard the in-process harness
@@ -264,11 +270,15 @@ struct MobileShellView: View {
             let width = proxy.size.width
             // VM-260 F-1a-W1: how far the band rises so its foot meets the
             // keyboard — zero wherever SwiftUI's own avoidance already reaches
-            // it (every case but the short one the walk caught).
+            // it (every case but the short ones: the walk's 52, and G-3's
+            // keyboard SwiftUI never avoided).
+            let sighting = MobileKeyboardFloor.Sighting(
+                bandFoot: proxy.frame(in: .global).maxY, reading: heldKeyboard ?? keyboardReading)
             let lift = MobileKeyboardFloor.lift(
-                bandFoot: proxy.frame(in: .global).maxY,
-                reading: heldKeyboard ?? keyboardReading,
-                noteShowing: noteShowing)
+                bandFoot: sighting.bandFoot,
+                reading: sighting.reading,
+                noteShowing: noteShowing,
+                avoidanceSawKeyboard: avoidanceSawKeyboard)
             ZStack {
                 page(.starred, width: width) {
                     stack(path: $starredPath, owner: .starred) {
@@ -355,6 +365,13 @@ struct MobileShellView: View {
             .simultaneousGesture(
                 bandGesture(width: width),
                 including: pagingAllowed ? .all : .subviews)
+            // VM-260 G-3: the floor's memory of whether SwiftUI's avoidance has
+            // met this keyboard — read after each change of the band's foot or the
+            // reading, outside the body (`MobileKeyboardFloor.sawAvoidance`).
+            .onChange(of: sighting, initial: true) { _, now in
+                avoidanceSawKeyboard = MobileKeyboardFloor.sawAvoidance(
+                    avoidanceSawKeyboard, bandFoot: now.bandFoot, reading: now.reading)
+            }
         }
         // VM-47 (the walk's W-A1, redone): the strips BEYOND the band — under
         // the status bar, past the home indicator, behind a keyboard — painted
