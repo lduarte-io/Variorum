@@ -941,8 +941,8 @@ extension Operations {
     /// answer (`BookMintPlacement`) handed to the op — its anchor in the
     /// book's one position list and its chapter. A door whose anchor left the
     /// book between the page's read and the write (another device, an undo)
-    /// is not refused for it: the note is born at the end of the same
-    /// chapter, which is where every door made it before the rule (a chapter
+    /// is not refused for it: the note is born at the end — every door's place
+    /// before the rule — still in the chapter the placement named (a chapter
     /// that died meanwhile still refuses in the op's own words).
     @discardableResult
     public func newPostInReading(

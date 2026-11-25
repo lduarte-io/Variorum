@@ -2924,9 +2924,14 @@ struct BookView: View {
     /// where it can act (P-2): a FINISHED book draws no mint door anywhere
     /// (the foot's rule); a refusal it can still meet (a full book, a chapter
     /// deleted meanwhile) is the operations layer's words on the book's line.
+    /// Nor on THE daily Journal: its entries file through ⌘J's own gate
+    /// (`shelveInDailyJournalBook` — at the end, in no chapter), so a chapter
+    /// door there could never put its entry in the chapter (PROVISIONAL
+    /// P-1036-B1-3, the batch record).
     @ViewBuilder
     private func chapterMintDoor(_ section: ReadingSection) -> some View {
-        if let reading = structure.reading, reading.kind == .book, !reading.locked {
+        if let reading = structure.reading, reading.kind == .book, !reading.locked,
+           reading.profile != Queries.dailyJournalBookProfile {
             let kind = Self.footMint(for: reading)
             Button(tokens.chromeLabel(kind == .entry ? "+ new entry" : "+ new note")) {
                 mint(kind, door: .chapter(section.id))
