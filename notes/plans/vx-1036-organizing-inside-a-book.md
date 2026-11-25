@@ -2,7 +2,7 @@
 
 **Ticket** VX-1036 (Umbrella, Books) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov22 · **Mockups** `notes/plans/vx-1036/`
 
-**STATUS — OPEN: DESIGN SITTINGS. Sitting 2 (2026-11-24) answered in part — rulings through R-1036-28; §4d holds what changed, §4e the round-2 mockup brief. Nothing is built. Her word at kickoff: "we will finish the design plans together before you do any building."**
+**STATUS — OPEN: THE DESIGN IS CLOSED (2026-11-25, R-1036-42). §4f is the design as closed, over §4d and §4b; rulings R-1036-1…43 are in §5. Nothing is built. Owed next, at her word: the umbrella composition (R-1036-43), then one execution plan per run.**
 
 ---
 
@@ -10,7 +10,7 @@
 
 *(Written whole at closeout. Until then, the state in four lines.)*
 
-- **A successor orchestrator starts at `notes/plans/vx-1036-orchestrator-handoff.md`** (written 2026-11-24 at the first orchestrator's context seam). Sitting 2 is answered in part (rulings through R-1036-28); §4d amends §4b; the round-2 mockup is delivered; sitting 3 opens on it.
+- **A successor orchestrator starts at `notes/plans/vx-1036-orchestrator-handoff.md`.** The design closed on 2026-11-25: read §4f first (the design as closed), then §4d and §4b beneath it, then §5's rulings. Three mockup files are in `notes/plans/vx-1036/`. Nothing is built.
 - Sitting 1 is answered: §5 holds her reply and the rulings R-1036-1…9. §4b is the design as it stands (lanes L-1…L-11, tags T-A…T-D, new notes N-1…N-3, the dial D-1, Read titles RT-1, wings W-1…W-6); §4c is the round-1 mockup brief; §4 is the first read it grew from, kept as written.
 - The tickets: VX-1037 lanes · VX-1038 tags inside a book · VX-1039 the new-note defect and landing · VX-1040 the order dial · VX-1041 wings · VX-881 titles in Read — all sub-issues of VX-1036.
 - One schema event is accepted in principle (R-1036-5: the lanes column); its mirror deploy runs only at her go. Nothing is built.
@@ -307,6 +307,22 @@ What stands today: the Library's List row already carries a note's title, its da
 
 ---
 
+## 4f. Sitting 3's amendments (2026-11-24/25) — THE DESIGN AS CLOSED: where these differ from §4d or §4b, these stand
+
+- **Modes.** The book's mode row is outline · list · index · book · read (R-1036-29). List is the Library's row, rows only — outline is the cards (R-1036-38). Known cost: five modes need about 222 pt of navigator in the Terminal voice, and the order dial drops to a second line in a narrow one.
+- **Tags inside a book.** One per-book switch with three positions: hidden (the default) · other tags · all tags (R-1036-39). Whenever it is not hidden, every outline card wears its pills in the header (T-1, R-1036-30) and list rows wear theirs. "Other tags" leaves off the tags that place a note — the gathering's own and its lane's.
+- **The lane move.** §4d's four steps are confirmed (R-1036-31). A move into a lane that leaves out a tag the note wears ASKS first, naming the tag; on yes the move goes through and takes that tag off, on no nothing changes (R-1036-32 — replaces the refusal).
+- **The long title** (T-2). Scrolls only under the pointer and on the live note; at rest it is one line cut with "…"; one title moves at a time, the one under the pointer first (R-1036-35).
+- **A note's title while reading** is a quiet muted line (R-1036-40).
+- **The order dial** is D-1 as drawn (R-1036-33).
+- **Tags on a new note** (Q-1). A tag button beside the title suggestion on the new-note box, and the same on the menu-bar quick note (R-1036-37).
+- **Wings.** One per-wing switch decides both all-wings search and the All Wings Library (R-1036-36). Home reorders and takes a colour like any wing; all-wings Starred keeps her one star order; a search in the All Wings Library shows the "in: all wings" chip (R-1036-41).
+- **Lanes.** An empty lane keeps its heading; a lane move is one undo step; binding a laned gathering turns each lane into a chapter (R-1036-41).
+- **Four faces exist only in words** — no mockup shows them, and the owning run's first walk shows them to her before it merges: the confirm before a tag-removing lane move; the three-position tags switch; the tag button beside the title suggestion; the "…" on a long title at rest.
+- **Not yet picked:** the add-tag chord (brought to her at the build from the registry's free chords); the lanes run's cast (hers at its kickoff — it carries a `Sync/` constant and a §12 event).
+
+---
+
 ## 5. Sittings
 
 ### Sitting 1 — 2026-11-22 (answered)
@@ -419,7 +435,7 @@ And, sent while the reply was being worked:
   4. *One switch or two for All wings:* the "take part in all-wings search" switch is read as also deciding who is in the All Wings Library. HERS to confirm.
   5. *The search band's wing chip* reading "in: all wings" — kept as drawn; hers on sight.
 
-### Sitting 3 — 2026-11-24 (on the round-2 mockup; in progress)
+### Sitting 3 — 2026-11-24/25 (on the round-2 mockup; answered — the design closed)
 
 Her reply, verbatim:
 
@@ -450,6 +466,13 @@ Batch 2 of the dialog (her picks):
 | R-1036-40 | **A note's title while reading is a quiet line** — the pick "A quiet line". RT-1 is settled. |
 | R-1036-41 | **Six defaults stand as drawn** — the pick "All six are fine": an empty lane keeps its heading (L-4); a lane move is one undo step (L-6e); binding a laned gathering turns each lane into a chapter (L-10); Home can be reordered and coloured like any wing; all-wings Starred keeps her one star order; a search in the All Wings Library shows the "in: all wings" chip. |
 
+Batch 3 of the dialog:
+
+| id | Ruling |
+|---|---|
+| R-1036-42 | **THE DESIGN IS CLOSED** — the pick "Close the design now" (2026-11-25). The four faces that exist only in words (§4f) are shown to her at their run's first walk. |
+| R-1036-43 | **How the work is cut is NOT yet ruled** — asked to choose among run orders, she typed: "hmm. how many tickets are there? 2 or 3 umbrella tickets would be ideal." Twelve tickets sit under VX-1036 today. The composition is proposed to her in chat and is written here only once she approves it (her standing rule: no unapproved plan in the repo; umbrellas are minted at her word). |
+
 ---
 
 ## 6. Ledger
@@ -474,7 +497,7 @@ Batch 2 of the dialog (her picks):
 
 *(Rows 1–2 are now T-1…T-6; row 8 is W-2′…W-10.)*
 
-**Sizing, as it stands (2026-11-24):** the umbrella now holds more than one run. A likely cut, hers to rule when the design closes: **(1)** the small book fixes — VX-1039, VX-1040, VX-881, VX-1080, VX-1081, VX-1026; **(2)** tags inside a book — VX-1038, VX-1078, and the List mode if ruled in; **(3)** lanes, their schema event and the wire — VX-1037, VX-1079; **(4)** wings — VX-1041.
+**Sizing (2026-11-25):** twelve member tickets, more than one run. Her word: "2 or 3 umbrella tickets would be ideal." The composition is hers to approve (R-1036-43); the four-run cut written here on 2026-11-24 was a proposal and is withdrawn.
 
 ---
 
