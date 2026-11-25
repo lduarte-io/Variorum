@@ -122,6 +122,12 @@ struct LibraryCatalogView: View {
     /// shell (`RootView.openBook(_:at:in:)`). nil falls back to opening the
     /// book plainly.
     var onOpenBook: ((String, String) -> Void)? = nil
+    /// **VX-1074 — a chapter row's door**: open the book (`bookID`) at its
+    /// chapter (`sectionID`) — the book's Outline landing that chapter, through
+    /// the shell's chapter road (`ShellRouter.pendingBookChapter`, the road
+    /// `show_in_app` and a receipt's "Open ›" take). nil falls back to opening
+    /// the book plainly.
+    var onOpenChapter: ((_ bookID: String, _ sectionID: String) -> Void)? = nil
     /// 13f batch 6 (W4): the star door, from the one note-row grammar.
     var starDoor: StarDoor? = nil
     /// 13i-d U5: the cross-wing note doors' brain (owned by the composition
@@ -518,10 +524,31 @@ struct LibraryCatalogView: View {
                 } background: {
                     rowBackground(picked: false, subject: isSubject(hit.id))
                 }
+            },
+            chapterRow: { chapter in
+                LibraryListRow {
+                    chapterLine(chapter)
+                } background: {
+                    rowBackground(picked: false, subject: isSubject(chapter.sectionID))
+                }
             })
             // VX-895: the sheet's drawn words are this session's (the DEBUG
             // oracle's scope — a no-op outside DEBUG).
             .debugProbeScope(session)
+    }
+
+    /// **VX-1074 — a chapter found by its own name, opened**: the book's
+    /// Outline at that chapter (`onOpenChapter` — the shell's chapter road).
+    /// The place she leaves and the row she left from are noted as any row's
+    /// open notes them (VX-823).
+    private func openChapter(_ chapter: SearchChapterHit) {
+        withAnimation(Self.panelAnimation) { model.closeInfo() }
+        model.rowOpened(chapter.sectionID, placeKey: placeKey)
+        if let onOpenChapter {
+            onOpenChapter(chapter.readingID, chapter.sectionID)
+        } else {
+            onOpen(.reading(chapter.readingID))
+        }
     }
 
     /// **The row wearing the SUBJECT face** — the info panel's subject, and
@@ -1203,6 +1230,28 @@ struct LibraryCatalogView: View {
         }
     }
 
+    /// **VX-1074 — a CHAPTER row's line** (PROVISIONAL A-1082-2): the
+    /// chapter's name leading, on the book titles' own column; its kind word
+    /// ("chapter" — the passage line's, "· archived" under the facet as a
+    /// book row says it); "in ‹book›". One click anywhere on the row opens the
+    /// book's Outline AT the chapter: a chapter is a hit INSIDE a book, so it
+    /// takes a passage line's one-click landing rather than a book row's
+    /// select-then-open (a chapter has no info-panel face of its own), and it
+    /// carries no menu (no chapter act is declared on a Library row — P-2).
+    private func chapterLine(_ chapter: SearchChapterHit) -> some View {
+        let kind = LibrarySearchCopy.kindWord(.chapter) ?? ""
+        let detail = chapter.isArchived ? LibrarySearchCopy.archivedBookDetail(kind) : kind
+        return CatalogChapterLine(tokens: tokens, name: chapter.name, detail: detail, book: chapter.readingName)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture { openChapter(chapter) }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            // VX-1074: what the row DREW (the DEBUG oracle).
+            .librarySearchDrawn(.chapterRow, CatalogChapterLine.words(
+                tokens: tokens, name: chapter.name, detail: detail, book: chapter.readingName))
+    }
+
     // (13o U2: the BLOCK hit's line LEFT with the block arm — a named block
     // or a scrap is a passage of its group on the answer sheet now, and lands
     // through `openPassage`, the same caret-precise road it used. VX-84a
@@ -1608,9 +1657,9 @@ struct CatalogBookLine: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             // A symbol in a `Text` carries the title's own baseline (a bare
-            // `Image` would hand the stack its bottom edge).
-            Text(Image(systemName: "book"))
-                .font(tokens.body)
+            // `Image` would hand the stack its bottom edge). The ONE spelling
+            // the chapter line's empty slot reads too (ladder round 1 NIT 2).
+            CatalogChapterLine.bookGlyph(tokens)
                 .foregroundStyle(tokens.muted)
             Text(title)
                 .font(tokens.body)
@@ -1650,6 +1699,10 @@ struct CatalogBookLine: View {
 // note row the Library's List draws — live in the shared home since the
 // VX-1036 run, batch 3: `Core/Views/CatalogNoteLine.swift`; the book's List
 // mode draws the same row, VX-1084.)
+
+// (VX-1074, D-1082-S1: `CatalogChapterLine` MOVED to the shared home,
+// `Core/Views/SearchAnswerFaces.swift` — the book's own answer sheet is its
+// second consumer, CLAUDE.md's shared-home rule; name preserved.)
 
 /// 17y B1 (k) — a book row reports its top in the catalog's own space (the
 /// rider's pitch measurement), on either engine.

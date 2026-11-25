@@ -171,6 +171,10 @@ nonisolated enum LibrarySearchCopy {
         (detail.map { $0 + " \u{00B7} " } ?? "") + archivedMark
     }
 
+    /// A chapter row's book ("in Video ideas" — VX-1074); its home is
+    /// `SearchAnswerCopy` since the book's own sheet shares the line.
+    static func chapterBook(_ book: String) -> String { SearchAnswerCopy.chapterBook(book) }
+
     static func archivedFoot(_ places: Int) -> String { SearchAnswerCopy.archivedFoot(places) }
     static var showArchived: String { SearchAnswerCopy.showArchived }
 }

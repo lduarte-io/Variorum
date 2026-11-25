@@ -1479,6 +1479,8 @@ struct RootView: View {
                 // The correction round, batch E (row 33): the panel's book
                 // outline opens the book AT a note — the ascent's landing.
                 onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) },
+                // VX-1074: a chapter row opens the book's Outline at it.
+                onOpenChapter: { bookID, sectionID in openBook(bookID, atChapter: sectionID, in: pane) },
                 starDoor: starDoor, wings: wings,
                 // VX-823: the place the Library remembers is this pane's.
                 placeKey: pane.raw)
@@ -1713,6 +1715,16 @@ struct RootView: View {
     /// door, so the pane's history is pushed and ⌥⌘[ returns to the note.
     private func openBook(_ bookID: String, at postID: String, in pane: PaneID) {
         router.pendingBookAscent = ShellRouter.BookAscent(bookID: bookID, postID: postID)
+        adopt(.reading(bookID), in: pane)
+    }
+
+    /// **VX-1074 — the book opened AT a chapter** (a Library search's chapter
+    /// row): the chapter landing parked for the book it names, then the book
+    /// adopted — `MCPNavigator`'s `.book` road exactly (the book, mounting or
+    /// already showing, switches to Outline and lands the chapter at the top:
+    /// `BookView.takeChapterRequest`).
+    private func openBook(_ bookID: String, atChapter sectionID: String, in pane: PaneID) {
+        router.pendingBookChapter = ShellRouter.BookChapterLanding(bookID: bookID, sectionID: sectionID)
         adopt(.reading(bookID), in: pane)
     }
 

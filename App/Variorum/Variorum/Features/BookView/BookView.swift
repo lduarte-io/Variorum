@@ -722,9 +722,18 @@ struct BookView: View {
 
     /// The book's answer sheet — the passages land through the shell's road.
     private var searchSheet: some View {
-        BookSearchSheet(tokens: tokens, model: bookSearch) { postID, blockID, find in
-            onOpenSearchHit?(BookOpenDoor.Landing(postID: postID, blockID: blockID, find: find))
-        }
+        BookSearchSheet(
+            tokens: tokens, model: bookSearch,
+            onOpen: { postID, blockID, find in
+                onOpenSearchHit?(BookOpenDoor.Landing(postID: postID, blockID: blockID, find: find))
+            },
+            // VX-1074 (D-1082-S1): a chapter of this book found by its name —
+            // the field closes (the answer was drawn OVER the mode) and the
+            // book takes its own chapter landing.
+            onOpenChapter: { sectionID in
+                bookSearch.close()
+                landChapter(sectionID)
+            })
     }
 
     /// **Drawn OVER the mode's body while the field holds words** — an
@@ -811,13 +820,17 @@ struct BookView: View {
         // 190 pt navigator, tabs + gear on one line compressed the labels
         // into mid-word wraps ("outl/ine"), the b6dae25 class this walk
         // caught live (2026-08-31).
-        HStack(spacing: 4) {
+        //
+        // VX-1014: ONE Layout, never wider than the column — the open search
+        // field's floor first (never past the room), then the name whole,
+        // then the field's growth; the name yields the rest. At rest it is
+        // the HStack it replaced (`BookMastheadTitleLine`).
+        BookMastheadTitleLine {
             Text(tokens.path([bookName]))
                 .bookNameProbe(.masthead, readingID: readingID, name: bookName)
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
-            Spacer(minLength: 2)
             // 13o U3 — SEARCH THIS BOOK (her R-13o-14): the masthead's right,
             // a magnifying glass at rest, the field only when clicked.
             BookSearchDoor(tokens: tokens, model: bookSearch)
@@ -839,6 +852,14 @@ struct BookView: View {
             .help(CapabilityRegistry.capability(.openBookSettings).verb
                 + " — collecting, finish, seal, own, length, rename")
         }
+        // VX-1014 (D-1082-S3): the title line's OWN laid-out width, for the
+        // DEBUG oracle (`BookOutlineGeometry.mastheadTitleLines`) — the whole
+        // observation gated, so Release carries none (ladder round 1 NIT 1).
+        #if DEBUG
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+            BookOutlineGeometry.recordMastheadTitleLine(readingID, width, owner: oracleOwner)
+        }
+        #endif
         // VX-887 (her three rulings, 2026-11-05 — "the area in books is a bit
         // crowded and lacks visual hierarchy"): the ORDER DIAL rides the mode
         // row's one line — the modes leading, the dial at the trailing end —
@@ -1580,9 +1601,17 @@ struct BookView: View {
     /// chapter row's own surface) and its one chapter-landing door.
     private func takeChapterRequest() {
         guard let revealSectionID else { return }
-        switchMode(to: .outline)
-        model.requestChapterReveal(revealSectionID)
+        landChapter(revealSectionID)
         onRevealSectionConsumed?()
+    }
+
+    /// **The book's chapter landing** — Outline (her navigator's chapter
+    /// row's own surface) and its one chapter-landing door. The shell's
+    /// request takes it (above), and since VX-1074 (D-1082-S1) so does a
+    /// chapter row in this book's own search answer.
+    private func landChapter(_ sectionID: String) {
+        switchMode(to: .outline)
+        model.requestChapterReveal(sectionID)
     }
 
     // MARK: - VX-553 — the book foot's doors, one per case
@@ -3342,6 +3371,7 @@ enum BookOutlineGeometry {
     private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
     private static var rowHeightStore = OwnedRegistrations<String, CGFloat>()
     private static var navigatorFrameStore = OwnedRegistrations<String, CGRect>()
+    private static var mastheadTitleLineStore = OwnedRegistrations<String, CGFloat>()
     private static var navigatorChapterRowStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorNoteRowStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorChapterMarkStore = OwnedRegistrations<String, Bool>()
@@ -3387,6 +3417,13 @@ enum BookOutlineGeometry {
     /// navigator" is flaky by construction (measured: 4 chapter rows in a
     /// two-chapter book, and a frame from someone else's mount).
     static var navigatorFrames: [String: CGRect] { navigatorFrameStore.current }
+    /// **VX-1014 (D-1082-S3) — the masthead TITLE LINE's own laid-out
+    /// width** (`BookMastheadTitleLine` — name · search door · trailing
+    /// doors), keyed by the book: in the navigator and in the Index column
+    /// alike (one masthead, one at a time). "The open field never widens its
+    /// column" is a claim about THIS line, so the pins read it rather than the
+    /// whole column (whose width any other child can move).
+    static var mastheadTitleLines: [String: CGFloat] { mastheadTitleLineStore.current }
     static var navigatorChapterRows: [String: CGRect] { navigatorChapterRowStore.current }
     static var navigatorNoteRows: [String: CGRect] { navigatorNoteRowStore.current }
     /// **VX-562 — what the navigator MARKED**: per chapter row (by section
@@ -3451,6 +3488,10 @@ enum BookOutlineGeometry {
 
     static func recordNavigator(_ readingID: String, _ frame: CGRect, owner: UUID) {
         navigatorFrameStore.publish(frame, for: readingID, owner: owner)
+    }
+
+    static func recordMastheadTitleLine(_ readingID: String, _ width: CGFloat, owner: UUID) {
+        mastheadTitleLineStore.publish(width, for: readingID, owner: owner)
     }
 
     static func recordNavigatorRow(_ id: String, chapter: Bool, _ frame: CGRect, owner: UUID) {
@@ -3520,6 +3561,7 @@ enum BookOutlineGeometry {
         anchorTopStore.release(owner: owner)
         rowHeightStore.release(owner: owner)
         navigatorFrameStore.release(owner: owner)
+        mastheadTitleLineStore.release(owner: owner)
         navigatorChapterRowStore.release(owner: owner)
         navigatorNoteRowStore.release(owner: owner)
         navigatorChapterMarkStore.release(owner: owner)
@@ -3540,6 +3582,7 @@ enum BookOutlineGeometry {
 
     static func resetNavigator() {
         navigatorFrameStore.forgetAll()
+        mastheadTitleLineStore.forgetAll()
         navigatorChapterRowStore.forgetAll()
         navigatorNoteRowStore.forgetAll()
         navigatorChapterMarkStore.forgetAll()

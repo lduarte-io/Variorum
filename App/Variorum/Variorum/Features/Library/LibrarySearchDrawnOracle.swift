@@ -32,6 +32,12 @@ enum LibrarySearchDrawnSlot: String, Hashable {
     /// The answer sheet's empty sentence ("Nothing matches.", or the field's
     /// reason when it holds nothing searchable — R-980-5, the VX-980 run).
     case emptyAnswer
+    /// The band's QUOTE of the question's words ("“dream”"); nil while the
+    /// band draws none — a tag alone, or folded words beside a tag (VX-1069).
+    case echo
+    /// The Books section's last-drawn CHAPTER row, its words as it reads
+    /// (`LibrarySearchCopy.chapterRow` — VX-1074); nil while none is drawn.
+    case chapterRow
 }
 
 #if DEBUG
