@@ -2468,3 +2468,23 @@ the park; UIKit's restore of input views after a sheet. And C-3b-1 (the label-in
 
 **The calls of this batch (for the merge's QUESTIONS):** P-260-3b-1 (the picking door's "Cancel"; alternatives (b) and
 (c) above); C-3b-1 (the VoiceOver names kept). VM-281 is a bug-class fix, not a call — its proof is the U leg.
+
+## BATCH 4a — record (VM-259 option B · R-260-11 · the C-3b-1 rider; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this batch did NOT do (kept current):** NO test has run — the stage is coordinated through nov24 and this
+batch's evidence rides the run's merge gate, so every red and green below is PENDING; no walk and no capture (the
+gate's: each root at rest and scrolled, both voices); no line in `Sources/`, `Sync/`, custody, `StatusCenter`,
+`VoiceTokens`, `Shared/`, the editor family (`MobileEditorTextView`, `MobileKeyboardBar`, the text-input path) or
+`MobileShellView` (the one bar, the band, the keyboard floor untouched); the note's top is batch 4b's, untouched.
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, R-260-11/-12 verbatim, A-260-15, "Batch 4a", BATCH 1a's VM-253/VM-255 and BATCH 2's tables; the VM-259 mockup §B and its script; SurfaceContracts "The app" in full, the Library's VM-68 bullet and the Bookcase's phone paragraph; the resiliency protocol) | DONE (this commit) |
+| 1. The pins on the pre-fix tree (the Library's slim line, both states' doors, the search glyph's re-open, the ask count; R-260-11's count line moved to its new rule; the rider's label-in-name) — **that commit IS the red-on-old tree** | NOT-STARTED |
+| 2. The red-on-old bundle `vm260-4a-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT-STARTED |
+| 3. The give-way rule, its tracker and the one top line (`MobileRootTop.swift`, phone target only); the Library's top gives way | NOT-STARTED |
+| 4. Bookcase and Starred: the same line, the hairline on scroll; R-260-11's count line removed (`MobileWingPath(detail:)` and `MobileShelfFaces.bookCount` retired) | NOT-STARTED |
+| 5. The rider: the picking door's VoiceOver name "Cancel picking" (C-3b-1, A-260-15) + the pins that ride the old name moved | NOT-STARTED |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
