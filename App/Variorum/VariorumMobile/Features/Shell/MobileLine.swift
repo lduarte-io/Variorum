@@ -117,6 +117,33 @@ enum MobileLine {
         session.status.withdraw(owner: ObjectIdentifier(door))
     }
 
+    /// **VM-275 — her rule: a refusal raised in a note clears when she leaves
+    /// that note** ("the error toast stays up even past leaving the note,
+    /// which it shouldn't"). Only the CLEARING learns about navigation: the
+    /// line stays one line (P-55-10) and fades on the seam's clock otherwise
+    /// (P-55-3). The note screen calls this on its one leaving road (its
+    /// `onDisappear` — Back, a swipe back, a screen pushed over it, and since
+    /// VM-256 every page change), beside `withdrawNoteLine`, handing the id of
+    /// the line that was showing when it arrived.
+    static func leaveNote(session: AppSession, lineWhenShown: UUID?) {
+        guard clearsOnLeavingNote(session.status.current, lineWhenShown: lineWhenShown)
+        else { return }
+        session.status.clear()
+    }
+
+    /// **The rule, pure.** What clears is a line of the refusal CLASS — a
+    /// refusal, or a direction, which rides that class (PROVISIONAL C-275-1) —
+    /// that was raised while the note showed: anything showing then that is not
+    /// the line which stood when it arrived. A line from before the note opened
+    /// is not the note's (the Today door's direction, said as its note is
+    /// pushed); a removal is no refusal and keeps its Undo's clock (the note's
+    /// delete pops the screen while its Put back line stands); an offer is a
+    /// question, not the note's complaint.
+    static func clearsOnLeavingNote(_ showing: StatusCenter.Item?, lineWhenShown: UUID?) -> Bool {
+        guard let showing, showing.kind == .refusal else { return false }
+        return showing.id != lineWhenShown
+    }
+
     // MARK: - The roads
 
     private static func action(

@@ -130,6 +130,10 @@ struct MobileWriteScreen: View {
     /// The ⋯ sheet (M20's persistent undo/redo door + PR1's Delete Note… +
     /// batch 6c's two time controls).
     @State private var noteActionsPresented = false
+    /// **VM-275 — the line that was showing when this note arrived**, so its
+    /// leaving clears only what was raised while it showed (`MobileLine
+    /// .leaveNote`). Written on appear; read by the leaving road.
+    @State private var lineWhenShown: UUID?
     @Environment(\.colorScheme) private var scheme
 
     /// `editor` is a TEST SEAM and nothing else: production passes nothing
@@ -217,12 +221,17 @@ struct MobileWriteScreen: View {
                 await model.arrive(focus: beginEditing)
                 await model.start()
             }
+            // VM-275: what the line held as this note arrived — not the note's.
+            .onAppear { lineWhenShown = session.status.current?.id }
             .onDisappear {
                 let model = model
                 let session = session
                 // VM-61: a line still offering this note's structural Undo is
                 // taken back — that door goes with the note.
                 MobileLine.withdrawNoteLine(of: model.undoDoor, session: session)
+                // VM-275 (her rule): a refusal raised in this note clears as
+                // she leaves it — the same leaving road, no second observer.
+                MobileLine.leaveNote(session: session, lineWhenShown: lineWhenShown)
                 router?.editors.deregister(model)
                 // **PR7 — the OTHER leaving road** (round 2 batch 4). The
                 // note is popped or replaced: land what is pending, then

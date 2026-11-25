@@ -190,6 +190,30 @@ struct MobileRefusalLeavesItsNoteTests {
         }
     }
 
+    /// **The clearing rule, pure** (the fix's `MobileLine.clearsOnLeavingNote`;
+    /// added with the fix, so not part of the red-on-old run). The refusal
+    /// class raised while the note showed clears — a direction too
+    /// (PROVISIONAL C-275-1); the line that stood when it arrived, a removal
+    /// and an offer do not; nothing showing clears nothing.
+    @Test func theClearingRuleClearsOnlyTheNotesOwnRefusals() {
+        let refusal = StatusCenter.Item(id: UUID(), text: "Refused.", kind: .refusal)
+        let direction = StatusCenter.Item(
+            id: UUID(), text: "Already collected.", kind: .refusal, isDirection: true)
+        let removal = StatusCenter.Item(
+            id: UUID(), text: "Block deleted.", action: .init(label: "Undo", perform: {}),
+            kind: .receipt, leavesPage: true)
+        let offer = StatusCenter.Item(
+            id: UUID(), text: "Diverge?", action: .init(label: "Diverge", perform: {}), kind: .offer)
+        #expect(MobileLine.clearsOnLeavingNote(refusal, lineWhenShown: nil))
+        #expect(MobileLine.clearsOnLeavingNote(refusal, lineWhenShown: UUID()), "a newer line than the arrival's")
+        #expect(!MobileLine.clearsOnLeavingNote(refusal, lineWhenShown: refusal.id),
+                "the line that stood when the note arrived is not the note's")
+        #expect(MobileLine.clearsOnLeavingNote(direction, lineWhenShown: nil))
+        #expect(!MobileLine.clearsOnLeavingNote(removal, lineWhenShown: nil))
+        #expect(!MobileLine.clearsOnLeavingNote(offer, lineWhenShown: nil))
+        #expect(!MobileLine.clearsOnLeavingNote(nil, lineWhenShown: nil))
+    }
+
     /// **HALF 2's TRACE, as a GUARD (expected GREEN on both trees).** On the
     /// Library with rows on screen, a four-line refusal takes the line: no row
     /// moves and none changes size — nothing in the app's window reads the line.
