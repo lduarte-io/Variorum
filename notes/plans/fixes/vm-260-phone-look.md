@@ -723,11 +723,11 @@ no line in `Sources/`, `Sync/`, custody, `MobileEditorTextView`, `MobileKeyboard
 | Piece | State |
 |---|---|
 | W1.0 Preflight (CLAUDE.md + canon; this record's binding sections, BATCH 1a in full, BATCH 2; SurfaceContracts' bar line; the resiliency protocol) and the trace (the captures' pixels; the walk's log; one Sonnet lookup for external facts, read-only) | DONE (this commit) — the mechanism below |
-| W1.1 The pin — `MobileKeyboardRevealUITests.testTheBarRidesAboveTheLibrarySearchKeyboard` (the UI test; the defect needs a real keyboard and a real keyboard session before it, which no mounted unit pin can make); its commit IS the red-on-old tree | NOT STARTED |
-| W1.2 The red-on-old tree's UI bundle built headless into `DerivedData/vm260-w1-rol` (APFS clone of `vm260-2-ui`, incremental, `nice -n 15`) | NOT STARTED |
-| W1.3 The fix — the band's foot never below UIKit's keyboard layout guide (`MobileKeyboardFloor`), with its rule pin and a mounted wiring pin | NOT STARTED |
-| W1.4 The tip bundles rebuilt on the fixed tip (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`), `nice -n 15`, incremental; batch 2's READY block updated | NOT STARTED |
-| W1.5 The window — the pin red on the red-on-old tree, green on the tip; the keyboard-reveal test on the tip; the s9 re-capture | PENDING (the GO) |
+| W1.1 The pin — `MobileKeyboardRevealUITests.testTheBarRidesAboveTheLibrarySearchKeyboard` (the UI test; the defect needs a real keyboard and a real keyboard session before it, which no mounted unit pin can make); its commit IS the red-on-old tree | DONE (`c4081441c`) — the run PENDING the window |
+| W1.2 The red-on-old tree's UI bundle built headless into `DerivedData/vm260-w1-rol` (APFS clone of `vm260-2-ui`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `c4081441c` |
+| W1.3 The fix — the band's foot never below UIKit's keyboard layout guide (`MobileKeyboardFloor`), with its rule pin and a mounted wiring pin | DONE (`dae368b4e`) — the pins PENDING the window |
+| W1.4 The tip bundles rebuilt on the fixed tip (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`), `nice -n 15`, incremental; batch 2's READY block updated | DONE — all three `TEST BUILD SUCCEEDED` at code tip `dae368b4e` (the batch-2 build logs kept as `vm260-2{,-mac,-ui}-build-b2.log`); no warning in the changed files |
+| W1.5 The window — the pin red on the red-on-old tree, green on the tip; the keyboard-reveal test on the tip; the s9 re-capture | PENDING (the GO) — the legs are in batch 2's READY block (R-W1, P, U, W) |
 
 #### The traced mechanism (from the captures' own pixels — not the suspected one)
 
@@ -765,13 +765,94 @@ reported it (the posted workaround); Apple's own page for `keyboardFrameEndUserI
 `UIKeyboardLayoutGuide`. **NOT KNOWN:** which layer carries the stale 52 — UIKit's reported frame or SwiftUI's own
 avoidance; the window answers it (below).
 
-#### The pin
+#### The pin (`c4081441c` — the red-on-old tree is that commit; its UI bundle `DerivedData/vm260-w1-rol`)
 
-PENDING (W1.1).
+`VariorumMobileUITests/MobileKeyboardRevealUITests.testTheBarRidesAboveTheLibrarySearchKeyboard` — a second test in
+the keyboard-reveal class (its `-only-testing:` line now runs both; the first test is byte-unchanged). A UI test because
+the defect needs a REAL keyboard after a real keyboard that wore an accessory; the unit host raises none reliably, and
+the stale avoidance is the system's state, not the shell's.
+- **The oracle is the screen's own pixels:** at rest (the Library's root, no keyboard) each of the bar's three doors is
+  read — its frame and its drawing; with the search holding the keyboard each door must draw EXACTLY as at rest (at most
+  a tenth of its ink pixels differing, a channel by more than 24 of 255 — the walk's s9 drew the words blurred under the
+  candidate strip's glass, nearly every ink pixel differing), and its frame must end above the keyboard's keys
+  (`app.keyboards.firstMatch.frame.minY` — XCUITest's keyboard element is the key plane, 583 on this phone; s9's bar
+  ended at 591). Premises: each resting door draws at least 40 ink pixels; the note's keyboard wears the editor's bar
+  (`kbar.block` on screen).
+- **Leg 1 — the control:** the search's keyboard with no keyboard before it (VM-47's c4 shape). Predicted GREEN on BOTH
+  trees.
+- **Leg 2 — the finding:** the lesson opened from the search, a tap mid-note (the editor's keyboard with its 52-pt bar),
+  Back with the keyboard up (the walk's road from s5), then the search's keyboard (tapped, or its focus restored at
+  Back — either is the first keyboard after the note's) — and again with the field emptied inside that keyboard (the
+  walk's s9 frame). **Predicted RED on `c4081441c`** (each door's pixels differing, each frame ending on the keys —
+  ~52 pt low), GREEN on the fixed tip.
+- The pin's text is byte-identical on the red-on-old tree and the fixed tip (`git diff c4081441c dae368b4e --
+  App/Variorum/VariorumMobileUITests/` is empty). One residual in its road: after Back it taps the search only when no
+  keyboard is up (a keyboard still up there is the search's own focus restored); a note's keyboard still sinking 2.1 s
+  after the Back tap would leave it waiting on no keyboard — a FAIL "no software keyboard rose", never a pass.
+- Nothing is written: a search typed and emptied, a caret placed in the lesson (its words untouched — no leaving
+  savepoint), the keyboard dropped by a page change at the end. Screenshots kept as attachments: "BAR at rest",
+  "BAR leg 1", "BAR leg 2", "BAR leg 2, emptied" — **leg 2's are the s9 re-capture in Study light** (export them with
+  the result bundle).
+- **If leg 1 is RED on old too,** the "after an accessory" mechanism is wrong (the shortfall is not tied to the note's
+  keyboard) — report it, the fix still answers any shortfall the guide sees. **If leg 2 is GREEN on old,** the test's road
+  did not reproduce the walk's state: the row is HOLLOW on this road (record it, do not claim the fix).
 
-#### The fix
+#### The fix (`dae368b4e`)
 
-PENDING (W1.3).
+**The band's foot never stands below UIKit's keyboard layout guide.** `VariorumMobile/Features/Shell/MobileKeyboardFloor.swift`:
+- **The rule** (`MobileKeyboardFloor.lift(bandFoot:reading:noteShowing:)`, pure): the band rises by however far its foot
+  (SwiftUI's own avoidance, `proxy.frame(in: .global).maxY`) stands below the guide's top — zero with no keyboard, zero
+  while the band's foot is at its RESTING foot (SwiftUI sees no keyboard — a keyboard leaving: its avoidance drops first
+  and the probe's nil arrives a turn later, so the band never meets the old floor), zero with the foot at or above the
+  keyboard (the floor never lowers the band), zero within 2 pt (rounding between the readings), zero while a NOTE is the
+  visible top screen (its text view rides the same guide itself — `MobileWriteSurfaceView` — and its screen ignores the
+  keyboard region). **Wherever SwiftUI's avoidance already reaches the keyboard the lift is zero and nothing moves:** the
+  fix changes the layout only in the short case.
+- **The probe** (`MobileKeyboardFloorProbe`): a `UIView` filling the window behind the band (`.background`,
+  `.ignoresSafeArea()`, untouchable, unheard), a hidden marker pinned to its own `keyboardLayoutGuide`; it reads the
+  guide's top and the window's resting foot (`window.bounds.maxY − window.safeAreaInsets.bottom`) in window points on
+  each keyboard notification (signals only — P-4: the measurement is the guide's frame) and on its layout, and hands the
+  shell a CHANGED reading always a turn later (never inside a SwiftUI update — a field resigning during one posts its
+  hide there). While a note shows it hands no new reading (so a note's keyboard never re-renders the shell); a nil (the
+  keyboard gone) is always handed on.
+- **The shell** (`MobileShellView`): `@State keyboardReading` from the probe (written with a 0.25 s ease — the lift
+  animates in the short case only); the band's `ZStack` framed `proxy.size.height − lift` at the reader's top, so the
+  pages, the one bar over the foot and the clip rise TOGETHER (the bar still covers exactly its reserved place); what the
+  lift leaves below is the shell's edge grounds (the bar's room when the bar stands), behind the keyboard's glass —
+  SurfaceContracts' edge line holds ("nothing a page lays out or scrolls runs under … the keyboard bar"). A test seam
+  `heldKeyboard:` (the `heldDrag:` precedent; nil in the app).
+- **Pins of the fix's own parts** (`VariorumMobileTests/MobileKeyboardFloorTests.swift`; the types are the fix's, so
+  these are GUARDS, not red-on-old claims): `MobileKeyboardFloorRuleTests` (six — no keyboard, the walk's 591/539 → 52,
+  an avoidance that reaches the keyboard moves nothing, a band at rest meets no floor, rounding, a note left alone);
+  `MobileKeyboardFloorShellTests.theBarRidesOnTheKeyboardTopHandedIn` (mounted shell, 393 × 852: a held reading at 600
+  with the resting foot below the band → every bar door ENDS at 600, same size and x, the top line unmoved; a band at
+  rest with the same reading → the bar unmoved). Prints `PERF[sim] F-1a-W1 …`.
+- **Untouched:** the one-bar overlay's kind and place (VM-253), `MobileTabBar`/`MobileTabBarSpace`, every page, the
+  editor family, `MobileKeyboardBar`, `MobileWriteView`, the text-input path, `Shared/`, `Sources/`. **Pins moved: none.**
+
+**Calls made (none gates the core; for the record):**
+- **C-W1-1 — the floor is UIKit's keyboard layout guide**, consulted as a FLOOR under SwiftUI's own avoidance (the
+  correction applies only to a shortfall). Alternatives: (b) the guide as the band's ONE avoidance
+  (`.ignoresSafeArea(.keyboard)` on the band + the guide's overlap as its padding) — one authority, but it changes every
+  keyboard's timing and the note's road, which the keyboard-reveal test guards; (c) remove the stale source in the
+  editor — drop the editor's `inputAccessoryView` as its text view resigns — the editor seam, not this fix's to touch.
+- **C-W1-2 — a note is left alone** (its own guide-pinned text view).
+- **C-W1-3 — the lift eases in 0.25 s** (the short case only; the keyboard's own curve is SwiftUI's and not readable
+  from the guide).
+
+**NOT KNOWN until the window — and what each answer means:** whether UIKit's keyboard layout guide carries the TRUE top
+on the keyboard after an accessory keyboard (Apple recommends it; a forum report shows it right where the notification
+frame was wrong — thread 801685), or the same stale 52. If leg 2 is GREEN on the tip, the guide is right and the fix
+holds. If leg 2 stays RED on the tip with the bar still ending at 591 (no lift) while the mounted wiring pin is green,
+the guide is stale too: the next road is C-W1-1 (c) — the editor seam, a Fable-reviewed change — and the record says so.
+
+**Not done here, for the window and the later reader:** (1) the same mechanism reaches the BOOKCASE's capture box (the
+contract's other half) when its keyboard is the first after a note's — the fix is band-wide, so it answers there too; a
+capture stop is proposed below. (2) The one message line tracks the keyboard from its own notifications
+(`MobileMessageLineController.adoptKeyboard`); if the stale 52 lives in UIKit's notification frame, the line would sit
+52 pt low over the bar on that same keyboard — batch 1b's surface, unverified, not touched; a capture stop is proposed.
+(3) Main's tree (before this run) is INFERRED to show the defect too (the in-page bar stood where the reserved place
+stands); no main-tree run is owed by this fix.
 
 
 ## BATCH 1b — record (VM-265 · VM-275 · VM-277 · A-260-1's direction line; implementer: Opus, 2026-11-25)
@@ -1308,6 +1389,11 @@ Each moved because the ruled change moved what it holds (batch 1a's pattern); no
 
 ### Batch 2 — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
 
+**UPDATED at the F-1a-W1 fix (2026-11-25):** the tip is code **`dae368b4e`** — batch 2's code, `origin/main` merged at
+`1a7b0d444` (PR #28, carrying PR #27), and the F-1a-W1 fix; all three tip bundles (`vm260-2`, `vm260-2-mac`,
+`vm260-2-ui`) were REBUILT on it (`TEST BUILD SUCCEEDED` each; incremental, `nice -n 15`). The window gains F-1a-W1's
+legs: **R-W1** below, its guard suites in **P**, its UI test in **U**, and the s9 re-capture in **W**.
+
 All from `App/Variorum/`, zsh, `test-without-building`; `UDID` = the device the GO names (iOS 26.2), booted fresh
 inside the claim, settled, shut down before release. Phone plan:
 `P(folder)=DerivedData/<folder>/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
@@ -1324,10 +1410,24 @@ inside the claim, settled, shut down before release. Phone plan:
   (both). A RED guard on old means a target was already under its law there — report it, it is a finding.
 - Read the `PERF[sim] VM-273 drawn …` and `VM-272 note top …` lines into this record (the measured boxes and heights).
 
-**P — the tip, the whole phone target, one launch** (`vm260-2`, code tip `ae12e4276`): `-only-testing:VariorumMobileTests`,
+**R-W1 — F-1a-W1's red on old** (a UI test: `DerivedData/vm260-w1-rol/Build/Products/TK2SpikeUITests_TK2SpikeUITests_iphonesimulator27.1-arm64-x86_64.xctestrun`,
+tree `c4081441c` — the pin over the pre-fix app; on the WALK device, whose library opens — `xcrun simctl list devices |
+grep vm260-walk`; the same device as U): `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests/testTheBarRidesAboveTheLibrarySearchKeyboard`
+(~2 min).
+- Predicted RED: LEG 2 and LEG 2 emptied — for each bar door "does not draw as it does at rest" and "ends at y ≈ 591, on
+  the keyboard's keys (their top 583)" (≈ 12 issues). Predicted GREEN: LEG 1 (the control).
+- Read the `REVEAL` lines (every door's frames, ink and differing counts, the keyboard's frame) into the F-1a-W1 block,
+  and export the "BAR …" attachments to `notes/plans/vm-260-screens/batch-2/w1-rol/`.
+- LEG 1 RED as well ⇒ the shortfall is not tied to the note's keyboard: report it (the fix still answers any shortfall
+  the guide sees). LEG 2 GREEN ⇒ the test's road did not reproduce the walk's state: HOLLOW on this road, recorded.
+
+**P — the tip, the whole phone target, one launch** (`vm260-2`, code tip `dae368b4e`): `-only-testing:VariorumMobileTests`,
 read against main's known reds (batch 1a's run: 6 known issues — `MobileFilterRowGeometryTests`' two Display-Zoom pins × 2,
 `MobileTrashTests`' empty-tree diagnostic × 2). It holds this batch's pins, the moved pins, and every suite that mounts a
 control, a root, a note or the line (the tip also carries batch 1b's code and pins). Predicted: green but those six.
+F-1a-W1's two guard suites ride here: `MobileKeyboardFloorRuleTests` (6) and `MobileKeyboardFloorShellTests` (1 — the
+mounted shell lifting the bar to a held keyboard top; it prints `PERF[sim] F-1a-W1 …`), predicted green; every suite
+that mounts the shell now carries the floor's probe in its background — inert with no keyboard (no reading, no lift).
 The likeliest place for a surprise is a geometry pin elsewhere that measured a 17- or 15-pt chrome word's width or a
 22-pt glyph — such a red is a pin the ruling moved only if it holds a drawn number; a TARGET under 44 is a regression.
 
@@ -1337,12 +1437,19 @@ PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInput
 OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests (the token pins and every Mac suite that
 walks the phone tree — this batch changes `Shared/Theme/Phone*.swift`, which the Mac compiles and never renders;
 `VoiceTokens.swift` untouched). If batch 1b's M leg runs in the same window it may run on this bundle instead (it
-carries 1b's code). Expected green but `IndexTierMetricsTests`' 4 declared known issues.
+carries 1b's code). Expected green but `IndexTierMetricsTests`' 4 declared known issues. (Rebuilt at `dae368b4e`: it now
+carries PR #27's `Shared/Protection/` changes from the main merge; the F-1a-W1 fix touches no `Shared/` file — its new
+phone file is walked by the scans that read the phone tree.)
 
-**U — the keyboard-reveal UI test** (OWED — this batch changes `MobileWriteView`'s layout): `DerivedData/vm260-2-ui`,
-scheme TK2SpikeUITests' plan, `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, on a device whose
-library opens (the walk device — batch 1a's no-verdict was a Castle-locked device). Expected green: the masthead is the
-screen's top inset; the reveal road is the text view's, untouched.
+**U — the keyboard-reveal UI test** (OWED — this batch changes `MobileWriteView`'s layout, and F-1a-W1 changes
+`MobileShellView.body`'s band frame): `DerivedData/vm260-2-ui` (rebuilt at `dae368b4e`), scheme TK2SpikeUITests' plan,
+`-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests` — the class now holds TWO tests (~4 min), on a device
+whose library opens (the walk device — batch 1a's no-verdict was a Castle-locked device). Expected green, both:
+`testAMidNoteTapRisesAboveTheKeyboard` (the masthead is the screen's top inset; the reveal road is the text view's; the
+keyboard floor leaves a note alone) and `testTheBarRidesAboveTheLibrarySearchKeyboard` (all three legs — the fix; if LEG
+2 stays RED with the bar still ending at ≈ 591 the keyboard guide carries the stale 52 too: the F-1a-W1 block's "NOT
+KNOWN" paragraph names the next road). Export its "BAR …" attachments to `notes/plans/vm-260-screens/batch-2/w1-tip/` —
+LEG 2's are the s9 re-capture in Study light.
 
 **W — the captures** (the window's job, both voices, light; to `notes/plans/vm-260-screens/batch-2/`). BEFORE: the
 Debug phone app from `vm260-2-rol` (its app is the pre-fix app); AFTER: the app from `vm260-2`. The same three stops
@@ -1354,3 +1461,13 @@ in each, at her screenshot's framing:
 3. **The Library** — the top line (trash, New Note, gear), the search field, the filter row, rows, the bar.
 And, after only (the step-down's other faces): Settings (menu rows at 15, the segmented choices — the remainder), the
 Trash's kind chips (near-square), a calm button (Create Book), a refusal's card (corner 8).
+
+**F-1a-W1's capture stops** (BEFORE from `vm260-2-rol`, which predates the fix too; AFTER from `vm260-2`; both voices,
+light):
+4. **The s9 re-capture** — the walk's own road: a note opened with its keyboard up (the editor's bar riding it), Back with
+   the keyboard up, then the Library's search tapped: BEFORE shows the bar under the candidate strip's glass (s9), AFTER
+   the bar standing on the keyboard's top, the list ending at the bar's hairline.
+5. **The same road ending on the Bookcase's capture box** (after only) — the contract's other half; the fix is band-wide.
+6. **If a line is on screen in stop 4** (any message the road raised), its place over the bar — the one line tracks the
+   keyboard from its own notifications (`MobileMessageLineController`) and is NOT touched by this fix; a line standing
+   52 pt low there is batch 1b's finding, not F-1a-W1's.
