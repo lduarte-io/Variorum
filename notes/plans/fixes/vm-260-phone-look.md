@@ -969,7 +969,7 @@ the decision is the orchestrator's.
 | 3. R2-1's fix | **STOPPED — decision owed to the orchestrator** (the trace and the options below) |
 | 4. R2-5 — the ten stale comments (comments only) | DONE (this commit) — the ten sites below; `git diff` of the commit: every changed line a `//` or `///` line (checked mechanically); no source-scan pin reads a comment line in these files (the scans read code lines or signatures — `MobilePhoneControlsSourceTests`' patterns, `MobileLookSourceTests`' code lines, `TutorialProtectionRecoveryTests`' `AuthViews` door literal) |
 | 5. R2-6 — the Read page's exception beside the whole-point rule (`PhoneType.swift`, a comment) | DONE (this commit) — the header, right after the whole-point paragraph: the Read page is the rule's ONE exception (P-260-3b, its own table): her text size reaches its words unrounded (`size × wordsScale` through `scaledValue`), harmlessly, its SwiftUI font and the UIKit font it measures its line with built from that one value with no `UIFontMetrics.scaledFont` between them; and one clause on `PhoneReadingModifier`'s `wordsScale` doc pointing at it. Comments only (checked mechanically); no pin reads `PhoneType.swift`'s comments |
-| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), package paths checked; READY-FOR-TESTS | NOT-STARTED |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), package paths checked; READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` at code tip **`1b4c436ee`** (logs `App/Variorum/DerivedData/vm260-2r-r2-build.log`, `vm260-2r-ui-r2-build.log`, `vm260-2r-mac-r2-build.log`), each bundle's `workspace-state.json` naming its OWN `SourcePackages` before and after (4 references each; no repoint needed — round 1's held); no error; no warning in a changed file (the Mac's 8 are `PaneSurface`/`EditorTypography`/the AppIntents processor, untouched files); the run list below |
 
 #### R2-1 — the mechanism, as the old tree's own trace shows it
 
@@ -1038,6 +1038,30 @@ reach under 69; the reach 70; the title gone; the strip open; the page at its fo
   frame on that runtime), the red widens to the title clauses too — the brief's model; the cure question is the same.
 - **Predicted under any tracker-only rule (either of the brief's): the same 6** — which is why piece 3 stopped.
 
+#### R2-1 — the decision owed (the implementer's options; the orchestrator's call)
+
+R1-1's guard is untouched and stays right: its own worst case — a leave landing in ONE frame (Reduce Motion) — clamps
+a page of reach R > h + 8 to R − h > 8, so the title stays gone and her text stays put on screen. R2-1 is not the
+tracker's; it is the clamp. The roads:
+- **(a) RECORD + TICKET; the pin off the branch before the final-tip legs** (`git revert 2b8b50e8c` — the test target
+  rebuilds incrementally in `vm260-2r`; nothing else moves). R2-1 dispositioned *traced: UIKit's persistent clamp at
+  the first animated frame, no chrome-only cure*; a ticket (Bug · Editor · Low — Suspected until the gate reads the
+  pin) for the seam cure, the pin's SHA its red-on-old. What she meets meanwhile: closing the tags (or unsealing) on a
+  short note scrolled into its room moves the page a fraction of the strip's height in the animated case; under
+  Reduce Motion it lands at its top and the title returns there. **The implementer's recommendation**, with the gate
+  running the pin first (road (b)'s evidence leg) so the ticket opens Confirmed.
+- **(b) The pin as the gate's evidence, then (a):** the R-r2 leg below reads the real numbers (the PERF line names the
+  drift, the leave's own landing, and whether the title ever flips); the revert follows the window.
+- **(c) The cure in this run, at the editor seam:** `MobileEditorTextView` keeps its scroll range from shrinking at a
+  frame change (the typewriter room re-derived for the incoming height BEFORE UIKit clamps — e.g. in a `frame`/`bounds`
+  setter override ahead of `super`). One place cures R2-1, the unseal's shrink, and the tip's own first-frame drift
+  when a mid-length page's title leaves at its foot; C-R1-1 could then be re-read. Fenced for this brief; editor seam ⇒
+  Fable review (VM-282 holds the owed round) and TEXTKIT2_NOTES at its preflight; a new implementer and a re-run of the
+  keyboard-reveal class. Not this run's last-change size.
+- **(d) A chrome-side hold** (the screen, on a masthead shrink while the title is gone, puts the offset back after the
+  text view's next layout): no editor line, but the chrome writing the editor's scroll — R1-1's declined alternative
+  (b), and `MobileScrollAuthority` is the one scroll authority (A-260-17's focus). Not recommended.
+
 #### R2-5 — the ten comments, as built (comments only)
 
 Each now says what is true on this tree (the change that falsified it named):
@@ -1057,6 +1081,72 @@ Each now says what is true on this tree (the change that falsified it named):
 8. `MobileShelfView.swift` (the Today chip) — a 24 pt near-square chip, 13 medium, in a 44 pt hit area (VM-273).
 9. `MobileProtectionScreen.swift` (`door(_:_:)`) — an inline act at the `control` role's 15 (VM-273).
 10. `MobileProtectionDoors.swift` (`door(_:_:action:)`) — the same.
+
+#### R2-6 — as built (a comment)
+
+`PhoneType.swift`'s header, beside the whole-point rule: the Read page is its one exception (P-260-3b — its own table,
+`PhoneReadingModifier`), her text size reaching its words unrounded, harmlessly (its two forms built from one value,
+no `UIFontMetrics.scaledFont` between them); one clause on `PhoneReadingModifier`'s `wordsScale` doc points back. No
+behaviour change.
+
+#### Round 2 fixes — READY-FOR-TESTS: the merge gate (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`, round 1's `P(folder)` / `U(folder)` / Mac paths (above);
+`-destination "platform=iOS Simulator,id=$UDID"`. **R2-1's red-on-old tree is `2b8b50e8c`; the code tip is
+`1b4c436ee`** (`2b8b50e8c..1b4c436ee` is comments only — so the tip's code is the red-on-old tree's code, and the P leg
+on the tip shows R2-1's result too, for as long as the pin is on the branch).
+
+- **R-r2 — R2-1 on its red-on-old tree** (`P(vm260-r2-rol)`, the gate's suite device):
+  `-only-testing:VariorumMobileTests/MobileNoteTopRowTests`. Predicted: `closingTheTagsLeavesAShortPageWhereItStood`
+  **RED 3 + 3** — the foot clause (`abs(settled.offset - foot) <= 0.5`) at all three settles, the page ≈ 15 pt above its
+  foot; its title, range and strip clauses GREEN. Every other case in the suite GREEN — `aShortPageAtItsFootNeverUndoes
+  ItsOwnTop` GREEN in both voices (this tree carries R1-1's fix) and the 4b pins GREEN. **Read the `PERF[sim] VM-260
+  R2-1` line first**: h, s, "after the leave … of …" (the leave's own first-frame drift — R1-1's residual class), the
+  trace. A red at a `#require` is calibration (s under two rows, the reach off 70), not a verdict. A title-clause red
+  too means the strip's change landed in one frame on that runtime — the brief's model; the decision's roads are the
+  same.
+- **The final tip** (`1b4c436ee`):
+  - **P** — the whole phone target from `vm260-2r` (`-only-testing:VariorumMobileTests`), one launch: predicted as
+    round 1's block predicted at `8bbc18d87` (no code has changed since but comments and R2-1's test) — main's known
+    issues as the previous windows read them (6: `MobileFilterRowGeometryTests` ×4, `MobileTrashTests` ×2 — PR #31/#32
+    may move that baseline; read it against main), R1-1's pin and the round-1 pins GREEN, the new give-way suites GREEN,
+    3b/4a/4b's pins GREEN — **plus R2-1's 6 while its pin is on the branch** (road (a) reverts it first).
+  - **U** — the keyboard-reveal class, its THREE tests: `U(vm260-2r-ui)`,
+    `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, the walk device (~6 min):
+    `testAMidNoteTapRisesAboveTheKeyboard`, `testTheBarRidesAboveTheLibrarySearchKeyboard`,
+    `testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` — predicted GREEN (the last is VM-281's claim; RED with frames
+    near 591 is model P: STOP, VM-271's road).
+  - **M — FENCED until her "done looking"** (nov24; the dev-store fence): `vm260-2r-mac`, the M3 list (ThemeTokenTests
+    NoLiteralColourTests PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
+    OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests) — predicted green but
+    `IndexTierMetricsTests`' 4 declared. Since round 1 the Mac compiles only comment changes (`Shared/AuthViews.swift`,
+    `Shared/Theme/SharedPageStyle.swift`, `Shared/Theme/PhoneType.swift`).
+- **W — the closing walk** (the Debug phone app from `vm260-2r`, a dedicated simulator under the claim, both voices,
+  light unless named; to `notes/plans/vm-260-screens/<batch>/`), the stops as the record collects them:
+  1. **Batch 2's retakes** (BATCH 2's W stops 1–3 AFTER in Study — the after run lacked Study; the refusal card on an
+     EMPTY new note; the F-1a-W1 s9 road re-captured) with the driver fixed: the voice reset at each pass's start, the
+     typed text verified, the opened note verified empty.
+  2. **W3** (BATCH 3): Settings ▸ Look's five rows and the palette menu open; Paper vs Cream (Study light/dark, Terminal
+     light, once with the keyboard); her words at Smaller · Default · Larger (and BEFORE/AFTER the default from
+     `vm260-3-rol`); a palette chosen on the phone; **the walk device put back** (Study · Sea glass · Paper · Follow
+     system · Default).
+  3. **W-3b** (BATCH 3b) stops 1–5: the walk's road (the bar on the keyboard's glass); Back with the keyboard up (it
+     leaves once); the drag-down dismiss; the ⋯ sheet and the takes card / a comment giving the keyboard back with its
+     bar; F-her-1's Cancel beside Done.
+  4. **W-4a** (BATCH 4a) stops 1–7: the Library at rest, scrolled (no jump at the flip), a nudge up and a resting thumb,
+     the slim line's search glyph with the keyboard, the Bookcase with no count line, Starred, the scroll indicator.
+  5. **W-4b** (BATCH 4b) stops 1–8: the note at rest and a long title; scrolled (the C-4b-1 slide); the keyboard up;
+     # open then scrolled, # closing, "+ tag"; the book door's three inks; the stack menu (lens active / fallen back —
+     R1-4's look, stop 6); the Note sheet's head; VM-281's two looks on the new top.
+  6. **Round 1's stop** (R1-1): a two-line note dragged into its room by a real thumb and released at its foot — the
+     title stays, nothing jumps; for her eye, a long note's leave at its very foot.
+  7. **R1-2 / R2-2 — mid-PUSH and mid-POP:** open a note from a list and capture the frame mid-push (the bar dropped at
+     the append while the outgoing page slides away with its empty reserved place); Back and capture mid-pop (the bar
+     over the leaving note). If either reads wrong to the orchestrator's eye, one later fix covers both directions.
+  8. **R2-1's look, for her eye** (added): a one- or two-line note wearing two long tags, # open, dragged to its foot —
+     the title gives way — then # closed: the page's shift (≈ a sixth of the strip's height). If the orchestrator wants
+     the Reduce Motion arm seen, the same with the simulator's Reduce Motion on (the page lands at its top and the title
+     returns) — set back off before the next stop.
 
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
