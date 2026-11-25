@@ -585,3 +585,28 @@ or the next window on an unlocked device); the walk (a separate leg).
 **Left as found:** the simulator shut down; no runner, no booted simulator; no new Variorum crash report. Logs in
 `App/Variorum/DerivedData/vm260-1a-{R1,R2,R3,P,M,U}.log` (gitignored); the UI run's result bundle in Xcode's default
 DerivedData.
+
+
+## BATCH 1b — record (VM-265 · VM-275 · VM-277 · A-260-1's direction line; implementer: Opus, 2026-11-25)
+
+**What this batch did NOT do (kept current):** VM-277 is NOT BUILT — its design waits on the architect's ruling (the
+proposal subsection below; the brief's stop-and-propose); NO suite has run (the stage is coordinated above this
+session — every test claim below is PENDING until the GO); the walk and its captures are not done; no line in
+`Sources/`, `Sync/`, custody, `MobileEditorTextView` or the text-input path; the Mac's seam face and words untouched.
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's binding sections, A-260-1, batch 1a's record; the resiliency protocol; SurfaceContracts "The app" incl. the status-seam bullet; the VM-55 FOR A LATER READER + its batch 2 brief; QUESTIONS #277; the three tickets' bodies) | DONE |
+| 1. The pins on the pre-fix tree, with the zero-behaviour seams they need | IN-PROGRESS |
+| 2. The red-on-old tree built headless (`DerivedData/vm260-1b-rol`) | NOT-STARTED |
+| 3. VM-265 — a direction draws in the muted ink | NOT-STARTED |
+| 4. VM-275 half 1 — a refusal raised in a note clears when she leaves it | NOT-STARTED |
+| 5. VM-275 half 2 — the squeeze, traced | NOT-STARTED |
+| 6. A-260-1 — the push door's made-but-not-opened outcome speaks a direction | NOT-STARTED |
+| 7. VM-277 — the proposal (stop-and-propose) | NOT-STARTED |
+| 8. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | NOT-STARTED |
+| 9. The suites at the GO (red-on-old, the tip, the Mac legs) | PENDING |
+| 10. VM-277 built, after the ruling | WAITING (the ruling) |
+| 11. The walk (a refusal, a direction, a receipt; both voices) | PENDING |
