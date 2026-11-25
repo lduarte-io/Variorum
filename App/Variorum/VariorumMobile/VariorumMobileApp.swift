@@ -59,16 +59,15 @@ struct VariorumMobileApp: App {
         _bootstrap = State(initialValue: AppBootstrap())
     }
 
-    /// The lobby's look: no library is open to ask (that is what a lobby is),
-    /// so it wears what a library that has chosen nothing reads — the shell's
-    /// own placeholder (VM-51, PROVISIONAL P-47-15). The phone keeps no voice
-    /// of its own (the device preference retired with VM-51).
+    /// The lobby's look: THIS PHONE's own (VM-247 — the voice and palette are
+    /// the device's, so the lobby needs no library to ask; before she picks,
+    /// Study under the sea-glass — her R-260-3, the same look P-47-15's
+    /// placeholder gave the lobby), through the router's one settings → tokens
+    /// road.
     private var lockedTokens: VoiceTokens {
         // VM-53: this phone's light/dark choice — resolved here at the app's
         // root, where the windows' override is not seen (`isDark(system:)`).
-        .resolve(
-            settings: MobileShellRouter.placeholder,
-            dark: shellRouter.appearance.choice.isDark(system: scheme == .dark))
+        shellRouter.tokens(dark: shellRouter.appearance.choice.isDark(system: scheme == .dark))
     }
 
     var body: some Scene {

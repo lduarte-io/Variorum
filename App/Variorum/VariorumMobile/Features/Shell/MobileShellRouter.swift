@@ -14,19 +14,25 @@
 //    most recently registered one; `onDisappear` never fires on whole-app
 //    backgrounding — the Phase 8 review-round-2 finding, carried).
 //
-//  · **The library's look** (VM-51 — her LK-1/LK-2: "follow the library but
-//    if the phone has dark mode on, that shouldn't change what your mac is
-//    like"): the router holds the open library's THEME STORE (the Mac's,
-//    hoisted to `Shared/`), and every chrome surface (shelf, library, tab
-//    bar, masthead, Settings) resolves its tokens here through the ONE
-//    settings → tokens road. Where the library's settings LAND, they reach
-//    `MobileEditorStyle` and EVERY registered editor surface through the
-//    liveness authority (MINOR 2 — a stood-down editor restyles too, so no
-//    mixed-voice storage survives a flip), whether the change was made here
-//    or on the Mac. Light or dark is the device's (the system's appearance).
-//    The phone-local voice preference (LK2's old switch) RETIRED with VM-51:
-//    Settings' two voice rows write the LIBRARY's voice (R-47-2), the Mac's
-//    own write. The S1 masthead switch door retired at S3 batch 1 (P11).
+//  · **The look** — since VM-247 (the VM-260 run, batch 3; her words: "I
+//    don't like that the theme syncs between mac and phone either it's
+//    annoying" · "the voice should also be per device") THIS PHONE'S OWN:
+//    the voice, the colour palette and the note's background are the
+//    device's (`MobileLookController`, `MobileLook.swift` — kept in this
+//    device's defaults, never the `setting` table), beside light · dark ·
+//    follow the system (VM-53). The router still holds the open library's
+//    THEME STORE (the Mac's, hoisted to `Shared/`, VM-51) for the library's
+//    OTHER settings, and lays the phone's look OVER what it lands
+//    (`MobileLookChoice.over`), so every chrome surface (shelf, library, tab
+//    bar, masthead, Settings, the lobby) resolves its tokens here through the
+//    ONE settings → tokens road in the phone's own look — a voice or palette
+//    chosen on the Mac moves the phone nothing. Where the phone's look moves
+//    (a Settings choice) or the library's settings land, the composed look
+//    reaches `MobileEditorStyle` and EVERY registered editor surface through
+//    the liveness authority (MINOR 2 — a stood-down editor restyles too, so no
+//    mixed-voice storage survives a flip). VM-51's library-voice road (R-47-2)
+//    retired with VM-247: the voice row writes the phone's voice. The S1
+//    masthead switch door retired at S3 batch 1 (P11).
 //
 
 import Foundation
@@ -76,18 +82,29 @@ final class MobileShellRouter {
     /// are `MobileAppearance.swift`'s.
     @ObservationIgnored let appearance: MobileAppearanceController
 
-    init(appearance: MobileAppearanceController = MobileAppearanceController()) {
+    /// **This phone's look** (VM-247 — voice, colour palette, the note's
+    /// background): the device's own, app-lived like `appearance`, so the lobby
+    /// wears it before any library opens. A reader observes the controller's own
+    /// `choice`; its rule and its storage are `MobileLook.swift`'s.
+    @ObservationIgnored let look: MobileLookController
+
+    init(
+        appearance: MobileAppearanceController = MobileAppearanceController(),
+        look: MobileLookController = MobileLookController()
+    ) {
         self.appearance = appearance
+        self.look = look
+        look.onChange = { [weak self] in self?.lookMoved() }
     }
 
-    /// **What the phone wears before a library has answered** — the lobby
-    /// (no library open) and the shell's first frame before its store's
-    /// first emission: what a library that has chosen NOTHING reads, Study
-    /// under the sea-glass (`Queries.ThemeSettings.unsetStoreVoice` /
-    /// `.unsetStorePalette`, AppSpec §12). PROVISIONAL P-47-15 — the Mac's
-    /// storeless placeholder is R1's Terminal in the voice's own colours
-    /// (`VoiceTokens.fallback`); on the phone that would flash the wrong
-    /// voice for a frame at every launch and unlock of a Study library.
+    /// **What the library's store holds before it has answered** — what a
+    /// library that has chosen NOTHING reads (`Queries.ThemeSettings
+    /// .unsetStoreVoice` / `.unsetStorePalette`, AppSpec §12; PROVISIONAL
+    /// P-47-15). Since VM-247 its voice and palette are never worn (the phone's
+    /// own look lies over them — the lobby and the shell's first frame wear the
+    /// phone's look, whose fresh default is the same Study under the sea-glass,
+    /// R-260-3); it is the library's OTHER settings' value before the first
+    /// emission.
     static var placeholder: Queries.ThemeSettings {
         var settings = Queries.ThemeSettings()
         settings.voice = Queries.ThemeSettings.unsetStoreVoice
@@ -95,17 +112,19 @@ final class MobileShellRouter {
         return settings
     }
 
-    /// The library's landed settings — the phone's look (LK-1). A bound store
-    /// holds the placeholder until its first landing. With no library bound
-    /// (harness and preview use only — the shell binds before its first read)
-    /// it is the editor face's own look, so a hosted masthead and the editor
-    /// below it agree.
-    var settings: Queries.ThemeSettings { theme?.settings ?? MobileEditorStyle.settings }
+    /// **The settings the phone wears** (VM-247): the library's landed settings
+    /// with THIS PHONE's look laid over them — its voice and palette, never the
+    /// library's (`MobileLookChoice.over`). A bound store holds the placeholder
+    /// until its first landing. With no library bound (the lobby; harness and
+    /// preview use) the look lies over the editor face's settings.
+    var settings: Queries.ThemeSettings {
+        look.choice.over(theme?.settings ?? MobileEditorStyle.settings)
+    }
 
-    /// The library's voice (R-47-2's rows read it).
+    /// This phone's voice (Settings ▸ Look ▸ Voice reads it).
     var voice: ThemeVoice { settings.voice }
 
-    /// The chrome's tokens: the library's voice and palette through the ONE
+    /// The chrome's tokens: this phone's voice and palette through the ONE
     /// settings → tokens road, in THIS device's appearance (LK-2).
     func tokens(dark: Bool) -> VoiceTokens {
         VoiceTokens.resolve(settings: settings, dark: dark)
@@ -131,25 +150,39 @@ final class MobileShellRouter {
         themeSession = id
     }
 
-    /// **Where the library's look LANDS on the phone** (the Mac's rule: a
-    /// settings value is adopted where it lands). The UIKit face takes it
-    /// (`MobileEditorStyle.adopt` — its one app writer), and when the face
-    /// moved, EVERY registered editor restyles — the LK2 flip's road, now
-    /// reached by a change made on either device.
-    func adoptLanded(_ settings: Queries.ThemeSettings) {
-        if MobileEditorStyle.adopt(settings) {
+    /// **Where the library's settings LAND on the phone** (the Mac's rule: a
+    /// settings value is adopted where it lands). The UIKit face takes them
+    /// with THIS phone's look laid over (`MobileEditorStyle.adopt` — its one app
+    /// writer), so a voice or palette landing from the Mac moves no face; when
+    /// the face DID move (the first landing over the placeholder), EVERY
+    /// registered editor restyles.
+    func adoptLanded(_ library: Queries.ThemeSettings) {
+        wear(library)
+    }
+
+    /// **Where this phone's look MOVES** (VM-247 — a Settings choice): the
+    /// composed look reaches the editor face and every registered editor at once
+    /// — the LK2 flip's road, now driven by the device's own choice.
+    func lookMoved() {
+        wear(theme?.settings ?? MobileEditorStyle.settings)
+    }
+
+    /// The face takes the library's settings under this phone's look — voice,
+    /// palette, the note's background — and the open editors restyle only when
+    /// the face moved.
+    private func wear(_ library: Queries.ThemeSettings) {
+        let choice = look.choice
+        if MobileEditorStyle.adopt(choice.over(library), ground: choice.ground) {
             editors.applyVoiceChangeEverywhere()
         }
     }
 
-    /// **The voice door (R-47-2):** write the LIBRARY's voice, through the
-    /// Mac's Settings' own write (`ThemeStore.setVoice` →
-    /// `Operations.setThemeVoice`). Nothing changes here at the press: the
-    /// write lands through the store's observation (`adoptLanded`), exactly
-    /// as one made on the Mac does. No store (harness use) writes nothing.
+    /// **The voice door** — since VM-247 THIS phone's voice (her words: "the
+    /// voice should also be per device"), kept in this device's defaults; the
+    /// library's `theme_voice` is never written from the phone (R-47-2's
+    /// library road retired). The face and the open editors follow at once.
     func setVoice(_ next: ThemeVoice) {
-        guard next != voice else { return }
-        theme?.setVoice(next)
+        look.setVoice(next)
     }
 }
 

@@ -1508,8 +1508,58 @@ phone's Look; the Mac's sources untouched; no canon edited (the deltas are draft
 | 0. Preflight (CLAUDE.md + canon; this record's binding sections — What binds every batch, the 13b constitution, her kickoff rulings R-260-2/-3, the adjudications incl. A-260-3's procedural note and A-260-9's flag, the Batch 3 section, the BATCH 2 record; SurfaceContracts "The app" in full incl. the phone's Settings bullet; the resiliency protocol; QUESTIONS #281 and its addendum (P-47-16's "the cream background stays an option"); the VM-47 record's P-47-15/-16/-17/-24/-25/-26 rows; TEXTKIT2_NOTES §3) | DONE (this commit) |
 | 1. The pins on the pre-fix tree — VM-247's fence (a Look change writes no row; a library's look moves the phone nothing) and VM-254's default (her words one notch under today's, the editor's body with them) | DONE (`2e03a6811` — **that commit IS the red-on-old tree**; two new files, only symbols both trees declare: `MobilePhoneOwnLookFenceTests`, `MobileHerWordsDefaultTests`) |
 | 2. The red-on-old tree built headless (`DerivedData/vm260-3-rol`, an APFS clone of `vm260-2`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `2e03a6811` |
-| 3. VM-247 — this phone's own look (voice · palette · background · appearance on the device; the router's overlay; the editor face's ground; Settings ▸ Look's rows) | NOT STARTED |
+| 3. VM-247 — this phone's own look (voice · palette · background · appearance on the device; the router's overlay; the editor face's ground; Settings ▸ Look's rows) | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-3`, an APFS clone of `vm260-3-rol`, incremental, `nice -n 15`); the suites PENDING; the pins it moves are piece 5's |
 | 4. VM-254 — the text-size row and the smaller default (the type layer's table and its words scale; the editor face's body; the environment at the roots) | NOT STARTED |
 | 5. Pins MOVED with the rulings + the tip's new pins | NOT STARTED |
 | 6. Tip bundles (`vm260-3`, `vm260-3-mac`, `vm260-3-ui`) and READY-FOR-TESTS | NOT STARTED |
 | 7. The window — red-on-old, the whole phone target, the Mac legs, the keyboard-reveal UI test, the captures | PENDING (the GO) |
+
+### VM-247 — the traced mechanism: why a look chosen on either device moved the other
+
+The phone's whole look funnels through ONE seam, the shell router (`MobileShellRouter`, VM-51): it binds the open
+library's `ThemeStore` (the Mac's, hoisted to `Shared/`) and answers `settings` = the store's landed
+`Queries.ThemeSettings`; `tokens(dark:)` resolves every chrome surface from it (the shelf, the Library, the bar, the
+masthead, Settings, the message line), and the store's landing seam (`onLanded` → `adoptLanded`) hands the same value
+to the UIKit editor face (`MobileEditorStyle.adopt`) and restyles every registered editor. The store observes the
+synced `setting` table (`theme_voice`, `theme_palette`, `theme_tint`, `theme_accent_tint`), so a change made on the Mac
+— or landed by a sync apply — re-voiced and re-coloured the phone; and Settings ▸ Look ▸ Voice (R-47-2) called
+`ThemeStore.setVoice` → `Operations.setThemeVoice`, an upsert of the synced `theme_voice` row with its outbox row, so the
+phone's choice moved the Mac. The lobby wore a fixed placeholder (P-47-15). Appearance alone was already the device's
+(`MobileAppearanceController`, VM-53 — `AppearanceChoiceRule`'s road: one key in this device's defaults).
+
+### VM-247 — as built (`AppearanceChoiceRule`'s road; nothing in `Sources/`, `Shared/` or the Mac)
+
+- **The choice and its owner** — `VariorumMobile/Features/Shell/MobileLook.swift` (phone target only, no shared type):
+  `MobileLookChoice` {voice, palette, ground} kept in THIS device's defaults under three keys (`phoneLookVoice`,
+  `phoneLookPalette`, `phoneLookBackground` — beside VM-53's `appearanceChoice`; deliberately not the retired VM-51 key,
+  so an old phone-local voice is never read, R-260-3's "no seed"); a strange value reads as that choice's fresh default
+  (`AppearanceChoice.remembered`'s posture). `MobileLookController` is `MobileAppearanceController`'s twin — one owner,
+  `set…` remembers and then tells the router; **memory-only under a test runner's host** (VX-604's posture: the suites
+  share the dev-store app's `.standard`, and a choice one suite makes must never reach the next).
+- **The fresh default (her R-260-3, "Sea-glass default")** — `MobileLookChoice.fresh` = `Queries.ThemeSettings
+  .unsetStoreVoice` / `.unsetStorePalette` (Study under the sea-glass — the same constants the unset library reads, so
+  they cannot drift) on the paper. No copy from the library: a library's synced purple simply stops being worn.
+- **The overlay** — the router's `settings` = `look.choice.over(theme?.settings ?? MobileEditorStyle.settings)`: the
+  library's landed settings with the phone's voice and palette in their place and the custom seeds cleared (the phone
+  offers no custom palette, and a seed changed on the Mac must never read as a look that moved here); every other
+  setting stays the library's (the phone reads none today). The store is still bound and still lands — it is the
+  library's OTHER settings' road — so `Shared/Theme/ThemeStore.swift` and every synced-settings read path are untouched.
+- **Where the look reaches the editors** — one private `wear(_:)`: `MobileEditorStyle.adopt(choice.over(library),
+  ground:)`, and when the face moved, `editors.applyVoiceChangeEverywhere()` (the existing LK2 flip road — attributes
+  only, O(open note), at a deliberate settings press). Called by `adoptLanded` (a library landing — under the phone's
+  look it moves no face) and by `lookMoved` (the controller's change hook).
+- **The voice door** — `setVoice` writes the phone's voice (`look.setVoice`); `ThemeStore.setVoice` is no longer called
+  from the phone. No phone road writes a `setting` row for Look.
+- **The cream (P-47-16's road (b) as her choice; her words: "I also did like the cream background color option. that
+  should stay as an option for the phone")** — `MobileNoteGround` {paper, cream}: the paper is `tokens.surface` (road
+  (a), as built since the VM-47 run's piece 3.10), the cream the VOICE's own room under every palette
+  (`ReadingPageTokens.room` — the palette-less road the Read page's cream page sits on: Study `#FAF8F3`, Terminal
+  `#F6F6F1`, R51's black in dark). It is the NOTE's ground in Write — P-47-16's own scope — worn by the screen, its
+  masthead (P-47-17: one ground) and its edge strips (`MobileWriteScreen.noteGround`, the one SwiftUI rule
+  `MobileNoteGround.color`), and by the editor (`MobileEditorStyle.Face.paper` → `room` under the cream — the text view's
+  one line `backgroundColor = face.paper` untouched).
+- **Settings ▸ Look** — Voice (the phone's), **Colour palette** (the Mac's label; the system menu of the Mac's palettes
+  in the Mac's words, a checkmark on the chosen), **Background** (Paper · Cream), Appearance (unchanged).
+- **The lobby** wears the phone's look (`lockedTokens` → the router's tokens) — no library needed to ask.
+- **The walk's palette seam** (`MobileWalkLaunch`, DEBUG) now chooses the phone's palette through the controller — the
+  library's palette is no longer worn, so writing it would show nothing.

@@ -240,8 +240,9 @@ struct MobileShellView: View {
         router.bindTheme(session: session)
     }
 
-    /// VM-51: the library's voice and palette (LK-1), in this device's
-    /// appearance (LK-2) — the ONE settings → tokens road, via the router.
+    /// This phone's voice and palette (VM-247; the library's until then,
+    /// VM-51), in this device's appearance (LK-2) — the ONE settings → tokens
+    /// road, via the router.
     private var tokens: VoiceTokens {
         router.tokens(dark: scheme == .dark)
     }
@@ -411,12 +412,15 @@ struct MobileShellView: View {
         .onAppear { attachProtectionReceipts() }
         .onChange(of: bootstrap?.roadStanding.map { ObjectIdentifier($0) }) { _, _ in attachProtectionReceipts() }
         .task { await starsModel.start() }
-        // VM-51: the library's theme — held for the shell's life, so a voice
-        // or palette changed on either device lands here and in the editors.
+        // VM-51: the library's theme — held for the shell's life, so the
+        // library's settings land here and in the editors (since VM-247 under
+        // this phone's own look: a voice or palette chosen on the Mac moves
+        // nothing here).
         .task {
             #if DEBUG
-            // The walk's palette seam (DEBUG only; nothing without its env).
-            await MobileWalkLaunch.applyPalette(session)
+            // The walk's palette seam (DEBUG only; nothing without its env) —
+            // this phone's palette since VM-247.
+            MobileWalkLaunch.applyPalette(to: router.look)
             #endif
             await router.theme?.start()
         }

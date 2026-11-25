@@ -176,8 +176,9 @@ struct MobileWriteScreen: View {
         // the router's theme seam, its one app writer; QUESTIONS #195 MINOR 3.)
     }
 
-    /// The SwiftUI chrome's tokens — the LIBRARY's voice and palette (VM-51,
-    /// LK-1) through the router's one settings → tokens road; dark rides the
+    /// The SwiftUI chrome's tokens — this PHONE's voice and palette (VM-247;
+    /// the library's until then, VM-51) through the router's one settings →
+    /// tokens road; dark rides the
     /// system scheme (LK-2; R51's black rooms are the token layer's own).
     /// Harness use (no router) wears the editor face's own look, so the
     /// masthead and the page below it always agree.
@@ -186,17 +187,30 @@ struct MobileWriteScreen: View {
             ?? .resolve(settings: MobileEditorStyle.settings, dark: scheme == .dark)
     }
 
+    /// **The note's ground** (VM-247): the paper, or — when this phone chose it
+    /// (her "the cream background color option … should stay as an option for
+    /// the phone") — the cream, the voice's own room; one rule for the screen,
+    /// its masthead and its edge strips (`MobileNoteGround.color`), the editor's
+    /// own ground being the face's `paper`, the same choice in UIKit. Harness use
+    /// (no router) wears the editor face's own ground, so the page and the editor
+    /// agree.
+    private var noteGround: Color {
+        (router?.look.choice.ground ?? MobileEditorStyle.ground)
+            .color(tokens: tokens, dark: scheme == .dark)
+    }
+
     var body: some View {
         MobileWriteView(model: model)
             .ignoresSafeArea(.keyboard) // the container's keyboardLayoutGuide owns avoidance
             // VM-51 (R-47-1; the VM-47 run's piece 3.10, P-47-16): the page's
             // ground is the editor's own — the paper (`MobileEditorStyle.Face
-            // .paper`, the Mac's editor and note masthead on `tokens.surface`).
-            .background(tokens.surface.ignoresSafeArea())
+            // .paper`, the Mac's editor and note masthead on `tokens.surface`),
+            // or the cream this phone chose (VM-247).
+            .background(noteGround.ignoresSafeArea())
             // VM-47 (the walk's W-A1, redone): the strips beyond the shell's
-            // band — the paper at both edges, so with the keyboard up the
-            // keyboard and its bar sit over her paper, never the bare window.
-            .mobileEdgeGrounds(top: tokens.surface, bottom: tokens.surface)
+            // band — the note's ground at both edges, so with the keyboard up the
+            // keyboard and its bar sit over her page, never the bare window.
+            .mobileEdgeGrounds(top: noteGround, bottom: noteGround)
             .safeAreaInset(edge: .top) { masthead }
             .task {
                 // Wiring COMPLETES before the infinite observation loops
@@ -364,7 +378,7 @@ struct MobileWriteScreen: View {
         .padding(.horizontal, PhoneMetrics.gutter)
         .padding(.top, Self.mastheadTop)
         .padding(.bottom, Self.mastheadBottom)
-        .background(tokens.surface)  // VM-51: her title shares the page's ground (P-47-17)
+        .background(noteGround)  // VM-51: her title shares the page's ground (P-47-17; VM-247's cream too)
         .alert("Rename Note", isPresented: $renamePresented) {
             TextField("Title", text: $renameField)
             Button("Rename") {

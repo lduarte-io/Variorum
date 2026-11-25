@@ -4,8 +4,9 @@
 //
 //  Mobile Stage 3, batch 1 — the voice switch's real home (scope item 6:
 //  P11's placement lands; the S1 masthead door RETIRED — recorded). A
-//  minimal voiced sheet off the shelf: the two voices (since VM-51 the
-//  LIBRARY's synced voice, R-47-2 — LK2's phone-local preference retired),
+//  minimal voiced sheet off the shelf: the two voices (VM-51 made them the
+//  LIBRARY's synced voice, R-47-2; since VM-247 — the VM-260 run, batch 3 —
+//  the whole of Look is THIS PHONE's own: voice, colour palette, background),
 //  the sync status row (the Phase
 //  8 shell that carries over), and the DEBUG spike door (the Stage 0
 //  KEPT deviation's manual entry).
@@ -82,7 +83,7 @@ struct MobileSettingsView: View {
     @State private var perfNote: String?
     #endif
 
-    /// VM-51: the library's voice and palette, this device's appearance.
+    /// This phone's voice and palette (VM-247) in this device's appearance.
     private var tokens: VoiceTokens {
         router.tokens(dark: scheme == .dark)
     }
@@ -114,6 +115,12 @@ struct MobileSettingsView: View {
     static let diagnosticsGroupTitle = "Diagnostics"
     static let voiceLabel = "Voice"
     static let appearanceLabel = "Appearance"
+    /// VM-247: the Mac's own label for the same row (`PaletteCopy.title`, Settings
+    /// ▸ General — a phone pin holds it to the Mac's source).
+    static let paletteLabel = "Colour palette"
+    /// VM-247: her own word ("the cream background color option") — DRAFT for
+    /// her wording pass, with its two words below.
+    static let groundLabel = "Background"
 
     /// The voice choice's two words — the two rows' own, kept (R-47-2).
     static func voiceWord(_ voice: ThemeVoice) -> String {
@@ -130,6 +137,57 @@ struct MobileSettingsView: View {
         case .system: "Follow system"
         case .light: "Light"
         case .dark: "Dark"
+        }
+    }
+
+    /// **VM-247 — the palettes' words: the Mac's own** (`PaletteCopy.label`, the
+    /// Mac's Settings ▸ General swatch strip; a phone pin holds every one to the
+    /// Mac's source, as the appearance words are held).
+    static func paletteWord(_ palette: ThemePalette) -> String {
+        switch palette {
+        case .default: "Classic"
+        case .lavender: "Lavender"
+        case .mint: "Mint"
+        case .pink: "Pink"
+        case .blue: "Blue"
+        case .goldAndBlack: "Gold & black"
+        case .sageAndTerracotta: "Sage & terracotta"
+        case .slateAndAmber: "Slate & amber"
+        case .plumAndCream: "Plum & cream"
+        case .inkAndCoral: "Ink & coral"
+        case .greyAndGreen: "Grey & green"
+        case .cobaltAndTangerine: "Cobalt & tangerine"
+        case .peachAndIndigo: "Peach & indigo"
+        case .butterAndCobalt: "Butter & cobalt"
+        case .roseAndMoss: "Rose & moss"
+        case .tealAndRust: "Teal & rust"
+        case .seaglass: "Sea glass"
+        case .custom: "Custom"
+        }
+    }
+
+    /// **VM-247 — the palette menu's sections**: the Mac's groups in the Mac's
+    /// order (`PaletteCopy.Group`), but for two calls (PROVISIONAL P-260-3c): the
+    /// Mac's two one-swatch rows ("Default" — the sea-glass — and "Classic") are
+    /// one untitled first section, where a "Classic" heading over a lone
+    /// "Classic" would say its word twice; and "Your own" is not offered (her own
+    /// hex needs the seed fields the phone does not have). The heading words are
+    /// the Mac's (pinned to its source).
+    static let paletteSections: [(title: String?, palettes: [ThemePalette])] = [
+        (nil, [.seaglass, .default]),
+        ("Pastels", [.lavender, .mint, .pink, .blue]),
+        ("Two-tone", [.goldAndBlack, .sageAndTerracotta, .slateAndAmber,
+                      .plumAndCream, .inkAndCoral, .greyAndGreen]),
+        ("Bold", [.cobaltAndTangerine, .peachAndIndigo, .butterAndCobalt,
+                  .roseAndMoss, .tealAndRust]),
+    ]
+
+    /// VM-247 — the note's background's two words. DRAFT (her wording pass):
+    /// "Cream" is her own word for road (b).
+    static func groundWord(_ ground: MobileNoteGround) -> String {
+        switch ground {
+        case .paper: "Paper"
+        case .cream: "Cream"
         }
     }
 
@@ -282,12 +340,13 @@ struct MobileSettingsView: View {
         }
     }
 
-    /// **The look** — the library's voice (R-47-2: the row writes the LIBRARY's
-    /// voice, the Mac Settings' own write, through the router's theme store; its
-    /// selection reads the voice as it landed, so a voice chosen on the Mac shows
-    /// here too) and THIS phone's light · dark · follow-the-system choice (VM-53;
-    /// her LK-1/LK-2 — light or dark is each device's own: a local preference,
-    /// `MobileAppearanceController`, never the synced `setting` table).
+    /// **The look — all of it THIS PHONE's own** (VM-247; her words: "I don't like
+    /// that the theme syncs between mac and phone either it's annoying" · "the
+    /// voice should also be per device"): the voice, the colour palette, the
+    /// note's background (her "cream background color option") and light · dark
+    /// · follow the system (VM-53) — each kept in this device's defaults
+    /// (`MobileLookController`, `MobileAppearanceController`), never the synced
+    /// `setting` table; a look chosen on the Mac moves nothing here.
     private var lookGroup: some View {
         MobileSettingsGroup(Self.lookGroupTitle, tokens: tokens) {
             choiceRow(Self.voiceLabel) {
@@ -295,12 +354,65 @@ struct MobileSettingsView: View {
                     [ThemeVoice.terminal, .study], selection: router.voice, tokens: tokens,
                     word: Self.voiceWord, select: { router.setVoice($0) })
             }
+            choiceRow(Self.paletteLabel) { paletteMenu }
+            choiceRow(Self.groundLabel) {
+                PhoneSegmentedChoice(
+                    MobileNoteGround.allCases, selection: router.look.choice.ground, tokens: tokens,
+                    word: Self.groundWord, select: { router.look.setGround($0) })
+            }
             choiceRow(Self.appearanceLabel) {
                 PhoneSegmentedChoice(
                     AppearanceChoice.allCases, selection: router.appearance.choice, tokens: tokens,
                     word: Self.appearanceWord, select: { router.appearance.set($0) })
             }
         }
+    }
+
+    /// **The colour palette** (VM-247) — sixteen choices, more than a segmented
+    /// control holds, so the choice is the SYSTEM's menu (the Library's sort door's
+    /// idiom: a checkmark on the chosen, nothing private built — PROVISIONAL
+    /// P-260-3c): its door is the row under the label, the chosen palette's name
+    /// in ink with the pop-up glyph, a whole-width target at least 44 tall. The
+    /// screen recolours as she picks — the swatches the Mac draws are the room
+    /// itself here.
+    private var paletteMenu: some View {
+        let chosen = router.look.choice.palette
+        return Menu {
+            ForEach(Self.paletteSections.indices, id: \.self) { index in
+                let section = Self.paletteSections[index]
+                Section {
+                    ForEach(section.palettes, id: \.self) { palette in
+                        Button {
+                            router.look.setPalette(palette)
+                        } label: {
+                            if palette == chosen {
+                                Label(Self.paletteWord(palette), systemImage: "checkmark")
+                            } else {
+                                Text(Self.paletteWord(palette))
+                            }
+                        }
+                    }
+                } header: {
+                    if let title = section.title { Text(title) }
+                }
+            }
+        } label: {
+            HStack(spacing: PhoneMetrics.Space.s8) {
+                Text(tokens.chromeLabel(Self.paletteWord(chosen)))
+                    .phoneType(.control, tokens)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.up.chevron.down")
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
+                    .accessibilityHidden(true)
+            }
+            .frame(maxWidth: .infinity, minHeight: PhoneMetrics.touchMinimum, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .accessibilityLabel(Self.paletteLabel)
+        .accessibilityValue(Self.paletteWord(chosen))
     }
 
     /// A labelled choice: the label on its own line, the system control under

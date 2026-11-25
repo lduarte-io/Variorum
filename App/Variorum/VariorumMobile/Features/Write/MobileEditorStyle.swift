@@ -8,10 +8,11 @@
 //
 //  **Since S1 batch 3 this is the LOOK CANON's editor half** (L13 ruled at
 //  the look sittings): the VALUES resolve from the shared `VoiceTokens`
-//  layer — the ONE canon both platforms carry (Shared/Theme). **Since VM-51
-//  (the VM-47 run, batch 3 — her LK-1/LK-2) they are the LIBRARY's voice
-//  and palette**, the synced settings the shell's theme store lands
-//  (`MobileShellRouter`), no longer a phone-local preference (retired).
+//  layer — the ONE canon both platforms carry (Shared/Theme). **Since VM-247
+//  (the VM-260 run, batch 3) they are THIS PHONE's voice, palette and note
+//  background** — the device's own look the shell router lays over the
+//  library's landed settings (`MobileShellRouter`, `MobileLook.swift`); VM-51
+//  had made them the library's synced voice and palette.
 //  Feature code still never holds a literal color (P-8): every UIColor here
 //  is a dynamic derivation of a token, and DARK is the token layer's own
 //  dark values riding the system scheme — light or dark stays the device's
@@ -20,8 +21,8 @@
 //  Concurrency (QUESTIONS #195 MINOR 3, closed at VM-51): the live look is
 //  MAIN-ACTOR state — the compiler now enforces what the old comment only
 //  claimed ("main-thread written, main-thread read") — and the app has ONE
-//  writer, `adopt(_:)`, called where the library's settings LAND (the shell
-//  router's theme seam). The two other writers (the Write screen's init and
+//  writer, `adopt(_:ground:)`, called by the shell router where the library's
+//  settings LAND and where the phone's own look MOVES (VM-247). The two other writers (the Write screen's init and
 //  the router's init) are gone. `voice`'s setter survives as the harness
 //  door the suites drive one voice through. The per-voice faces are cached
 //  `static let`s, and a palette face is built once per landed palette and
@@ -48,18 +49,24 @@ import UIKit
 import VariorumCore
 
 nonisolated enum MobileEditorStyle {
-    // MARK: - The live look (the library's — VM-51)
+    // MARK: - The live look (the phone's own — VM-247)
 
-    /// The library's look as the editor wears it — voice, palette and the
-    /// custom seeds — the last value `adopt(_:)` took (before any library has
-    /// landed: R1's placeholder, Terminal in the voice's own colours, which is
-    /// what the suites' editor worlds assume). MAIN-ACTOR state (MINOR 3).
+    /// The look as the editor wears it — voice, palette and the custom seeds —
+    /// the last value `adopt(_:ground:)` took (before anything has landed: R1's
+    /// placeholder, Terminal in the voice's own colours, which is what the
+    /// suites' editor worlds assume). MAIN-ACTOR state (MINOR 3).
     @MainActor private static var stored = Queries.ThemeSettings()
+    /// The note's ground the editor wears (VM-247 — the paper, or the cream).
+    @MainActor private static var storedGround: MobileNoteGround = .paper
     /// The face `stored` names, rebuilt only when the look moves.
     @MainActor private static var current: Face = terminalFace
 
-    /// The library's settings the editor wears now.
+    /// The settings the editor wears now.
     @MainActor static var settings: Queries.ThemeSettings { stored }
+
+    /// The note's ground the editor wears now (the Write screen reads it where no
+    /// router is — harness use).
+    @MainActor static var ground: MobileNoteGround { storedGround }
 
     /// The live voice. Its SETTER is the harness door (the suites drive one
     /// voice through it, the palette left as it stands); the app writes only
@@ -72,28 +79,37 @@ nonisolated enum MobileEditorStyle {
         }
     }
 
-    /// **THE ONE APP WRITER** (VM-51): the library's landed settings, adopted
-    /// where they land (`MobileShellRouter`'s theme seam). Answers whether the
-    /// FACE moved — the voice, the palette or the custom seeds — so the caller
-    /// restyles the open editors only when there is something to restyle.
+    /// **THE ONE APP WRITER** (VM-51; VM-247): the look the phone wears —
+    /// the settings the shell router composed (the library's, under this
+    /// phone's voice and palette) and the note's ground — adopted where the
+    /// library's settings land and where the phone's look moves. Answers whether
+    /// the FACE moved — the voice, the palette, the custom seeds or the ground —
+    /// so the caller restyles the open editors only when there is something to
+    /// restyle. A caller that names no ground (the suites' resets) adopts the
+    /// paper.
     @MainActor
     @discardableResult
-    static func adopt(_ settings: Queries.ThemeSettings) -> Bool {
+    static func adopt(_ settings: Queries.ThemeSettings, ground: MobileNoteGround = .paper) -> Bool {
         let moved = settings.voice != stored.voice
             || settings.palette != stored.palette
             || PaletteTint(settings) != PaletteTint(stored)
+            || ground != storedGround
         stored = settings
+        storedGround = ground
         if moved { current = makeFace(settings) }
         return moved
     }
 
     /// The voice's own face, with the palette laid over the slots a palette
-    /// replaces; a settings value that names no palette (`.default`, or a
-    /// `custom` with no valid seed) is the voice's static face itself.
+    /// replaces and the note's ground chosen; a settings value that names no
+    /// palette (`.default`, or a `custom` with no valid seed) on the paper is
+    /// the voice's static face itself.
     @MainActor
     private static func makeFace(_ settings: Queries.ThemeSettings) -> Face {
         let voiceFace = settings.voice == .terminal ? terminalFace : studyFace
-        return voiceFace.applying(palette: settings.palette, tint: PaletteTint(settings))
+        return voiceFace
+            .applying(palette: settings.palette, tint: PaletteTint(settings))
+            .grounded(storedGround)
     }
 
     // MARK: - One voice's resolved editor face
@@ -115,9 +131,12 @@ nonisolated enum MobileEditorStyle {
         let muted: UIColor
         /// The VOICE's own room — a palette never replaces it here
         /// (`applying(palette:tint:)` carries it through). Since the VM-47
-        /// run's piece 3.10 it is no longer the editor's ground (that is
-        /// `paper`, below); no editor view reads it.
+        /// run's piece 3.10 it is the editor's ground only when this phone
+        /// chose the cream (VM-247 — `paper`, below); no editor view reads it
+        /// directly.
         let room: UIColor
+        /// The note's ground this face draws (VM-247): the paper, or the cream.
+        private(set) var ground: MobileNoteGround = .paper
         // The six colours below — with the markdown palette's `link` — are
         // the ones a palette replaces (`applying(palette:tint:)`; in light the
         // resolver keeps the voice's own paper and card, as
@@ -227,8 +246,25 @@ nonisolated enum MobileEditorStyle {
         /// (`EditorSurfaceChrome.paper` = `NSColor(tokens.surface)`, its scroll
         /// view's background); its one reader here is the text view's
         /// background (`MobileEditorTextView.applyVoiceChrome`). The same
-        /// object as `surface`, so a palette's landing moves it with the rest.
-        var paper: UIColor { surface }
+        /// object as `surface`, so a palette's landing moves it with the rest —
+        /// **or, when this phone chose the cream (VM-247; P-47-16's road (b) as
+        /// her choice — "I also did like the cream background color option"),
+        /// the voice's OWN room**: never the palette's (R-47-1), the same object
+        /// as `room`, the SwiftUI twin being `MobileNoteGround.color`.
+        var paper: UIColor {
+            switch ground {
+            case .paper: surface
+            case .cream: room
+            }
+        }
+
+        /// This face on the given ground — itself when the ground is already it.
+        func grounded(_ ground: MobileNoteGround) -> Face {
+            guard ground != self.ground else { return self }
+            var face = self
+            face.ground = ground
+            return face
+        }
 
         /// VM-48: the phone layer's UIKit type — a role in this face's voice
         /// (`PhoneType.uiFont`: scaled with the text size, chrome held at
@@ -282,8 +318,8 @@ nonisolated enum MobileEditorStyle {
     static let terminalFace = Face(voice: .terminal)
     static let studyFace = Face(voice: .study)
 
-    /// The face the editor wears now — the library's voice under its
-    /// palette (`adopt(_:)`).
+    /// The face the editor wears now — this phone's voice under its palette,
+    /// on its ground (`adopt(_:ground:)`).
     @MainActor static var face: Face { current }
 
     /// P26/P43 (parity A3, her ruled flip — "the phone's menus
