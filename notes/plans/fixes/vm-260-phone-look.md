@@ -1062,8 +1062,8 @@ choice's drawing untouched (a remainder, below); no masthead rebuild (VM-148's).
 | 2. The red-on-old tree built headless (`DerivedData/vm260-2-rol`, an APFS clone of `vm260-1b`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` on the compile-fix commit's tree |
 | 3. VM-273 — the central step-down (`PhoneType` chrome roles and the note title's role, `PhoneControls` glyph · chip · box, `PhoneMetrics` radii, the bar's chip corner) + its consequence (`MobileBookDetails`' designated row off the faint) + the pins it moved | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-2`, incremental, `nice -n 15`); the suites PENDING |
 | 4. VM-272 — the note's top (`MobileWriteView`'s chrome only: the rows' gaps and air, the chips' 44 × 44 floor; the title's role and the tools' glyph come through piece 3) | DONE (this commit) — compiled in piece 3's bundle (`vm260-2`); zero lines in `MobileEditorTextView` or the text-input path; the suites PENDING |
-| 5. Pins MOVED with the rulings | NOT-STARTED |
-| 6. Tip bundles (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`) and READY-FOR-TESTS | NOT-STARTED |
+| 5. Pins MOVED with the rulings | DONE (`b4611e748`, with piece 3) — listed below |
+| 6. Tip bundles (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`) and READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` on code tip `ae12e4276` (APFS clones of `vm260-2-rol`, `vm260-1b-mac`, `vm260-1a-ui`; incremental; `nice -n 15`); the run list below. (Machinery note: the "Calls made" block below was on disk uncommitted when the orchestrator committed the record, so it rode `935bb5aa2` — content as written.) |
 | 7. The window — red-on-old, the whole phone target, the Mac legs, the keyboard-reveal UI test, the captures | PENDING (the GO) |
 
 ### The traced mechanism — "ridiculously oversized icons", "the top part is so huge it takes up half of the area"
@@ -1229,3 +1229,52 @@ Each moved because the ruled change moved what it holds (batch 1a's pattern); no
   own text frame, not its padded box, so `phoneField`'s "at least 44 tall" has been a drawn 44 since wave 1, not an
   answering one; the step-down neither widens nor narrows what answers. If confirmed (a pointer-injection tap 4 pt
   inside the box's top edge), it is a 44-pt-law ticket for every field (focus on a tap anywhere in the frame).
+
+### Batch 2 — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`; `UDID` = the device the GO names (iOS 26.2), booted fresh
+inside the claim, settled, shut down before release. Phone plan:
+`P(folder)=DerivedData/<folder>/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
+`-destination "platform=iOS Simulator,id=$UDID"`.
+
+**R — red on old** (`vm260-2-rol`, tree `f99f20818` — the pins over the pre-fix app):
+`-only-testing:VariorumMobileTests/MobileDrawnStepDownTableTests -only-testing:VariorumMobileTests/MobileDrawnStepDownRenderedTests
+-only-testing:VariorumMobileTests/MobileDrawnStepDownTargetTests -only-testing:VariorumMobileTests/MobileNoteTopTests`
+- Predicted RED: `theChromeSitsOneNotchUnderHerWords`, `theCornersAreTheMacsTwo`,
+  `theDrawingsSitWellInsideTheirTargets` (both voices), `theNoteTopGivesTheScreenBackToWriting` (both voices),
+  `everyDoorOnTheNoteTopAnswersAcrossFortyFour` (**Study only**).
+- Predicted GREEN (guards): `theNewThirteensNeverDipUnderTheFloor`, `everyControlAnswersAcrossItsWholeTarget` (all
+  four cases), `everyDoorOnTheNoteTopAnswersAcrossFortyFour` (Terminal), `theToolsAreOneRowOfFortyFourSquareTargets`
+  (both). A RED guard on old means a target was already under its law there — report it, it is a finding.
+- Read the `PERF[sim] VM-273 drawn …` and `VM-272 note top …` lines into this record (the measured boxes and heights).
+
+**P — the tip, the whole phone target, one launch** (`vm260-2`, code tip `ae12e4276`): `-only-testing:VariorumMobileTests`,
+read against main's known reds (batch 1a's run: 6 known issues — `MobileFilterRowGeometryTests`' two Display-Zoom pins × 2,
+`MobileTrashTests`' empty-tree diagnostic × 2). It holds this batch's pins, the moved pins, and every suite that mounts a
+control, a root, a note or the line (the tip also carries batch 1b's code and pins). Predicted: green but those six.
+The likeliest place for a surprise is a geometry pin elsewhere that measured a 17- or 15-pt chrome word's width or a
+22-pt glyph — such a red is a pin the ruling moved only if it holds a drawn number; a TARGET under 44 is a regression.
+
+**M — the Mac legs** (`DerivedData/vm260-2-mac/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`,
+`-destination 'platform=macOS'`): `-only-testing:VariorumTests/<type>` for ThemeTokenTests NoLiteralColourTests
+PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
+OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests (the token pins and every Mac suite that
+walks the phone tree — this batch changes `Shared/Theme/Phone*.swift`, which the Mac compiles and never renders;
+`VoiceTokens.swift` untouched). If batch 1b's M leg runs in the same window it may run on this bundle instead (it
+carries 1b's code). Expected green but `IndexTierMetricsTests`' 4 declared known issues.
+
+**U — the keyboard-reveal UI test** (OWED — this batch changes `MobileWriteView`'s layout): `DerivedData/vm260-2-ui`,
+scheme TK2SpikeUITests' plan, `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, on a device whose
+library opens (the walk device — batch 1a's no-verdict was a Castle-locked device). Expected green: the masthead is the
+screen's top inset; the reveal road is the text view's, untouched.
+
+**W — the captures** (the window's job, both voices, light; to `notes/plans/vm-260-screens/batch-2/`). BEFORE: the
+Debug phone app from `vm260-2-rol` (its app is the pre-fix app); AFTER: the app from `vm260-2`. The same three stops
+in each, at her screenshot's framing:
+1. **A note with the keyboard up** — a note in a book with a few paragraphs, a tap in its lower half (her screenshot's
+   frame: the back button, the title row with its four tools, the membership line, the chips, her text, the keyboard).
+2. **The Bookcase root** — the top line (name, count, New Note, gear), the book rows with the Today chip, the quick
+   entry, the bar.
+3. **The Library** — the top line (trash, New Note, gear), the search field, the filter row, rows, the bar.
+And, after only (the step-down's other faces): Settings (menu rows at 15, the segmented choices — the remainder), the
+Trash's kind chips (near-square), a calm button (Create Book), a refusal's card (corner 8).
