@@ -177,7 +177,9 @@ struct MobileWingPath: View {
             // ladder round 1, finding 7); none on a root that draws none.
             .accessibilityValue(detail ?? "")
         } else {
-            lines(Text(tokens.path(MobileWingTitle.components(wing: wing)))
+            // An unread name says nothing — never the voice's bare prefix ("~/").
+            let words = MobileWingTitle.components(wing: wing)
+            lines(Text(words.isEmpty ? "" : tokens.path(words))
                 .foregroundStyle(tokens.phone.muted))
         }
     }

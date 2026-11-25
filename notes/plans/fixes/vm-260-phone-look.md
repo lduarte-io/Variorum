@@ -494,6 +494,11 @@ a muted line under it on the Bookcase, the trash on the Library only, P-47-27's 
 #281's P-47-9, P-47-22, P-47-27, P-47-31 answered by this member.
 
 
+**Self-review finding (fixed, pinned).** With the page word gone, a root's plain line for a wing whose name is not
+yet read drew Terminal's bare prefix "~/" (`tokens.path([])`); it now draws nothing (`MobileWingPath`'s plain branch).
+Pin: `MobileWingDoorGeometryTests.anUnreadNameDrawsNoBarePrefix` — red on `f8aa3f6f4` by construction (that tree drew
+"~/"), green expected on the tip; PENDING (it runs in leg P, the whole phone target).
+
 ### READY-FOR-TESTS (the stage window's commands; every result PENDING until run)
 
 All from `App/Variorum/`, zsh, `test-without-building` against the bundles already built (nothing builds in the

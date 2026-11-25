@@ -419,6 +419,24 @@ struct MobileWingDoorGeometryTests {
         }
     }
 
+    /// **An unread wing name draws nothing** (VM-255's self-review — RED on
+    /// `f8aa3f6f4`, where the plain line drew Terminal's bare "~/" once the page
+    /// word had left it). A non-Home wing whose name is not yet read: no line
+    /// beginning with the voice's prefix, in Terminal.
+    @Test func anUnreadNameDrawsNoBarePrefix() async throws {
+        try await withEditorWorld { session, _ in
+            await withHostedSurface(
+                MobileStarredView(
+                    stars: MobileStarsModel(session: session), tokens: .terminalLight,
+                    wingName: nil, tabBar: { EmptyView() }, onOpen: { _ in })
+            ) { surface in
+                await surface.settle(10)
+                #expect(!surface.visibleLabels.contains { $0.hasPrefix(VoiceTokens.terminalLight.pathPrefix) },
+                        "labels were \(surface.visibleLabels)")
+            }
+        }
+    }
+
     /// Without a door wired (every existing harness), the line is the single
     /// text batch 1 drew — no button carries the wing's name.
     @Test func withoutADoorTheLineIsPlainText() async throws {
