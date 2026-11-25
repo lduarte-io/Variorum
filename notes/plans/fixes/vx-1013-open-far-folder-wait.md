@@ -128,7 +128,16 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
    `take(_:)` seam byte-for-byte. `AppBootstrap`: one `FarFolderWalk` per `beginOpening`, handed to `routeAndOpen`'s
    context; `finish(.roadLobby)` awaits the begun walk and lands it on the lobby still standing. `searchIfOwed` keeps its
    own full walk (D-1013-4).
-4. NOT-STARTED — app pins (route zero far reads, walk count, press equivalence, lobby landing).
+4. IN-PROGRESS — app pins `App/Variorum/VariorumTests/Protection/OpenFarFolderWaitTests.swift` (8 tests; compiles —
+   `** TEST BUILD SUCCEEDED **` via `build-for-testing`, nothing run on the stage): the route pin (a quiet-road open,
+   ZERO far reads), the walk-count pin (lobby + landing + a refused and an opening press = ONE far read), the
+   press-equivalence pin (a passphrase only a far key file carries still opens, one read — the join), the rule-27
+   landing pin, the typed-roads landing pin, the P-1013-3 quiet-road landing pin, the custody-probe pin, and the
+   model's landing-waits-for-the-press pin. Over a planted road whose far folder COUNTS its claims
+   (`ProtectionFarFolder.accessed`). Remains: running them headless (the VX-306 SwiftPM harness recipe, in the
+   scratchpad — `swift test`, never `xcodebuild test`) green, then red-on-old by the behavioural revert (R1:
+   `CatalogLister.catalog(_:)` reads both roots for every state; R2: the probe reads `catalog()`), then the press pin's
+   mutation (the join dropped). PENDING.
 5. NOT-STARTED — the sweep table (D-1013-3) below.
 
 ## THE LADDER
