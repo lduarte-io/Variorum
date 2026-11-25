@@ -419,6 +419,8 @@ chip=(AddToBookMintTests AscentDoorTests AscentRoutingTests BookAnchorTests Book
 - **The WHOLE phone target: NOT RUN in window 1.**
 - **Machinery honesty — the orchestrator's budget death.** The orchestrator session (Fable) hit the author's Fable usage limit right after the Mac target finished (~07:04): it could neither ping SEAM nor release, and the claim expired unreleased at 08:08 (nov24's 07:41 status check went unanswered). Nothing was lost — the log on disk held the run whole, nothing was mid-revert, the walk had not started, the dev store was never touched. The session continued on Opus at her word ("continue - I hit my fable limit but I have opus credits"). Nothing Fable-owed remained: the Fable-mandatory ladder (the editor-seam class) had already closed. Machine state at the resume: zero instances, no Problem Reporter, 0 new `Variorum-*.ips` since 06:07.
 
+**Carried from VX-1036 (nov24, ~10:00):** VX-1036's batch 3 moves the book navigator's floor PER VOICE — 229 pt Terminal, 203 pt Study (was 190). `BookMastheadFitsItsColumnTests` assumes the 190-pt floor; VX-1036 merges AFTER this run and OWNS that re-read — nothing changes here. **Consequence for VX-1091** (the Terminal mode tabs, 168 pt in a 166-pt room at the 190 floor): at a 229-pt floor the room is ~205 pt, so the overflow likely dissolves with VX-1036's merge — VX-1091's triage at this closeout says so, to be confirmed by VX-1036's re-read rather than closed blind.
+
 **Window 2 (re-requested ~09:55, first after vm-260):** the three reds re-run alone · the WHOLE phone target · SEAM · the gate walk. PENDING.
 
 ## CLOSEOUT
