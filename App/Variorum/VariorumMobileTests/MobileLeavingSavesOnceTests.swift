@@ -16,10 +16,11 @@
 //  company:
 //
 //  · **(a) every road still savepoints a note she changed — once:** the pop,
-//    the tab switch (the capture box's filing — a tab switch leaves the box;
-//    the note on the stack it hides stays open on that stack, as before), a
-//    Standard backgrounding, a Castle backgrounding, and the lock itself;
-//    each leaves exactly ONE new quiet savepoint holding her text;
+//    the tab switch (the capture box's filing, and — since VM-256, her R-260-5
+//    "Note closes on leaving", P-71-1 retired — the note on the page the switch
+//    leaves, which closes as a pop closes it), a Standard backgrounding, a
+//    Castle backgrounding, and the lock itself; each leaves exactly ONE new
+//    quiet savepoint holding her text;
 //  · **(b) an earlier leaving never stands in for a later one:** she edits
 //    again and leaves again, and a second savepoint is written;
 //  · **(c) under Castle the savepoint is in the store before the store
@@ -257,14 +258,17 @@ struct MobileLeavingSavesOnceTests {
 
     // MARK: (a) — the tab switch
 
-    /// **A tab switch leaves the capture box — its filing savepoints the box's
-    /// note ONCE** (the shell's `selectPage`: `fileOnLeaving`, then the
-    /// liveness handoff). The note on the stack the switch hides stays OPEN on
-    /// that stack (stood down, as the liveness authority's rule has always
-    /// had it), so the switch asks nothing for it — its savepoint comes when
-    /// it is popped, the app is left, or the library locks. Unchanged by
-    /// VM-71; pinned so the road is stated.
-    @Test func aTabSwitchFilesTheBoxOnceAndLeavesTheHiddenNoteOpen() async throws {
+    /// **A tab switch leaves the capture box AND the note on the page it leaves
+    /// — each savepointed ONCE** (VM-256, her R-260-5 "Note closes on leaving";
+    /// P-71-1 retired with its premise). The shell's `selectPage` returns the
+    /// page left to its root first — the note's screen leaves the tree and its
+    /// own leaving road runs exactly as a pop's (teardown, `savepointOnLeaving`,
+    /// the hold given back) — then files the box and hands the pen on. MOVED
+    /// from `aTabSwitchFilesTheBoxOnceAndLeavesTheHiddenNoteOpen`, VM-71's
+    /// statement of P-71-1 (the hidden note stayed open; the switch asked
+    /// nothing for it). The shell's own road is mounted in
+    /// `MobilePageLeavingTests`.
+    @Test func aTabSwitchFilesTheBoxOnceAndClosesTheNoteOnThePageItLeaves() async throws {
         try await withLockableWorld { session, store in
             let postID = try await seedLeftNote(session)
             let router = MobileShellRouter()
@@ -280,19 +284,27 @@ struct MobileLeavingSavesOnceTests {
             #expect(await router.quickNote.mintNow() != nil, "the box minted its note")
             let boxNote = try #require(router.quickNote.postID)
 
-            // `MobileShellView.selectPage`'s two calls, in its order.
+            // `MobileShellView.selectPage`'s order: the page left returns to its
+            // root (the note's screen leaves the tree), then the box files and
+            // the pen is handed on.
+            screen.close()
             let handoff = router.editors.beginHandoff()
             await router.quickNote.fileOnLeaving()
             await router.editors.tabDidBecomeVisible(.library, handoff: handoff)
+            #expect(await eventually { session.autosaveHolderCount(forPost: postID) == 0 },
+                    "the note's leaving finished (its editor gave its coordinator back)")
 
             #expect(try await autoSavepoints(store.view, postID: boxNote).count == 1,
                     "the box's note: one savepoint at its filing")
+            let text = try await storedTakeText(store.view, postID: postID)
+            let left = try await autoSavepoints(store.view, postID: postID)
+            #expect(left.count == 2 && left.last == text,
+                    "the note on the page left: ONE leaving savepoint, holding her text — \(left)")
+            #expect(router.editors.registeredPostIDs.isEmpty, "and its screen left the liveness authority")
+
             await router.quickNote.fileOnLeaving()  // the next switch, an empty box
             #expect(try await autoSavepoints(store.view, postID: boxNote).count == 1, "and only one")
-            try? await Task.sleep(for: .milliseconds(800))  // past the hidden note's debounce
-            #expect(try await autoSavepoints(store.view, postID: postID) == ["Base."],
-                    "the hidden stack's note is still open there — the switch did not leave it")
-            #expect(router.editors.registeredPostIDs == [postID], "and its screen is still registered")
+            #expect(try await autoSavepoints(store.view, postID: postID).count == 2, "and only one for the note")
         }
     }
 

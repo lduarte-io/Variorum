@@ -326,7 +326,7 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 | 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (this commit) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
 | 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (this commit) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) PENDING |
 | 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (this commit) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
-| 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | NOT-STARTED |
+| 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (this commit) — phone `build-for-testing` green; the moved pins PENDING |
 | 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | NOT-STARTED |
 | 6. Phone + Mac `build-for-testing` green; READY-FOR-TESTS | NOT-STARTED |
 | 7. The suites (each pin red on old by behavioural revert, then the batch's suites green) | PENDING (needs the stage GO) |
@@ -400,3 +400,31 @@ root (`pagingAllowed`). Two roads did not:
   road already popped) — recorded as such, not as a red. PENDING.
 - The Protection-ask road (2) is not mounted in a pin (a bootstrap world is the Protection suites' heavy harness); it
   is covered by construction — the pop moves INTO `selectPage`, the one page road every road takes.
+
+**The fix (piece 4), two halves, both structural.** (1) The pop moved INTO `MobileShellView.selectPage` — the one road
+every page change takes (a tab, a swipe, the wing landing, the Protection ask's adoption): the stack being left returns
+to its root, unanimated, before `tab` moves. A note on it closes exactly as Back closes it — its screen's `onDisappear`
+road (teardown → `AppSession.savepointOnLeaving` → the hold given back) IS the existing leaving occasion; no new
+operation, no new ask. `tabSelected` keeps only the current tab's animated pop. (2) The one push door
+`push(_:in:)` refuses when the owning stack's page is not the one showing, and every stack write in the roots' wiring
+now goes through it (the Starred, Bookcase and Library closures used `…Path.append` directly). With both, a hidden page
+always stands at its root, so arriving anywhere — a tap, or a swipe revealing the neighbour mid-flight — shows the page
+itself.
+
+**PROVISIONAL P-260-1a (for QUESTIONS at the merge — the push door's face).** A note (or book) asked for on a page she
+has since left is MADE and kept — it lists where it lives — and NOT opened; nothing is said. Built: (a) as described —
+the only arm that keeps P-3 (no editor mounts or takes the pen on a page she cannot see) and R-260-5 (a page she left
+stands at its root). Alternatives: (b) follow it — the page changes back to where it was asked and opens it (yanks her
+from the page she chose); (c) open it on the page she is on now (a note born in the Library opening on the Bookcase's
+stack). The window is a mint's latency, so the case is rare outside a lag.
+
+Moved pins (P-71-1 retired by R-260-5): `MobileLeavingSavesOnceTests.aTabSwitchFilesTheBoxOnceAndLeavesTheHiddenNoteOpen`
+→ `aTabSwitchFilesTheBoxOnceAndClosesTheNoteOnThePageItLeaves` (selectPage's new order: the screen leaves, the box
+files, the pen is handed on — the box's note one savepoint, the note on the page left one leaving savepoint holding her
+text, its screen out of the authority); `MobileProtectionScreenTests.theReopensAskIsAdoptedOnceAndPushesTheScreen`
+(the typed write `shelfPath = [.protection]`). The liveness authority's own two-stack pins (`MobileLivenessTests`,
+`MobileNoteOpenOnceTests`) drive the authority's brain, which still governs any state, and stay unchanged.
+
+**Canon owed at the merge (not this batch's to write):** SurfaceContracts' phone-bar bullet (P-47-19's sentence becomes
+every road's law; the bar drawn once), the QUESTIONS #280 addendum retiring P-71-1 (R-260-5, this run the pointer), and
+P-260-1a into QUESTIONS.

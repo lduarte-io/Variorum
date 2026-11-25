@@ -255,7 +255,7 @@ struct MobileShellView: View {
                             wingName: MobileWingTitle.name(of: wings),
                             onWingDoor: { wingDoor.open() },
                             tabBar: { barSpace },
-                            onOpen: { starredPath.append($0) })
+                            onOpen: { push($0, in: .starred) })
                     }
                 }
                 page(.shelf, width: width) {
@@ -266,18 +266,18 @@ struct MobileShellView: View {
                             wingName: MobileWingTitle.name(of: wings),
                             onWingDoor: { wingDoor.open() },
                             tabBar: { barSpace },
+                            // VM-256: every road onto a stack is the one push door,
+                            // which lands nothing on a page she has since left.
                             onOpenBook: { id in
-                                leavingShelf { shelfPath.append(MobileRoute.book(id)) }
+                                leavingShelf { push(.book(id), in: .shelf) }
                             },
                             onOpenForWriting: { id in
-                                leavingShelf {
-                                    shelfPath.append(MobileRoute.note(id, focus: true))
-                                }
+                                leavingShelf { push(.note(id, focus: true), in: .shelf) }
                             },
                             // Finding 1: a deleted BOOK rows in the Trash while
                             // books live here, so the Shelf renders the same door.
                             onOpenTrash: {
-                                leavingShelf { shelfPath.append(MobileRoute.trash) }
+                                leavingShelf { push(.trash, in: .shelf) }
                             })
                     }
                 }
@@ -293,9 +293,9 @@ struct MobileShellView: View {
                             wingName: MobileWingTitle.name(of: wings),
                             onWingDoor: { wingDoor.open() },
                             tabBar: { barSpace },
-                            onOpen: { libraryPath.append($0) },
-                            onOpenTrash: { libraryPath.append(MobileRoute.trash) },
-                            onOpenArchive: { libraryPath.append(MobileRoute.archive) },
+                            onOpen: { push($0, in: .library) },
+                            onOpenTrash: { push(.trash, in: .library) },
+                            onOpenArchive: { push(.archive, in: .library) },
                             isOnScreen: libraryOnScreen(width: width))
                     }
                 }
@@ -361,11 +361,12 @@ struct MobileShellView: View {
         // VM-225 — the interim wing door's plain list (the name on any root
         // opens it). A pick lands on the wing's Bookcase: the door counts the
         // landing, and the shell shows the Shelf page through its one page
-        // road (P-55-14: no stack is touched, so nothing she has open is
-        // closed. The Shelf's own stack is never left holding a screen while
-        // hidden — a page is left only from its root, and the protection
-        // ask selects the Shelf before it pushes — so the landing always
-        // shows the Bookcase itself).
+        // road (P-55-14: the door is on a root's line, so the page left
+        // already stands at its root and nothing she has open is closed. The
+        // Shelf's own stack never holds a screen while hidden — VM-256: the one
+        // page road returns every page left to its root, and the one push door
+        // lands nothing on a page not showing — so the landing always shows the
+        // Bookcase itself).
         .sheet(isPresented: $wingDoor.isOpen) {
             MobileWingListSheet(door: wingDoor, tokens: tokens)
                 .presentationDetents([.medium, .large])
@@ -567,8 +568,21 @@ struct MobileShellView: View {
     ///   thing being animated, so the animation belongs where the change
     ///   happens — which makes "a tap and a swipe are the same act" true of
     ///   how they LOOK as well as of what they do.
+    ///
+    /// · **The page left returns to its root** (VM-256, her R-260-5 — "Note
+    ///   closes on leaving"): on EVERY road — a tab, a swipe, a wing landing,
+    ///   the Protection ask's adoption — the stack being left is returned to
+    ///   its root here, unanimated (the slide is the motion). A note standing
+    ///   on it closes exactly as Back closes it: its screen's own leaving road
+    ///   flushes and leaves the quiet savepoint (`closeAutoCommit`'s occasion —
+    ///   the note stops being shown), so P-71-1's hidden open note is gone.
+    ///   With the push door's half (`push(_:in:)` lands nothing on a page not
+    ///   showing), a hidden page always stands at its root, so arriving
+    ///   anywhere — a tap, or a swipe revealing the neighbour mid-flight —
+    ///   shows the page itself.
     private func selectPage(_ target: MobileTab) {
         guard tab != target else { return }
+        popToRoot(tab, animated: false)
         withAnimation(Self.settle) { tab = target }
         let editors = router.editors
         let handoff = editors.beginHandoff()
@@ -724,9 +738,17 @@ struct MobileShellView: View {
         push()
     }
 
-    /// One push door for the route builders — the OWNING stack's path,
-    /// never the visible tab's (the S3 BLOCKER wiring rule).
+    /// **The ONE push door** — the OWNING stack's path, never the visible
+    /// tab's (the S3 BLOCKER wiring rule) — **and it lands nothing on a page
+    /// that is not showing** (VM-256, R-260-5). A door that mints and then opens
+    /// (New Note, Today, a created book, a diverged copy) pushes when its mint
+    /// returns; if she has changed page meanwhile, the screen is NOT pushed onto
+    /// the page she left: it would mount there hidden — an editor registering and
+    /// taking the pen on a page she cannot see — and be what that page shows when
+    /// she comes back. The made thing is kept (it lists where it lives); nothing
+    /// opens it. PROVISIONAL (the record's P-260-1a).
     private func push(_ route: MobileRoute, in owner: MobileTab) {
+        guard owner == tab else { return }
         switch owner {
         case .starred: starredPath.append(route)
         case .shelf: shelfPath.append(route)
@@ -790,21 +812,20 @@ struct MobileShellView: View {
     ///
     /// · The CURRENT tab, from a pushed list: back to its root (the system's
     ///   own tab grammar).
-    /// · Another tab: the stack being left returns to ITS root first, then
-    ///   the page changes. So a hidden stack always stands at its root
-    ///   (PROVISIONAL P-47-19) — the band never reveals a pushed screen, a page
-    ///   change always lands on a root, and nothing she left open in another
-    ///   room keeps a note mounted behind the one on screen. (The bar shows
-    ///   on lists only, so the screen she taps from is never a note; a note
-    ///   BELOW a list — Versions pushed over its note — closes exactly as
-    ///   Back would close it, its leaving road and savepoint included.)
+    /// · Another tab: the page changes, and the stack being left returns to
+    ///   ITS root — since VM-256 inside `selectPage`, so every road does it,
+    ///   not only this one. A hidden stack always stands at its root
+    ///   (PROVISIONAL P-47-19, made the law of every road by R-260-5) — the
+    ///   band never reveals a pushed screen, a page change always lands on a
+    ///   root, and nothing she left open in another room keeps a note mounted
+    ///   behind the one on screen. (A note BELOW a list — Versions pushed over
+    ///   its note — closes exactly as Back would close it, its leaving road and
+    ///   savepoint included.)
     private func tabSelected(_ target: MobileTab) {
-        let leaving = tab
-        guard target != leaving else {
-            popToRoot(leaving, animated: true)
+        guard target != tab else {
+            popToRoot(tab, animated: true)
             return
         }
-        popToRoot(leaving, animated: false)
         selectPage(target)
     }
 

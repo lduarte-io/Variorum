@@ -381,7 +381,8 @@ struct MobileProtectionCompositionTests {
         let shell = try Self.code("VariorumMobile/Features/Shell/MobileShellView.swift")
         #expect(shell.contains(".onAppear { adoptProtectionRequest() }"))
         #expect(shell.contains(".onChange(of: bootstrap?.protection.settingsRequest) { _, _ in adoptProtectionRequest() }"))
-        #expect(shell.contains("shelfPath = NavigationPath([MobileRoute.protection])"))
+        // MOVED at VM-253 (the VM-260 run): the stacks are typed now (`[MobileRoute]`), the write unchanged in meaning.
+        #expect(shell.contains("shelfPath = [.protection]"))
         #expect(shell.contains("MobileProtectionScreen(standing: bootstrap?.roadStanding, services: services, tokens: tokens)"))
     }
 
