@@ -1206,6 +1206,56 @@ muted ink and ✕, a refusal raised in a note clearing as she leaves it. Plus th
 refusal arm superseded, P-55-19 → (b) built, C-275-1, A-260-1's line, P-260-1a. This run is the pointer.
 
 
+### Batch 1b — RECONCILE (the consolidated window's two harness findings; implementer: Opus, the 1b session resumed, 2026-11-25)
+
+The window (its section above) ran this batch's legs: R1's 13 reds all present, R2 exactly as predicted, A-260-5's
+hollow CONFIRMED by `theListNeverMovesWhileTheLineShows`, and the LIVE line walk green at every stop that was reached
+(the card, the reason held past 6.5 s, both dismissals, leaving with its note, the removal's Undo, the card above the
+keyboard). TWO of this batch's pins had broken HARNESS roads; the product was right. Both are reconciled here. No test
+has run on the reconciled tree — the re-evidence rides the next window.
+
+**Finding 1 — the leave-the-note step (`MobileRefusalLeavesItsNoteTests.swift:110`, `:115`).** The step pressed the
+system Back by `accessibilityActivate()` on its bar button, a road the mounted harness never delivered, on EITHER tree.
+So `aRefusalRaisedInANoteClearsWhenSheLeavesIt`, `aLineSaidBeforeTheNoteOpenedOutlivesItsLeaving` and
+`aRemovalSaidInTheNoteOutlivesItsLeaving` never reached their own assertion anywhere. **Said plainly: none of them has
+ever been green, and the first's red in R1 was the harness's, not her defect's — so VM-275 half 1's red-on-old is NOT
+yet established.** Fix (`39e608327`): the step takes the Back's own act. The note's stack — the one navigation
+controller holding a pushed screen (`stackHoldingAPushedScreen(under:)`) — pops its top screen, exactly what the
+system Back performs, and the note's leaving road (`onDisappear`) runs as it does for her. The pins' meaning is
+unchanged: she leaves the note by Back. Their first green is the next window's, and their first ever.
+
+**Finding 2 — `theLineIsACardClearOfTheBarAndTheSides` read a nil frame on the tip.** The probe did not miss the card,
+and the keyboard floor is not involved: this pin hosts the line's face in a window of its own, not the shell. The pin
+reset its own reading. It drew a refusal and then, in ONE turn, cleared the line, set `lineFrame` to nil and said a
+removal. SwiftUI saw a single card whose content changed while its frame did not (both 44 tall in the same place), so
+the frame probe (`onGeometryChange`) had no change to report and the nil stood. On the rol277 tree the same nil
+followed iteration 1's real reds, which were the predicted kind. Fix (`d3356f04e`): each class — a refusal, a removal,
+in each voice — stands in its own fresh window and model, so the card's FIRST geometry is what is read (the road
+`aLongRefusalTakesOneLine` reads, green on the tip in the window). The law is unchanged.
+
+**The bundles** (incremental, `nice -n 15`, all `TEST BUILD SUCCEEDED` on code tip `d3356f04e`):
+- the `vm260-2r` trio rebuilt IN PLACE on the new tip (it already carried batches 2 and 3): phone
+  `DerivedData/vm260-2r`, Mac `DerivedData/vm260-2r-mac`, UI `DerivedData/vm260-2r-ui`;
+- **the corrected old tree for VM-275 half 1 — IN-PROGRESS at this commit:** `ea3f95831` with ONLY the reconciled Back
+  step dropped into its pin file → `DerivedData/vm260-1b-rol-r` (an APFS clone of `vm260-1b-rol`). Built by checking
+  out `ea3f95831` in this worktree, writing that one file, building, then `git checkout vm-260-phone-look`. Everything
+  is committed before the checkout, so the branch restores clean. If a session finds the worktree detached at
+  `ea3f95831`, restore it with `git checkout -- App/Variorum/VariorumMobileTests/MobileRefusalLeavesItsNoteTests.swift`
+  then `git checkout vm-260-phone-look`.
+
+**Predicted at the next window:**
+- **R1r — red on old, VM-275 half 1, for the real reason** (`vm260-1b-rol-r`):
+  `-only-testing:VariorumMobileTests/MobileRefusalLeavesItsNoteTests`.
+  - RED: `aRefusalRaisedInANoteClearsWhenSheLeavesIt`, at its OWN assertion ("the refusal raised in the note left with
+    the note — still showing: This note has no text to copy.").
+  - GREEN: `aLineSaidBeforeTheNoteOpenedOutlivesItsLeaving`, `aRemovalSaidInTheNoteOutlivesItsLeaving`,
+    `theListNeverMovesWhileTheLineShows`.
+  - A red at "the note's stack" or "the note left" is a harness red again: STOP and report.
+- **On the tip** (`vm260-2r`, or the whole phone target, which holds them):
+  `-only-testing:VariorumMobileTests/MobileRefusalLeavesItsNoteTests -only-testing:VariorumMobileTests/MobileRefusalLineTests`
+  — ALL GREEN predicted: the five leave/list pins and the twelve line pins, the card pin over both classes × both
+  voices.
+
 ### Batch 1b — READY-FOR-TESTS (the FULL batch, both tranches — ONE window runs everything, A-260-7)
 
 All from `App/Variorum/`, zsh, `test-without-building` against the bundles already built (nothing builds in the window);
