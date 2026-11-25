@@ -82,13 +82,15 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
     /// (P-VX306-U1a-5): every catalogued key file's keys (the live one, the backups', Previous Libraries'),
     /// what each memory item names (its current key and its mirror's keys — read as stated, unverified: a
     /// key file holds no secret), the plan's two keys, and the staged key. Reads only.
+    /// VX-1013: the catalogue is read under the listing's scope (`CatalogRead.probing` — `.everything` but inside the
+    /// launch road), so a custody listing inside an open never walks the far folder before the open's one walk lands.
     static func touchIDCandidates(places: ProtectionPlaces, memory: any MemoryStoreLeaf) -> @Sendable () -> Set<String> {
         let lister = CatalogLister(places: places)
         let library = SQLCipherLibraryLeaf(places: places)
         let plans = FilePlanStoreLeaf(places: places)
         nonisolated(unsafe) let memory = memory
         return {
-            var known = Set(lister.catalog().keyFiles.flatMap(\.heldFingerprints))
+            var known = Set(lister.catalog(CatalogRead.probing).keyFiles.flatMap(\.heldFingerprints))
             for libraryID in (try? memory.rememberedLibraryIDs()) ?? [] {
                 guard let sealed = try? memory.readMemory(libraryID: libraryID),
                       let named = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload)
@@ -136,9 +138,13 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
     }
 
     /// What `assess` reads now (before unlock: `unlocked` nil). The last Touch ID press is the custody
-    /// leaf's own unless the caller says otherwise.
-    func facts(session: SessionFact, unlocked: UnlockedLibrary? = nil, touchIDPress: TouchIDPress? = nil) throws -> ProtectionFacts {
+    /// leaf's own unless the caller says otherwise. `catalog` (VX-1013): `.everything` for every caller but the launch
+    /// road (`RoadContext.facts`), whose reads take this open's far-folder state.
+    func facts(
+        session: SessionFact, unlocked: UnlockedLibrary? = nil, touchIDPress: TouchIDPress? = nil,
+        catalog: CatalogRead = .everything
+    ) throws -> ProtectionFacts {
         let press = touchIDPress ?? (custody as? KeychainCustodyLeaf)?.lastPress
-        return try gatherer.facts(session: session, unlocked: unlocked, touchIDPress: press)
+        return try gatherer.facts(session: session, unlocked: unlocked, touchIDPress: press, catalog: catalog)
     }
 }

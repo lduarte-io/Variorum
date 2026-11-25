@@ -18,6 +18,13 @@
 //  the face it had — so a first read that missed the item heals without a relaunch, and a flicker never
 //  removes a button. The ONE thing that drops the button is a press that found the item gone.
 //
+//  VX-1013 (`notes/plans/fixes/vx-1013-open-far-folder-wait.md`, D-1013-4) — the launch road's lobby draws from the
+//  CONTAINER's facts and the far folder (her picked backup folder) is read once, off the launch path. When that walk
+//  lands, `farWalkLanded()` takes the full facts through the same seam `refresh()` uses — extra typed roads, and rule
+//  27's refusal where the full listing proves it, may appear then (PROVISIONAL P-1013-1) — or goes on through `opened`
+//  when the far folder's key files let a quiet road open the library (PROVISIONAL P-1013-3). The landing never runs
+//  beside a press: one that lands while a press is in flight waits for the press to end.
+//
 
 import Foundation
 import Observation
@@ -52,6 +59,13 @@ final class ProtectionLobbyModel {
     /// this design set aside whole into Previous Libraries, then the calm first open. Answers the sentence to show, nil
     /// when it went on.
     @ObservationIgnored private let startFreshRoad: (() async -> String?)?
+    /// VX-1013 — the far walk's landing (nil: no far walk owed — every lobby but the launch road's).
+    @ObservationIgnored private let farLandingRoad: (() async -> RoadFarLanding)?
+    /// The landing arrived while a press was in flight: it runs when the press ends without opening.
+    @ObservationIgnored private var farLandingOwed = false
+    @ObservationIgnored private var farLandingTaken = false
+    /// The lobby was left — a road opened, the missing face took over, a creation went on: nothing lands on it any more.
+    @ObservationIgnored private var left = false
 
     init(
         standing: RoadLobbyFacts,
@@ -61,7 +75,8 @@ final class ProtectionLobbyModel {
         opened: @escaping (ProtectionRoadSession) -> Void,
         recordMissing: @escaping () -> Void,
         startNew: (() async -> String?)? = nil,
-        startFresh: (() async -> String?)? = nil
+        startFresh: (() async -> String?)? = nil,
+        farLanding: (() async -> RoadFarLanding)? = nil
     ) {
         self.standing = standing
         self.typedRoad = typedRoad
@@ -71,6 +86,7 @@ final class ProtectionLobbyModel {
         self.recordMissing = recordMissing
         startNewRoad = startNew
         startFreshRoad = startFresh
+        farLandingRoad = farLanding
         face = ProtectionLobbyFace.derive(standing)
     }
 
@@ -86,7 +102,8 @@ final class ProtectionLobbyModel {
         message = nil
         let sentence = await startFreshRoad()
         busy = false
-        if let sentence { message = sentence }
+        if let sentence { message = sentence } else { left = true }
+        await landOwedFarWalk()
     }
 
     // MARK: - Rule 27's doors (VX-306 U2)
@@ -101,7 +118,8 @@ final class ProtectionLobbyModel {
         message = nil
         let sentence = await startNewRoad()
         busy = false
-        if let sentence { message = sentence }
+        if let sentence { message = sentence } else { left = true }
+        await landOwedFarWalk()
     }
 
     // MARK: - Touch ID (VX-310)
@@ -128,8 +146,10 @@ final class ProtectionLobbyModel {
         busy = false
         switch attempt {
         case .opened(let session):
+            left = true
             opened(session)
         case .recordMissing:
+            left = true
             recordMissing()
         case .refused(let sentence):
             message = sentence
@@ -145,6 +165,7 @@ final class ProtectionLobbyModel {
             rederive()
             if case .transient(let reason)? = press { message = ProtectionWords.touchIDUnusableForNow(reason) }
         }
+        await landOwedFarWalk()
     }
 
     // MARK: - The typed roads
@@ -168,11 +189,16 @@ final class ProtectionLobbyModel {
         let attempt = await typedRoad(secret)
         busy = false
         switch attempt {
-        case .opened(let session): opened(session)
-        case .recordMissing: recordMissing()
+        case .opened(let session):
+            left = true
+            opened(session)
+        case .recordMissing:
+            left = true
+            recordMissing()
         case .refused(let sentence): message = sentence
         case .touchIDNotOpened: message = ProtectionWords.somethingWentWrong
         }
+        await landOwedFarWalk()
     }
 
     // MARK: - Re-reading the roads
@@ -182,6 +208,13 @@ final class ProtectionLobbyModel {
     func refresh() async {
         guard !busy else { return }
         let fresh = await refreshRoad()
+        take(fresh)
+    }
+
+    /// The seam both re-reads land through: a read that failed keeps the face; Touch ID items seen before stay.
+    /// `keepingUnreadableLiveFile` (the far landing's): the route's finding about the live place stands — a far folder
+    /// says nothing about it.
+    private func take(_ fresh: RoadLobbyFacts, keepingUnreadableLiveFile: Bool = false) {
         guard var facts = fresh.facts else { return }
         if let before = standing.facts {
             for item in before.custody where item.itemClass == .touchid && !facts.custody.contains(item) {
@@ -190,8 +223,43 @@ final class ProtectionLobbyModel {
         }
         var next = fresh
         next.facts = facts
+        if keepingUnreadableLiveFile { next.liveKeyFileUnreadable = next.liveKeyFileUnreadable || standing.liveKeyFileUnreadable }
         standing = next
         rederive()
+    }
+
+    // MARK: - The far folder's walk lands (VX-1013, D-1013-4)
+
+    /// The launch road's far walk landed (the bootstrap calls this once, while this lobby stands): the full facts are
+    /// taken, or — a quiet road opening through the far folder's key files — the lobby goes on as after a press. Never
+    /// beside a press (one in flight owes it to its end); once only; nothing once the lobby was left.
+    func farWalkLanded() async {
+        guard let farLandingRoad, !farLandingTaken, !left else { return }
+        guard !busy else {
+            farLandingOwed = true
+            return
+        }
+        farLandingTaken = true
+        busy = true
+        let landing = await farLandingRoad()
+        busy = false
+        guard !left else { return }
+        switch landing {
+        case .opened(let session):
+            left = true
+            opened(session)
+        case .recordMissing:
+            left = true
+            recordMissing()
+        case .lobby(let fresh):
+            take(fresh, keepingUnreadableLiveFile: true)
+        }
+    }
+
+    private func landOwedFarWalk() async {
+        guard farLandingOwed else { return }
+        farLandingOwed = false
+        await farWalkLanded()
     }
 
     private func rederive() {

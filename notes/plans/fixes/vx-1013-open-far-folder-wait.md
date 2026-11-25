@@ -108,8 +108,26 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
    catalogue default pin and the healthy-library parity pin. Restored (`git checkout --`), `git diff` clean, `✔ 6 tests
    passed`.
    The no-backup-yet consult (Assess ~551) is NOT changed — see THE FORK below.
-2. NOT-STARTED — app: the lister's scope, the per-open far state, the facts' catalogue parameter, the scoped custody probe.
-3. NOT-STARTED — app: the road's plumbing (route, open, presses' join, the lobby's far landing) + the bootstrap wiring.
+2. DONE (this commit) — app (`CatalogLister.swift`): `CatalogLister.Scope` (`.everything` default · `.containerOnly`, the
+   far folder marked unread only when one is picked — resolving the bookmark reads no folder); `CatalogRead`
+   (`.everything` default · `.thisOpen(FarFolderWalk)`) with its task-local `probing` scope; `FarFolderWalk` (resolves the
+   far folder once per open, walks it at most once, detached at `.utility`, joinable; logs begin/landed with the entry
+   count and ms). `ProtectionFactsGatherer.facts` / `ProtectionSystem.facts` take `catalog: CatalogRead = .everything`;
+   the gatherer's custody listing runs under that scope; `ProtectionSystem.touchIDCandidates` reads the catalogue under
+   `CatalogRead.probing`. `ProtectionFarFolder.accessed` — a test's witness at each claim of the far folder (nil in
+   production).
+3. DONE (this commit; the Mac target BUILDS — `** BUILD SUCCEEDED **`, no warning in a touched file) — the road:
+   `RoadContext.far` (nil default — every non-launch context reads as before) with `catalogRead` / `catalog()` /
+   `facts(unlocked:)` / `joinTheFarWalk()` / `scoped(_:)`; `route` runs scoped and BEGINS the far walk only when it lands
+   in the lobby with the far folder unread; `lobbyFacts`, `open`'s expansion (the route's and `openTyped`'s facts handed
+   in — D-1013-5's replumb), `repairPasses`, `logSummary` read through the context; `openTyped` and `pressTouchID` run
+   scoped and, on `.noneOpens` only, join the far walk and try once more (the typed road re-derives only the far files'
+   new descriptors — `typedCandidatesAndKeys(…, reusing:)`); `landTheFarWalk(ctx)` → `RoadFarLanding` (`.opened` ·
+   `.recordMissing` · `.lobby`). `ProtectionLobbyModel`: `farLanding:` (nil default), `farWalkLanded()` serialized against
+   the presses (owed to a press's end; once; nothing after the lobby was left), `refresh()` refactored onto the shared
+   `take(_:)` seam byte-for-byte. `AppBootstrap`: one `FarFolderWalk` per `beginOpening`, handed to `routeAndOpen`'s
+   context; `finish(.roadLobby)` awaits the begun walk and lands it on the lobby still standing. `searchIfOwed` keeps its
+   own full walk (D-1013-4).
 4. NOT-STARTED — app pins (route zero far reads, walk count, press equivalence, lobby landing).
 5. NOT-STARTED — the sweep table (D-1013-3) below.
 

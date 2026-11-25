@@ -302,6 +302,19 @@ nonisolated struct RoadLobbyFacts: Sendable {
     var liveKeyFileUnreadable = false
 }
 
+/// **VX-1013 (D-1013-4) — what the far folder's walk, landed, makes of a standing lobby** (`ProtectionOpenRoad
+/// .landTheFarWalk`).
+nonisolated enum RoadFarLanding: Sendable {
+    /// A quiet road the far folder's key files revealed opened the library (a far-only Apple wrap — a hand-damaged
+    /// container's rarity): the lobby goes on exactly as after a successful press (PROVISIONAL P-1013-3).
+    case opened(ProtectionRoadSession)
+    /// K5: that key opened a store with no protection record — the missing face, as a press's would be.
+    case recordMissing
+    /// The lobby's facts over every place — the standing lobby takes them: extra typed roads, and rule 27's refusal
+    /// where the full listing now proves it (PROVISIONAL P-1013-1).
+    case lobby(RoadLobbyFacts)
+}
+
 /// Where the route goes.
 nonisolated enum RoadRoute: Sendable {
     case opened(ProtectionRoadSession)
@@ -330,6 +343,37 @@ nonisolated struct RoadContext: Sendable {
     let session: SessionFact
     /// false in a hosted test run over a real scope: read-only (see the header).
     let writes: Bool
+    /// **VX-1013 (D-1013-5) — this open's one far-folder walk**: the launch road's, made by the bootstrap at each open
+    /// (`AppBootstrap.beginOpening`). nil — every other context (a face's door, the relock's lobby, a copy door's) —
+    /// reads both roots at each read, exactly as before.
+    var far: FarFolderWalk? = nil
+
+    /// The catalogue state this context's reads take (`.everything` with no far walk).
+    var catalogRead: CatalogRead { far.map(CatalogRead.thisOpen) ?? .everything }
+
+    /// The catalogue now, as this context reads it.
+    func catalog() -> Catalog { system.lister.catalog(catalogRead) }
+
+    /// `assess`'s facts now, as this context reads them.
+    func facts(unlocked: UnlockedLibrary? = nil) throws -> ProtectionFacts {
+        try system.facts(session: session, unlocked: unlocked, catalog: catalogRead)
+    }
+
+    /// **A press that would refuse JOINS this open's far walk** (D-1013-4, PROVISIONAL P-1013-2): when the far folder is
+    /// picked and unread, await its one walk (beginning it if the lobby had not). true: the walk landed key files the
+    /// press has not seen — retry once with them; false: nothing to retry with (no walk owed, or no key file landed).
+    func joinTheFarWalk() async -> Bool {
+        guard let far, far.isUnread else { return false }
+        ProtectionOpenRoad.log("road: a press found no opener among the container's key files — it joins the far walk")
+        let entries = await far.read()
+        return !Catalog.build(entries).keyFiles.isEmpty
+    }
+
+    /// Run `body` with every custody listing in it probing under this context's catalogue state (`CatalogRead.probing`)
+    /// — the launch road's route, presses and far landing, so nothing inside an open walks the far folder unasked.
+    func scoped<R>(_ body: () async -> R) async -> R {
+        await CatalogRead.$probing.withValue(catalogRead) { await body() }
+    }
 }
 
 nonisolated enum ProtectionOpenRoad {
@@ -342,7 +386,22 @@ nonisolated enum ProtectionOpenRoad {
 
     /// The launch's road: a key already in hand (today's adoption doors hand one back) is tried first through
     /// the executor; otherwise the facts → `assess` → the verdict.
+    /// VX-1013 (D-1013-4): over the bootstrap's context the route reads the CONTAINER only — the far folder (her picked
+    /// backup folder, often iCloud-synced) is never read on the way to `.opened` or `.created`; a route that lands in the
+    /// lobby draws it at once from the container's facts and BEGINS the far folder's one walk, off the launch path —
+    /// when it lands, the standing lobby takes the full facts (`landTheFarWalk`).
     static func route(_ ctx: RoadContext, keyInHand: StoreKey? = nil) async -> RoadRoute {
+        await ctx.scoped {
+            let routed = await routeOnce(ctx, keyInHand: keyInHand)
+            if case .lobby = routed, let far = ctx.far, far.isUnread {
+                log("road: the lobby draws from the container's facts; the far folder is read once, off the launch path")
+                far.begin()
+            }
+            return routed
+        }
+    }
+
+    private static func routeOnce(_ ctx: RoadContext, keyInHand: StoreKey?) async -> RoadRoute {
         if let keyInHand {
             switch await open(ctx, candidates: [keyInHand], typed: .none) {
             case .opened(let session): return .opened(session)
@@ -370,7 +429,8 @@ nonisolated enum ProtectionOpenRoad {
             return .lobby(lobby)
         case .lobby, .open:
             var standing = lobby
-            switch await open(ctx, candidates: quietCandidates(ctx, facts: facts), typed: .none) {
+            // VX-1013 (D-1013-5): the open's key-file expansion reuses the facts the route just gathered.
+            switch await open(ctx, candidates: quietCandidates(ctx, facts: facts), typed: .none, facts: facts) {
             case .opened(let session): return .opened(session)
             case .recordMissing: return .libraryMissing
             case .unreadableLiveKeyFile: standing.liveKeyFileUnreadable = true
@@ -382,13 +442,49 @@ nonisolated enum ProtectionOpenRoad {
     }
 
     /// The lobby's facts, read now (a READ). A listing that could not be read yields no facts (P-VX306-U1a-3).
+    /// VX-1013: as the context reads them — the launch road's from the container and this open's far walk.
     static func lobbyFacts(_ ctx: RoadContext) -> RoadLobbyFacts {
         do {
-            let facts = try ctx.system.facts(session: ctx.session)
+            let facts = try ctx.facts()
             return RoadLobbyFacts(facts: facts, offeredTyped: offeredTyped(ctx, facts: facts))
         } catch {
             log("road: the lobby's facts could not be read — \(String(describing: error))")
             return RoadLobbyFacts(facts: nil, offeredTyped: [.passphrase, .words])
+        }
+    }
+
+    /// **VX-1013 (D-1013-4) — THE FAR WALK LANDS ON A STANDING LOBBY.** Awaits this open's one far-folder walk (the
+    /// route began it), then reads the lobby's facts over every place. Where the far folder holds key files, the quiet
+    /// roads are tried once more with them in hand — the route tried the container's alone — exactly as the route tries
+    /// them (a store from before this design, or one no longer in the lobby's state, is tried by nothing): one that opens
+    /// the slot answers `.opened` (PROVISIONAL P-1013-3). Otherwise the full facts, for the standing lobby to take
+    /// (PROVISIONAL P-1013-1). The caller serializes it against the lobby's presses (`ProtectionLobbyModel
+    /// .farWalkLanded`). Over a context with no far walk it is a plain re-read.
+    static func landTheFarWalk(_ ctx: RoadContext) async -> RoadFarLanding {
+        await ctx.scoped {
+            await ctx.far?.read()
+            var lobby = lobbyFacts(ctx)
+            guard let facts = lobby.facts, facts.catalog.keyFiles.contains(where: { $0.place == .farFolder }) else {
+                return .lobby(lobby)
+            }
+            switch assess(facts).launch {
+            case .lobby, .open: break
+            case .startFresh, .libraryMissing, .preDesignStore: return .lobby(lobby)
+            }
+            switch await open(ctx, candidates: quietCandidates(ctx, facts: facts), typed: .none, facts: facts) {
+            case .opened(let session):
+                log("road: the far folder's key files opened the library by a quiet road — the lobby goes on (P-1013-3)")
+                return .opened(session)
+            case .recordMissing:
+                return .recordMissing
+            case .unreadableLiveKeyFile:
+                lobby.liveKeyFileUnreadable = true
+            case .noneOpens:
+                break
+            case .failed(let error):
+                log("road: a quiet road failed to open after the far walk — \(String(describing: error))")
+            }
+            return .lobby(lobby)
         }
     }
 
@@ -482,8 +578,18 @@ nonisolated enum ProtectionOpenRoad {
     /// library it opens that is bound to an account in Castle loads that account's sync keys for the session from the vault
     /// with the secret just typed (`loadSyncKeysAfterTypedUnlock` — the passphrase's derived key reused, never re-derived),
     /// waiting at most `syncKeysWithin` for the vault before the open goes on.
+    /// VX-1013 (D-1013-4, PROVISIONAL P-1013-2): the container's key files first — the common unlock stays instant;
+    /// only a press that would otherwise refuse JOINS this open's far walk, extends its candidates with the far folder's
+    /// key files and tries once more before refusing — so what opens and what refuses are today's, and a wait happens
+    /// only where today's refusal would have been said without looking there.
     static func openTyped(
         _ ctx: RoadContext, secret: ProtectionSecret, syncKeysWithin bound: Duration = typedUnlockVaultBound
+    ) async -> RoadAttempt {
+        await ctx.scoped { await openTypedOnce(ctx, secret: secret, syncKeysWithin: bound) }
+    }
+
+    private static func openTypedOnce(
+        _ ctx: RoadContext, secret: ProtectionSecret, syncKeysWithin bound: Duration
     ) async -> RoadAttempt {
         if case .words(let words) = secret {
             do {
@@ -494,15 +600,29 @@ nonisolated enum ProtectionOpenRoad {
                 return .refused(ProtectionWords.wordsDoNotOpen)
             }
         }
-        let files = heldKeyFiles(ctx, facts: (try? ctx.system.facts(session: ctx.session)))
-        let typedRoad = typedCandidatesAndKeys(secret, files: files, floor: ctx.system.floor)
+        let facts = try? ctx.facts()
+        var files = heldKeyFiles(ctx, facts: facts)
+        var typedRoad = typedCandidatesAndKeys(secret, files: files, floor: ctx.system.floor)
         var typed = TypedSecrets.none
         switch secret {
         case .passphrase(let passphrase): typed = TypedSecrets(passphrase: passphrase)
         case .words(let words): typed = TypedSecrets(words: words)
         case .passphraseKey: break
         }
-        switch await open(ctx, candidates: typedRoad.keys, typed: typed) {
+        var outcome = await open(ctx, candidates: typedRoad.keys, typed: typed, facts: facts)
+        if case .noneOpens = outcome, await ctx.joinTheFarWalk() {
+            let more = heldKeyFiles(ctx, facts: try? ctx.facts()).filter { !files.contains($0) }
+            if !more.isEmpty {
+                let known: [PassphraseKey]
+                if case .passphrase(let derived) = typedRoad.unlock { known = derived } else { known = [] }
+                let extra = typedCandidatesAndKeys(secret, files: more, floor: ctx.system.floor, reusing: known)
+                files += more
+                typedRoad = (typedRoad.keys + extra.keys.filter { !typedRoad.keys.contains($0) }, extra.unlock)
+                log("road: the press tries once more with the far folder's \(more.count) key file(s)")
+                outcome = await open(ctx, candidates: typedRoad.keys, typed: typed)
+            }
+        }
+        switch outcome {
         case .opened(let session):
             // VX-501: the typed twin of the Touch ID load — off the main actor (the lobby's press is detached), after the
             // open, before the app's open goes on (bounded; never hostage).
@@ -651,6 +771,10 @@ nonisolated enum ProtectionOpenRoad {
     /// a library it opens that is bound to an account loads that account's sync keys into session memory riding it
     /// (`loadSyncKeysForTheSession` — one press, never two prompts) — and ended on every path.
     static func pressTouchID(_ ctx: RoadContext, facts: ProtectionFacts?) async -> RoadAttempt {
+        await ctx.scoped { await pressTouchIDOnce(ctx, facts: facts) }
+    }
+
+    private static func pressTouchIDOnce(_ ctx: RoadContext, facts: ProtectionFacts?) async -> RoadAttempt {
         let custody = ctx.system.custody
         let touchItems = (facts?.custody ?? []).filter { $0.itemClass == .touchid }
         let hint = facts?.slotFingerprintHint
@@ -685,7 +809,13 @@ nonisolated enum ProtectionOpenRoad {
             let gone = press == nil
             return .touchIDNotOpened(press: press, biometry: ctx.system.leaves.biometry.biometry(), itemGone: gone)
         }
-        switch await open(ctx, candidates: [key], typed: .none) {
+        var outcome = await open(ctx, candidates: [key], typed: .none)
+        // VX-1013 (D-1013-4, PROVISIONAL P-1013-2): the item's key reaches the slot only through a key file the far
+        // folder holds (a library file swapped for an older one) — the press joins the far walk and tries once more.
+        if case .noneOpens = outcome, await ctx.joinTheFarWalk() {
+            outcome = await open(ctx, candidates: [key], typed: .none)
+        }
+        switch outcome {
         case .opened(let session):
             loadSyncKeysForTheSession(session, riding: evaluated)
             return .opened(session)
@@ -955,7 +1085,9 @@ nonisolated enum ProtectionOpenRoad {
             else { continue }
             add(memory.keyFileMirror)
         }
-        for file in (facts?.catalog ?? ctx.system.lister.catalog()).keyFiles { add(file.document) }
+        // VX-1013: with no facts in hand, the catalogue as the context reads it (the launch road's: the container and
+        // this open's far walk).
+        for file in (facts?.catalog ?? ctx.catalog()).keyFiles { add(file.document) }
         return files
     }
 
@@ -985,12 +1117,20 @@ nonisolated enum ProtectionOpenRoad {
     static func typedCandidatesAndKeys(
         _ secret: ProtectionSecret, files: [KeyFile], floor: PassphraseKDF.Floor
     ) -> (keys: [StoreKey], unlock: TypedUnlockSecret) {
+        typedCandidatesAndKeys(secret, files: files, floor: floor, reusing: [])
+    }
+
+    /// The same over more files, the passphrase's keys already derived reused (VX-1013: a press's second try over the far
+    /// folder's files never pays a descriptor's Argon2id twice); the unlock carries every key derived, the reused first.
+    static func typedCandidatesAndKeys(
+        _ secret: ProtectionSecret, files: [KeyFile], floor: PassphraseKDF.Floor, reusing known: [PassphraseKey]
+    ) -> (keys: [StoreKey], unlock: TypedUnlockSecret) {
         var keys: [StoreKey] = []
         func add(_ key: StoreKey?) { if let key, !keys.contains(key) { keys.append(key) } }
         switch secret {
         case .passphrase(let typed):
             guard !typed.isEmpty else { return ([], .nothing) }
-            var derived: [PassphraseKey] = []
+            var derived: [PassphraseKey] = known
             for file in files {
                 guard let kdf = file.passphrase?.kdf else { continue }
                 let key: PassphraseKey
@@ -1042,10 +1182,13 @@ nonisolated enum ProtectionOpenRoad {
     }
 
     /// The candidates expanded, the one that opens the slot unlocking with every other key reached in hand;
-    /// then the settle and the repairs.
-    static func open(_ ctx: RoadContext, candidates: [StoreKey], typed: TypedSecrets) async -> OpenTry {
+    /// then the settle and the repairs. `facts` (VX-1013, D-1013-5): facts the caller gathered in this same open —
+    /// their catalogue serves the expansion (no second listing); nil reads the catalogue as the context does.
+    static func open(
+        _ ctx: RoadContext, candidates: [StoreKey], typed: TypedSecrets, facts: ProtectionFacts? = nil
+    ) async -> OpenTry {
         guard !candidates.isEmpty else { return .noneOpens }
-        let expanded = expand(candidates, files: heldKeyFiles(ctx, facts: nil))
+        let expanded = expand(candidates, files: heldKeyFiles(ctx, facts: facts))
         let library = ctx.system.leaves.library
         guard let opener = expanded.first(where: { (try? library.libraryOpens(with: $0)) == true }) else {
             return .noneOpens
@@ -1101,7 +1244,9 @@ nonisolated enum ProtectionOpenRoad {
         for pass in 0..<4 {
             let facts: ProtectionFacts
             do {
-                facts = try ctx.system.facts(session: ctx.session, unlocked: library)
+                // VX-1013: as the context reads them — the launch road's from the container (fresh: the repairs change
+                // it) and this open's far walk; every other caller's from both roots, as before.
+                facts = try ctx.facts(unlocked: library)
             } catch {
                 // Said, like every other throwing edge of the road (the ladder's round-1 NIT 2): the open goes on, the
                 // repairs run again at the next open.
@@ -1127,7 +1272,7 @@ nonisolated enum ProtectionOpenRoad {
     /// ONE Diagnostics line per open (the walk reads it — `log show … category == "protection"`): what the
     /// library and this Mac hold now, by count and eight-character name only — never key material.
     static func logSummary(_ ctx: RoadContext, _ library: UnlockedLibrary, _ report: RoadOpenReport, how: String) {
-        let facts = try? ctx.system.facts(session: ctx.session, unlocked: library)
+        let facts = try? ctx.facts(unlocked: library)
         let silent = facts.map { String($0.custody.filter { $0.itemClass == .silent }.count) } ?? "?"
         let touch = facts.map { String($0.custody.filter { $0.itemClass == .touchid }.count) } ?? "?"
         let apple = facts.map { $0.appleKeys.readable.map { String($0.prefix(8)) }.sorted().joined(separator: ",") } ?? "?"
