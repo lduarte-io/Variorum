@@ -347,6 +347,12 @@ struct MobileNoteClipboardTests {
                 // no-redirect rule for every sentence this phone speaks).
                 #expect(!spoken.contains("⌘"))
                 #expect(!spoken.contains("Mac"))
+                // VM-260 batch 1b (VM-265): the copy that did not follow the
+                // screen is a DIRECTION, so the one line draws it in the
+                // phone's muted ink, never the alarm. RED ON OLD: the alarm.
+                let line = try #require(session.status.current, "the direction keeps its line")
+                #expect(line.text == spoken)
+                expectMutedInk(line)
             }
         }
     }

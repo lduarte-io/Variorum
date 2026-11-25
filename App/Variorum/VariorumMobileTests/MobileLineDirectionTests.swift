@@ -27,6 +27,17 @@
 //  silent twins. The models' own records are unchanged (a receipt stays a
 //  receipt) — the existing pins on them still hold.
 //
+//  **VM-265 (the VM-260 run, batch 1b; QUESTIONS #277, P-55-19 → (b), ruled
+//  2026-11-22): A DIRECTION READS IN A NEUTRAL INK, NOT THE ALARM.** A direction
+//  rides the refusal CLASS at the seam (always drawn — that is unchanged, and
+//  every pin above still reads `kind == .refusal`); the face's INK is what
+//  changes: the phone's muted, the ink a removal's line already wears, while a
+//  refusal keeps the alarm. Each direction door above now also asks the face's
+//  one ink rule (`MobileMessageLineModel.ink(for:)`) what its line wears —
+//  `expectMutedInk`. RED ON OLD: every direction drew in the alarm (the face
+//  inked by kind alone, and a direction's kind is the refusal's); a refusal's
+//  twin (`aDirectionReadsMutedAndARefusalKeepsTheAlarm`) stays alarm on both.
+//
 
 import Foundation
 import GRDB
@@ -34,9 +45,69 @@ import Testing
 import VariorumCore
 @testable import VariorumMobile
 
+/// **VM-265 — a direction's line wears the muted ink, never the alarm** (the
+/// face's one ink rule, asked of the item the door actually said).
+@MainActor
+func expectMutedInk(
+    _ line: StatusCenter.Item, sourceLocation: SourceLocation = #_sourceLocation
+) {
+    #expect(MobileMessageLineModel.ink(for: line) == .muted,
+            "a direction reads in the phone's muted ink, not the alarm (VM-265): \(line.text)",
+            sourceLocation: sourceLocation)
+}
+
 @MainActor
 @Suite("P-55-11 — a direction keeps its line")
 struct MobileLineDirectionTests {
+
+    // MARK: VM-265 — the ink follows the door's word, and a refusal keeps the alarm
+
+    /// The seam's two always-drawn doors side by side: `direct` (a direction,
+    /// nothing refused) and `refuse` (nothing happened). Both draw (the class
+    /// is the refusal's — the placement is untouched); the face inks the
+    /// direction muted and the refusal in the alarm. An offer keeps her ink, a
+    /// removal the muted it always wore. RED ON OLD: the direction's line read
+    /// the alarm.
+    @Test func aDirectionReadsMutedAndARefusalKeepsTheAlarm() throws {
+        let status = StatusCenter()
+        status.direct("Already collected — it matches “By the Water”'s filter.")
+        let direction = try #require(status.current, "a direction always draws")
+        #expect(direction.kind == .refusal, "the seam's class is unchanged")
+        expectMutedInk(direction)
+
+        status.refuse("That take is archived — unarchive it first.")
+        let refusal = try #require(status.current)
+        #expect(MobileMessageLineModel.ink(for: refusal) == .alarm, "a refusal keeps the alarm")
+
+        status.offer("Diverge?", action: .init(label: "Diverge", perform: {}))
+        #expect(MobileMessageLineModel.ink(for: try #require(status.current)) == .ink)
+
+        status.removal("Block deleted.", undo: .init(label: MobileLine.undoLabel, perform: {}))
+        #expect(MobileMessageLineModel.ink(for: try #require(status.current)) == .muted)
+    }
+
+    /// **The Today door's entry, opened but NOT filed** (the Journal is
+    /// finished) — the shelving note is a direction she must see (the Mac ⌘J
+    /// door's own class), and it reads muted. RED ON OLD: the alarm.
+    @Test func theTodayDoorsUnfiledEntryReadsMuted() async throws {
+        try await withEditorWorld { session, db in
+            let model = MobileShelfViewModel(session: session)
+            // The first open mints the daily Journal and files the day's entry.
+            _ = await model.openToday(day: "2026-10-04")
+            let journal = try #require(try await db.read { try Queries.dailyJournalBookID($0) })
+            try await session.runner.run { ops in try ops.lockReading(journal) }
+
+            session.status.clear()
+            let opened = await model.openToday(day: "2026-10-05")
+            #expect(opened != nil, "the entry still opens")
+            let words = try #require(
+                MobileTodayDoor.shelvingNote(.bookFinished), "the finished Journal's note")
+            let line = try #require(session.status.current, "the unfiled entry keeps its line")
+            #expect(line.text == words)
+            #expect(line.kind == .refusal)
+            expectMutedInk(line)
+        }
+    }
 
     // MARK: A take back among the ARCHIVED takes
 
@@ -86,6 +157,7 @@ struct MobileLineDirectionTests {
             #expect(trash.lastError == nil, "a direction is not an error")
             let line = try #require(session.status.current, "the direction keeps its line")
             #expect(line.kind == .refusal, "P-55-7's class")
+            expectMutedInk(line)
             #expect(line.text == RecoveryCopy.takeRestoredArchived)
         }
     }
@@ -110,6 +182,7 @@ struct MobileLineDirectionTests {
                     "the model's record stays a receipt")
             let line = try #require(session.status.current)
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == RecoveryCopy.takeRestoredArchived)
         }
     }
@@ -134,6 +207,7 @@ struct MobileLineDirectionTests {
             #expect(model.blockHistory.status == .receipt(BlockPastCopy.takeRestoredArchived))
             let line = try #require(session.status.current)
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == BlockPastCopy.takeRestoredArchived)
         }
     }
@@ -177,6 +251,7 @@ struct MobileLineDirectionTests {
             #expect(lenses.status == MobileLensesModel.restoredDeletedButArchived)
             let line = try #require(session.status.current, "the direction keeps its line")
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == MobileLensesModel.restoredDeletedButArchived)
         }
     }
@@ -206,6 +281,7 @@ struct MobileLineDirectionTests {
             #expect(trash.receipt == RecoveryCopy.putBackAtEnd(.post))
             let line = try #require(session.status.current)
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == RecoveryCopy.putBackAtEnd(.post))
             _ = postID
         }
@@ -230,6 +306,7 @@ struct MobileLineDirectionTests {
             #expect(trash.receipt == RecoveryCopy.putBackUnplaced(.post))
             let line = try #require(session.status.current)
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == RecoveryCopy.putBackUnplaced(.post))
         }
     }
@@ -259,6 +336,7 @@ struct MobileLineDirectionTests {
             #expect(tray.status == .receipt(RecoveryCopy.putBackAtEnd(.post)))
             var line = try #require(session.status.current)
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == RecoveryCopy.putBackAtEnd(.post))
 
             // An original whose successor still stands lands beside it: silent.
@@ -275,6 +353,7 @@ struct MobileLineDirectionTests {
             #expect(tray.status == .receipt(RecoveryCopy.putBackAtEnd(.post)))
             line = try #require(session.status.current)
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == RecoveryCopy.putBackAtEnd(.post))
         }
     }
@@ -308,6 +387,7 @@ struct MobileLineDirectionTests {
             #expect(membership.status == words)
             let line = try #require(session.status.current, "the direction keeps its line")
             #expect(line.kind == .refusal)
+            expectMutedInk(line)
             #expect(line.text == words)
         }
     }

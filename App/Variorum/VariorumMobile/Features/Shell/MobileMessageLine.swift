@@ -110,6 +110,27 @@ final class MobileMessageLineModel {
         guard !overlap.isNull, overlap.height > 0 else { return 0 }
         return max(0, windowBounds.maxY - overlap.minY)
     }
+
+    /// **Which ink the line's words wear** — a ROLE, resolved to a colour by
+    /// the face against the library's look (`MobileMessageLineView.ink`).
+    /// Decided from the item's own facts, which its door set; never from its
+    /// words (VM-260, review focus 6). Pure, pinned.
+    enum Ink: Equatable {
+        /// The phone's alarm — something was refused.
+        case alarm
+        /// Her ink — an offer, a question she is asked.
+        case ink
+        /// The phone's corrected muted — a removal's line.
+        case muted
+    }
+
+    static func ink(for item: StatusCenter.Item) -> Ink {
+        switch item.kind {
+        case .refusal: return .alarm
+        case .offer: return .ink
+        case .receipt: return .muted
+        }
+    }
 }
 
 // MARK: - The face
@@ -198,10 +219,10 @@ struct MobileMessageLineView: View {
     }
 
     private func ink(_ item: StatusCenter.Item, tokens: VoiceTokens) -> Color {
-        switch item.kind {
-        case .refusal: return tokens.alarm
-        case .offer: return tokens.ink
-        case .receipt: return tokens.phone.muted
+        switch MobileMessageLineModel.ink(for: item) {
+        case .alarm: return tokens.alarm
+        case .ink: return tokens.ink
+        case .muted: return tokens.phone.muted
         }
     }
 }
