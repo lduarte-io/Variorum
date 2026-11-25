@@ -309,7 +309,9 @@ this branch and round 2's re-review covers it.
 
 ## BATCH 2 LIVE STATUS (the implementer's — round 1's fixes, then the VX-524 rider)
 
-*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight.*
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. NEXT: a MUTATION run on the
+VX-524 probe's sensitivity (`CopyDoorsListing.make` rowing a far copy twice), from the committed state, restored by
+`git checkout --` on `CopyDoorsModel.swift` (unmodified by this batch, so the restore is safe).*
 
 - PHASE A — DONE (`8f5f1f538`): the round-1 dispositions, each from this session's own read of the named code, under
   THE LADDER ▸ ROUND 1 DISPOSITIONS below. The reviewer's final calls landed at `30caec3fa` (ROUND 1 FINAL CALLS).
@@ -347,7 +349,15 @@ this branch and round 2's re-review covers it.
   - B4 F-R1-3 — DONE (this commit): the closing disposition line under ROUND 1 DISPOSITIONS — DEFERRED to VX-1090; no
     code.
   - B5 — NOT-STARTED: the Mac target `build-for-testing`, the phone build, the widened headless harness, the core suite.
-  - VX-524 — NOT-STARTED: pin first as the confirm (MEMBERS brief).
+  - VX-524 — IN-PROGRESS. THE CONFIRM, pin first (this commit): `App/Variorum/VariorumTests/Protection/
+    CopyCountsAndRestoreListTests.swift` (new; 1 test) replays W-8's scene on a planted road through the REAL pair road
+    (`takePairReporting` — the day's first pair beside the library AND, the picked folder due, its far copy; a second
+    pair the same day beside the library only), the real lister and both real readers (`ProtectionCopyCounts.read`,
+    `ProtectionCopyDoors.listing`). It asserts what a counting or listing defect would break — no copy rowed twice,
+    every row counted by exactly one place's count, the rows the two counts' sum — and records W-8's shape. RUN on the
+    current tree (headless harness): `✔ Test run with 1 test in 1 suite passed` — GREEN: the two predicates agree copy
+    for copy (container 2, picked folder 1, three rows); the first pair's stamp IS two rows, one per place, the same
+    day, time and kind, and a row names no place. PENDING: the sensitivity mutation (above), then the disposition.
 
 ## THE LADDER
 
