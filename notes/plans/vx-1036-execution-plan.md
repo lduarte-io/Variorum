@@ -212,7 +212,7 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 
 | Piece | Status |
 |---|---|
-| P1 — VX-1081 the pill's × (pin/trace first) + the chip's move to `Core/Views` (3C parity) | IN-PROGRESS — the trace and the geometry oracle next |
+| P1 — VX-1081 the pill's × (pin/trace first) + the chip's move to `Core/Views` (3C parity) | IN-PROGRESS — **the pin is committed on the PRE-FIX tree and RED** (`TagChipCrossCentredTests`, the ink oracle: the card drawn at 3× off-screen — a borderless window never ordered in — the ×'s ink centre against a x-height-only label's ink middle). Run headless in a scratch SwiftPM package compiling the app's own chip, token and probe files with the pin file itself: **RED, 4/4** — the × stands +0.67 pt (light) / +0.50 pt (dark) BELOW the x-height middle in both voices (tolerance one 3× pixel, 0.33 pt). Mechanism: the stack aligns `.firstTextBaseline` and the × is a symbol inside a `Text`, so its ink sits ON the baseline, its top a point under the x-height. Next: the fix, then the move. |
 | P2 — T-1 pills in the card header (collapsed card + open header) | NOT-STARTED |
 | P3 — T-3 the "+" field (adopt-or-mint, the one road) + rider VX-576 most-used-first | NOT-STARTED |
 | P4 — T-5/R-1036-39 the three-position per-book switch + the pure placing-tags Domain rule | NOT-STARTED |
