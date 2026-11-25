@@ -55,6 +55,8 @@ nonisolated final class CountingFarSlot {
     var farRoot: URL { far.appendingPathComponent(CatalogNames.variorumFolderName, isDirectory: true) }
 }
 
+enum FarWalkRoadError: Error { case notCreated }
+
 /// A planted road over a counting far folder (`PlantedRoad`'s leaves).
 @MainActor
 final class FarWalkRoad {
@@ -82,7 +84,7 @@ final class FarWalkRoad {
 
     func created() async throws -> (session: ProtectionRoadSession, words: [String]) {
         guard case .created(let session, let words) = await ProtectionOpenRoad.route(context()) else {
-            throw RoadWorld.RoadWorldError.notCreated
+            throw FarWalkRoadError.notCreated
         }
         return (session, words.words)
     }
