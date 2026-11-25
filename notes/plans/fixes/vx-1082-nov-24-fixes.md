@@ -161,13 +161,14 @@ Required reading for every session on this record: this file top to bottom; `not
 - **A-1082-3 — VX-409's collision rule.** Default built: the hint yields while a message shows; the message truncates only as a last resort, whole sentence on hover. Alternative: the message truncates and the hint always stands.
 - **A-1082-4 — VX-1027's ticked row.** Default built: ticked and NOT pressable (the Private-row precedent). Alternative: pressable no-op with a receipt saying it already is the Journal.
 - **The VX-1076 rule** (never cross a line; marker-only removes the marker; at a line's start the break alone) — PROVISIONAL per her ticket comment.
+- **P-1076-1 — ⌥⌫ at a block's START (and ⌥⌦ at a block's end): the press does nothing, silently** — the implementer's in-batch fork, ADJUDICATED (a) by the orchestrator (2026-11-25): the document-start precedent is the exact analogue (the system's own ⌥⌫ at the document's start is silent); every road that removes a block separator is structural (⌥⌘Z), while this key's undo story is one ordinary text edit, so taking the seam would mix the worlds; ⌫ stays the seam key. Alternatives held for her: (b) a refusal line naming ⌫; (c) behave like ⌫ at the seam. Note for the merge: this answers QUESTIONS #126 (the 13u4 E2 "your call" — her Nov 24 ticket IS the call); the merging session adds the pointer and the addendum.
 - **The wording pass:** every new rendered sentence (VX-1077's toast lines first) listed at closeout for her pass; provisional wording is fine (her standing R-981-4 posture).
 
 ## LIVE LEDGER (flipped per piece, same commit)
 
 | Member | Batch | Status |
 |---|---|---|
-| VX-1076 ⌥⌫ cross-line word delete | E | NOT-STARTED |
+| VX-1076 ⌥⌫ cross-line word delete | E | BUILT (74bd0a399) — every pin PENDING the app-suite window; P-1076-1 adjudicated (a) |
 | VX-1074 chapter search results | S | NOT-STARTED |
 | VX-1069 the dash in the band | S | NOT-STARTED |
 | VX-1014 narrow-column field overflow | S | NOT-STARTED |
