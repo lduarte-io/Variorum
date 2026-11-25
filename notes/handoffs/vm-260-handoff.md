@@ -1,11 +1,12 @@
-# VM-260 — the morning handoff (2026-11-25, written ~06:4x by the overnight orchestrator)
+# VM-260 — the morning handoff (2026-11-25; written ~06:4x overnight, brought current ~10:5x after the final evidence window)
 
 ## 1 · FIRST: the fresh build for your phone (R-260-7)
 
-The app is PRE-BUILT and signed — nothing compiles while you wait. It is the run's code tip **`54c0d1cc8`**
-(batches 1a + 1b + 2 + 3 and the keyboard floor, with main merged through PR #28): the new bar, the top lines,
-the message-line card, the whole drawn step-down, the note's top, and Settings ▸ Look per-device with the
-text-size row.
+The app is PRE-BUILT and signed — nothing compiles while you wait. It is the run's code tip **`78ed5b4bb`**
+(rebuilt ~10:5x so it carries the morning's reconciles: batches 1a + 1b + 2 + 3, the keyboard floor, the field
+drawn 36, the note's top at exactly 136, whole-point text-size steps; main merged through PR #28): the new bar,
+the top lines, the message-line card, the whole drawn step-down, the note's top, and Settings ▸ Look
+per-device with the text-size row.
 
 ```sh
 # 1 — plug in or have the phone on the same network, then find its identifier:
@@ -49,26 +50,34 @@ Batch 4 builds only after your pick.
   floor guard does NOT cure the original road: both SwiftUI's avoidance and UIKit's keyboard guide report the
   stale 52 after the editor's accessory keyboard. The traced cure is dropping the editor's accessory as its
   text view resigns — an **editor-seam line**, yours to sanction here or fold into VM-271.
-- **VM-280 (Low, Suspected)** — a field may answer taps only across its text, not its drawn box; the window
-  added a datapoint (the field's measured frame came out 39, not 44 — being reconciled, see §4).
+- **VM-280 (Low, Suspected)** — a field may answer taps only across its text, not its drawn box. The windows
+  added a datapoint that strengthens it: the text field's own view measures 22 pt tall inside its 36-pt box
+  inside the 44-pt frame — if the suspicion holds, a phone field answers across ~22 pt, not 44.
+- **The ladder's reviewer (since the Fable limit):** (a) wait for Fable credits; (b) `opus-reviewer` with
+  `MobileEditorStyle` (the editor's LOOK file batch 3 touched — fonts and grounds, no typing code) named as a
+  focus; (c) Opus rounds now plus one Fable round over the final diff when credits return. The orchestrator
+  suggests (c).
 - **The PROVISIONAL sets to judge on your phone:** P-260-2a…2d (the step-down as one set; the note title at
-  20; the bar chip's corner; the 36-pt boxes), P-260-3a…3e (the text-size steps and smaller default; the
-  system palette menu; cream as Write's room only, black in dark; the Read page keeping its own table), the
+  20; the bar chip's corner; the 36-pt boxes), P-260-3a…3e (the text-size steps and smaller default — now WHOLE
+  POINTS, halves rounding up, two steps coinciding where the 13-pt floor meets the small end; the system palette
+  menu; cream as Write's room only, black in dark; the Read page keeping its own table), C-272-2 (the note's
+  four tools now centre on the title rather than sit on its baseline), the
   floating card shape (A-260-4e), and the DRAFT words (the direction line's sentence, the long refusals'
   draft headlines — the full word list is in the record for your wording pass).
 
 ## 4 · Where the run stands (honesty block)
 
-- **Built and window-verified:** batches 1a, 1b, 2 (red-on-old established for every bug-class pin that could
-  be; the live line walk green; Mac legs green; both keyboard UI tests green ×2 bundles).
-- **Built, evidence part-pending:** batch 3 (its red-on-old is established and its keyboard UI test green;
-  its whole-target and Mac legs are queued with nov24; its captures come with the gate window).
-- **Open reconciles before the ladder** (each owed to its own implementer, in flight this morning): batch 2's
-  field pin measured 39/39 against laws 38.5/43.5 — drawing vs target to settle; the note top measured 145
-  against its 140 cap; 1b's mounted leave-the-note walk step and the card pin's harness road (the LIVE
-  behavior is proven — walk captures `notes/plans/vm-260-screens/batch-1b/`).
-- **Not started:** batch 4 (your pick), the ladder (fresh reviewer per round, cap five), the merge gate
-  (on a tree containing PR #27 — already merged in), closeout and canon deltas.
+- **Built and window-verified:** batches 1a, 1b, 2 and 3. Two evidence windows (04:55–06:01 and 09:53–10:14)
+  established red-on-old for every bug-class pin that could be (VM-275 half 1 included, on a corrected old
+  tree), the live line walk green, the Mac legs green, both keyboard UI tests green, and the whole phone target
+  (1,293 tests) green but main's 6 known issues and ONE batch-3 red.
+- **The morning's reconciles, all accepted (A-260-12…14):** batch 2's field now draws its designed 36 inside
+  the 44 (the pin had been reading the drawing); the note's top is exactly 136 (9 pt of invisible air removed);
+  1b's two harness roads fixed (the live behaviour was always right); batch 3's one red traced to a real
+  half-point mismatch between iOS's two font roads at fractional text sizes — fixed by whole-point steps. Their
+  last re-runs ride the merge gate.
+- **Not started:** batch 4 (your pick), the ladder (its reviewer is your call, §3), the merge gate (VX-1082
+  merges first; main merges in after it), closeout and canon deltas.
 - **Captures for your eyes:** `notes/plans/vm-260-screens/batch-2/` (before/after; the after run's "s" pass
   accidentally ran in Terminal — Study after-shots come with the gate window's retakes) and `batch-1b/`
   (the line's walk). The gitignored folders stay local.
