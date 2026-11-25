@@ -243,6 +243,22 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 - **P-1036-B2-9** the switch is undeclared in the registry (a way of looking — the Index grouping's and the dial looks' class); the "+" and × are declared as `.tagNote`'s book renderer. Alternative: declare the switch as an act.
 - **The known cost (for the reviewer, not a PROVISIONAL):** with tags shown, a card whose pills wrap or take their own row is taller than its preview-lines shape in the Outline's height model (`BookOutlineHeightModel.Shape.card(lines:)`); realized rows measure themselves, an unrealized row of that shape stands at a learned height until it realizes. Hidden (the default) is untouched. A shape keyed on header lines too is the follow-up if the walk shows a hop.
 
+### THE BATCH 1+2 ACCEPTANCE — the stage window (2026-11-25, the orchestrator's run)
+
+**The window:** nov24's GO at 03:56 (stage FREE: zero instances, no sims, no Problem Reporter, 0 new ips, HID idle 1533 s, load 6); the takeover line run and the claim `vx-1036` held for 75 min (~04:00), the 75 size — batch 2 landed (`c2a11cb4b`) so this window accepts BOTH batches. NOT the dress window: the dev store's posture is left as found. nov24's nice rule amended for the whole night (no "cleared" coming); these stage runs are un-niced under this claim.
+
+**The tree:** `d2d998486` = batch 2 closed + MAIN MERGED IN (`5d11dec20`, no conflicts — `5ca093319` VX-1013 + `1a7b0d444` docs) + the record commits. The acceptance suites run on the MERGE tree, so this run doubles as the overnight tail's post-merge BookView/Library re-run.
+
+**The pins, red-on-old by behavioural revert on the final tree (the recipes as written in P5/P-final; each revert applied, run, restored by `git checkout --`; tree clean at `d2d998486` after):**
+- **Pin B** — the `arrive(at:)` revert (`pendingArrival = nil; requestReveal(postID)`): `BookMintLandingTests` suite RED with 1 issue — `theMintsLandingSurvivesEntriesArrivingAfterTheAct` failed; `theGeneralDoorMakesTheNoteAfterTheNoteSheIsOnAndItArrivesLive` stayed green (the door still mints; only the landing's survival broke — the race's exact shape). **The race finding is CONFIRMED, not hollow.**
+- **Pin C + twin** — the `outlineRowPreMounts` revert (`travelingTo` → `pendingReveal`): `theRevealsPreMountHoldsPastTheConsumeWhileTheLandingTravels` RED (`outlineRowPreMounts(storyID)` expectations failed), `aRevealOnlyLandingHoldsThePreMountUntilItEndsThenLetsGo` RED (`lapsedTurns == 0` failed), the suite's two travel tests red with them (the consult they test was the reverted line).
+- **The × pin** — the `TagChipCard` revert (the old 7-pt `Text` symbol ×, alignment guide deleted): `TagChipCrossCentredTests` RED IN THE APP HOST, 4/4 voice×appearance cases (`abs(offset) <= tolerance` failed) — the implementer's headless red now proven in the host too.
+- **The P7 pin** — the `BookReadMint.turnsToOutline` block deleted from `BookView.mint(_:door:)`: `BookReadMintSourceTests/theActTurnsReadToTheOutlineAtThePressBeforeItsTask` RED.
+
+**The suites:** ONE run of the Tier 1 ∪ Tier 2 union (both batches' lists, deduped — 180 suites, `-only-testing` type names), log `App/Variorum/DerivedData/vx1036-accept-tier12.log`. RESULT: *(filled when the run completes)*.
+
+**The walk:** after the SEAM ping to nov24. *(Filled at the walk.)*
+
 ### BATCH 3 BRIEF (written 2026-11-25 in batch 2's build gap; ACTIVE at batch 2's close — the base line is filled at spawn)
 
 *(The same recorded deviation as batch 2's carries forward if the batch 1(+2) stage window has not yet run at the spawn: batch 3 builds HEADLESS in the gap, the behavioural-revert pins stay valid — batch 3 must not touch `BookViewModel.arrive` or `outlineRowPreMounts` — and the pause protocol below governs. The ladder and the merge gate judge the combined diff regardless.)*
