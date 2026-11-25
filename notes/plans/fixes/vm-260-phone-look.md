@@ -2261,3 +2261,25 @@ at three) — the floor's own consequence, recorded. Halves round up (17.5 → 1
   the same tip — `PhoneType.swift` is shared and compiled there, one `.rounded()` and comments) predicted as M3: green
   but `IndexTierMetricsTests`' 4 declared. The UI bundle is untouched by this reconcile (no default size moved: the
   default is the table, unrounded and unchanged), so U3's green stands.
+
+
+## BATCH 3b — record (VM-281 · F-her-1; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this batch did NOT do (kept current):** NO test has run — the stage is coordinated through nov24 and this
+batch's evidence rides the run's merge gate, so every red and green below is PENDING; no walk and no capture (the
+gate's); no line in `Sources/`, `Sync/`, custody, `StatusCenter`, `VoiceTokens`, `MobileKeyboardBar` (its numbers
+R22/R25 untouched), the typed-Return model, crystallization or `BlockRangeIndex`; `MobileKeyboardFloor` STAYS (the
+class guard); the throwaway walk driver (`~/dev/variorum-vm260-walk/…/VM260WalkDriver1a.swift`) was read, never
+copied into the tree.
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's binding sections, Batch 3b, F-1a-W1, the two windows; SurfaceContracts "The app" and the note's editor bullets; TEXTKIT2_NOTES in full; the resiliency protocol) and the two traces (below) | DONE (this commit) |
+| 1. VM-281's pin — a UI test on the road that REPRODUCED (the 1a walk's order) | NOT-STARTED |
+| 2. F-her-1's pin (+ the behaviour-neutral rename of the picking door's word static, so the pin's text is byte-identical on both trees) | NOT-STARTED |
+| 3. The red-on-old bundles at piece 2's commit: the UI bundle `vm260-3b-rol-ui` (APFS clone of `vm260-2r-ui`) and the unit bundle `vm260-3b-rol` (clone of `vm260-2r`), incremental, `nice -n 15` | NOT-STARTED |
+| 4. VM-281's fix — the editor drops its keyboard bar as it resigns and puts it back as it becomes first responder | NOT-STARTED |
+| 5. F-her-1's fix — the picking door reads "Cancel" (PROVISIONAL P-260-3b-1) | NOT-STARTED |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-mac`, `vm260-2r-ui`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
