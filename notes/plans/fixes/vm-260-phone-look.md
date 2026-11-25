@@ -1236,12 +1236,12 @@ in each voice — stands in its own fresh window and model, so the card's FIRST 
 **The bundles** (incremental, `nice -n 15`, all `TEST BUILD SUCCEEDED` on code tip `d3356f04e`):
 - the `vm260-2r` trio rebuilt IN PLACE on the new tip (it already carried batches 2 and 3): phone
   `DerivedData/vm260-2r`, Mac `DerivedData/vm260-2r-mac`, UI `DerivedData/vm260-2r-ui`;
-- **the corrected old tree for VM-275 half 1 — IN-PROGRESS at this commit:** `ea3f95831` with ONLY the reconciled Back
+- **the corrected old tree for VM-275 half 1 — DONE:** `ea3f95831` with ONLY the reconciled Back
   step dropped into its pin file → `DerivedData/vm260-1b-rol-r` (an APFS clone of `vm260-1b-rol`). Built by checking
   out `ea3f95831` in this worktree, writing that one file, building, then `git checkout vm-260-phone-look`. Everything
-  is committed before the checkout, so the branch restores clean. If a session finds the worktree detached at
-  `ea3f95831`, restore it with `git checkout -- App/Variorum/VariorumMobileTests/MobileRefusalLeavesItsNoteTests.swift`
-  then `git checkout vm-260-phone-look`.
+  is committed before the checkout, so the branch restores clean. `TEST BUILD SUCCEEDED`; the worktree was restored to
+  `vm-260-phone-look` at `e4b512df0` and verified clean. (The variant differs from `ea3f95831`'s file by the Back step
+  alone — the helper and its three `try` calls; checked by diff before the build.)
 
 **Predicted at the next window:**
 - **R1r — red on old, VM-275 half 1, for the real reason** (`vm260-1b-rol-r`):
