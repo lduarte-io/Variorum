@@ -126,7 +126,7 @@ struct MobileNoteTopTests {
     func everyDoorOnTheNoteTopAnswersAcrossFortyFour(voice: ThemeVoice) async throws {
         try await mounted(voice) { _, surface in
             var measured: [String] = []
-            func measure(_ label: String) throws {
+            @MainActor func measure(_ label: String) throws {
                 let door = try #require(surface.element(labeled: label),
                                         "\(label) in \(voice): \(surface.visibleLabels)")
                 let frame = door.accessibilityFrame

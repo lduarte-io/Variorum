@@ -384,7 +384,7 @@ struct MobileFaintOnDoorsRenderedTests {
                         "a note opened in Write")
                 await surface.settle(60)
                 var pixels = try surface.render()
-                func ratio(_ label: String, in elements: [NSObject]) throws -> Double {
+                @MainActor func ratio(_ label: String, in elements: [NSObject]) throws -> Double {
                     let bounds = surface.window.bounds.insetBy(dx: 1, dy: 1)
                     let found = elements.first {
                         $0.accessibilityLabel == label && bounds.intersects($0.accessibilityFrame)

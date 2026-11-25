@@ -826,7 +826,7 @@ struct MobileNoteTrayTests {
             ) { surface in
                 await surface.settle(60)
                 let stack = "Blocks, Lenses and More Info"
-                func stackValue() -> String { surface.element(labeled: stack)?.accessibilityValue ?? "" }
+                @MainActor func stackValue() -> String { surface.element(labeled: stack)?.accessibilityValue ?? "" }
                 // Calm before a lens drives the page.
                 #expect(surface.visibleLabels.contains(stack),
                         "labels were \(surface.visibleLabels)")

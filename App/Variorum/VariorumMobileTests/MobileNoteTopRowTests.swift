@@ -133,7 +133,7 @@ struct MobileNoteTopRowTests {
         try await mounted(voice, paragraphs: 30) { model, surface in
             let tv = try #require(model.textView, "the editor is up")
             let safeTop = surface.host.view.safeAreaInsets.top
-            func chrome() -> CGFloat { tv.convert(tv.bounds, to: nil).minY - safeTop }
+            @MainActor func chrome() -> CGFloat { tv.convert(tv.bounds, to: nil).minY - safeTop }
 
             let title = try #require(surface.element(labeled: "Rename Note"),
                                      "the title at rest: \(surface.visibleLabels)").accessibilityFrame
@@ -299,7 +299,7 @@ struct MobileNoteTopRowTests {
         try await withEditorWorld { session, _ in
             let loose = try await seedNote(session, title: "Loose")
             let held = try await seedNote(session, title: "Held", inBook: "Poems")
-            func contrast(_ postID: String) async throws -> Double {
+            @MainActor func contrast(_ postID: String) async throws -> Double {
                 let model = MobileEditorViewModel(session: session, postID: postID)
                 return try await withSceneSurface(
                     MobileWriteScreen(session: session, postID: postID, editor: model), dark: dark
