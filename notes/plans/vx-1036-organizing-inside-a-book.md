@@ -2,7 +2,7 @@
 
 **Ticket** VX-1036 (Umbrella, Books) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov22 · **Mockups** `notes/plans/vx-1036/`
 
-**STATUS — OPEN: THE DESIGN IS CLOSED (2026-11-25, R-1036-42) and cut into three umbrellas (R-1036-44): VX-1036 inside a book · VX-1085 lanes · VX-1086 wings. §4f is the design as closed, over §4d and §4b; rulings R-1036-1…45 are in §5. VX-1036's build kicked off 2026-11-25 — its execution plan is `notes/plans/vx-1036-execution-plan.md`. VX-1085 and VX-1086 still owe theirs, at their kickoffs.**
+**STATUS — OPEN for VX-1085 (lanes) and VX-1086 (wings): THE DESIGN IS CLOSED (2026-11-25, R-1036-42) and cut into three umbrellas (R-1036-44); the first, VX-1036 inside a book, is BUILT AND MERGED (PR #31, 2026-11-25 — its record `notes/plans/vx-1036-execution-plan.md`). §4f is the design as closed, over §4d and §4b; rulings R-1036-1…45 are in §5. VX-1036's build kicked off 2026-11-25 — its execution plan is `notes/plans/vx-1036-execution-plan.md`. VX-1085 and VX-1086 still owe theirs, at their kickoffs.**
 
 ---
 
