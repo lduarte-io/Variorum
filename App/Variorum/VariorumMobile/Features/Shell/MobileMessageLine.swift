@@ -76,6 +76,9 @@ final class MobileMessageLineModel {
     /// The line's door, in the overlay's coordinate space — the ONLY region
     /// that takes a touch. Not observed: hit-testing reads it, nothing draws it.
     @ObservationIgnored var doorFrame: CGRect?
+    /// The line's own frame — its ground's edges — in the same space (VM-277's
+    /// pins read where the line stands; not observed, nothing draws it).
+    @ObservationIgnored var lineFrame: CGRect?
 
     init(
         status: StatusCenter, voice: @escaping @MainActor () -> ThemeVoice,
@@ -210,6 +213,9 @@ struct MobileMessageLineView: View {
         .background(tokens.room)
         .overlay(alignment: .top) {
             Rectangle().fill(tokens.line).frame(height: 1)
+        }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            model.lineFrame = frame
         }
         .accessibilityElement(children: .contain)
     }
