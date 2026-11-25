@@ -286,13 +286,23 @@ struct BookListNoteRow: View {
                     tokens: tokens, title: entry.displayTitle,
                     date: entry.entryDate,
                     tags: pills ?? [], allTags: tags.vocabulary,
-                    onTitleTap: onOpen,
+                    // The VX-1036 ladder's R1-4 (BL-3, the row's own hover):
+                    // the title has NO tap of its own here, so the row's one
+                    // click brain hears it — one click selects, a double opens.
+                    // (Handing the open act opened the note on one click; a
+                    // select act would have left a double-click on the title
+                    // selecting twice and never opening — a child's tap beats
+                    // the row's single AND double.)
+                    onTitleTap: nil,
                     onApply: { tags.apply($0, to: entry.postID, session: session) },
                     onRemove: { tags.remove($0, from: entry.postID, session: session) },
                     stamp: LibrarySortFace.RowStamp(subject: .edited, stamp: list.edited[entry.postID]),
                     badge: badge, badgePostID: entry.postID,
                     showsTags: pills != nil,
-                    tagUses: tags.uses)
+                    tagUses: tags.uses,
+                    // N2: what the note wears — under "other tags" more than
+                    // the row shows (the placing tags), never suggested again.
+                    appliedPaths: tags.appliedPaths(entry.postID))
             }
         } background: {
             LibraryListRowPick(tokens: tokens, picked: false, subject: selected)

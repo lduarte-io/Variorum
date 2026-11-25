@@ -165,6 +165,12 @@ struct NoteTagChips: View {
     /// them (the book's List rows); empty keeps the path order (every other
     /// caller, byte for byte).
     var uses: [String: Int] = [:]
+    /// The paths the note WEARS, when they are more than the chips show (the
+    /// VX-1036 ladder's N2 — the book's List under "other tags" draws no chip
+    /// for a tag that places the note, yet the note wears it, so the ＋ must not
+    /// suggest it). nil — every other caller — is the shown chips' paths, byte
+    /// for byte as before.
+    var applied: Set<String>? = nil
 
     @State private var adding = false
     @Environment(\.colorScheme) private var scheme
@@ -183,7 +189,7 @@ struct NoteTagChips: View {
         }
         .popover(isPresented: $adding, arrowEdge: .bottom) {
             TagChipAdder(
-                tokens: tokens, allTags: allTags, applied: Set(tags.map(\.path)),
+                tokens: tokens, allTags: allTags, applied: applied ?? Set(tags.map(\.path)),
                 onApply: { path in
                     adding = false
                     onApply(path)
@@ -345,6 +351,9 @@ struct NoteTagsRow: View {
     var baselineProbeSpace: String = ""
     /// VX-576: the popover's use counts (`NoteTagChips.uses`); empty by default.
     var uses: [String: Int] = [:]
+    /// The VX-1036 ladder's N2: the paths the note wears (`NoteTagChips.applied`);
+    /// nil by default (the chips' own paths).
+    var applied: Set<String>? = nil
 
     /// The chip row's height, RESERVED even when nothing is drawn, so a card
     /// does not jump the moment the pointer arrives (the N40 jumping class:
@@ -361,7 +370,8 @@ struct NoteTagsRow: View {
         revealsOnHover: Bool = false,
         baselineProbePrefix: String? = nil, baselineProbeSpace: String = "",
         initiallyHovering: Bool = false,
-        uses: [String: Int] = [:]
+        uses: [String: Int] = [:],
+        applied: Set<String>? = nil
     ) {
         self.tokens = tokens
         self.tags = tags
@@ -372,6 +382,7 @@ struct NoteTagsRow: View {
         self.baselineProbePrefix = baselineProbePrefix
         self.baselineProbeSpace = baselineProbeSpace
         self.uses = uses
+        self.applied = applied
         _hovering = State(initialValue: initiallyHovering)
     }
 
@@ -411,7 +422,8 @@ struct NoteTagsRow: View {
                 onApply: onApply, onRemove: onRemove,
                 baselineProbePrefix: baselineProbePrefix,
                 baselineProbeSpace: baselineProbeSpace,
-                uses: uses)
+                uses: uses,
+                applied: applied)
         }
     }
 }

@@ -37,7 +37,13 @@ struct CatalogNoteLine: View {
     let date: String?
     let tags: [Tag]
     let allTags: [Tag]
-    let onTitleTap: () -> Void
+    /// The title's OWN tap — the Library's (its title opens the note at once,
+    /// its own click model). **nil draws no tap on the title** (the VX-1036
+    /// ladder's R1-4 — the book's List, BL-3): a child's tap beats its row's, so
+    /// a title with a tap of its own never reaches the row's ONE click brain
+    /// (`rowClick` on `CatalogNoteRowShell`) — with none, one click on the
+    /// title selects like the rest of the row and a double-click opens.
+    let onTitleTap: (() -> Void)?
     let onApply: (String) -> Void
     let onRemove: (Tag) -> Void
     /// **18h batch 1 (her row 9):** the muted trailing stamp — the SORT'S
@@ -77,6 +83,11 @@ struct CatalogNoteLine: View {
     /// VX-576: the ＋ popover's use counts (most-used first); empty — the
     /// Library's — keeps the path order.
     var tagUses: [String: Int] = [:]
+    /// The VX-1036 ladder's N2: the paths the note WEARS, when the row shows
+    /// fewer (the book's List under "other tags" leaves the placing tags off),
+    /// so the ＋ never suggests a tag the note already wears. nil — the
+    /// Library's — is the shown tags' own paths.
+    var appliedPaths: Set<String>? = nil
 
     static let probeSpace = "catalog-note-line"
 
@@ -92,7 +103,7 @@ struct CatalogNoteLine: View {
                 // two modes agree about a long name: both truncate.
                 .lineLimit(1)
                 .baselineProbe("note.title", in: Self.probeSpace)
-                .onTapGesture(perform: onTitleTap)
+                .titleTap(onTitleTap)
             // VX-268: the ONE shared icon beside its sibling, the ask glyph
             // (the Bookcase row's order — shared, then a waiting ask).
             if !reach.isEmpty {
@@ -117,7 +128,7 @@ struct CatalogNoteLine: View {
                     tokens: tokens, tags: tags, allTags: allTags,
                     onApply: onApply, onRemove: onRemove,
                     baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace,
-                    uses: tagUses)
+                    uses: tagUses, applied: appliedPaths)
             }
             if let badge {
                 OwnershipBadgeView(tokens: tokens, badge: badge, postID: badgePostID)
@@ -135,6 +146,18 @@ struct CatalogNoteLine: View {
                 oracleKey: oracleKey, oracleSlot: "row.stamp")
         }
         .coordinateSpace(name: Self.probeSpace)
+    }
+}
+
+private extension View {
+    /// The title's own tap, when the host hands one (`CatalogNoteLine.onTitleTap`).
+    @ViewBuilder
+    func titleTap(_ action: (() -> Void)?) -> some View {
+        if let action {
+            onTapGesture(perform: action)
+        } else {
+            self
+        }
     }
 }
 
