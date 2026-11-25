@@ -43,10 +43,12 @@
 //  body 16 (the pre-wave-1 phone's and the Mac's Iowan 16), a screen's title
 //  19, a row's title 16, its preview 14, the note's title keeping the 20 its
 //  notch already took (VM-272) — and a text-size setting on the device scales
-//  exactly those roles (`followsTextSize`) by its words scale, carried to the
-//  SwiftUI form by the environment (`phoneWordsScale`) and to the UIKit forms by
-//  their caller; the chrome, the twelve words and the 13 pt floor never move
-//  with it. Terminal's prose stays two under, never under the floor.
+//  exactly those roles (`followsTextSize`) by its words scale — each step's size
+//  a whole point (the batch-3 reconcile: UIKit's scaled fonts do not keep a
+//  fraction) — carried to the SwiftUI form by the environment (`phoneWordsScale`)
+//  and to the UIKit forms by their caller; the chrome, the twelve words and the
+//  13 pt floor never move with it. Terminal's prose stays two under, never under
+//  the floor.
 //  PROVISIONAL as a set (P-260-3a/3b).
 //
 //  The pure table is platform-neutral (the Mac compiles it and never reads
@@ -170,13 +172,19 @@ nonisolated enum PhoneType {
     /// stepped down by VM-273, her words by VM-254), at a words scale — 1, the
     /// default, unless her text-size setting says otherwise (VM-254). A scale
     /// reaches only the roles that follow the text size (`followsTextSize`),
-    /// size and pitch alike, never under the floor.
+    /// size and pitch alike, never under the floor — and **a step's size is a
+    /// WHOLE POINT** (the VM-260 run's batch-3 reconcile): the scaled size is
+    /// rounded to the nearest point before the floor, because UIKit's
+    /// `UIFontMetrics.scaledFont` does not keep a fractional size (the row
+    /// preview at Larger, 15.75, came back a quarter point off while the SwiftUI
+    /// form drew 15.75), and a whole-point size passes through both forms
+    /// unchanged at the default text size — so the two forms agree at every step.
     static func spec(
         _ role: PhoneTypeRole, voice: ThemeVoice, wordsScale: CGFloat = 1
     ) -> PhoneTypeSpec {
         let table = voiceSpec(role, voice: voice)
         guard wordsScale != 1, role.followsTextSize else { return table }
-        let size = max(floorSize, table.size * wordsScale)
+        let size = max(floorSize, (table.size * wordsScale).rounded())
         return PhoneTypeSpec(
             family: table.family,
             weight: table.weight,

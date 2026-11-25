@@ -37,8 +37,10 @@ struct MobileTextSizeTests {
     ]
 
     /// **The five steps, her words only.** At each step a role that follows the
-    /// text size takes the step's scale on its size and its pitch (never under the
-    /// floor); every other role — the chrome, the twelve words — is its table spec
+    /// text size takes the step's scale on its size — rounded to a whole point
+    /// (MOVED with the batch-3 reconcile: UIKit's scaled fonts do not keep a
+    /// fraction) — and its pitch moves with the size (never under the floor);
+    /// every other role — the chrome, the twelve words — is its table spec
     /// exactly. The note's body in Study: 14 · 15 · 16 · 17 · 18; "Large" is wave
     /// 1's 17 back.
     @Test func theFiveStepsScaleHerWordsOnly() {
@@ -59,7 +61,7 @@ struct MobileTextSizeTests {
                     let table = PhoneType.spec(role, voice: voice)
                     let scaled = PhoneType.spec(role, voice: voice, wordsScale: step.wordsScale)
                     if role.followsTextSize {
-                        let size = max(PhoneType.floorSize, table.size * step.wordsScale)
+                        let size = max(PhoneType.floorSize, (table.size * step.wordsScale).rounded())
                         #expect(abs(scaled.size - size) < 0.001, "\(role) \(voice) at \(step): \(scaled.size)")
                         #expect(abs(scaled.lineHeight - table.lineHeight * size / table.size) < 0.001,
                                 "\(role) \(voice) at \(step): pitch \(scaled.lineHeight)")
