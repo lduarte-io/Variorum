@@ -309,9 +309,7 @@ this branch and round 2's re-review covers it.
 
 ## BATCH 2 LIVE STATUS (the implementer's — round 1's fixes, then the VX-524 rider)
 
-*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. NEXT: a MUTATION run on the
-VX-524 probe's sensitivity (`CopyDoorsListing.make` rowing a far copy twice), from the committed state, restored by
-`git checkout --` on `CopyDoorsModel.swift` (unmodified by this batch, so the restore is safe).*
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight.*
 
 - PHASE A — DONE (`8f5f1f538`): the round-1 dispositions, each from this session's own read of the named code, under
   THE LADDER ▸ ROUND 1 DISPOSITIONS below. The reviewer's final calls landed at `30caec3fa` (ROUND 1 FINAL CALLS).
@@ -357,7 +355,44 @@ VX-524 probe's sensitivity (`CopyDoorsListing.make` rowing a far copy twice), fr
     every row counted by exactly one place's count, the rows the two counts' sum — and records W-8's shape. RUN on the
     current tree (headless harness): `✔ Test run with 1 test in 1 suite passed` — GREEN: the two predicates agree copy
     for copy (container 2, picked folder 1, three rows); the first pair's stamp IS two rows, one per place, the same
-    day, time and kind, and a row names no place. PENDING: the sensitivity mutation (above), then the disposition.
+    day, time and kind, and a row names no place. SENSITIVITY (two mutations from the committed state `d9b91c896`, each
+    restored by `git checkout --`, `git status` clean after): `CopyDoorsListing.make` rowing a far copy twice ⇒ `✘ … with
+    3 issues` (no copy rowed twice; rows = the counts' sum; the first pair's two rows); `ProtectionCopyCounts.read`
+    counting the picked folder's row from the container ⇒ `✘ … with 2 issues` (the far count; the sum). So the probe
+    WOULD catch either defect the ticket suspected, and there is none.
+  - VX-524 OUTCOME — RECORD-ONLY AS A CODE DEFECT (the pin green on the tree it was written against: the row is HOLLOW,
+    no fix built) + A FACE FORK PROPOSED (below), STOPPED for the architect's ruling. Nothing in the app's code changed
+    for VX-524; the probe stays as the agreement's regression pin.
+
+**VX-524 — what the probe showed (the mechanism, settled).** Data Safety draws, in this order: "Copies of your library"
+with ONE count row, "Beside your library" (`DataSafetyModel.primary` ← `RoadCopyCounts.container`); then the Restore list
+(`RoadRestoreRows` ← `CopyDoorsListing.thisLibrary` — every catalogued copy of the open library, BOTH places); then the
+second-folder section with its own count row (`destination` ← `RoadCopyCounts.far`). The pair road copies the day's FIRST
+pair into the picked folder too (one a day there — `ProtectionBackupHook.landFarPair`, due per library per Mac), so that
+pair stands as two physical copies: one beside the library, one in the picked folder. The list rows both; a row reads
+its day and time and "Backup" (`RoadRestoreRows.rowView`: `asOf` + `ProtectionWords.copyKind`), never its place. W-8's
+walk: five pairs beside the library ("5 copies" — the row right above the list), the 9:12 pair's copy in the picked
+folder, six rows — the 9:12 backup twice, identically worded. Both predicates are right and agree copy for copy (the
+rows = the two count rows' sum); the mismatch is what the face says. *Proposed correction of the ticket (the
+orchestrator's to write on the board):* "Not a count defect: the Restore list lists the copies in both places — the
+day's first backup stands beside the library and in your backup folder — and a row never says which, under a count
+that is the copies beside the library alone."
+
+**VX-524 — THE FORK (a face call; not built — the architect rules, PROVISIONAL where word-shaped):**
+- (a) **RECOMMENDED — each Restore row says its place.** The row's second line gains the place: "Backup · beside your
+  library" / "Backup · in your backup folder" (a `ProtectionWords` line; Look inside and Make this my library unchanged).
+  Two physical copies stay two rows — each is its own thing to restore from (the picked folder's survives losing this
+  disk), which is exactly why the far leg exists. Smallest change; word-shaped ⇒ PROVISIONAL for her bundle.
+- (b) The list folds a pair standing in both places into ONE row (beside the library first; the picked folder's used
+  when that one is gone). New behaviour in the doors (which file Look inside and Make this my library act on), and it
+  does not close the gap: retention differs by place (the newest 14 beside the library; 14 days plus 4 weeks in the
+  picked folder), so older picked-folder-only pairs still row with no container twin, and the rows again match neither
+  count.
+- (c) The counts say the split where the list stands — a total line atop the Restore list ("6 copies: 5 beside your
+  library, 1 in your backup folder"), or the list drawn below both count rows. The arithmetic then reads, but the two
+  same-time rows still do not say which is which.
+Pin owed with whichever is ruled: (a)'s — a row's words name its place for both places (the probe's scene); (b)'s — the
+fold, and the doors' file choice; (c)'s — the total line's arithmetic.
 
 ## THE LADDER
 
