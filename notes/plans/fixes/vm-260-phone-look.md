@@ -2716,3 +2716,24 @@ it before this batch). If the tip's slim-line pins are RED at "the top never gav
 predicted, read it as the HARNESS's red first: check one capture of the Library scrolled by a real thumb (W-4a stop 2)
 before touching the rule; a slim line there means the pins need a real-drag road (the keyboard-reveal UI target's
 swipe), not a code change.
+
+## BATCH 4b — record (R-260-13 as picked, ratified R-260-14 — the note's top; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this batch did NOT do (kept current):** NO test has run — the stage is coordinated through nov24 and this
+batch's evidence rides the run's merge gate, so every red and green below is PENDING; no walk and no capture (the
+gate's: at rest, scrolled, tags open, the Note sheet — both voices); no line in `Sources/`, `Sync/`, custody,
+`StatusCenter`, `VoiceTokens`, `Shared/`, `MobileShellView`, `MobileEditorTextView`, `MobileKeyboardBar` or the
+text-input path (the text view keeps riding its own keyboard guide; batch 3b's VM-281 overrides untouched); VM-148's
+rename-in-place and title quickfill are NOT built (the title's rename door is the alert it always was).
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, R-260-8/-13/-14 verbatim, "Batch 4b"; BATCH 2's VM-272 record and its RECONCILE, BATCH 3b, BATCH 4a; the mockup `notes/plans/vm-260/note-top-options.html` frame P and its script; SurfaceContracts "The app" in full and every note/Write bullet; the resiliency protocol; TEXTKIT2_NOTES skimmed for the phone's resize findings — none bears on a top-edge frame change) | DONE (this commit) |
+| 1. The pins on the pre-fix tree — new behaviour (red on old) and the pins the ruling moved; that commit IS the red-on-old tree | NOT STARTED |
+| 2. The red-on-old bundle `vm260-4b-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT STARTED |
+| 3. The note's top as drawn (`MobileWriteView`'s masthead + a new phone-target file for the title's give-way, the row, the strip, the stack door) | NOT STARTED |
+| 4. The Note sheet's head (Seal · Date tiles; the date's alert moves with its door) | NOT STARTED |
+| 5. The guide's lessons that name the moved doors (P-6 — the tutorial is the executable spec) | NOT STARTED |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT STARTED |
