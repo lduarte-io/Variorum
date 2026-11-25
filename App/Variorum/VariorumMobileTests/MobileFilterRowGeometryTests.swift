@@ -129,13 +129,73 @@ extension HostedSurface {
 
     /// Every element as `label @ minX…maxX (w×h)` — the dump a later session
     /// re-runs to get these numbers again.
+    ///
+    /// **A frame that is not finite is NAMED, never converted** (the VM-260
+    /// merge gate's G-1: `Int(frame.minX)` over a non-finite frame on the real
+    /// Library trapped the whole test host, and the restart left ≈ 240 tests
+    /// unrun). The line says which element it is instead; the pins that dump
+    /// also FAIL on it (`nonFiniteFrames`), so a crash that hid a defect never
+    /// becomes a silent pass.
     var frameDump: [String] {
         visibleElements.compactMap { element in
             guard let label = element.accessibilityLabel else { return nil }
             let frame = element.accessibilityFrame
+            guard Self.isFinite(frame) else { return "\(label)=NON-FINITE(\(Self.describe(element)))" }
             return "\(label)=\(Int(frame.minX))…\(Int(frame.maxX))"
                 + "(w\(String(format: "%.1f", frame.width)))"
         }
+    }
+
+    /// **The labelled elements whose frame is not finite** (a NaN or an
+    /// infinity anywhere in it — `CGRect.null` among them), each described
+    /// whole: what it is, what it says, where its container is. An element no
+    /// assistive reader can place is a finding about the surface, not a number
+    /// to skip.
+    var nonFiniteFrames: [String] {
+        visibleElements.compactMap { element in
+            guard element.accessibilityLabel != nil, !Self.isFinite(element.accessibilityFrame) else { return nil }
+            return Self.describe(element)
+        }
+    }
+
+    /// Every one of a rect's four numbers is finite.
+    static func isFinite(_ frame: CGRect) -> Bool {
+        frame.origin.x.isFinite && frame.origin.y.isFinite
+            && frame.size.width.isFinite && frame.size.height.isFinite
+    }
+
+    /// One element, whole: its class, label, value, identifier, traits, frame
+    /// (as stored — never converted), and its containers' classes and frames up
+    /// three levels (the line that says WHERE in the surface it hangs).
+    static func describe(_ element: NSObject) -> String {
+        let identifier = (element as? UIAccessibilityIdentification)?.accessibilityIdentifier ?? ""
+        var line = "\(type(of: element)) label=\(element.accessibilityLabel.map { "\"\($0)\"" } ?? "nil")"
+            + " value=\(element.accessibilityValue.map { "\"\($0)\"" } ?? "nil")"
+            + " id=\"\(identifier)\" traits=\(element.accessibilityTraits.rawValue)"
+            + " frame=\(element.accessibilityFrame)"
+            + " hidden=\(element.accessibilityElementsHidden)"
+        if let view = element as? UIView {
+            line += " view.frame=\(view.frame) window=\(view.window != nil) isHidden=\(view.isHidden) alpha=\(view.alpha)"
+        }
+        var container = Self.container(of: element)
+        for level in 1...3 {
+            guard let parent = container else { break }
+            line += " · container\(level)=\(type(of: parent)) \(parent.accessibilityFrame)"
+                + " label=\(parent.accessibilityLabel.map { "\"\($0)\"" } ?? "nil")"
+            container = Self.container(of: parent)
+        }
+        return line
+    }
+
+    /// An element's accessibility container (a view's superview), asked only
+    /// where the object answers — never by key-value coding, which traps on an
+    /// object without the key.
+    private static func container(of object: NSObject) -> NSObject? {
+        if let element = object as? UIAccessibilityElement { return element.accessibilityContainer as? NSObject }
+        if let view = object as? UIView { return view.superview }
+        let selector = NSSelectorFromString("accessibilityContainer")
+        guard object.responds(to: selector) else { return nil }
+        return object.perform(selector)?.takeUnretainedValue() as? NSObject
     }
 }
 
@@ -499,6 +559,15 @@ struct MobileFilterRowGeometryTests {
             ) { surface in
                 await surface.settle(50)
                 #expect(surface.host.view.bounds.width == 402)
+                // G-1 (the VM-260 merge gate): every labelled element on the real
+                // Library can be placed — the gate's crash was a non-finite frame
+                // HERE, at the ordinary width, read by the dump below.
+                let unplaced = surface.nonFiniteFrames
+                if !unplaced.isEmpty { print("PERF[sim] VM-260 G-1 non-finite at 402:\n" + unplaced.joined(separator: "\n")) }
+                #expect(unplaced.isEmpty, """
+                    an element on the real Library at 402 pt has a frame no reader can place — \
+                    \(unplaced.joined(separator: " | "))
+                    """)
                 for label in measured {
                     ideal[label] = surface.frame(ofDoorLabelled: label)?.width
                 }
@@ -515,6 +584,12 @@ struct MobileFilterRowGeometryTests {
             ) { surface in
                 await surface.settle(50)
                 #expect(surface.host.view.bounds.width == 320)
+                let unplaced = surface.nonFiniteFrames
+                if !unplaced.isEmpty { print("PERF[sim] VM-260 G-1 non-finite at 320:\n" + unplaced.joined(separator: "\n")) }
+                #expect(unplaced.isEmpty, """
+                    an element on the real Library at 320 pt has a frame no reader can place — \
+                    \(unplaced.joined(separator: " | "))
+                    """)
                 dump.append("320 pt · real: " + surface.frameDump
                     .filter { line in measured.contains { line.hasPrefix("\($0)=") } }
                     .joined(separator: " "))
