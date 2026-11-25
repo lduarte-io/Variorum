@@ -88,7 +88,15 @@ held no claim, launched nothing and walked nothing. (3) The Mac target's suites 
 session ran the planted Protection suites HEADLESS instead (the SwiftPM harness below: 208 tests in 35 suites). (4) The
 relock's lobby (noticed, not taken — below).
 
-*Batch 1, opus-implementer, session 1 (2026-11-24). No behavioural revert is in flight.*
+*Batch 1, opus-implementer, session 1 (2026-11-24; resumed 2026-11-25 for the two ruled pieces). No behavioural revert is
+in flight.*
+
+**RESUMED (R-1013-A1, R-1013-A2):** 6a NOT-STARTED — (a)'s pin for row 12 (core). 6b NOT-STARTED — the relock's lobby on
+the per-open plumbing (piece 6): `ProtectionRoadLock.lobbyContext(road)` (its own `FarFolderWalk`), the lobby beginning
+the walk through the route's one helper, the landing's refresh; the relock's landing NEVER retries the quiet roads (the
+lock's own rule — "the quiet roads are NOT tried at a lock", `ProtectionRoadLock.swift` header — so P-1013-3 has nothing
+to retry there and what the lock does is unchanged; a context flag carries it). Full `swift test` held (the coordinator's
+load window) — targeted `--filter` runs only.
 
 **BATCH 1 STATE — built and verified, but for THE FORK (commits `006072617` → `1635b1f2f`, all pushed):**
 - Core suite: `swift test` (full) GREEN — `✔ 746 tests in 139 suites`, `━ 4203 tests in 579 suites passed … with 5 known
