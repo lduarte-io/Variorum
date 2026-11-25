@@ -567,6 +567,47 @@ struct MobileBlockSelectionTests {
         }
     }
 
+    /// **THE PICKING DOOR'S SPOKEN NAME HOLDS THE WORD IT DRAWS** (C-3b-1,
+    /// ruled at A-260-15 — label in name, WCAG 2.5.3: Voice Control matches
+    /// the VISIBLE word, so a door that draws "Cancel" while it is named "Done
+    /// picking" cannot be reached by "tap Cancel"; batch 4a's rider). While she
+    /// picks, some button in the header speaks a name that CONTAINS the word the
+    /// picking door draws (`pickingExitTitle`, the value the sheet renders —
+    /// no other door there draws it), beside the sheet's own Done. Both voices
+    /// (Terminal lowercases chrome words, so the match folds case).
+    ///
+    /// **Red on old:** the door is named "Done picking", which holds no
+    /// "Cancel" — one issue per voice.
+    @Test func thePickingDoorsSpokenNameHoldsTheWordItDraws() async throws {
+        for tokens in [VoiceTokens.terminalLight, VoiceTokens.studyLight] {
+            try await withEditorWorld { session, _ in
+                let seed = try await seedFourBlockNote(session)
+                let list = MobileBlockListModel(session: session, postID: seed.post)
+                try await withHostedSurface(
+                    MobileBlockListSheet(
+                        model: list, tokens: tokens,
+                        onDeleteBlocks: { _ in true }, onJump: { _ in })
+                ) { surface in
+                    await surface.settle(40)
+                    #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
+                    await surface.settle(40)
+                    #expect(list.isSelecting, "picking mode is on")
+
+                    let drawn = MobileBlockSelectionCopy.pickingExitTitle
+                    let dismissWord = tokens.chromeLabel("Done")
+                    let buttons = surface.visibleElements
+                        .filter { $0.accessibilityTraits.contains(.button) }
+                        .compactMap(\.accessibilityLabel)
+                    #expect(buttons.contains(dismissWord), "the sheet's own Done: \(buttons)")
+                    #expect(buttons.contains { $0.localizedCaseInsensitiveContains(drawn) }, """
+                        RED — while picking, no door's spoken name holds the word the picking door draws \
+                        (“\(drawn)”): Voice Control's “tap \(drawn)” reaches nothing — buttons \(buttons)
+                        """)
+                }
+            }
+        }
+    }
+
     /// **THE MODE'S EXIT SURVIVES AN EMPTIED NOTE** (MINOR 1's rider). The
     /// Select/Done chrome used to render only over a non-empty listing, so
     /// if every row left the note WHILE she was picking — a remote delete of

@@ -19,7 +19,8 @@
 //  Library's ONLY: "only show the trash icon within library"), New Note's
 //  writing glyph, the Settings gear (the ⋯ gone). The bounds VM-50 set stand:
 //  one 44 pt line at 402 and 430 in both voices, every door 44 × 44 on the wing
-//  door's line, after it, on the surface.
+//  door's line, after it, on the surface. MOVED again at batch 4a (R-260-11): the
+//  Bookcase's count line is gone — no count until the phone has shelves.
 //
 
 import Foundation
@@ -82,11 +83,15 @@ struct MobilePathLineGeometryTests {
         }
     }
 
-    /// **The Bookcase's line** — the long case (a two-digit count, "14 books"),
-    /// 402 and 430, both voices: the wing door a 44 × 44 target that never grows
-    /// the line with its count inside it (its value is the count, voiced), the
-    /// New Note glyph and the gear 44 × 44 on its line, and NO trash door.
-    @Test func theBookcaseLineIsTheWingsNameItsCountAndTwoDoors() async throws {
+    /// **The Bookcase's line** — 402 and 430, both voices, fourteen books on the
+    /// shelf: the wing door a 44 × 44 target on one 44 pt line, saying nothing
+    /// past the name (its value empty), the New Note glyph and the gear 44 × 44
+    /// on its line, and NO trash door. MOVED at batch 4a (R-260-11 — no count
+    /// until the phone has shelves): it was "the long case (a two-digit count,
+    /// "14 books")", the count inside the door's 44; the count is gone — RED on
+    /// the batch-4a pre-fix tree (one issue per voice × width: the door's value
+    /// says "14 books").
+    @Test func theBookcaseLineIsTheWingsNameAndTwoDoors() async throws {
         try await withEditorWorld { session, _ in
             for index in 0..<14 {
                 _ = try await session.runner.run { ops in
@@ -106,10 +111,10 @@ struct MobilePathLineGeometryTests {
                     #expect(wing.width >= 43.5 && wing.height >= 43.5,
                             "the wing door answers across 44 × 44 in \(tokens.voice) at \(Int(width)): \(wing)")
                     #expect(wing.height <= 44.5,
-                            "the name and its count stay inside one 44 pt line in \(tokens.voice) at \(Int(width)): \(wing)")
+                            "the name stays one 44 pt line in \(tokens.voice) at \(Int(width)): \(wing)")
                     #expect(wing.minX >= PhoneMetrics.gutter - 0.5, "the door starts at the gutter: \(wing)")
-                    #expect(door.accessibilityValue == tokens.chromeLabel(MobileShelfFaces.bookCount(14)),
-                            "the count under the name: \(door.accessibilityValue ?? "nil")")
+                    #expect((door.accessibilityValue ?? "") == "",
+                            "no count under the name (R-260-11): \(door.accessibilityValue ?? "nil")")
                     try expectDoors(["New Note", MobileSettingsGear.spokenLabel], on: surface,
                                     wing: wing, width: width, voice: tokens.voice)
                     #expect(frame(surface, MobileRecoveryDoors.trashLabel) == nil,

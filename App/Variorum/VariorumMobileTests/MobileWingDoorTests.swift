@@ -390,11 +390,11 @@ struct MobileWingDoorGeometryTests {
                     onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
                 // MOVED at VM-255 (R-260-1, R-260-6): the page word left the line
-                // and the count is the door's quiet second line, so the door's
-                // value is the count alone (an empty store: no books).
-                try await measure(
-                    surface, pressed: { presses }, root: "Bookcase",
-                    value: Self.study.chromeLabel(MobileShelfFaces.bookCount(0)))
+                // and the count became the door's quiet second line. MOVED again
+                // at batch 4a (R-260-11 — no count until the phone has shelves):
+                // the line is the name alone, so the door's value is nothing (RED
+                // on the batch-4a pre-fix tree, whose door says "0 books").
+                try await measure(surface, pressed: { presses }, root: "Bookcase", value: "")
             }
         }
     }

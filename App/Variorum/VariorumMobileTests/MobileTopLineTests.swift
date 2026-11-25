@@ -70,13 +70,19 @@ struct MobileTopLineTests {
         }
     }
 
-    /// **RED ON OLD — the line is the wing's name alone; the Bookcase's count
-    /// is its quiet second line.** On the mounted shell, each root's wing door
-    /// is named by the wing ("Home") and its value is the rest of what it draws:
-    /// on the Bookcase the count ("2 books", voiced), on the Library and Starred
-    /// nothing (old: "Bookcase  ·  2 books", "Library", "Starred" — the page
-    /// word on the line). The door stays one 44 pt line at the default size.
-    @Test func theLineIsTheWingsNameAloneAndTheBookcaseCountsUnderIt() async throws {
+    /// **RED ON OLD — the line is the wing's name alone, on EVERY root, the
+    /// Bookcase's included.** On the mounted shell, each root's wing door is
+    /// named by the wing ("Home") and its value is the rest of what it draws —
+    /// nothing, on all three. MOVED at batch 4a (R-260-11, her words: "i also
+    /// don't like the "2 books" under Home. we don't have shelves on here yet,
+    /// but eventually each shelves should have the numbers. in the meantime we
+    /// just don't need numbers of the books i suppose until the shelves are
+    /// added."): the Bookcase's quiet count line under the name ("2 books",
+    /// R-260-6) is gone — RED on the batch-4a pre-fix tree, where the
+    /// Bookcase's door still says it (one issue). (Before VM-255 the lines read
+    /// "Bookcase  ·  2 books", "Library", "Starred" — the page word on the
+    /// line.) The door stays one 44 pt line at the default size.
+    @Test func theLineIsTheWingsNameAloneOnEveryRoot() async throws {
         try await withEditorWorld { session, _ in
             for name in ["Poems", "Letters"] {
                 _ = try await session.runner.run { ops in try ops.createReading(name: name, kind: .book) }
@@ -86,11 +92,10 @@ struct MobileTopLineTests {
                 MobileShellView(session: session, services: nil, router: router)
             ) { surface in
                 await surface.settle(40)
-                let tokens = router.tokens(dark: false)
-                // (Literal, not `MobileShelfFaces.bookCount(2)`: this file compiles on
-                // the pre-fix tree too, which is how its red-on-old run is made.)
+                // Two books stand, so a count line would say "2 books" (the
+                // batch-4a pre-fix tree's red): the door says nothing past the name.
                 for (page, value) in [
-                    (MobileTab.shelf, tokens.chromeLabel("2 books")),
+                    (MobileTab.shelf, ""),
                     (.library, ""), (.starred, ""),
                 ] {
                     if page != .shelf { await go(surface, page) }
