@@ -26,9 +26,12 @@
 //  `NSTextView` with nothing of ours wired — AppKit's own word-delete rule.
 //  The pins below hold both halves: the ⌘⌫ ones are the brief's expected
 //  shape, green on the shipped tree and kept as regression guards; the ⌥⌫
-//  ones are CHARACTERIZATION — they record what the app does today so a
-//  ruling can rewrite them deliberately (QUESTIONS #126), never a claim
-//  that today's answer is the right one.
+//  ones in the APP's editor were CHARACTERIZATION until VX-1076 (2026-11-25)
+//  built the word-delete rule (PROVISIONAL, her ticket comment; QUESTIONS
+//  #126 (a)(ii) as amended there, (b)(iii) at the seam): they now pin that
+//  rule and were red on the old tree. The bare-AppKit trace pin below is
+//  untouched — AppKit's own answer has not changed, ours has
+//  (`Surface/WordDelete.swift`; the full set is `WordDeleteKeyTests`).
 //
 
 import AppKit
@@ -312,15 +315,15 @@ struct CommandDeleteInEditorTests {
         }
     }
 
-    // MARK: CHARACTERIZATION — what her report's content actually needs
+    // MARK: ⌥⌫ — her report's content, under VX-1076's rule
 
-    /// **What DOES take her content, in her own one-block note: ⌥⌫.** The
-    /// range is AppKit's (`deleteWordBackward:`, pinned in the trace suite
-    /// against a bare text view), the newline it crosses is CONTENT (I4),
-    /// and the edit is an ordinary in-block one — byte-identical to what
-    /// TextEdit does with the same keystroke. **CHARACTERIZATION, not
-    /// approval:** QUESTIONS #126 carries the product call.
-    @Test func optionDeleteTakesHerContentFromTheOneBlockNote() async throws {
+    /// **⌥⌫ in her own one-block note takes the empty item's marker and
+    /// NOTHING of the line above** (VX-1076). Until then the range was
+    /// AppKit's alone (`deleteWordBackward:`, still pinned against a bare
+    /// text view in the trace suite): it crossed the content newline and took
+    /// `start?)` with it — this pin's old expectation, recorded at 13u4 E2 as
+    /// characterization. **RED ON OLD.**
+    @Test func optionDeleteTakesOnlyTheMarkerFromTheOneBlockNote() async throws {
         try await withEditor(seedBlocks: [CheckboxSeamFixture.first]) { h in
             let window = try hosted(h)
             defer { window.teardown() }
@@ -330,19 +333,18 @@ struct CommandDeleteInEditorTests {
             press(h, window.window, modifiers: .option)
             await h.flush()
 
-            let survivor = "- [ ] Create carousel format for blog posts "
-                + "(maybe just screenshots of personal blog to "
+            let survivor = CheckboxSeamFixture.first + "\n"
             #expect(h.textView.string == survivor)
             #expect(try h.storeSlots().map { $0.text ?? "<gap>" } == [survivor])
         }
     }
 
-    /// And in the TWO-BLOCK shape the same chord spans a seam, so it takes
-    /// the ruled cross-block road (R-13u-2 / item 5): the block the span
-    /// covers WHOLE rides `deleteBlock` (the Trash/tray road, recoverable)
-    /// and the surviving end keeps its cut text. **CHARACTERIZATION** — the
-    /// ruling is the author's, and this pin records what it does today.
-    @Test func optionDeleteAcrossASeamRidesTheCrossBlockRoad() async throws {
+    /// And in the TWO-BLOCK shape the same chord takes the second block's
+    /// marker inside that block — no seam crossed, no block sent to the
+    /// Trash, the first block byte-intact (VX-1076; until then the span
+    /// crossed the seam and rode the cross-block road — the block covered
+    /// whole went to the Trash and the first kept a cut). **RED ON OLD.**
+    @Test func optionDeleteInTheSecondBlockStaysInIt() async throws {
         try await withEditor(
             seedBlocks: [CheckboxSeamFixture.first, CheckboxSeamFixture.second]
         ) { h in
@@ -352,22 +354,25 @@ struct CommandDeleteInEditorTests {
             press(h, window.window, modifiers: .option)
             await h.flush()
 
-            let survivor = "- [ ] Create carousel format for blog posts "
-                + "(maybe just screenshots of personal blog to "
-            #expect(try h.storeSlots().map { $0.text ?? "<gap>" } == [survivor],
-                    "the second block left for the Trash; the first kept its cut")
+            #expect(h.model.index.entries.count == 2, "both blocks stand")
+            #expect(try h.storeSlots().map { $0.text ?? "<gap>" }
+                    == [CheckboxSeamFixture.first, ""],
+                    "the marker went, in its own block; the first is untouched")
         }
     }
 
     /// The family's forward half at the seam's LEADING side (the caret at the
     /// end of the first block), recorded because that is where a forward
     /// chord is the one that reaches over. ⌦ joins the blocks (the ruled
-    /// merge join — E3 changes the join, not this road), ⌥⌦ takes the second
-    /// block's word and joins, ⌘⌦ is bound to nothing and does nothing.
+    /// merge join — E3 changes the join, not this road), ⌥⌦ does NOTHING at
+    /// a block's end (VX-1076, P-1076-1 — every road that removes a separator
+    /// is structural; it took the second block's word through the cross-block
+    /// road until then — **RED ON OLD**), ⌘⌦ is bound to nothing and does
+    /// nothing.
     @Test func theForwardFamilyAtTheSeam() async throws {
         let cases: [(String, NSEvent.ModifierFlags, [String])] = [
             ("⌦", [], [CheckboxSeamFixture.first + " " + CheckboxSeamFixture.second]),
-            ("⌥⌦", .option, [CheckboxSeamFixture.first]),
+            ("⌥⌦", .option, [CheckboxSeamFixture.first, CheckboxSeamFixture.second]),
             ("⌘⌦", .command, [CheckboxSeamFixture.first, CheckboxSeamFixture.second]),
         ]
         for (name, modifiers, expected) in cases {

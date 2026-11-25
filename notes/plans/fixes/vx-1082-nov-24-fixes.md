@@ -70,10 +70,10 @@ Required reading for every session on this record: this file top to bottom; `not
 
 | Piece | Status |
 |---|---|
-| 0. This record + the traced mechanism | IN-PROGRESS — this commit |
-| 1. The key-path pins (editor, pane, seam, forward twin, her recording-1), red-on-old by construction | NOT-STARTED |
+| 0. This record + the traced mechanism | DONE (0be30cd8b) |
+| 1. The key-path pins (editor, pane, seam, forward twin, her recording-1) — `VariorumTests/WordDeleteKeyTests.swift`, compiled against the PRE-FIX tree (`build-for-testing` green, nothing of the fix exists yet); the three 13u4 E2 characterizations in `CommandDeleteLineTests` rewritten to the rule in the same commit | DONE (the commit after 0be30cd8b) — red-on-old PENDING the window |
 | 2. The rule (`Surface/WordDelete.swift`, pure) + the wiring (`EditorTextView`, `PaneTextView`, the model's seam answer) + the pure suite | NOT-STARTED |
-| 3. The three 13u4 E2 characterization pins rewritten to the rule (they record the OLD answer by name) | NOT-STARTED |
+| 3. (folded into piece 1 — the characterizations moved with the pins, so the fix commit never leaves a red pin behind) | — |
 | 4. `build-for-testing` green; report ready for the app-suite window | NOT-STARTED |
 | 5. At the window: suites green on the fix, red on the behavioral revert, green again | NOT-STARTED — PENDING the GO |
 
