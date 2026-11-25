@@ -1148,6 +1148,23 @@ on the tip shows R2-1's result too, for as long as the pin is on the branch).
      the Reduce Motion arm seen, the same with the simulator's Reduce Motion on (the page lands at its top and the title
      returns) — set back off before the next stop.
 
+**A-260-19 (round 2's fixes handed back, 2026-11-25, orchestrator on Opus).** R2-5 and R2-6 ACCEPTED, checked
+line by line as the final round's fixes require: `2b8b50e8c..1b4c436ee` changes only comment lines in eleven files
+(every non-comment changed line filtered out mechanically: none). **R2-1: the implementer STOPPED correctly, and its
+trace corrects the run's own reading of R1-1.** From R1-1's red-on-old log: SwiftUI animates the text view's frame
+over several frames (52 pt over about 9), and UIKit clamps the offset ONCE, at the first frame (40 → 31), and the
+offset stays there — **the title never returned**. So R1-1's red was a one-time HOP of the page (the foot clause,
+`:288`), not the self-undo the reviewer modelled. R1-1's fix still stands, correctly: in the band where a page is
+too short to lose its title (reach ≤ h + 8) the title no longer leaves, so that page doesn't hop; a mid-length
+page still hops by the leave's first frame (about 9 pt). R2-1 is the same hop when the # strip closes (about
+15 pt for a two-row strip), and no tracker rule can cure it, because the tracker only READS the offset that
+UIKit's clamp moves (under Reduce Motion the strip closes in one frame and the clamp lands at 0, where the
+title's return is the rule working). **The decision (the implementer's (b) then (a)):** R2-1's pin runs on its
+frozen red-on-old tree `vm260-r2-rol` at the gate to record the real numbers; the pin comes OFF the branch before
+the gate's tip legs (a known-red pin cannot ride a green merge); the cure (the text view regrows its room before
+the clamp, an editor-seam change) is **VM-284** (Bug · Confirmed · Editor · Low), under VM-271's editor rework.
+The hop is minor and visible: on the closing walk (R1-1's stop, R2-1's look) and in her bundle.
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
