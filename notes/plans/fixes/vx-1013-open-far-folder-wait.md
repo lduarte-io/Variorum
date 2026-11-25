@@ -315,9 +315,8 @@ other two options (the fold, the total line) are not; the board's ticket is the 
 the planted Protection suites HEADLESS in the harness instead. (3) No walk, no stage, no store touched, no Castle posture
 changed. (4) F-R1-3 has no code here by its final call (DEFERRED to VX-1090).
 
-*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. NEXT: the ruling's piece
-verified by revert from its committed state (`copyRowLine` answering the kind alone), restored by `git checkout --` on
-`ProtectionWords.swift`; then the closing builds and the harness.*
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. BATCH 2 DONE — every piece
+below is committed and pushed, VX-524's ruled face included; round 2 (a fresh reviewer) takes the whole diff.*
 
 - PHASE A — DONE (`8f5f1f538`): the round-1 dispositions, each from this session's own read of the named code, under
   THE LADDER ▸ ROUND 1 DISPOSITIONS below. The reviewer's final calls landed at `30caec3fa` (ROUND 1 FINAL CALLS).
@@ -391,7 +390,13 @@ verified by revert from its committed state (`copyRowLine` answering the kind al
     WORDS (the seam `copyRowLine` answering `copyKind` alone — the line's absence, both views already reading it):
     `✘ Test run with 2 tests in 1 suite failed … with 2 issues` (lines 93 and 98 — both place expectations; the probe
     test green). With the words: `✔ Test run with 6 tests in 2 suites passed` (`CopyCountsAndRestoreListTests` 2 and
-    the `ProtectionWordsVX307Tests` words suite, unmodified). VERIFIED BY REVERT from the committed state: PENDING.
+    the `ProtectionWordsVX307Tests` words suite, unmodified). VERIFIED BY REVERT from the committed state `909ef9dfb`
+    (`copyRowLine` answering `copyKind(kind)` alone): `✘ Test run with 2 tests in 1 suite failed … with 2 issues` (the
+    same two lines, 93 and 98); restored by `git checkout --`, `git status` clean. CLOSING RUNS (on `909ef9dfb`): Mac
+    `build-for-testing` ⇒ `** TEST BUILD SUCCEEDED **`, zero warnings in a touched file; phone build ⇒ `** BUILD
+    SUCCEEDED **`; headless harness, every suite ⇒ `✔ Test run with 215 tests in 36 suites passed`; parity — the same
+    three NEW test files against main, zero edits to an existing test. The core suite's full run at `71410a6ab` stands:
+    nothing under `Sources/` changed since (`git diff 30caec3fa..HEAD -- Sources/` empty). VX-524 closes at the merge.
 
 **VX-524 — what the probe showed (the mechanism, settled).** Data Safety draws, in this order: "Copies of your library"
 with ONE count row, "Beside your library" (`DataSafetyModel.primary` ← `RoadCopyCounts.container`); then the Restore list
