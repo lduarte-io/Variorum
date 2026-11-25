@@ -775,12 +775,13 @@ struct BookView: View {
                 + " — collecting, finish, seal, own, length, rename")
         }
         // VX-1014 (D-1082-S3): the title line's OWN laid-out width, for the
-        // DEBUG oracle (`BookOutlineGeometry.mastheadTitleLines`).
+        // DEBUG oracle (`BookOutlineGeometry.mastheadTitleLines`) — the whole
+        // observation gated, so Release carries none (ladder round 1 NIT 1).
+        #if DEBUG
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
-            #if DEBUG
             BookOutlineGeometry.recordMastheadTitleLine(readingID, width, owner: oracleOwner)
-            #endif
         }
+        #endif
         // VX-887 (her three rulings, 2026-11-05 — "the area in books is a bit
         // crowded and lacks visual hierarchy"): the ORDER DIAL rides the mode
         // row's one line — the modes leading, the dial at the trailing end —
