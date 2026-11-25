@@ -1593,6 +1593,16 @@ struct BookView: View {
     private func mint(_ kind: FootMint, door: BookMintPlacement.Door) {
         // Read at the press — the page as she sees it — never after the write.
         let placement = mintPlacement(door)
+        // VX-1036 P7 (ledger row 15 — P-1036-B1-2's alternative, ruled in): a
+        // door pressed in READ turns the book to the Outline at the press, so
+        // the note arrives LIVE with the caret in it (N-1's letter; P-2's
+        // fire-and-DO choreography) — Read itself stays read-only. The
+        // navigator note door's own road (no carry: the arrival IS the
+        // landing, and a carried reveal landing after it would let it go).
+        if BookReadMint.turnsToOutline(structure.mode) {
+            arrivals.setReviewOpen(false)
+            structure.mode = .outline
+        }
         Task {
             let id: String?
             switch kind {
@@ -4686,6 +4696,19 @@ nonisolated enum BookFootDoors {
     /// offer. No restore door either: a gathering refuses sections.
     static func gathering() -> [BookFootDoor] {
         [.newNote]
+    }
+}
+
+// MARK: - VX-1036 P7 — a mint in Read lands live
+
+/// **Which book modes a mint door turns to the Outline** (the VX-1036 run,
+/// batch 2 — ledger row 15): READ, the one mode with no live editor of its own
+/// (A43 — Read is read-only), so its doors' notes arrive live on the Outline
+/// instead of shown on the page. Outline, the spread and the Index each land a
+/// minted note their own way (batch 1's arrival).
+enum BookReadMint {
+    static func turnsToOutline(_ mode: BookStructureModel.ViewMode) -> Bool {
+        mode == .read
     }
 }
 
