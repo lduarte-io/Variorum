@@ -324,6 +324,13 @@ install and the #281 dispositions.
   trees are frozen commits in their own DerivedData so they cannot go stale; the tip legs (P, M) run once on the
   final 1b tip; the line's walk covers the whole line, VM-277 included. A-260-1's draft direction words ("That
   note didn't open because you'd moved on — it's in the Library.") stay DRAFTS for her wording pass.
+- **A-260-8 (the editor-spoken refusals, 2026-11-25): wiring DEFERRED to VM-279 (Low).** The sites the fence kept
+  this run out of — `CrossBlockRefusal`'s nine causes, `MobileStructural`'s two, `MobileComments` and
+  `MobileTakesController` through the editor model's `report` — keep the plain sentence through the ruled "…"
+  clip, so the RULED BEHAVIOR (short line, dismissable, reason on demand) already holds on them; what's missing
+  is authored headlines: one expression per site plus nine short forms, in editor-family files VM-271 will
+  rework. Verified by the orchestrator: the final 1b diff touches no editor-family file. The new seam spellings
+  (`refusalHeadline`, `refuse(headline:sentence:)`, `holdForReading(_:)`) are fenced off the Mac by the VM61 scan.
 
 ## Scope calls made at kickoff (the orchestrator's; each on the ratify list)
 
@@ -347,8 +354,8 @@ install and the #281 dispositions.
 | nov24 coordinator announced; its protocol folded in above | DONE |
 | Riders re-parented under VM-260; batch 1a members In Progress | DONE |
 | Batch 1a (VM-253 · VM-256 · VM-255) | BUILT + SUITES GREEN 2026-11-25 (every red-on-old as predicted; the whole phone target and the 9 Mac suites green; code tip `19b31c4c3`). PENDING: the walk leg, and the keyboard-reveal UI test on a device whose library opens (the window's device was Castle-locked — no verdict, not a regression) |
-| Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | IN PROGRESS 2026-11-25 — implementer spawned; VM-277's gesture/short-form design comes back as a proposal before that half builds |
-| Batch 2 (VM-273 · VM-272) | NOT STARTED |
+| Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | BUILT, READY-FOR-TESTS 2026-11-25 (tip `ca9a8d7be`; adjudications A-260-3…8; the editor-spoken refusals' authored headlines deferred to VM-279, the clip standing in). PENDING: the one window — two red-on-old trees, the tip, the Mac legs, the line's 7-stop walk |
+| Batch 2 (VM-273 · VM-272) | IN PROGRESS 2026-11-25 — implementer spawned (headless under the quiet window) |
 | Batch 3 (VM-247 · VM-254) | NOT STARTED |
 | Batch 4 (VM-259: design → pick → build) | NOT STARTED |
 | Ladder · gate · walk | NOT STARTED |
