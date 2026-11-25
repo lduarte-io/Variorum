@@ -18,10 +18,11 @@
 //  VX-1013 (`notes/plans/fixes/vx-1013-open-far-folder-wait.md`, D-1013-2 and D-1013-5) — THE OPEN NEVER WAITS ON A
 //  FOLDER OUTSIDE THE LIBRARY. The far folder is hers to pick and is commonly iCloud-synced: a cold or evicted folder
 //  blocks every small key-file read, and the launch road used to walk both roots on the order of ten times before the
-//  first frame. So a listing has a SCOPE — `.everything` (today's, the default for every caller) or `.containerOnly`
-//  (the far folder, when one is picked, marked UNREAD in `Catalog.unreadPlaces`, never read) — and a facts read takes
-//  its catalogue from the caller as a `CatalogRead`: `.everything`, or `.thisOpen(walk)` — the container listed at the
-//  read and the far folder as THIS OPEN's one walk (`FarFolderWalk`) has it. Only the launch road reads `.thisOpen`.
+//  first frame. So a facts read takes its catalogue from the caller as a `CatalogRead`: `.everything` (both roots,
+//  walked at the read — today's, and the default for every caller), or `.thisOpen(walk)` — the container listed at the
+//  read and the far folder as THIS OPEN's one walk (`FarFolderWalk`) has it: its entries once the walk has landed, the
+//  place marked UNREAD in `Catalog.unreadPlaces` while it has not. Only the launch road (and a lock's lobby) reads
+//  `.thisOpen`; the walk resolves the picked folder once per open and walks it at most once.
 //
 
 import Foundation
@@ -34,25 +35,7 @@ nonisolated struct CatalogLister: Sendable {
     static let walkedContainerFolders = [CatalogNames.backupsFolderName, CatalogNames.previousLibrariesFolderName]
     static let walkedFarFolders = [CatalogNames.backupsFolderName]
 
-    /// VX-1013 (D-1013-2) — what one listing reads.
-    enum Scope: Sendable {
-        /// Both roots, walked now — today's, and the default everywhere.
-        case everything
-        /// The container alone; the far folder, when one is picked, is marked UNREAD and never read (resolving the
-        /// picked folder's bookmark reads no folder).
-        case containerOnly
-    }
-
-    func catalog() -> Catalog { catalog(scope: .everything) }
-
-    func catalog(scope: Scope) -> Catalog {
-        switch scope {
-        case .everything:
-            return Catalog.build(entries())
-        case .containerOnly:
-            return Catalog.build(containerEntries(), unreadPlaces: places.farFolder() == nil ? [] : [.farFolder])
-        }
-    }
+    func catalog() -> Catalog { Catalog.build(entries()) }
 
     /// VX-1013 (D-1013-2/-5) — the catalogue a facts read takes from its caller: both roots now, or the container now
     /// over this open's one far-folder walk.
@@ -124,8 +107,9 @@ nonisolated struct CatalogLister: Sendable {
 
 /// **VX-1013 (D-1013-2) — THE CATALOGUE STATE A FACTS READ TAKES FROM ITS CALLER.** `.everything` is today's and the
 /// default for every caller — the copy doors, the copy counts, the backup hook and pair, the crossing and account acts,
-/// Data Safety, a face's door, the relock's lobby — so all of them read byte-identically. Only the launch road's reads
-/// (`ProtectionOpenRoad` over a `RoadContext` whose `far` the bootstrap's open made) take `.thisOpen`.
+/// Data Safety, a face's door — so all of them read byte-identically. Only the launch road's reads (`ProtectionOpenRoad`
+/// over a `RoadContext` whose `far` the bootstrap's open made) and a lock's lobby (`ProtectionRoadLock.lobbyContext`, its
+/// own walk — R-1013-A2) take `.thisOpen`.
 nonisolated enum CatalogRead: Sendable {
     /// Both roots, walked at the read.
     case everything
@@ -146,11 +130,12 @@ nonisolated enum CatalogRead: Sendable {
 }
 
 /// **VX-1013 (D-1013-5) — THIS OPEN'S ONE FAR-FOLDER WALK.** Made by the bootstrap at each open (`beginOpening`) and
-/// carried by the launch road's `RoadContext`: every facts read in that open composes a fresh container listing (the
+/// carried by the launch road's `RoadContext` — and one per lock, carried by a lock's lobby context
+/// (`ProtectionRoadLock.lobbyContext`, R-1013-A2): every facts read in that open composes a fresh container listing (the
 /// open's repairs change it) over this one shared far listing. The far folder is resolved at most once per open (a
 /// bookmark's resolution — no folder is read) and WALKED at most once, detached at a low priority, only when something
-/// asks: the lobby (`ProtectionOpenRoad.route` begins it when it draws), or a press that would otherwise refuse (it joins
-/// the walk). An open that goes straight on (`.opened`, `.created`) never walks it.
+/// asks: a lobby as it draws (`ProtectionOpenRoad.route`, `ProtectionRoadLock.lobby`), or a press that would otherwise
+/// refuse (it joins the walk). An open that goes straight on (`.opened`, `.created`) never walks it.
 nonisolated final class FarFolderWalk: @unchecked Sendable {
     private let places: ProtectionPlaces
     private let lock = NSLock()

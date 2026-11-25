@@ -40,6 +40,7 @@ So the blank window is: first-frame-color → N × (far-folder byte reads of 155
 
 - **D-1013-1 — The catalogue says which places it read.** `Catalog` gains `unreadPlaces: Set<CatalogPlace>` (default `[]`, so every existing call site and pin compiles and passes unmodified — the 3C parity pattern). A place in `unreadPlaces` contributed no entries, and nothing may be concluded from their absence.
 - **D-1013-2 — The launch route runs on container-only facts.** `CatalogLister` gains a scope (`.everything` — today's, the default everywhere — and `.containerOnly`, which lists the container and marks `.farFolder` unread). `ProtectionFactsGatherer.facts`/`ProtectionSystem.facts` take the catalogue state from the caller with `.everything` the default: the copy doors, copy counts, backup hook/pair, crossing and account acts, Data Safety — every non-launch caller — are byte-identical by default. Only `ProtectionOpenRoad`'s launch-route facts reads (lobbyFacts, open's, repairPasses', logSummary's, openTyped's first leg) run on the per-open far state (D-1013-5).
+  - *As built (round 1's F-R1-2):* no listing scope shipped. The catalogue state a facts read takes is `CatalogRead` (`.everything`, the default, or `.thisOpen(FarFolderWalk)`); its `.thisOpen` arm lists the container at the read and marks the far folder unread itself until the open's one walk lands (`FarFolderWalk.catalog(over:)`). Batch 1's `CatalogLister.Scope` / `.containerOnly` had no caller and was deleted in batch 2; `CatalogLister.catalog()` is main's body again.
 - **D-1013-3 — Unread-far is indeterminate, by the road's standing idiom** ("could not read ≠ opens nothing", `ProtectionFactsGatherer`; "anything that might still open it says nothing", `AssessRules.lobby`). Concretely:
   - Rule 27 is NEVER claimed on a partial listing: `AssessRules.lobby`'s `mightOpen` treats an unread far place as possibly-holding ⇒ `noKeyFileAnywhere` stays nil until a full listing proves it; the unlocked `noKeyFileAnywhere` fault and `backupHoldsTheCurrentKeyFile` (Assess.repairs ~278/~301) likewise do not fire while far is unread.
   - The no-backup-yet consult: **superseded by R-1013-A1 (the fork's ruling, below)** — the container's copies answer it on a partial listing. The original line here ("its act waits for a full-listing assessment — the backup hook's own moment walks everything anyway") rested on a false parenthetical the implementer traced: no post-open assessment feeds the reminder, so the literal reading would lose rule 3's "always" moment. The fork section carries the full trace and options.
@@ -308,9 +309,7 @@ this branch and round 2's re-review covers it.
 
 ## BATCH 2 LIVE STATUS (the implementer's — round 1's fixes, then the VX-524 rider)
 
-*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. NEXT: a MUTATION run on
-F-R1-1's guard (the edge — a missing standing read as a whole listing), from the committed state, restored by
-`git checkout --` on `ProtectionLobbyModel.swift` (committed first, so the restore is safe).*
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight.*
 
 - PHASE A — DONE (`8f5f1f538`): the round-1 dispositions, each from this session's own read of the named code, under
   THE LADDER ▸ ROUND 1 DISPOSITIONS below. The reviewer's final calls landed at `30caec3fa` (ROUND 1 FINAL CALLS).
@@ -328,9 +327,17 @@ F-R1-1's guard (the edge — a missing standing read as a whole listing), from t
     the gate opened held (the landing did take the full facts); the edge pin green, as designed. With the guard:
     `✔ Test run with 35 tests in 4 suites passed` (`OpenFarFolderWaitTests` 13, `ProtectionLobbyModelTests`,
     `LobbyTouchIDReaskTests`, `RoadLockTests` — the last three UNMODIFIED). The pre-fix run IS the guard's revert (the
-    guard is the only production change in this piece).
-  - B2 F-R1-2 — NOT-STARTED: delete `CatalogLister.Scope` and `catalog(scope:)`; the header rewritten to the shipped
-    seam; an as-built line beneath D-1013-2.
+    guard is the only production change in this piece). MUTATION (from the committed state, `0ab517ee6`): the guard's
+    edge written as `standing.facts?.catalog.readsEveryPlace ?? true` (a missing standing read as a whole listing) ⇒
+    `✘ … 13 tests … failed … with 2 issues` — the edge pin alone (464, 465); restored by `git checkout --`, `git status`
+    clean.
+  - B2 F-R1-2 — DONE (this commit). `CatalogLister.Scope` and `catalog(scope:)` deleted; `catalog()` is main's body again
+    (`Catalog.build(entries())`); the file's VX-1013 header paragraph rewritten to the shipped seam (`CatalogRead` +
+    `FarFolderWalk`), and — the same stale claim in the same file — `CatalogRead`'s and `FarFolderWalk`'s doc comments now
+    name a lock's lobby among the `.thisOpen` readers (R-1013-A2). The as-built line sits beneath D-1013-2 (the design
+    text untouched). `git grep containerOnly\|catalog(scope` over `App Sources Tests Tools`: nothing. Harness (with B3's
+    comments, below): `✔ Test run with 42 tests in 4 suites passed` (`OpenFarFolderWaitTests`,
+    `ProtectionLobbyModelTests`, `RoadLockTests`, `ProtectionOpenRoadPlantedTests`). No pin (not bug-class).
   - B3 F-R1-4 — NOT-STARTED: the two comments (`AppBootstrap.swift:642`, `ProtectionOpenRoad.swift:472`).
   - B4 F-R1-3 — NOT-STARTED: the closing disposition line naming VX-1090; no code.
   - B5 — NOT-STARTED: the Mac target `build-for-testing`, the phone build, the widened headless harness, the core suite.
