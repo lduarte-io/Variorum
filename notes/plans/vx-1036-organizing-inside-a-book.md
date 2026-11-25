@@ -319,7 +319,7 @@ What stands today: the Library's List row already carries a note's title, its da
 - **Wings.** One per-wing switch decides both all-wings search and the All Wings Library (R-1036-36). Home reorders and takes a colour like any wing; all-wings Starred keeps her one star order; a search in the All Wings Library shows the "in: all wings" chip (R-1036-41).
 - **Lanes.** An empty lane keeps its heading; a lane move is one undo step; binding a laned gathering turns each lane into a chapter (R-1036-41).
 - **Four faces exist only in words** — no mockup shows them, and the owning run's first walk shows them to her before it merges: the confirm before a tag-removing lane move; the three-position tags switch; the tag button beside the title suggestion; the "…" on a long title at rest.
-- **The add-tag chord is ⌘⇧H** (R-1036-46, picked at the build kickoff 2026-11-25 from the registry survey — every T chord is takes', ⌘⇧1–9 are the Open list's badges; ⌃⌘T and ⌥⌘3 were the offered alternatives). **Not yet picked:** the lanes run's cast (hers at its kickoff — it carries a `Sync/` constant and a §12 event).
+- **The add-tag chord is ⌘⇧I** — the standing `.tagNote` act, extended to books (R-1036-46 as resolved at her check-in: "Keep ⌘⇧I"; the ⌘⇧H pick was premise-broken and lapsed, ⌘⇧H stays free — §5 carries the story). **Not yet picked:** the lanes run's cast (hers at its kickoff — it carries a `Sync/` constant and a §12 event).
 
 ---
 
