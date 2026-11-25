@@ -774,6 +774,13 @@ struct BookView: View {
             .help(CapabilityRegistry.capability(.openBookSettings).verb
                 + " — collecting, finish, seal, own, length, rename")
         }
+        // VX-1014 (D-1082-S3): the title line's OWN laid-out width, for the
+        // DEBUG oracle (`BookOutlineGeometry.mastheadTitleLines`).
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+            #if DEBUG
+            BookOutlineGeometry.recordMastheadTitleLine(readingID, width, owner: oracleOwner)
+            #endif
+        }
         // VX-887 (her three rulings, 2026-11-05 — "the area in books is a bit
         // crowded and lacks visual hierarchy"): the ORDER DIAL rides the mode
         // row's one line — the modes leading, the dial at the trailing end —
@@ -2980,6 +2987,7 @@ enum BookOutlineGeometry {
     private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
     private static var rowHeightStore = OwnedRegistrations<String, CGFloat>()
     private static var navigatorFrameStore = OwnedRegistrations<String, CGRect>()
+    private static var mastheadTitleLineStore = OwnedRegistrations<String, CGFloat>()
     private static var navigatorChapterRowStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorNoteRowStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorChapterMarkStore = OwnedRegistrations<String, Bool>()
@@ -3025,6 +3033,13 @@ enum BookOutlineGeometry {
     /// navigator" is flaky by construction (measured: 4 chapter rows in a
     /// two-chapter book, and a frame from someone else's mount).
     static var navigatorFrames: [String: CGRect] { navigatorFrameStore.current }
+    /// **VX-1014 (D-1082-S3) — the masthead TITLE LINE's own laid-out
+    /// width** (`BookMastheadTitleLine` — name · search door · trailing
+    /// doors), keyed by the book: in the navigator and in the Index column
+    /// alike (one masthead, one at a time). "The open field never widens its
+    /// column" is a claim about THIS line, so the pins read it rather than the
+    /// whole column (whose width any other child can move).
+    static var mastheadTitleLines: [String: CGFloat] { mastheadTitleLineStore.current }
     static var navigatorChapterRows: [String: CGRect] { navigatorChapterRowStore.current }
     static var navigatorNoteRows: [String: CGRect] { navigatorNoteRowStore.current }
     /// **VX-562 — what the navigator MARKED**: per chapter row (by section
@@ -3089,6 +3104,10 @@ enum BookOutlineGeometry {
 
     static func recordNavigator(_ readingID: String, _ frame: CGRect, owner: UUID) {
         navigatorFrameStore.publish(frame, for: readingID, owner: owner)
+    }
+
+    static func recordMastheadTitleLine(_ readingID: String, _ width: CGFloat, owner: UUID) {
+        mastheadTitleLineStore.publish(width, for: readingID, owner: owner)
     }
 
     static func recordNavigatorRow(_ id: String, chapter: Bool, _ frame: CGRect, owner: UUID) {
@@ -3158,6 +3177,7 @@ enum BookOutlineGeometry {
         anchorTopStore.release(owner: owner)
         rowHeightStore.release(owner: owner)
         navigatorFrameStore.release(owner: owner)
+        mastheadTitleLineStore.release(owner: owner)
         navigatorChapterRowStore.release(owner: owner)
         navigatorNoteRowStore.release(owner: owner)
         navigatorChapterMarkStore.release(owner: owner)
@@ -3178,6 +3198,7 @@ enum BookOutlineGeometry {
 
     static func resetNavigator() {
         navigatorFrameStore.forgetAll()
+        mastheadTitleLineStore.forgetAll()
         navigatorChapterRowStore.forgetAll()
         navigatorNoteRowStore.forgetAll()
         navigatorChapterMarkStore.forgetAll()

@@ -18,10 +18,11 @@
 //  `SideColumn`'s fixed `.frame(width:)` CENTRES it, so the whole navigator
 //  hangs over both edges. The Index column carries the same masthead.
 //
-//  The oracle is the column's own size as it LAID OUT (`BookOutlineGeometry
-//  .navigatorFrames` / `BookIndexGeometry.columnFrames`, DEBUG): a column that
-//  holds its contents is exactly its panel width; an overflowing masthead
-//  makes it wider. RED on the pre-fix tree for every open-field row below (by
+//  The oracle is the masthead TITLE LINE's own laid-out width
+//  (`BookOutlineGeometry.mastheadTitleLines`, DEBUG — D-1082-S3: the first cut
+//  read the whole column, which another child moved by 1 pt in Terminal at
+//  rest), against the room its column gives it (the floor less the column's
+//  padding). RED on the pre-fix tree for every open-field row below (by
 //  the windowless measurement: "Poems" draws a 190-pt line in a 166-pt room,
 //  "Video ideas" 200 pt, "Video ideas" with "12" at Arrivals 220 pt; in the
 //  Index column at its 240-pt floor, 245 pt in 212). GUARD, green on both
@@ -165,29 +166,35 @@ struct BookMastheadFitsItsColumnTests {
     }
 
     /// The navigator as it laid out, against its panel width.
-    private func navigatorWidth(_ readingID: String) -> CGFloat? {
+    /// **The ORACLE (D-1082-S3): the masthead TITLE LINE's own laid-out
+    /// width** (`BookOutlineGeometry.mastheadTitleLines`, DEBUG) — the line
+    /// this fix owns, read directly. The first cut read the whole column's
+    /// width, which any other child can move: the window's green pass (00:41)
+    /// caught a 1-pt Terminal overflow from another navigator element at REST
+    /// (the record's LIVE STATUS rows 7–8), so the pins now test what they
+    /// claim.
+    private func titleLineWidth(_ readingID: String) -> CGFloat? {
         #if DEBUG
-        BookOutlineGeometry.navigatorFrames[readingID]?.width
+        BookOutlineGeometry.mastheadTitleLines[readingID]
         #else
         nil
         #endif
     }
 
-    private func indexColumnWidth(_ readingID: String) -> CGFloat? {
-        #if DEBUG
-        BookIndexGeometry.columnFrames[readingID]?.width
-        #else
-        nil
-        #endif
-    }
+    /// The room each column gives its masthead line: the navigator's floor
+    /// less its `.padding(12)` each side (`BookView.navigator`); the Index
+    /// column's floor less the masthead's `.padding(.horizontal, 14)`
+    /// (`BookIndexView.column`).
+    static let navigatorRoom: CGFloat = BookNavigatorLayout.minimumWidth - 24
+    static let indexRoom: CGFloat = BookIndexColumn.minimumWidth - 28
 
     // MARK: - The navigator at its 190-pt floor
 
     /// Her sighting's shape — a short-named GATHERING — and her own book's
     /// name, nothing waiting; and a book whose Arrivals door shows a count.
-    /// The field OPEN: the navigator is exactly its panel width. RED on the
-    /// pre-fix tree (the line outgrew its 166-pt room and the navigator laid
-    /// out 214–244 pt wide).
+    /// The field OPEN: the title line is no wider than the room its column
+    /// gives it. RED on the pre-fix tree (the HStack drew 190–220 pt in a
+    /// 166-pt room).
     @Test(arguments: [ThemeVoice.terminal, .study])
     func theOpenFieldNeverWidensTheNavigator(voice: ThemeVoice) async throws {
         #if DEBUG
@@ -203,17 +210,17 @@ struct BookMastheadFitsItsColumnTests {
                     book.search.open()
                     let window = await mount(book, theme)
                     defer { window.orderOut(nil); window.close() }
-                    let width = try #require(navigatorWidth(book.readingID), "\(voice) \(name): the navigator reported")
-                    #expect(width <= BookNavigatorLayout.minimumWidth + 0.5,
-                            "\(voice) \(name) (\(kind), \(waiting) waiting): the open field widened the navigator to \(width) pt")
+                    let width = try #require(titleLineWidth(book.readingID), "\(voice) \(name): the title line reported")
+                    #expect(width <= Self.navigatorRoom + 0.5,
+                            "\(voice) \(name) (\(kind), \(waiting) waiting): the open title line drew \(width) pt in a \(Self.navigatorRoom)-pt room")
                 }
             }
         }
         #endif
     }
 
-    /// GUARD (green on both trees): the field at REST — the bare 🔍 — never
-    /// widens the navigator, the Arrivals count shown or not.
+    /// GUARD (green on both trees): the field at REST — the bare 🔍 — the
+    /// title line fits its room, the Arrivals count shown or not.
     @Test(arguments: [ThemeVoice.terminal, .study])
     func theRestingGlyphNeverWidensTheNavigator(voice: ThemeVoice) async throws {
         #if DEBUG
@@ -223,9 +230,9 @@ struct BookMastheadFitsItsColumnTests {
                     BookOutlineGeometry.resetNavigator()
                     let window = await mount(book, theme)
                     defer { window.orderOut(nil); window.close() }
-                    let width = try #require(navigatorWidth(book.readingID), "\(voice) \(name): the navigator reported")
-                    #expect(width <= BookNavigatorLayout.minimumWidth + 0.5,
-                            "\(voice) \(name): the resting masthead drew \(width) pt")
+                    let width = try #require(titleLineWidth(book.readingID), "\(voice) \(name): the title line reported")
+                    #expect(width <= Self.navigatorRoom + 0.5,
+                            "\(voice) \(name): the resting title line drew \(width) pt in a \(Self.navigatorRoom)-pt room")
                 }
             }
         }
@@ -236,19 +243,20 @@ struct BookMastheadFitsItsColumnTests {
 
     /// The Index column carries the same masthead (wave 2c): the field OPEN on
     /// a book whose Arrivals door shows a count, the column at its floor —
-    /// exactly its panel width. RED on the pre-fix tree.
+    /// the title line within the column's room. RED on the pre-fix tree.
     @Test(arguments: [ThemeVoice.terminal, .study])
     func theOpenFieldNeverWidensTheIndexColumn(voice: ThemeVoice) async throws {
         #if DEBUG
         try await withColumnsAtTheirFloors {
             try await withMasthead(name: "Video ideas", kind: .book, waiting: 12, voice: voice, mode: .index) { book, theme in
                 BookIndexGeometry.reset()
+                BookOutlineGeometry.resetNavigator()
                 book.search.open()
                 let window = await mount(book, theme)
                 defer { window.orderOut(nil); window.close() }
-                let width = try #require(indexColumnWidth(book.readingID), "\(voice): the Index column reported")
-                #expect(width <= BookIndexColumn.minimumWidth + 0.5,
-                        "\(voice): the open field widened the Index column to \(width) pt")
+                let width = try #require(titleLineWidth(book.readingID), "\(voice): the Index column's title line reported")
+                #expect(width <= Self.indexRoom + 0.5,
+                        "\(voice): the open title line drew \(width) pt in the Index column's \(Self.indexRoom)-pt room")
             }
         }
         #endif
