@@ -178,32 +178,43 @@ struct MobileRefusalLineTests {
     /// **RED ON OLD — the line floats as a card** clear of the screen's sides
     /// and of the bar beneath it (the old band ran edge to edge, flush on the
     /// bar — VM-275 half 2's look). Every class wears the card.
+    ///
+    /// *RECONCILED (the consolidated window, 2026-11-25 — the tip read a nil
+    /// frame):* the probe did not miss the card; this pin reset its own reading.
+    /// It drew a refusal and then, in ONE turn, cleared the line, set `lineFrame`
+    /// to nil and said a removal — so SwiftUI saw a single card whose content
+    /// changed while its frame did not (both 44 tall in the same place), the
+    /// frame probe (`onGeometryChange`) had no change to report, and the nil
+    /// stood. Each class now stands in its own fresh window and model, so the
+    /// card's FIRST geometry is what is read (the road `aLongRefusalTakesOneLine`
+    /// reads, green on the tip). The law is unchanged.
     @Test func theLineIsACardClearOfTheBarAndTheSides() async throws {
         for voice in [ThemeVoice.terminal, .study] {
-            try await withEditorWorld { session, _ in
-                session.status.dismissAfter = .seconds(60)
-                let model = MobileMessageLineModel(status: session.status, voice: { voice })
-                try await standing(model) { window in
-                    let foot = window.bounds.maxY - Self.inset - Self.bar
-                    let margin = PhoneMetrics.Space.s8 - 0.5
-                    for say in [
-                        { session.status.refuse("That couldn't be done.") },
-                        { session.status.removal(
-                            "Block deleted.", undo: .init(label: MobileLine.undoLabel, perform: {})) },
-                    ] {
-                        session.status.clear()
-                        model.lineFrame = nil
-                        say()
+            for kind in ["a refusal", "a removal"] {
+                try await withEditorWorld { session, _ in
+                    session.status.dismissAfter = .seconds(60)
+                    let model = MobileMessageLineModel(status: session.status, voice: { voice })
+                    try await standing(model) { window in
+                        let foot = window.bounds.maxY - Self.inset - Self.bar
+                        let margin = PhoneMetrics.Space.s8 - 0.5
+                        if kind == "a refusal" {
+                            session.status.refuse("That couldn't be done.")
+                        } else {
+                            session.status.removal(
+                                "Block deleted.", undo: .init(label: MobileLine.undoLabel, perform: {}))
+                        }
                         await settle(window)
-                        let frame = try #require(await lineFrame(window, model))
-                        #expect(frame.minX >= margin, "clear of the left edge in \(voice): \(frame)")
+                        let frame = try #require(await lineFrame(window, model),
+                                                 "\(kind)'s card drew in \(voice)")
+                        #expect(frame.minX >= margin, "\(kind) clear of the left edge in \(voice): \(frame)")
                         #expect(frame.maxX <= window.bounds.maxX - margin,
-                                "clear of the right edge in \(voice): \(frame)")
+                                "\(kind) clear of the right edge in \(voice): \(frame)")
                         #expect(frame.maxY <= foot - margin,
-                                "clear of the bar in \(voice): \(frame), bar's top \(foot)")
-                        #expect(frame.maxY >= foot - 30, "and close above it, not floated away: \(frame)")
+                                "\(kind) clear of the bar in \(voice): \(frame), bar's top \(foot)")
+                        #expect(frame.maxY >= foot - 30,
+                                "\(kind) close above it, not floated away: \(frame)")
+                        session.status.clear()
                     }
-                    session.status.clear()
                 }
             }
         }
