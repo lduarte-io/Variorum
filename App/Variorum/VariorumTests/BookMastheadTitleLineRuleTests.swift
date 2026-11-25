@@ -52,7 +52,15 @@ struct BookMastheadTitleLineRuleTests {
     @Test func theNameIsWholeBeforeTheFieldGrows() {
         let middle = Rule.widths(room: 236, nameIdeal: 89, doorMin: Self.open.min, doorMax: Self.open.max, trailing: [13])
         #expect(middle.name == 89, "the name whole: \(middle)")
-        #expect(middle.door == 236 - 27 - 89, "the field takes what is left above its floor: \(middle)")
+        // A TYPED constant (D-1082-S3, the window's red at 00:41): written
+        // inline, `#expect(middle.door == 236 - 27 - 89)` FAILS although the
+        // door is bit-exactly 120.0 — the macro evaluates an all-literal
+        // operand on its own, as an Int, and the CGFloat 120.0 compares false
+        // against Int 120 (measured headless: the bits are 0x405e000000000000,
+        // plain `==` is true, the macro's operand prints `→ 120`). Never an
+        // all-literal arithmetic operand beside a CGFloat in this file.
+        let rest: CGFloat = 236 - 27 - 89
+        #expect(middle.door == rest, "the field takes what is left above its floor: \(middle)")
         let wide = Rule.widths(room: 336, nameIdeal: 89, doorMin: Self.open.min, doorMax: Self.open.max, trailing: [13])
         #expect(wide.door == Self.open.max, "the field at its 180 ceiling: \(wide)")
         #expect(wide.name >= 89, "and the name whole beside it: \(wide)")
