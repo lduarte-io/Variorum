@@ -148,7 +148,8 @@ extension LibraryCatalogModel {
             let groups = searchState.groups
             let groupIndex = searchState.groupIndex
             return .concatenated([
-                .init(ids: searchState.books.map(\.id)),
+                // VX-1074: the Books section as it draws — its chapter rows too.
+                .init(ids: searchState.bookRows.map(\.id)),
                 .init(count: groups.count, position: { groupIndex[$0] },
                       id: { groups.indices.contains($0) ? groups[$0].homeID : nil }),
             ])

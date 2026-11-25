@@ -80,6 +80,8 @@ struct LibrarySearchBand: View {
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
                     .truncationMode(.middle)
+                    // VX-1069: the quote the band DREW (the DEBUG oracle).
+                    .librarySearchDrawn(.echo, LibrarySearchCopy.echo(question.words))
             }
             if let line = countsLine {
                 Text(tokens.chromeLabel(line))

@@ -223,11 +223,25 @@ struct ShelfView: View {
             // main column's full width. The tour offer's card on top (PROVISIONAL P-292-13 — the band's top card is
             // the one whose leaving moves nothing under it: the listing above takes its height), the words card under
             // it, the quick entry under both.
-            if let offerCard {
-                offerCard
-            }
-            if let wordsBand {
-                wordsBand
+            //
+            // VX-1070: the band is one a status toast never covers — the
+            // quick entry's own mark (VX-121's `statusToastKeepClear`), so the
+            // shell's toast lifts above whichever card is showing instead of
+            // landing on its sentence and its doors. Marked HERE, around both
+            // cards, so the band marks itself as one (a card's own view is
+            // never touched); a band whose cards have nothing to say lays out
+            // at zero height and asks for nothing (`StatusToastPlacement
+            // .keepClearTops`).
+            if offerCard != nil || wordsBand != nil {
+                VStack(spacing: 0) {
+                    if let offerCard {
+                        offerCard
+                    }
+                    if let wordsBand {
+                        wordsBand
+                    }
+                }
+                .statusToastKeepClear()
             }
             entryBar
                 #if DEBUG
@@ -834,15 +848,50 @@ struct ShelfView: View {
     /// The ⌘K hint at the window's foot — and, at its trailing end, the
     /// board's QUIET RECEIPT home (18i's one slot; rows 103/108: the old
     /// report overlay drew over these words).
+    ///
+    /// **VX-409 (PROVISIONAL A-1082-3) — the hint YIELDS while the line
+    /// speaks.** The bar's static layout never overlapped (measured: the line
+    /// truncates in its room and ends before the hint), but the line ANIMATES
+    /// its arrival and leaving (`QuietReceiptLine.fade`) while the hint stayed
+    /// put, and for that beat her words ran onto it (VX-306's walk, W-7). So
+    /// while a receipt — or a standing ask — holds the line the hint is not
+    /// drawn and the line has the bar's trailing room to itself (a message
+    /// that still overflows truncates there, the whole sentence its hover);
+    /// when the line goes the hint returns at once in the layout but fades in
+    /// only after the line's own fade is over, so the leaving words never
+    /// cross it. No hairline: nothing follows a speaking line here now.
     private var hintBar: some View {
-        HStack(spacing: 12) {
+        let lineSpeaks = session.status.lineItem != nil
+        return HStack(spacing: 12) {
             Text(tokens.chromeLabel("⌘K — find anything: notes, books, commands"))
                 .lineLimit(1)
             Spacer(minLength: 12)
-            QuietReceiptLine(status: session.status, tokens: tokens, separated: true)
-            Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
-                .lineLimit(1)
-                .fixedSize()
+            QuietReceiptLine(status: session.status, tokens: tokens)
+                #if DEBUG
+                // VX-409: where the quiet line sits in the bar (the pin reads
+                // it against the bar's own edge).
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintLineKey, $0, in: session, owner: oracleOwner)
+                }
+                #endif
+            if !lineSpeaks {
+                Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .transition(.asymmetric(
+                        insertion: .opacity.animation(
+                            .easeIn(duration: QuietReceiptLine.fade).delay(QuietReceiptLine.fade)),
+                        removal: .identity))
+                    #if DEBUG
+                    // VX-409: whether — and where — the ⌘J · ⌘N hint is drawn.
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                        BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintWordsKey, $0, in: session, owner: oracleOwner)
+                    }
+                    .onDisappear {
+                        BookcaseRowOracle.withdrawFrame(BookcaseRowOracle.hintWordsKey, in: session, owner: oracleOwner)
+                    }
+                    #endif
+            }
         }
         .font(tokens.small)
         .foregroundStyle(tokens.faint)
@@ -1036,6 +1085,12 @@ enum BookcaseRowOracle {
         frames.publish(frame, for: scoped(key, session), owner: owner)
     }
 
+    /// VX-409: a reserved key's record goes when the thing it recorded is
+    /// no longer drawn (the bar's ⌘J · ⌘N hint, while it yields).
+    static func withdrawFrame(_ key: String, in session: AppSession, owner: UUID) {
+        frames.withdraw(scoped(key, session), owner: owner)
+    }
+
     private static func scoped(_ key: String, _ session: AppSession) -> String {
         "\(session.debugProbeScope)\u{2016}\(key)"
     }
@@ -1056,6 +1111,9 @@ enum BookcaseRowOracle {
     /// bar's, so a pin can read where the box sits (`BookcaseQuickEntryPlacementTests`).
     static let entryKey = "\u{2116}entry"
     static let hintBarKey = "\u{2116}hint"
+    /// VX-409: the bottom bar's ⌘J · ⌘N hint words, and its quiet line.
+    static let hintWordsKey = "\u{2116}hint-words"
+    static let hintLineKey = "\u{2116}hint-line"
     // (13s-b U1a's `offerRowKey` — the tour offer line's held row — retired
     // with the line at VX-292 U4; the offer card reports its own paper,
     // `TourOfferCardOracle`.)

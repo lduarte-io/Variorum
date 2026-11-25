@@ -270,6 +270,17 @@ public enum SearchComposer {
         SearchTokenCharacters.holdsToken(word)
     }
 
+    /// **A typed word that FOLDS TO NOTHING** — the index keeps no token of
+    /// any of its characters (`hasTokenCharacter`, negated: punctuation and
+    /// symbols as the linked tokenizer reads them; a quote mark is never a
+    /// token character, so `"—"` folds and `"a + b"` does not). Public for
+    /// the bands' QUOTE (VX-1069 — her ruling of P-980-B1-1, option (b): such
+    /// words drop out of the quote beside a tag; the app's `SearchFieldWords`
+    /// reads it), so the quote and the question read one table. Pure.
+    public static func foldsToNothing(_ word: String) -> Bool {
+        !hasTokenCharacter(word)
+    }
+
     // MARK: - The passage page
 
     /// The page statement: matches → their homes → scope / facet / filter →

@@ -54,9 +54,18 @@ struct LibrarySearchFaceTests {
     /// trimmed), a lone `#` is a word, and `#/` is NEITHER. Both sheets'
     /// models read it (`LibrarySearchQuestion.read`, `BookSearchModel.read`).
     @Test func theOneWordsReaderSpeaksTheParsersLetter() {
+        // JUSTIFIED EDIT (VX-1069 — her ruling of P-980-B1-1, option (b)):
+        // beside a tag the words that fold to nothing drop out of the quote,
+        // and a lone `#` is such a word (no token character), so this field
+        // — which holds the tag `#life/goals` — now quotes without it. The
+        // parser's letter is unchanged: with NO tag a lone `#` is still a
+        // quoted word (the second line).
         #expect(SearchFieldWords.words(of: "dream  \"old  house\" #life/goals # #/ rain")
+                == "dream \"old  house\" rain",
+                "phrases whole, tags and #/ aside, a folded # out beside the tag")
+        #expect(SearchFieldWords.words(of: "dream  \"old  house\" # #/ rain")
                 == "dream \"old  house\" # rain",
-                "phrases whole, tags and #/ aside, a lone # a word")
+                "no tag: a lone # is a quoted word (#/ is neither)")
         #expect(SearchFieldWords.tagPaths(of: "#a #b/c/ #/ # words") == ["a", "b/c"])
         let question = LibrarySearchQuestion.read("lantern #x/ #/")
         #expect(question?.words == "lantern" && question?.tagPaths == ["x"],

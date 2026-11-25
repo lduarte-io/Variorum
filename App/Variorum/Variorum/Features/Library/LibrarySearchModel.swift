@@ -164,11 +164,36 @@ extension LibraryCatalogModel.Scope {
     }
 }
 
+/// **One row of the answer's Books section** (VX-1074): a BOOK — found by its
+/// own name, or associated with a typed tag — or a CHAPTER found by its own
+/// name, which says itself and the book it is in rather than standing behind
+/// its book's row (her report: *"chapter titles are not being found in
+/// search"*). In the section's order: the associated books first, then every
+/// name hit best-first.
+nonisolated enum LibrarySearchBookRow: Equatable, Sendable, Identifiable {
+    case book(Queries.CatalogHit)
+    case chapter(SearchChapterHit)
+
+    /// The row's id — the book's, or the chapter's own (`reading_section.id`);
+    /// the place memory names rows by it (VX-823).
+    var id: String {
+        switch self {
+        case .book(let hit): hit.id
+        case .chapter(let chapter): chapter.sectionID
+        }
+    }
+}
+
 /// **One read of the answer sheet** — the band's numbers, the Books
 /// section, the first page of groups and the road to the next.
 nonisolated struct LibrarySearchListing: Equatable, Sendable {
     var counts: SearchCounts?
+    /// The BOOK rows of the Books section (the catalog's book-row doors, reach
+    /// and marks are held for exactly these).
     var books: [Queries.CatalogHit] = []
+    /// **The Books section as it draws** (VX-1074): `books` and the chapter
+    /// rows, in the section's order.
+    var bookRows: [LibrarySearchBookRow] = []
     /// **Why each ASSOCIATED book is listed** (13o U3, the tag-association
     /// join — the row says why: the mockup's "#dream flows here"); a book a
     /// name hit lists has no entry.
@@ -235,6 +260,9 @@ final class LibrarySearchModel {
     /// hit names, ranked by its best hit (∝ the wing's books — the
     /// Bookcase's own class).
     private(set) var books: [Queries.CatalogHit] = []
+    /// **The Books section as it draws** (VX-1074): the book rows above and
+    /// every chapter found by its own name, in the section's order.
+    private(set) var bookRows: [LibrarySearchBookRow] = []
     /// Why each associated book is listed (13o U3 — its row's words).
     private(set) var bookReasons: [String: SearchTagAssociation.Reason] = [:]
     /// The listed books that are archived (13o U3 — only under the facet).
@@ -364,6 +392,7 @@ final class LibrarySearchModel {
         self.generation = generation
         counts = listing?.counts
         books = listing?.books ?? []
+        bookRows = listing?.bookRows ?? []
         bookReasons = listing?.bookReasons ?? [:]
         archivedBooks = listing?.archivedBooks ?? []
         groups = listing?.groups ?? []
@@ -493,7 +522,10 @@ final class LibrarySearchModel {
             db, query: question.query, facet: scope.facet, scope: where_, calendar: calendar)
         if scope == .all || scope == .books {
             let section = try books(db, question: question, wing: wing, calendar: calendar)
-            listing.books = section.hits
+            listing.bookRows = section.rows
+            listing.books = section.rows.compactMap { row in
+                if case .book(let hit) = row { hit } else { nil }
+            }
             listing.bookReasons = section.reasons
             listing.archivedBooks = section.archived
         }
@@ -530,20 +562,33 @@ final class LibrarySearchModel {
     /// associated with it … top-ranked"*; `Queries.searchTagAssociations`) —
     /// then every book the books family names, best hit first, each once; as
     /// the catalog's own rows (`Queries.catalogBookHits`).
+    ///
+    /// **VX-1074 — a chapter found by its own name is its OWN row**, in its
+    /// rank, saying the chapter and the book it is in (`Queries
+    /// .searchChapterHits`), instead of standing its book's row in for it. A
+    /// book is a row only for its OWN name hit or a typed tag's association;
+    /// a chapter hit the read does not answer (a gathering's stray row, P-2)
+    /// keeps today's road — its book's row, once. The band's books count is
+    /// untouched: it counts the distinct books the section names, chapter
+    /// rows' books included (PROVISIONAL A-1082-2 — no new facet).
     nonisolated static func books(
         _ db: Database, question: LibrarySearchQuestion, wing: String, calendar: Calendar
     ) throws -> (
-        hits: [Queries.CatalogHit], reasons: [String: SearchTagAssociation.Reason], archived: Set<String>
+        rows: [LibrarySearchBookRow], reasons: [String: SearchTagAssociation.Reason], archived: Set<String>
     ) {
         let query = question.scoped(.books)
         let scope = SearchScope(wingID: wing)
-        var ids: [String] = []
-        var seen: Set<String> = []
+        // The section's order, as keys: a book by its id, a chapter by its
+        // section id (with its book, for the fallback).
+        enum Key: Hashable { case book(String), chapter(String, book: String, archived: Bool) }
+        var keys: [Key] = []
+        var seenBooks: Set<String> = []
+        var seenChapters: Set<String> = []
         var reasons: [String: SearchTagAssociation.Reason] = [:]
         var archived: Set<String> = []
         for association in try Queries.searchTagAssociations(db, query: query, scope: scope)
-        where seen.insert(association.readingID).inserted {
-            ids.append(association.readingID)
+        where seenBooks.insert(association.readingID).inserted {
+            keys.append(.book(association.readingID))
             reasons[association.readingID] = association.reason
             if association.isArchived { archived.insert(association.readingID) }
         }
@@ -554,16 +599,53 @@ final class LibrarySearchModel {
                     db, query: query, scope: scope, after: cursor, limit: 200, calendar: calendar)
                 for passage in page.passages {
                     guard let id = passage.readingID else { continue }
-                    // The BOOK's own archived fact (its name hit's; a chapter
-                    // hit wears its book's).
-                    if passage.isArchived, passage.kind == .book || passage.kind == .chapter {
-                        archived.insert(id)
+                    if passage.kind == .chapter {
+                        if seenChapters.insert(passage.sourceID).inserted {
+                            keys.append(.chapter(passage.sourceID, book: id, archived: passage.isArchived))
+                        }
+                        continue
                     }
-                    if seen.insert(id).inserted { ids.append(id) }
+                    // The BOOK's own archived fact (its name hit's).
+                    if passage.isArchived, passage.kind == .book { archived.insert(id) }
+                    if seenBooks.insert(id).inserted { keys.append(.book(id)) }
                 }
                 cursor = page.next
             } while cursor != nil
         }
-        return (try Queries.catalogBookHits(db, ids: ids), reasons, archived)
+        let chapterIDs = keys.compactMap { key -> String? in
+            if case .chapter(let id, _, _) = key { id } else { nil }
+        }
+        var chapters: [String: SearchChapterHit] = [:]
+        for hit in try Queries.searchChapterHits(db, ids: chapterIDs) { chapters[hit.sectionID] = hit }
+        // Resolve the order: a chapter the read answered keeps its own row; one
+        // it did not stands as its book — once, where it first ranked, wearing
+        // the chapter hit's archived fact (today's road). A book is a row once.
+        var resolved: [Key] = []
+        var placedBooks: Set<String> = []
+        for key in keys {
+            switch key {
+            case .book(let id):
+                if placedBooks.insert(id).inserted { resolved.append(key) }
+            case .chapter(let id, let book, let wasArchived):
+                if chapters[id] != nil {
+                    resolved.append(key)
+                } else if placedBooks.insert(book).inserted {
+                    resolved.append(.book(book))
+                    if wasArchived { archived.insert(book) }
+                }
+            }
+        }
+        let bookIDs = resolved.compactMap { key -> String? in
+            if case .book(let id) = key { id } else { nil }
+        }
+        var hits: [String: Queries.CatalogHit] = [:]
+        for hit in try Queries.catalogBookHits(db, ids: bookIDs) { hits[hit.id] = hit }
+        let rows = resolved.compactMap { key -> LibrarySearchBookRow? in
+            switch key {
+            case .book(let id): hits[id].map(LibrarySearchBookRow.book)
+            case .chapter(let id, _, _): chapters[id].map(LibrarySearchBookRow.chapter)
+            }
+        }
+        return (rows, reasons, archived)
     }
 }

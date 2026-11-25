@@ -470,6 +470,19 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
         MarkdownActs.indentLists(MarkdownEditing.Act.outdent, in: self) { super.insertBacktab(sender) }
     }
 
+    /// **VX-1076 — ⌥⌫ and ⌥⌦ never take a word from another line, here
+    /// too** (R118: Write is never privileged over Takes). The one rule
+    /// (`Surface/WordDelete.swift`); a pane holds one take's buffer and no
+    /// block seam, so every line break in it is content the press may take
+    /// alone.
+    override func deleteWordBackward(_ sender: Any?) {
+        WordDelete.press(.backward, in: self) { super.deleteWordBackward(sender) }
+    }
+
+    override func deleteWordForward(_ sender: Any?) {
+        WordDelete.press(.forward, in: self) { super.deleteWordForward(sender) }
+    }
+
     /// 13b 1b (N9's keyboard half): a pane that goes LIVE should hold the
     /// keyboard — set when liveness arrives before the view has a window
     /// (programmatic landings), honored at attach.

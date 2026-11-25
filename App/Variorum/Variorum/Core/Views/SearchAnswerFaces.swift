@@ -43,6 +43,12 @@ nonisolated enum SearchAnswerCopy {
         "\u{201C}\(words)\u{201D}"
     }
 
+    /// **A chapter row's book** (VX-1074 — PROVISIONAL A-1082-2's words):
+    /// "in Video ideas", on a Library chapter row beside the chapter's name
+    /// and its kind word ("chapter" — `kindWord(.chapter)`). A book's own
+    /// answer names no book (it is this one).
+    static func chapterBook(_ book: String) -> String { "in \(book)" }
+
     /// "all N ›" — the group's whole road (R-13o-9).
     static func allLines(_ n: Int) -> String { "all \(n) \u{203A}" }
     /// The open group's road closed again.
@@ -131,8 +137,19 @@ nonisolated enum SearchAnswerFace {
 nonisolated enum SearchFieldWords {
     /// The band's echo: the words as typed, tags (and the dropped `#/`)
     /// aside.
+    ///
+    /// **VX-1069 — her ruling of P-980-B1-1, option (b) (QUESTIONS #276
+    /// addendum 2): beside a tag, the words that FOLD TO NOTHING drop out of
+    /// the quote** (`SearchComposer.foldsToNothing` — the index's own table).
+    /// The answer was already the tag's (VX-954's `asksWords`), so `— #tag`
+    /// now reads on the band exactly as `#tag` does, and `red — #tag` quotes
+    /// "red". With NO tag the quote is what she typed — R-980-5's field of
+    /// only punctuation keeps its “—” byte for byte.
     static func words(of text: String) -> String {
-        tokens(of: text).filter { !isTagShaped($0) }.joined(separator: " ")
+        let all = tokens(of: text)
+        let words = all.filter { !isTagShaped($0) }
+        guard all.contains(where: isTag) else { return words.joined(separator: " ") }
+        return words.filter { !SearchComposer.foldsToNothing($0) }.joined(separator: " ")
     }
 
     /// The typed `#tag` paths, in the order typed.
@@ -225,6 +242,69 @@ struct LibrarySearchChip: View {
             } else {
                 face
             }
+        }
+    }
+}
+
+/// **VX-1074 — a CHAPTER row's line**: the chapter's name · its kind word ·
+/// "in ‹book›", on ONE text baseline (the book line's own grammar). In the
+/// Library's Books section (`book` given) the name sits on the book titles'
+/// column — the book line's glyph slot kept, empty, so a chapter row never
+/// reads as a book row and the names still align. In a book's OWN answer
+/// (`book` nil — D-1082-S1) there is no book to name and no book row to align
+/// with: the name stands where the note groups' heads stand. Moved here from
+/// `LibraryCatalogView.swift` (the book's sheet is its second consumer).
+struct CatalogChapterLine: View {
+    let tokens: VoiceTokens
+    let name: String
+    /// The kind word ("chapter", or "chapter · archived" under the facet).
+    let detail: String
+    /// The book it is in — nil inside that book's own answer.
+    var book: String? = nil
+
+    /// The line's words as it reads them (the DEBUG oracle's record and the
+    /// pins' oracle) — her name as stored, the chrome in the voice's case.
+    static func words(tokens: VoiceTokens, name: String, detail: String, book: String?) -> String {
+        let head = "\(name) \u{00B7} \(tokens.chromeLabel(detail))"
+        guard let book else { return head }
+        return head + " \u{00B7} \(tokens.chromeLabel(SearchAnswerCopy.chapterBook(book)))"
+    }
+
+    /// **The book line's leading glyph, in its font — ONE spelling** (ladder
+    /// round 1 NIT 2): the book line (`CatalogBookLine`) draws it in its muted
+    /// ink, and this line's empty slot draws it hidden, so the chapter name
+    /// sits on the titles' column for as long as both read this — a change to
+    /// the glyph or its font moves both together. A symbol in a `Text` carries
+    /// the title's own baseline (a bare `Image` would hand the stack its
+    /// bottom edge). Lives here, in the shared home, beside the line it
+    /// aligns: the feature reads the shared helper, never the reverse.
+    static func bookGlyph(_ tokens: VoiceTokens) -> Text {
+        Text(Image(systemName: "book")).font(tokens.body)
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            if book != nil {
+                // The book line's glyph slot, empty: the name on the titles' column.
+                Self.bookGlyph(tokens)
+                    .hidden()
+            }
+            Text(name)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(1)
+            Text(tokens.chromeLabel(detail))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .fixedSize()
+            if let book {
+                Text(tokens.chromeLabel(SearchAnswerCopy.chapterBook(book)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
         }
     }
 }
