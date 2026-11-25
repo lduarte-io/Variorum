@@ -421,7 +421,10 @@ chip=(AddToBookMintTests AscentDoorTests AscentRoutingTests BookAnchorTests Book
 
 **Carried from VX-1036 (nov24, ~10:00):** VX-1036's batch 3 moves the book navigator's floor PER VOICE — 229 pt Terminal, 203 pt Study (was 190). `BookMastheadFitsItsColumnTests` assumes the 190-pt floor; VX-1036 merges AFTER this run and OWNS that re-read — nothing changes here. **Consequence for VX-1091** (the Terminal mode tabs, 168 pt in a 166-pt room at the 190 floor): at a 229-pt floor the room is ~205 pt, so the overflow likely dissolves with VX-1036's merge — VX-1091's triage at this closeout says so, to be confirmed by VX-1036's re-read rather than closed blind.
 
-**Window 2 (re-requested ~09:55, first after vm-260):** the three reds re-run alone · the WHOLE phone target · SEAM · the gate walk. PENDING.
+**Window 2 (nov24's GO at 10:13, claim `vx-1082`, 75 min; the same tested SHA — `d65254b80`→tip is notes-only):**
+- **The WHOLE phone target** (iPhone 17 Pro / iOS 26.2, the coordinator's phone-suite device, shut down after): "Test run with 1226 tests in 215 suites passed after 775.036 seconds with 6 known issues", zero failed — VM-24's zero-red baseline exactly, and the same count VX-1013's gate read last night. Batch S's Core line costs the phone nothing.
+- **The three reds re-run ALONE** (run last, after the phone leg, at nov24's ask — VX-1036's niced build had finished, load 2.6): `SpellingDoorTests` (the write case among 5) PASSED · `MastheadLayoutTests.thePathChipAndTheTagClusterNeverIntersectInStudy` PASSED (19 tests in 2 suites for the two types) · `theNinthStarIsClearTheMomentTheBeatEnds` PASSED (11 tests in 1 suite — its type is `SidebarSectionWindowMountTests`; the first solo ask named the FILE's word and ran nothing for it, caught by checking every named test's line, then re-asked by its real type). **All three classifications stand: flake-shaped under the full run, green alone, no diff line reaches any of them. The Mac leg is GREEN at the tested SHA.**
+- **The gate walk:** PENDING.
 
 ## CLOSEOUT
 
