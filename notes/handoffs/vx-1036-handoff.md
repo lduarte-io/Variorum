@@ -4,7 +4,7 @@ Everything in this umbrella is built, reviewed and merged: the book's List view,
 
 ## Your checklist
 
-- [ ] **Look at it live — the Debug app on the dev store.** It's built from the final main and the dev store is dressed so the new things show. *(What's dressed and where to look is filled in below once the final window runs — see "Your look" at the end.)*
+- [ ] **Look at it live — the Debug app on the dev store.** It's built from the final main and the dev store is dressed so the new things show. Open it from Xcode (Run) or from the path in "Your look" below, then go to Bookcase ▸ **Harbour notebook**.
 - [ ] **Then tell any session "done looking" — THE PUT-BACK.** Your words: "make sure you note in the handoff that the dev store will have to be put back to whatever is normal / latest once I've looked through it." The session you tell sweeps the sample content, puts the dev store back to its normal resting posture (signed out, the settings it had), and asks nov24's successor to lift the fence.
 - [ ] **The 1.6 release — yours.** It's made ready and published nowhere. The notes are below in "The release"; the label 1.6 is provisional, yours to rename. If you like it after your look, say so and a session publishes it; changes first are fine too.
 - [ ] **Read QUESTIONS #285** — every call I made, each built to the option named with its alternative. The ones you're most likely to want to change:
@@ -31,7 +31,7 @@ Everything in this umbrella is built, reviewed and merged: the book's List view,
 
 1.6 is made ready and published nowhere. The notes, in the shape you approved for 1.5:
 
-*(The notes are `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-1.6.md`; the session that publishes reads them to you in chat first.)*
+The notes are `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-1.6.md`: a one-line summary, then **Fixed** (13 lines) and **New** (8 lines), covering this run, VX-1082 and VX-1013. The Debug app already shows them in Help ▸ What's New. **Nothing is built for release yet and nothing is published.** Your rule is that the notes are approved before the release run, because they're built into the app, so the release build waits for your word on the notes after your look. When you say go, a session reads you the notes, lands any changes, quits every Variorum and runs `Tools/Release/release.sh` on main (the build, notarization and the DMG; the appcast and the site only at your further word).
 
 ## How it was checked
 
@@ -48,7 +48,10 @@ Everything in this umbrella is built, reviewed and merged: the book's List view,
 
 ## Your look
 
-*(Filled in after the final window: the Debug app's path, the main commit it's built from, what's dressed in the dev store and where to find it, and the release's state.)*
+- **The app:** `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/Variorum.app`, built from main `73d2d9738` (the merge of this run). It opens the dev store, signed out, as always.
+- **Where to look:** Bookcase ▸ **Harbour notebook**, two chapters (Mornings, Evenings) and three titled notes with tags. It opens in the **Outline** with **tags: all**: the first card's two pills sit on their own row under its long title, the others beside the title; each card has a + for adding a tag (⌘⇧I does it on the note you're on); each chapter heading has "+ new note". Then try **List** (the fifth tab), **Read** (note titles are switched on: the quiet line above each note), the tags switch's three positions, and hover a long title. The tag button on a quick note is on the Bookcase's new-note box and the Library's: type a line and a + appears beside "name it …?".
+- **Also in the dev store from today's walks:** three Pool notes ("Harbour walk at dawn", "Tide pools at noon", "Shore birds", each tagged #garden), one empty note in "garden log", and one deleted note in the Trash. The field guide was restored so it says "five views".
+- **The dev store is fenced** for your look: no session touches it until you say you're done; then the put-back above.
 
 ## Tickets filed
 
