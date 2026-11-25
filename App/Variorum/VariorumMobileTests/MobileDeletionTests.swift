@@ -309,36 +309,26 @@ struct MobileDeletionTests {
         }
     }
 
-    /// **THE SHELF RENDERS THE SAME TRASH DOOR, FROM THE SAME DECLARATION**
-    /// (batch 6c, PROVISIONAL — the design record's finding 1 and its Q6).
-    ///
-    /// Books live on the Shelf and a deleted BOOK rows in the Trash, so a
-    /// trash door reachable only from the Library would put a tab switch
-    /// between deleting a book and getting it back. The pin drives the real
-    /// door on the real shelf and asserts it carries the SAME label the
-    /// Library's does — one declaration, two renderers, which is what stops
-    /// the two path lines drifting about what 🗑 means.
-    @Test func theShelfCarriesTheSameTrashDoor() async throws {
+    /// **THE SHELF CARRIES NO TRASH DOOR** (VM-255, her words: "let's just only
+    /// show the trash icon within library"). MOVED from
+    /// `theShelfCarriesTheSameTrashDoor` — batch 6c's second renderer (the
+    /// design record's finding 1: a deleted book rows in the Trash) is retired
+    /// by her ruling; the Library's top line is the one door (the mounted
+    /// shell's fence is `MobileTopLineTests.onlyTheLibrarysTopLineCarriesTheTrash`).
+    /// The Trash's one declaration still names the room with the shared noun.
+    @Test func theShelfCarriesNoTrashDoor() async throws {
         try await withEditorWorld { session, _ in
-            let shelf = MobileShelfViewModel(session: session)
-            let stars = MobileStarsModel(session: session)
-            let quick = MobileQuickNoteModel()
-            let opened = LockIsolatedBox(false)
-
-            try await withHostedSurface(
+            await withHostedSurface(
                 MobileShelfView(
-                    model: shelf, stars: stars, quickNote: quick,
+                    model: MobileShelfViewModel(session: session),
+                    stars: MobileStarsModel(session: session), quickNote: MobileQuickNoteModel(),
                     tokens: .terminalLight, tabBar: { EmptyView() },
-                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenTrash: { opened.value = true })
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
                 await surface.settle(20)
-                #expect(surface.activate(MobileRecoveryDoors.trashLabel),
+                #expect(surface.element(labeled: MobileRecoveryDoors.trashLabel) == nil,
                         "labels were \(surface.visibleLabels)")
-                await surface.settle(20)
             }
-            #expect(opened.value, "the shelf's door really opens the Trash room")
-            // ONE declaration: the label the Shelf drove is the Library's.
             #expect(MobileRecoveryDoors.trashLabel == RecoveryCopy.trashSection)
         }
     }

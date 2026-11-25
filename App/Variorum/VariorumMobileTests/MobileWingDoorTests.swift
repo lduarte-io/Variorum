@@ -257,25 +257,20 @@ struct MobileWingDoorTests {
         }
     }
 
-    /// The door changes no letter of the line batch 1 drew: its three pieces,
-    /// put together, are `VoiceTokens.path` over the same words (plus the
-    /// Shelf's count), in both voices.
+    /// The door changes no letter of the line a root without a door draws: its
+    /// two pieces, put together, are `VoiceTokens.path` over the wing's name, in
+    /// both voices. (MOVED at VM-255, her R-260-1: the line is the wing's name
+    /// alone — the page word and the Bookcase's trailing count left it; the
+    /// count is the door's quiet second line.)
     @Test func theLineReadsTheSameWithItsDoor() {
         for voice in [ThemeVoice.terminal, .study] {
             let tokens = VoiceTokens.resolve(voice: voice, dark: false)
-            for (wing, page, trailing) in [
-                ("Home", "Library", ""), ("Work", MobileStarsModel.pageName, ""),
-                // R-47-3 MOVED from "Shelf": the Bookcase root's page word is its
-                // tab's, "Bookcase" (her ruling, 2026-11-19).
-                ("Taxes 2025", "Bookcase", tokens.chromeLabel("  ·  6 books")),
-            ] {
-                let parts = MobileWingTitle.doorParts(
-                    tokens, wing: wing, page: page, trailing: trailing)
-                #expect(parts.lead + parts.door + parts.rest
-                        == tokens.path(MobileWingTitle.components(wing: wing, page: page)) + trailing)
+            for wing in ["Home", "Work", "Taxes 2025"] {
+                let parts = MobileWingTitle.doorParts(tokens, wing: wing)
+                #expect(parts.lead + parts.door == tokens.path(MobileWingTitle.components(wing: wing)))
                 #expect(parts.door == tokens.chromeLabel(wing), "the door's piece is the name")
                 #expect(String(MobileWingPath.title(parts, tokens: tokens).characters)
-                        == parts.lead + parts.door + parts.rest, "the drawn title is those letters")
+                        == parts.lead + parts.door, "the drawn title is those letters")
             }
         }
     }
@@ -315,10 +310,9 @@ struct MobileWingDoorGeometryTests {
     /// inset, and reaches no lower than the top of the first thing drawn under
     /// the line (the search field, the books, the first row); and pressing it
     /// fires the door. VM-55 ladder round 1, finding 7: the door's
-    /// accessibility VALUE is the rest of the line as it is drawn (the page,
-    /// and the Shelf's count) — so VoiceOver reads "Home, Library", as batch
-    /// 1's plain line read the whole path (red on the tree before the fix,
-    /// where the value is nil).
+    /// accessibility VALUE is the rest of what it draws — since VM-255 the
+    /// Bookcase's count under the name ("Home, 0 books") and nothing on the
+    /// other roots, whose line is the name alone.
     private func measure<V: View>(
         _ surface: HostedSurface<V>, pressed: () -> Int, root: String, value: String,
         sourceLocation: SourceLocation = #_sourceLocation
@@ -332,7 +326,7 @@ struct MobileWingDoorGeometryTests {
             },
             "\(root): no door named Home; labels were \(surface.visibleLabels)",
             sourceLocation: sourceLocation)
-        #expect(door.accessibilityValue == value,
+        #expect((door.accessibilityValue ?? "") == value,
                 "\(root): the door's value is \(door.accessibilityValue ?? "nil")",
                 sourceLocation: sourceLocation)
         let frame = door.accessibilityFrame
@@ -375,8 +369,9 @@ struct MobileWingDoorGeometryTests {
                     wingName: "Home", onWingDoor: { presses += 1 },
                     tabBar: { EmptyView() }, onOpen: { _ in })
             ) { surface in
-                try await measure(
-                    surface, pressed: { presses }, root: "Starred", value: MobileStarsModel.pageName)
+                // MOVED at VM-255 (R-260-1): the line is the wing's name alone,
+                // so the door's value — the rest of what it draws — is nothing.
+                try await measure(surface, pressed: { presses }, root: "Starred", value: "")
             }
         }
     }
@@ -392,16 +387,14 @@ struct MobileWingDoorGeometryTests {
                     tokens: Self.study,
                     wingName: "Home", onWingDoor: { presses += 1 },
                     tabBar: { EmptyView() },
-                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenTrash: {})
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
-                // The page and the count, as the line draws them (an empty
-                // store: no books). R-47-3 MOVED both from "Shelf": the root's
-                // own line says its tab's word, "Bookcase" (her ruling,
-                // 2026-11-19) — the door's value is that line's rest.
+                // MOVED at VM-255 (R-260-1, R-260-6): the page word left the line
+                // and the count is the door's quiet second line, so the door's
+                // value is the count alone (an empty store: no books).
                 try await measure(
                     surface, pressed: { presses }, root: "Bookcase",
-                    value: "Bookcase" + Self.study.chromeLabel("  ·  0 books"))
+                    value: Self.study.chromeLabel(MobileShelfFaces.bookCount(0)))
             }
         }
     }
@@ -420,7 +413,8 @@ struct MobileWingDoorGeometryTests {
                     tabBar: { EmptyView() },
                     onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
             ) { surface in
-                try await measure(surface, pressed: { presses }, root: "Library", value: "Library")
+                // MOVED at VM-255 (R-260-1): no page word on the line.
+                try await measure(surface, pressed: { presses }, root: "Library", value: "")
             }
         }
     }
@@ -438,10 +432,9 @@ struct MobileWingDoorGeometryTests {
                 #expect(!surface.visibleElements.contains {
                     $0.accessibilityLabel == "Home" && $0.accessibilityTraits.contains(.button)
                 })
-                // The line as the voice draws it (Study "Home · Starred",
-                // Terminal "~/home/starred") — never a literal in one voice.
-                let line = Self.study.path(MobileWingTitle.components(
-                    wing: "Home", page: MobileStarsModel.pageName))
+                // The line as the voice draws it (Study "Home", Terminal "~/home"
+                // — VM-255: the wing's name alone) — never a literal in one voice.
+                let line = Self.study.path(MobileWingTitle.components(wing: "Home"))
                 #expect(surface.visibleLabels.contains { $0.contains(line) },
                         "labels were \(surface.visibleLabels)")
             }

@@ -327,7 +327,7 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 | 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (this commit) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) PENDING |
 | 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (this commit) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
 | 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (this commit) — phone `build-for-testing` green; the moved pins PENDING |
-| 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | NOT-STARTED |
+| 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | DONE (this commit) — phone `build-for-testing` green; the suites PENDING |
 | 6. Phone + Mac `build-for-testing` green; READY-FOR-TESTS | NOT-STARTED |
 | 7. The suites (each pin red on old by behavioural revert, then the batch's suites green) | PENDING (needs the stage GO) |
 | 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (needs the stage GO) |
@@ -428,3 +428,66 @@ text, its screen out of the authority); `MobileProtectionScreenTests.theReopensA
 **Canon owed at the merge (not this batch's to write):** SurfaceContracts' phone-bar bullet (P-47-19's sentence becomes
 every road's law; the bar drawn once), the QUESTIONS #280 addendum retiring P-71-1 (R-260-5, this run the pointer), and
 P-260-1a into QUESTIONS.
+
+
+### VM-255 — the roots' top line (her four changes; R-260-1, R-260-6; S-260-1, S-260-2)
+
+**As built.**
+- **The wing's name alone** (`MobileWingTitle.components(wing:)`, `doorParts(_:wing:)`; `MobileWingPath(detail:)`):
+  Study "Home", Terminal "~/home" — the voice's own path grammar over the one word (the Terminal prefix kept: it is the
+  voice's, not the page's). The page word left all three roots.
+- **The Bookcase's count**, a quiet second line UNDER the name in the phone's muted ink (`MobileShelfFaces.bookCount`,
+  "12 books", voiced), INSIDE the wing door's own 44 pt box — so the line does not grow at the default size, and the
+  count rides the door (its accessibility value: "Home, 12 books"; a tap on it opens the wings list).
+- **The gear** (`MobileSettingsGear.swift`, moved from `MobileRootMenu.swift`): a plain Button on
+  `PhoneIconButtonStyle`, glyph `gearshape` in the accent (the ⋯'s tone), label "Settings", one press = the shell's
+  Settings door; none without a shell (P-2). It replaces the ⋯ outright (S-260-1).
+- **The trash door on the Library only** — `MobileShelfView.onOpenTrash` and the shell's wiring of it are gone.
+- **The Mac's glyphs** (S-260-2 — symbols, never views): trash `trash` (the Mac Library masthead's
+  `MastheadDoor.trash.icon`), New Note `square.and.pencil` (the Mac toolbar's `Button("New Note", systemImage:)`), the
+  gear `gearshape` (the Mac's settings doors). Each is an icon button (44 × 44 target, the layer's icon size — batch 2
+  steps the size down centrally); tones kept from the doors they replace: trash muted, New Note accent, gear accent.
+- **The empty Library's line** named the door by its word ("+ New Note starts one.") — a word the root's door no longer
+  wears. It now SHOWS the door's glyph inline ("[✎] starts one.", `MobileEmptyStoreCopy.noNotesDoorTail`) and SPEAKS
+  "New Note starts one." (`noNotesDoor`, derived from `MobileNewNoteDoor.spokenName`) — the copy doctrine's own rule
+  (a door's name derived, never retyped). PROVISIONAL with the rest of that copy (its header: her voice pass).
+- Unchanged: a book's own "+ New Note" foot row (`MobileBookView.newNoteDoorTitle` — not a root's top line).
+
+**Pins** (look-class: what is pinnable; the look itself is the walk's).
+- `MobileTopLineTests.onlyTheLibrarysTopLineCarriesTheTrash` — mounted shell: no trash door on the Bookcase or Starred,
+  one on the Library. RED on old (the Bookcase's 🗑). PENDING.
+- `MobileTopLineTests.theLineIsTheWingsNameAloneAndTheBookcaseCountsUnderIt` — mounted shell, each root: the wing
+  door's value is the count on the Bookcase ("2 books") and nothing elsewhere, the door one 44 pt line, no page word
+  across its band. RED on old ("Bookcase  ·  2 books", "Library", "Starred"). PENDING.
+- `MobileTopLineTests.theGlyphsAreTheMacsSymbols` — source: the phone draws `trash`, `square.and.pencil`, `gearshape`
+  through its declarations; the Mac's sources state the same three; each is a real symbol; no 🗑 in the phone's code.
+  RED on old (no symbol declarations, no gear file, the emoji). PENDING.
+- `MobileSettingsGearTests` (moved from `MobileRootMenuTests`): every root's gear 44 × 44 on its line, its act the
+  shell's door, no "More" beside it; no shell, no gear; `theShellsRootsCarryTheGearAndTheMenuIsGone` (RED on old: three
+  "More", no "Settings" door); `theGearOpensSettingsThroughTheWholeShell` (RED on old: no gear to press); the note's ⋯
+  road unchanged. PENDING.
+- These two new files use only symbols both trees declare (plus literals), so the red-on-old run drops them into the
+  pre-VM-255 tree (`8d7fc32cb`) unchanged.
+
+**Pins moved with the ruling** (each says MOVED and why): `MobilePathLineGeometryTests` (rewritten: the Bookcase's line
+is the name with its count inside the 44 and two doors, no trash; the Library's the name and three doors — every door
+44 × 44 on the door's line, 402/430, both voices); `MobileWingDoorTests` (the letters: two pieces; each root's door
+value; the plain line); `MobileWingsTests.theTopLineIsTheWingsNameAlone`; `MobileEmptyStoreTests.
+theEmptyLibraryNamesTheRealDoor`; `MobileDeletionTests.theShelfCarriesNoTrashDoor` (was `…CarriesTheSameTrashDoor`);
+`MobileTabBarTests` (`aPushedListWears…`, `theMessageLineClears…` through the Library's Trash; `aWingLanding…` through a
+book's contents on the Bookcase's stack); `MobileScreenEdgeGroundsTests.onAPushedListThePaperRunsUp…` (the Library's
+Trash).
+
+**Calls made (for the record; none gates the core):**
+- C-255-1 — the count rides INSIDE the wing door's 44 pt box (the line does not grow; a tap on the count opens the wings
+  list). Alternative: a separate line under the 44 pt row (the top grows by one 13 pt line, against "everything too
+  big").
+- C-255-2 — the Terminal prefix "~/" stays before the wing's name (the voice's path grammar; R-260-1 removed the page).
+- C-255-3 — the glyph doors keep the tones of the doors they replace (trash muted; New Note and gear accent).
+
+**Canon owed at the merge (the merging session's, two-file shape):** SurfaceContracts "The app" — the phone's bottom
+bar bullet (drawn once by the shell; every road returns the page left to its root, R-260-5), the phone's Settings
+bullet ("It opens from the ⋯ menu all three roots carry" → the gear), and "The Bookcase and books" wing-switcher phone
+paragraph ("The Bookcase root's top line reads the wing's name, "Bookcase" and the count…" → the name alone, the count
+a muted line under it on the Bookcase, the trash on the Library only, P-47-27's ⋯ last → the gear last); QUESTIONS
+#281's P-47-9, P-47-22, P-47-27, P-47-31 answered by this member.

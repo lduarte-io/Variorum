@@ -201,38 +201,30 @@ struct MobileLibraryView<TabBar: View>: View {
         }
     }
 
-    /// **The path line gains a THIRD door — the Trash's 🗑** (batch 6c;
-    /// option 2's own letter, and the analogue of her Mac B1 ruling, where
-    /// the Library masthead's trash icon replaced a ⋯ menu). This is the
-    /// cost she knowingly accepted: P38's crowding lesson kept this strip
-    /// two doors wide, and the Two-rooms option spends the third here rather
-    /// than in the filter row, which is already at its width budget.
+    /// **The top line** (VM-255 — her four changes): the wing's name ALONE, the
+    /// wing door (R-260-1 — the page word left; the bar's chip says Library);
+    /// trailing, the Trash's door — HERE ONLY ("let's just only show the trash
+    /// icon within library"; batch 6c gave it to this line, the analogue of her
+    /// Mac B1 ruling) in the Mac's trash glyph, the Mac's writing glyph for New
+    /// Note (P33: the Bookcase's twin), and the Settings gear (S-260-1).
     private var pathLine: some View {
-        // `spacing: 16` — the Shelf path line's own value, adopted now that
-        // this strip carries two trailing doors instead of one.
-        // VM-50: the Bookcase's twin — the same controls, the same one line
-        // (🗑 an icon button, + New Note an inline act, hit areas touching).
-        // VM-225: the path text is the wing door's line (`MobileWingPath`).
+        // VM-50: the Bookcase's twin — the same controls, the same one 44 pt
+        // line (icon buttons, hit areas touching).
+        // VM-225: the name is the wing door's (`MobileWingPath`).
         HStack(alignment: .center, spacing: 0) {
-            MobileWingPath(
-                tokens: tokens, wing: wingName, page: "Library", onDoor: onWingDoor)
+            MobileWingPath(tokens: tokens, wing: wingName, onDoor: onWingDoor)
             Spacer(minLength: PhoneMetrics.Space.s16)
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
             }
-            Button {
+            MobileNewNoteGlyphDoor(tokens: tokens) {
                 Task {
                     if let postID = await model.newNote() {
                         onOpen(.note(postID, focus: true))
                     }
                 }
-            } label: {
-                // The ONE door word (P33: the shelf's twin reads it too).
-                Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
             }
-            .buttonStyle(PhoneInlineActStyle(tokens: tokens))
-            .accessibilityLabel("New Note")
-            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
+            MobileSettingsGear(tokens: tokens)
         }
         .padding(.horizontal, PhoneMetrics.gutter)
         .padding(.top, PhoneMetrics.Space.s4)
@@ -466,7 +458,11 @@ struct MobileLibraryView<TabBar: View>: View {
         case .storeEmpty?:
             VStack(spacing: 6) {
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotes))
-                Text(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
+                // VM-255: the door is the writing glyph now, so the line SHOWS
+                // it — the door's own symbol, never a word it no longer wears —
+                // and says its name to an assistive reader.
+                Text("\(Image(systemName: MobileNewNoteDoor.symbol)) \(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoorTail))")
+                    .accessibilityLabel(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoor))
                 Text(tokens.chromeLabel(MobileEmptyStoreCopy.signIn))
                     .foregroundStyle(tokens.phone.muted)
             }

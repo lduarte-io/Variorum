@@ -273,12 +273,9 @@ struct MobileShellView: View {
                             },
                             onOpenForWriting: { id in
                                 leavingShelf { push(.note(id, focus: true), in: .shelf) }
-                            },
-                            // Finding 1: a deleted BOOK rows in the Trash while
-                            // books live here, so the Shelf renders the same door.
-                            onOpenTrash: {
-                                leavingShelf { push(.trash, in: .shelf) }
                             })
+                            // (VM-255: the Trash's door is the Library's alone — her
+                            // "only show the trash icon within library".)
                     }
                 }
                 page(.library, width: width) {
@@ -353,7 +350,8 @@ struct MobileShellView: View {
         .background(MobileMessageLineHost(
             model: messageLine, chromeInset: barOnScreen ? tabBarHeight : 0))
         // (13p Batch 4's notice bar — today's nudge and reminder — left with today's road at VX-329 U1.)
-        // VM-53: Settings' door from every root's ⋯ menu and a note's ⋯ sheet (`MobileRootMenu.swift`).
+        // VM-53: Settings' door from every root's gear (a ⋯ menu until VM-255) and a note's ⋯ sheet
+        // (`MobileSettingsGear.swift`).
         .environment(\.mobileSettingsDoor, MobileSettingsDoor { settingsPresented = true })
         .sheet(isPresented: $settingsPresented) {
             settingsSheet

@@ -214,17 +214,18 @@ struct MobileWingStandTests {
         }
     }
 
-    /// The path line's words: the wing first, then the page, in each voice's
-    /// own path grammar; an unread name leaves the page alone.
-    @Test func thePathLineLeadsWithTheWing() {
-        #expect(MobileWingTitle.components(wing: "Home", page: "Library") == ["Home", "Library"])
-        #expect(MobileWingTitle.components(wing: nil, page: "Library") == ["Library"])
+    /// The top line's words: the wing's name ALONE, in each voice's own path
+    /// grammar; an unread name says nothing (never a false "Home"). MOVED at
+    /// VM-255 (her R-260-1 — "it says on the bottom what area you're in"): the
+    /// page word left the line ("Work · Bookcase" / "~/work/bookcase" before).
+    @Test func theTopLineIsTheWingsNameAlone() {
+        #expect(MobileWingTitle.components(wing: "Home") == ["Home"])
+        #expect(MobileWingTitle.components(wing: nil).isEmpty)
+        #expect(MobileWingTitle.components(wing: "").isEmpty)
         let study = VoiceTokens.resolve(voice: .study, dark: false)
         let terminal = VoiceTokens.resolve(voice: .terminal, dark: false)
-        // R-47-3 MOVED from "Shelf": the Bookcase root's page word is its tab's,
-        // "Bookcase" (her ruling, 2026-11-19).
-        #expect(study.path(MobileWingTitle.components(wing: "Work", page: "Bookcase")) == "Work · Bookcase")
-        #expect(terminal.path(MobileWingTitle.components(wing: "Work", page: "Bookcase")) == "~/work/bookcase")
+        #expect(study.path(MobileWingTitle.components(wing: "Work")) == "Work")
+        #expect(terminal.path(MobileWingTitle.components(wing: "Work")) == "~/work")
     }
 }
 

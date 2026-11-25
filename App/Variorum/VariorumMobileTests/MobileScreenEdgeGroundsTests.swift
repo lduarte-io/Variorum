@@ -189,9 +189,10 @@ struct MobileScreenEdgeGroundsTests {
     static let oneGroundTolerance = 0.03
 
     /// **A pushed list: its paper runs up under the status bar and the bar's
-    /// room down past the home indicator** — the Trash, by the Bookcase's own
-    /// door (a list wears the bar, VM-52). And back on the root by the current
-    /// tab (P-47-19), the strips are the room again: no stale paper is left.
+    /// room down past the home indicator** — the Trash, by the Library's own
+    /// door (a list wears the bar, VM-52; MOVED at VM-255 from the Bookcase's,
+    /// which her ruling retired). And back on the root by the current tab
+    /// (P-47-19), the strips are the room again: no stale paper is left.
     /// GROUNDS — red on main (the sentinel), green on the first fix (the page's
     /// and the bar's own grounds ran on) and on the redo (the shell paints them).
     @Test(arguments: [false, true])
@@ -202,8 +203,11 @@ struct MobileScreenEdgeGroundsTests {
                 MobileShellView(session: session, services: nil, router: router), dark: dark
             ) { surface in
                 await surface.settle(40)
+                let library = try #require(lowestOnScreen(surface, "Library"), "the bar's Library door: \(surface.labels)")
+                #expect(library.accessibilityActivate())
+                await surface.settle(40)
                 let door = try #require(surface.onScreen(MobileRecoveryDoors.trashLabel),
-                                        "the Bookcase's Trash door: \(surface.labels)")
+                                        "the Library's Trash door: \(surface.labels)")
                 #expect(door.accessibilityActivate())
                 await surface.settle(50)
                 try #require(surface.onScreen(MobileTrashView.emptyTrashLine) != nil,
@@ -235,18 +239,18 @@ struct MobileScreenEdgeGroundsTests {
                             "dark \(dark): under the Trash's bar at \(point) the screen shows \(seen), not the bar's room \(room)")
                 }
                 // Back on the root by the bar's current tab: the strips follow it.
-                let tab = try #require(lowestOnScreen(surface, "Bookcase"),
-                                       "the bar's Bookcase door: \(surface.labels)")
+                let tab = try #require(lowestOnScreen(surface, "Library"),
+                                       "the bar's Library door: \(surface.labels)")
                 #expect(tab.accessibilityActivate())
                 await surface.settle(60)
-                try #require(surface.onScreen("New Book") != nil
+                try #require(surface.onScreen(MobileListingFilter.all.word) != nil
                                 && surface.onScreen(MobileTrashView.emptyTrashLine) == nil,
-                             "back on the Bookcase's root: \(surface.labels)")
+                             "back on the Library's root: \(surface.labels)")
                 let after = try surface.render()
                 for point in edges.top + edges.bottom {
                     let seen = after.color(at: point)
                     #expect(seen.distance(to: room) <= Self.tolerance,
-                            "dark \(dark): back on the Bookcase at \(point) the screen shows \(seen), not the room \(room)")
+                            "dark \(dark): back on the Library at \(point) the screen shows \(seen), not the room \(room)")
                 }
             }
         }

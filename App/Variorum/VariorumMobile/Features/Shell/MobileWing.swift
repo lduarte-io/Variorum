@@ -32,9 +32,9 @@
 //    tasks on the wing (`.task(id: session.wing.currentID)`); the phone's
 //    models follow it themselves, so a listing's re-read is a model fact the
 //    pins can drive, and the views' task lines are untouched.
-//  · `MobileWingTitle` — what a root's path line says: the wing's name first,
-//    then the page (P-55-2, PROVISIONAL — the batch record has the options);
-//    since VM-225 the wing's name is a DOOR there (`MobileWingDoor.swift`).
+//  · `MobileWingTitle` — what a root's top line says: since VM-255 (her
+//    R-260-1) the wing's name alone (P-55-2's "name · page" retired); since
+//    VM-225 the name is a DOOR there (`MobileWingDoor.swift`).
 //
 
 import Foundation
@@ -85,15 +85,18 @@ enum MobileWingScope {
     }
 }
 
-/// **What a root's path line says** (VM-56; P-55-2, PROVISIONAL).
+/// **What a root's top line says** (VM-56; VM-255 — her R-260-1).
 nonisolated enum MobileWingTitle {
-    /// The wing's name LEADS the root's path, then the page: Study reads
-    /// "Home · Library", Terminal "~/home/library" — the voice's own path
-    /// grammar (`VoiceTokens.path`), today's line, no new row. A wing whose
-    /// name is not yet read leaves the page alone.
-    static func components(wing: String?, page: String) -> [String] {
-        guard let wing, !wing.isEmpty else { return [page] }
-        return [wing, page]
+    /// **The wing's name ALONE** (VM-255, her words: "I also don't think the
+    /// Home · Bookcase and Home · Starred thing is necessary - it says on the
+    /// bottom what area you're in"; R-260-1: the line is the wing's name, the
+    /// wing door): Study reads "Home", Terminal "~/home" — the voice's own path
+    /// grammar (`VoiceTokens.path`) over the one word. The page's word left
+    /// the line; the bar's chip says where she is. A wing whose name is not yet
+    /// read says nothing (never a false "Home").
+    static func components(wing: String?) -> [String] {
+        guard let wing, !wing.isEmpty else { return [] }
+        return [wing]
     }
 
     /// **The roots' title — batch 1's rule, kept through the fold (VM-225).**
@@ -116,19 +119,15 @@ nonisolated enum MobileWingTitle {
         name(currentID: wings.currentID, wings: wings.wings)
     }
 
-    /// **The path line, in three pieces, so the wing's name can be a door
-    /// (VM-225)** — the voice's prefix ("~/" in Terminal, nothing in Study),
-    /// the wing's name as the voice writes it, and everything after it. The
-    /// three pieces put together are, byte for byte, the line batch 1 drew
-    /// (`VoiceTokens.path` over `components`, plus the root's own trailing
-    /// words — the Shelf's book count), so making the name a door changes no
-    /// letter of the line (pinned).
+    /// **The line, in two pieces, so the wing's name can be a door
+    /// (VM-225)** — the voice's prefix ("~/" in Terminal, nothing in Study) and
+    /// the wing's name as the voice writes it. Put together they are, byte for
+    /// byte, `VoiceTokens.path` over `components` — the line a root without a
+    /// door draws — so making the name a door changes no letter (pinned).
+    /// (VM-255: the page and the Bookcase's count that once trailed it left
+    /// the line — the count is its own quiet line under the name.)
     @MainActor
-    static func doorParts(
-        _ tokens: VoiceTokens, wing: String, page: String, trailing: String = ""
-    ) -> (lead: String, door: String, rest: String) {
-        (lead: tokens.pathPrefix,
-         door: tokens.chromeLabel(wing),
-         rest: tokens.pathSeparator + tokens.chromeLabel(page) + trailing)
+    static func doorParts(_ tokens: VoiceTokens, wing: String) -> (lead: String, door: String) {
+        (lead: tokens.pathPrefix, door: tokens.chromeLabel(wing))
     }
 }

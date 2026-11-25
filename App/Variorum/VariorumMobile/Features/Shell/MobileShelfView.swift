@@ -3,10 +3,10 @@
 //  VariorumMobile
 //
 //  Mobile Stage 3, batch 1 — the shelf home (M7), the ratified mockup
-//  §1's shape: the voiced path line ("~/shelf · 6 books" / "Shelf · 6
-//  books"), the book rows with LK5's faces (note count + tags lead; ✓
-//  finished a STATE on the name), the tab bar below. The settings door
-//  rides the path line's trailing edge (PROVISIONAL placement, recorded).
+//  §1's shape: the voiced top line (since VM-255 the wing's name alone, the
+//  count a quiet line under it), the book rows with LK5's faces (note count +
+//  tags lead; ✓ finished a STATE on the name), the tab bar's place below. The
+//  settings door (a gear again since VM-255) rides the line's trailing edge.
 //
 //  ── ROUND 2, BATCH 5 — HER R26/R27 LAYOUT ─────────────────────────────
 //  She said it twice: *"I still see today's entry where i don't want it
@@ -73,15 +73,11 @@ struct MobileShelfView<TabBar: View>: View {
     @ViewBuilder let tabBar: () -> TabBar
     let onOpenBook: (String) -> Void
     /// Open a note straight into typing — the Today button's landing AND
-    /// the + New Note door's (P33: "the note opens for writing").
+    /// the New Note door's (P33: "the note opens for writing").
     let onOpenForWriting: (String) -> Void
-    /// **The Trash room's door, SECOND renderer** (batch 6c — the design
-    /// record's finding 1, and PROVISIONAL by its Q6). Books live HERE and
-    /// a deleted book rows in the Trash, so a trash door reachable only from
-    /// the Library would put a tab switch between deleting a book and
-    /// getting it back. One declaration (`MobileRecoveryDoors`), two
-    /// renderers, no new surface. nil in harness/preview use.
-    var onOpenTrash: (() -> Void)?
+    // (The Trash room's SECOND renderer — batch 6c's finding 1, a deleted book
+    // rows in the Trash — retired at VM-255, her words: "let's just only show
+    // the trash icon within library." The Library's top line is its one door.)
     /// VM-48: the quick-entry box types in the note body, which follows the
     /// text size; the layout brain's floor is in lines of it.
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -224,43 +220,32 @@ struct MobileShelfView<TabBar: View>: View {
         }
     }
 
-    /// "~/home/bookcase · 6 books" (terminal) / "Home · Bookcase · 6 books"
-    /// (study) — the page word is the tab's, "Bookcase" (R-47-3: her ruling
-    /// that this line matches the tab, the swipe names and the Mac; it read
-    /// "Shelf" before) — the wing's name leading (VM-56) and the wing door (VM-225,
-    /// `MobileWingPath`); the + New Note door (P33 — Library's twin, same
-    /// path-line placement) and the ⋯ menu trailing.
+    /// **The top line** (VM-255 — her four changes): the wing's name ALONE, the
+    /// wing door (R-260-1: "it says on the bottom what area you're in" — the
+    /// page word left; Study "Home", Terminal "~/home"), with the Bookcase's
+    /// count as a quiet muted line UNDER it, inside the door's 44 pt box
+    /// (R-260-6, "12 books"); trailing, the Mac's writing glyph for New Note
+    /// (P33 — the Library's twin) and the Settings gear (S-260-1, the ⋯ gone).
+    /// No trash door here ("only show the trash icon within library").
     ///
-    /// **ONE line at 402 pt in both voices** (VM-50, the batch-1 carry-in:
-    /// Terminal's 13 pt mono path beside two 17 pt mono words needed ~437 pt
-    /// and wrapped). The doors are the phone's controls with 44 pt hit areas
-    /// that touch: 🗑 an icon button, + New Note an inline act (15), and —
-    /// since VM-53 — the roots' one ⋯ menu (`MobileRootMenu`, the same 44 pt
-    /// icon door), where Settings went from its gear (PROVISIONAL P-47-9). The
-    /// path's own line keeps its place; the hit areas reach into the line's
-    /// air. Pinned by `MobilePathLineGeometryTests`.
+    /// **ONE 44 pt line** (VM-50): the doors are the phone's icon buttons with
+    /// 44 pt hit areas that touch; the name's two lines sit inside the door's
+    /// own 44. Pinned by `MobilePathLineGeometryTests`.
     private var pathLine: some View {
         HStack(alignment: .center, spacing: 0) {
             MobileWingPath(
-                tokens: tokens, wing: wingName, page: "Bookcase",  // R-47-3: the tab's word
-                trailing: tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"),
+                tokens: tokens, wing: wingName,
+                detail: tokens.chromeLabel(MobileShelfFaces.bookCount(model.books.count)),
                 onDoor: onWingDoor)
             Spacer(minLength: PhoneMetrics.Space.s16)
-            if let onOpenTrash {
-                MobileTrashDoor(tokens: tokens, act: onOpenTrash)
-            }
-            Button {
+            MobileNewNoteGlyphDoor(tokens: tokens) {
                 Task {
                     if let postID = await model.newNote() {
                         onOpenForWriting(postID)
                     }
                 }
-            } label: {
-                Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
             }
-            .buttonStyle(PhoneInlineActStyle(tokens: tokens))
-            .accessibilityLabel("New Note")
-            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
+            MobileSettingsGear(tokens: tokens)
         }
         .padding(.horizontal, PhoneMetrics.gutter)
         .padding(.top, PhoneMetrics.Space.s4)

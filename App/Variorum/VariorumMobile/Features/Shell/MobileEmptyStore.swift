@@ -35,8 +35,14 @@ enum MobileEmptyStoreCopy {
     /// The Library listing, with no notes and no search running.
     static let noNotes = "No notes yet."
 
-    /// …and the door that ends it. Derived from the door's own title.
-    static var noNotesDoor: String { "\(MobileNewNoteDoor.doorTitle) starts one." }
+    /// …and the door that ends it, as SPOKEN. Derived from the door's own name
+    /// (VM-255: the door is the writing glyph, `MobileNewNoteDoor.symbol` —
+    /// the drawn line shows that glyph and then `noNotesDoorTail`, so the
+    /// sentence never points at a word the door no longer wears).
+    static var noNotesDoor: String { "\(MobileNewNoteDoor.spokenName) \(noNotesDoorTail)" }
+
+    /// The drawn line's words after the door's glyph.
+    static let noNotesDoorTail = "starts one."
 
     /// The returning-owner road, named on both empty surfaces. The phone's
     /// sign-in lives in Settings under Sync (`SyncStatusRow`), which is

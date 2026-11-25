@@ -126,13 +126,17 @@ final class MobileWingDoor {
 
 // MARK: - The door, in a root's path line
 
-/// **A root's path line, the wing's name a door** (VM-225; the line is batch
-/// 1's — P-55-2). With a door to wire and a name to say, the line stays ONE
-/// text — the same letters (`MobileWingTitle.doorParts`, pinned), the same
-/// wrapping — with the wing's name in the accent, the ink of the other doors
-/// on these lines (P-55-17, PROVISIONAL), and the whole title is the door's
-/// target. Without either it is exactly the line batch 1 drew, so a harness
-/// that wires no door renders as before.
+/// **A root's top line, the wing's name a door** (VM-225; since VM-255 — her
+/// R-260-1 — the wing's name ALONE: "it says on the bottom what area you're
+/// in"). With a door to wire and a name to say, the name is ONE text — the
+/// letters `VoiceTokens.path` draws for it (`MobileWingTitle.doorParts`,
+/// pinned) — in the accent, the ink of the other doors on these lines (P-55-17,
+/// PROVISIONAL), and the whole title is the door's target. Under it, on the
+/// Bookcase only, a quiet second line in the phone's muted ink: the count
+/// ("12 books" — her R-260-6, "Muted line under the wing name"), inside the
+/// door's own 44 pt box, so the line does not grow (R-260-1: "bookcase
+/// shouldn't have its count on the same line, but it should have its count").
+/// Without a door it is the same words as plain text.
 ///
 /// **The target is at least 44 pt tall, and it is real.** A target hung
 /// invisibly beyond its line would reach either up into the status bar's inset
@@ -151,53 +155,56 @@ final class MobileWingDoor {
 struct MobileWingPath: View {
     let tokens: VoiceTokens
     let wing: String?
-    let page: String
-    /// What the line says after the page (the Shelf's "  ·  6 books"),
-    /// already voiced.
-    var trailing: String = ""
+    /// **The quiet second line** under the name (VM-255, R-260-6): the
+    /// Bookcase's count, already voiced ("12 books"); nil on the other roots.
+    var detail: String? = nil
     let onDoor: (() -> Void)?
 
     var body: some View {
         if let wing, let onDoor {
             Button(action: onDoor) {
-                Text(Self.title(
-                    MobileWingTitle.doorParts(tokens, wing: wing, page: page, trailing: trailing),
-                    tokens: tokens))
-                    .phoneType(.meta, tokens)
-                    .lineLimit(1)
+                lines(Text(Self.title(MobileWingTitle.doorParts(tokens, wing: wing), tokens: tokens)))
                     // The line's own 44 (the hit-area helper), the words on
-                    // the line's leading edge.
+                    // the line's leading edge — the count's line inside it.
                     .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             // The wing's NAME, never its voiced casing (the tab doors'
             // precedent).
             .accessibilityLabel(wing)
-            // …and the rest of the line as it is drawn — the page, and the
-            // Shelf's count — so VoiceOver reads "Home, Library" as batch 1's
-            // plain line read the whole path. No new words (VM-55 ladder
-            // round 1, finding 7).
-            .accessibilityValue(page + trailing)
+            // …and the rest of what the door draws — the Bookcase's count — as
+            // its value, so VoiceOver reads "Home, 12 books". No new words (VM-55
+            // ladder round 1, finding 7); none on a root that draws none.
+            .accessibilityValue(detail ?? "")
         } else {
-            Text(tokens.path(MobileWingTitle.components(wing: wing, page: page)) + trailing)
-                .phoneType(.meta, tokens)
-                .foregroundStyle(tokens.phone.muted)
-                .lineLimit(1)
+            lines(Text(tokens.path(MobileWingTitle.components(wing: wing)))
+                .foregroundStyle(tokens.phone.muted))
         }
     }
 
-    /// The line's letters, the name in the accent and the rest in the line's
-    /// muted ink (the phone's corrected muted — VM-48).
-    static func title(
-        _ parts: (lead: String, door: String, rest: String), tokens: VoiceTokens
-    ) -> AttributedString {
+    /// The name on its one line, and the quiet count under it (Bookcase only).
+    private func lines(_ name: Text) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            name
+                .phoneType(.meta, tokens)
+                .lineLimit(1)
+            if let detail {
+                Text(detail)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    /// The name's letters: the voice's prefix in the line's muted ink (the
+    /// phone's corrected muted — VM-48), the name in the accent.
+    static func title(_ parts: (lead: String, door: String), tokens: VoiceTokens) -> AttributedString {
         var lead = AttributedString(parts.lead)
         lead.foregroundColor = tokens.phone.muted
         var door = AttributedString(parts.door)
         door.foregroundColor = tokens.accent
-        var rest = AttributedString(parts.rest)
-        rest.foregroundColor = tokens.phone.muted
-        return lead + door + rest
+        return lead + door
     }
 }
 

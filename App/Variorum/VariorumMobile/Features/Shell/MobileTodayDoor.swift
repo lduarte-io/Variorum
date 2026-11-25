@@ -21,6 +21,7 @@
 //
 
 import Foundation
+import SwiftUI
 import VariorumCore
 
 @MainActor
@@ -93,8 +94,17 @@ enum MobileTodayDoor {
 /// writing (the landing is part of the twin promise).
 @MainActor
 enum MobileNewNoteDoor {
-    /// The door's word on BOTH tabs (voice-cased at render; pinned).
+    /// The door's WORD — since VM-255 a book's own foot row (`MobileBookView`,
+    /// the Mac book's "+ new note" twin); voice-cased at render; pinned.
     static let doorTitle = "+ New Note"
+
+    /// **The roots' door is a writing glyph** (VM-255, her words: "new note
+    /// should also be a writing icon, the way it's a writing icon on the mac
+    /// app") — the Mac toolbar's New Note (`RootView`'s `square.and.pencil`);
+    /// S-260-2, the Mac's SYMBOL, never its view.
+    static let symbol = "square.and.pencil"
+    /// The glyph door's name — spoken, and the word the pins drive it by.
+    static let spokenName = "New Note"
 
     /// Mints the nameless bookless note; returns its id.
     ///
@@ -111,6 +121,23 @@ enum MobileNewNoteDoor {
     }
 }
 
+/// **The roots' New Note door — the writing glyph** (VM-255): the phone's icon
+/// button (the glyph at the layer's icon size, a 44 × 44 hit area) in the accent
+/// the word door wore; the root's own act (mint, then open for writing).
+struct MobileNewNoteGlyphDoor: View {
+    let tokens: VoiceTokens
+    let act: () -> Void
+
+    var body: some View {
+        Button(action: act) {
+            Image(systemName: MobileNewNoteDoor.symbol)
+        }
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: .accent))
+        .accessibilityLabel(MobileNewNoteDoor.spokenName)
+    }
+}
+
 // (The Bookcase path line's Settings gear — VM-50, P-47-9 — retired into the
-// roots' ⋯ menu at VM-53: `MobileRootMenu.swift`, where `MobileSettingsDoor`
-// is now the shell's Settings door itself.)
+// roots' ⋯ menu at VM-53, and the ⋯ became a gear again at VM-255:
+// `MobileSettingsGear.swift`, where `MobileSettingsDoor` is the shell's
+// Settings door itself.)

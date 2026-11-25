@@ -87,7 +87,7 @@ struct MobileNoteActionsSheet: View {
     @Environment(\.dismiss) private var dismiss
     /// **Settings, from a note** (VM-53 — the ticket: Settings "reachable from
     /// every root and from a note"). The shell's door, from the environment
-    /// (`MobileRootMenu.swift`); nil outside a shell, and then no row (P-2).
+    /// (`MobileSettingsGear.swift`); nil outside a shell, and then no row (P-2).
     @Environment(\.mobileSettingsDoor) private var settingsDoor
     /// Set by the Settings row: the shell's sheet is asked for only once THIS
     /// sheet has gone (`onDisappear`), so two presentations never overlap.

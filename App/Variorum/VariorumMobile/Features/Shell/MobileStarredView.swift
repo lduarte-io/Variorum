@@ -92,21 +92,19 @@ struct MobileStarredView<TabBar: View>: View {
         .mobileEdgeGrounds(top: tokens.room, bottom: tokens.room)
     }
 
-    /// "~/home/starred" (terminal) / "Home · Starred" (study) — the wing's name
-    /// leading (VM-56) and the wing door (VM-225, `MobileWingPath`); the two
-    /// sibling roots' own path-line shape. Nothing is minted here (P38: a
-    /// strip earns its doors), so the one door trailing it is the roots' ⋯
-    /// menu (VM-53).
+    /// **The top line** (VM-255): the wing's name ALONE, the wing door (R-260-1
+    /// — "Home · Starred" was her example of the page word she does not need;
+    /// Study "Home", Terminal "~/home"). Nothing is minted here (P38: a strip
+    /// earns its doors), so the one door trailing it is the Settings gear
+    /// (S-260-1). No trash door (the Library only).
     private var pathLine: some View {
         // VM-50: the same 44 pt line as its two siblings' (whose doors are
         // 44 pt hit areas), so the three roots' content starts level as the
         // band pages between them.
         HStack(alignment: .center, spacing: 16) {
-            MobileWingPath(
-                tokens: tokens, wing: wingName, page: MobileStarsModel.pageName,
-                onDoor: onWingDoor)
+            MobileWingPath(tokens: tokens, wing: wingName, onDoor: onWingDoor)
             Spacer()
-            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
+            MobileSettingsGear(tokens: tokens)
         }
         .frame(minHeight: PhoneMetrics.touchMinimum)
         .padding(.horizontal, PhoneMetrics.gutter)

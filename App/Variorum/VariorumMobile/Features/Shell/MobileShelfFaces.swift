@@ -103,6 +103,12 @@ nonisolated enum MobileShelfFaces {
         meta.isEmpty ? name : "\(name), \(meta)"
     }
 
+    /// **The Bookcase's count** — its quiet line under the wing's name (VM-255,
+    /// R-260-6: "12 books"); the words the top line said after the page before.
+    static func bookCount(_ count: Int) -> String {
+        "\(count) book\(count == 1 ? "" : "s")"
+    }
+
     /// **A gathering's kind word** (VM-83, W-073) — the Mac shelf row's own
     /// ("gathering", never "smart"): the shelf's meta line and the
     /// membership sheet's row mark both say it.

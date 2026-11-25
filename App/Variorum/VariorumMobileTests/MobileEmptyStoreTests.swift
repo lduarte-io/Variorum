@@ -55,9 +55,20 @@ struct MobileEmptyStoreTests {
     /// The door name is derived, never a second copy of the same string —
     /// so renaming the door cannot leave a sentence pointing at a button
     /// that no longer says that (the K5 naming discipline applied to copy).
-    @Test func theEmptyLibraryNamesTheRealDoor() {
+    ///
+    /// MOVED at VM-255: the roots' New Note door is the Mac's writing glyph now,
+    /// so the line SHOWS that glyph (the door's own symbol) before its tail and
+    /// SPEAKS the door's own name — it never points at the "+ New Note" word the
+    /// door no longer wears.
+    @Test func theEmptyLibraryNamesTheRealDoor() throws {
         #expect(MobileEmptyStoreCopy.noNotesDoor
-            .contains(MobileNewNoteDoor.doorTitle))
+            == "\(MobileNewNoteDoor.spokenName) \(MobileEmptyStoreCopy.noNotesDoorTail)")
+        #expect(!MobileEmptyStoreCopy.noNotesDoor.contains(MobileNewNoteDoor.doorTitle),
+                "the sentence names the glyph door, not the word door")
+        let library = try MobileProtectionCompositionTests.code("VariorumMobile/Features/Shell/MobileLibraryView.swift")
+        #expect(library.contains(
+            "Text(\"\\(Image(systemName: MobileNewNoteDoor.symbol)) \\(tokens.chromeLabel(MobileEmptyStoreCopy.noNotesDoorTail))\")"),
+            "the drawn line shows the door's own glyph")
     }
 
     /// **BOTH roads, on both empty surfaces.** A fresh install has exactly

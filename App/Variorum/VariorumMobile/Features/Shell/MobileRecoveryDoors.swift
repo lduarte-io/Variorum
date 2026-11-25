@@ -8,12 +8,11 @@
 //  becomes a room you browse; the Trash becomes a utility you visit. Two
 //  doors, two destinations, nothing shared."*).
 //
-//  Two rooms means two doors, and the trash door has **two renderers** — the
-//  Library's path line and the Shelf's. That is the design record's finding
-//  1 made real: **books live on the Shelf and a deleted book rows in the
-//  Trash**, so a door reachable only from the Library would make deleting a
-//  book from the Shelf a tab switch away from its own recovery. One
-//  declaration here; the Library and the Shelf each render it.
+//  Two rooms means two doors. The trash door had **two renderers** — the
+//  Library's path line and the Shelf's (the design record's finding 1: a
+//  deleted book rows in the Trash, so the Shelf carried its door too) — until
+//  VM-255, her words (2026-11-22): "let's just only show the trash icon within
+//  library." One declaration here; the Library's top line renders it.
 //
 //  **Why a declaration file at all, for what looks like two strings.** The
 //  round's own drift class (MobileSoul §3, `KnownIssuesAndTechDebt`'s
@@ -32,17 +31,19 @@ import VariorumCore
 
 /// The Two-rooms doors, declared once.
 ///
-/// **PROVISIONAL — the design record's Q7 (the word) and Q3 (glyph vs
-/// word).** The Archive door and its room say **"Archived"** (the Mac's
-/// surface noun, `RecoveryCopy.archivedSection`) and the Trash says
-/// **"Trash"**; the trash door renders as the mockup's 🗑 glyph with the
-/// word as its accessibility label. Both are one string each if she
-/// re-words them.
+/// **PROVISIONAL — the design record's Q7 (the word).** The Archive door and
+/// its room say **"Archived"** (the Mac's surface noun,
+/// `RecoveryCopy.archivedSection`) and the Trash says **"Trash"**; the trash
+/// door draws the Mac's trash glyph with the word as its accessibility label.
 enum MobileRecoveryDoors {
-    /// Option 2's own drawing: *"A 🗑 glyph joins the path line."* The word
-    /// rides as the accessibility label, so VoiceOver — and every pin —
-    /// names the room rather than an emoji.
-    static let trashGlyph = "\u{1F5D1}"
+    /// **The Mac's trash glyph** (VM-255, her words: "i also don't like the trash
+    /// bin emoji, it looks out of place. the same trash bin icon the mac uses is
+    /// what we should use" — the Library masthead's door,
+    /// `LibraryCatalogView.MastheadDoor.trash.icon`; S-260-2, the Mac's SYMBOL,
+    /// never its view). Monochrome, in the icon button's ink; it replaced the
+    /// mockup's 🗑 emoji (P-47-31's (a)). The word rides as the accessibility
+    /// label, so VoiceOver — and every pin — names the room, never a picture.
+    static let trashSymbol = "trash"
 
     /// What the trash door is CALLED (VoiceOver, and the pins' handle).
     static var trashLabel: String { RecoveryCopy.trashSection }
@@ -83,17 +84,19 @@ nonisolated enum MobileRoomListing {
     }
 }
 
-/// **The trash door, one renderer for both path lines.** A real `Button`
-/// (§15's trap (b): a door a pin can drive), labelled with the room's word.
+/// **The trash door, on the Library's top line** (VM-255: the Library only). A
+/// real `Button` (§15's trap (b): a door a pin can drive), labelled with the
+/// room's word.
 struct MobileTrashDoor: View {
     let tokens: VoiceTokens
     let act: () -> Void
 
     var body: some View {
         Button(action: act) {
-            Text(MobileRecoveryDoors.trashGlyph)
+            Image(systemName: MobileRecoveryDoors.trashSymbol)
         }
-        // VM-50: the icon button — the glyph at 22, a 44 × 44 hit area.
+        // VM-50: the icon button — the glyph at the layer's icon size, a
+        // 44 × 44 hit area; the quiet ink it has always worn.
         .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: .muted))
         .accessibilityLabel(MobileRecoveryDoors.trashLabel)
     }

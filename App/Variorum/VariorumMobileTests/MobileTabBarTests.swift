@@ -247,12 +247,13 @@ struct MobileTabBarTests {
     }
 
     /// **A PUSHED LIST WEARS THE BAR, AND A TAB TAP RETURNS TO THAT ROOT.**
-    /// Home → the Trash (a list, pushed on the Bookcase's stack): the bar is
-    /// on screen under it, the Bookcase chosen. Tapping the CURRENT tab goes
-    /// back to the Bookcase's root. Pushed again, a tap on Library changes
-    /// the page AND leaves the Bookcase's stack at its root (P-47-19) — the
-    /// Trash is gone from the walk entirely, and the Bookcase's root is back
-    /// under the band.
+    /// The Library → its Trash (a list, pushed on the Library's stack): the bar
+    /// is on screen under it, Library chosen. Tapping the CURRENT tab goes back
+    /// to the Library's root. Pushed again, a tap on Bookcase changes the page
+    /// AND leaves the Library's stack at its root (P-47-19) — the Trash is gone
+    /// from the walk entirely, and the Library's root is back under the band.
+    /// (MOVED at VM-255: the Trash's door is the Library's alone now — "only show
+    /// the trash icon within library" — so the list is pushed from there.)
     @Test func aPushedListWearsTheBarAndATabTapReturnsToThatRoot() async throws {
         try await withEditorWorld { session, _ in
             let router = MobileShellRouter()
@@ -261,36 +262,39 @@ struct MobileTabBarTests {
             ) { surface in
                 await surface.settle(30)
                 let trashLine = MobileTrashView.emptyTrashLine
+                let libraryRoot = MobileListingFilter.all.word
 
-                // Into the Trash, by the Bookcase's own door.
+                // To the Library, and into its Trash by its own door.
+                #expect(activateOnScreen(surface, "Library"), "labels: \(surface.visibleLabels)")
+                await surface.settle(40)
                 #expect(activateOnScreen(surface, MobileRecoveryDoors.trashLabel),
                         "labels: \(surface.visibleLabels)")
                 await surface.settle(40)
                 #expect(surface.visibleLabels.contains(trashLine), "the Trash arrived: \(surface.visibleLabels)")
-                let bookcase = try #require(onScreen(surface, "Bookcase").first,
-                                            "the bar is on the pushed list: \(surface.visibleLabels)")
-                #expect(bookcase.accessibilityTraits.contains(.selected))
-                #expect(bookcase.accessibilityFrame.height >= MobileTabBarMetrics.target - 0.5)
-                #expect(onScreen(surface, "Library").count == 1)
+                let library = try #require(onScreen(surface, "Library").first,
+                                           "the bar is on the pushed list: \(surface.visibleLabels)")
+                #expect(library.accessibilityTraits.contains(.selected))
+                #expect(library.accessibilityFrame.height >= MobileTabBarMetrics.target - 0.5)
+                #expect(onScreen(surface, "Bookcase").count == 1)
 
                 // The current tab: back to its root.
-                #expect(activateOnScreen(surface, "Bookcase"))
+                #expect(activateOnScreen(surface, "Library"))
                 await surface.settle(40)
                 #expect(!surface.visibleLabels.contains(trashLine), "the Trash is gone: \(surface.visibleLabels)")
-                #expect(surface.visibleLabels.contains("New Book"), "the Bookcase's root is back")
+                #expect(surface.visibleLabels.contains(libraryRoot), "the Library's root is back")
 
                 // Another tab, from the pushed list.
                 #expect(activateOnScreen(surface, MobileRecoveryDoors.trashLabel))
                 await surface.settle(40)
                 #expect(surface.visibleLabels.contains(trashLine))
-                #expect(activateOnScreen(surface, "Library"))
+                #expect(activateOnScreen(surface, "Bookcase"))
                 await surface.settle(40)
-                #expect(onScreen(surface, "Library").first?.accessibilityTraits.contains(.selected) == true,
+                #expect(onScreen(surface, "Bookcase").first?.accessibilityTraits.contains(.selected) == true,
                         "the page changed")
                 #expect(!surface.visibleLabels.contains(trashLine),
                         "the stack left behind is back at its root — no Trash anywhere in the walk")
-                #expect(surface.visibleLabels.contains("New Book"),
-                        "the Bookcase's root stands under the band, a screen away")
+                #expect(surface.visibleLabels.contains(libraryRoot),
+                        "the Library's root stands under the band, a screen away")
             }
         }
     }
@@ -361,7 +365,10 @@ struct MobileTabBarTests {
                 #expect(line.chromeInset >= MobileTabBarMetrics.target - 0.5,
                         "on a root the line clears the bar: \(line.chromeInset), bar \(rootBar)")
 
-                // A pushed list wears the bar — and the line still clears it.
+                // A pushed list wears the bar — and the line still clears it (the
+                // Library's Trash: VM-255 made the Trash's door the Library's alone).
+                #expect(activateOnScreen(surface, "Library"))
+                await surface.settle(40)
                 #expect(activateOnScreen(surface, MobileRecoveryDoors.trashLabel),
                         "labels: \(surface.visibleLabels)")
                 await surface.settle(40)
@@ -370,7 +377,7 @@ struct MobileTabBarTests {
                 #expect(line.chromeInset >= MobileTabBarMetrics.target - 0.5,
                         "on a pushed list the line clears the bar: \(line.chromeInset)")
 
-                // Back to the root, then into a note: no bar, no lift.
+                // Home, then into a note: no bar, no lift.
                 #expect(activateOnScreen(surface, "Bookcase"))
                 await surface.settle(40)
                 #expect(surface.activate(MobileShelfFaces.todayDoorSpoken), "labels: \(surface.visibleLabels)")
@@ -384,24 +391,30 @@ struct MobileTabBarTests {
     /// **A WING LANDING SHOWS THE BOOKCASE ITSELF** (the VM-55 re-land,
     /// meeting 4). VM-55's landing changes the page to the Shelf and touches no
     /// stack (P-55-14) — it relies on the Shelf's own stack standing at its root
-    /// while hidden. This run's tab road keeps that true (P-47-19: a tab from a
-    /// pushed list first returns the stack being left to its root), so the two
-    /// agree: the Trash pushed on the Bookcase's stack, Library by its tab, the
-    /// wing door, Work picked — the landing is Work's Bookcase ROOT, never the
-    /// Trash left behind.
+    /// while hidden. This run's tab road keeps that true (P-47-19, and since
+    /// VM-256 every page road), so the two agree: a book's contents pushed on
+    /// the Bookcase's stack, Library by its tab, the wing door, Work picked —
+    /// the landing is Work's Bookcase ROOT, never the book left behind. (MOVED
+    /// at VM-255: the list on the Bookcase's stack was its Trash, whose door is
+    /// the Library's alone now; a book's contents is the Bookcase's own list.)
     @Test func aWingLandingAfterAListWasLeftShowsTheBookcaseItself() async throws {
         try await withEditorWorld { session, _ in
             let world = try TwoWingWorld.make(session)
+            _ = try await session.runner.run { ops in try ops.createReading(name: "Poems", kind: .book) }
             let router = MobileShellRouter()
             try await withHostedSurface(
                 MobileShellView(session: session, services: nil, router: router)
             ) { surface in
-                await surface.settle(30)
-                let trashLine = MobileTrashView.emptyTrashLine
-                #expect(activateOnScreen(surface, MobileRecoveryDoors.trashLabel),
-                        "labels: \(surface.visibleLabels)")
                 await surface.settle(40)
-                #expect(surface.visibleLabels.contains(trashLine), "the Trash is on the Bookcase's stack")
+                let contents = MobileBookView.newChapterDoorTitle
+                let window = surface.window.bounds.insetBy(dx: 1, dy: 1)
+                let row = try #require(surface.visibleElements.first {
+                    ($0.accessibilityLabel ?? "").lowercased().hasPrefix("poems")
+                        && window.intersects($0.accessibilityFrame)
+                }, "the book's row on the Bookcase: \(surface.visibleLabels)")
+                #expect(row.accessibilityActivate())
+                await surface.settle(50)
+                #expect(surface.visibleLabels.contains(contents), "the book's contents are on the Bookcase's stack")
 
                 #expect(activateOnScreen(surface, "Library"))
                 await surface.settle(40)
@@ -415,8 +428,8 @@ struct MobileTabBarTests {
                 #expect(surface.host.presentedViewController == nil, "the list went")
                 #expect(onScreen(surface, "Bookcase").first?.accessibilityTraits.contains(.selected) == true,
                         "landed on the Bookcase")
-                #expect(!surface.visibleLabels.contains(trashLine),
-                        "the Bookcase's ROOT, not the Trash left on its stack — labels \(surface.visibleLabels)")
+                #expect(!surface.visibleLabels.contains(contents),
+                        "the Bookcase's ROOT, not the book left on its stack — labels \(surface.visibleLabels)")
                 #expect(!onScreen(surface, "Work").isEmpty, "the Bookcase root's wing door names Work")
             }
         }
