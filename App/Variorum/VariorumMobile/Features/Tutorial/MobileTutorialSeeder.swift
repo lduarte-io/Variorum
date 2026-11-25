@@ -328,30 +328,34 @@ enum MobileTutorialSeeder {
             + "is summoned per block from the bottom bar, and put away the "
             + "same way.",
 
+            // VM-260 batch 4b (R-260-13): the note's top is the title and ONE
+            // row of icons now — the lesson names the doors where they stand.
             "The note's masthead is its identity: tap the title to rename "
-            + "the note, tap the books line under it to see which books "
-            + "hold it — add it to one, take it out of one, or diverge a "
-            + "separate copy for a single book — and tap the date beside it "
-            + "to set or clear the day this note counts as (journals sort "
-            + "by it). Editing a note edits it everywhere it appears; "
-            + "diverging is how one book gets its own. The magnifier up by "
-            + "the title finds text inside this note — the system's own "
-            + "find panel, and finding works even on a sealed note.",
+            + "the note. Under it, one row of icons stays with you as you "
+            + "scroll. The book icon shows which books hold it — add it to "
+            + "one (the icon is grey while the note is in none), take it out "
+            + "of one, or diverge a separate copy for a single book — and "
+            + "the date, at the top of the ⋯ at the row's end, sets or "
+            + "clears the day this note counts as (journals sort by it). "
+            + "Editing a note edits it everywhere it appears; diverging is "
+            + "how one book gets its own. The magnifier in the row finds "
+            + "text inside this note — the system's own find panel, and "
+            + "finding works even on a sealed note.",
 
-            "The masthead's second line is the note's tags and its "
-            + "sources: tap the tags to tag the note — type a tag and ⏎ "
-            + "applies it, creating it if it's new (“/” nests: life/goals "
-            + "makes the whole path), or tap a suggestion; ✕ takes one "
-            + "off. Chips show a nested tag's last piece; the full path "
-            + "lives in the sheet. more info, beside the tags, keeps "
-            + "links and files with the note — tap a link to open it, or "
-            + "add one; a file listed there stays on the device where it "
-            + "was added, and only its name travels. blocks lists this "
-            + "note's blocks — a block's name where you've set one, else "
-            + "its first sentence, worked out fresh each time — and a tap "
-            + "jumps you there. And lens, at the line's end, switches "
-            + "between saved ways of looking at this note (the lenses "
-            + "lesson shows it off).",
+            "The # in the row opens the note's tags right there, and # "
+            + "again puts them away: tap + tag to tag the note — type a "
+            + "tag and ⏎ applies it, creating it if it's new (“/” nests: "
+            + "life/goals makes the whole path), or tap a suggestion; ✕ "
+            + "takes one off. Chips show a nested tag's last piece; the "
+            + "full path lives in the sheet. The stacked squares beside it "
+            + "hold three more. more info keeps links and files with the "
+            + "note — tap a link to open it, or add one; a file listed "
+            + "there stays on the device where it was added, and only its "
+            + "name travels. blocks lists this note's blocks — a block's "
+            + "name where you've set one, else its first sentence, worked "
+            + "out fresh each time — and a tap jumps you there. And lens "
+            + "switches between saved ways of looking at this note (the "
+            + "lenses lesson shows it off).",
 
             "Settings, on the shelf's top line, holds the voice switch (the "
             + "last lesson), tag management — browse the whole tag tree "
@@ -547,7 +551,7 @@ enum MobileTutorialSeeder {
 
             "The lighthouse keeps its own hours.",
 
-            "Tap lens on the masthead's second line to open the sheet: "
+            "Tap the stacked squares in the masthead's row, then lens, to open the sheet: "
             + "the note is what the note really says, and each saved lens "
             + "is one tap to view. This note ships with one — switch to "
             + "it and the block above flips to its other take, wearing "
@@ -686,8 +690,10 @@ enum MobileTutorialSeeder {
             + "locked, unlock it to go on. A door that can't act tells you "
             + "why.",
 
-            "The lock lives on the masthead, up by the title: one tap "
-            + "unlocks, one tap seals again. Sealing quietly commits "
+            "The lock lives at the top of the note's ⋯, at the end of the "
+            + "masthead's row: one tap unlocks, one tap seals again — and "
+            + "while a note is sealed, Unlock Note stands on the masthead "
+            + "too. Sealing quietly commits "
             + "any unsaved take first — the guard insures "
             + "exactly what it protects.",
         ])
@@ -721,7 +727,7 @@ enum MobileTutorialSeeder {
             "2 — ARCHIVED: kept out of the way, forever, with no countdown. "
             + "Whole NOTES have their own room, the Archived row at the end "
             + "of the Library's list. A single BLOCK you set aside stays with "
-            + "its note — tap blocks on the masthead, then the archived "
+            + "its note — tap the stacked squares on the masthead, then blocks, then the archived "
             + "segment. Archive Block, in the bottom bar's ⋯, is how one "
             + "gets there, and Put back is how it comes home.",
 
@@ -774,7 +780,7 @@ enum MobileTutorialSeeder {
             + "History ▸ Came from, with Bring back.",
 
             "Both exits, on the block below. First: ⋯ ▸ Delete Block, then "
-            + "tap blocks on the masthead and the leaving segment — its row "
+            + "tap the stacked squares on the masthead, then blocks and the leaving segment — its row "
             + "is there with its days, and Put back returns it. Then put the "
             + "cursor mid-sentence and ⋯ ▸ Divide Block, and open Block "
             + "History ▸ Came from on either half: the block you just cut is "
