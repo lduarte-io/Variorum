@@ -268,6 +268,15 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 - **(B) The masthead source pin:** `BookMastheadSourceTests/theMastheadIsOneLayoutOverOneSetOfViews` (VX-887) red — batch 1's P4 (`BookOrderLookDoors` under the mode row) changed the masthead's source shape. Trace whether VX-887's ONE-LAYOUT invariant still holds over the new shape; if it holds, move the pin's expected text to the new true shape with the why in the test's comment and the record; if it does NOT hold, STOP and report — that would be a real regression, not a pin edit.
 - Evidence: headless (scratch/core) runs + `build-for-testing` green; the five suites re-run in the app host at a SHORT follow-up stage window (the orchestrator REQUESTS it; expected all green). *(Result: filled at the fix's close.)*
 
+#### THE ACCEPTANCE FIX — LIVE STATUS (the implementer's; flipped per piece in the same commit as the piece)
+
+*Base: `33999cad1`. Required reading done before any code: this file's §2, §8's batch 1+2 acceptance section whole (this block's brief), the batch 1 and batch 2 LIVE STATUS tables; `notes/SessionResiliencyProtocol.md`. No `xcodebuild test` runs here (the brief — the five suites re-run in the host at the orchestrator's follow-up window); headless and `build-for-testing` only, under `nice -n 15`, one at a time.*
+
+| Piece | Status |
+|---|---|
+| (A) the dependency-trap class — the 12 tests given `\.date` + `\.withRandomNumberGenerator` the house way, zero product lines, subjects and expectations byte-identical | IN-PROGRESS — the four harnesses (`BookMintArrivalTests.withBook`, `BookOutlineTravelTests.withModel` + its hosted twin's own scope, `BookOrderDialSavesTests.aSaveWritesTheBooksOrderOnEveryKindThatCanSave`'s scope, `BookCardTagsTests.world`) get the BookView neighbours' form (`BookMintLandingTests.withMintLandingBook`, `BookOutlineLandingTests.withLandingBook`): a one-second ticking clock from `1_782_864_000` and a seeded generator. |
+| (B) the masthead source pin (VX-887's one-layout leg) — trace first; move the text only if the invariant holds | NOT-STARTED — traced by reading (holds; the paragraph lands with the piece). |
+
 ### BATCH 3 BRIEF (written 2026-11-25 in batch 2's build gap; ACTIVE at batch 2's close — the base line is filled at spawn)
 
 *(The same recorded deviation as batch 2's carries forward if the batch 1(+2) stage window has not yet run at the spawn: batch 3 builds HEADLESS in the gap, the behavioural-revert pins stay valid — batch 3 must not touch `BookViewModel.arrive` or `outlineRowPreMounts` — and the pause protocol below governs. The ladder and the merge gate judge the combined diff regardless.)*
