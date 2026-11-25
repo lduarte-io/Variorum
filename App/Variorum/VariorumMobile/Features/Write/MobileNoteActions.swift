@@ -84,6 +84,10 @@ struct MobileNoteActionsSheet: View {
     /// so a pin can prove the row exists and fires.
     var onOpenVersions: (() -> Void)?
     @State private var deletePresented = false
+    /// The entry date's alert (parity C2, her sitting item 4) — its door moved
+    /// here from the note's top with R-260-13.
+    @State private var datePresented = false
+    @State private var dateField = ""
     @Environment(\.dismiss) private var dismiss
     /// **Settings, from a note** (VM-53 — the ticket: Settings "reachable from
     /// every root and from a note"). The shell's door, from the environment
@@ -99,21 +103,28 @@ struct MobileNoteActionsSheet: View {
     static let doorLabel = "Note Actions"
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            PhoneSheetHeader(tokens.chromeLabel(Self.sheetTitle), tokens: tokens) { dismiss() }
-            // The note's two TIME controls first — the grain pairing the
-            // phone teaches here instead of with chords (finding 2).
-            saveVersionRow
-            versionsRow
-            Divider().overlay(tokens.line)
-            undoRow
-            redoRow
-            settingsRow
-            Divider().overlay(tokens.line)
-            deleteRow
-            Spacer(minLength: 0)
+        // R-260-13 (the VM-260 run, batch 4b): the sheet SCROLLS — its head
+        // grew by the two doors, and at the medium detent its last rows (Delete
+        // Note… above all) must stay reachable without a drag to large.
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                PhoneSheetHeader(tokens.chromeLabel(Self.sheetTitle), tokens: tokens) { dismiss() }
+                // The seal and the date head the sheet (R-260-13): two easy
+                // doors above its rows, where she asked for them.
+                headDoors
+                // The note's two TIME controls first — the grain pairing the
+                // phone teaches here instead of with chords (finding 2).
+                saveVersionRow
+                versionsRow
+                Divider().overlay(tokens.line)
+                undoRow
+                redoRow
+                settingsRow
+                Divider().overlay(tokens.line)
+                deleteRow
+            }
+            .padding(20)
         }
-        .padding(20)
         .background(tokens.room.ignoresSafeArea())
         // VM-53: the Settings row's ask, once this sheet is gone (a swipe-down
         // or Done never asks).
@@ -157,6 +168,84 @@ struct MobileNoteActionsSheet: View {
             Button(tokens.chromeLabel("Cancel"), role: .cancel) {}
         } message: {
             Text(MobileEditorViewModel.deleteNoteConfirmDetail)
+        }
+        // The entry date (parity C2 — set AND clear; the alert-confirmed door is
+        // the rename door's own grammar). R-260-13 moved it here with its door.
+        .alert(MobileNoteTopDoors.dateName, isPresented: $datePresented) {
+            TextField("2026-08-09", text: $dateField)
+                .keyboardType(.numbersAndPunctuation)
+            Button("Set") {
+                let day = dateField
+                let model = model
+                Task { await model.setEntryDate(day) }
+            }
+            Button("Clear Date") {
+                let model = model
+                Task { await model.setEntryDate(nil) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("A date makes this a day's entry — journals sort by it. Plain days only (2026-08-09); Clear leaves the note undated.")
+        }
+    }
+
+    /// **The sheet's head — the seal and the date** (R-260-13, her words:
+    /// "sealing the note can also go in the note's menu (maybe it can stay an
+    /// easy to click icon at the top of the note menu instead of another row)
+    /// … date could go in the note menu, again it could be an easy to click
+    /// icon at the top"). Two of the phone's calm buttons side by side, each a
+    /// glyph over its word, each answering across half the sheet and well over
+    /// 44 tall:
+    /// · **the seal** — the note seal's door, moved from the top (parity A1
+    ///   item 4 — "you should be able to unlock a note and lock it on
+    ///   mobile"): one reversible tap either way (the seal is a guard, never a
+    ///   snapshot — I6); the glyph and the accent say it is sealed, the word is
+    ///   the act ("Lock" / "Unlock", inside the spoken "Lock Note" / "Unlock
+    ///   Note"). The sheet stays up: a guard, not a departure.
+    /// · **the date** — the "no date" chip's act: the day when set, in ink,
+    ///   else "no date" in the muted; it opens the Entry Date alert.
+    private var headDoors: some View {
+        let day = MobileWriteScreen.dateChipDay(model)
+        let sealed = model.isSealed
+        return HStack(spacing: PhoneMetrics.Space.s8) {
+            Button {
+                let model = model
+                Task {
+                    if model.isSealed {
+                        await model.unlockNote()
+                    } else {
+                        await model.lockNote()
+                    }
+                }
+            } label: {
+                headLabel(
+                    symbol: sealed ? "lock.fill" : "lock.open",
+                    word: sealed ? MobileNoteTopDoors.unlockWord : MobileNoteTopDoors.lockWord)
+            }
+            .buttonStyle(PhoneCalmButtonStyle(tokens: tokens, tone: sealed ? .accent : .ink, fullWidth: true))
+            .accessibilityLabel(sealed ? MobileWriteScreen.unlockDoorTitle : MobileWriteScreen.lockDoorTitle)
+            Button {
+                dateField = MobileWriteScreen.dateChipDay(model) ?? ""
+                datePresented = true
+            } label: {
+                headLabel(
+                    symbol: MobileNoteTopDoors.calendarSymbol,
+                    word: day ?? MobileNoteTopDoors.noDateWord)
+            }
+            .buttonStyle(PhoneCalmButtonStyle(tokens: tokens, tone: day != nil ? .ink : .muted, fullWidth: true))
+            .accessibilityLabel(MobileNoteTopDoors.dateName)
+            .accessibilityValue(day ?? MobileNoteTopDoors.noDateWord)
+        }
+    }
+
+    /// A head door's face: its glyph (the icon button's 17) over its word.
+    private func headLabel(symbol: String, word: String) -> some View {
+        VStack(spacing: PhoneMetrics.Space.s4) {
+            Image(systemName: symbol)
+                .modifier(PhoneGlyphModifier(size: PhoneControlMetrics.iconGlyph))
+                .accessibilityHidden(true)
+            Text(tokens.chromeLabel(word))
+                .lineLimit(1)
         }
     }
 

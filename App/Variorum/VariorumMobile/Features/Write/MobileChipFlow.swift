@@ -27,6 +27,10 @@ import SwiftUI
 struct MobileChipFlow: Layout {
     var hSpacing: CGFloat = 12
     var vSpacing: CGFloat = 4
+    /// Each row centred in the width (VM-260 batch 4b — the note top's open tag
+    /// strip, centred under its centred row as drawn); off, rows start at the
+    /// leading edge exactly as they always have. The row brain is the same.
+    var centred = false
 
     /// The ONE row-breaking rule: greedy fill, break when the next chip
     /// (plus its leading spacing) would cross the available width; a
@@ -105,6 +109,11 @@ struct MobileChipFlow: Layout {
         for row in rows {
             let rowHeight = row.map { ideal[$0].height }.max() ?? 0
             var x = bounds.minX
+            if centred {
+                let chips: CGFloat = row.map { clamped[$0] }.reduce(0, +)
+                let gaps: CGFloat = CGFloat(max(row.count - 1, 0)) * hSpacing
+                x += max(0, (bounds.width - chips - gaps) / 2)
+            }
             for index in row {
                 subviews[index].place(
                     at: CGPoint(x: x, y: y + (rowHeight - ideal[index].height) / 2),

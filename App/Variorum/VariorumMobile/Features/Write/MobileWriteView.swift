@@ -77,9 +77,15 @@ struct MobileWriteScreen: View {
     /// Rename note (parity C2): the title IS the door; the alert's field.
     @State private var renamePresented = false
     @State private var renameField = ""
-    /// Entry date (parity C2, her sitting item 4): the date chip's alert.
-    @State private var datePresented = false
-    @State private var dateField = ""
+    /// **R-260-13 (the VM-260 run, batch 4b)** — the note's top as she picked
+    /// it: the title gives way as she scrolls (the tracker reads the text
+    /// view's own scroll); # opens the tags in place; the stack door's menu,
+    /// and the row it chose (asked for once the menu has gone). The entry
+    /// date's alert moved with its door into the Note sheet.
+    @State private var titleTracker = MobileNoteTitleTracker()
+    @State private var tagsOpen = false
+    @State private var stackOpen = false
+    @State private var stackChoice: MobileNoteStackChoice?
     /// The note's tags (parity C3 — "tag posts", leaf-chip grammar): the
     /// chip's model and its sheet.
     @State private var noteTags: MobileNoteTagsModel
@@ -228,6 +234,9 @@ struct MobileWriteScreen: View {
                 // speaks; raising focus never bypasses the police), then
                 // the loops, last, forever.
                 AppTiming.noteArrived() // VM-65: this open's reads are counted from here
+                // R-260-13: the title reads the text view's own scroll (a read;
+                // nothing of the editor changes).
+                titleTracker.watch(model.textView)
                 // VM-70: the arrival counts itself and, for a screen shown again
                 // whose leaving gave its coordinator back, takes it again —
                 // before the liveness grant flushes it.
@@ -241,7 +250,10 @@ struct MobileWriteScreen: View {
                 await model.start()
             }
             // VM-275: what the line held as this note arrived — not the note's.
-            .onAppear { lineWhenShown = session.status.current?.id }
+            .onAppear {
+                lineWhenShown = session.status.current?.id
+                titleTracker.watch(model.textView)
+            }
             .onDisappear {
                 let model = model
                 let session = session
@@ -284,80 +296,38 @@ struct MobileWriteScreen: View {
         // REAL observation dependency, which is exactly what the Mac's
         // computed-`Binding` purge dialogs lack (§15's trap (a)).
         @Bindable var door = model.undoDoor
-        // VM-272 (the VM-260 run, batch 2 — her "the top part is so huge it
-        // takes up half of the area"): the rows sit on one another. Each row is
-        // its doors' 44 pt targets, and a 44 already carries its word's air, so
-        // the 4 pt gaps between them (and the 10 above, the 8 below — and the
-        // inset's own 8, the reconcile's) were air stacked on air: 167 pt at
-        // one chip row as measured, now 136.
-        return VStack(alignment: .leading, spacing: Self.mastheadRowGap) {
-            // The reconcile: the title row's doors align by their CENTRES —
-            // every one is a 44 pt target, so the row is exactly 44. On the
-            // title's baseline the tools hung a point below it (Study 1.0,
-            // Terminal 0.3 — the window's 145 against 144.3).
-            HStack(alignment: .center) {
-                // Rename note (parity C2 — "full app functionality"): the
-                // title IS the door; an alert confirms, so a stray tap
-                // costs nothing. The field edits the STORED title (the
-                // display title may be derived — DisplayTitle's brain).
-                Button {
-                    renameField = model.header?.title ?? ""
-                    renamePresented = true
-                } label: {
-                    Text(model.displayTitle ?? "")
-                        .phoneType(.noteTitle, tokens)
-                        .foregroundStyle(tokens.ink)
-                        .lineLimit(1)
-                        .phoneHitArea(alignment: .leading)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Rename Note")
-                Spacer(minLength: 12)
-                // The note-tool corner (M3 ≡ R6 joins it): copy · find ·
-                // seal, spaced so three small glyphs stay three separate
-                // taps.
-                // VM-50: icon buttons — 44 × 44 hit areas that touch.
-                // VM-272: P-47-12's road (b) — through the icon button's own
-                // step-down (VM-273) the tools draw 17 pt glyphs in their ink
-                // (they drew 22), with only the 44 × 44 frame around each.
-                HStack(spacing: 0) {
-                    copyDoor
-                    findDoor
-                    sealDoor
-                    noteActionsDoor
-                }
+        // **R-260-13 — THE NOTE'S TOP AS SHE PICKED IT** (the VM-260 run, batch
+        // 4b; the drawing `notes/plans/vm-260/note-top-options.html` frame P).
+        // The title on its own row, centred and wrapping; under it ONE row of
+        // six icon doors with no separator; while the tags are open, their strip
+        // under the row. Only the row (and the open strip, and a sealed note's
+        // state line) stays as she scrolls: the title gives way with her text
+        // (`MobileNoteTitleTracker` reads the text view's own scroll) and is
+        // back at the top. The seal and the date moved into the Note sheet's
+        // head (`MobileNoteActionsSheet`); the membership line and the five
+        // chips left the top — the book door, #, and the stack door hold them.
+        return VStack(spacing: 0) {
+            if !titleTracker.gone {
+                titleRow
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
-            // The note's primary home reads alone (full width for
-            // "in N books"); the FIVE identity chips — date · tags ·
-            // more info · blocks · lens — ride ONE wrapping flow (D2,
-            // the routed PC4b-4/PC5-5 crowding answer: OVERFLOW — the
-            // chips wrap when their content grows, so nothing clips and
-            // no door hides; calm at rest, five bare words fit one
-            // line. PROVISIONAL for her sitting).
-            membershipChip
-            // VM-49: each chip answers 44 tall, its hit area reaching 6
-            // into the 12 pt gap on each side (so neighbours' areas touch
-            // and the words keep their places — the flow is shifted back by
-            // the same 6). VM-272: and at least 44 ACROSS — a short word
-            // ("tags", "lens") reaches further, centred. The capsule look and
-            // one sideways row are VM-148's masthead.
-            MobileChipFlow(hSpacing: 0, vSpacing: 0) {
-                dateChip
-                tagsChip
-                moreInfoChip
-                blocksChip
-                lensChip
+            doorRow
+            if tagsOpen {
+                MobileNoteTagStrip(model: noteTags, tokens: tokens) { tagsPresented = true }
+                    .transition(.opacity)
             }
-            .padding(.horizontal, -Self.chipHitReach)
             if let canary = model.canaryMessage {
                 Text(canary).phoneType(.meta, tokens).foregroundStyle(.red)  // CANARY: deliberately not the voice's alarm
             }
             if model.isSealed {
                 // The state line pairs with its door (the 13b fire-and-DO
-                // doctrine: a message naming an act offers the act) —
-                // every sealed refusal on this screen says "unlock it",
-                // and the door stands right here in the masthead. Both
-                // render voice-cased (P26/P43 — PA1-1 resolved).
+                // doctrine: a message naming an act offers the act) — every
+                // sealed refusal on this screen says "unlock it", and the door
+                // stands right here in the masthead. Both render voice-cased
+                // (P26/P43 — PA1-1 resolved). R-260-13: the seal's OWN door
+                // moved into the Note sheet's head; this line and its unlock
+                // stay where they were — under the note's facts, in the part of
+                // the top that stays — so a sealed note always says so.
                 HStack(spacing: 10) {
                     Text(tokens.chromeLabel(Self.sealedStateLine))
                         .phoneType(.meta, tokens).foregroundStyle(tokens.phone.muted)
@@ -379,16 +349,23 @@ struct MobileWriteScreen: View {
             // the same door (`MobileUndoDoor.beginUndo(from: .receipt)`), and
             // A12's warning still presents from this masthead's alert host.
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        // The A3 spacing floor: the canon's masthead frame — h20 where the
-        // system default (~16) sat. VM-272: the air above (10) and below (8)
-        // retire into the rows' own 44s — the title row's carries its air
-        // under the system bar, and 4 stays between the last chip row and her
-        // first line.
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, PhoneMetrics.gutter)
         .padding(.top, Self.mastheadTop)
         .padding(.bottom, Self.mastheadBottom)
         .background(noteGround)  // VM-51: her title shares the page's ground (P-47-17; VM-247's cream too)
+        // The row's edge once her text runs under it (the drawing's `.edge`):
+        // the palette's line, the bar's hairline.
+        .overlay(alignment: .bottom) {
+            if titleTracker.gone {
+                Rectangle()
+                    .fill(tokens.line)
+                    .frame(height: MobileTabBarMetrics.hairline)
+                    .accessibilityHidden(true)
+            }
+        }
+        // The title's slide never draws over the system bar above the top.
+        .clipped()
         .alert("Rename Note", isPresented: $renamePresented) {
             TextField("Title", text: $renameField)
             Button("Rename") {
@@ -434,7 +411,8 @@ struct MobileWriteScreen: View {
         //     mount no lens is active yet (`activeLensID` starts nil), so a
         //     mount-time read could not change the marker either way.
         // One bounded post-scoped read (`refresh()`'s own cost note), once
-        // per sheet close.
+        // per sheet close. (R-260-13: the marker is the stack door's now —
+        // its alarm tone and its spoken value — and its menu's lens row.)
         .sheet(isPresented: $blocksPresented, onDismiss: {
             let lenses = lenses
             Task { await lenses.refresh() }
@@ -489,193 +467,184 @@ struct MobileWriteScreen: View {
             Text(model.undoDoor.pendingWarning.map(
                 { MobileUndoDoor.discardingUndoDetail($0.warning) }) ?? "")
         }
-        .alert("Entry Date", isPresented: $datePresented) {
-            TextField("2026-08-09", text: $dateField)
-                .keyboardType(.numbersAndPunctuation)
-            Button("Set") {
-                let day = dateField
-                let model = model
-                Task { await model.setEntryDate(day) }
-            }
-            Button("Clear Date") {
-                let model = model
-                Task { await model.setEntryDate(nil) }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("A date makes this a day's entry — journals sort by it. Plain days only (2026-08-09); Clear leaves the note undated.")
-        }
     }
 
-    /// The entry-date chip (parity C2, her sitting item 4 — set AND
-    /// clear). Placement: beside the books chip on the masthead's
-    /// identity line — the date is note identity exactly as membership
-    /// is, and the alert-confirmed chip is the rename door's own grammar.
-    private var dateChip: some View {
-        let day = Self.dateChipDay(model)
-        return Button {
-            dateField = Self.dateChipDay(model) ?? ""
-            datePresented = true
+    /// **The title on its own row** (R-260-13 — her "the title to get more
+    /// space on top … then the title could be more centered"): the whole width
+    /// between the gutters and a little more room (`titleInset`), centred, and
+    /// WRAPPING — never cut. It is still the rename door (parity C2 — "full app
+    /// functionality"): the title IS the door; an alert confirms, so a stray tap
+    /// costs nothing; the field edits the STORED title (the display title may
+    /// be derived — DisplayTitle's brain). VM-148's rename-in-place is not this.
+    private var titleRow: some View {
+        Button {
+            renameField = model.header?.title ?? ""
+            renamePresented = true
         } label: {
-            Text(day ?? tokens.chromeLabel("no date"))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(day != nil ? tokens.ink : tokens.phone.muted)
-                .lineLimit(1)
-                .mastheadChipHitArea()
+            Text(model.displayTitle ?? "")
+                .phoneType(.noteTitle, tokens)
+                .foregroundStyle(tokens.ink)
+                .multilineTextAlignment(.center)
+                .phoneHitArea()
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Entry Date")
+        .accessibilityLabel("Rename Note")
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, Self.titleInset)
+        .padding(.top, Self.titleTop)
     }
 
-    /// **The date chip's one fact** (VM-84): the day it shows, read in ONE
-    /// place — the chip's words, its ink and the alert's seed — so what the
-    /// chip OBSERVES is exactly what a pin can hold. It reads the model's
-    /// OBSERVED `entryDate`, never `header` (deliberately unobserved), so a
-    /// date change re-renders the chip whether or not the title moved.
+    /// **The one row** (R-260-13): six icon doors, each the phone's 44 × 44
+    /// icon button, touching (centres 44 apart — "I don't think there should be
+    /// a verticle line between the options"), centred, in her order: copy ·
+    /// find · book · # · the stack door · ⋯ (C-13-1: ⋯ last, the iOS
+    /// convention).
+    private var doorRow: some View {
+        HStack(spacing: 0) {
+            copyDoor
+            findDoor
+            bookDoor
+            tagsDoor
+            stackDoor
+            noteActionsDoor
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// **The entry date's one fact** (VM-84): the day it shows, read in ONE
+    /// place — the Note sheet's date door's words, its ink and the alert's seed
+    /// (R-260-13 moved the door off the top) — so what the door OBSERVES is
+    /// exactly what a pin can hold. It reads the model's OBSERVED `entryDate`,
+    /// never `header` (deliberately unobserved), so a date change re-renders the
+    /// door whether or not the title moved.
     static func dateChipDay(_ model: MobileEditorViewModel) -> String? {
         model.entryDate
     }
 
-    /// The tags chip (parity C3 — "tag posts", the LK5 expansion's "full
-    /// app functionality"): the note's tags as LEAF-only chips (13k K3's
-    /// grammar; the full paths live in the sheet, where hierarchy is
-    /// surfaced). Tap → the tags sheet (apply by typing or suggestion,
-    /// remove with ✕).
-    private var tagsChip: some View {
-        Button {
-            tagsPresented = true
-        } label: {
-            Text(tokens.chromeLabel(noteTags.chipLine ?? "tags"))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(noteTags.chipLine != nil ? tokens.ink : tokens.phone.muted)
-                .lineLimit(1)
-                .mastheadChipHitArea()
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Tags")
-        // VM-69: the chip's own read — this note's tags, never the vocabulary
-        // (the sheet reads that on appear).
-        .task(id: model.postID) { await noteTags.refreshChip() }
-    }
-
-    /// The "more info" chip (parity C3 — her own name for the surface):
-    /// the note's kept links and files, one tap away; the count rides
-    /// the word when any exist.
-    private var moreInfoChip: some View {
-        Button {
-            referencesPresented = true
-        } label: {
-            Text(tokens.chromeLabel(
-                MobileReferencesModel.chipLabel(count: references.references.count)))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(references.references.isEmpty ? tokens.phone.muted : tokens.ink)
-                .lineLimit(1)
-                .mastheadChipHitArea()
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("More Info")
-        .task(id: model.postID) { await references.refresh() }
-    }
-
-    /// The membership chip (parity C2): which books hold this note — the
-    /// voice's path grammar for the single-book case (the Mac label's own
-    /// rule), accent ink when the note appears in several.
-    private var membershipChip: some View {
+    /// **The book door** (R-260-13 — her "in no book should be replaced with a
+    /// book icon that you can tap on to add it to a book, maybe greyed out when
+    /// there's no book"): the membership line's act (parity C2 — which books
+    /// hold this note; add it to one, take it out, diverge), behind the Mac's
+    /// book glyph, grey (the corrected faint) while the note is in no book, in
+    /// ink in one, in the accent in several. Its name is the line's; its value
+    /// is what the line used to say.
+    private var bookDoor: some View {
         Button {
             membershipPresented = true
         } label: {
-            Text(tokens.chromeLabel(chipLabel))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(membership.books.count > 1 ? tokens.accent : tokens.phone.muted)
-                .lineLimit(1)
-                .phoneHitArea(alignment: .leading)
+            Image(systemName: MobileNoteTopDoors.bookSymbol)
+                .foregroundStyle(MobileNoteTopDoors.bookInk(count: membership.books.count, tokens: tokens))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel("Books holding this note")
-        // VM-69: the chip's own read — the books holding this note, never
+        .accessibilityValue(MobileMembershipModel.labelText(bookNames: membership.books.map(\.name)))
+        // VM-69: the door's own read — the books holding this note, never
         // every book (the sheet reads those on appear).
         .task(id: model.postID) { await membership.refreshChip() }
     }
 
-    private var chipLabel: String {
-        let names = membership.books.map(\.name)
-        if names.count == 1, !tokens.pathPrefix.isEmpty {
-            return tokens.path([names[0]])
-        }
-        return MobileMembershipModel.labelText(bookNames: names)
-    }
-
-    /// The blocks chip (parity C4b item 5 — her ruling 11): the in-note
-    /// block list's door, on the masthead's second identity line beside
-    /// tags and more info. Deliberately the bare voiced WORD — no count
-    /// (the chip refreshes at sheet cadence, not keystroke cadence; a
-    /// stale census on the masthead would be worse than none, and the
-    /// list itself is the census — recorded judgment).
-    private var blocksChip: some View {
+    /// **#** (R-260-13 — "easy to click on tags to see them expand and then
+    /// click on the tag icon so tags close again"): opens the note's tags IN
+    /// PLACE, under the row, and the same # closes them; the accent while open
+    /// (the Mac masthead's ＃'s own open state). Adding a tag stays one press
+    /// away — the strip's add door opens the tags sheet. Its name is the tags
+    /// chip's; its value the chip's words (the leaves, or that there are none).
+    private var tagsDoor: some View {
         Button {
-            blocksPresented = true
+            if UIAccessibility.isReduceMotionEnabled {
+                tagsOpen.toggle()
+            } else {
+                withAnimation(.easeOut(duration: MobileNoteTopDoors.flipSeconds)) { tagsOpen.toggle() }
+            }
         } label: {
-            Text(tokens.chromeLabel(MobileBlockListModel.chipWord))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(tokens.phone.muted)
-                .lineLimit(1)
-                .mastheadChipHitArea()
+            Image(systemName: MobileNoteTopDoors.tagsSymbol)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Blocks")
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: tagsOpen ? .accent : .ink))
+        .accessibilityLabel("Tags")
+        .accessibilityValue(noteTags.chipLine ?? "no tags")
+        .accessibilityAddTraits(tagsOpen ? .isSelected : [])
+        // VM-69: the door's own read — this note's tags, never the vocabulary
+        // (the sheet reads that on appear).
+        .task(id: model.postID) { await noteTags.refreshChip() }
     }
 
-    /// The lens chip (parity C5 — her sketch: "choose between lenses on
-    /// the top bar"): the bare voiced word at rest; the ACTIVE lens's
-    /// name in words while one drives the display (the whole-surface
-    /// viewing state, named honestly — accent ink says the display is a
-    /// way of looking, not the note). Fourth chip on the second line —
-    /// joins PC4b-4's recorded crowding look item.
-    private var lensChip: some View {
+    /// **The stack door** (R-260-13 — her "blcoks and lens and more info could
+    /// probably go together"; C-13-3): one door, a three-row menu — blocks ·
+    /// lens · more info — each opening what its chip opened. It keeps the lens
+    /// chip's states: the accent while a lens drives the page, the ALARM while
+    /// the active lens has a pick that fell back (PR14's marker, her 13j gate
+    /// ruling (5) — "say loudly"), said in its value too.
+    private var stackDoor: some View {
         Button {
-            lensesPresented = true
+            stackOpen = true
         } label: {
-            // **PR14's marker** (her 13j gate ruling (5) — *"say loudly"*):
-            // while the ACTIVE lens has a pick that fell back to the note's
-            // own take, the chip says so on the page the lens is driving,
-            // in the alarm token, rather than leaving the fact inside a
-            // sheet she would have to think to open. The sheet's own loud
-            // region names WHICH block and offers the way back.
-            Text(tokens.chromeLabel(
-                lenses.chipLabel + (lenses.activeLensHasFallback ? " \u{26A0}" : "")))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(
-                    lenses.activeLensHasFallback
-                        ? tokens.alarm
-                        : (lenses.activeLensID != nil ? tokens.accent : tokens.phone.muted))
-                .lineLimit(1)
-                .mastheadChipHitArea()
+            Image(systemName: MobileNoteTopDoors.stackSymbol)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(lenses.activeLensHasFallback ? Self.lensFallbackChipLabel : "Lenses")
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: stackTone))
+        .accessibilityLabel(MobileNoteTopDoors.stackName)
+        .accessibilityValue(stackValue)
+        // The more-info row's count — the chip's own read, kept at the open.
+        .task(id: model.postID) { await references.refresh() }
+        .popover(isPresented: $stackOpen, arrowEdge: .top) {
+            MobileNoteStackMenu(
+                tokens: tokens, lensWord: lenses.chipLabel,
+                lensFellBack: lenses.activeLensHasFallback,
+                referenceCount: references.references.count
+            ) { choice in
+                stackChoice = choice
+                stackOpen = false
+            }
+            // The chosen sheet is asked for only once the menu has gone
+            // (`MobileNoteActionsSheet`'s Settings row precedent), so two
+            // presentations never overlap.
+            .onDisappear { openStackChoice() }
+        }
     }
 
-    /// The chip's spoken label while the active lens has a fallback — a
+    private var stackTone: PhoneActTone {
+        if lenses.activeLensHasFallback { return .alarm }
+        return lenses.activeLensID != nil ? .accent : .ink
+    }
+
+    private var stackValue: String {
+        guard lenses.activeLensID != nil else { return "" }
+        return lenses.activeLensHasFallback
+            ? "\(lenses.chipLabel) — \(MobileNoteTopDoors.fellBackValue)"
+            : lenses.chipLabel
+    }
+
+    private func openStackChoice() {
+        guard let choice = stackChoice else { return }
+        stackChoice = nil
+        Task { @MainActor in
+            switch choice {
+            case .blocks: blocksPresented = true
+            case .lens: lensesPresented = true
+            case .moreInfo: referencesPresented = true
+            }
+        }
+    }
+
+    /// The lens row's spoken label while the active lens has a fallback — a
     /// glyph is not a sentence, and VoiceOver reads words.
     static let lensFallbackChipLabel = "Lenses — a pick fell back"
 
-    /// How far a masthead chip's hit area reaches into the flow's old 12 pt
-    /// gap on each side (VM-49): half of it, so neighbours' areas touch.
-    static let chipHitReach: CGFloat = 6
-
-    /// **The note's top, tightened** (VM-272, the VM-260 run's batch 2): no
-    /// gap between its rows of 44 pt targets, none above the title row, 4
-    /// below the last chip row (they were 4, 10 and 8). PROVISIONAL with the
-    /// step-down's set (P-260-2a).
-    static let mastheadRowGap: CGFloat = 0
+    /// **The note's top's room** (VM-272 → R-260-13): nothing above the title's
+    /// row but its own 8 (`titleTop`), the title 8 further in than the gutter
+    /// each side (`titleInset` — the drawing's 28), and 4 below the last row
+    /// (`mastheadBottom`, VM-272's). At a one-line title the top is 8 + 44 + 44
+    /// + 4 = 100 pt at rest and 44 + 4 scrolled (it was 136, always).
+    /// PROVISIONAL with the set (P-260-4b-1).
     static let mastheadTop: CGFloat = 0
     static let mastheadBottom: CGFloat = PhoneMetrics.Space.s4
+    static let titleTop: CGFloat = PhoneMetrics.Space.s8
+    static let titleInset: CGFloat = PhoneMetrics.Space.s8
 
     /// Copy the whole note (round 2 batch 2 — M3 ≡ R6; her ask: *"a button
     /// added at the top that allows me to copy everything i've written in a
-    /// particular note"*). It sits in the masthead's note-tool corner
-    /// beside find and seal, because what it copies is the NOTE — the
-    /// bar's ⋯ is where block-level acts live, and this is not one.
+    /// particular note"*). It sits in the masthead's one row (R-260-13), first,
+    /// because what it copies is the NOTE — the bar's ⋯ is where block-level
+    /// acts live, and this is not one.
     /// Markdown, exactly what export writes; the model's `copyNote` owns
     /// the flush-first contract and the receipt (this view sends an action
     /// and nothing else). Works on a sealed note — copying is reading.
@@ -691,9 +660,9 @@ struct MobileWriteScreen: View {
     }
 
     /// The note's ⋯ (round 2 batch 4): the note-scale acts sheet — M20's
-    /// persistent undo/redo door and PR1's Delete Note…. It sits in the
-    /// note-tool corner beside copy · find · seal, because everything it
-    /// carries is the NOTE's (the bar's ⋯ is where BLOCK acts live).
+    /// persistent undo/redo door and PR1's Delete Note…, and since R-260-13
+    /// the seal and the date at its head. It ends the row, because everything
+    /// it carries is the NOTE's (the bar's ⋯ is where BLOCK acts live).
     private var noteActionsDoor: some View {
         Button {
             noteActionsPresented = true
@@ -704,13 +673,12 @@ struct MobileWriteScreen: View {
         .accessibilityLabel(MobileNoteActionsSheet.doorLabel)
     }
 
-    /// Find in note (parity C4b item 3): the masthead's trailing corner
-    /// is the phone's note-tool corner (the seal glyph's own placement
-    /// justification — note-level, always visible however far she has
-    /// scrolled), and the magnifier presents the SYSTEM find navigator
-    /// (find only; replace is structurally declined — the text view
-    /// carries the reasoning). Works on a sealed note too: finding is
-    /// reading, and reading stays free under the seal.
+    /// Find in note (parity C4b item 3): the masthead's row is the phone's
+    /// note-tool corner (note-level, and since R-260-13 it stays however far
+    /// she has scrolled), and the magnifier presents the SYSTEM find navigator
+    /// (find only; replace is structurally declined — the text view carries
+    /// the reasoning). Works on a sealed note too: finding is reading, and
+    /// reading stays free under the seal.
     private var findDoor: some View {
         Button {
             model.presentFind()
@@ -719,43 +687,5 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel("Find in Note")
-    }
-
-    /// The note seal's door (parity round Stage A batch A1, item 4 — her
-    /// ruling: "you should be able to unlock a note and lock it on
-    /// mobile"). Placement: the masthead is the phone's note-identity
-    /// surface and its only note-level acts home — block acts live in the
-    /// bar's ⋯, but the seal is the NOTE's own state, already displayed
-    /// here, so its door lives beside it. The glyph mirrors the state;
-    /// lock and unlock are both one reversible tap (the seal is a guard,
-    /// never a snapshot — I6).
-    private var sealDoor: some View {
-        Button {
-            let model = model
-            Task {
-                if model.isSealed {
-                    await model.unlockNote()
-                } else {
-                    await model.lockNote()
-                }
-            }
-        } label: {
-            Image(systemName: model.isSealed ? "lock.fill" : "lock.open")
-        }
-        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: model.isSealed ? .accent : .ink))
-        .accessibilityLabel(model.isSealed ? Self.unlockDoorTitle : Self.lockDoorTitle)
-    }
-}
-
-private extension View {
-    /// A masthead chip's hit area (VM-49): 44 tall, reaching
-    /// `chipHitReach` past the word on each side, the word drawn where it
-    /// was — and (VM-272) at least 44 across, centred on a short word: the
-    /// chips were 44 tall only, so in Study "tags" and "lens" answered under
-    /// 44 wide, and the step-down to 13 pt would have taken them under 40.
-    func mastheadChipHitArea() -> some View {
-        padding(.horizontal, MobileWriteScreen.chipHitReach)
-            .frame(minWidth: PhoneMetrics.touchMinimum, minHeight: PhoneMetrics.touchMinimum)
-            .contentShape(Rectangle())
     }
 }
