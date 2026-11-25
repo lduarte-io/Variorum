@@ -319,12 +319,17 @@ final class AppBootstrap {
         let storeURL = liveStoreURL
         // VX-306 U1b: the road's system, composed ONCE per open on the main actor (U1a's hand-forward).
         let road = roadInputs.compose()
+        // VX-1013 (D-1013-5): this open's one far-folder walk — made here, read at most once and never on the way to the
+        // library: the route reads the container only, and the far folder is walked off the launch path when the lobby
+        // draws (or a press that would refuse joins it). Making it reads nothing.
+        let far = road.map { FarFolderWalk(places: $0.system.places) }
         opening = Task { [weak self] in
             // OFF the main actor: the road's facts (custody, the key file, the memory item), then — on the open
             // routes only — `openStore`, which runs the migration set. The lobby DEFERS all of that.
             let outcome = await Task.detached(priority: .userInitiated) {
                 await Self.routeAndOpen(
-                    variant: variant, storeURL: storeURL, unlockedKey: unlockedKey, road: road, roadOpened: roadOpened)
+                    variant: variant, storeURL: storeURL, unlockedKey: unlockedKey, road: road, roadOpened: roadOpened,
+                    far: far)
             }.value
             guard let self else { return }
             // …and back, for `install` (a process-global dependency
@@ -350,7 +355,7 @@ final class AppBootstrap {
     /// straight to the open.
     private nonisolated static func routeAndOpen(
         variant: AppDatabase.StoreVariant, storeURL: URL?, unlockedKey: StoreKey?, road: ComposedRoad?,
-        roadOpened: ProtectionRoadSession?
+        roadOpened: ProtectionRoadSession?, far: FarFolderWalk?
     ) async -> OpenOutcome {
         guard let road else {
             return .failed(AppDatabase.StoreOpenError(
@@ -361,7 +366,8 @@ final class AppBootstrap {
             if roadOpened.owesInterlude { return .roadInterlude(roadOpened, road.context()) }
             return openOnTheRoad(roadOpened, road: road, variant: variant)
         }
-        let ctx = road.context()
+        var ctx = road.context()
+        ctx.far = far
         #if DEBUG
         // Walk machinery (P-VX306-U1b-9): a launch asked to forget a quiet road does so once, before the facts; and
         // (VX-307 U2a, P-VX307-U2a-6) one asked to fail its first Touch ID press arms that on the road's custody leaf.
@@ -513,7 +519,9 @@ final class AppBootstrap {
         case .failed(let error):
             state = .failed(error)
         case .roadLobby(let facts, let ctx):
-            state = .roadLobby(makeRoadLobby(facts, ctx))
+            let lobby = makeRoadLobby(facts, ctx)
+            state = .roadLobby(lobby)
+            awaitTheFarLanding(on: lobby, ctx)
         case .roadCreated(let session, let words):
             if ProtectionRoad.showsWordsAtCreation {
                 // The phone (P-VX307-U2b-0): its creation card stands this phase.
@@ -578,6 +586,19 @@ final class AppBootstrap {
             })
     }
 
+    /// VX-1013 (D-1013-4) — the launch road's lobby drew from the container's facts and the route began the far folder's
+    /// one walk: when it lands, the lobby still standing takes the full facts (or goes on, should a quiet road open through
+    /// the far folder's key files — `ProtectionLobbyModel.farWalkLanded`). Awaited here without blocking the main actor;
+    /// a lobby left meanwhile (a press opened, a relock's lobby replaced it) is told nothing.
+    private func awaitTheFarLanding(on lobby: ProtectionLobbyModel, _ ctx: RoadContext) {
+        guard let far = ctx.far, far.hasBegun else { return }
+        Task { @MainActor [weak self, weak lobby] in
+            await far.read()
+            guard let self, let lobby, case .roadLobby(let standing) = self.state, standing === lobby else { return }
+            await lobby.farWalkLanded()
+        }
+    }
+
     /// VX-306 U1b — the new road's lobby: its presses run off the main actor through the road; an opened
     /// session continues into the app's open; K5's `recordMissing` lands on the missing face.
     private func makeRoadLobby(_ facts: RoadLobbyFacts, _ ctx: RoadContext) -> ProtectionLobbyModel {
@@ -617,6 +638,12 @@ final class AppBootstrap {
             startFresh: { [weak self] in
                 guard let self else { return nil }
                 return await self.startFreshOverAPreDesignStore()
+            },
+            // VX-1013 (D-1013-4, R-1013-A2): a lobby whose context carries a far walk — the launch road's (its landing tries
+            // the quiet roads once more with the far folder's key files) and a lock's (its landing only re-reads: a lock
+            // is never theater). No landing without a walk.
+            farLanding: ctx.far == nil ? nil : {
+                await Task.detached(priority: .userInitiated) { await ProtectionOpenRoad.landTheFarWalk(ctx) }.value
             })
     }
 
@@ -1488,8 +1515,9 @@ final class AppBootstrap {
         newRoadSyncKeys.attach(nil)
         let lobby = await Task.detached(priority: .userInitiated) { () -> (facts: RoadLobbyFacts, ctx: RoadContext) in
             binding.lock()
-            // The context off the main actor: it reads the sign-in (a Keychain read).
-            let ctx = road.context()
+            // The context off the main actor: it reads the sign-in (a Keychain read). VX-1013 (R-1013-A2): with its own
+            // far-folder walk — the lobby draws from the container and the walk lands on it (`finish`'s far landing).
+            let ctx = ProtectionRoadLock.lobbyContext(road)
             return (ProtectionRoadLock.lobby(ctx), ctx)
         }.value
         session.endAct()
