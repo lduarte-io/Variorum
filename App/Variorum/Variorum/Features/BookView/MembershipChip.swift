@@ -136,7 +136,8 @@ struct MembershipChip: View {
                             // (`rowDoors(for:)` — VX-1034).
                             let rowDoors = MembershipChip.rowDoors(for: book)
                             // 13f W23 — DIVERGE FOR THIS BOOK, on the row
-                            // that names the book.
+                            // that names the book — a BOOK's row only since
+                            // VX-1034 (a gathering always refuses it; P-2).
                             if rowDoors.contains(.diverge) {
                                 Button("diverge") { diverge(for: book) }
                                     .buttonStyle(.borderless)
@@ -401,21 +402,37 @@ struct MembershipChip: View {
     }
 
     /// **VX-1034 — a membership row's doors, by its book** (pure; the row
-    /// draws exactly these).
+    /// draws exactly these). A gathering's row draws NO Diverge (her call,
+    /// QUESTIONS #279 addendum: "h - agree that mac should hide it"): the
+    /// operation is books only and always refuses a gathering
+    /// (`divergePostForReading`, AppSpec §9), so the door could only refuse
+    /// (P-2 — a door that can never act is not rendered; the phone's W-110
+    /// already drew none). Its honest doors stay: one "remove #tag" per rule
+    /// tag the note wears. (`DivergeCopy.refusal`'s tag-road sentence stays
+    /// as the operation's refusal words, should any road still reach it.)
     nonisolated static func rowDoors(for book: Reading) -> [MembershipRowDoor] {
-        book.kind == .book ? [.diverge, .remove] : [.diverge, .removeRuleTags]
+        book.kind == .book ? [.diverge, .remove] : [.removeRuleTags]
     }
 
     /// **VX-1034 — one add-picker option** (pure; the picker lists exactly
     /// these): a book by its name, annotated "archived" when it is; a
-    /// gathering by its name and the road it is joined by ("by tagging").
+    /// gathering by its name and the road it is joined by ("by tagging") —
+    /// and, when ARCHIVED, "archived" first, as an archived book already says
+    /// (her call, QUESTIONS #279 addendum: "g - agree the mac should show that
+    /// it's archived"; R-13ie-4 — every book selector names an archived book).
+    /// The words are PROVISIONAL ("archived · by tagging" — the Mac picker's
+    /// annotation idiom; the phone's row reads "Quotes (archived) (by
+    /// tagging)").
     nonisolated static func addOption(for reading: Reading) -> SearchPickerOption {
         guard reading.kind == .gathering else {
             return SearchPickerOption(
                 id: reading.id, label: reading.name,
                 annotation: reading.archivedAt != nil ? BookArchiveCopy.word : nil)
         }
-        return SearchPickerOption(id: reading.id, label: reading.name, annotation: AddToBookCopy.byTagging)
+        let road = AddToBookCopy.byTagging
+        return SearchPickerOption(
+            id: reading.id, label: reading.name,
+            annotation: reading.archivedAt != nil ? "\(BookArchiveCopy.word) \u{00B7} \(road)" : road)
     }
 
     /// A pick: a book joins by membership, a gathering by tagging (R98).
