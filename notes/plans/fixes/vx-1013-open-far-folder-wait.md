@@ -306,6 +306,16 @@ this branch and round 2's re-review covers it.
   if word-shaped).
 - Same fences as batch 1: headless only, no stage, no canon edit, checkpoint protocol, public-copy wording.
 
+## BATCH 2 LIVE STATUS (the implementer's — round 1's fixes, then the VX-524 rider)
+
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight.*
+
+- PHASE A — DONE (this commit): the round-1 dispositions, each from this session's own read of the named code, under
+  THE LADDER ▸ ROUND 1 DISPOSITIONS below. NO fix built. Awaiting the round-1 reviewer's final call on each (relayed by
+  the orchestrator).
+- PHASE B — NOT-STARTED: the confirmed fixes with their pins (F-R1-1's gated-refresh pin red on this tree; F-R1-2 and
+  F-R1-4 not bug-class, no pin; F-R1-3 per the final call — this session proposes ticket-instead), then VX-524 pin-first.
+
 ## THE LADDER
 
 *(round 1: fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, zero framing — RUNNING 2026-11-25; its findings land below)*
@@ -418,6 +428,98 @@ reviewer named (a far folder PICKED — `BackupDestination.isSet` — that fails
 `.noFarFolder`'s whole listing; the per-open cache keeps whichever it saw); if the trace shows more than that one seam,
 it becomes its own ticket instead, and the finding's disposition says so. F-R1-5 asks no code change and lands in the
 sitting bundle below.
+
+### ROUND 1 DISPOSITIONS (batch 2 implementer)
+
+*Written 2026-11-25 by a fresh opus-implementer from its own read of the named code at `62347ecef` (no fix built yet —
+the cross-model flow: the round-1 reviewer makes the final call on each). F-R1-5 is routed to the sitting bundle and is
+not dispositioned here.*
+
+**F-R1-1 (MAJOR) — AGREE, with the reviewer's fix shape.** My trace, `ProtectionLobbyModel.swift` at this commit:
+`refresh()` (208–212) checks `!busy` and never sets it, then suspends on `refreshRoad()`. The bootstrap's road
+(`AppBootstrap.swift:617–619`) is `Task.detached { ProtectionOpenRoad.lobbyFacts(ctx) }`; `lobbyFacts` → `ctx.facts()` →
+the gatherer's FIRST statement `lister.catalog(read)` → `FarFolderWalk.catalog(over:)`, which reads `standing` once:
+`.unread` ⇒ `Catalog.build(container, unreadPlaces: [.farFolder])`. So a refresh begun before the walk lands carries a
+partial catalogue however long its custody listing then takes. While it is suspended, the bootstrap's watcher
+(`awaitTheFarLanding`, 593–600 — `await far.read()`, the identity check, `lobby.farWalkLanded()`) runs on the main
+actor: `farWalkLanded` (236–257) passes `!busy`, sets `farLandingTaken`, awaits the landing, and `take(full)`. When the
+refresh resumes, `take(partial)` (217–229) replaces `standing` whole — `take` copies Touch ID items forward but has no
+notion of listing width — and `rederive()` recomputes from the partial: `AssessRules.lobby`'s `mightOpen` is true on a
+partial listing (`Assess.swift:223`), so `noKeyFileAnywhere` goes nil (the banner and `offersStartNew` vanish), and
+`offeredTyped` loses any road only a far key file carried (`ProtectionOpenRoad.offeredTyped` reads `heldKeyFiles` →
+`facts.catalog`). `farLandingTaken` stops the landing from running again; the face stays regressed until the next
+`didBecomeActive` refresh (`StoreLockView.swift:71–77`), which reads the landed walk (`standing` never returns from
+`.read`) and heals it. The press roads are NOT affected (a press reads its own facts through the context, full once
+landed) — the loss is the face's: a passphrase field or rule 27's door that should be drawn is not.
+Two notes for the final call. (1) In production the window is narrow — the refresh's read must straddle the landing AND
+finish after the landing's own full read — so it is timing-dependent there; it is deterministic only under the pin's
+gate. I do not dispute the severity on that ground: the landing's facts are P-1013-1's whole point, and the loss is
+silent. (2) The phone shares the model (`MobileRoadFaces.swift:89–96` refreshes on `scenePhase == .active`) but cannot
+reach the race: a far folder is never picked on iOS (`BackupDestination.remember` throws there), so its walk is
+`.noFarFolder` and every listing is whole. The fix is shared and inert there.
+*Fix (the reviewer's shape, agreed):* `take(_:)` refuses to NARROW — a fresh read whose `facts.catalog.readsEveryPlace`
+is false never replaces a standing whose catalogue reads every place. It fires only in this race (a walk never goes
+back from landed to unread); non-launch lobbies always read whole, so every existing pin is untouched. (I considered a
+generation counter on `refresh()` instead; the width guard is narrower, needs no new state, and is the existing "a read
+that failed keeps the face" idiom.) *Pin (app, red on this tree):* a `ProtectionLobbyModel` test whose `refreshRoad`
+signals entry and then waits on a gate before answering the partial standing; the test starts `refresh()`, waits for
+the entry, runs `farWalkLanded()` (whose road answers `.lobby(full)` with a far key file's passphrase road, or a full
+listing proving rule 27), checks the face took the landing, opens the gate, awaits the refresh, and asserts the face
+KEPT the landed facts. Run headless in the VX-306 SwiftPM harness recipe, red-on-old by reverting the guard.
+
+**F-R1-2 (MINOR) — AGREE.** `git grep` over `App/`, `Sources/`, `Tests/` and `Tools/`: `containerOnly` and
+`catalog(scope:` appear only in their own declaration and in the header's sentence (`CatalogLister.swift:21, 37–55`).
+Every read takes `catalog()` (both roots) or `catalog(_ read: CatalogRead)`; the launch road's container-only listing
+is `CatalogRead.thisOpen` over `FarFolderWalk.catalog(over:)`, which marks the far folder unread itself. So `Scope` is
+dead, and its `.containerOnly` arm would resolve the bookmark at each listing — the opposite of the walk's once-per-open
+cache, as the reviewer says. *Fix:* delete `Scope` and `catalog(scope:)`; `catalog()` keeps today's body
+(`Catalog.build(entries())`); the header's VX-1013 paragraph rewritten to name the shipped seam (`CatalogRead` +
+`FarFolderWalk`); an as-built line beneath D-1013-2 in this record (the design text itself left as written — it is the
+orchestrator's). Not bug-class, no pin owed; the proof is the Mac target building and the harness suites green.
+
+**F-R1-3 (MINOR) — AGREE ON THE MECHANISM; the in-ladder fix is NOT one seam ⇒ TICKET INSTEAD (the routing's own
+exit).** The mechanism holds as written: production's far folder is `BackupDestination.resolve().map { … }`
+(`ProtectionSystem.swift:119–121`), and `resolve()` answers nil both when nothing is picked (no bookmark data) and when
+the bookmark no longer resolves (`try?` over `URL(resolvingBookmarkData:)`, `BackupDestination.swift:115–128`).
+`FarFolderWalk.farFolder` caches that nil for the open (`resolved = .some(now)`, `CatalogLister.swift:210–218`), so
+`standing` is `.noFarFolder`, `catalog(over:)` builds a whole listing, and on a broken container `mightOpen` is false and
+rule 27 is claimed — over a key file that may sit on an unplugged drive. Pre-existing in kind (the old road's `entries()`
+had the same `places.farFolder().map` conflation per listing); widened in time by the per-open cache.
+Why the one seam the routing names does not close it alone — three things the trace shows:
+1. **The resolve layer cannot tell "unplugged" from "gone for good."** Both a removed volume and a deleted or renamed
+   folder whose bookmark no longer resolves land in the same `try?` nil. Marking every picked-but-unresolvable folder
+   UNREAD (`BackupDestination.isSet`) fixes the unplugged case and BREAKS the gone case: with the container broken,
+   `mightOpen` would stay true on every launch, so rule 27's face — and its only door, *Start a New Library*
+   (`offersStartNew` reads `face.noKeyFileAnywhere`) — would never be offered again. The lobby would draw both typed
+   fields (`ProtectionLobbyFace.derive`'s empty-roads arm), every press would refuse ("doesn't open"), the join would
+   find nothing (`theWalk()` returns nil without a folder), and nothing in the lobby reaches Settings ▸ Data Safety to
+   un-pick the folder. That trades an overclaim for a dead end. Which way the honest answer leans — rule 21's "if none
+   opens it, rule 27 says so" against rule 27's "every backup gone" — or whether a face should name the unreachable
+   folder ("your backup folder can't be reached…") is a product call, not a mechanical fix.
+2. **The listing layer has the same conflation:** a folder that resolves but whose listing errors (a refused scope
+   claim, a read error under the file provider) lands `.read([])` — `CatalogLister.list`'s `try?` over
+   `contentsOfDirectory` answers `[]` for any error, not only for a `Variorum/` folder that is truly absent — and reads
+   as "looked, nothing there." A second seam.
+3. **The cache never retries:** a drive plugged in mid-lobby is not seen until the next launch (the old road's refresh
+   re-resolved and would have seen it). A third seam, and batch 1's own widening.
+*Disposition:* no in-ladder code. Proposed ticket for the orchestrator to mint (Bug · Suspected · Castle & sync · Low —
+the harm is bounded: *Start a New Library* sets the unopenable library aside whole into Previous Libraries, never
+deleting it), its one-liner: "A picked backup folder that can't be reached at launch reads as holding nothing, so the
+lobby may claim no key file exists while one sits on an unplugged drive." Options to carry: (a) unread when picked but
+unreachable, plus a face line naming the unreachable folder and rule 27's door still offered beside it; (b) today's
+reading kept, rule 27's face saying the backup folder was not reachable; (c) unread for a bounded number of launches,
+then today's reading. The listing-failure seam and the cache's no-retry ride the same ticket.
+
+**F-R1-4 (NIT) — AGREE.** `AppBootstrap.swift:642`'s "(a relock's lobby carries no far walk)" is false since piece 6:
+`lockOnNewRoad` (1514–1523) composes through `ProtectionRoadLock.lobbyContext`, which sets `ctx.far` and
+`farLandingTriesQuietRoads = false`, and lands through `finish(.roadLobby(…))` → `makeRoadLobby`, so 643's
+`ctx.far == nil ? nil : …` hands the relock's lobby a landing road. And `landTheFarWalk`'s "Over a context with no far
+walk it is a plain re-read" (`ProtectionOpenRoad.swift:472`) is inaccurate for that hypothetical: with `ctx.far` nil the
+read is `.everything`, so a catalogue holding far key files passes the `place == .farFolder` guard (478–481) and, with
+the flag's default true, tries the quiet roads. Unreachable today (the bootstrap hands no landing without a walk).
+*Fix:* the two comments corrected — 642 names both lobbies (the launch road's tries the quiet roads; a lock's only
+re-reads); 472 says a context with no walk reads every place and, unless it is a lock's, tries the quiet roads once
+more over any far key file, which is why the bootstrap wires a landing only where a walk exists. Comments only, no pin.
 
 ## HELD FOR HER SITTING (the away-run bundle)
 
