@@ -8,9 +8,10 @@
 //  8's `MobileRootView` + capture stack.
 //
 //  Both tab stacks stay ALIVE (opacity-switched) so each keeps its
-//  navigation state; the bottom bar (`MobileTabBar`, VM-52) renders on the
-//  tab ROOTS and on every pushed LIST, never inside a note (her LK-5 —
-//  "Roots and lists, not notes"). Pushed screens keep the system navigation
+//  navigation state; the bottom bar (`MobileTabBar`, VM-52) stands under the
+//  tab ROOTS and every pushed LIST, never inside a note (her LK-5 — "Roots and
+//  lists, not notes") — drawn ONCE by this shell over the band's foot since
+//  VM-253, so a swipe moves the pages and never the bar. Pushed screens keep the system navigation
 //  back door in minimal inline form (functional; the nav chrome's exact
 //  voice is look-track material, recorded PROVISIONAL — and VM-52's trace
 //  of each screen's top edge is P-47-20).
@@ -99,11 +100,14 @@ struct MobileShellView: View {
     var bootstrap: AppBootstrap?
 
     @State private var tab: MobileTab = MobileShellBand.home
-    @State private var shelfPath = NavigationPath()
-    @State private var libraryPath = NavigationPath()
+    /// Each stack's screens, TYPED (VM-253): the shell reads the visible stack's
+    /// top screen to know whether the one bar stands (`MobileTabBarPlace`) — at
+    /// the push itself, never a frame later. Every screen is a `MobileRoute`.
+    @State private var shelfPath: [MobileRoute] = []
+    @State private var libraryPath: [MobileRoute] = []
     /// The starred page's own stack (batch 10) — a starred row opens a note
     /// or a book, and a root surface that pushes needs somewhere to push.
-    @State private var starredPath = NavigationPath()
+    @State private var starredPath: [MobileRoute] = []
     /// The live band drag, in points, in the NAMED coordinate space
     /// (`MobileShellBand.coordinateSpace` — the 13e jitter rider). Zero
     /// whenever no page drag is in flight.
@@ -168,12 +172,12 @@ struct MobileShellView: View {
     /// a root and (VM-52) a pushed list (measured on `MobileTabBar`, never
     /// assumed: umbrella VM-47 owns the bar's size).
     @State private var tabBarHeight: CGFloat = 0
-    /// VM-47 (the VM-55 re-land, meeting 2) — the bars a pushed LIST is
-    /// showing now, per stack (VM-52 gives each list its own bar; a note
-    /// pushed over a list covers it, the Versions reader leaves its listing's).
-    /// Counted by the list bars' own appear and disappear, so the one line
-    /// clears a bar wherever one is on screen — `barOnScreen`.
-    @State private var listBarsShowing: [MobileTab: Int] = [:]
+    /// VM-253 — the Versions LISTINGS showing now, per stack: the one screen
+    /// whose route cannot say whether it stands over the bar (its listing does,
+    /// a moment's reader does not). Counted by the listing's reserved place
+    /// appearing and leaving, read by `barOnScreen`. (VM-47's count of every
+    /// list's own bar retired with those copies.)
+    @State private var versionsListingsShowing: [MobileTab: Int] = [:]
     /// VM-47 (the walk's W-A1, redone) — each page's declared edge grounds, for
     /// the strips the shell paints beyond the band (`MobileEdgeGrounds.swift`).
     @State private var edgeGrounds = MobileEdgeGroundsBoard()
@@ -250,7 +254,7 @@ struct MobileShellView: View {
                             stars: starsModel, tokens: tokens,
                             wingName: MobileWingTitle.name(of: wings),
                             onWingDoor: { wingDoor.open() },
-                            tabBar: { tabBar },
+                            tabBar: { barSpace },
                             onOpen: { starredPath.append($0) })
                     }
                 }
@@ -261,7 +265,7 @@ struct MobileShellView: View {
                             quickNote: router.quickNote, tokens: tokens,
                             wingName: MobileWingTitle.name(of: wings),
                             onWingDoor: { wingDoor.open() },
-                            tabBar: { tabBar },
+                            tabBar: { barSpace },
                             onOpenBook: { id in
                                 leavingShelf { shelfPath.append(MobileRoute.book(id)) }
                             },
@@ -288,7 +292,7 @@ struct MobileShellView: View {
                             tokens: tokens,
                             wingName: MobileWingTitle.name(of: wings),
                             onWingDoor: { wingDoor.open() },
-                            tabBar: { tabBar },
+                            tabBar: { barSpace },
                             onOpen: { libraryPath.append($0) },
                             onOpenTrash: { libraryPath.append(MobileRoute.trash) },
                             onOpenArchive: { libraryPath.append(MobileRoute.archive) },
@@ -297,6 +301,17 @@ struct MobileShellView: View {
                 }
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
+            // **VM-253 — THE ONE BAR, OUTSIDE THE PAGES.** Her words: "the bar
+            // should stay still and just the highlighted pill should change."
+            // Laid over the band's foot, where every root and pushed list keeps
+            // its place (`barSpace`), so the band's offset moves the pages under
+            // it and never the bar; only `current` — the chip — follows `tab`.
+            // Inside the band's frame (it rides above a keyboard exactly as the
+            // pages' feet do) and before its clip (drawn exactly as a page's
+            // copy was).
+            .overlay(alignment: .bottom) {
+                if barOnScreen { tabBar }
+            }
             // Neighbours sit exactly one screen away, so nothing but the
             // current page can draw — and the clip says so rather than
             // relying on the window's own edge to hide them.
@@ -470,14 +485,25 @@ struct MobileShellView: View {
         }
     }
 
-    /// **A bar is on screen** (the VM-55 re-land, meeting 2): a root (every
-    /// root draws the bar at its foot — the visible stack at its root is
-    /// `pagingAllowed`), or a pushed list on the visible stack wearing its own
-    /// (VM-52's destination builder — `listBar`). Inside a note, on Read, the
-    /// Versions reader and Protection there is none, and the line keeps to the
-    /// safe area's foot.
+    /// **The one bar stands** (VM-253; the VM-55 re-land's meeting 2 for the
+    /// line's lift): the visible stack's top screen is a root or a pushed list
+    /// (`MobileTabBarPlace` — read from the route at the push itself, so a push
+    /// from a root to a list never drops the bar for a frame), or Versions while
+    /// its listing shows. Inside a note, on Read, the Versions reader and
+    /// Protection there is none, and the line keeps to the safe area's foot.
     private var barOnScreen: Bool {
-        pagingAllowed || (listBarsShowing[tab] ?? 0) > 0
+        MobileTabBarPlace.stands(
+            over: path(of: tab).last,
+            versionsListingShowing: (versionsListingsShowing[tab] ?? 0) > 0)
+    }
+
+    /// One stack's screens, by its identity.
+    private func path(of owner: MobileTab) -> [MobileRoute] {
+        switch owner {
+        case .starred: starredPath
+        case .shelf: shelfPath
+        case .library: libraryPath
+        }
     }
 
     /// The page drag. The latch is taken ONCE per gesture and honoured for
@@ -559,7 +585,7 @@ struct MobileShellView: View {
     /// the other tab shows, so liveness registration must carry the
     /// owning stack, never `tab`'s current value).
     private func stack<Root: View>(
-        path: Binding<NavigationPath>, owner: MobileTab, @ViewBuilder root: () -> Root
+        path: Binding<[MobileRoute]>, owner: MobileTab, @ViewBuilder root: () -> Root
     ) -> some View {
         NavigationStack(path: path) {
             root()
@@ -592,8 +618,9 @@ struct MobileShellView: View {
                 // PR4: the book went — never leave a contents list standing
                 // on a tombstone.
                 onDeleted: { pop(in: owner) })
-                // VM-52: a LIST — the bar rides its foot.
-                .safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }
+                // VM-52: a LIST — the bar stands at its foot (VM-253: the list
+                // keeps the place; the shell draws the one bar over it).
+                .safeAreaInset(edge: .bottom, spacing: 0) { barSpace }
         case .bookRead(let readingID):
             MobileReadView(
                 session: session, readingID: readingID, tokens: tokens,
@@ -614,21 +641,22 @@ struct MobileShellView: View {
             MobileTrashView(
                 model: trashModel, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) })
-                .safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }  // VM-52: a list
+                .safeAreaInset(edge: .bottom, spacing: 0) { barSpace }  // VM-52: a list
         case .archive:
             MobileArchiveView(
                 model: archiveModel, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) })
-                .safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }  // VM-52: a list
+                .safeAreaInset(edge: .bottom, spacing: 0) { barSpace }  // VM-52: a list
         case .versions(let postID):
             // Built per push: a note's moments are that note's, and this
             // screen's whole lifetime is one visit (the read is the note's
             // own version count — never corpus-shaped).
-            // VM-52: the bar rides the LISTING (a list) and leaves while a
-            // moment's words are read (the reader is her words, not a list).
+            // VM-52: the bar stands over the LISTING (a list) and leaves while a
+            // moment's words are read (the reader is her words, not a list) —
+            // the listing keeps the place and says it is showing (VM-253).
             MobileVersionsScreen(
                 session: session, postID: postID, tokens: tokens,
-                listingBar: AnyView(listBar(owner)))
+                listingBar: AnyView(versionsListingSpace(owner)))
         case .protection:
             // VM-52: NO bar here (PROVISIONAL P-47-18) — not a root, not a
             // list, and while new words are held on screen it gives no way off
@@ -663,7 +691,7 @@ struct MobileShellView: View {
         guard let protection = bootstrap?.protection, Self.adoptsProtectionRequest(protection) else { return }
         settingsPresented = false
         if tab != .shelf { selectPage(.shelf) }
-        shelfPath = NavigationPath([MobileRoute.protection])
+        shelfPath = [.protection]
     }
 
     /// The adoption rule, pinnable: an ask newer than the last adopted one is adopted ONCE (and marked so); every other
@@ -719,9 +747,11 @@ struct MobileShellView: View {
 
     /// **The bottom bar** (VM-52, her LK-5 — "Words on a chip"): Starred ·
     /// Bookcase · Library, the current one on a chip, 56 pt targets — the
-    /// face is `MobileTabBar`. Each root draws it at its foot and the
-    /// destination builder gives it to every pushed LIST, so a note pushed
-    /// over a list covers it ("Roots and lists, not notes").
+    /// face is `MobileTabBar`. **Drawn ONCE, here, over the band's foot**
+    /// (VM-253 — `body`'s overlay), wherever the visible stack's top screen is a
+    /// root or a pushed list (`barOnScreen`); each of those pages only keeps
+    /// its place (`barSpace`). A note pushed over a list has none ("Roots and
+    /// lists, not notes").
     ///
     /// **It IS the band's index** (batch 10): its doors are in
     /// `MobileShellBand.pages` order, so what the bar shows and what a swipe
@@ -732,18 +762,25 @@ struct MobileShellView: View {
             // VM-61: the message line sits above the bar's doors — measured on
             // the bar itself (re-attached here at the VM-55 re-land: VM-55's
             // measurement rode the old `tabBar` body, which `MobileTabBar`
-            // replaced). Every copy of the bar is one height.
+            // replaced).
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabBarHeight = $0 }
     }
 
-    /// **A pushed list's bar** — the bar, counted while it shows (it appears
-    /// with its list and leaves when a note is pushed over the list, the list is
-    /// popped, or the Versions reader replaces its listing), so `barOnScreen`
-    /// knows the one line has a bar to clear on this stack.
-    private func listBar(_ owner: MobileTab) -> some View {
-        tabBar
-            .onAppear { listBarsShowing[owner, default: 0] += 1 }
-            .onDisappear { listBarsShowing[owner, default: 0] -= 1 }
+    /// **The bar's place at a page's foot** (VM-253): each root and pushed list
+    /// keeps it (`MobileTabBarSpace` — the bar itself, never drawn, heard or
+    /// touched), so its layout is what it was when it drew its own copy and the
+    /// one bar above covers exactly that place.
+    private var barSpace: some View {
+        MobileTabBarSpace(current: tab, tokens: tokens)
+    }
+
+    /// **The Versions listing's place** — the bar's place, counted while it
+    /// shows (it leaves when a moment's reader replaces the listing, and with the
+    /// screen), so `barOnScreen` knows the listing stands over the bar.
+    private func versionsListingSpace(_ owner: MobileTab) -> some View {
+        barSpace
+            .onAppear { versionsListingsShowing[owner, default: 0] += 1 }
+            .onDisappear { versionsListingsShowing[owner, default: 0] -= 1 }
     }
 
     /// **A TAB TAP RETURNS TO THAT ROOT** (VM-52 — the ticket's "changing
@@ -778,9 +815,9 @@ struct MobileShellView: View {
         transaction.disablesAnimations = !animated
         withTransaction(transaction) {
             switch owner {
-            case .starred: if !starredPath.isEmpty { starredPath = NavigationPath() }
-            case .shelf: if !shelfPath.isEmpty { shelfPath = NavigationPath() }
-            case .library: if !libraryPath.isEmpty { libraryPath = NavigationPath() }
+            case .starred: if !starredPath.isEmpty { starredPath = [] }
+            case .shelf: if !shelfPath.isEmpty { shelfPath = [] }
+            case .library: if !libraryPath.isEmpty { libraryPath = [] }
             }
         }
     }

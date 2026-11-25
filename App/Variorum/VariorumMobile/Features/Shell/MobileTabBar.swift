@@ -34,11 +34,18 @@
 //  (`MobileTabBarMetrics.chipSide`) and pinned over every width, voice and
 //  size the phone ships.
 //
-//  WHERE IT SHOWS is the shell's (`MobileShellView`): the roots draw it at
-//  their foot as before, and the shell's destination builder gives it to each
-//  pushed LIST (a book's contents, Trash, Archived, Versions' listing) — so a
-//  note pushed over a list covers it, and the bar is hidden inside a note by
-//  construction, never by a flag.
+//  WHERE IT SHOWS is the shell's (`MobileShellView`), and since VM-253 the
+//  shell DRAWS it, once, outside the paged band: her words, "the bar should
+//  stay still and just the highlighted pill should change." Before, each root
+//  drew its own copy at its foot and each root rides the band's offset, so a
+//  swipe slid one copy out and the next one in. Now every page that stands
+//  over the bar — the three roots and each pushed LIST (a book's contents,
+//  Trash, Archived, Versions' listing) — only RESERVES its place at its foot
+//  (`MobileTabBarSpace`: the bar itself, never drawn, heard or touched, so the
+//  page's layout is exactly what it was), and the shell lays the one bar over
+//  the band's foot wherever the visible stack's top screen is a root or a list
+//  (`MobileTabBarPlace`). Inside a note, on Read, Versions' reader and
+//  Protection there is none.
 //
 
 import SwiftUI
@@ -167,5 +174,40 @@ struct MobileTabBar: View {
             wordWidth: MobileTabBarMetrics.wordWidth(
                 rendered, voice: tokens.voice, at: typeSize.phoneCategory),
             cellWidth: width / CGFloat(MobileShellBand.pages.count))
+    }
+}
+
+/// **The bar's place at a page's foot** (VM-253). A root or a pushed list keeps
+/// the bar's height at its foot so its layout is exactly what it was when it drew
+/// its own copy — and the shell draws the ONE bar over that place, outside the
+/// band, so the pages move and the bar does not. It IS the bar (the same view, the
+/// same words and text size, so the same height by construction), never drawn,
+/// never heard by an assistive reader, never touched.
+struct MobileTabBarSpace: View {
+    let current: MobileTab
+    let tokens: VoiceTokens
+
+    var body: some View {
+        MobileTabBar(current: current, tokens: tokens, select: { _ in })
+            .hidden()
+            .accessibilityHidden(true)
+            .allowsHitTesting(false)
+    }
+}
+
+/// **Where the one bar stands** (VM-253; her LK-5, "Roots and lists, not notes").
+/// The visible stack's top screen decides: a root (nil) or a pushed LIST stands
+/// over the bar; a note, a book's Read page and Protection do not; Versions stands
+/// over it while its listing shows and not while a moment's words are read (the
+/// reader is her words, not a list — the screen reports which it shows).
+@MainActor
+enum MobileTabBarPlace {
+    static func stands(over top: MobileRoute?, versionsListingShowing: Bool) -> Bool {
+        guard let top else { return true }
+        switch top {
+        case .book, .trash, .archive: return true
+        case .versions: return versionsListingShowing
+        case .bookRead, .note, .protection: return false
+        }
     }
 }

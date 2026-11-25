@@ -184,8 +184,8 @@ struct MobileNavigationTests {
     /// RED-ON-OLD: with the pre-batch two-door bar the `Starred` activation
     /// returns false and the door is absent.
     @Test func theTabBarCarriesThreeDoorsAndEachOneMovesTheBand() async throws {
-        /// Every rendered copy of one door (each root wears its own tab bar,
-        /// and they all render the same `tab`), and whether they are selected.
+        /// Every rendered copy of one door (since VM-253, the shell's one bar),
+        /// and whether they are selected.
         func selection(
             _ surface: HostedSurface<MobileShellView>, _ label: String
         ) -> (copies: Int, allSelected: Bool, noneSelected: Bool) {
@@ -234,9 +234,11 @@ struct MobileNavigationTests {
                 #expect(selection(surface, "Library").allSelected)
                 #expect(selection(surface, "Starred").noneSelected)
 
-                // Every root wears the bar, so the doors come in threes —
-                // stated rather than left as a surprise for the next reader.
-                #expect(selection(surface, "Bookcase").copies == MobileShellBand.pages.count)
+                // MOVED by VM-253 (the VM-260 run): every root wore its own bar,
+                // so the doors came in threes — and each copy rode its page's
+                // slide. The shell now draws the ONE bar outside the band, so
+                // each door is drawn once (`MobileTabBarStaysStillTests`).
+                #expect(selection(surface, "Bookcase").copies == 1)
             }
         }
     }

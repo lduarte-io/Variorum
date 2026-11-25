@@ -25,9 +25,11 @@
 //    bar; the note, the Read page and Protection do not).
 //
 //  THE WALKER'S THREE PAGES (`MobileNavigationTests`' recorded fact): the
-//  harness walks raw subviews, so the two offscreen roots — each wearing its
-//  own bar, a screen away — are in every walk. A door is counted here only
-//  when its frame is ON the window.
+//  harness walks raw subviews, so the two offscreen roots are in every walk.
+//  Until VM-253 each wore its own bar, a screen away; since then the shell
+//  draws the one bar outside the band and each root keeps only its place
+//  (`MobileTabBarStaysStillTests`). A door is still counted here only when its
+//  frame is ON the window.
 //
 
 import Foundation
@@ -462,9 +464,24 @@ struct MobileTabBarTests {
 
     // MARK: - The route rule (source)
 
-    /// The destination builder decides where the bar shows: each LIST route
-    /// carries it, and the note, the Read page and Protection do not (her
-    /// "Roots and lists, not notes"; P-47-18 for Protection).
+    /// **Where the one bar stands** (VM-253 MOVED the rule here from the
+    /// destination builder's per-list copies): a root and each LIST route stand
+    /// over it; Versions while its listing shows; the note, the Read page and
+    /// Protection never (her "Roots and lists, not notes"; P-47-18).
+    @Test func theOneBarStandsOverRootsAndListsOnly() {
+        #expect(MobileTabBarPlace.stands(over: nil, versionsListingShowing: false), "a root")
+        for list in [MobileRoute.book("b"), .trash, .archive] {
+            #expect(MobileTabBarPlace.stands(over: list, versionsListingShowing: false), "\(list) is a list")
+        }
+        #expect(MobileTabBarPlace.stands(over: .versions("p"), versionsListingShowing: true), "Versions' listing")
+        #expect(!MobileTabBarPlace.stands(over: .versions("p"), versionsListingShowing: false), "a moment's reader")
+        for bare in [MobileRoute.note("p", focus: false), .note("p", focus: true), .bookRead("b"), .protection] {
+            #expect(!MobileTabBarPlace.stands(over: bare, versionsListingShowing: true), "\(bare) carries no bar")
+        }
+    }
+
+    /// The destination builder keeps the bar's PLACE on each list (VM-253: the
+    /// shell draws the one bar over it), and on nothing else.
     @Test func theRouteRuleIsTheDestinationBuilders() throws {
         let shell = try MobileProtectionCompositionTests.code(
             "VariorumMobile/Features/Shell/MobileShellView.swift")
@@ -479,18 +496,20 @@ struct MobileTabBarTests {
         }
         #expect(Set(arms.keys) == ["book", "bookRead", "note", "trash", "archive", "versions", "protection"],
                 "the arms read: \(arms.keys.sorted())")
-        // MOVED at the VM-55 re-land (meeting 2): a list's bar is the same bar
-        // COUNTED while it shows (`listBar(owner)`), so the one message line
-        // knows to clear it — the rule pinned is unchanged: lists carry the
-        // bar, the note, the Read page and Protection carry none.
+        // MOVED at VM-253: a list keeps the bar's PLACE (`barSpace`) and the
+        // shell draws the one bar over it (`MobileTabBarPlace` decides where);
+        // the Versions listing's place is counted while it shows. The rule is
+        // unchanged: lists stand over the bar, the note, the Read page and
+        // Protection keep no place for one.
         for list in ["book", "trash", "archive"] {
-            #expect(arms[list]?.contains(".safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }") == true,
-                    "\(list) is a list and carries the bar")
+            #expect(arms[list]?.contains(".safeAreaInset(edge: .bottom, spacing: 0) { barSpace }") == true,
+                    "\(list) is a list and keeps the bar's place")
         }
-        #expect(arms["versions"]?.contains("listingBar: AnyView(listBar(owner))") == true)
+        #expect(arms["versions"]?.contains("listingBar: AnyView(versionsListingSpace(owner))") == true)
         for bare in ["bookRead", "note", "protection"] {
-            #expect(arms[bare]?.contains("tabBar") == false && arms[bare]?.contains("listBar") == false,
-                    "\(bare) carries no bar")
+            #expect(arms[bare]?.contains("barSpace") == false && arms[bare]?.contains("ListingSpace") == false
+                        && arms[bare]?.contains("tabBar") == false,
+                    "\(bare) keeps no place for a bar")
         }
     }
 }

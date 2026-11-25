@@ -52,6 +52,8 @@ struct MobileStarredView<TabBar: View>: View {
     /// VM-225 — the wing's name in the path line is the interim wing door
     /// (the shell opens the list); nil in harness use draws the plain line.
     var onWingDoor: (() -> Void)? = nil
+    /// The bar's place at the foot (VM-253: the shell hands its reserved place
+    /// and draws the one bar over it, outside the band; a harness hands nothing).
     @ViewBuilder let tabBar: () -> TabBar
     /// A row's destination, through the model's own route brain — the
     /// Library's callback shape.

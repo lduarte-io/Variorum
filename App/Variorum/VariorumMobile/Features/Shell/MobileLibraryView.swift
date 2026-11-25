@@ -54,6 +54,8 @@ struct MobileLibraryView<TabBar: View>: View {
     /// VM-225 — the wing's name in the path line is the interim wing door
     /// (the shell opens the list); nil in harness use draws the plain line.
     var onWingDoor: (() -> Void)? = nil
+    /// The bar's place at the foot (VM-253: the shell hands its reserved place
+    /// and draws the one bar over it, outside the band; a harness hands nothing).
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
     /// **The Two-rooms doors** (batch 6c — her QUESTIONS #84 ruling). Batch

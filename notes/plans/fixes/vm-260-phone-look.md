@@ -324,7 +324,7 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 |---|---|
 | 0. Preflight (CLAUDE.md + canon, this record's binding sections, the resiliency protocol, SurfaceContracts' phone bullets, the VM-47 FOR A LATER READER, the three tickets' bodies); the screens folder made gitignored | DONE (this commit) |
 | 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (this commit) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
-| 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | NOT-STARTED |
+| 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (this commit) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) PENDING |
 | 3. VM-256 — the trace; the pins on the pre-fix tree | NOT-STARTED |
 | 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | NOT-STARTED |
 | 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | NOT-STARTED |
@@ -354,3 +354,21 @@ red-on-old run is exactly this commit.
   Expected RED on old: "Bookcase" on the window twice, "Library" and "Starred" 160 pt off. PENDING.
 - `aPageChangeMovesOnlyTheChip` — a guard (green on both by construction: at rest the old copies coincide; the motion
   was mid-flight). PENDING.
+
+**The fix (piece 2).** `MobileShellView.body` lays the ONE bar over the band's foot (`.overlay(alignment: .bottom)` on
+the band's frame, before its clip — inside the frame, so it rides above a keyboard exactly as a page's foot did) while
+`barOnScreen`; only `current` (the chip) follows `tab`. Every root and pushed list keeps the bar's PLACE at its foot
+(`MobileTabBarSpace`: the bar itself, `.hidden()`, `.accessibilityHidden(true)`, untouchable — the same height by
+construction, so no page's layout moved). Where the bar stands is a pure rule over the visible stack's TOP screen
+(`MobileTabBarPlace.stands(over:versionsListingShowing:)`): a root or a list yes; Versions while its listing shows
+(the one route whose screen must say — `versionsListingSpace` counts it); a note, Read, Protection no. To read the top
+screen the three stacks became TYPED (`[MobileRoute]`, every screen already was one), so a push from a root to a list
+never drops the bar for a frame. VM-47's per-list bar count (`listBarsShowing`, `listBar`) retired with the copies.
+
+Moved pins: `MobileNavigationTests.theTabBarCarriesThreeDoorsAndEachOneMovesTheBand` (copies 3 → 1);
+`MobileTabBarTests.theRouteRuleIsTheDestinationBuilders` (the lists keep `barSpace`; Versions
+`versionsListingSpace(owner)`); new `MobileTabBarTests.theOneBarStandsOverRootsAndListsOnly` (the pure rule).
+
+**A consequence, recorded (no ruling needed unless she objects at the walk):** a push into a NOTE takes the bar away at
+the push (the route says so at once) — the page sliding out keeps its empty reserved place at its foot; before, its
+own copy slid out with it. A pop back to a root or list brings the bar back at the pop. Captured at the walk.
