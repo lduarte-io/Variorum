@@ -128,16 +128,28 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
    `take(_:)` seam byte-for-byte. `AppBootstrap`: one `FarFolderWalk` per `beginOpening`, handed to `routeAndOpen`'s
    context; `finish(.roadLobby)` awaits the begun walk and lands it on the lobby still standing. `searchIfOwed` keeps its
    own full walk (D-1013-4).
-4. IN-PROGRESS — app pins `App/Variorum/VariorumTests/Protection/OpenFarFolderWaitTests.swift` (8 tests; compiles —
-   `** TEST BUILD SUCCEEDED **` via `build-for-testing`, nothing run on the stage): the route pin (a quiet-road open,
-   ZERO far reads), the walk-count pin (lobby + landing + a refused and an opening press = ONE far read), the
-   press-equivalence pin (a passphrase only a far key file carries still opens, one read — the join), the rule-27
-   landing pin, the typed-roads landing pin, the P-1013-3 quiet-road landing pin, the custody-probe pin, and the
-   model's landing-waits-for-the-press pin. Over a planted road whose far folder COUNTS its claims
-   (`ProtectionFarFolder.accessed`). Remains: running them headless (the VX-306 SwiftPM harness recipe, in the
-   scratchpad — `swift test`, never `xcodebuild test`) green, then red-on-old by the behavioural revert (R1:
-   `CatalogLister.catalog(_:)` reads both roots for every state; R2: the probe reads `catalog()`), then the press pin's
-   mutation (the join dropped). PENDING.
+4. DONE — app pins `App/Variorum/VariorumTests/Protection/OpenFarFolderWaitTests.swift` (8 tests; the Mac test bundle
+   compiles — `** TEST BUILD SUCCEEDED **` via `build-for-testing`; nothing run on the stage), over a planted road whose
+   picked far folder COUNTS its claims (`ProtectionFarFolder.accessed`). RUN HEADLESS in the VX-306 SwiftPM harness recipe
+   (a scratchpad package — not durable — whose `Variorum` target symlinks every `App/Variorum/Shared/Protection/*.swift`
+   but `ProtectionBackupHook.swift`, plus `DeviceName`, `BackupDestination`, `LibraryOpenCopy`, `KeychainCustody` and one
+   stub file — `ProjectConfig` (unconfigured), `FirstRoundOutcome`, `SyncRowFace`, `SyncStatusRow`, `AuthTokens`,
+   `KeychainAuthStorage`, `AuthSession`; the app's concurrency settings; the worktree's core by path; its test target
+   symlinks `ProtectionTestSupport`, `ProtectionLobbyModelTests`, `ProtectionOpenRoadPlantedTests`, the new suite, and a
+   one-line `RoadWorld.RoadWorldError` stub; `swift test`, never `xcodebuild test`):
+   - GREEN: `✔ Test run with 33 tests in 3 suites passed` (the 8 new + the planted road's 9 + the lobby model's 16,
+     those two UNMODIFIED — parity).
+   - RED-ON-OLD by behavioural revert (R1 `CatalogLister.catalog(_:)` reads both roots for `.thisOpen` — the pre-fix
+     launch road; R2 `ProtectionSystem.touchIDCandidates` reads `catalog()`): `✘ Test run with 8 tests in 1 suite failed
+     … with 8 issues` — 7 of 8 red: the route pin (the old road read the far folder 3 times on the way to a quiet open,
+     planted custody — the production probe adds a walk per listing), the walk-count pin (8 claims, not 1), the press pin's
+     count (4 claims; its OPEN stays green — the preserved contract), the rule-27 landing pin (the old lobby claimed rule
+     27 before it drew), the typed-roads landing pin (the old lobby already offered the far file's passphrase road), the
+     P-1013-3 pin (the old route opened through the far Apple wrap at once), the probe pin (both arms). Green on both
+     sides, as designed: the model's landing-waits-for-the-press pin (a new seam, no old behaviour). Restored
+     (`git checkout --`), `git diff` clean, `✔ 33 tests passed`.
+   - MUTATIONS (each restored, `✔ 33 passed` after): the press's join dropped ⇒ the press pin RED alone (`refused` where
+     today opens); the landing's press guard dropped ⇒ the model pin RED alone (`landings == 0` fails).
 5. NOT-STARTED — the sweep table (D-1013-3) below.
 
 ## THE LADDER
