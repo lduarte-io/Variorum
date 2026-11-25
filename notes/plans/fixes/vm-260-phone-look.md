@@ -1182,9 +1182,15 @@ The hop is minor and visible: on the closing walk (R1-1's stop, R2-1's look) and
 
 ### Gate findings — fixes (G-1 · G-2 · G-3; implementer: Opus, a fresh session, 2026-11-25)
 
-**What this session did NOT do (kept current):** NO test has run — the stage is coordinated above this session, so
-every red and green below is PENDING the gate's re-run; no walk and no capture; no line in `Sources/`, `Sync/`,
-custody, `StatusCenter`, `VoiceTokens`, `Shared/` or the editor seam.
+**What this session did NOT do (kept current):** **G-1's SOURCE IS NOT FIXED — the element with the non-finite frame
+is NOT KNOWN until the re-run names it (the harness now names it and fails on it instead of crashing); its source fix
+is owed after that run.** **G-2 is fixed by the ink, not the scan** (the scan road was refused as weakening a check —
+the brief's own rule — and reverted; the faint for the book door returns only with a scan change, C-G2-1). **G-3's
+cure rests on one NOT KNOWN** (whether UIKit's keyboard layout guide reads the keyboard given back during a pop). NO
+test has run — the stage is coordinated above this session, so every red and green below is PENDING the gate's
+re-run; no walk and no capture; no line in `Sources/`, `Sync/`, custody, `StatusCenter`, `VoiceTokens`, `Shared/` or
+the editor seam (all changed app files are phone-target: `MobileKeyboardFloor.swift`, `MobileShellView.swift`,
+`MobileNoteTop.swift`, `MobileWriteView.swift` — the last a comment only).
 
 #### LIVE STATUS
 
@@ -1197,7 +1203,185 @@ custody, `StatusCenter`, `VoiceTokens`, `Shared/` or the editor seam.
 | 4. G-2 — the book door's bookless ink (the scan untouched) | DONE (this commit) — `MobileNoteTopDoors.bookInk`'s case 0 `tokens.phone.faint` → `tokens.phone.muted` (PROVISIONAL, call C-G2-1 below); the pin's doc comment brought current (assertions byte-unchanged); phone `build-for-testing` green with G-1 (log `App/Variorum/DerivedData/vm260-2r-g12-build.log`; no new warning in a changed file). The road first tried — the faint read moved onto the glyph's own line plus a scan clause reading an SF Symbol as a glyph — was REFUSED by the session's permission classifier as weakening a check, which is the brief's own rule; it was reverted whole, nothing of it committed |
 | 5a. G-3's in-process pin on the pre-fix code — `MobileKeyboardFloorShellTests.theBarRidesOnTheKeyboardTopHandedIn`'s third mount MOVED to G-3's rule (a band at REST under a reading SwiftUI never avoided rides to the keyboard's top — it was "a band at rest meets no floor", which is G-3's defect); **this commit is its red-on-old tree** (`vm260-g3-rol`, APFS clone of `vm260-2r`, `workspace-state.json` repointed ×4 from `vm260-2r/`, the original in the scratchpad) | DONE (this commit) — `TEST BUILD SUCCEEDED` (log `App/Variorum/DerivedData/vm260-g3-rol-build.log`); the run PENDING the gate |
 | 5. G-3's fix — the keyboard floor's at-rest gate made specific to a keyboard LEAVING (the memory `MobileKeyboardFloor.sawAvoidance`, the shell's `avoidanceSawKeyboard`), the probe re-reading the guide when it becomes active; the rule's pins moved with it and two added | DONE (this commit) — phone `build-for-testing` green (log `App/Variorum/DerivedData/vm260-2r-g3-build.log`; no warning in a changed file); the pins PENDING the gate |
-| 6. The trio rebuilt on the tip; READY-FOR-TESTS | — |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` at **code tip `4f05e7c02`** (logs `App/Variorum/DerivedData/vm260-2r-g3-build.log`, `vm260-2r-ui-g-build.log`, `vm260-2r-mac-g-build.log`; each bundle's `workspace-state.json` names its own folder); no warning in a changed file; the run list below |
+
+#### G-1 — the test host's crash (the harness hardened; the element's NAME is the re-run's)
+
+- **What the crash is, read off the report** (`VariorumMobile-2026-11-25-151141.ips`, symbolicated): `Swift runtime failure:
+  Double value cannot be converted to Int because it is either infinite or NaN` in `HostedSurface.frameDump`'s closure
+  (`MobileFilterRowGeometryTests.swift:136`, `Int(frame.minX)`), called from the test's line **505 — the FIRST mount, at
+  402 pt**, not the Display Zoom one (the gate's table says "at Display Zoom"; the 402 mount is where it trapped). So
+  some LABELLED element of the real `MobileLibraryView` at an ordinary width reports a non-finite `accessibilityFrame`
+  (`CGRect.null`'s +∞ origin, or a NaN). The same test printed every measured door's frame at both widths on the
+  pre-4a trees (`/tmp/vm260-win/P.log`, `/tmp/vm260-win2/P3.log`: `402 pt · real: All=20…44 … Sort: edited=363…381`),
+  so the element arrived with batch 4a's Library (the full top laid OVER the listing in a `ZStack`, the hidden spacer at
+  the lazy listing's head, the top's `offset`/`opacity`/`accessibilityHidden`/`zIndex` chain, the slim line).
+- **NOT KNOWN — which element.** Read statically, nothing in 4a's code computes a non-finite number (no division; every
+  value at rest is 0 or a measured height); one external fact narrows the class (a Sonnet lookup, forum and docs only:
+  UIKit's accessibility conversion "returns CGRectNull" when a frame cannot be converted — a view with no window is
+  the documented shape — and a SwiftUI `Menu` is a `UIButton` with no subviews whose activation point is (inf, inf)
+  while its frame stays valid; no source reports a SwiftUI node's frame going non-finite). Candidates, none assumed: a
+  UIKit-backed element of the full top (the search's `UITextField`, the sort `Menu`'s button) detached from the
+  window under the new effect chain; a SwiftUI node of the lazy listing (the hidden spacer at its head shifts every
+  row's index); a node of the slim line if it was ever built at the mount. **No speculative source fix** (the hallucination
+  guard): the harness now NAMES it.
+- **The harness, hardened IN ADDITION** (`14448364c`): `frameDump` never converts a non-finite frame — it prints
+  `label=NON-FINITE(…)` with the element described whole (`describe(_:)`: its class, label, value, identifier, traits,
+  its frame as stored, its view's `window` / `isHidden` / `alpha`, and three containers up); `nonFiniteFrames` lists
+  every labelled element that has one; and `theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` **FAILS** on any at
+  402 pt and at 320 pt, printing `PERF[sim] VM-260 G-1 non-finite at <width>: …`. So the crash cannot become a silent
+  pass: the re-run's red carries the name, and the source fix follows from it (owner: the fix after the re-run — the
+  orchestrator's to brief).
+- **Pin:** the crash itself, on the gate's tip `6afaf255a` (P.log, the crash report) is the red-on-old; the hardened
+  test on the tip is predicted to RUN (no crash, the ≈ 240 tests the restart lost all executed) and to be RED naming the
+  element — or GREEN if the frame does not recur (then the crash's element was transient, and the new expectation stays
+  as its guard).
+
+#### G-2 — the faint scan at `MobileNoteTop.swift:211` (the ink, the scan untouched)
+
+- **The scan's rule, read** (`MobileFaintCarriesNoWordsSourceTests.wordOffenders`): every read of the corrected faint
+  in the phone tree and the shared pages is an offender unless it is an edge or a fill, a field's placeholder, the box's
+  hint, a letterless `Text` glyph within four lines above it, or under a role of 17 pt or more; **a read whose role
+  cannot be found counts — the conservative side.** `bookInk(count:tokens:)`'s `case 0: tokens.phone.faint` is a
+  colour returned from a function: no glyph, no role near it, so it counts. Batch 4b had placed it "outside any door's
+  braces so the faint scan reads it as the glyph tone it is" — true of the DOOR scan (`offenders`, which asks
+  `insideADoor`), not of the word scan beside it.
+- **Does the faint reach words?** No: its one reader is `MobileWriteScreen.bookDoor`'s `Image(systemName: "book")`
+  — a glyph, the faint's own use by the sheet (§D, 3:1). So the scan cannot SEE a glyph that is there: it knows only
+  the letterless-`Text` glyph, and no code shape draws an SF Symbol as one (`Text(Image(…))` has no string literal; an
+  interpolated literal holds letters).
+- **The road refused:** the faint read moved onto the glyph's own modifier line plus a tight clause teaching both scans
+  an SF Symbol's own chain — the session's permission classifier REFUSED the scan edit as weakening a check, which is
+  the brief's own rule ("never weaken the scan"); reverted whole, nothing committed.
+- **The fix (`739925a82`, PROVISIONAL — call C-G2-1):** the bookless glyph draws in the **corrected muted**
+  (`bookInk`'s case 0) — still grey beside the held note's ink, now over 4.5:1 rather than ≈ 3.8:1, and the tree's faint
+  reads are exactly the faint's own uses again (the block list's ○, the box's dashed edge and hint, the fields'
+  placeholders). The pin's comment brought current; its assertions untouched.
+- **Pin:** the scan itself — RED at the gate's tip `6afaf255a` (`theFaintCarriesNoWordsUnderSeventeenPoints`, the one
+  site), predicted GREEN on the tip. Riders predicted green: `MobileFaintOnDoorsSourceTests` (the door scan),
+  `MobileNoteTopRowTests.theBookDoorIsGreyWhileTheNoteIsInNoBook` (bookless ≥ 2.95 — now ≈ 5–6; held ≈ 14; their gap
+  far over 2), `MobileFaintOnDoorsRenderedTests.theNoteTopsMarksClearTheirFloors` (the glyph floor 3:1).
+- **C-G2-1 (for her pass and QUESTIONS):** (a) the corrected muted — built; (b) the faint back, once the faint scans
+  learn an SF Symbol's own chain (a scan change — the orchestrator's or her call, never this session's); (c) another
+  grey the sheet names for disabled glyphs (none exists today).
+
+#### G-3 — the bar at rest under the search's keyboard on the after-a-note road
+
+- **The traced mechanism (from the gate's own evidence; the pin's red is the confirm):**
+  - **What the screen shows.** `sa5`/`ta5`: the bar at REST under the keyboard (its words blurred behind the bottom
+    row) — the band never lifted at all, not 52 short. The search field carries the system's edit callout ("Select ·
+    Select All · AutoFill"), which a tap draws on a field ALREADY holding the keyboard — and the walk's log has the
+    keyboard up BEFORE that tap: after the Trash's Back the bar's Bookcase was "NOT-HITTABLE … skipped" (t 106.6 s).
+    `g2` (part G, settled after Back): the same at-rest bar under a keyboard. The pop burst: `f01` — the lesson with NO
+    keyboard before Back; `f04` — mid-pop, the keyboard sliding in WITH the incoming Library page. `sa1b` — Back with
+    the editor's keyboard still up: the search takes it over and the bar rides right. `sd2` — a search keyboard raised
+    on a settled Library: right.
+  - **What the code does.** The search field held the keyboard when the walk pushed a screen over the Library (the
+    hit at a1; the Trash at a5, pressed while the search had the keyboard back from a5's Back). At the pop the framework
+    hands that field its focus back as the Library's page returns, and VM-47's rule lets it stand on a page that shows
+    (`MobileLibraryView.searchField`: "a Back from her hit — that restoration stands"). **A keyboard first raised that
+    way, during the pop, is not avoided by the band's SwiftUI keyboard avoidance** (its foot stays at rest — every
+    capture above), and **the F-1a-W1 floor could not answer it by construction:** `MobileKeyboardFloor.lift`
+    returned zero whenever the band's foot stood at rest, the gate built for a keyboard LEAVING (SwiftUI's avoidance
+    drops first, the probe's nil a turn later). A band SwiftUI never lifted looks exactly like that.
+  - **The candidates weighed:** the restore at Back — CONFIRMED as the road (the callout, the pre-tap keyboard, the
+    burst); the refusal raised in the note just before — RULED OUT as needed (`g2`'s road has none); the field already
+    holding text — not sufficient (`sa1b` held "swipe" and was right). What decides it is a keyboard ARRIVING during a
+    pop with none up at Back; the handover of a keyboard still up (`sa1b`) is avoided.
+  - **NOT KNOWN (UIKit/SwiftUI's private layers):** why SwiftUI's avoidance misses the keyboard raised mid-pop (the
+    burst shows it sliding in sideways with the page), and **whether UIKit's keyboard layout guide reads it** — the
+    probe's reading is the floor's whole input. If the guide reads it, the fix cures; if not, nothing in-process sees
+    that keyboard and the next road is the restore's own timing (the Library's search focus at a pop — VM-47's ruled
+    behaviour, a product call: STOP, hers or the orchestrator's).
+- **The pins:**
+  - **UI, the walk's road (`bdc8b821b` — THE RED-ON-OLD TREE; app code = the gate's tip `6afaf255a`; bundle
+    `vm260-g3-rol-ui`):** `MobileKeyboardRevealUITests.testTheBarRidesAboveTheSearchKeyboardOnTheAfterANoteRoad` — the
+    gate walk's part A in its own order (a1 the search typed and the lesson's hit opened with the field holding the
+    keyboard, a tap mid-note, Back with it up; a2/a3 Bookcase, Library; a4 a new note's copy door's refusal, Back; a5 a
+    new note's keyboard, Back with it up, the Trash and Back; the bar's Bookcase and Library pressed only where they can
+    be — the walk's own rule, never a centre tap that would land on the keys; the search tapped), then an isolating leg
+    (a settled Library's search tapped; the Trash pressed with that keyboard up; Back with none up). The oracle is the
+    keyboard-reveal class's (each bar door draws as at rest; its frame ends above the keys), judged at: **J0** (CONTROL —
+    the handover at a1's Back, `sa1b`), **J1** (the keyboard given back at the Trash's Back), **J2** + held (the walk's
+    `sa5`), **C** (CONTROL — the settled Library's search, `sd2`), **J3** (the isolated pop). `REVEAL` lines log the
+    keyboard count at every step (so the restore's timing is on the record), the bar's hittable count at J1/J3. Writes
+    two empty notes (the walk's two New Note presses).
+  - **In-process (`2fef0d3c5` — its red-on-old tree; bundle `vm260-g3-rol`):**
+    `MobileKeyboardFloorShellTests.theBarRidesOnTheKeyboardTopHandedIn`'s third mount MOVED to the new rule: a band at
+    REST under a held reading (one SwiftUI never avoided — the harness raises no keyboard) rides to the reading's top;
+    it was pinned as "a band at rest meets no floor", which is G-3's defect. Deterministic, independent of the
+    simulator's keyboard; it proves the floor answers the G-3 shape, not that the guide reads the real keyboard (only
+    the UI pin can).
+- **The fix (`4f05e7c02` = the code tip; the phone target only; no editor-seam line):**
+  - `MobileKeyboardFloor.lift(bandFoot:reading:noteShowing:avoidanceSawKeyboard:)` — the at-rest gate now holds only
+    once SwiftUI's avoidance had MET this keyboard (a keyboard leaving); a band SwiftUI never avoided gets its whole
+    shortfall like any other. `MobileKeyboardFloor.sawAvoidance(_:bandFoot:reading:)` — the memory: set once the
+    band's foot stands above rest while a reading stands, held for that reading's life (through the foot's return —
+    the leave), forgotten with it. `Sighting` — the two facts as one `Equatable` for the change observation.
+  - `MobileShellView`: `@State avoidanceSawKeyboard`, fed by `.onChange(of: sighting, initial: true)` inside the band's
+    reader (outside the body, every change of the foot or the reading); `lift` reads it.
+  - `MobileKeyboardFloorProbe`: re-reads the guide (`reread()`, a turn later) the moment it becomes active — a
+    keyboard that settled while a note still showed is handed on without waiting for a keyboard event (a belt for the
+    NOT KNOWN of when the stack's path empties at a pop).
+  - **The rule's pins** (`MobileKeyboardFloorRuleTests`, 8): every old case passes the memory its meaning (`true` where
+    SwiftUI had avoided; both for "no keyboard" and "a note"); `aBandAtRestMeetsNoFloor` keeps its name and its claim
+    (now: having met the keyboard); NEW `aKeyboardSwiftUINeverAvoidedLiftsTheBandFromRest` (840 → 539: 301, and at the
+    tolerance edge 299) and `theMemoryOfSwiftUIsAvoidanceLastsTheReading` (set only above rest, held through the leave,
+    forgotten with the reading).
+- **Calls (for the merge's QUESTIONS; none gates the core):**
+  - **C-G3-1 — the cure is the class guard's** (the floor that F-1a-W1 kept "as the class guard": SwiftUI's avoidance
+    short of UIKit's guide — here short by the whole keyboard). Alternatives: (b) the Library's search never takes its
+    keyboard back at a pop (VM-47's "that restoration stands" — a product behaviour, hers); (c) the restore deferred
+    until the pop has settled (a keyboard that rises after the page lands — a visible bounce, and a seam into the
+    navigation's transition).
+  - **C-G3-2 — the probe's re-read on activation** (above).
+  - **Residuals, for the walk's eye (not defects on the record):** a keyboard SwiftUI never avoids for a reason of its
+    own — a field in a sheet or an alert over a root, if SwiftUI's presenter avoidance stays out there (it usually
+    does not) — now lifts the band behind the sheet or the dim; and a given-back keyboard's leave lags one turn (the
+    probe's nil) before the band eases down over 0.25 s.
+
+#### Gate findings — READY-FOR-TESTS (the gate's re-run; nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`; `P(folder)` / `U(folder)` / the Mac paths as round 1's block;
+`-destination "platform=iOS Simulator,id=$UDID"`. **The code tip is `4f05e7c02`.** Red-on-old trees: G-3 UI
+`bdc8b821b` (`vm260-g3-rol-ui`), G-3 in-process `2fef0d3c5` (`vm260-g3-rol`); G-1 and G-2's red-on-old is the gate's own
+P on `6afaf255a` (the crash; the scan red).
+
+1. **G1-probe (first, seconds — so a source fix can be briefed before P whole if the window allows):** `P(vm260-2r)`,
+   `-only-testing:VariorumMobileTests/MobileFilterRowGeometryTests` — predicted: NO crash; the suite's 2 + 2 known
+   issues as ever; `theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` RED naming the element (read the `PERF[sim]
+   VM-260 G-1 non-finite at 402` line into G-1's block) — or GREEN if the frame does not recur.
+2. **R-G3u — red on old, in-process:** `P(vm260-g3-rol)`, `-only-testing:VariorumMobileTests/MobileKeyboardFloorShellTests`
+   — predicted **RED, 3 issues** (the third mount: each bar door ends at the band's resting foot, not at 600; its
+   count clause green); the first two mounts GREEN.
+3. **R-G3 — red on old, the walk's road:** `U(vm260-g3-rol-ui)`,
+   `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests/testTheBarRidesAboveTheSearchKeyboardOnTheAfterANoteRoad`,
+   the walk device (~4 min) — predicted **RED at J1, J2, J2 held and J3** (each: the three doors' ink differing under
+   the glass, and their frames ending at the bar's rest, below the keys' 583 — up to 6 issues a judgement, ≈ 24);
+   **J0 and C GREEN.** Read the `REVEAL` lines for the keyboard count at a1's Back, the Trash's Back and before the
+   search tap. **Rules written before the run:** GREEN at J1/J2/J3 (no keyboard given back, or the bar riding) ⇒ the
+   road is HOLLOW for this pin: record it, the fix `4f05e7c02` comes OFF (its rule pins with it) and G-3 is recorded as
+   not reproduced by a pin; J0 or C RED ⇒ a different mechanism — report, claim nothing; an INCONCLUSIVE stop (no
+   hit, no keyboard) ⇒ no verdict.
+4. **P — the whole phone target on the tip** (`vm260-2r`, `-only-testing:VariorumMobileTests`, one launch): predicted
+   main's 6 known issues and, at most, G-1's named red; **no crash** (every suite runs — ≈ 1,300 tests, not the 1,049 of
+   a restart); `MobileFaintCarriesNoWordsSourceTests` GREEN (G-2); the faint door scan, the book door's grey and the
+   note top's marks GREEN; `MobileKeyboardFloorRuleTests` 8 GREEN and `MobileKeyboardFloorShellTests` GREEN (G-3);
+   everything else as the gate predicted at `6afaf255a` (this session changed only the phone target: the floor and the
+   shell's wiring, the book door's ink, and tests).
+5. **U — the keyboard-reveal class, now FOUR tests** (`vm260-2r-ui`, built at `4f05e7c02`;
+   `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, the walk device, ~10 min): predicted ALL GREEN —
+   the three as before (on their roads SwiftUI avoids, so the floor's change is silent there), and the new one GREEN
+   at every judgement (the claim). **If the new one's J1/J2/J3 stay RED with the bar at REST while R-G3u's pin is green
+   on the tip, the guide does not read the given-back keyboard either: STOP** — the next road is C-G3-1 (b)/(c), a
+   product call.
+6. **M — FENCED as before** (her "done looking"): `vm260-2r-mac` rebuilt at `4f05e7c02` (the Mac compiles no file this
+   session changed), the M3 list predicted as before (`IndexTierMetricsTests`' 4 declared).
+7. **W retakes** (the Debug phone app from `vm260-2r`, both voices): the walk's part A a5 road (`sa5`/`ta5`) — the bar
+   ON the keyboard's glass after the Trash's Back and at the search's tap; the pop burst re-taken (the keyboard arriving
+   with the Library, the bar lifting to it as it settles); `se9` (the bookless book door in the muted — C-G2-1, her
+   eye); a search keyboard dismissed by a tab (the bar follows it down, no lag); for the eye, a field in a sheet or an
+   alert over a root (the residual above).
 
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
