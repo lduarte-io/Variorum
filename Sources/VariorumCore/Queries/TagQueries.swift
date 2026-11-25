@@ -241,13 +241,24 @@ extension Queries {
     /// is exact up to it and the saturated tags tie (the suggest brain keeps
     /// the path order among ties). The wing's live tags drive — the vocabulary,
     /// author-scale metadata (`allTags`' posture) — and each probes its own
-    /// applications through the tag's index (`CROSS JOIN`, the VX-654 lesson:
-    /// the application drives, the note is probed by its key), at most `cap`
-    /// of them. The first form drove from `post_tag` and filtered on the tag's
-    /// wing; Home's scope (`wing_id = '' OR … NOT IN …`) is unindexable, so it
-    /// SCANNED every live application in the store at each field's opening.
-    /// P1: ∝ the wing's vocabulary × `cap`, never the library's applications
-    /// (pinned: `TagUseCountsP1Tests`).
+    /// LIVE applications (`CROSS JOIN`, the VX-654 lesson: the application
+    /// drives, the note is probed by its key), at most `cap` of them. The
+    /// first form drove from `post_tag` and filtered on the tag's wing; Home's
+    /// scope (`wing_id = '' OR … NOT IN …`) is unindexable, so it SCANNED every
+    /// live application in the store at each field's opening.
+    ///
+    /// **`INDEXED BY uq_post_tag_live`** (the ladder's round 2, R2-1): the
+    /// probe names the LIVE partial index, which holds the live applications
+    /// alone. Left to itself the stats-free planner (the store never runs
+    /// `ANALYZE`) took `idx_post_tag_tag(tag_id)` — NOT partial — and walked
+    /// every application ever written for the tag, tombstones included (every
+    /// un-tag and every note deletion's cascade leaves one, and none is ever
+    /// cleaned), until it found `cap` live ones: ∝ the tag's whole history.
+    /// Legal because the probe's own `pt.deleted_at IS NULL` is the partial
+    /// index's predicate (`LibraryPaging` names its indexes the same way).
+    /// P1: ∝ the wing's vocabulary × `cap` LIVE applications, never the
+    /// library's applications and never their history (pinned:
+    /// `TagUseCountsP1Tests`).
     public static func tagUseCounts(
         _ db: Database, wingID: String, saturatingAt cap: Int = tagUseCountSaturation
     ) throws -> [String: Int] {
@@ -260,7 +271,7 @@ extension Queries {
             sql: """
                 SELECT t.id AS tag_id, (
                     SELECT COUNT(*) FROM (
-                        SELECT 1 FROM post_tag pt
+                        SELECT 1 FROM post_tag pt INDEXED BY uq_post_tag_live
                         CROSS JOIN container c ON c.id = pt.post_id AND c.deleted_at IS NULL
                         WHERE pt.tag_id = t.id AND pt.deleted_at IS NULL
                         LIMIT ?)
