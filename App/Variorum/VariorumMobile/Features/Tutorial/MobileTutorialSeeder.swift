@@ -288,14 +288,16 @@ enum MobileTutorialSeeder {
             // door the writing glyph, so the lesson names the pencil — as the
             // empty Library's line shows that glyph and says "New Note starts
             // one" — never the "+ new note" words the door no longer wears.
-            // Words a DRAFT for her pass.
+            // "New Note" is the door's spoken name (`MobileNewNoteDoor
+            // .spokenName`, main-actor state the nonisolated seeder cannot
+            // read — spelled here). Words a DRAFT for her pass.
             "The SHELF is home: your books at the top, starred books first "
             + "— this one is starred. The daily journal's row wears a "
             + "small \(MobileShelfFaces.todayDoorTitle) badge: tap it and "
             + "today's entry opens, made if the day hasn't started yet. "
             + "(With no journal on the shelf the same door stands as its own "
             + "row at the list's end, and pressing it makes one.) The pencil "
-            + "on the shelf's top line — \(MobileNewNoteDoor.spokenName) — "
+            + "on the shelf's top line — New Note — "
             + "starts a bookless note and drops you straight into writing; "
             + "+ new book, at the list's end, starts a fresh book — "
             + "hand-picked, a dated journal, or a smart book collecting by "
