@@ -1180,6 +1180,24 @@ The hop is minor and visible: on the closing walk (R1-1's stop, R2-1's look) and
 
 **Owed before the gate can pass:** G-1, G-2 and **G-3** to ONE fresh fix implementer (G-3: reproduce the walk's exact after-a-note sequence as a UI test FIRST — red on the current tip is the confirm; a road the pin can't make red is recorded, not fixed) (trace before fix; G-1: find the element with the non-finite frame — a real layout defect in 4a's top is fixed at its source, and the harness's `frameDump` made tolerant only IN ADDITION, never instead; G-2: read the scan's rule and the site, fix the ink or the scan's reading with the reason stated, never loosening the rule), then P re-run whole on the fixed tip.
 
+### Gate findings — fixes (G-1 · G-2 · G-3; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this session did NOT do (kept current):** NO test has run — the stage is coordinated above this session, so
+every red and green below is PENDING the gate's re-run; no walk and no capture; no line in `Sources/`, `Sync/`,
+custody, `StatusCenter`, `VoiceTokens`, `Shared/` or the editor seam.
+
+#### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, the merge gate's table and owed line, BATCH 4a, BATCH 4b, BATCH 3b, F-1a-W1, THE CONSOLIDATED WINDOW; the resiliency protocol) and the evidence (`/tmp/vm260-gate/P.log`, the crash report, `/tmp/vm260-gate/walk.log`, the gate captures and the coordinator's pop burst) | DONE (this commit) |
+| 1. G-3's pin — the walk's own after-a-note road as a UI test; its commit IS the red-on-old tree | — |
+| 2. G-3's red-on-old UI bundle (APFS clone of `vm260-2r-ui`) | — |
+| 3. G-1 — the harness names a non-finite frame (and fails on it) instead of crashing | — |
+| 4. G-2 — the scan's glyph reading and the book door's shape | — |
+| 5. G-3's fix | — |
+| 6. The trio rebuilt on the tip; READY-FOR-TESTS | — |
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
