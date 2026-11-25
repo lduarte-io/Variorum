@@ -2286,7 +2286,7 @@ copied into the tree.
 | 1. VM-281's pin — a UI test on the road that REPRODUCED (the 1a walk's order): `MobileKeyboardRevealUITests.testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` | DONE (this commit; compiled at piece 3) — the run PENDING the gate |
 | 2. F-her-1's pin (+ the behaviour-neutral rename of the picking door's word static, so the pin's text is byte-identical on both trees): `MobileBlockSelectionTests.whilePickingTheHeaderNeverDrawsOneWordOnTwoDoors`; `doneSelectingTitle` → `pickingExitTitle` (still "Done" here) | DONE (this commit — **this commit IS the red-on-old tree for BOTH pins**) — the run PENDING the gate |
 | 3. The red-on-old bundles at piece 2's commit: the UI bundle `vm260-3b-rol-ui` (APFS clone of `vm260-2r-ui`) and the unit bundle `vm260-3b-rol` (clone of `vm260-2r`), incremental, `nice -n 15` | DONE — both `TEST BUILD SUCCEEDED` at `b48b391e2` (logs `DerivedData/vm260-3b-rol{,-ui}-build.log`; the clones' "stale file outside the allowed root paths" warnings are the clone's own, harmless) |
-| 4. VM-281's fix — the editor drops its keyboard bar as it resigns and puts it back as it becomes first responder | NOT-STARTED |
+| 4. VM-281's fix — the editor drops its keyboard bar as it resigns and puts it back as it becomes first responder | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-2r-3b-build.log`); the pin's green PENDING the gate |
 | 5. F-her-1's fix — the picking door reads "Cancel" (PROVISIONAL P-260-3b-1) | NOT-STARTED |
 | 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-mac`, `vm260-2r-ui`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
 
@@ -2350,3 +2350,25 @@ model.isSelecting ? MobileBlockSelectionCopy.doneSelectingTitle /* "Done" */ : s
 picking mode the header renders two buttons with the one word "Done" (one ends picking, one closes the sheet). The code
 documents the collision itself — the toggle's explicit VoiceOver names exist because of it. Pre-existing (PR20), not
 this run's regression.
+
+### VM-281 — the fix (`MobileEditorTextView`, one MARK, two overrides and one stored property)
+
+- **`resignFirstResponder()`**: while this view still holds the keyboard and wears its bar, the bar leaves UIKit's input
+  views first — `inputAccessoryView = nil`, `reloadInputViews()` — then `super`. A resign that lands parks the SAME bar
+  (`parkedKeyboardBar`); a refused one keeps the keyboard, so the bar goes straight back (and reloads). A view that is
+  not first responder, or wears no bar, resigns exactly as before.
+- **`becomeFirstResponder()`**: the parked bar goes back before `super` (where UIKit reads the input views), unless a
+  voice switch installed a fresh one meanwhile (`applyVoiceChrome`, untouched — the fresh one wins); the park clears.
+- **Why the same bar, not a fresh `makeBar()`:** the controller holds its bar WEAKLY (`MobileKeyboardBarController.bar`)
+  and sizes an open strip from the live bar's width; parking keeps that bar alive and its width real, so the
+  "caller that tidied up first" hazard its own doc describes (an open strip rebuilt at 23 pt on a 402 pt phone) cannot
+  arise, and the keyboard-hide collapse still reaches the parked bar. No number of the bar's moves.
+- **Untouched:** `MobileKeyboardBar.swift`, the typed-Return model, crystallization, `BlockRangeIndex`, every text-input
+  road (the overrides touch only the input-views pair); `MobileKeyboardFloor` stays as the class guard (a floor that
+  lifts only on a shortfall — after the cure it should find none on this road).
+- **What it costs, for the reviewer and the walk (NOT KNOWN until a run):** every resign of the editor now reloads its
+  input views once before the keyboard leaves — Back from a note with its keyboard up, the interactive drag-down,
+  a hand-off to the title field, a comment, the takes card. The keyboard's going may show the bar leaving a beat
+  before the keys (a 52-pt band); under model (P) a reload inside a pop's resign could also bounce the keyboard. The
+  gate's closing walk owes two looks: Back from a note with the keyboard up (the keyboard leaves once, no bounce), and
+  the drag-down dismiss in a note (the bar's exit reads clean).

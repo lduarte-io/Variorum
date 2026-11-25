@@ -995,6 +995,52 @@ final class MobileEditorTextView: UITextView {
         }
     }
 
+    // MARK: The keyboard bar leaves with its keyboard (VM-281)
+
+    /// The bar set aside while this view does not hold the keyboard — the SAME
+    /// bar, put back as it becomes first responder (a voice switch in between
+    /// installs a fresh one, which wins).
+    private var parkedKeyboardBar: UIView?
+
+    /// **VM-281 — no keyboard UIKit takes down ever carries the bar.** After a
+    /// keyboard taken down while its first responder wore an input accessory —
+    /// this view's 52-pt bar; Back from a note with its keyboard up is the
+    /// road — the NEXT fresh keyboard was reported 52 pt short by SwiftUI's
+    /// avoidance and UIKit's keyboard layout guide alike, so the shell's band
+    /// and its bar stood under the keyboard's glass (iOS 26.2; the same shape
+    /// as FB20386257; the trace is VM-281 under BATCH 3b in
+    /// `notes/plans/fixes/vm-260-phone-look.md`). UIKit reads a responder's
+    /// input views only as it becomes first responder and at
+    /// `reloadInputViews()` while it is one, so the bar leaves UIKit's input
+    /// views HERE, while this view still holds the keyboard, and the keyboard
+    /// then goes without it. A refused resign keeps the keyboard, so the bar
+    /// goes straight back. Nothing else about the bar moves (its numbers,
+    /// acts and strip are `MobileKeyboardBar`'s).
+    override func resignFirstResponder() -> Bool {
+        guard isFirstResponder, let bar = inputAccessoryView else {
+            return super.resignFirstResponder()
+        }
+        inputAccessoryView = nil
+        reloadInputViews()
+        let resigned = super.resignFirstResponder()
+        if resigned {
+            parkedKeyboardBar = bar
+        } else {
+            inputAccessoryView = bar
+            reloadInputViews()
+        }
+        return resigned
+    }
+
+    /// The bar back, before UIKit reads this view's input views.
+    override func becomeFirstResponder() -> Bool {
+        if inputAccessoryView == nil, let parkedKeyboardBar {
+            inputAccessoryView = parkedKeyboardBar
+        }
+        parkedKeyboardBar = nil
+        return super.becomeFirstResponder()
+    }
+
     // MARK: The ⏎ door (13k K5/K8 on the phone — batch 2)
 
     /// **⏎ continues a list.** The keystroke itself is untouched:
