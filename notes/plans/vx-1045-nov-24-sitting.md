@@ -163,6 +163,15 @@ that."
 | "yes, close vx-460" | Done, with her word on the ticket. |
 | "you can contact them for that" | REQUEST sent to `nov24`; queued first. See "The release's step 0". |
 
+**The 1.5 notes.** Put to her as drafted on 2026-11-19; her answer, verbatim: "ok i want the release notes changed. I
+don't like this type of riddler update: This update makes two things say exactly what is true. I'd make it more
+simple. Maybe: Search had a bug where symbols made resujlts blank fixed. The daily journal had a bug where it didn't
+show the Private symbol fixed. that kind of simpler style. "what the tag answers" doesn't make that much sense. I want
+them rewritten in a more straightforward style of communication." The rewrite was put to her in chat (a one-line
+summary, then Fixed, New, and For connected AI tools, each fix as the bug and its fix). Her answer: "yeah that looks
+good". It is `ReleaseNotes-1.5.md` as committed on this branch. The label stays 1.5 (she was asked twice and changed
+nothing).
+
 **The wording pass** was not ruled: she sent no edit. The sentences listed in the two handoffs stay provisional, and
 canon keeps that word on the Trash line's wording.
 
