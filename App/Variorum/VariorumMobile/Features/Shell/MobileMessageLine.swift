@@ -32,8 +32,8 @@
 //  numbers, P-47-1): ONE line, 44 tall; the words SF 15 (`controlInline`,
 //  chrome — they follow the text size to xxxLarge and hold) — a refusal in the
 //  alarm ink every phone error slot wore, a removal and (VM-265) a direction in
-//  the corrected muted, an offer in ink; its act 15 semibold in the accent across a 44 pt hit area
-//  (`PhoneInlineActStyle`); at the gutter, on the room with the tab bar's
+//  the corrected muted, an offer in ink; its act 15 semibold in the accent
+//  across a 44 pt hit area (`PhoneInlineActStyle`); at the gutter, on the room with the tab bar's
 //  hairline, because a line that floats over content needs a ground to be read
 //  on — in the library's look (voice, palette and tint: the shell hands its
 //  settings road, `look`). Its words, its classes and its timing are VM-61's.

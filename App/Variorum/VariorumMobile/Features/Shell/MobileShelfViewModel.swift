@@ -251,7 +251,8 @@ final class MobileShelfViewModel {
             let outcome = try await MobileTodayDoor.open(session: session, day: day)
             lastReport = outcome.note
             // The entry opened but was NOT filed — a direction she must see
-            // (the Mac ⌘J door's own class: `status.refuse(note)`).
+            // (always drawn, as the Mac ⌘J door's `status.refuse(note)` is; on
+            // the phone in the muted ink, never the alarm — VM-265).
             MobileLine.say(outcome.note, as: .direction, session: session)
             return outcome.postID
         } catch {
