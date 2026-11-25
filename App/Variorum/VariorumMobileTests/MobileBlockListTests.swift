@@ -429,7 +429,7 @@ struct MobileBlockSelectionTests {
                 #expect(labels.contains(MobileBlockSelectionCopy.selectLabel))
                 // ABSENT: nothing about picking.
                 #expect(!labels.contains(MobileBlockSelectionCopy.deleteVerb(picked: 1)))
-                #expect(!labels.contains(MobileBlockSelectionCopy.doneSelectingLabel))
+                #expect(!labels.contains(MobileBlockSelectionCopy.pickingExitLabel))
                 #expect(surface.presentedAlert == nil)
             }
         }
@@ -497,12 +497,12 @@ struct MobileBlockSelectionTests {
                 #expect(list.selection.count == 1, "picked, over a populated sheet")
 
                 // The sheet's own dismiss — the door labelled plain "Done",
-                // NOT the "done picking" toggle beside it. Its label is the
+                // NOT the picking toggle beside it ("Cancel picking" since C-3b-1). Its label is the
                 // VOICED chrome word (Terminal lowercases), read from the
                 // same tokens the sheet was mounted with rather than typed.
                 let dismissDoor = VoiceTokens.terminalLight.chromeLabel("Done")
                 #expect(surface.visibleLabels.contains(
-                    MobileBlockSelectionCopy.doneSelectingLabel),
+                    MobileBlockSelectionCopy.pickingExitLabel),
                         "the toggle is distinct: \(surface.visibleLabels)")
                 #expect(surface.activate(dismissDoor),
                         "labels were \(surface.visibleLabels)")
@@ -550,7 +550,7 @@ struct MobileBlockSelectionTests {
                     let dismissWord = tokens.chromeLabel("Done")
                     let labels = surface.visibleLabels
                     #expect(labels.contains(dismissWord), "the sheet's own Done: \(labels)")
-                    #expect(labels.contains(MobileBlockSelectionCopy.doneSelectingLabel),
+                    #expect(labels.contains(MobileBlockSelectionCopy.pickingExitLabel),
                             "the picking door: \(labels)")
 
                     // THE FACT: the two doors draw two words.
@@ -560,7 +560,7 @@ struct MobileBlockSelectionTests {
                         “\(dismissWord)”: two doors, one word
                         """)
                     // And their VoiceOver names stay distinct.
-                    #expect(MobileBlockSelectionCopy.doneSelectingLabel.lowercased()
+                    #expect(MobileBlockSelectionCopy.pickingExitLabel.lowercased()
                         != dismissWord.lowercased())
                 }
             }
@@ -615,7 +615,7 @@ struct MobileBlockSelectionTests {
     /// leave by, the banner reading "Tap blocks to pick them." over nothing.
     ///
     /// **Red on old (behavioural revert):** drop `|| model.isSelecting` from
-    /// the chrome's condition and the Done-picking door is gone from the
+    /// the chrome's condition and the picking door is gone from the
     /// tree — the presence assertion reds.
     @Test func theDonePickingDoorSurvivesTheLastRowLeaving() async throws {
         try await withEditorWorld { session, _ in
@@ -641,9 +641,9 @@ struct MobileBlockSelectionTests {
 
                 // The way out is still on screen, and it works.
                 #expect(surface.visibleLabels
-                    .contains(MobileBlockSelectionCopy.doneSelectingLabel),
+                    .contains(MobileBlockSelectionCopy.pickingExitLabel),
                         "labels were \(surface.visibleLabels)")
-                #expect(surface.activate(MobileBlockSelectionCopy.doneSelectingLabel))
+                #expect(surface.activate(MobileBlockSelectionCopy.pickingExitLabel))
                 await surface.settle(40)
                 #expect(!list.isSelecting)
             }

@@ -202,12 +202,15 @@ nonisolated enum MobileBlockSelectionCopy {
     /// the other closing the sheet. iOS's own select mode leaves by "Cancel"
     /// where leaving drops the picks — which `exitSelection` does.
     static let pickingExitTitle = "Cancel"
-    /// The VoiceOver names, kept as they were. They were made DISTINCT from
-    /// the drawn words when this door and the sheet's dismiss both drew
-    /// "Done" (two identically-named doors in one tree is the shape a walk
-    /// cannot tell apart); the drawn words differ now too.
+    /// The VoiceOver names. They were made DISTINCT from the drawn words when
+    /// this door and the sheet's dismiss both drew "Done" (two identically-named
+    /// doors in one tree is the shape a walk cannot tell apart); the drawn words
+    /// differ now too. **The picking door's name holds the word it draws**
+    /// (C-3b-1, ruled at A-260-15 — label in name, WCAG 2.5.3: Voice Control
+    /// matches the VISIBLE word, so "tap Cancel" must reach the door that draws
+    /// "Cancel"): "Cancel picking", still distinct from the sheet's "Done".
     static let selectLabel = "Select blocks"
-    static let doneSelectingLabel = "Done picking"
+    static let pickingExitLabel = "Cancel picking"
 
     /// The banner's line — the count, and nothing it cannot deliver.
     static func bannerLabel(picked: Int) -> String {
@@ -361,13 +364,12 @@ struct MobileBlockListSheet: View {
                     .buttonStyle(PhoneTextButtonStyle(tokens: tokens))
                     // An EXPLICIT label, made when this button and the
                     // sheet's dismiss both drew "Done" (F-her-1 parted the
-                    // drawn words; the names stay as they were). The
-                    // dismiss keeps its implicit label untouched — a
-                    // shipped door's VoiceOver name is not this batch's to
-                    // move (and pins ride it).
+                    // drawn words; C-3b-1 made the picking door's name hold
+                    // its drawn "Cancel"). The dismiss keeps its implicit
+                    // label untouched (pins ride it).
                     .accessibilityLabel(
                         model.isSelecting
-                            ? MobileBlockSelectionCopy.doneSelectingLabel
+                            ? MobileBlockSelectionCopy.pickingExitLabel
                             : MobileBlockSelectionCopy.selectLabel)
                 }
             }
