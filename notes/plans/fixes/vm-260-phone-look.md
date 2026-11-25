@@ -4,65 +4,24 @@
 Ticket VM-260 (team VM, project "Mobile — the catch-up & launch") · branch `vm-260-phone-look` ·
 worktree `~/dev/variorum-vm-260` · PR: — (opens at the ladder).
 
-## RESUME HERE (state at the 2026-11-25 ~04:0x compaction; her ask: "prepare for compaction … I'll compact you since you still have batches and a ladder")
+## RESUME HERE (rewritten 2026-11-25 ~14:3x at ladder round 2's R2-3; the night's earlier compaction state is in git history)
 
-**Where the run stands.** Batches 1a and 1b are BUILT: 1a's suites green, its UI test green on the walk device,
-its walk run and read — every stop PASS in both voices except **F-1a-W1 (MAJOR, OPEN)**, the bar under the
-Library-search keyboard; 1b is READY-FOR-TESTS awaiting its one window (A-260-7). Batch 2's implementer is LIVE
-in this worktree, headless (the coordinator's nice-mode was never formally lifted — keep `nice -n 15` on heavy
-jobs until nov24 says cleared). Batches 3 and 4 NOT STARTED. Ladder NOT STARTED. Away mode (THE AWAY RULING)
-and R-260-7 (the morning install) govern the night.
+**The state is the LIVE STATUS table below — read it first, then the sections a step needs.** In one paragraph:
+every batch is BUILT and adjudicated (1a, 1b, 2, 3, 3b, 4a, 4b; A-260-1…18); main merged through PR #32; the
+ladder ENDED at round 2 (Opus reviewers at her R-260-10; **VM-282** holds the owed Fable round); round 2's small
+fixes (R2-1, R2-5, R2-6) go to one implementer and the orchestrator's line-by-line check; every owed red-on-old
+leg has run RED as built. **Owed, in order:** round 2's fixes → the merge gate's SIMULATOR legs (the whole phone
+target on the final tip, the keyboard-reveal class, R2-1's red-on-old, the closing walk with its captures) →
+the gate's MAC legs, which wait on her "done looking" (the dev store is fenced for VX-1036's dress) → a fresh
+phone build for her judgment → closeout (canon deltas, QUESTIONS, the parity line, her checklist, the handoff
+rewritten). Her open items: R1-7 (does a page change close an opened reason card on a root — orchestrator's
+default: yes), the C-4b-1 frame-by-frame title ride, and the PROVISIONAL sets for her eye on the phone.
 
-**Owed at batch 2's boundary, in order:** (1) merge `origin/main` at `1a7b0d444` (PR #28, notes; it contains
-`5ca093319`, PR #27 — the run's FINAL gate legs must run on a tree containing #27); (2) the F-1a-W1 fix by
-batch 1a's implementer — ONE writer per tree, never two implementers at once; its re-evidence (a contract pin
-red on the current tree, the s9 capture re-taken, the keyboard-reveal UI test) folds into the next window;
-(3) batch 3 spawns (VM-247 · VM-254 — the Batch 3 section is the brief); (4) the VM-259 options drawn at batch
-2's corrected sizes (two or three local HTML mockups under `notes/plans/vm-260/`, committed, NEVER published as
-Artifacts) for her morning pick; batch 4 builds only after that pick.
-
-**The stage (nov24):** 1b's full window is queued after VX-1082's revert cycles and VX-1036's window; claim
-name `vm-260`; the full protocol is under "What binds every batch". The walk DEVICE is named `vm260-walk` —
-recover its UDID with `xcrun simctl list devices | grep vm260-walk`, NEVER commit the id; shut it down between
-windows; DELETE it at closeout (`xcrun simctl delete`) and say so to nov24. The walk WORKTREE is
-`~/dev/variorum-vm260-walk` (DETACHED at `19b31c4c3`): it holds the UNCOMMITTED throwaway driver
-`App/Variorum/VariorumMobileUITests/VM260WalkDriver1a.swift` (the 1b line-walk driver adapts it; the swipe-burst
-sync polls `/tmp/vm260-walk-go`) and `DerivedData/vm260-walk1a` — keep until closeout, then
-`git worktree remove --force` it. Captures: `notes/plans/vm-260-screens/batch-1a/` (gitignored, KEPT for her
-sitting; `s5-note-bar-gone…png` is batch 2's "before" at the note top; `swipe-burst/f04.png` is the mid-swipe
-money shot).
-
-**Session-local agent handles** (meaningful only inside this session's continuation; a FRESH session spawns
-narrow continuations briefed from this record instead): batch 2's implementer `a0ec19b54b0cfa201` (LIVE),
-batch 1a's `a04567e8a4ed418a1` (owes the F-1a-W1 fix), batch 1b's `a6eb5f3c3d1dca464` (done, pending window).
-
-**Then, in order:** the remaining windows via nov24 · the ladder (a FRESH `fable-reviewer` per round,
-`notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over the run's whole diff; cap five, a further round only
-while the last found a BLOCKER/MAJOR; the cross-model flow — the reviewer makes the final call, the implementer
-applies confirmed fixes red-on-old, the next fresh reviewer re-checks; a final round's fixes get the
-orchestrator's line-by-line read) · the run MERGE GATE on a tree containing PR #27 (the whole phone target in
-one launch read against main's known reds; the gated speed suite ALONE — a skip is never a pass; the Mac suites
-covering EVERY changed source file; the keyboard-reveal UI test; the closing walk) · the morning bundle and the
-handoff `notes/handoffs/vm-260-handoff.md` with R-260-7's INSTALL BLOCK FIRST (the device .app PRE-BUILT
-overnight, headless, no stage; the exact SHA named; the devicectl steps self-contained; the what-to-try-first
-list) · closeout per CLAUDE.md and the architect skill: canon deltas (AppSpec §12 — the phone's look
-per-device, VM-247 the pointer; SurfaceContracts — the phone-look bullets, the bar's keyboard line, the card,
-VM-255's top line, P-55-3's refusal arm and P-47-31/-36 supersessions; `notes/MobileSoul.md`);
-`notes/AppSpecRecord.md` dated entry; QUESTIONS at the merge — the #281 dispositions (what stands returns
-there), the #277 addendum, #280's P-71-1 retirement (R-260-5), the new PROVISIONALs (P-260-1a, C-275-1, the
-size/radii set, the card shape, the draft words and headlines); the MOBILE PARITY line; every ticket the effort
-FILED triaged (VM-279 so far); the in-flight row retired; worktrees removed, the walk device deleted, the
-branch deleted after the merge; `Tools/canon-size`; her tickets-filed checklist as the session's very last
-message.
-
-**The post-compaction kickoff (paste-ready):** *"You are the VM-260 run's orchestrator (architect shape,
-session vm-260), resuming after compaction. Before anything: re-read
-`notes/plans/fixes/vm-260-phone-look.md` — RESUME HERE and LIVE STATUS first, then the sections a step needs.
-The standing rules: you never implement (small ruled adjudication fixes only, never on the editor seam); one
-implementer at a time, `opus-implementer` per batch, fresh per batch; every `xcodebuild test` and walk only
-inside a GO'd stage window from nov24, claim `vm-260`; rule provisionally (her away ruling) and bundle
-her-hands items for the morning sitting; the morning install leads the handoff (R-260-7). Pick up at: the
-batch-2 hand-back (adjudicate its size/radii set), then the boundary order RESUME HERE names."*
+**The post-compaction kickoff (paste-ready):** *"You are the VM-260 run's orchestrator (architect shape, session
+vm-260), resuming after compaction. Re-read `notes/plans/fixes/vm-260-phone-look.md` in `~/dev/variorum-vm-260` —
+RESUME HERE and LIVE STATUS first. You never implement; one implementer at a time; every `xcodebuild test` and
+walk only inside a GO'd stage window from nov24, claim `vm-260`; the Mac legs wait on her 'done looking'. Pick up
+at the first owed step RESUME HERE names."*
 
 ## FOR A LATER READER
 
@@ -737,7 +696,7 @@ present):**
 | Batch 4b (the note's top, R-260-13/14) | BUILT 2026-11-25 (red-on-old `4be933b0e` in `vm260-4b-rol`, ~34 issues in 21 cases predicted; code tip `af449326a`; trio rebuilt); ADJUDICATED A-260-17 — one departure (the title FLIPS away instead of riding frame by frame: the fence), C-4b-1 hers after the phone. PENDING the gate |
 | Batch 4 (VM-259 + the note's top + R-260-11) | BOTH PICKS IN: VM-259 B, the slim bar (R-260-12); the note's top A as picked, ratified with no further checkpoint (R-260-13, R-260-14); the Bookcase count line goes (R-260-11). 4a then 4b after batch 3b and the main merge; her judgment is the phone install after 4b |
 | Her phone (R-260-7) | INSTALLED 2026-11-25 ~11:0x at her word (*"install the build on my phone now"*): the signed device build at code tip `78ed5b4bb` (`DerivedData/vm260-device`, Release-iphoneos), `devicectl` to her iPhone 17 Pro, same bundle id (her store carried over). Her assessment on the phone is the run's real close |
-| Ladder · gate · walk | LADDER ROUND 1 RUNNING 2026-11-25 (a fresh `opus-reviewer`, R-260-10; `notes/REVIEW_PROMPT.md` verbatim with {PHASE} filled by the run's locator and the record as the plan; over the whole diff at code tip `af449326a`). VM-282 holds the owed Fable round. The gate follows the last round, queued with nov24 behind VX-1036; ROUND 1 DONE (one MAJOR, R1-1; fixes to a fresh implementer). **THE GATE'S MAC LEGS ARE FENCED** (nov24, 2026-11-25 afternoon): the dev store is dressed for her look and fenced until her "done looking"; the Mac app-suite test host opens the dev store, so every Mac `xcodebuild test` leg (the source scans, the token pins) waits for her word. The simulator legs may run any time. The REQUEST names which legs.; **THE RED-ON-OLD WINDOW RAN (14:11–14:24): every owed red-on-old leg RED as built; R1-1 NOT hollow (its fix stands)**; ROUND 2 RUNNING. Owed: the tip legs + the closing walk (simulator), then the Mac legs at her word |
+| Ladder · gate · walk | **THE LADDER ENDED at round 2 (no BLOCKER/MAJOR)**; round 1's MAJOR (R1-1) fixed and NOT hollow (red on old); round 2's fixes (R2-1, R2-5, R2-6) to one implementer, then the orchestrator's line-by-line check; every owed red-on-old leg RED as built (14:11–14:24). Owed: the gate's simulator legs (whole phone target, keyboard-reveal class, R2-1's red-on-old, the closing walk), then the Mac legs at her "done looking" (the dev-store fence) |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
 
 ## THE LADDER — round 1 (2026-11-25; a fresh `opus-reviewer`, REVIEW_PROMPT verbatim, over the whole diff at code tip `af449326a`)
@@ -754,7 +713,7 @@ Opus implements): the orchestrator arbitrates against the spec.** One MAJOR, so 
 | R1-3 | MINOR — the guide's lesson still says "+ new note" for the Bookcase's top-line door, which VM-255 made the writing glyph (`MobileTutorialSeeder.swift:292`) | **ACCEPTED — FIX** (words DRAFT for her pass): name the pencil glyph, as the empty-Library line does |
 | R1-4 | MINOR — the lens state no longer reads in WORDS on the page (the chip drew the lens's name and "⚠" on a fallback; now a tint on the stack glyph, the words in the accessibility value and the popover row) | **ACCEPTED — RECORD, no code:** a consequence of her merge pick (R-260-13), so the closeout's "rulings reconciled" duty: into her capture bundle and QUESTIONS at the merge; walk stop 6 shows it |
 | R1-5 | MINOR — the keyboard floor stays with no road on which it was ever seen to act (its own pin's road hollow; the reproduced road's guide carried the stale 52 too); it costs a probe view, six observers, a shell body evaluation per keyboard show/hide, a test seam in the production init | **DEFERRED TO THE GATE, then decided:** if VM-281's walk-road pin is green on the tip, the floor guards a hypothetical class — a follow-up ticket (Debt) retires it or names and pins the sequence it guards; if VM-281 is red (model P), the floor's value is re-read with that evidence. Not churned before the evidence exists |
-| R1-6 | MINOR — the refusal-slot pattern copied 13 times, in two spellings (the triple vs String-only; a headline-less `lastError = Self.refusal(...)` beside `lastRefusal = refusalWords(...)`): F-0's drift class | **TICKET** (Debt, Low): one small phone helper holding the rule once at next touch (the Mac's `StatusForwarder` precedent). Not this merge — thirteen models' churn for no behavioral change |
+| R1-6 | MINOR — the refusal-slot pattern copied 13 times, in two spellings (the triple vs String-only; a headline-less `lastError = Self.refusal(...)` beside `lastRefusal = refusalWords(...)`): F-0's drift class | **TICKET — VM-283** (Debt, Low): one small phone helper holding the rule once at next touch (the Mac's `StatusForwarder` precedent). Not this merge — thirteen models' churn for no behavioral change |
 | R1-7 | MINOR — an OPENED reason card raised on a root stays up indefinitely (A-260-4(d) lists ✕, flick, leaving the note, a newer message — a root has no "leaving") | **HERS — product silence:** into her bundle and QUESTIONS; no code until she rules |
 | R1-8 | NIT — stale comments the step-down falsified (`MobileMessageLine.swift:32, 35` SF 15 / 15 semibold; `Shared/SyncStatusViews.swift:513` inline acts at 17; `MobileShellView.swift:228` the library's look) | **FIX** (comments only) |
 | R1-9 | NIT — "Terminal's prose stays two under" fails at the Larger step for the note title (Study 23 vs Terminal 20: three under) | **FIX THE CODE TO THE CLAIM:** round Terminal FROM Study's rounded size (Study − 2 after rounding), so the stated rule holds at every step; a pure pin over every step × role |
@@ -965,6 +924,29 @@ red-on-old tree is `96e07e2db`; the code tip is `8bbc18d87`.**
 - **W — the closing walk's added stop** (the Debug phone app from `vm260-2r`, both voices): a two-line note dragged into
   its room by a real thumb and released at the foot — the title stays and nothing jumps (the tip); for her eye, a long
   note's leave at its very foot.
+
+## THE LADDER — round 2 (2026-11-25; a fresh `opus-reviewer`, REVIEW_PROMPT verbatim, the whole diff after round 1's fixes and main's PR #32)
+
+**No BLOCKER, no MAJOR — THE LADDER ENDS at round 2** (her standing rule: a further round only while the last
+found one). The reviewer re-stated the scope honestly (Fable's classes, run on Opus under R-260-10; VM-282 holds
+the Fable round). Same-model round: the orchestrator arbitrates. **This is the final round, so its fixes get the
+orchestrator's line-by-line check against each finding** (CLAUDE.md), and their pins' red-on-old runs at the gate.
+
+| # | Finding (reviewer's severity) | Disposition |
+|---|---|---|
+| R2-1 | MINOR, SPECULATIVE — R1-1's SIBLING: closing the # tag strip shrinks the masthead while the title is gone; on a short page (reach > h + 8, and a two-row strip of height s > reach − 8) the same clamp ordering lands the offset ≤ 8, the title returns by itself and the page jumps to its top. Its hollow rule: hollow if R1-1's pin were green on old | **FIX.** The condition the reviewer set is settled the other way: R1-1's pin was RED on old in both voices (the red-on-old window), so the clamp ordering is real and this sibling's premise holds. Pin first (R1-1's mounted harness, reach ≈ 70 via `contentInset.bottom`, a two-row strip; title gone, offset at the foot; close the strip; three settles: title state stable, offset unchanged), red on the current tip; then ONE rule for every masthead change while the title is gone (the reviewer's: ignore the tracker's readings in the turn its own masthead height lands, or re-read after the text view's next layout), keeping R1-1's guard green |
+| R2-2 | MINOR — R1-2's PUSH half: opening a note drops the one bar at the append while the outgoing page slides away with its empty reserved place (~0.35 s), on the app's most frequent road | **WALK DECIDES**, with R1-2: the closing walk captures mid-push AND mid-pop; if either reads wrong, one later fix covers both directions |
+| R2-3 | MINOR — record hygiene: RESUME HERE and the handoff contradict LIVE STATUS; R1-6's ticket id unrecorded | **DONE by the orchestrator, this commit:** RESUME HERE replaced by a pointer to LIVE STATUS with the current state; the handoff bannered superseded until the closeout rewrites it; R1-6 = **VM-283** recorded |
+| R2-4 | NIT — the VM61 fence's bare `"isDirection"` would collide with the shared recovery brain's `answer.isDirection` if a Mac door ever read it | **RECORD, no change:** green today (no Mac source reads it); a collision would surface as a LOUD red on that future door's run, never silently — that run is the moment to narrow the spelling |
+| R2-5 | NIT — ten stale comments in R1-8's class the round-1 fix didn't reach (`MobileWing:128`, `MobileTrashView:17-21`, `MobileSettingsView:22-25`, `MobileAppearance:8-9`, `MobileWriteView:180-182`, `SharedPageStyle:322`, `AuthViews:200-201`, `MobileShelfView:425`, `MobileProtectionScreen:233`, `MobileProtectionDoors:72`) | **FIX** (comments only) |
+| R2-6 | NIT — the whole-point rule isn't applied on the Read page (`PhoneReadingModifier`), harmlessly (both forms built from one value) | **STATE THE EXCEPTION** in a comment beside the header's rule (P-260-3b: the Read page keeps its own table); no behaviour change |
+
+**Clean bill (the reviewer's):** round 1's fixes read line by line (R1-1's hoist byte-equivalent, the
+`.infinity` default the old rule, `titleHeight` exactly the viewport's growth; R1-9's table recomputed; R1-3 and
+R1-8); all seven review foci; A-260-17's focus (the scroll-authority setups hide no assertion; the real-use
+effect is the flip itself, her typing line lifting away from the keyboard, never under it); VM-281; VM-68's
+three tasks; the custody wiring whitespace-only; no commit trailers in 146 commits; no device ids or personal
+data in the record diff; no skips or known-issue wrappers added.
 
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 

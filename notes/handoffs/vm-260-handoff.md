@@ -1,3 +1,9 @@
+> **SUPERSEDED — this is the MORNING's handoff (2026-11-25), kept for the record.** The run moved on since: the
+> note's top, the slim tops, VM-281's fix and the ladder are all built, and her picks and rulings are in. The
+> current state is the run record's LIVE STATUS (`notes/plans/fixes/vm-260-phone-look.md`); the closeout rewrites
+> this file whole. The prebuilt phone app in `DerivedData/vm260-device` predates round 1's fixes (R1-1, R1-9) and
+> is rebuilt before her next install.
+
 # VM-260 — the morning handoff (2026-11-25; written ~06:4x overnight, brought current ~10:5x after the final evidence window)
 
 ## 1 · FIRST: the fresh build for your phone (R-260-7)
