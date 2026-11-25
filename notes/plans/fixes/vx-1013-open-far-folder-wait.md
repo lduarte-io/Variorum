@@ -826,6 +826,27 @@ dev-castle.env unused); signed out ("Sync off (dev store)"); the restore-hold ba
 pressed; the words band card showing, untouched. Nothing typed or filed. Zero instances after the quit by identity
 (both strict pgrep forms), Problem Reporter not running, zero new `Variorum-*.ips` since 01:44.
 
+
+### THE MERGE GATE (claim `vx1013-gate`, 2026-11-25 02:07–03:17, nov24's GO; the two owed whole-target windows): GREEN
+
+nov24 held the merge on the skill's merge rule — the selected 154-suite run is not a whole-target run, the diff touches
+`AppBootstrap` (the construction seam) and Core/`Shared` files the phone compiles (the VX-980 lesson) — and the hold was
+accepted without argument. On the tip's snapshot (`51fc90bff`, the gate worktree moved there; Mac build refreshed
+incrementally, `VariorumMobile` build-for-testing fresh):
+
+- **The WHOLE Mac target** (no -only-testing, test-without-building, 02:08→03:02): "Test run with 6450 tests in 1116
+  suites failed after 3240.532 seconds with 16 issues (including 14 known issues)" — the 14 the standing
+  withKnownIssue set; 46 skipped lines, the pre-existing gated/trace tests; EXACTLY ONE red test,
+  `SpellingDoorTests.aCheckStepsToTheNextMisspellingAndTurnsNothingOn` (write arm) — PRE-EXISTING: VX-953's documented
+  flaky class (one of main's two named flaky tests in the VM-64 merge-gate record), green RE-RUN ALONE ("5 tests in 1
+  suite passed after 0.378 seconds"), and this diff touches no spelling, editor or command code. The Mac leg GREEN at
+  main's baseline.
+- **The WHOLE phone target** (the coordinator's iOS 26.2 device, booted for the leg and shut down after): "Test run
+  with 1226 tests in 215 suites passed after 770.064 seconds with 6 known issues", zero failed — VM-24's zero-red
+  baseline exactly; 14 skipped lines, the standing gated set.
+- Machine state at the release: zero instances by both strict forms, Problem Reporter not running, zero new
+  `Variorum-*.ips` across the window. ~71 of the 100 claimed minutes used; no renew.
+
 ## HELD FOR HER SITTING (the away-run bundle)
 
 - P-1013-1 (the lobby may gain roads/rule 27's banner after it draws, when the deferred far walk lands) — PROVISIONAL, built.
