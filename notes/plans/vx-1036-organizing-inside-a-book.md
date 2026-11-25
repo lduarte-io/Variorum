@@ -502,6 +502,8 @@ The cut, approved (2026-11-25):
 | 13 | The tag pill's × centred | VX-1081 | RULED (R-1036-20) |
 | 14 | A list mode for the book | VX-1084 | RULED (R-1036-29, -38): a fifth mode, rows only; BL-1…BL-3 as drawn |
 
+| 15 | Main's copy of the handoff has a wrong sentence in its kickoff line | VX-1036's PR | FIXED ON THE BRANCH (`cde7ea279`); reaches main with this umbrella's merge — the run's plan lists it and the closeout checks main |
+
 *(Rows 1–2 are now T-1…T-6; row 8 is W-2′…W-10.)*
 
 **The cut (2026-11-25, R-1036-44):** three umbrellas — VX-1036 (rows 1, 2, 4, 5, 7, 10, 12, 13, 14) · VX-1085 (rows 3, 9, 11) · VX-1086 (row 8). The lanes umbrella is the largest and sits at the sizing guidance's cap; its plan says how it batches.

@@ -45,4 +45,8 @@ For VX-1036 (inside a book):
 
 > /architect-phase vx-1036 — you are taking over as architect/orchestrator from a session that reached its context seam. Read `notes/plans/vx-1036-orchestrator-handoff.md` first, then `notes/plans/vx-1036-organizing-inside-a-book.md` whole, in the worktree `~/dev/variorum-vx-1036`. The design is closed (§4f) and nothing is built. This umbrella is the book view: list its sub-issues on Linear for the roster. Write its execution plan first and bring me its batches and their evidence. Do not spawn an implementer before that plan is in the repo.
 
-For VX-1085 (lanes) or VX-1086 (wings), the same line with that id and without the worktree clause — each takes its own branch, worktree and in-flight row at kickoff and reads the design record from main.
+For VX-1085 (lanes) or VX-1086 (wings): a plain `/architect-phase vx-1085` or `/architect-phase vx-1086`. Each ticket's description names this handoff and the design record (§4f first); the session lists the umbrella's sub-issues, takes its own branch, worktree and in-flight row, and writes its own execution plan before the first spawn.
+
+## Owed by the VX-1036 run (her word, 2026-11-25: "add fixing that to the plan for vx-1036")
+
+- **Main's copy of this file has a wrong sentence in its kickoff line** ("The design is not closed … the design is closed"). The correction is on this branch (commit `cde7ea279`, made after PR #26 merged) and reaches main with this run's PR. The run's execution plan carries it as a line item, and its closeout checks that main's copy reads right. Nothing else on main is wrong: the handoff's body, the design record and the mockups merged as intended.
