@@ -2013,10 +2013,10 @@ steps); no `Sources/`, editor family or text-input path; no other batch's file.
 | Piece | State |
 |---|---|
 | T. The trace, from the window's own log (`/tmp/vm260-win2/P3.log`) | DONE (this commit) — below |
-| 1. The pins on the current tree (the red-on-old for this reconcile): the two forms agree at every step; every step a whole point; the face's row preview printed and compared with the SwiftUI form | NOT STARTED |
-| 2. The red-on-old bundle `DerivedData/vm260-3r-rol` (an APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT STARTED |
-| 3. The fix: a step's size is a whole point | NOT STARTED |
-| 4. `vm260-2r` rebuilt on the new tip; the re-evidence's run list | NOT STARTED |
+| 1. The pins on the current tree (the red-on-old for this reconcile): the two forms agree at every step; every step a whole point; the face's row preview printed and compared with the SwiftUI form | DONE (`defecf3a9` — **that commit IS the reconcile's red-on-old tree**) |
+| 2. The red-on-old bundle `DerivedData/vm260-3r-rol` (an APFS clone of `vm260-2r`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `defecf3a9` |
+| 3. The fix: a step's size is a whole point | DONE (`78ed5b4bb`) |
+| 4. `vm260-2r` rebuilt on the new tip; the re-evidence's run list | DONE (this commit) — `vm260-2r` and `vm260-2r-mac` rebuilt in place at `78ed5b4bb` (`TEST BUILD SUCCEEDED` each; incremental; `nice -n 15`); the run list below |
 
 #### The trace — H1, a deterministic size-path miss; H2 refuted
 
@@ -2047,3 +2047,53 @@ before it in the same test passed: the note's body at **18.0** in Iowan Old Styl
   passes through both forms unchanged at the default text size, so the two forms agree at every step, and the setting's
   numbers are the scale's own kind (whole points, as every size in the sheet). Away from the default text size the UIKit
   form keeps the pre-existing third-of-a-point gap VM-47 measured (not this batch's; unchanged).
+
+#### The pins (the reconcile's; all PENDING the merge gate)
+
+In `MobileTextSizeTests`, on the pre-fix tree `defecf3a9` (bundle `vm260-3r-rol`):
+- `everyStepIsAWholePoint` — every role that follows the text size, at every step, both voices, is a whole number of
+  points. **RED on the pre-fix tree: exactly 27 issues** (pure arithmetic — Study: note title and screen title at four
+  steps each, row preview at three; Terminal: note body and row title at three each, note title and screen title at
+  four each, row preview at two). Prints `PERF[sim] VM-254 fractional step sizes — 27: …`.
+- `theTwoFormsAgreeAtEveryStep` — at the default text size, `PhoneType.uiFont`'s size equals `PhoneType.pointSize`'s for
+  every step, voice and role. **RED on the pre-fix tree at the fractional sizes: 27 issues if UIKit snaps to a whole
+  point, 25 if to a half** (Study's note title at 17.5 and 22.5 would then agree). Prints `PERF[sim] VM-254 the two
+  forms at the default text size — N disagree: …` with each pair, which settles the grid. **This is the mechanism's
+  own pin**; a GREEN here on the pre-fix tree would refute H1 (then the 0.25 is something else — report it, do not
+  ship the fix on faith).
+- `theEditorFaceTakesTheStep` (MOVED at its line 145): the face's row preview at Larger equals the SwiftUI form's size
+  and is 16; prints `PERF[sim] VM-254 the face's row preview at Larger — UIKit …, SwiftUI …, the step's spec …`. **RED on
+  the pre-fix tree: 1 issue (UIKit ≠ 15.75) if UIKit read 16, 2 if it read 15.5.**
+
+On the tip `78ed5b4bb` (bundle `vm260-2r`): all three GREEN, and `theFiveStepsScaleHerWordsOnly` (MOVED to the rounded
+rule — its expected size is now `max(13, (table × step).rounded())`) GREEN. Unchanged and still green:
+`nothingIsEverBelowThirteenPointsAtAnyStep`, `aStepReachesHerWordsOnAMountedScreenAndNotTheChrome` (a row's title in
+Study is a whole point at every step already: 14 · 16 · 18 — its printed 19.33 / 22.0 / 24.67 line heights stand),
+`aStepChosenOnThePhoneRebasesAnOpenNote` (18), `MobilePhoneOwnLookTests.everyLookChoiceWritesNoSettingRowAndMovesTheFace`
+(18), `MobileHerWordsDefaultTests` (the default IS the table — no rounding reaches it).
+
+#### The fix (`78ed5b4bb`)
+
+`PhoneType.spec(_:voice:wordsScale:)`: `size = max(floorSize, (table.size * wordsScale).rounded())` (was without
+`.rounded()`); the pitch still moves with the size (`table.lineHeight × size / table.size`). The default (scale 1) is
+untouched — the table is returned as it stands. Docs: `PhoneType`'s header and `spec`, `MobileTextSize`'s.
+
+**P-260-3a, amended (the step values, Study / Terminal, at the system's default text size — Smaller · Small · Default ·
+Large · Larger):** note body 14 · 15 · 16 · 17 · 18 / 13 · 13 · 14 · 15 · 16; note title 18 · 19 · 20 · 21 · 23 / 16 · 17
+· 18 · 19 · 20; screen title 17 · 18 · 19 · 20 · 21 / 15 · 16 · 17 · 18 · 19; row title 14 · 15 · 16 · 17 · 18 / 13 · 13
+· 14 · 15 · 16; row preview 13 · 13 · 14 · 15 · 16 / 13 · 13 · 13 · 14 · 15. Where the floor meets a step two steps
+read the same (Terminal's body and row title at Smaller and Small; the row preview at the two smallest, and Terminal's
+at three) — the floor's own consequence, recorded. Halves round up (17.5 → 18, 22.5 → 23).
+
+#### Run list for the merge gate (nothing builds in the window; `nice -n 15`, incremental)
+
+- **R-b3r — red on the pre-fix tree** (`DerivedData/vm260-3r-rol`, tree `defecf3a9`):
+  `-only-testing:VariorumMobileTests/MobileTextSizeTests` — predicted RED: `everyStepIsAWholePoint` (27),
+  `theTwoFormsAgreeAtEveryStep` (27 or 25 — read its PERF line), `theEditorFaceTakesTheStep` (1 or 2); GREEN:
+  `theFiveStepsScaleHerWordsOnly` (the old rule, as it was), `nothingIsEverBelowThirteenPointsAtAnyStep`,
+  `aStepReachesHerWordsOnAMountedScreenAndNotTheChrome`, `aStepChosenOnThePhoneRebasesAnOpenNote`.
+- **The tip** (`DerivedData/vm260-2r`, code tip `78ed5b4bb`): the gate's whole phone target carries it — predicted green
+  but main's 6 known issues; `MobileTextSizeTests` all 7 green. The Mac legs (`DerivedData/vm260-2r-mac`, rebuilt at
+  the same tip — `PhoneType.swift` is shared and compiled there, one `.rounded()` and comments) predicted as M3: green
+  but `IndexTierMetricsTests`' 4 declared. The UI bundle is untouched by this reconcile (no default size moved: the
+  default is the table, unrounded and unchanged), so U3's green stands.
