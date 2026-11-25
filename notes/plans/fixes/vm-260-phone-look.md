@@ -2287,7 +2287,7 @@ copied into the tree.
 | 2. F-her-1's pin (+ the behaviour-neutral rename of the picking door's word static, so the pin's text is byte-identical on both trees): `MobileBlockSelectionTests.whilePickingTheHeaderNeverDrawsOneWordOnTwoDoors`; `doneSelectingTitle` → `pickingExitTitle` (still "Done" here) | DONE (this commit — **this commit IS the red-on-old tree for BOTH pins**) — the run PENDING the gate |
 | 3. The red-on-old bundles at piece 2's commit: the UI bundle `vm260-3b-rol-ui` (APFS clone of `vm260-2r-ui`) and the unit bundle `vm260-3b-rol` (clone of `vm260-2r`), incremental, `nice -n 15` | DONE — both `TEST BUILD SUCCEEDED` at `b48b391e2` (logs `DerivedData/vm260-3b-rol{,-ui}-build.log`; the clones' "stale file outside the allowed root paths" warnings are the clone's own, harmless) |
 | 4. VM-281's fix — the editor drops its keyboard bar as it resigns and puts it back as it becomes first responder | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-2r-3b-build.log`); the pin's green PENDING the gate |
-| 5. F-her-1's fix — the picking door reads "Cancel" (PROVISIONAL P-260-3b-1) | NOT-STARTED |
+| 5. F-her-1's fix — the picking door reads "Cancel" (PROVISIONAL P-260-3b-1) | DONE (this commit) — compiled at piece 6; the pin's green PENDING the gate |
 | 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-mac`, `vm260-2r-ui`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
 
 ### VM-281 — the traced mechanism (re-traced in this session; the F-1a-W1 trace re-read, not adopted on trust)
@@ -2372,3 +2372,19 @@ this run's regression.
   before the keys (a 52-pt band); under model (P) a reload inside a pop's resign could also bounce the keyboard. The
   gate's closing walk owes two looks: Back from a note with the keyboard up (the keyboard leaves once, no bounce), and
   the drag-down dismiss in a note (the bar's exit reads clean).
+
+### F-her-1 — the fix (`MobileBlockList.swift`; PROVISIONAL P-260-3b-1)
+
+`MobileBlockSelectionCopy.pickingExitTitle` = **"Cancel"** (it was "Done", as `doneSelectingTitle` — renamed in the pin's
+commit, behaviour-neutral, so the static's name does not lie and the pin's text is byte-identical on both trees). The
+door's act is unchanged (`exitSelection` — it ends picking AND drops the picks, which is what iOS's own select-mode
+"Cancel" says); the sheet's own Done is unchanged. The comments that named the collision are brought current.
+Alternatives (the plan's, for her pass): (b) the sheet's own Done hides while picking, so one Done ends picking and a
+second closes; (c) one Done that ends picking AND closes the sheet.
+
+**Call C-3b-1 — the VoiceOver names stay as they were** (the plan: "the VoiceOver names stay distinct as they are"): the
+picking door is still named "Done picking" while it draws "Cancel". Distinct from the dismiss's "Done", as before. The
+gap this leaves, recorded rather than silently decided: a door whose spoken name does not contain its drawn word is the
+label-in-name shape (WCAG 2.5.3) — a Voice Control user saying "tap Cancel" may not reach it. Alternative (b): name it
+"Cancel picking" (one static's value; the three existing pins drive it by the static, not the words). Hers or the
+orchestrator's; not gating.

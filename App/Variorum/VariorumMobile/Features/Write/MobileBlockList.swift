@@ -196,12 +196,16 @@ final class MobileBlockListModel {
 nonisolated enum MobileBlockSelectionCopy {
     static let selectTitle = "Select"
     /// The word the picking door wears WHILE she picks (the door that leaves
-    /// picking and drops the picks).
-    static let pickingExitTitle = "Done"
-    /// The VoiceOver names. They are DISTINCT from the rendered words on
-    /// purpose: while picking, this button and the sheet's dismiss both read
-    /// "Done", and two identically-named doors in one tree is the shape a
-    /// walk cannot tell apart.
+    /// picking and drops the picks). **"Cancel", not "Done"** (F-her-1, her
+    /// finding in the VM-260 run; PROVISIONAL P-260-3b-1): it stood beside the
+    /// sheet's own Done, two doors drawing one word, one ending picking and
+    /// the other closing the sheet. iOS's own select mode leaves by "Cancel"
+    /// where leaving drops the picks — which `exitSelection` does.
+    static let pickingExitTitle = "Cancel"
+    /// The VoiceOver names, kept as they were. They were made DISTINCT from
+    /// the drawn words when this door and the sheet's dismiss both drew
+    /// "Done" (two identically-named doors in one tree is the shape a walk
+    /// cannot tell apart); the drawn words differ now too.
     static let selectLabel = "Select blocks"
     static let doneSelectingLabel = "Done picking"
 
@@ -337,7 +341,8 @@ struct MobileBlockListSheet: View {
             ) {
                 // PR20's entry door: chrome, and only where there is a
                 // delete road to reach and blocks to pick (P-2). It swaps
-                // to "Done" while picking, which is also how she leaves.
+                // to "Cancel" while picking (F-her-1 — never the sheet's own
+                // "Done" beside it), which is also how she leaves.
                 // `|| model.isSelecting` is the missing-exit half (the fix
                 // wave, MINOR 1's rider): if every row leaves the note WHILE
                 // she is picking — a remote delete of the whole note's
@@ -354,9 +359,10 @@ struct MobileBlockListSheet: View {
                         else { model.enterSelection() }
                     }
                     .buttonStyle(PhoneTextButtonStyle(tokens: tokens))
-                    // An EXPLICIT label, because while picking this button
-                    // and the sheet's dismiss both render the word "Done".
-                    // The dismiss keeps its implicit label untouched — a
+                    // An EXPLICIT label, made when this button and the
+                    // sheet's dismiss both drew "Done" (F-her-1 parted the
+                    // drawn words; the names stay as they were). The
+                    // dismiss keeps its implicit label untouched — a
                     // shipped door's VoiceOver name is not this batch's to
                     // move (and pins ride it).
                     .accessibilityLabel(
