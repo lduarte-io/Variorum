@@ -36,7 +36,10 @@
 //  · (ladder round 1, R1-1 — landed on its own red-on-old tree, the commit
 //    that adds it) a short page at its foot never undoes its own top: the
 //    title's leave never moves her page or flips back by itself (RED ON OLD
-//    where UIKit clamps the offset as the frame grows — the pin's own note).
+//    where UIKit clamps the offset as the frame grows — the pin's own note);
+//  · (ladder round 2, R2-1 — landed on its own red-on-old tree, the commit
+//    that adds it) closing the tags on a short page at its foot, the title
+//    gone, never moves her page or brings the title back by itself.
 //  The six doors' one row is `MobileNoteTopTests` (the four tools' guard,
 //  moved with the ruling).
 //
@@ -289,6 +292,133 @@ struct MobileNoteTopRowTests {
                         "\(voice) settle \(index + 1): her page stays where she set it (\(settled.offset), set \(foot))")
             }
             #expect(flips <= 1, "\(voice): the top flipped back by itself — \(flips) flips with no hand on the page")
+        }
+    }
+
+    // MARK: - Closing the tags never moves a short page (ladder round 2, R2-1)
+
+    /// Two tags long enough that the open strip takes TWO rows at 402 pt in
+    /// either voice (one chip each wider than half the row; the second and the
+    /// add door share the second row).
+    static let twoRowTags = ["lighthouse-keepers-logbook", "evening-harbor-crossings"]
+
+    /// **R2-1 — ladder round 2's sibling of R1-1: closing the # tag strip
+    /// shrinks the top while the title is gone.** The strip's rows leave the
+    /// top, so the text view grows by the strip's height s; on a short page at
+    /// its foot whose whole reach R is under s, UIKit's clamp of the offset at
+    /// the frame change (before the text view's own layout regrows its
+    /// typewriter room — the ordering R1-1's pin proved RED on old) could move
+    /// her page, and land it within the rest, where the title returns by
+    /// itself. R1-1's mounted harness: the app's Write screen at 402 × 874 over
+    /// a one-line note, the reach set exactly by the scroll view's own bottom
+    /// inset — here 70, past the title's row + 8 so the title may leave (R1-1's
+    /// guard lets it), and under a two-row strip less the rest; the tags open,
+    /// the title gone, her page at its foot; then the same # closes the strip.
+    /// At every one of three settles: the title as it stood before the close
+    /// (gone), never flipped in the turn-by-turn trace, the page inside its
+    /// range, and **her page where she set it**.
+    @Test(arguments: [ThemeVoice.study, .terminal])
+    func closingTheTagsLeavesAShortPageWhereItStood(voice: ThemeVoice) async throws {
+        try await mounted(voice, paragraphs: 1, text: "Harbor light.", tags: Self.twoRowTags) { model, surface in
+            let tv = try #require(model.textView, "the editor is up")
+            let safeTop = surface.host.view.safeAreaInsets.top
+            struct Sample: Equatable {
+                var title: Bool
+                var strip: Bool
+                var chrome: CGFloat
+                var offset: CGFloat
+                var maxOffset: CGFloat
+                var content: CGFloat
+                var height: CGFloat
+            }
+            @MainActor func reach() -> CGFloat {
+                tv.contentSize.height + tv.adjustedContentInset.top + tv.adjustedContentInset.bottom - tv.bounds.height
+            }
+            @MainActor func sample() -> Sample {
+                Sample(
+                    title: surface.element(labeled: "Rename Note") != nil,
+                    strip: surface.element(labeled: Self.addTag) != nil,
+                    chrome: tv.convert(tv.bounds, to: nil).minY - safeTop,
+                    offset: tv.contentOffset.y,
+                    maxOffset: max(-tv.adjustedContentInset.top,
+                                   tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.height),
+                    content: tv.contentSize.height,
+                    height: tv.bounds.height)
+            }
+
+            // h, the title's row (R1-1's reading): the chrome at rest less the
+            // row and the 4 below it. Then s, what the open strip adds.
+            let rest = sample()
+            try #require(rest.title && !rest.strip, "\(voice): at rest, the title up and the tags closed")
+            let titleRow = rest.chrome - PhoneMetrics.touchMinimum - MobileWriteScreen.mastheadBottom
+            try #require(surface.activate("Tags"), "\(voice): the # door: \(surface.visibleLabels)")
+            await surface.settle(30)
+            let opened = sample()
+            try #require(opened.strip, "\(voice): # opened the strip: \(surface.visibleLabels)")
+            let strip = opened.chrome - rest.chrome
+            let target: CGFloat = 70
+            try #require(target - titleRow > MobileNoteTitleGiveWay.rest + 4,
+                         "\(voice): a page of reach 70 may lose its title (h = \(titleRow))")
+            try #require(strip >= 2 * PhoneMetrics.touchMinimum - 1 && strip > target - MobileNoteTitleGiveWay.rest + 4,
+                         "\(voice): a two-row strip, taller than the reach less the rest (s = \(strip))")
+            let natural = reach()
+            try #require(natural < target - 1, "\(voice): a one-line note's own reach sits under 70 (\(natural))")
+            tv.contentInset.bottom += target - natural
+            await surface.settle(10)
+            try #require(abs(reach() - target) <= 0.5, "\(voice): the page's reach is 70 (\(reach()))")
+
+            // The title gives way: her page at its foot.
+            tv.setContentOffset(CGPoint(x: 0, y: sample().maxOffset), animated: false)
+            try #require(await settleUntil(surface, until: { surface.element(labeled: "Rename Note") == nil }),
+                         "\(voice): at its foot, the title gave way: \(surface.visibleLabels)")
+            await surface.settle(40)
+            // Her page at its foot again (the leave's own frame change is R1-1's
+            // to answer, not this pin's — printed below), the strip still open.
+            let afterLeave = sample()
+            let foot = afterLeave.maxOffset
+            tv.setContentOffset(CGPoint(x: 0, y: foot), animated: false)
+            await surface.settle(10)
+            let before = sample()
+            try #require(!before.title && before.strip && abs(before.offset - foot) <= 0.5,
+                         "\(voice): the title gone, the strip open, her page at its foot (\(before), foot \(foot))")
+
+            // The same # closes the strip. Settle one: turn by turn, the trace kept.
+            try #require(surface.activate("Tags"), "\(voice): the # door, to close: \(surface.visibleLabels)")
+            var previous = before
+            var trace: [Sample] = [previous]
+            var titleChanges = 0
+            for _ in 0..<60 {
+                await surface.settle(1)
+                let now = sample()
+                if now.title != previous.title { titleChanges += 1 }
+                if now != previous { trace.append(now) }
+                previous = now
+            }
+            var settles: [Sample] = [sample()]
+            // Settles two and three.
+            for _ in 0..<2 {
+                await surface.settle(40)
+                settles.append(sample())
+            }
+            print("PERF[sim] VM-260 R2-1 \(voice): h \(titleRow), s \(strip), reach \(target) (natural \(natural)), "
+                  + "after the leave \(afterLeave.offset) of \(afterLeave.maxOffset), "
+                  + "foot \(foot), title changes \(titleChanges); trace "
+                  + trace.map { "[title \($0.title) strip \($0.strip) chrome \($0.chrome) offset \($0.offset) "
+                                + "max \($0.maxOffset) content \($0.content) height \($0.height)]" }
+                .joined(separator: " → ")
+                  + "; settles " + settles.map { "[title \($0.title) offset \($0.offset) max \($0.maxOffset)]" }
+                .joined(separator: " · "))
+
+            #expect(!(settles.last?.strip ?? true), "\(voice): the same # closed the strip")
+            #expect(settles.allSatisfy { !$0.title },
+                    "\(voice): the title stays as it stood before the close — gone (\(settles.map(\.title)))")
+            #expect(titleChanges == 0, "\(voice): the title flipped \(titleChanges) times with no hand on the page")
+            for (index, settled) in settles.enumerated() {
+                #expect(settled.offset <= settled.maxOffset + 0.5,
+                        "\(voice) settle \(index + 1): the page stands inside its range (\(settled.offset) > \(settled.maxOffset))")
+                #expect(abs(settled.offset - foot) <= 0.5,
+                        "\(voice) settle \(index + 1): her page stays where she set it (\(settled.offset), set \(foot))")
+            }
         }
     }
 

@@ -948,6 +948,96 @@ effect is the flip itself, her typing line lifting away from the keyboard, never
 three tasks; the custody wiring whitespace-only; no commit trailers in 146 commits; no device ids or personal
 data in the record diff; no skips or known-issue wrappers added.
 
+### Round 2 fixes — record (R2-1 · R2-5 · R2-6; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this pass did NOT do (kept current):** NO test has run (the stage is coordinated; every red and green below
+is PENDING the gate); no walk, no capture; nothing in the round-2 table but R2-1, R2-5 and R2-6; no line in
+`Sources/`, `Sync/`, custody, `StatusCenter`, `VoiceTokens`, `MobileEditorTextView`, `MobileKeyboardBar`, the
+text-input path, or `MobileShellView` code. **R2-1's FIX IS NOT BUILT — STOPPED at the pin, by the hallucination
+guard:** the pin is landed (its own red-on-old tree), but the traced mechanism is UIKit's clamp of the OFFSET, which
+the tracker only reads; neither rule the brief offers (ignore the turn's readings, or re-read after the next layout)
+can move an offset back, so neither can turn the pin green. The trace, the predictions and the options are below;
+the decision is the orchestrator's.
+
+#### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, THE LADDER — round 1 with A-260-18, round 1's fixes block whole, THE RED-ON-OLD WINDOW, round 2's table; the resiliency protocol; the code: `MobileNoteTop.swift` whole, `MobileWriteView.swift`'s masthead and title row, `MobileNoteTopRowTests.swift` whole, the harness's `settle`; **the red-on-old window's own log `/tmp/vm260-win3/R-r1.log` — R1-1's PERF trace on old**, which settles R2-1's mechanism; the ten R2-5 sites; `PhoneType.swift` whole) | DONE |
+| 1. R2-1's pin on the current code — **that commit IS R2-1's red-on-old tree** | DONE (this commit) — `MobileNoteTopRowTests.closingTheTagsLeavesAShortPageWhereItStood(voice:)`; R1-1's pin and every 4b/4a pin byte-unchanged; the runs PENDING the gate |
+| 2. R2-1's bundle `vm260-r2-rol` (APFS clone of `vm260-2r`, its `workspace-state.json` checked/repointed to its own `SourcePackages`, incremental `build-for-testing`, `nice -n 15`) | IN-PROGRESS |
+| 3. R2-1's fix | **STOPPED — decision owed to the orchestrator** (the trace and the options below) |
+| 4. R2-5 — the ten stale comments (comments only) | NOT-STARTED |
+| 5. R2-6 — the Read page's exception beside the whole-point rule (`PhoneType.swift`, a comment) | NOT-STARTED |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), package paths checked; READY-FOR-TESTS | NOT-STARTED |
+
+#### R2-1 — the mechanism, as the old tree's own trace shows it
+
+The reviewer's model (and the brief's): the strip closes, the text view grows by the strip's height s in ONE frame
+change, UIKit clamps the offset into the transiently short range (the typewriter room not yet regrown) at
+max(0, R − s) ≤ 8, the tracker HEARS that as the page back at its rest and the title returns — so the cure would be
+the tracker's reading. **R1-1's red-on-old PERF trace (`/tmp/vm260-win3/R-r1.log`, the 14:11 window) shows how the
+clamp actually lands on this screen**, Study (Terminal the same shape, 30.33):
+
+`[title true chrome 100 offset 40 max 40 content 728 height 720] → [title false chrome 100 offset 40 …] → [title
+false chrome 90.98 offset 31 max 40 content 737 height 729] → [… chrome 82.19 offset 31 … height 737.67] → … →
+[title false chrome 48 offset 31 max 40 content 780 height 772]`; settles `[title false offset 31] ×3`.
+
+- **SwiftUI animates the text view's frame frame by frame** (the masthead's change rides the 0.2 s ease: 9, 8.67,
+  8.33, 7, 6.67, 5, 4, 2.67, 0.67 pt), and **UIKit clamps at each frame change before the text view's layout
+  regrows the room** — the offset fell by EXACTLY the first frame's growth (40 → 31) and never again: from the second
+  frame on, each step is smaller than the slack the first clamp left (the transient max 40 − 8.67 > 31). The clamp is
+  **persistent**: the room regrew (content = height + 8 at every frame, max back at 40) and nothing put the offset
+  back over 140 turns.
+- **The title did NOT come back** on old (31 > 8): R1-1's red was the page leaving the foot she set (`:288` only), not
+  a self-undo. So: the clamp ordering is real (A-260-18 stands), but in animated use it costs one frame's share of
+  the change, not the whole change.
+- **For R2-1** (reach 70, a two-row strip s ≈ 88, the title gone, the page at its foot): the close's first frame is
+  about 0.17 × 88 ≈ 15 pt, so the offset is predicted to fall to ≈ 55 and stay there — **her page moves ≈ 15 pt off
+  the foot she set; the title stays gone** (55 > 8). The reviewer's self-undo needs the whole s in ONE frame change:
+  that is **Reduce Motion** (the # door toggles without animation, `MobileWriteView.tagsDoor`), where the clamp lands
+  at max(0, 70 − 88) = 0 — her page at its top — and the title's return is then **the rule working**: the page IS at
+  its top, and the note's title stands at the top of her text.
+
+**Why the brief's rule cannot cure it (model-independent):** the tracker READS the offset (KVO) and writes only
+`gone`; the clamp is UIKit's own, persistent offset change at the frame change. Ignoring the readings of the turn the
+masthead height lands, or re-reading after the text view's next layout, changes what the TITLE does — never where the
+PAGE stands. In the animated case the title never flips (nothing to ignore) and the offset still moves ≈ 15; in the
+Reduce Motion case the offset is already 0 before any reading, and ignoring that reading would leave the title GONE
+while her page sits at its top (until her next touch) — worse than today, where it returns. A generalised "ignore the
+turn" also could not have cured R1-1 (whose cure is the refused leave), so it disturbs nothing — it simply does
+nothing for this pin. **The cure has to keep UIKit from shrinking the range at a frame change** (the editor's room
+regrown before the clamp — the editor seam) or put the offset back after it (the chrome writing the editor's scroll —
+R1-1's declined alternative (b), "fights UIKit; seam-adjacent"). Both are outside this brief's fences.
+
+**The same class already on the tip, unpinned (recorded, not mine to fix):** R1-1's guard keeps a page of reach
+≤ h + 8 from leaving; a page of reach just past it (60 < R ≲ a screen) still leaves at its foot, and the leave's own
+first frame (≈ 9 pt of 52) moves her page off the foot she set by that much — the same persistent clamp. R2-1's pin
+prints it ("after the leave … of …"), so the gate's run shows the size. The unseal (the sealed state line leaving the
+masthead while the title is gone) is the third member of the class, by the same arithmetic.
+
+#### R2-1 — the pin (red-on-old tree: this commit; bundle `vm260-r2-rol`)
+
+`MobileNoteTopRowTests.closingTheTagsLeavesAShortPageWhereItStood(voice:)`, both voices — R1-1's mounted harness: the
+app's Write screen at 402 × 874 over a one-line note ("Harbor light.") wearing two long tags
+(`twoRowTags` — each chip wider than half the row, so the open strip takes two rows in either voice); h (the title's
+row) read as R1-1 reads it; # opens the strip at rest and s is what it adds; **the reach set to exactly 70 by
+`tv.contentInset.bottom`** (no editor line writes it — R1-1's reasoning); the page sent to its foot — the title gives
+way (R1-1's guard lets it: 70 − 52 = 18 > 8); the page set at its foot again (the leave's own drift printed, not
+asserted); then the same # closes the strip; settle one turn by turn (60, traced), then two settles of 40. Asserts:
+the strip closed (a guard); **the title as it stood before the close — gone — at every settle; no title change in the
+trace; the page inside its range at every settle; the page where she set it (± 0.5) at every settle.**
+Preconditions (`#require` — a red there is calibration, not a verdict): the title up and the tags closed at rest; the
+strip opened; 70 − h > 12; s ≥ 87 and s > 66 (two rows, taller than the reach less the rest); the one-line note's own
+reach under 69; the reach 70; the title gone; the strip open; the page at its foot before the close.
+
+- **Predicted on `vm260-r2-rol` (= the current code): RED, 3 issues per voice (6)** — the foot clause at all three
+  settles (the page ≈ 15 pt above its foot: the close's first frame); the title clauses, the range clause and the strip
+  guard GREEN. Read the `PERF[sim] VM-260 R2-1` line first (h, s, the leave's own landing, the trace of title · strip ·
+  chrome · offset · max · content · height). **If instead the title flips back** (the strip's change landing in one
+  frame on that runtime), the red widens to the title clauses too — the brief's model; the cure question is the same.
+- **Predicted under any tracker-only rule (either of the brief's): the same 6** — which is why piece 3 stopped.
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
