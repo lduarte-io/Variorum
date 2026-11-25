@@ -7,13 +7,43 @@ Required reading for every session on this record: `notes/CastleRules.md` IN FUL
 
 ## FOR A LATER READER
 
-*(Written at closeout; until then the sections below are the working record.)*
+*(Drafted at the gate wait, 2026-11-25; the PENDING slots fill at closeout.)*
 
-- **The mechanism as settled:** PENDING.
-- **The fix as built:** PENDING.
-- **Her rulings:** PENDING (away run — PROVISIONALs bundled for her sitting).
-- **The evidence lines:** PENDING.
-- **Open items:** PENDING.
+- **The mechanism as settled:** every library open blocked its first real frame on `CatalogLister.catalog()` reading
+  BOTH catalogue roots — including every key file's bytes in the picked second backup folder (iCloud-synced; evicted
+  or file-provider-mediated reads block inside the sandbox) — and one open repeated that two-root walk about ten
+  times (the lobby facts, every custody listing's Touch ID probe, `open()`'s own re-walk, up to four repair passes,
+  the log summary). ~9 minutes of blank window cold at the VX-980 gate; seconds warm. The route's happy-path
+  decisions never needed the far folder. Trace correction along the way: `executor.unlock` reads only the live key
+  file — the in-open far walks were the custody probe's.
+- **The fix as built (one pointer per piece):** the catalogue says which places it read (`Catalog.unreadPlaces`,
+  default empty — `Sources/VariorumCore/Protection/Assess/Catalog.swift`); the launch route and the relock's lobby
+  run on container-only facts with ONE far walk per open, detached, landing on the standing lobby through its
+  refresh seam (`CatalogRead`/`FarFolderWalk` in `App/Variorum/Shared/Protection/CatalogLister.swift`;
+  `ProtectionOpenRoad` + `AppBootstrap` wire it; `ProtectionRoadLock.lobbyContext` is the lock's leg); an unread far
+  place is INDETERMINATE — rule 27 and its kin are never claimed on a partial listing (`AssessRules.lobby`'s
+  `mightOpen`, `backupMightHoldTheCurrentKeyFile`), while rule 21's offer search keeps its deliberate full walk; a
+  press that would refuse joins the walk and retries once, so outcomes match the old road's; the lobby model's
+  `take(_:)` refuses to narrow a full standing to a partial one (the ladder's MAJOR); the rider VX-524 ended
+  record-only as a code defect — the real mechanism was the one Restore list rowing both places' copies with no
+  place named, fixed as words: each row's second line names its place (`ProtectionWords.copyRowLine`, both row
+  views). CastleRules byte-identical; no `Sync/`, no schema; `StoreOpeningView` untouched.
+- **Rulings (the orchestrator's, an away run — every one PROVISIONAL for her bundle):** R-1013-A1 (the container
+  answers the no-backup consult on a partial listing — rule 3's "always" kept; P-1013-4) · R-1013-A2 (the relock's
+  lobby joins the batch — the class completed in-effort) · R-1013-A3 (VX-524's face: each row names its place;
+  P-1013-5) · P-1013-1/2/3 (the lobby gains roads when the walk lands; a refusing press joins the walk; a
+  far-revealed quiet road opens the standing lobby). The full bundle, with the reviewers' riders F-R1-5/F-R2-1/
+  F-R2-2 and the un-built opening-line taste call, is HELD FOR HER SITTING below.
+- **The evidence lines:** 14 new pins in three new test files (zero existing tests edited — the parity proof), each
+  bug-class pin red-on-old by behavioral revert with counts in the batch LIVE STATUS sections; the old road read the
+  far folder 3–8× per open against 1 now; full core suite green (746 + 4204 + 32, exit 0); the headless harness 215
+  tests / 36 suites green; Mac build-for-testing and the phone target green. THE GATE: PENDING (the 154-suite Mac
+  run and the dev-store launch walk under `vx1013-gate`).
+- **The ladder:** two rounds, closed. Round 1 — 1 MAJOR (a refresh race that could narrow the landed lobby facts;
+  fixed, three pins) · 2 MINOR (dead scope code, deleted; the unreachable-folder conflation → VX-1090, Needs
+  Lillian) · 2 NIT. Round 2 — fresh reviewer, everything HOLDING, no new BLOCKER/MAJOR.
+- **Open items:** VX-1090 (hers — the unreachable picked folder's three face options); the sitting bundle below;
+  MERGE: PENDING (PR, closeout deltas, the in-flight row's retirement).
 
 ## THE MECHANISM (traced 2026-11-24, orchestrator's own read; the field evidence is `notes/plans/fixes/vx-980-search-fixes.md` GATE 1 and GATE 2)
 
