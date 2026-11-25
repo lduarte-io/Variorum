@@ -49,6 +49,10 @@ struct BookView: View {
         // VX-1040 — the order dial's save (a saving pick, the Save row, the
         // hand-ordered look's masthead door).
         + [.saveBookOrder]
+        // VX-1038 — the card headers' "+" field and their pills' × are the
+        // note-tagging act's book renderer (the masthead's ＃ and the
+        // Library's rows are the others).
+        + [.tagNote]
         // VX-563 — ⌘↑ / ⌘↓: the book's key monitor is the step's one door
         // (`BookNoteStepKeyMonitor`).
         + [.previousNoteInBook, .nextNoteInBook]
@@ -2443,6 +2447,11 @@ struct BookView: View {
                                 model.collapseAll()
                             }
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                            // VX-1038 (T-5 / R-1036-39): the per-book tags
+                            // switch — hidden · other tags · all tags.
+                            BookTagsSwitch(
+                                tokens: tokens, position: cardTags.position,
+                                choose: { cardTags.setPosition($0) })
                         }
                     }
                     .padding(.bottom, 22)

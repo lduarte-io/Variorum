@@ -305,3 +305,6 @@ struct BookCardPills: View {
         .help(BookCardTagsCopy.plusHelp)
     }
 }
+
+// (The switch's face — `BookTagsSwitch` and its words — is its own file,
+// `BookTagsSwitch.swift`: a value and a closure, no model.)
