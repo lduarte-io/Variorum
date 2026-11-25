@@ -854,9 +854,25 @@ struct ShelfView: View {
                 .lineLimit(1)
             Spacer(minLength: 12)
             QuietReceiptLine(status: session.status, tokens: tokens, separated: true)
+                #if DEBUG
+                // VX-409: where the quiet line sits in the bar (the pin reads
+                // it against the bar's own edge).
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintLineKey, $0, in: session, owner: oracleOwner)
+                }
+                #endif
             Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
                 .lineLimit(1)
                 .fixedSize()
+                #if DEBUG
+                // VX-409: whether — and where — the ⌘J · ⌘N hint is drawn.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintWordsKey, $0, in: session, owner: oracleOwner)
+                }
+                .onDisappear {
+                    BookcaseRowOracle.withdrawFrame(BookcaseRowOracle.hintWordsKey, in: session, owner: oracleOwner)
+                }
+                #endif
         }
         .font(tokens.small)
         .foregroundStyle(tokens.faint)
@@ -1050,6 +1066,12 @@ enum BookcaseRowOracle {
         frames.publish(frame, for: scoped(key, session), owner: owner)
     }
 
+    /// VX-409: a reserved key's record goes when the thing it recorded is
+    /// no longer drawn (the bar's ⌘J · ⌘N hint, while it yields).
+    static func withdrawFrame(_ key: String, in session: AppSession, owner: UUID) {
+        frames.withdraw(scoped(key, session), owner: owner)
+    }
+
     private static func scoped(_ key: String, _ session: AppSession) -> String {
         "\(session.debugProbeScope)\u{2016}\(key)"
     }
@@ -1070,6 +1092,9 @@ enum BookcaseRowOracle {
     /// bar's, so a pin can read where the box sits (`BookcaseQuickEntryPlacementTests`).
     static let entryKey = "\u{2116}entry"
     static let hintBarKey = "\u{2116}hint"
+    /// VX-409: the bottom bar's ⌘J · ⌘N hint words, and its quiet line.
+    static let hintWordsKey = "\u{2116}hint-words"
+    static let hintLineKey = "\u{2116}hint-line"
     // (13s-b U1a's `offerRowKey` — the tour offer line's held row — retired
     // with the line at VX-292 U4; the offer card reports its own paper,
     // `TourOfferCardOracle`.)
