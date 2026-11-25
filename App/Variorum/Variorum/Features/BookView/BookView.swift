@@ -3153,7 +3153,9 @@ struct BookView: View {
             Button {
                 mint(kind, door: .chapter(section.id))
             } label: {
-                Text(BookCardTagsCopy.plus)
+                // The ladder's R2-4: its own copy home's glyph — never the
+                // tags header's constant.
+                Text(ChapterMintDoorCopy.plus)
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
@@ -4890,6 +4892,11 @@ nonisolated enum ChapterMintDoorCopy {
     static let unavailableNote =
         "A note is made in a chapter from the \u{201C}+ new note\u{201D} on its heading, in a book that isn\u{2019}t finished."
     static let help = "A new note at the end of this chapter"
+    /// The navigator chapter row's door (ledger row 14 — mockup-1 frame 8b's
+    /// "a chapter's +"). Its own constant (the VX-1036 ladder's R2-4): it
+    /// used to draw the tags header's "+" (`BookCardTagsCopy.plus`), so a
+    /// change to one door's glyph would have moved the other's.
+    static let plus = "+"
 }
 
 /// The shell's one-shot requests a book takes, as ONE value its hook watches

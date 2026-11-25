@@ -175,6 +175,29 @@ struct BookListModeRulesTests {
         #expect(BookView.surfaceCapabilities.filter { $0 == .newNoteInChapter }.count == 1)
         #expect(CapabilityRegistry.capability(.newNoteInChapter).verb == ChapterMintDoorCopy.verb)
     }
+
+    /// The VX-1036 ladder's R2-4: the navigator row's "+" draws its OWN copy
+    /// home's glyph (`ChapterMintDoorCopy.plus`), never the tags header's
+    /// constant — so one door's glyph can never move the other's. A source
+    /// scan of the door's renderer (`#filePath`'s symlinks resolved; comment
+    /// lines ignored — the `BookReadMintSourceTests` shape).
+    @Test func theNavigatorRowsDoorDrawsItsOwnCopyHomesGlyph() throws {
+        #expect(ChapterMintDoorCopy.plus == "+")
+        let url = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Variorum/Features/BookView/BookView.swift")
+        let lines = try String(contentsOf: url, encoding: .utf8)
+            .split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+        let start = try #require(lines.firstIndex { $0.contains("func navigatorChapterMintDoor(") },
+                                 "the navigator row's door")
+        let end = try #require(lines[start...].firstIndex { $0.contains(".help(ChapterMintDoorCopy.help)") },
+                               "its hover, the renderer's last line")
+        let body = lines[start...end].joined(separator: "\n")
+        #expect(body.contains("Text(ChapterMintDoorCopy.plus)"), "its own glyph:\n\(body)")
+        #expect(!body.contains("BookCardTagsCopy"), "never the tags header's:\n\(body)")
+    }
 }
 
 // MARK: - The List's selection and place (state)
