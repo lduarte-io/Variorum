@@ -29,14 +29,16 @@
 //
 //  **The receipt line's anatomy** (the VM-47 run's phone layer, put on at the
 //  VM-55 re-land — the sizing sheet §E, "Receipt line"; PROVISIONAL with its
-//  numbers, P-47-1): ONE line, 44 tall; the words SF 15 (`controlInline`,
-//  chrome — they follow the text size to xxxLarge and hold) — a refusal in the
+//  numbers, P-47-1): ONE line, 44 tall; the words 13 (`controlInline`, chrome —
+//  the voice's chrome face; 15 until VM-273's step-down; they follow the text
+//  size to xxxLarge and hold) — a refusal in the
 //  alarm ink every phone error slot wore, a removal and (VM-265) a direction in
-//  the corrected muted, an offer in ink; its act 15 semibold in the accent
+//  the corrected muted, an offer in ink; its act the same 13, semibold, in the accent
 //  across a 44 pt hit area (`PhoneInlineActStyle`); at the gutter, on the room with the tab bar's
 //  hairline, because a line that floats over content needs a ground to be read
-//  on — in the library's look (voice, palette and tint: the shell hands its
-//  settings road, `look`). Its words, its classes and its timing are VM-61's.
+//  on — in this phone's look (VM-247: voice, palette and tint chosen on the
+//  device; the shell hands its settings road, `look`). Its words, its classes
+//  and its timing are VM-61's.
 //
 
 import SwiftUI
@@ -50,12 +52,14 @@ import VariorumCore
 final class MobileMessageLineModel {
     /// The ONE seam (`AppSession.status`).
     @ObservationIgnored let status: StatusCenter
-    /// The library's voice, read live (the shell's own resolver input).
+    /// This phone's voice, read live (the shell's own resolver input — the
+    /// phone's own since VM-247, the library's before).
     @ObservationIgnored let voice: @MainActor () -> ThemeVoice
-    /// **The library's look, read live** — voice, palette and tint through the
+    /// **This phone's look, read live** — voice, palette and tint through the
     /// shell's settings road (the VM-47 run's VM-51: every phone face wears the
-    /// library's palette, never the voice's bare colours). nil — a harness —
-    /// wears the voice's own (`voice`), as before.
+    /// palette, never the voice's bare colours; since VM-247 the look the phone
+    /// chose, laid over the library's settings). nil — a harness — wears the
+    /// voice's own (`voice`), as before.
     @ObservationIgnored let look: (@MainActor (_ dark: Bool) -> VoiceTokens)?
 
     /// How far above the safe area's foot the line sits when the keyboard is
@@ -167,7 +171,7 @@ final class MobileMessageLineModel {
     }
 
     /// **Which ink the line's words wear** — a ROLE, resolved to a colour by
-    /// the face against the library's look (`MobileMessageLineView.ink`).
+    /// the face against this phone's look (`MobileMessageLineView.ink`).
     /// Decided from the item's own facts, which its door set; never from its
     /// words (VM-260, review focus 6). Pure, pinned.
     enum Ink: Equatable {

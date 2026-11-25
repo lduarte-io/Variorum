@@ -510,9 +510,10 @@ struct SyncStatusRow: View {
                 }
                 if !face.doors.isEmpty {
                     // VM-53 (the VM-47 run, batch 5): the doors are the phone's
-                    // inline acts at 17 with 44 pt hit areas (they were 11.5 pt
-                    // plain words) — the press and disabled read are the
-                    // control's own, so no second dimming here.
+                    // inline acts in the `control` role (15 since VM-273's
+                    // step-down; 17 when they landed) with 44 pt hit areas
+                    // (they were 11.5 pt plain words) — the press and disabled
+                    // read are the control's own, so no second dimming here.
                     HStack(spacing: PhoneMetrics.Space.s16) {
                         ForEach(face.doors) { door in
                             Button {
