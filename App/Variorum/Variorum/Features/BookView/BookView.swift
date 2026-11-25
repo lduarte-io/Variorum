@@ -1028,11 +1028,18 @@ struct BookView: View {
                                         mode: structure.mode, readForm: structure.readForm,
                                         section: section,
                                         collapsedNote: collapsedNote, tokens: tokens,
-                                        follow: navigatorFollow)
+                                        follow: navigatorFollow,
+                                        trailingRoom: chapterMintKind == nil
+                                            ? 0 : BookNavigatorLayout.chapterDoorRoom)
                                         .contentShape(Rectangle())
                                         .navigatorRowFrame(section.id, chapter: true)
                                 }
                                 .buttonStyle(.plain)
+                                // VX-1039/ledger row 14 — the chapter's own "+"
+                                // (mockup-1 frame 8b), a further renderer of
+                                // `.newNoteInChapter`: its own button over the
+                                // row's trailing end, never the row's act.
+                                .overlay(alignment: .trailing) { navigatorChapterMintDoor(section) }
                                 // VX-646: the row's scroll identity (the follow's reveal).
                                 .id(BookNavigatorFollow.chapterRowID(section.id))
                                 .contextMenu {
@@ -3069,9 +3076,7 @@ struct BookView: View {
     /// P-1036-B1-3, the batch record).
     @ViewBuilder
     private func chapterMintDoor(_ section: ReadingSection) -> some View {
-        if let reading = structure.reading, reading.kind == .book, !reading.locked,
-           reading.profile != Queries.dailyJournalBookProfile {
-            let kind = Self.footMint(for: reading)
+        if let kind = chapterMintKind {
             Button(tokens.chromeLabel(kind == .entry ? "+ new entry" : "+ new note")) {
                 mint(kind, door: .chapter(section.id))
             }
@@ -3080,6 +3085,40 @@ struct BookView: View {
             .foregroundStyle(tokens.muted)
             .lineLimit(1)
             .fixedSize()
+            .help(ChapterMintDoorCopy.help)
+        }
+    }
+
+    /// **The chapter door's one fence** (VX-1039, P-2 — drawn only where it can
+    /// act): a book's own chapters, an unfinished book, never THE daily
+    /// Journal; the kind is the book's foot mint (an entry on a journal-trait
+    /// book). nil = no chapter door draws, on any of its renderers.
+    private var chapterMintKind: FootMint? {
+        guard let reading = structure.reading, reading.kind == .book, !reading.locked,
+              reading.profile != Queries.dailyJournalBookProfile
+        else { return nil }
+        return Self.footMint(for: reading)
+    }
+
+    /// **Ledger row 14 — the navigator chapter row's "+"** (mockup-1 frame 8b:
+    /// "a chapter's + (its navigator row, or '+ new note' on its heading line)
+    /// makes the note at the end of that chapter and shows it ready to type"):
+    /// a further renderer of the ONE declared act (`.newNoteInChapter`), the
+    /// same mint (`mint(kind, door: .chapter(id))`) under the same fence.
+    @ViewBuilder
+    private func navigatorChapterMintDoor(_ section: ReadingSection) -> some View {
+        if let kind = chapterMintKind {
+            Button {
+                mint(kind, door: .chapter(section.id))
+            } label: {
+                Text(BookCardTagsCopy.plus)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    .frame(width: BookNavigatorLayout.chapterDoorRoom, alignment: .center)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
             .help(ChapterMintDoorCopy.help)
         }
     }
@@ -3517,6 +3556,8 @@ nonisolated enum BookNavigatorLayout {
     /// a chapter list; the note's panels keep the brain's own 640.
     static let maximumWidth: CGFloat = 360
     static let chapterRowHeight: CGFloat = 30
+    /// Ledger row 14: the chapter row's "+" — its hit width at the row's end.
+    static let chapterDoorRoom: CGFloat = 18
     static let noteRowHeight: CGFloat = 24
     /// Inside a group the rows touch — a chapter and its notes belong
     /// together, and their own pitches carry the air.
@@ -3689,6 +3730,9 @@ private struct NavigatorChapterLabel: View {
     let tokens: VoiceTokens
     /// VX-646: the list's follow (the note label's reason).
     let follow: BookNavigatorFollowMemory
+    /// Ledger row 14: the room the chapter's "+" takes at the row's trailing
+    /// end (0 where no door draws), so a long name truncates before it.
+    var trailingRoom: CGFloat = 0
 
     var body: some View {
         // VX-645: every mode but Index has a viewed pair now — Outline's and
@@ -3720,6 +3764,7 @@ private struct NavigatorChapterLabel: View {
                 .foregroundStyle(BookNavigatorLayout.chapterNameInk(tokens, viewed: washed))
                 .lineLimit(1)
         }
+        .padding(.trailing, trailingRoom)
         .frame(
             maxWidth: .infinity,
             minHeight: BookNavigatorLayout.chapterRowHeight,

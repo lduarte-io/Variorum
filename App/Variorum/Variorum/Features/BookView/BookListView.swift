@@ -12,7 +12,7 @@
 //
 //  What lives here (P-9 — the List's own concerns, never more of the book's
 //  view model):
-//  - `BookListRows` — the List's groups, PURE: the Outline's own row assembly
+//  - `BookListRows` (its own file) — the List's groups, PURE: the Outline's own row assembly
 //    (`BookOutlineRows` — chapters in order, empty ones kept, "unfiled" last;
 //    a gathering's tag-path headings) regrouped under headings with counts.
 //    The ENTRIES are the book's (`BookViewModel.entries`): its order — the
@@ -34,61 +34,7 @@ import GRDB
 import SwiftUI
 import VariorumCore
 
-// MARK: - The rows (pure)
-
-nonisolated enum BookListRows {
-    /// One heading of the List, and how many of the list's notes stand under it.
-    struct Heading: Equatable, Sendable {
-        enum Kind: Equatable, Sendable {
-            /// A book's chapter — its own "+ new note" stands at the trailing end.
-            case chapter(ReadingSection)
-            /// The chapterless group, last ("unfiled" — the one word).
-            case unfiled
-            /// A gathering's tag-path section (`grouping_tag_id`).
-            case tagPath(String)
-        }
-
-        var kind: Kind
-        var count: Int
-    }
-
-    /// A heading (or none — a flat book's notes) and the notes under it, in
-    /// the book's order.
-    struct Group: Equatable, Sendable, Identifiable {
-        var id: String
-        var heading: Heading?
-        var entries: [Queries.ReadingEntry]
-    }
-
-    /// **The List's groups** from the Outline's row assembly — the same
-    /// headings in the same order, each counted by the notes the List lists
-    /// under it (the window's — PROVISIONAL P-1036-B3-6).
-    static func groups(rows: [BookOutlineRows.Row]) -> [Group] {
-        var groups: [Group] = []
-        func open(_ id: String, _ kind: Heading.Kind) {
-            groups.append(Group(id: id, heading: Heading(kind: kind, count: 0), entries: []))
-        }
-        for row in rows {
-            switch row {
-            case .chapter(let section): open(row.id, .chapter(section))
-            case .unfiledHeading: open(row.id, .unfiled)
-            case .tagHeading(let path, _): open(row.id, .tagPath(path))
-            case .note(let entry):
-                if groups.isEmpty {
-                    groups.append(Group(id: "list-lead", heading: nil, entries: []))
-                }
-                groups[groups.count - 1].entries.append(entry)
-                if groups[groups.count - 1].heading != nil {
-                    groups[groups.count - 1].heading?.count += 1
-                }
-            }
-        }
-        return groups
-    }
-
-    /// A note row's anchor in the List's own scroll.
-    static func noteAnchor(_ postID: String) -> String { "list-note-\(postID)" }
-}
+// (The rows' pure assembly, `BookListRows`, is its own file — `BookListRows.swift`.)
 
 // MARK: - The rows' stamps (the List's one held read)
 
@@ -208,12 +154,15 @@ struct BookListView<ChapterDoor: View>: View {
                 return .handled
             }
             .onAppear {
-                holdsKeys = true
+                // The keyboard is the List's (for ⏎) only in the focused pane
+                // — a split's other book never takes it.
+                if model.paneFocused { holdsKeys = true }
                 takeReveal(proxy)
                 takeChapterReveal(proxy)
             }
             .onChange(of: model.pendingReveal) { _, _ in takeReveal(proxy) }
-            .onChange(of: model.entries.map(\.postID)) { _, _ in takeReveal(proxy) }
+            // A reveal that arrived before the book's first rows waits for them.
+            .onChange(of: model.entries.isEmpty) { _, _ in takeReveal(proxy) }
             .onChange(of: model.pendingChapterReveal) { _, _ in takeChapterReveal(proxy) }
         }
         // The rows' edited stamps — held only while the List shows.
