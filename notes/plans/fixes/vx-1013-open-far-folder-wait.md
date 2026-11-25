@@ -91,7 +91,11 @@ relock's lobby (noticed, not taken — below).
 *Batch 1, opus-implementer, session 1 (2026-11-24; resumed 2026-11-25 for the two ruled pieces). No behavioural revert is
 in flight.*
 
-**RESUMED (R-1013-A1, R-1013-A2):** 6a NOT-STARTED — (a)'s pin for row 12 (core). 6b NOT-STARTED — the relock's lobby on
+**RESUMED (R-1013-A1, R-1013-A2):** 6a DONE (`9a4f64544`) — core pin
+`FarFolderUnreadTests.theNoBackupYetMomentIsOwedOnAPartialListing` (the suite now 7): GREEN `✔ 7 tests`; a RULING pin,
+green on both sides by construction — on the pre-fix `Assess.swift` (`006072617`) `✔ 1 test passed`; the record's option
+(b) as a mutation (`passphraseAsks` skipped while `!readsEveryPlace`) ⇒ `✘ 1 test failed with 1 issue` (the partial-listing
+expectation); restored, `git status` clean, `✔ 7 tests`. Row 12 flipped to UNAFFECTED-BY-RULING. 6b NOT-STARTED — the relock's lobby on
 the per-open plumbing (piece 6): `ProtectionRoadLock.lobbyContext(road)` (its own `FarFolderWalk`), the lobby beginning
 the walk through the route's one helper, the landing's refresh; the relock's landing NEVER retries the quiet roads (the
 lock's own rule — "the quiet roads are NOT tried at a lock", `ProtectionRoadLock.swift` header — so P-1013-3 has nothing
@@ -198,7 +202,7 @@ INDETERMINATE-HANDLED = never concludes "none" from an unread place (its pin); F
 | 9 | `AssessRules.olderKeyFileSweep` (`Assess.swift:343`) | `catalog.foreign` at the container's root | UNAFFECTED — `entry.place == .container, entry.folders.isEmpty` |
 | 10 | `AssessRules.acts` — rule 21's `.offerKeyFile` (`Assess.swift:514`) | the same fact | INDETERMINATE-HANDLED — owed on a partial listing; `searchIfOwed` keeps its FULL walk at its call site (D-1013-4) and answers (the offer, or rule 27's refusal, which the standing faces show from the search exactly as from the fault). Healthy opens never reach it (the live file is the current key's). Pins: #7's and #8's (`acts.contains(.offerKeyFile)`) |
 | 11 | `AssessRules.backupHoldsTheCurrentKeyFile` (`Assess.swift:548`) | `catalog.keyFiles` (non-live, the current key) | the plain fact — its only readers are #7, #8, #10, each through `backupMightHoldTheCurrentKeyFile` (`Assess.swift:557`) |
-| 12 | `AssessRules.passphraseAsks` — `.beforeFirstBackup` (`Assess.swift:570`) | `copies(ofLibrary:)` holds no backup | **FORK — NOT CHANGED** (below) |
+| 12 | `AssessRules.passphraseAsks` — `.beforeFirstBackup` (`Assess.swift:570`) | `copies(ofLibrary:)` holds no backup | UNAFFECTED-BY-RULING (R-1013-A1, option (a)) — on a partial listing the container's copies answer it (every backup run lands there first); code untouched. Pin: `FarFolderUnreadTests.theNoBackupYetMomentIsOwedOnAPartialListing` |
 | 13 | `AssessRules.useCastleSpec` — copies under a key this Mac can't delete (`Assess.swift:715`) | every copy and its serving files | FULL-WALK CALLER — Use Castle's door words, rendered only from the crossings' / key doors' / account section's facts (`ProtectionCrossingActs:139`, `ProtectionKeyDoorActs`, `ProtectionAccountActs:452` — all `.everything`); the launch road's assessments compute doors and discard them |
 | 14 | `RouteFinder` (`RouteFinder.swift:96,109,134`) | the catalogue, the live file, a copy's serving files | FULL-WALK CALLER — reached only through #1/#3 |
 | 15 | `OwnCopies` (`OwnCopies.swift:16–113`) | this Mac's copies per place | FULL-WALK CALLER — `ProtectionBackupHook.runPair`, `ProtectionBackupPair` (the far due-check), `ProtectionCopyCounts`, `ProtectionCopyDoors`, `CopyDoorsModel` — each `lister.catalog()` (`.everything`) |
@@ -206,8 +210,9 @@ INDETERMINATE-HANDLED = never concludes "none" from an unread place (its pin); F
 | 17 | `ProtectionFacts.catalog` (`Facts.swift:204`) | — | the field itself |
 | — | `CatalogNames`, `LibraryNotice`, `Assessment` | — | no catalogue read (names, the open's notice, a doc line) |
 
-Counts: 17 rows — UNAFFECTED 4 (#2, #4, #6, #9) · INDETERMINATE-HANDLED 4 (#5, #7, #8, #10; #11 is their shared fact) ·
-FULL-WALK CALLER 6 (#1, #3, #13, #14, #15, #16) · FORK 1 (#12) · definition/plain fact 2 (#11, #17).
+Counts (final, after R-1013-A1): 17 rows — UNAFFECTED 4 (#2, #4, #6, #9) · UNAFFECTED-BY-RULING 1 (#12) ·
+INDETERMINATE-HANDLED 4 (#5, #7, #8, #10; #11 is their shared fact) · FULL-WALK CALLER 6 (#1, #3, #13, #14, #15, #16) ·
+definition/plain fact 2 (#11, #17) · FORK 0.
 
 Beside the table (the app's launch-road readers, for the reviewer): `ProtectionFactsGatherer` (live key file → hint and
 live id, rule 26's names — container), `ProtectionLobbyFace.derive` (`catalog.liveKeyFile` — container),
