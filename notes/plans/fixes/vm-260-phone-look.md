@@ -2693,3 +2693,11 @@ Products/TK2SpikeUITests_TK2SpikeUITests_iphonesimulator27.1-arm64-x86_64.xctest
    books scrolled: the hairline under the line, nothing else moved.
 6. **Starred at rest and scrolled** — the same.
 7. **The scroll indicator under the chrome** (C-4a-8) — one capture mid-scroll, for her eye.
+
+**Read before the gate — the one mechanism no run has seen.** Every mounted slim-line pin drives the list the paging
+pins' way (`UIScrollView.setContentOffset`, unanimated) and relies on SwiftUI's `onScrollGeometryChange` hearing that
+programmatic offset (the Mac's place and sidebar pins lean on the same reading for `NSScrollView`; no phone code read
+it before this batch). If the tip's slim-line pins are RED at "the top never gave way" while the R-4a reds are as
+predicted, read it as the HARNESS's red first: check one capture of the Library scrolled by a real thumb (W-4a stop 2)
+before touching the rule; a slim line there means the pins need a real-drag road (the keyboard-reveal UI target's
+swipe), not a code change.
