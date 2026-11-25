@@ -404,6 +404,12 @@ struct BookView: View {
                         archivedCount: archived.door.count, tokens: tokens)
                 }
                 .overlay { contentOverlay }
+            case .list:
+                // VX-1084 — the List mode (R-1036-29, R-1036-38): the book's
+                // notes as the Library's rows. (WIP at P1; the face is P3.)
+                BookListView(model: model, tokens: tokens)
+                    .overlay(alignment: .bottomTrailing) { pageFootReceipt }
+                    .overlay { contentOverlay }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
                 // TWO-UP spread — each page a whole scrollable post, the
@@ -914,6 +920,7 @@ struct BookView: View {
     static func tourMode(_ mode: BookStructureModel.ViewMode) -> Tour.BookMode {
         switch mode {
         case .outline: .outline
+        case .list: .list
         case .index: .index
         case .spread: .book
         case .read: .read
@@ -923,6 +930,7 @@ struct BookView: View {
     private func modeHelp(_ mode: BookStructureModel.ViewMode) -> String {
         switch mode {
         case .outline: "The book's writing surface — every note in one column"
+        case .list: "The book's notes as rows — each one's day, tags and last edit, in the book's order"
         case .index: "The book's index — chapters and notes beside the whole text"
         case .spread: "The two-up spread — each page a whole note"
         case .read: "Read the book as pure text"
@@ -1273,7 +1281,8 @@ struct BookView: View {
             mode: structure.mode,
             focusedPostID: model.focusedPostID,
             spreadPostIDs: model.spreadEntries.map(\.postID),
-            indexPostID: model.indexSelectedPostID)
+            indexPostID: model.indexSelectedPostID,
+            listPostID: model.listSelectedPostID)
         let live = BookNoteBox.livePost(
             mode: structure.mode,
             liveFocusedPostID: model.liveFocusedPostID,
@@ -1402,6 +1411,19 @@ struct BookView: View {
                     postID: postID, blockID: blockID,
                     offsetInBlock: remembered?.utf16Offset ?? 0)
             }
+            model.focus(postID)
+            model.requestReveal(postID)
+        case .list:
+            // VX-1084 (PROVISIONAL P-1036-B3-5): List mounts no editor, so
+            // "edit here" turns the book to the Outline and makes the note
+            // live there at her remembered block — the mint's own choreography
+            // out of a mode with no editor (P-2's fire-and-DO; ledger row 15).
+            if let blockID = remembered?.blockID {
+                session.commandRouter.pendingWriteIntent = WriteIntent(
+                    postID: postID, blockID: blockID,
+                    offsetInBlock: remembered?.utf16Offset ?? 0)
+            }
+            structure.mode = .outline
             model.focus(postID)
             model.requestReveal(postID)
         case .read:
@@ -1648,7 +1670,8 @@ struct BookView: View {
             selected: BookNoteBox.selectedPost(
                 mode: mode, focusedPostID: model.focusedPostID,
                 spreadPostIDs: model.spreadEntries.map(\.postID),
-                indexPostID: model.indexSelectedPostID),
+                indexPostID: model.indexSelectedPostID,
+                listPostID: model.listSelectedPostID),
             viewed: model.navigatorViewedPair(
                 mode: mode, readForm: structure.readForm,
                 chapterOf: { structure.chapterID(of: $0) }).postID)
@@ -2380,6 +2403,12 @@ struct BookView: View {
             // were in — so the focus is released and the box empties. The
             // expansion is untouched: what you unfolded stays unfolded.
             model.focus(nil)
+            model.requestChapterReveal(section.id)
+        case .list:
+            // VX-1084: List brings the chapter's heading into view (it takes
+            // the chapter reveal, as the Outline does); a chapter is a click
+            // OUT of the selected note there too.
+            model.noteListSelection(nil)
             model.requestChapterReveal(section.id)
         case .index:
             // Ladder R1-16: nothing in Index consumes a chapter reveal
@@ -3585,7 +3614,7 @@ private struct NavigatorNoteLabel: View {
         // Read their viewed note (VX-645 — `navigatorViewedPair`); the spread
         // its pages and the focus for the MARK, its left page for the follow;
         // Index the focus (its navigator is hidden — nothing follows).
-        let follows = mode == .outline || mode == .read
+        let follows = mode == .outline || mode == .read || mode == .list
         let viewed = mode == .index
             ? .nothingViewed
             : model.navigatorViewedPair(mode: mode, readForm: readForm, chapterOf: { _ in nil })
@@ -3645,7 +3674,7 @@ private struct NavigatorChapterLabel: View {
             ? .nothingViewed
             : model.navigatorViewedPair(
                 mode: mode, readForm: readForm, chapterOf: { structure.chapterID(of: $0) })
-        let follows = mode == .outline || mode == .read
+        let follows = mode == .outline || mode == .read || mode == .list
         let noteMarked = collapsedNote.map { note in
             BookNavigatorMark.note(
                 mode: mode, postID: note.postID,
@@ -4516,6 +4545,10 @@ enum BookNavigatorDoor {
             // Batch B's row 50 road: the flow consumes the reveal and lands
             // the story (its chapter's heading when it opens the chapter).
             model.requestReveal(entry.postID)
+        case .showInList:
+            // VX-1084: List takes the reveal — the row selected and brought
+            // into view, as her click on it would select it.
+            model.requestReveal(entry.postID)
         }
     }
 
@@ -4551,7 +4584,7 @@ enum BookNoteStepDoor {
             return grouped.map(\.postID)
         case (.spread, _), (.read, .pages):
             return entries.map(\.postID)
-        case (.index, _):
+        case (.index, _), (.list, _):
             return []
         }
     }
@@ -4615,7 +4648,7 @@ enum BookNoteStepDoor {
             // landing's target at its start (VX-645), so the next press steps
             // on from it.
             model.requestReveal(postID)
-        case (.index, _):
+        case (.index, _), (.list, _):
             break
         }
     }
@@ -4709,13 +4742,15 @@ nonisolated enum BookFootDoors {
 // MARK: - VX-1036 P7 — a mint in Read lands live
 
 /// **Which book modes a mint door turns to the Outline** (the VX-1036 run,
-/// batch 2 — ledger row 15): READ, the one mode with no live editor of its own
-/// (A43 — Read is read-only), so its doors' notes arrive live on the Outline
-/// instead of shown on the page. Outline, the spread and the Index each land a
-/// minted note their own way (batch 1's arrival).
+/// batch 2 — ledger row 15): READ, a mode with no live editor of its own (A43 —
+/// Read is read-only), so its doors' notes arrive live on the Outline instead
+/// of shown on the page — and, since batch 3, LIST, the other (VX-1084: rows
+/// only, no editor; N-1's letter, "every mint door ends with the new note on
+/// the page, live" — PROVISIONAL P-1036-B3-2). Outline, the spread and the
+/// Index each land a minted note their own way (batch 1's arrival).
 enum BookReadMint {
     static func turnsToOutline(_ mode: BookStructureModel.ViewMode) -> Bool {
-        mode == .read
+        mode == .read || mode == .list
     }
 }
 

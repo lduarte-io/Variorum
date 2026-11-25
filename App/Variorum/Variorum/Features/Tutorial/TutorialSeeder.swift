@@ -2441,10 +2441,14 @@ enum TutorialSeeder {
             // librarywalkpolish VR-122 (F-10): the toggle is FOUR —
             // Outline · Index · Book · Read (`BookView.bookMasthead`; the book
             // Index since pre-13u Act 10 wave 2c, editable in place since the
-            // correction round). Words functional, 13s re-voices.
-            "Four views of a book share the toggle at the top. Outline is this "
+            // correction round). Words functional, 13s re-voices. VX-1084
+            // (the VX-1036 run, batch 3): FIVE — List joins after Outline.
+            "Five views of a book share the toggle at the top. Outline is this "
             + "scroll, and it is where a book gets written: chapter headings, "
             + "notes you can collapse, and the same editor you write a note in. "
+            + "List shows the same notes as rows, the way the Library lists "
+            + "them, in the book's order and under its chapters; click a row to "
+            + "select its note, double-click to open it. "
             + "Index keeps a column of the chapters and notes beside the whole "
             + "text; click any block in the text and it goes live right where it "
             + "is. Book is a two-page spread. Each page is one whole note, and "

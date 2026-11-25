@@ -255,6 +255,10 @@ nonisolated enum BookOutlineRows {
         case landTheFlow
         /// Read ▸ Pages: the reader turns to the story's first page.
         case turnThePages
+        /// **VX-1084 — List**: the row is selected and brought into view (the
+        /// List takes the reveal — its selection, as a row click makes it);
+        /// the navigator never leaves List (PROVISIONAL P-1036-B3-4).
+        case showInList
     }
 
     /// **R-cor-17 (2026-09-02, her ruling on round 2's R2-10):** in the
@@ -282,6 +286,8 @@ nonisolated enum BookOutlineRows {
             return .showOnSpread
         case .outline, .index:
             return .openTheNote
+        case .list:
+            return .showInList
         }
     }
 }

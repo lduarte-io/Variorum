@@ -112,7 +112,8 @@ nonisolated enum BookOpenDoor {
             guard live.indexPostID == postID, let block = live.indexBlockID else { return nil }
             let offset = live.indexCaret?.blockID == block ? live.indexCaret?.offsetInBlock : nil
             return Place(blockID: block, offsetInBlock: offset)
-        case .read:
+        case .read, .list:
+            // VX-1084: List, like Read, has no caret — a plain open.
             return nil
         }
     }

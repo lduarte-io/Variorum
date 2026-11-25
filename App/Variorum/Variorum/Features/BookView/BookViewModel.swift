@@ -1245,6 +1245,18 @@ final class BookViewModel {
         indexSelectedPostID = postID
     }
 
+    /// **VX-1084 — the List's SELECTION** (BL-3: a row's click selects the
+    /// note into the sidebar's box), reported by the List the way the index
+    /// column reports its own — a report, not a decision. It is also List's
+    /// PLACE for the click-over (`BookAnchor.Place.listPostID`) and the note
+    /// the navigator marks while List shows (`navigatorViewedPair`).
+    private(set) var listSelectedPostID: String?
+
+    func noteListSelection(_ postID: String?) {
+        guard postID != listSelectedPostID else { return }
+        listSelectedPostID = postID
+    }
+
     /// **The index's LIVE note** (18d batch 1): the note whose block the
     /// index's one live pane is in, reported the same way its selection is.
     /// Index mounts no full-document editor by design — it is a projection
@@ -1332,7 +1344,9 @@ final class BookViewModel {
             standingPostID: standingAnchorPostID,
             // VX-681: Read ▸ Scroll's place is the story its page shows — the
             // flow's own slot (empty whenever the flow is not on screen).
-            flowViewedPostID: viewedFlowPair.postID)
+            flowViewedPostID: viewedFlowPair.postID,
+            // VX-1084: List's place is its selected row.
+            listPostID: listSelectedPostID)
     }
 
     /// THE CARRY (her round-8 ruling): capture where the DEPARTING mode is
@@ -1567,6 +1581,10 @@ final class BookViewModel {
             BookOutlineViewed.pagePair(postID: pagedAnchorPostID, chapterOf: chapterOf)
         case (.spread, _):
             BookOutlineViewed.pagePair(postID: leftPage?.postID, chapterOf: chapterOf)
+        // VX-1084: List's selected row and its chapter — a selection is
+        // discrete (the Pages arm's reason), so nothing follows between picks.
+        case (.list, _):
+            BookOutlineViewed.pagePair(postID: listSelectedPostID, chapterOf: chapterOf)
         case (.index, _): .nothingViewed
         }
     }

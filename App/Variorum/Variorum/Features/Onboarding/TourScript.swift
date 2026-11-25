@@ -115,11 +115,22 @@ enum TourScript {
     /// (`PaletteDerivationTests.theSearchBlurbCountsThePalettesTheStripShows`),
     /// so a new preset can never leave the card a number behind.
     static var paletteCountWord: String {
-        let count = ThemePalette.allCases.filter { $0 != .custom }.count
+        spelled(ThemePalette.allCases.filter { $0 != .custom }.count)
+    }
+
+    /// A count as the cards spell it ("five").
+    static func spelled(_ count: Int) -> String {
         let speller = NumberFormatter()
         speller.locale = Locale(identifier: "en_US")
         speller.numberStyle = .spellOut
         return speller.string(from: NSNumber(value: count)) ?? "\(count)"
+    }
+
+    /// Names in a sentence: "a, b and c".
+    static func listed(_ names: [String]) -> String {
+        guard let last = names.last else { return "" }
+        guard names.count > 1 else { return last }
+        return names.dropLast().joined(separator: ", ") + " and " + last
     }
 
     /// **Step 3's last sentence when the ring is NOT on the chapter the
@@ -226,11 +237,13 @@ enum TourScript {
             // VX-292 U3 — the book arc's first beat (R-292-10; reworks
             // step 9's climb). BUILD-VERIFY: the book icon's ascent lands the
             // note's own card at the Outline's top (`requestReveal`), the
-            // book's four tabs quoted from the row that draws them.
+            // book's tabs quoted from the row that draws them — counted and
+            // listed from the table (five since the List mode, VX-1084), so a
+            // new tab can never leave the card a view behind.
             let tabs = BookView.tabOrder.map(BookView.tabLabel)
             return Card(
                 title: "Up to the book",
-                body: "Click the book icon: you're back in \(seededBookName), one level up, with your chapter in view. A book has four views of its own along the top: \(tabs[0]), \(tabs[1]), \(tabs[2]) and \(tabs[3]).")
+                body: "Click the book icon: you're back in \(seededBookName), one level up, with your chapter in view. A book has \(Self.spelled(tabs.count)) views of its own along the top: \(Self.listed(tabs)).")
         case .bookAndRead:
             // VX-292 U3 — the second beat: the book's Book tab (the spread —
             // each note a page), then its Read.

@@ -23,6 +23,9 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
+/// `@MainActor`: the stable widths' memo is the main actor's (the app's
+/// default isolation), so the voice cases measure one at a time.
+@MainActor
 @Suite("VX-1091 — the book navigator's floor holds its mode row")
 struct BookNavigatorFloorTests {
     /// The tab row's stable width in a voice, measured in the voice's own font.
