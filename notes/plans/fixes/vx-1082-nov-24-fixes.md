@@ -228,7 +228,7 @@ Either ruling is a small follow-on piece for this session (resume me) — the Li
 | Piece | Status |
 |---|---|
 | 0. This record + the four traced mechanisms | DONE (this commit) |
-| 1. VX-1016 pins, test-only, on the pre-fix tree | NOT-STARTED |
+| 1. VX-1016 pins, test-only, on the pre-fix tree | DONE (this commit) — `VariorumTests/TrashListingRestartTests.swift` (5 tests: the filter's render beat, the filter's in-flight answer, the order's flag contract, the wing's render beat, the wing's in-flight answer); `build-for-testing` GREEN on the pre-fix tree (`.vx1082d-logs/bft1.log`, local). Red-on-old by a deterministic model read (each test's note says which expectations) — RUN PENDING the window |
 | 2. VX-1016 fix (`RecoveryView.swift` only) | NOT-STARTED — the didSets do what `ask` does; the listing's question carries its wing |
 | 3. VX-1077 pins, test-only (+ the two single-note dialog pins re-pointed at a two-note ask — a ruled change) | NOT-STARTED |
 | 4. VX-1077 fix (`NoteDeletion.swift` only) | NOT-STARTED — the one host decides by count; a single delete's outcome is an offer with Undo |
