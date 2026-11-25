@@ -65,6 +65,19 @@ struct MobileFaintOnDoorsSourceTests {
             .filter { PhoneType.spec($0, voice: .study).size >= 17 }
             .map(\.rawValue))
 
+    /// **The quick-entry box's hint is the box's PLACEHOLDER** — the faint's own
+    /// use at any size (sheet §D: "glyphs, 17 pt semibold words and placeholders
+    /// need 3:1"; the faint clears 3:1 on every shipped ground, `PhoneInks`),
+    /// drawn as the empty box's overlay rather than a field's `prompt:`, so the
+    /// rule's two placeholder forms do not name it. It rode the full-size
+    /// exemption while her words' body was 17; VM-254 (the VM-260 run, batch 3 —
+    /// her R-260-2) took the body to 16 — MOVED with the ruling: the one site,
+    /// named by its one function, keeps the faint as the placeholder it is.
+    static func isTheBoxsHint(_ relative: String, _ lines: [String], at index: Int) -> Bool {
+        relative == "VariorumMobile/Features/Shell/MobileQuickNote.swift"
+            && (max(index - 6, 0)...index).contains { lines[$0].contains("func hintLine(") }
+    }
+
     private static let stringLiteral = try! NSRegularExpression(pattern: #""(?:[^"\\]|\\.)*""#)
     private static let trailingComment = try! NSRegularExpression(pattern: #"(^|\s)//.*$"#)
     private static let roleRead = try! NSRegularExpression(pattern: #"\.phoneType\(\.(\w+)"#)
@@ -206,9 +219,9 @@ extension MobileFaintOnDoorsSourceTests {
     /// / `.fill(` — the box's dashed edge), a glyph-only mark (a `Text` whose
     /// literals hold no letter — the block list's ○), a field's placeholder
     /// (a line holding a `prompt:` argument or the `\.phoneFieldPrompt` key
-    /// path, case-sensitive — ladder round 3, R3-n1), and a word at
-    /// 17 pt or more (the box's 17 pt hint; the disabled "Use as Daily
-    /// Journal"). Anything else — a sentence, a section header, a path, a
+    /// path, case-sensitive — ladder round 3, R3-n1), the box's hint (the
+    /// box's placeholder, `isTheBoxsHint` — VM-254 took its 17 pt to 16), and a
+    /// word at 17 pt or more. Anything else — a sentence, a section header, a path, a
     /// row's meta line, a status word, a door's word — is the class. A read
     /// whose role cannot be found counts (the conservative side).
     static func wordOffenders() throws -> (sites: [String], scanned: Int) {
@@ -232,6 +245,7 @@ extension MobileFaintOnDoorsSourceTests {
             for (index, line) in lines.enumerated() where faint.contains(where: { line.contains($0) }) {
                 if line.contains(".stroke(") || line.contains(".fill(") { continue }  // edges and fills
                 if line.contains("prompt:") || line.contains("\\.phoneFieldPrompt") { continue }  // a field's placeholder
+                if isTheBoxsHint(relative, lines, at: index) { continue }  // the box's placeholder (VM-254)
                 if (max(index - 4, 0)...index).contains(where: { isGlyph(lines[$0]) }) { continue }
                 if let found = nearestRole(lines, at: index), fullSizeRoles.contains(found) { continue }
                 sites.append("\(relative):\(index + 1)")

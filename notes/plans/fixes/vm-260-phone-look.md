@@ -1510,8 +1510,8 @@ phone's Look; the Mac's sources untouched; no canon edited (the deltas are draft
 | 2. The red-on-old tree built headless (`DerivedData/vm260-3-rol`, an APFS clone of `vm260-2`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `2e03a6811` |
 | 3. VM-247 — this phone's own look (voice · palette · background · appearance on the device; the router's overlay; the editor face's ground; Settings ▸ Look's rows) | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-3`, an APFS clone of `vm260-3-rol`, incremental, `nice -n 15`); the suites PENDING; the pins it moves are piece 5's |
 | 4. VM-254 — the text-size row and the smaller default (the type layer's table and its words scale; the editor face's body; the environment at the roots) | DONE (this commit) — phone `build-for-testing` green on it (`vm260-3`, incremental, `nice -n 15`); the suites PENDING; the pins it moves are piece 5's |
-| 5. Pins MOVED with the rulings + the tip's new pins | NOT STARTED |
-| 6. Tip bundles (`vm260-3`, `vm260-3-mac`, `vm260-3-ui`) and READY-FOR-TESTS | NOT STARTED |
+| 5. Pins MOVED with the rulings + the tip's new pins | DONE (`8d088be03`; the faint rule's box-hint move in the READY commit) — listed below; compiled in `vm260-3` |
+| 6. Tip bundles (`vm260-3`, `vm260-3-mac`, `vm260-3-ui`) and READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` on this commit's code (APFS clones of `vm260-3-rol`, `vm260-2-mac`, `vm260-2-ui`; incremental; `nice -n 15`); the run list below |
 | 7. The window — red-on-old, the whole phone target, the Mac legs, the keyboard-reveal UI test, the captures | PENDING (the GO) |
 
 ### VM-247 — the traced mechanism: why a look chosen on either device moved the other
@@ -1601,3 +1601,178 @@ only lever was the system's text size, which moves the chrome too.
   seam). A book's Read page follows the setting too (`PhoneReadingModifier`) but keeps its own table at the default
   (P-260-3b).
 - **Settings ▸ Look ▸ Text size** — the five words as the system segmented control (every Settings choice's control).
+
+### Pins (all PENDING the window)
+
+**Red on old — the pre-fix tree `2e03a6811`, bundle `DerivedData/vm260-3-rol`** (only symbols both trees declare):
+- `MobilePhoneOwnLookFenceTests.thePhonesVoiceDoorWritesNoSettingRowAndNoOutboxRow` — a bound router, an open editor;
+  `router.setVoice(.terminal)`; the chrome, the face and the open editor's storage move; the `setting` rows and the
+  `setting` outbox rows are byte-unchanged. **RED ON OLD predicted** (2 issues: the `theme_voice` row and its outbox row
+  — R-47-2's road wrote both; the movement half passes on old, through the landing).
+- `MobilePhoneOwnLookFenceTests.aLookWrittenToTheLibraryMovesThePhoneNothing` — the Mac's operations write Terminal under
+  lavender; a witness `ThemeStore` and the router's own store both land it; the router, its tokens (both appearances),
+  the face and the open editor still wear Study under the sea-glass. **RED ON OLD predicted** (≈ 6 issues: the voice,
+  the palette, the tokens ×2, the face, the editor's font).
+- `MobileHerWordsDefaultTests.herWordsSitOneNotchUnderTodaysSet` — the table's her-words roles at 16 / 25 · 20 / 25 ·
+  19 / 24 · 16 / 21 · 14 / 19, Terminal 14 / 23 · 18 / 23 · 17 / 22 · 14 / 19 · 13 / 18, the chrome unmoved, the twelve
+  words 17. **RED ON OLD predicted** (7 issues: Study's body, screen title, row title, preview; Terminal's body, screen
+  title, row title — the note's title and Terminal's preview already hold on old).
+- `MobileHerWordsDefaultTests.theNoteInWriteTakesTheSmallerBody` — the editor's body Terminal 14 on 23, Study 16 on 25.
+  **RED ON OLD predicted** (4 issues).
+
+**The tip's own — new behaviour, GUARDS** (green on the tip predicted; their symbols are new, so no red-on-old run):
+- `MobilePhoneOwnLookTests` (8): `theLookIsKeptInThisDevicesDefaults` (fresh = Study · sea-glass · paper · default; the
+  four keys; a fresh owner reads them back; strange values and `custom` read the default; the inert owner remembers
+  nothing; never the retired key) · `theOverlayTakesOnlyTheLook` · `everyLookChoiceWritesNoSettingRowAndMovesTheFace`
+  (palette, background, text size, voice — no row, no outbox row; the accent, the ground, the body, the voice each
+  move) · `theCreamIsTheVoicesOwnRoomNeverThePalettes` (the SwiftUI rule and the editor face agree, both voices, light
+  and dark, two palettes; a real text view's ground) · `aNoteInWriteWearsTheCreamSheChose(dark:)` ×2 (a real scene
+  window, the shell, the Today door into Write: the editor's margin and the four edge points within 0.012 of the cream,
+  which is > 0.02 from the paper — Study light's cream is `#FAF8F3` against `#FFFFFF`, so the pin's tolerance is tight
+  on purpose) · `theLookGroupDrivesThePhonesOwnChoices` (the segments exist; Cream, Large, Terminal drive the phone's
+  owner and are remembered in its defaults; the palette's door under the Mac's label names the sea-glass and answers
+  ≥ 44 tall across the row) · `thePaletteMenuOffersEveryPresetOnce` · `thePaletteWordsAreTheMacsOwn` (a source pin on
+  the Mac's `PaletteCopy.swift`, P-47-24's precedent).
+- `MobileTextSizeTests` (5): `theFiveStepsScaleHerWordsOnly` · `nothingIsEverBelowThirteenPointsAtAnyStep` (12
+  categories × 5 steps × 2 voices × 12 roles, both forms) · `aStepReachesHerWordsOnAMountedScreenAndNotTheChrome` (a row
+  title's line grows at Larger and shrinks at Smaller, a control's word within 0.5 — prints `PERF[sim] VM-254 mounted
+  lines …`) · `theEditorFaceTakesTheStep` · `aStepChosenOnThePhoneRebasesAnOpenNote` (attributes only; no `setting` row).
+
+### Pins MOVED with the rulings (each because the ruled change moved what it holds; none loosened past its new number)
+
+- `MobileShellTests.theVoiceDoorWritesTheLibraryAndTheLandingReachesTheOpenSurface` → `…theVoiceDoorIsThePhonesAndReaches
+  TheOpenSurface` — the door moves the phone's voice and the open surface in the same turn; `theme_voice` is nil (it
+  asserted the library's row written — VM-247 reverses exactly that).
+- `MobileLibraryLookTests.aLookWrittenElsewhereReachesThePhoneAndItsOpenEditor` → `aLookChosenOnThePhoneReachesItsChrome
+  ItsFaceAndAnOpenEditor` — the same coverage (chrome, face, open editor, the markdown link, `.default`'s byte-identical
+  road) driven by the phone's own doors; its inverse is the fence pin. `thePlaceholderIsWhatAnEmptyLibraryReads`: with
+  no library bound the router reports the fresh look over the face's settings (it reported the face's own). The suite's
+  header and `aFreshLibraryWearsStudyUnderTheSeaGlass`'s doc say why that one still holds (R-260-3's constants).
+- `MobileLivenessTests.aVoiceFlipReachesEveryRegisteredEditor` — the flip is the phone's look moving
+  (`router.setVoice`), not a library landing (`adoptLanded` now lays the phone's look over whatever lands, so its
+  second flip would move nothing).
+- `MobileLookSourceTests.theNoteInWriteIsOnThePaper` — Write's three grounds read the one note-ground rule
+  (`noteGround`), no `tokens.surface` ground of their own and no room but the rule's; the editor's line unchanged.
+- `MobilePhoneLayerTests.theStudyTableIsTheSheetsAsDrawn` (her words' new table) and
+  `…terminalIsTheSameRolesInMonoWithItsProseTwoUnder` (14 · 18 · 17; two under, never under the floor — the preview
+  13 / 18).
+- `MobileDrawnStepDownTableTests.theChromeSitsOneNotchUnderHerWords` — its "her other words are batch 3's to move" line
+  now holds batch 3's numbers.
+- `MobileVoiceTests.surfaceWriteValuesFollowTheLiveVoice` — Terminal 14 on 23, Study 16 on 25 (the gaps 12 / 14 kept).
+- `MobileFaintOnDoorsTests` (the sibling rule, `wordOffenders`) — **the quick-entry box's hint**, drawn in the faint at
+  `noteBody`, rode the rule's full-size exemption at 17; at 16 the rule's letter would flag it. It is the box's
+  PLACEHOLDER (sheet §D: placeholders need 3:1, the faint's own use; the faint clears 3:1 on every shipped ground), so the
+  rule names that one site by its one function (`isTheBoxsHint`) — C-254-1 below. Predicted RED on the tip without the
+  move.
+- `MobileSettingsListTests.theGroupsAndTheTwoChoices` — wording of its doc and one message only (the voice is the
+  phone's); its assertions unchanged and green on both.
+
+### Calls made in the batch (for the record and the merge's QUESTIONS; none gates the core)
+
+- **P-260-3a — her words' default and steps as a set** (VM-254): the default one notch under wave 1's set (16 · 20 · 19 ·
+  16 · 14, the note's title's notch already taken), Terminal two under and never under the floor; five steps = the
+  note's body 14 · 15 · 16 · 17 · 18 (a words scale of 14/16 … 18/16; "Large" is wave 1's set back); the words
+  "Smaller · Small · Default · Large · Larger" DRAFT. Alternatives: (b) the default on the five-size scale's own notch
+  (body 15, row title 15, preview 13, screen title 17 — her words would then equal the chrome, against batch 2's
+  "chrome one notch under her words"); (c) steps of the five-size scale itself (13 · 15 · 17 · 20 · 24 for the body —
+  coarse jumps); (d) a slider.
+- **P-260-3b — the reach of the setting**: the five her-words roles everywhere (the shell, every sheet, the lobby, the
+  editor and its UIKit faces); a book's Read page follows the SETTING but keeps its own table at the default (R2's
+  voice-independent page — 17); the twelve words (`mono`) never. Alternatives: (b) the Read page takes the default drop
+  too (body 16, the Mac's page); (c) the Read page outside the setting.
+- **P-260-3c — the palette row's shape and words**: the system menu (16 presets — more than a segmented control holds;
+  the Library sort door's idiom), its door the row under the Mac's label "Colour palette" naming the chosen palette; the
+  Mac's words for every palette; the Mac's two one-swatch groups (Default · Classic) folded into one untitled first
+  section; "Your own" (custom hex) NOT offered on the phone. Alternatives: (b) a sheet of rows with the Mac's swatches;
+  (c) a horizontal swatch strip (the Mac's); (d) offer Custom with a hex field.
+- **P-260-3d — the cream's reach**: the NOTE's ground in Write (P-47-16's own scope — the screen, its masthead, its edge
+  strips, the editor), the voice's own room through the palette-less road; the lists stay on the paper. Words
+  "Background: Paper · Cream" DRAFT ("Cream" is hers). Alternatives: (b) every place her words sit (the roots' lists, a
+  book's contents, Archived, the Trash, Versions) on the cream too; (c) in dark, the voice's own unhued paper rather than
+  R51's black room.
+- **P-260-3e — the look's storage and fresh default**: four keys in this device's defaults (`phoneLookVoice`,
+  `phoneLookPalette`, `phoneLookBackground`, `phoneLookTextSize`), memory-only under a test host; the fresh default her
+  R-260-3's (Study, sea-glass, paper, default size); the library's synced look rows untouched and still landed (the
+  router keeps its store for the library's other settings); the lobby wears the phone's look. Alternative: unbind the
+  phone's `ThemeStore` entirely (it reads no other setting today) — one fewer observation, but a road a later phone
+  setting would have to rebuild.
+- **C-247-1 — the walk's palette seam** (`MobileWalkLaunch`, DEBUG) now chooses the phone's palette through the owner
+  (remembered in the walk device's defaults — a walk that uses it should end by choosing the sea-glass again, or the
+  device keeps the palette).
+- **C-254-1 — the box's hint keeps the faint as a placeholder** (the moved faint rule above). Alternative: the hint in
+  the corrected muted (darker, 4.5:1 — a look change her placeholder never asked for).
+- **C-254-2 — the lobby's environment**: `VariorumMobileApp`'s state switch is wrapped in one `Group` to carry the words
+  scale (its diff is that and one line — read it with `git diff -w`).
+
+### Canon owed at closeout (drafts — the orchestrator's to land, two-file shape, VM-247 / VM-254 the pointers)
+
+- **AppSpec §12, The app** — after "appearance (follow system, light, dark) is a local preference": "On the phone the
+  voice, the palette, the note's background and her words' size are the device's own as well, never the library's
+  (VM-247, VM-254)."
+- **SurfaceContracts, The app — the first bullet's phone sentences** replace "On the phone the voice and palette are the
+  library's own … (PROVISIONAL P-47-15)" with: "**On the phone the whole look is this device's own** — the voice, the
+  colour palette (every preset; no custom hex), the note's background (the paper, or the cream: the voice's own room
+  under every palette — P-47-16's road (b)), her words' size and light · dark · follow the system — kept in its defaults
+  and never the `setting` table, so a look chosen on either device moves the other nothing; a phone that has chosen
+  nothing wears Study under the sea-glass on the paper (R-260-3; VM-247)."
+- **SurfaceContracts, the phone's sizes** — "Study 13 · 15 · 17 · 20 · 24" gains: "her words' roles one notch under wave
+  1's set by default (the note's body 16, a screen's title 19, a row's title 16, its preview 14, the note's title 20),
+  and a text-size setting on the device (five steps, 14–18 on the note's body) scales those roles only — never the
+  chrome, the twelve words or the floor (VM-254; PROVISIONAL P-260-3a/3b)."
+- **SurfaceContracts, the phone's Settings** — Look becomes "Voice: Terminal | Study · Colour palette (the system menu,
+  the Mac's words) · Background: Paper | Cream · Appearance: Follow system | Light | Dark · Text size: Smaller | Small |
+  Default | Large | Larger" — every Look row this device's own (VM-247, VM-254).
+- **`notes/MobileSoul.md`** — the look's per-device row (MOBILE PARITY: the Mac's look stays library-wide; the phone's is
+  its own — a deliberate divergence at her word).
+
+### Batch 3 — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`; `UDID` = the device the GO names (iOS 26.2), booted fresh inside
+the claim, settled, shut down before release. Phone plan:
+`P(folder)=DerivedData/<folder>/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
+`-destination "platform=iOS Simulator,id=$UDID"`. The code tip is THIS commit (the bundles were built from its tree).
+
+**R3 — red on old** (`vm260-3-rol`, tree `2e03a6811`):
+`-only-testing:VariorumMobileTests/MobilePhoneOwnLookFenceTests -only-testing:VariorumMobileTests/MobileHerWordsDefaultTests`
+- Predicted RED, all four: `thePhonesVoiceDoorWritesNoSettingRowAndNoOutboxRow` (2 issues),
+  `aLookWrittenToTheLibraryMovesThePhoneNothing` (≈ 6), `herWordsSitOneNotchUnderTodaysSet` (7),
+  `theNoteInWriteTakesTheSmallerBody` (4). A GREEN one on old means its road is hollow there — report it.
+
+**P3 — the tip, the whole phone target, one launch** (`vm260-3`): `-only-testing:VariorumMobileTests`, read against
+main's known reds (6 known issues — `MobileFilterRowGeometryTests`' two Display-Zoom pins × 2, `MobileTrashTests`'
+empty-tree diagnostic × 2). It holds the four pins above (green), the 13 new guards, the moved pins, and every suite that
+mounts the shell, a root, a note, Settings or a row — the tip carries batches 1a · 1b · 2, F-1a-W1 and batch 3. Predicted:
+green but those six. **The likeliest surprises, in order:** (1) a geometry pin elsewhere that measured her words at 17 /
+15 (a row's height or a title's width) — a pin the ruling moved only if it holds a drawn number of her words; a TARGET
+under 44 or a floor under 13 is a regression; (2) `aNoteInWriteWearsTheCreamSheChose` (light) — its 0.012 tolerance
+between the cream `#FAF8F3` and the paper `#FFFFFF` is tight by necessity; a render off by more than 3/255 is the pin's
+problem, not the cream's — read its printed colours; (3) `theLookGroupDrivesThePhonesOwnChoices`' palette door — it
+finds the Menu by label AND value; if SwiftUI exposes the menu's value differently, the issue text says what it saw.
+
+**M3 — the Mac legs** (`DerivedData/vm260-3-mac/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`,
+`-destination 'platform=macOS'`): `-only-testing:VariorumTests/<type>` for ThemeTokenTests NoLiteralColourTests
+PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
+OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests (this batch changes
+`Shared/Theme/PhoneType.swift`, which the Mac compiles and never renders: a table, a defaulted parameter and one
+`@Entry`; `VoiceTokens.swift`, `ThemeStore.swift` and the Mac's own sources untouched). Expected green but
+`IndexTierMetricsTests`' 4 declared known issues. (If batch 2's M leg runs in the same window it may run here instead —
+this bundle carries batch 2's code.)
+
+**U3 — the keyboard-reveal UI test** (`DerivedData/vm260-3-ui`, scheme TK2SpikeUITests' plan,
+`-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, both tests, ~4 min, on the walk device whose library
+opens): OWED — the note's body font changed (17 → 16) under the mid-note tap and `MobileWriteView`'s grounds moved to the
+note-ground rule; nothing in the band, the editor host or the keyboard road changed. Expected green, both. If
+`testAMidNoteTapRisesAboveTheKeyboard`'s tap lands below the shorter text (the note's lines are ~6 % shorter), that is
+the test's seeded note running out of lines at its tap point, not the reveal — its printed frames say which.
+
+**W3 — the captures** (the Debug phone app from `vm260-3`, both voices, light unless named, to
+`notes/plans/vm-260-screens/batch-3/`; BEFORE where named from `vm260-3-rol`, whose app is the pre-fix app):
+1. **Settings ▸ Look** — the five rows (Voice · Colour palette · Background · Appearance · Text size), both voices; and
+   the palette menu OPEN (its sections, the checkmark).
+2. **The cream** — a note in Write on Paper and on Cream, Study light and dark, Terminal light (the masthead, her text,
+   the edge strips; with the keyboard up once).
+3. **Her words' size** — the same note and the Library at Smaller · Default · Larger (Study light), and BEFORE/AFTER the
+   default (the note and the Library from `vm260-3-rol` against `vm260-3`, both at the system's default size).
+4. **A palette chosen on the phone** — the Bookcase under two palettes (sea-glass and one bold) — the screen recolours.
+5. **At the end, put the walk device back**: Settings ▸ Look to Study · Sea glass · Paper · Follow system · Default (the
+   choices persist in the device's defaults).
