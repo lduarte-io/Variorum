@@ -667,6 +667,25 @@ present):**
   `onScrollGeometryChange` hearing an unanimated `setContentOffset`); read the closing walk's real-thumb
   stop before touching the rule. P-260-4a-1 (the 24/60/8 numbers) and C-4a-1…8 join her bundle; "Search"
   and "· All" are drafts for her wording pass.
+- **A-260-17 (batch 4b's hand-back, 2026-11-25, orchestrator on Opus): ACCEPTED, with ONE departure from her
+  ratified drawing recorded for her eye.** Verified against the diff (`262f5115e..af449326a`): `Sources/`,
+  `Shared/`, `MobileShellView`, `MobileEditorTextView` and `MobileKeyboardBar` untouched (empty diff); the title
+  reads the editor's scroll by KEY-VALUE OBSERVATION of `contentOffset` (a read: no delegate, no editor line),
+  and the tracker publishes only on a flip. **The departure (P-260-4b-1):** the drawing has the title ride away
+  frame by frame with her text; that needs the title INSIDE the text view's content, which is the fenced
+  editor seam. Built instead: the title leaves on a FLIP once the page has really scrolled (4a's 24-pt rule)
+  and comes back within 8 pt of the top, the masthead shrinking so title and text slide together; the
+  mid-note upward-nudge re-open is deliberately NOT reused (it would push the line she's reading down a
+  title's height). The implementer was right not to cross the fence; whether she wants the frame-by-frame
+  ride (C-4b-1: a top content room plus a scroll callback in `MobileEditorTextView`, editor-seam work, her go
+  and a Fable review) is hers after she feels it on the phone. **Review focus added:** two setups in
+  `MobileWriteScrollAuthorityTests` now place the caret twice with a settle (assertions byte-unchanged)
+  because the flip moves the page's foot a frame after a reveal scroll. The reviewer reads whether that hides
+  a real-use effect: her standing first-try, typing low in a note with the keyboard up, may now trigger the
+  flip mid-reveal. That stop is on the closing walk. The guide's six lesson sentences rewritten for the new
+  door positions are DRAFTS for her wording pass (already-seeded guides keep their text). The gate rules in
+  the implementer's read-before-the-gate list (the popover rows, the scroll pin's printed frames) are
+  ADOPTED as harness-first readings, not licences to dispose a pin.
 - **A-260-10 (the F-1a-W1 fix's hand-back, 2026-11-25): trace and fix ACCEPTED; the orchestrator's suspected
   mechanism stands REFUTED by the captures' own pixels.** The trace is the stronger kind of evidence — two
   independent captures of the same field on the same device class, the 52.0-pt gap equal to
@@ -715,6 +734,7 @@ present):**
 | Batch 3 (VM-247 · VM-254) | BUILT 2026-11-25 (code tip `54c0d1cc8`, record `5bbff189f`; adjudicated A-260-11); R3 red-on-old ESTABLISHED in the window (all 4 pins red as predicted, 19 issues); P3 + M3 queued as their own window (nov24, at VX-1082's SEAM or after); W3 captures fold into the gate window; U3 already GREEN (2/2, this window); **FINAL WINDOW: M3 GREEN (53/53 in 9 suites, the 4 declared known); P3 ONE unexpected red, `MobileTextSizeTests.theEditorFaceTakesTheStep` (`:145`, the UIKit row preview at the Larger step ≠ 14 × 1.125), owed to this batch's implementer, traced headless (hypotheses in the final-window section)** |
 | Batch 3b (VM-281 · F-her-1) | BUILT 2026-11-25 (red-on-old `b48b391e2` — `vm260-3b-rol` + `vm260-3b-rol-ui`; fixes `dc8312a89` VM-281, `9bf8e6b55` F-her-1 = code tip; trio rebuilt); ADJUDICATED A-260-15 (C-3b-1 ruled "Cancel picking", a 4a rider). PENDING the gate: both pins red on old; the walk's-road keyboard test GREEN on the tip is the VM-281 claim — red with frames near 591 means model P: STOP, VM-271's road |
 | Batch 4a (VM-259 B · R-260-11 · the C-3b-1 rider) | BUILT 2026-11-25 (red-on-old `0bfd8326c` in `vm260-4a-rol`; code tip `262f5115e`; trio rebuilt, compiling main's merged Core); ADJUDICATED A-260-16. PENDING the gate: R-4a's 12 predicted issues in 8 cases on old, the tip green |
+| Batch 4b (the note's top, R-260-13/14) | BUILT 2026-11-25 (red-on-old `4be933b0e` in `vm260-4b-rol`, ~34 issues in 21 cases predicted; code tip `af449326a`; trio rebuilt); ADJUDICATED A-260-17 — one departure (the title FLIPS away instead of riding frame by frame: the fence), C-4b-1 hers after the phone. PENDING the gate |
 | Batch 4 (VM-259 + the note's top + R-260-11) | BOTH PICKS IN: VM-259 B, the slim bar (R-260-12); the note's top A as picked, ratified with no further checkpoint (R-260-13, R-260-14); the Bookcase count line goes (R-260-11). 4a then 4b after batch 3b and the main merge; her judgment is the phone install after 4b |
 | Her phone (R-260-7) | INSTALLED 2026-11-25 ~11:0x at her word (*"install the build on my phone now"*): the signed device build at code tip `78ed5b4bb` (`DerivedData/vm260-device`, Release-iphoneos), `devicectl` to her iPhone 17 Pro, same bundle id (her store carried over). Her assessment on the phone is the run's real close |
 | Ladder · gate · walk | NOT STARTED |
