@@ -606,7 +606,7 @@ session — every test claim below is PENDING until the GO); the walk and its ca
 | 5. VM-275 half 2 — the squeeze, traced | TRACED: no row moves (a guard pin, expected GREEN on both trees ⇒ the literal mechanism HOLLOW — PENDING its run); what she saw is the line's face, whose cure is VM-277's anatomy — carried in the proposal below, NOT built |
 | 6. A-260-1 — the push door's made-but-not-opened outcome speaks a direction | DONE (`982390ada`) — compiles; the suites PENDING |
 | 7. VM-277 — the proposal (stop-and-propose) | DONE (this commit) — WAITING on the architect's ruling |
-| 8. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | PHONE DONE (`DerivedData/vm260-1b`, tip `982390ada`, incremental, under `nice`); MAC NOT-STARTED — held for the coordinator's "cleared" (its quiet window from 02:06: no cold or full builds); the run list below is drafted |
+| 8. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | DONE — phone `DerivedData/vm260-1b` (tip `1f005a89a`), Mac `DerivedData/vm260-1b-mac` (`85874a1b3`; the later commit touched phone-only files), both incremental clones of batch 1a's warm trees under `nice -n 15` (the coordinator's quiet window); the Mac guard `85874a1b3` added to the Mac leg; the run list below |
 | 9. The suites at the GO (red-on-old, the tip, the Mac legs) | PENDING |
 | 10. VM-277 built, after the ruling | WAITING (the ruling) |
 | 11. The walk (a refusal, a direction, a receipt; both voices) | PENDING |
@@ -796,3 +796,48 @@ pointer.
 expanded reason, the widened touch rule); the pins (the composers' headline walk, the face's geometry — one 44 pt line,
 each door 44 × 44, the card clear of the bar and sides — the touch rule, the clock hold, VM-275's clear of an opened
 reason); captures of a refusal (the line, the reason opened, dismissed), a direction and a receipt, both voices.
+
+
+### Batch 1b — READY-FOR-TESTS (the commands for the GO; nothing builds in the window)
+
+All from `App/Variorum/`, zsh, `test-without-building` against the bundles already built; `UDID` = the device the GO
+names (iOS 26.2), booted fresh inside the claim, settled, shut down before release. Phone plans:
+`P=DerivedData/<folder>/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
+`-destination "platform=iOS Simulator,id=$UDID"`.
+
+**R — red on old** (`vm260-1b-rol`, the pins tree `ea3f95831` — ONE run for every member):
+`-only-testing:VariorumMobileTests/MobileLineDirectionTests -only-testing:VariorumMobileTests/MobileNoteClipboardTests
+-only-testing:VariorumMobileTests/MobileRefusalLeavesItsNoteTests -only-testing:VariorumMobileTests/MobilePushLandingDirectionTests`
+- Predicted RED (13): VM-265 — `MobileLineDirectionTests`: `aDirectionReadsMutedAndARefusalKeepsTheAlarm`,
+  `theTodayDoorsUnfiledEntryReadsMuted`, `theTrashsArchivedTakeSpeaksAndItsFanTwinDoesNot`,
+  `theTraysArchivedTakeSpeaksAndItsFanTwinDoesNot`, `theBlockHistorysArchivedTakeSpeaksAndItsFanTwinDoesNot`,
+  `aLensPickThatComesBackArchivedSpeaksAndItsFanTwinDoesNot`, `aBlockPutBackAtTheEndOfItsNoteSpeaks`,
+  `aBlockPutBackWithItsNoteGoneSpeaks`, `theTraysEndLandingsSpeakAndItsBesideLandingDoesNot`,
+  `aCollectByTaggingSpeaksAndJoiningABookDoesNot` (each on its ink line alone); `MobileNoteClipboardTests.
+  aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking` (its ink line). VM-275 — `aRefusalRaisedInANoteClearsWhenSheLeavesIt`.
+  A-260-1 — `aNoteMadeAfterSheLeftThePageSaysWhereItLanded`.
+- Predicted GREEN: `theDirectionsAreTheLandingsThatAreNotItsPlace`; every other `MobileNoteClipboardTests` test; the
+  guards `aLineSaidBeforeTheNoteOpenedOutlivesItsLeaving`, `aRemovalSaidInTheNoteOutlivesItsLeaving`,
+  `aNoteMadeWhereSheStandsOpensAndSaysNothing`; and **`theListNeverMovesWhileTheLineShows` — green here is VM-275
+  half 2's HOLLOW verdict** (a red here would mean the trace is wrong: STOP and report, do not dispose it).
+
+**P — the tip, the whole phone target, one launch** (`vm260-1b`): `-only-testing:VariorumMobileTests` — read against
+main's known reds (batch 1a's run: 6 known issues, all pre-existing — `MobileFilterRowGeometryTests`' two Display-Zoom
+pins × 2, `MobileTrashTests`' empty-tree diagnostic × 2). Every suite that mounts the shell, a note or the line is in it.
+
+**M — the Mac legs** (`DerivedData/vm260-1b-mac/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`,
+`-destination 'platform=macOS'`): `-only-testing:VariorumTests/<type>` for VM61MacStatusSeamPinTests StatusCenterTests
+StatusSeamVocabularyTests StatusToastPlacementRuleTests StatusToastPlacementShellTests WordsBandSurfaceTests (the suites
+over the one shared file this batch changed, `Shared/StatusCenter.swift`) and batch 1a's nine — ThemeTokenTests
+NoLiteralColourTests PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
+OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests (the token pins and every Mac suite that
+walks the whole phone tree, which this batch changed). Expected green but `IndexTierMetricsTests`' 4 declared known
+issues.
+
+**U — not owed:** the keyboard-reveal UI test's trigger is the Write screen's LAYOUT; this batch's `MobileWriteView.swift`
+edit is two calls on the note screen's appear/disappear (no layout, nothing in the editor host). Batch 2 runs it.
+
+**W — the walk (a later GO, after VM-277 is built, so one walk covers the whole line):** the Debug phone app on a
+dedicated simulator, captures to `notes/plans/vm-260-screens/batch-1b/`, Study and Terminal: a refusal raised in a note,
+then Back — the Library with no line; a direction (the Trash's put back of an archived take, and A-260-1's line) in the
+muted; a removal's line with Undo; VM-277's line, its reason opened and dismissed.
