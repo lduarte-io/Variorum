@@ -67,7 +67,12 @@ struct BookSearchDoor: View {
                     }))
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
-                    .frame(minWidth: 90, idealWidth: 160, maxWidth: 180)
+                    // VX-1014: the field's 90-pt FLOOR lives in the masthead's
+                    // title line now (`BookMastheadTitleLineRule.fieldFloor`),
+                    // which keeps it whenever the column can and gives way
+                    // only where it cannot — a frame floor here pushed the
+                    // masthead past a narrow column.
+                    .frame(minWidth: 0, idealWidth: 160, maxWidth: 180)
                     .focused($focused)
                     .onExitCommand { model.close() }
                     .onAppear { focused = true }

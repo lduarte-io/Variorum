@@ -733,13 +733,17 @@ struct BookView: View {
         // 190 pt navigator, tabs + gear on one line compressed the labels
         // into mid-word wraps ("outl/ine"), the b6dae25 class this walk
         // caught live (2026-08-31).
-        HStack(spacing: 4) {
+        //
+        // VX-1014: ONE Layout, never wider than the column — the open search
+        // field's floor first (never past the room), then the name whole,
+        // then the field's growth; the name yields the rest. At rest it is
+        // the HStack it replaced (`BookMastheadTitleLine`).
+        BookMastheadTitleLine {
             Text(tokens.path([bookName]))
                 .bookNameProbe(.masthead, readingID: readingID, name: bookName)
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
-            Spacer(minLength: 2)
             // 13o U3 — SEARCH THIS BOOK (her R-13o-14): the masthead's right,
             // a magnifying glass at rest, the field only when clicked.
             BookSearchDoor(tokens: tokens, model: bookSearch)
