@@ -311,3 +311,23 @@ install and the #281 dispositions.
 | Batch 4 (VM-259: design → pick → build) | NOT STARTED |
 | Ladder · gate · walk | NOT STARTED |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
+
+## BATCH 1a — record (VM-253 · VM-256 · VM-255; implementer: Opus, 2026-11-25)
+
+**What this batch did NOT do (kept current):** no test has been RUN yet — every result below is PENDING until the
+stage GO; no walk yet (captures PENDING); no line in `Sources/`, `Sync/`, custody, `MobileEditorTextView` or the
+text-input path; `Shared/` untouched; the one message line untouched (batch 1b's).
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon, this record's binding sections, the resiliency protocol, SurfaceContracts' phone bullets, the VM-47 FOR A LATER READER, the three tickets' bodies); the screens folder made gitignored | DONE (this commit) |
+| 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | NOT-STARTED |
+| 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | NOT-STARTED |
+| 3. VM-256 — the trace; the pins on the pre-fix tree | NOT-STARTED |
+| 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | NOT-STARTED |
+| 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | NOT-STARTED |
+| 6. Phone + Mac `build-for-testing` green; READY-FOR-TESTS | NOT-STARTED |
+| 7. The suites (each pin red on old by behavioural revert, then the batch's suites green) | PENDING (needs the stage GO) |
+| 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (needs the stage GO) |
