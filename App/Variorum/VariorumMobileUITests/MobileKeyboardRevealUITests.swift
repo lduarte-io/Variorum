@@ -54,6 +54,22 @@
 //  per-release device checks (TEXTKIT2_NOTES §5). It is not part of the unit
 //  targets' whole-run gates.
 //
+//  VM-260 F-1a-W1 (the walk's s9) — **THE BAR RIDES ABOVE THE LIBRARY
+//  SEARCH'S KEYBOARD** (`testTheBarRidesAboveTheLibrarySearchKeyboard`;
+//  SurfaceContracts' bar line: "While the capture box or the Library search
+//  holds the keyboard the bar rides above it"). The walk caught the bar 52 pt
+//  low — on the keys, under the keyboard's candidate strip — on the search's
+//  FIRST keyboard after a note's keyboard, whose editor wears its 52-pt bar
+//  (an `inputAccessoryView`); the band's SwiftUI keyboard avoidance came out
+//  short by exactly that. A real keyboard session before a real keyboard is
+//  what the defect needs, so this is a UI test. Its oracle is the screen's own
+//  pixels: each of the bar's three doors must draw exactly as it draws at rest
+//  (no glass over it), and its frame must end above the keyboard's keys. Leg 1
+//  (the search's keyboard with none before it) is the control; leg 2 (right
+//  after the note's keyboard, then with the field emptied — the walk's frame)
+//  is the finding. Same device, same cold-run commands, the same cleanup
+//  discipline: nothing is written (a search typed and cleared, a caret placed).
+//
 
 import UIKit
 import XCTest
@@ -164,6 +180,160 @@ final class MobileKeyboardRevealUITests: XCTestCase {
         if let restored {
             XCTAssertTrue(restored, "the lesson's text is as it was after the letter was deleted")
         }
+    }
+
+    // MARK: - VM-260 F-1a-W1 — the bar rides above the Library search's keyboard
+
+    /// **RED ON OLD (predicted, leg 2): the bar stands 52 pt low — on the keys,
+    /// under the candidate strip's glass — on the search's first keyboard after
+    /// a note's.** Leg 1 (no keyboard before it) is the control, green on both
+    /// trees. See the file header; the record is F-1a-W1 in
+    /// `notes/plans/fixes/vm-260-phone-look.md`.
+    func testTheBarRidesAboveTheLibrarySearchKeyboard() throws {
+        // Every leg reports; the cleanup at the end always runs.
+        continueAfterFailure = true
+        Self.setHardwareKeyboard(attached: false)
+        app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 20), "the app came up")
+        pause(2.0)
+        passLobby()
+        XCTAssertTrue(button("Bookcase").waitForExistence(timeout: 10), "the shell is up (its bar's Bookcase door)")
+        openThePocketGuide()
+
+        // AT REST — the Library's root with no keyboard: the bar's own drawing, the reference.
+        goTab("Library")
+        pause(0.6)
+        XCTAssertEqual(app.keyboards.count, 0, "PREMISE: no keyboard is up at rest")
+        let rest = try barShot("at rest")
+
+        // LEG 1 — THE CONTROL: the search's keyboard with no keyboard before it (VM-47's c4 shape).
+        let field = onscreen(app.textFields, wait: 3)
+        XCTAssertTrue(field.waitForExistence(timeout: 4), "the Library's search field")
+        field.tap()
+        let firstKeyboard = try softwareKeyboardUp()
+        pause(1.0)
+        judgeTheBar(try barShot("leg 1"), rest: rest, keyboard: firstKeyboard,
+                    leg: "LEG 1 (the control: the search's keyboard, none before it)")
+
+        // Into the lesson, and ITS keyboard: the editor's, wearing the 52-pt bar.
+        emptyTheSearch(field)
+        field.typeText(Self.lesson.query)
+        pause(1.4)
+        let hit = onscreen(app.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] %@", Self.lesson.title)))
+        XCTAssertTrue(tap(hit, "the lesson's search hit"), "the lesson \"\(Self.lesson.title)\" is found")
+        pause(1.8)
+        let tv = onscreen(app.textViews.matching(NSPredicate(format: "label !=[c] 'Quick note'")), wait: 4)
+        XCTAssertTrue(tv.waitForExistence(timeout: 4), "the lesson's editor")
+        if app.keyboards.count > 0 {
+            // The search's keyboard rode into the note: dropped, so the editor's is a session of its own.
+            dismissKeyboardInNote(tv)
+        }
+        let editor = tv.frame
+        tap(at: CGPoint(x: editor.midX, y: editor.midY))
+        _ = try softwareKeyboardUp()
+        let editorsBar = app.buttons.matching(NSPredicate(format: "identifier == 'kbar.block'")).firstMatch
+        XCTAssertTrue(editorsBar.waitForExistence(timeout: 3),
+                      "PREMISE: the note's keyboard wears the editor's bar (its inputAccessoryView)")
+        report("the note's keyboard \(app.keyboards.firstMatch.frame); the editor's bar cell \(editorsBar.frame)")
+
+        // Back with the keyboard up — the walk's road from s5.
+        back()
+        pause(1.2)
+
+        // LEG 2 — THE FINDING: the search's keyboard right after the note's.
+        if app.keyboards.count == 0 {
+            let again = onscreen(app.textFields, wait: 3)
+            XCTAssertTrue(again.waitForExistence(timeout: 4), "the Library's search field, back on its root")
+            again.tap()
+        } else {
+            report("at Back the search took the keyboard back on its own (its focus restored)")
+        }
+        let secondKeyboard = try softwareKeyboardUp()
+        pause(1.0)
+        judgeTheBar(try barShot("leg 2"), rest: rest, keyboard: secondKeyboard,
+                    leg: "LEG 2 (the search's keyboard right after the note's)")
+
+        // And with the field emptied inside that same keyboard — the walk's s9 frame.
+        emptyTheSearch(onscreen(app.textFields, wait: 2))
+        pause(1.2)
+        judgeTheBar(try barShot("leg 2, emptied"), rest: rest, keyboard: app.keyboards.firstMatch,
+                    leg: "LEG 2, the field emptied (the walk's s9)")
+
+        // Cleanup: a page change takes the keyboard down (nothing was written).
+        goTab("Bookcase")
+    }
+
+    /// The bar's three doors' frames and the screen, read together.
+    private struct BarShot {
+        let name: String
+        let doors: [String: CGRect]
+        let shot: XCUIScreenshot
+    }
+
+    /// The bar's doors are the LOWEST on-screen buttons wearing the three
+    /// words (no page draws those words lower than the bar does).
+    private func barShot(_ name: String) throws -> BarShot {
+        var doors: [String: CGRect] = [:]
+        let screen = app.frame
+        for word in ["Starred", "Bookcase", "Library"] {
+            let query = app.buttons.matching(NSPredicate(format: "label ==[c] %@", word))
+            _ = query.firstMatch.waitForExistence(timeout: 2)
+            var lowest: CGRect?
+            for i in 0..<min(query.count, 12) {
+                let frame = query.element(boundBy: i).frame
+                guard screen.contains(CGPoint(x: frame.midX, y: frame.midY)) else { continue }
+                if let found = lowest, frame.minY <= found.minY { continue }
+                lowest = frame
+            }
+            guard let lowest else {
+                throw RevealStop("INCONCLUSIVE: the bar's \(word) door is not on the screen (\(name))")
+            }
+            doors[word] = lowest
+        }
+        let shot = XCUIScreen.main.screenshot()
+        keep(shot, "BAR \(name)")
+        return BarShot(name: name, doors: doors, shot: shot)
+    }
+
+    /// THE FACT: each door draws exactly as it does at rest (no glass over it —
+    /// the walk's s9 drew the words blurred under the candidate strip), and its
+    /// frame ends above the keyboard's keys.
+    private func judgeTheBar(_ up: BarShot, rest: BarShot, keyboard: XCUIElement, leg: String) {
+        let width = app.frame.width
+        guard let a = ScreenPixels(rest.shot, pointsWide: width),
+              let b = ScreenPixels(up.shot, pointsWide: width) else {
+            XCTFail("INCONCLUSIVE: \(leg) — a screenshot could not be read")
+            return
+        }
+        let keys = keyboard.exists ? keyboard.frame : .null
+        var lines = ["\(leg): the keyboard \(keys)"]
+        for word in ["Starred", "Bookcase", "Library"] {
+            guard let atRest = rest.doors[word], let now = up.doors[word] else { continue }
+            let same = ScreenPixels.sameDrawing(a, at: atRest.insetBy(dx: 2, dy: 2), b, at: now.insetBy(dx: 2, dy: 2))
+            lines.append("\(word) at rest \(atRest) · now \(now) · ink \(same.ink) px · differing \(same.differing) px")
+            XCTAssertGreaterThanOrEqual(same.ink, 40, """
+                INCONCLUSIVE: \(leg) — the resting \(word) door draws no word to compare (\(same.ink) px of ink)
+                """)
+            XCTAssertLessThanOrEqual(same.differing, max(12, same.ink / 10), """
+                RED — \(leg): the bar's \(word) door does not draw as it does at rest (\(same.differing) of its \
+                \(same.ink) ink pixels differ) — something covers it: the bar is under the keyboard's glass
+                """)
+            if keyboard.exists {
+                XCTAssertLessThanOrEqual(now.maxY, keys.minY + 0.5, """
+                    RED — \(leg): the bar's \(word) door ends at y \(now.maxY), on the keyboard's keys (their top \
+                    \(keys.minY)) — the bar does not ride above the keyboard
+                    """)
+            }
+        }
+        report(lines.joined(separator: "\n"))
+    }
+
+    /// The search field emptied by the keyboard's own deletes (an empty field
+    /// reads its placeholder back, so a few spare deletes are harmless).
+    private func emptyTheSearch(_ field: XCUIElement) {
+        guard field.exists, let text = field.value as? String, !text.isEmpty else { return }
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: text.count + 2))
     }
 
     // MARK: - The road to the lesson
@@ -462,6 +632,40 @@ private struct ScreenPixels {
             return String(format: "%d px differ, x %.1f…%.1f, y %.1f…%.1f (%.1f pt wide)",
                           count, x0, x1, y0, y1, x1 - x0)
         }
+    }
+
+    /// One drawing in two places (F-1a-W1): the rect `ra` of `a` against the
+    /// same-sized rect `rb` of `b`, pixel for pixel. `ink` counts the pixels
+    /// of `a`'s rect that differ from its own top-left pixel (its ground) —
+    /// the words and the chip, what there is to compare; `differing` counts the
+    /// pixels where the two places differ (a channel by more than 24 of 255).
+    /// A rect off either screen reads as nothing comparable (no ink).
+    static func sameDrawing(
+        _ a: ScreenPixels, at ra: CGRect, _ b: ScreenPixels, at rb: CGRect
+    ) -> (ink: Int, differing: Int) {
+        let w = Int((min(ra.width, rb.width) * a.scale).rounded(.down))
+        let h = Int((min(ra.height, rb.height) * a.scale).rounded(.down))
+        let ax = Int((ra.minX * a.scale).rounded()), ay = Int((ra.minY * a.scale).rounded())
+        let bx = Int((rb.minX * b.scale).rounded()), by = Int((rb.minY * b.scale).rounded())
+        guard w > 0, h > 0, a.scale == b.scale,
+              ax >= 0, ay >= 0, ax + w <= a.width, ay + h <= a.height,
+              bx >= 0, by >= 0, bx + w <= b.width, by + h <= b.height
+        else { return (0, 0) }
+        func delta(_ p: [UInt8], _ i: Int, _ q: [UInt8], _ j: Int) -> Int {
+            max(abs(Int(p[i]) - Int(q[j])), abs(Int(p[i + 1]) - Int(q[j + 1])),
+                abs(Int(p[i + 2]) - Int(q[j + 2])))
+        }
+        let ground = (ay * a.width + ax) * 4
+        var ink = 0, differing = 0
+        for y in 0..<h {
+            for x in 0..<w {
+                let i = ((ay + y) * a.width + ax + x) * 4
+                let j = ((by + y) * b.width + bx + x) * 4
+                if delta(a.bytes, i, a.bytes, ground) > 24 { ink += 1 }
+                if delta(a.bytes, i, b.bytes, j) > 24 { differing += 1 }
+            }
+        }
+        return (ink, differing)
     }
 
     static func difference(_ a: ScreenPixels, _ b: ScreenPixels, rows: ClosedRange<CGFloat>) -> Difference {
