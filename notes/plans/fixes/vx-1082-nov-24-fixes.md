@@ -1,19 +1,18 @@
 # VX-1082 — Run: fixes from her Nov 24 use
 
-**STATUS: OPEN 2026-11-24 (/architect-phase; away run; the stage coordinator is nov24 — every xcodebuild test run takes its GO).**
+**STATUS: CLOSED 2026-11-25 (PR #29; /architect-phase away run, nov24 coordinating; the closeout below).**
 Run ticket: VX-1082 (Umbrella · High) · Branch: `vx-1082-nov-24-fixes` · Worktree: `~/dev/variorum-vx-1082` (Pro).
 **Members (the sub-issue roster, listed via the Linear MCP at kickoff per the VX-548 rule — eleven, matching the description):** VX-1074 · VX-1075 · VX-1076 · VX-1077 (the four she reported) + VX-409 · VX-1014 · VX-1016 · VX-1027 · VX-1034 · VX-1069 · VX-1070 (the riders, each chosen by her at the Nov 24 sitting).
 Required reading for every session on this record: this file top to bottom; `notes/SurfaceContracts.md` sections The app · The Library · The Bookcase and books · The note; `notes/TEXTKIT2_NOTES.md` IN FULL for batch E; `notes/SessionResiliencyProtocol.md`.
 
 ## FOR A LATER READER
 
-*(Written at closeout; until then the sections below are the working record.)*
-
-- **The mechanisms as settled:** PENDING.
-- **The fixes as built:** PENDING (one pointer per member).
-- **Her rulings:** the load-bearing ones were hers BEFORE kickoff, on the tickets (VX-1077's four rulings, VX-1069's option (b), VX-1034's two calls, VX-1027's "already ticked", VX-1076's High). The run's own PROVISIONALs are bundled below (HER BUNDLE) — away run.
-- **The evidence lines:** PENDING.
-- **Open items:** PENDING.
+- **The mechanisms as settled.** ⌥⌫/⌥⌦ were AppKit's own (`nextWord`, which walks over line breaks before taking a word) on both writing surfaces, so an empty list item, an empty line or a punctuation-only line lost the word above, and at a block's start the cross-block clamp took the previous block's word (VX-1076). A chapter hit was counted and drawn as its BOOK; a book's own 🔍 counted it and drew nothing (VX-1074). The band quoted every non-tag word (VX-1069). The masthead's search field had a hard 90-pt floor in an HStack that kept a short name whole, overflowing a narrow navigator (VX-1014 — real). Seven doors raised one confirm for any delete (VX-1077). Only the quick-entry band marked itself keep-clear for toasts (VX-1070). The receipt line's ANIMATED arrival crossed the standing ⌘J · ⌘N hint (VX-409 — the static layout never overlapped). The Trash's kind/order/wing restarts kept the old answer adopted (VX-1016 — real by run). The shared mark was a plain image inside a click/drag area whose own help answered (VX-1075); the chip offered Diverge on gatherings and an unmarked archived gathering (VX-1034); the Journal row's door had no designation check (VX-1027).
+- **The fixes as built (one pointer each).** `Surface/WordDelete.swift` + both text views (VX-1076) · `SearchChapterHit`/`Queries.searchChapterHits`, `LibrarySearchModel`/`Sheet`, `CatalogChapterLine`, `BookSearchModel.chapters` + `bandCounts` (VX-1074, D-1082-S1) · `SearchComposer.foldsToNothing` + `SearchFieldWords.words` (VX-1069) · `Features/BookView/BookMastheadTitleLine.swift` (VX-1014) · `NoteDeleteConfirm.asks` + `NoteDeletion.undo` (VX-1077) · `statusToastKeepClear` on the cards band at `ShelfView`, `StatusToastPlacement.keepClearTops` (VX-1070) · the hint's yield in `ShelfView` + `QuietReceiptLine.fade` (VX-409) · `RecoveryView`'s `questionChanged()` + `answeredWing` (VX-1016) · `SharedMarkDoor`/`SharedBooksList` in `OwnershipBadge.swift` (VX-1075) · `MembershipChip.rowDoors`/`addOption` (VX-1034) · `BookRowMenuTable.dailyJournalRow` (VX-1027). Ladder nits: 36b612586 · efac0674d · bfc11fc17.
+- **Her rulings, by id.** On the tickets before kickoff: VX-1077's four (versions line in the toast; multi-select keeps its confirm; no ⌥⌘Z; the phone unchanged) · VX-1027 "already ticked" · VX-1034 g/h (#279) · VX-1069 = P-980-B1-1 (b) (#276). Overnight: "everyone should rule provisionally." Every other call is PROVISIONAL in QUESTIONS #284 (A-1082-1…4, P-1076-1, P-1077-1…4, P-1014-1, P-1075-1…3, P-1034-1, D-1082-S1, D-1082-B2, D-1082-D1; the wording pass); #126 is answered by VX-1076.
+- **The rulings reconciled.** Each re-read word by word against what shipped: VX-1077's "remove confirmations" is the single-note delete on every door of the one set (her own ruling kept the multi-select confirm); VX-1074's "not being found in search" is met in the Library and a book's own 🔍 — the remainder, ⌘K, is VX-1089; VX-1075's "isn't saying that on hover" is built (the mark carries its own help) but unproven live — VX-1094, her hover; every other ruling is built as worded. No further remainder.
+- **The evidence lines that matter.** Every pin red-on-old by behavioral revert, no pin hollow (two non-discriminating Terminal cases kept as guards, D-1082-S4). One Fable ladder round: 0 · 0 · 0 · 3 nits, applied. The merge gate at `d65254b80`: the whole Mac target 6532 tests (three full-run flakes, each green alone), the whole phone target 1226 0 failed, the dev-store walk live on every row but VX-1075's tooltip. VX-1016 confirmed real by its run (5/5 reds).
+- **Open items.** QUESTIONS #284 (her calls and the wording pass) · VX-1094 (her hover) · VX-1089 (⌘K chapters, Low) · VX-1091 (the Terminal mode tabs' 1 pt; VX-1036's new floors likely dissolve it — its re-read confirms) · D-1082-D1 held (five same-shape bars; no walk evidence, no ticket). VX-1036 merges after this run and owns `BookMastheadFitsItsColumnTests`' re-read at its navigator floors.
 
 ## THE CONSTITUTION (the 13b P-1…P-9, binding per /architect-phase; carried verbatim)
 
@@ -441,4 +440,11 @@ chip=(AddToBookMintTests AscentDoorTests AscentRoutingTests BookAnchorTests Book
 
 ## CLOSEOUT
 
-PENDING.
+- **Results:** eleven members DONE — the four reports and seven riders, each traced, pinned red-on-old and revert-proven; VX-1016 confirmed real by run (her pin-first rule). The ladder closed at one round. The gate GREEN (THE MERGE GATE above).
+- **Canon** (the two-file shape): eleven SurfaceContracts contract lines in place (The app: the delete door, the hint, the cards band · The Library: chapter rows, the quote beside a tag · The Bookcase and books: the book's own band and field, the Journal row, the chip, the Trash's restarts, the shared mark · The note: word delete), each with one pointer; TEXTKIT2_NOTES §3's measured finding (batch E); QUESTIONS #126 addendum + #284; the dated entry and narratives in `notes/AppSpecRecord.md`; no AppSpec, OverallModel, CoreDescription, MCPSpec or CLAUDE.md line moved (each re-read and still true). `Tools/canon-size`: 143606 total (harness limit 150000, headroom 6394) — no crossing.
+- **The master plan:** the in-flight row retired; the closeout paragraph replaced; VX-1013's paragraph rolled verbatim to `notes/PhaseCloseoutArchive.md`.
+- **Tickets:** the eleven members and the run ticket close at the merge. Filed and triaged at mint: VX-1089 (Improvement · Confirmed · Search · Low · Backlog) · VX-1091 (Bug · Confirmed · Books · Low · Backlog) · VX-1094 (Task · Books · Low · Todo — hers).
+- **MOBILE PARITY:** PL-82 (`notes/MobileSoul.md`) — the delete toast is the Mac's alone at her word; nothing else mobile-visible.
+- **Next phase plan:** none owed (a fix run).
+- **The handoff:** `notes/handoffs/vx-1082-handoff.md`.
+- **Machinery honesty:** the orchestrator's Fable budget death mid-gate (THE MERGE GATE, window 1) — nothing lost, continued on Opus at her word. A walk Undo click missed by the walker's own latency (recorded beside the timed re-run). A guessed ticket number (VX-1092) was written into the record before the ticket existed and corrected to the minted VX-1094 before any push — her rule (never invent a ticket id) applies even to a one-line forecast.
