@@ -187,6 +187,13 @@ final class BookCardTagsModel {
     /// counts once, for the suggestions' most-used-first order (VX-576).
     func openField(on postID: String, session: AppSession, wingID: String) {
         fieldPostID = postID
+        readUses(session: session, wingID: wingID)
+    }
+
+    /// The use counts, read ONCE (never held) — for a "+" field opening here,
+    /// and for the book's List rows' ＋ popovers when the List shows tags
+    /// (VX-1084: the rows' adder orders most-used first too — VX-576).
+    func readUses(session: AppSession, wingID: String) {
         Task {
             let counts = try? await session.database.read { db in
                 try Queries.tagUseCounts(db, wingID: wingID)

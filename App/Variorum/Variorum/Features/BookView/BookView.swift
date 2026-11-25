@@ -163,6 +163,9 @@ struct BookView: View {
     @State private var cardTags: BookCardTagsModel
     /// VX-1080 (T-2) — the book's one title arbiter (P-9, its own model).
     @State private var titleTicker = BookTitleTickerModel()
+    /// VX-1084 — the List mode's rows' edited stamps (P-9, its own model; its
+    /// read is held only while List shows).
+    @State private var listModel = BookListModel()
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -406,10 +409,30 @@ struct BookView: View {
                 .overlay { contentOverlay }
             case .list:
                 // VX-1084 — the List mode (R-1036-29, R-1036-38): the book's
-                // notes as the Library's rows. (WIP at P1; the face is P3.)
-                BookListView(model: model, tokens: tokens)
-                    .overlay(alignment: .bottomTrailing) { pageFootReceipt }
-                    .overlay { contentOverlay }
+                // notes as the Library's own rows (`BookListView`), the
+                // Outline's frame around them — the archived line atop, the
+                // receipt at the page's foot, the bottom bar's counts and,
+                // for the List's selected note, its place ("note 4 of 11 ·
+                // tuesday" — the round-2 mockup's frame 9a).
+                VStack(spacing: 0) {
+                    BookArchivedLine(model: archived, structure: structure)
+                    BookListView(
+                        session: session, model: model, structure: structure,
+                        tags: cardTags, list: listModel, tokens: tokens,
+                        noteDoors: noteDoors, noteRoads: noteRoads,
+                        badge: { ownershipBadge($0) },
+                        onOpen: { openInWrite($0) },
+                        chapterDoor: { chapterMintDoor($0) })
+                        .overlay(alignment: .bottomTrailing) { pageFootReceipt }
+                    OutlineBottomBar(
+                        readingID: readingID, model: model, structure: structure,
+                        archivedCount: archived.door.count, tokens: tokens,
+                        pair: model.navigatorViewedPair(
+                            mode: .list, readForm: structure.readForm,
+                            chapterOf: { structure.chapterID(of: $0) }),
+                        records: false)
+                }
+                .overlay { contentOverlay }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
                 // TWO-UP spread — each page a whole scrollable post, the
@@ -3118,7 +3141,8 @@ struct BookView: View {
     /// The same list over the two models alone (VX-562: the viewed pair's
     /// derivation runs from a queued hop and a landing's finish, which hold
     /// the models, never the view; the pinned line reads it too).
-    fileprivate static func outlineRows(
+    /// (Internal since VX-1084: the List groups the same rows — `BookListRows`.)
+    static func outlineRows(
         structure: BookStructureModel, entries: [Queries.ReadingEntry]
     ) -> [BookOutlineRows.Row] {
         structure.chaptersActive
@@ -3784,20 +3808,27 @@ private struct OutlineBottomBar: View {
     /// line's last piece.
     let archivedCount: Int
     let tokens: VoiceTokens
+    /// VX-1084: the pair the bar's position names — nil, the Outline's viewed
+    /// pair (as shipped); the List hands its selected note's.
+    var pair: BookOutlineViewed.Pair? = nil
+    /// VX-1084: whether the Outline's DEBUG bar oracles record this bar (the
+    /// List's copy records nothing there — they are the Outline's).
+    var records = true
     #if DEBUG
     @Environment(\.debugOracleOwner) private var owner
     #endif
 
     var body: some View {
+        let pair = pair ?? model.viewedOutlinePair
         let bar = BookOutlineViewed.bar(
             gathering: structure.reading?.kind == .gathering,
             chapters: structure.sections.count, archived: archivedCount,
             total: BookOutlineViewed.NoteTotal(
                 count: model.entries.count, isAtLeast: model.truncated),
-            pair: model.viewedOutlinePair,
+            pair: pair,
             // The rows are read only while a pair is viewed (the position's
             // ordinal and chapter name); at rest the bar is the counts alone.
-            rows: model.viewedOutlinePair == .nothingViewed
+            rows: pair == .nothingViewed
                 ? [] : BookView.outlineRows(structure: structure, entries: model.entries),
             chaptered: structure.chaptersActive,
             filtered: model.viewFilter != nil)
@@ -3826,9 +3857,10 @@ private struct OutlineBottomBar: View {
                 .frame(height: 1)
         }
         #if DEBUG
-        .onAppear { record(bar) }
-        .onChange(of: bar) { _, new in record(new) }
+        .onAppear { if records { record(bar) } }
+        .onChange(of: bar) { _, new in if records { record(new) } }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            guard records else { return }
             BookOutlineGeometry.recordOutlinePinFrame(
                 readingID, frame, owner: owner ?? DebugOracleOwner.unowned)
         }

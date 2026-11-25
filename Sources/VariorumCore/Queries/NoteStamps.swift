@@ -64,4 +64,28 @@ extension Queries {
             createdAt: container.createdAt,
             editedAt: container.lastTouchedAt ?? container.createdAt, savedAt: saved)
     }
+
+    /// **Many notes' EDITED stamps at once** (VX-1084 — the book's List mode:
+    /// each row's trailing "edited …", the Library row's own stamp). The
+    /// stored ISO strings by note id — `COALESCE(last_touched_at, created_at)`,
+    /// the shelf's and the Library's own COALESCE, so a note's last edit reads
+    /// the same in the Library and in a book. Missing and tombstoned notes are
+    /// simply absent. ∝ the ids named (the primary key) — the caller hands the
+    /// notes its window shows, never the book.
+    public static func noteEditedStamps(_ db: Database, noteIDs: [String]) throws -> [String: String] {
+        guard !noteIDs.isEmpty else { return [:] }
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT c.id AS id, COALESCE(c.last_touched_at, c.created_at) AS stamp
+                FROM json_each(?) j
+                JOIN container c ON c.id = j.value AND c.deleted_at IS NULL
+                """,
+            arguments: [String(decoding: try JSONEncoder().encode(noteIDs), as: UTF8.self)])
+        var answer: [String: String] = [:]
+        for row in rows {
+            if let stamp: String = row["stamp"] { answer[row["id"]] = stamp }
+        }
+        return answer
+    }
 }

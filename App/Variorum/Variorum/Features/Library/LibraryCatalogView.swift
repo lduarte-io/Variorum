@@ -571,19 +571,10 @@ struct LibraryCatalogView: View {
     /// a system highlight): a picked row (⌘/⇧-click) wears the wash with a
     /// quiet border; the panel's SUBJECT wears the fuller border, so the row
     /// the panel describes reads as the one she last touched.
-    @ViewBuilder
+    /// (The face is `LibraryListRowPick` in the shared home since the VX-1036
+    /// run, batch 3 — the book's List draws the same pick.)
     private func rowBackground(picked: Bool, subject: Bool) -> some View {
-        if picked || subject {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(tokens.wash)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(tokens.accent.opacity(subject ? 0.42 : 0.22), lineWidth: 1))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 1)
-        } else {
-            Color.clear
-        }
+        LibraryListRowPick(tokens: tokens, picked: picked, subject: subject)
     }
 
     /// Row 34 — OUR boundary between the list and the panel: the shell's
