@@ -265,7 +265,12 @@ struct MobileWriteScreen: View {
         // REAL observation dependency, which is exactly what the Mac's
         // computed-`Binding` purge dialogs lack (§15's trap (a)).
         @Bindable var door = model.undoDoor
-        return VStack(alignment: .leading, spacing: 4) {
+        // VM-272 (the VM-260 run, batch 2 — her "the top part is so huge it
+        // takes up half of the area"): the rows sit on one another. Each row is
+        // its doors' 44 pt targets, and a 44 already carries its word's air, so
+        // the 4 pt gaps between them (and the 10 above, the 8 below) were air
+        // stacked on air — 158 pt at one chip row, now 136.
+        return VStack(alignment: .leading, spacing: Self.mastheadRowGap) {
             HStack(alignment: .firstTextBaseline) {
                 // Rename note (parity C2 — "full app functionality"): the
                 // title IS the door; an alert confirms, so a stray tap
@@ -288,6 +293,9 @@ struct MobileWriteScreen: View {
                 // seal, spaced so three small glyphs stay three separate
                 // taps.
                 // VM-50: icon buttons — 44 × 44 hit areas that touch.
+                // VM-272: P-47-12's road (b) — through the icon button's own
+                // step-down (VM-273) the tools draw 17 pt glyphs in their ink
+                // (they drew 22), with only the 44 × 44 frame around each.
                 HStack(spacing: 0) {
                     copyDoor
                     findDoor
@@ -306,8 +314,9 @@ struct MobileWriteScreen: View {
             // VM-49: each chip answers 44 tall, its hit area reaching 6
             // into the 12 pt gap on each side (so neighbours' areas touch
             // and the words keep their places — the flow is shifted back by
-            // the same 6). The capsule look and one sideways row are
-            // VM-148's masthead.
+            // the same 6). VM-272: and at least 44 ACROSS — a short word
+            // ("tags", "lens") reaches further, centred. The capsule look and
+            // one sideways row are VM-148's masthead.
             MobileChipFlow(hSpacing: 0, vSpacing: 0) {
                 dateChip
                 tagsChip
@@ -347,13 +356,14 @@ struct MobileWriteScreen: View {
             // A12's warning still presents from this masthead's alert host.
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        // The A3 spacing floor: the canon's masthead frame (`.notetitle
-        // padding:10px 20px 2px` + the prose's 8 below it) — h20 where
-        // the system default (~16) sat, real top air under the safe
-        // area, bottom 8.
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 8)
+        // The A3 spacing floor: the canon's masthead frame — h20 where the
+        // system default (~16) sat. VM-272: the air above (10) and below (8)
+        // retire into the rows' own 44s — the title row's carries its air
+        // under the system bar, and 4 stays between the last chip row and her
+        // first line.
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, Self.mastheadTop)
+        .padding(.bottom, Self.mastheadBottom)
         .background(tokens.surface)  // VM-51: her title shares the page's ground (P-47-17)
         .alert("Rename Note", isPresented: $renamePresented) {
             TextField("Title", text: $renameField)
@@ -629,6 +639,14 @@ struct MobileWriteScreen: View {
     /// gap on each side (VM-49): half of it, so neighbours' areas touch.
     static let chipHitReach: CGFloat = 6
 
+    /// **The note's top, tightened** (VM-272, the VM-260 run's batch 2): no
+    /// gap between its rows of 44 pt targets, none above the title row, 4
+    /// below the last chip row (they were 4, 10 and 8). PROVISIONAL with the
+    /// step-down's set (P-260-2a).
+    static let mastheadRowGap: CGFloat = 0
+    static let mastheadTop: CGFloat = 0
+    static let mastheadBottom: CGFloat = PhoneMetrics.Space.s4
+
     /// Copy the whole note (round 2 batch 2 — M3 ≡ R6; her ask: *"a button
     /// added at the top that allows me to copy everything i've written in a
     /// particular note"*). It sits in the masthead's note-tool corner
@@ -708,10 +726,12 @@ struct MobileWriteScreen: View {
 private extension View {
     /// A masthead chip's hit area (VM-49): 44 tall, reaching
     /// `chipHitReach` past the word on each side, the word drawn where it
-    /// was.
+    /// was — and (VM-272) at least 44 across, centred on a short word: the
+    /// chips were 44 tall only, so in Study "tags" and "lens" answered under
+    /// 44 wide, and the step-down to 13 pt would have taken them under 40.
     func mastheadChipHitArea() -> some View {
         padding(.horizontal, MobileWriteScreen.chipHitReach)
-            .frame(minHeight: PhoneMetrics.touchMinimum)
+            .frame(minWidth: PhoneMetrics.touchMinimum, minHeight: PhoneMetrics.touchMinimum)
             .contentShape(Rectangle())
     }
 }

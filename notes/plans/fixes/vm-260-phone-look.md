@@ -990,7 +990,7 @@ choice's drawing untouched (a remainder, below); no masthead rebuild (VM-148's).
 | 1. The pins on the pre-fix tree — VM-273's drawn sizes, radii and chrome roles; VM-272's note top | DONE (`cdc471fd2`, compile fix — two local helpers main-actor — in the next commit: **that commit IS the red-on-old tree**; two new files, only symbols both trees declare) |
 | 2. The red-on-old tree built headless (`DerivedData/vm260-2-rol`, an APFS clone of `vm260-1b`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` on the compile-fix commit's tree |
 | 3. VM-273 — the central step-down (`PhoneType` chrome roles and the note title's role, `PhoneControls` glyph · chip · box, `PhoneMetrics` radii, the bar's chip corner) + its consequence (`MobileBookDetails`' designated row off the faint) + the pins it moved | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-2`, incremental, `nice -n 15`); the suites PENDING |
-| 4. VM-272 — the note's top (`MobileWriteView`'s chrome only) | NOT-STARTED — the settled design below |
+| 4. VM-272 — the note's top (`MobileWriteView`'s chrome only: the rows' gaps and air, the chips' 44 × 44 floor; the title's role and the tools' glyph come through piece 3) | DONE (this commit) — compiled in piece 3's bundle (`vm260-2`); zero lines in `MobileEditorTextView` or the text-input path; the suites PENDING |
 | 5. Pins MOVED with the rulings | NOT-STARTED |
 | 6. Tip bundles (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`) and READY-FOR-TESTS | NOT-STARTED |
 | 7. The window — red-on-old, the whole phone target, the Mac legs, the keyboard-reveal UI test, the captures | PENDING (the GO) |
