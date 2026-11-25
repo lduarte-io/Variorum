@@ -233,6 +233,17 @@ struct BookMastheadFitsItsColumnTests {
                     let width = try #require(titleLineWidth(book.readingID), "\(voice) \(name): the title line reported")
                     #expect(width <= Self.navigatorRoom + 0.5,
                             "\(voice) \(name): the resting title line drew \(width) pt in a \(Self.navigatorRoom)-pt room")
+                    // D-1082-S3's ONE measured read (printed, never asserted —
+                    // the 1-pt Terminal overflow is ANOTHER element's, named
+                    // headless as the mode row's tabs and ticketed): the mode
+                    // row's own placement at this floor, beside the navigator
+                    // and the title line, for the record.
+                    if let placed = BookMastheadProbe.placed[book.readingID] {
+                        print("D-1082-S3 MEASURED READ \(voice) \(name): room \(Self.navigatorRoom) · "
+                              + "mode row bounds \(placed.boundsWidth) · tabs \(placed.arrangement.tabs.width) "
+                              + "(stable \(placed.tabsWidth)) · navigator \(BookOutlineGeometry.navigatorFrames[book.readingID]?.width ?? -1) "
+                              + "· title line \(width)")
+                    }
                 }
             }
         }
