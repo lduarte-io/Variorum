@@ -319,7 +319,7 @@ What stands today: the Library's List row already carries a note's title, its da
 - **Wings.** One per-wing switch decides both all-wings search and the All Wings Library (R-1036-36). Home reorders and takes a colour like any wing; all-wings Starred keeps her one star order; a search in the All Wings Library shows the "in: all wings" chip (R-1036-41).
 - **Lanes.** An empty lane keeps its heading; a lane move is one undo step; binding a laned gathering turns each lane into a chapter (R-1036-41).
 - **Four faces exist only in words** — no mockup shows them, and the owning run's first walk shows them to her before it merges: the confirm before a tag-removing lane move; the three-position tags switch; the tag button beside the title suggestion; the "…" on a long title at rest.
-- **Not yet picked:** the add-tag chord (brought to her at the build from the registry's free chords); the lanes run's cast (hers at its kickoff — it carries a `Sync/` constant and a §12 event).
+- **The add-tag chord is ⌘⇧H** (R-1036-46, picked at the build kickoff 2026-11-25 from the registry survey — every T chord is takes', ⌘⇧1–9 are the Open list's badges; ⌃⌘T and ⌥⌘3 were the offered alternatives). **Not yet picked:** the lanes run's cast (hers at its kickoff — it carries a `Sync/` constant and a §12 event).
 
 ---
 
@@ -479,6 +479,15 @@ The cut, approved (2026-11-25):
 |---|---|
 | R-1036-44 | **Three umbrellas** — "yes, these three look good." **VX-1036 — Inside a book** (kept): VX-1039 · VX-1040 · VX-881 · VX-1080 · VX-1081 · VX-1038 · VX-1084 · VX-1078; no schema change. **VX-1085 — Lanes in gatherings**: VX-1037 · VX-1079 · VX-1026; carries the one §12 event (her deploy go) and a Fable cold review. **VX-1086 — Wings**: VX-1041 (the All Wings Library, its search, the ⌘K row, the Library line removed) · VX-1087 (Starred by wing colour) · VX-1088 (Settings ▸ Wings) — the wider wings ticket split in three. Proposed order, not ruled: VX-1036, then VX-1085, with VX-1086 able to run beside either. This file stays the ONE design record for all three; each umbrella writes its own execution plan at its kickoff. |
 | R-1036-45 | **The design goes to main by a docs-only PR, the coordinator told first** — "go ahead and merge a docs only PR, but message nov24 coordinator before you do so." |
+
+### The build kickoff sitting — 2026-11-25 (the VX-1036 run; its record is `notes/plans/vx-1036-execution-plan.md` §9)
+
+Her dialog picks at the run's kickoff: the four batches approved · the ladder's reviewer `opus-reviewer` · riders VX-96, VX-576, VX-1091 seated · Index's header rows get nothing this run. Then, preparing an overnight run before sleep:
+
+| id | Ruling |
+|---|---|
+| R-1036-46 | **The add-tag chord is ⌘⇧H** — the dialog's pick ("H for hashtag"; recommended) over ⌃⌘T (a fifth T chord beside takes' four) and ⌥⌘3 (a third digit family). T-4 is settled; the build's collision sweep still verifies before wiring. |
+| R-1036-47 | **The overnight run MERGES if fully green** — the dialog's pick "Merge too if fully green": after the ladder and the nov24 coordinator's gate, the PR merges overnight; §4f's three faces-in-words owed at a first walk are WAIVED TO THE HANDOFF — she reviews them as captures in her morning checklist. Anything NOT fully green (an unresolved ladder finding, a failed gate, a material rebase conflict with VX-1082's merge) HOLDS the merge and bundles for her sitting instead. |
 
 ---
 
