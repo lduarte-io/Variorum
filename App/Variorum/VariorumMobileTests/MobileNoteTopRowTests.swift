@@ -411,7 +411,8 @@ struct MobileNoteTopRowTests {
     /// **RED ON OLD — "in no book should be replaced with a book icon that you can
     /// tap on to add it to a book, maybe greyed out when there's no book."** Read
     /// as pixels off a real scene window: the book door of a note in no book
-    /// draws in the corrected faint — still a glyph that reads (the glyph floor,
+    /// draws grey — since the merge gate's G-2 the corrected muted, PROVISIONAL
+    /// (batch 4b drew the faint) — still a glyph that reads (the glyph floor,
     /// 3:1) — and the same door on a note a book holds draws in ink, well above
     /// it. The old membership line read the same muted words either way.
     @Test(arguments: [false, true])

@@ -531,8 +531,9 @@ struct MobileWriteScreen: View {
     /// book icon that you can tap on to add it to a book, maybe greyed out when
     /// there's no book"): the membership line's act (parity C2 — which books
     /// hold this note; add it to one, take it out, diverge), behind the Mac's
-    /// book glyph, grey (the corrected faint) while the note is in no book, in
-    /// ink in one, in the accent in several. Its name is the line's; its value
+    /// book glyph, grey (the corrected muted since the merge gate's G-2,
+    /// PROVISIONAL — `MobileNoteTopDoors.bookInk`) while the note is in no book,
+    /// in ink in one, in the accent in several. Its name is the line's; its value
     /// is what the line used to say.
     private var bookDoor: some View {
         Button {

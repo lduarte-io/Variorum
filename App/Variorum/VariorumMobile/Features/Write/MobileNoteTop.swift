@@ -201,14 +201,19 @@ enum MobileNoteTopDoors {
     /// The title's flip: how long the slide takes (not under Reduce Motion).
     static let flipSeconds: Double = 0.2
 
-    /// **The book door's ink**: the corrected faint while the note is in no
-    /// book (the glyph still reads — the faint clears 3:1 on every ground, and
-    /// the faint is for glyphs, PhoneInks' rule), her ink in one book, the
-    /// accent in several (the membership line's own "accent when it appears in
-    /// several", carried to the glyph).
+    /// **The book door's ink**: the corrected MUTED while the note is in no book
+    /// — grey beside the ink of a held note, and above 4.5:1 on every ground —
+    /// her ink in one book, the accent in several (the membership line's own
+    /// "accent when it appears in several", carried to the glyph). PROVISIONAL
+    /// (the VM-260 merge gate's G-2): batch 4b drew the bookless glyph in the
+    /// corrected faint, a glyph's own ink by the sheet, but read here — in a
+    /// function returning a colour — the faint has no glyph the faint scans can
+    /// see, and the word scan counted it (it cannot tell an SF Symbol from a
+    /// word, and is not loosened to); the muted keeps the grey and clears the
+    /// scans as they stand. The faint returns with a scan that reads SF Symbols.
     static func bookInk(count: Int, tokens: VoiceTokens) -> Color {
         switch count {
-        case 0: tokens.phone.faint
+        case 0: tokens.phone.muted
         case 1: tokens.ink
         default: tokens.accent
         }
