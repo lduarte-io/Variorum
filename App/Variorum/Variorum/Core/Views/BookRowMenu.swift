@@ -258,6 +258,8 @@ nonisolated enum BookRowMenuTable {
         // capacity — Length & Extent… is a BOOK's door only.
         if isBook { configure.append(.extent) }
         // The designation door — a journal-trait book of ANY wing (VX-435).
+        // VX-1027: it stays on THE daily Journal's own row too, read ticked
+        // there (`dailyJournalRow(for:)` — the menu says which book IS it).
         if isBook, Queries.hasJournalTrait(reading.profile) {
             configure.append(.useAsDailyJournal)
         }
@@ -278,9 +280,14 @@ nonisolated enum BookRowMenuTable {
 
     /// **VX-1027 — the Use as Daily Journal row's face, for the row's book**
     /// (both faces draw it through the one renderer, so one rule covers the
-    /// Bookcase and every row beyond it).
+    /// Bookcase and every row beyond it). THE daily Journal is the row's own
+    /// marker (`Queries.isDailyJournalMintShape` — a live book wearing
+    /// `'daily'`), the same fact this table's state doors read
+    /// (`BookStateFacts.isDailyJournal`): in a converged store it names the
+    /// very book `Queries.dailyJournalBookID` names (that read is the keeper's
+    /// pick over the marker's bearers, and every writer keeps one bearer).
     static func dailyJournalRow(for reading: Reading) -> DailyJournalRowFace {
-        .offer
+        Queries.isDailyJournalMintShape(reading) ? .ticked : .offer
     }
 
     /// **Every registry act a face can draw** (P-1's walk lines). The
