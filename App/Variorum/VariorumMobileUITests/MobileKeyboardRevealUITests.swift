@@ -69,6 +69,21 @@
 //  after the note's keyboard, then with the field emptied — the walk's frame)
 //  is the finding. Same device, same cold-run commands, the same cleanup
 //  discipline: nothing is written (a search typed and cleared, a caret placed).
+//  That test's road turned out HOLLOW on old (the consolidated window: at Back
+//  UIKit restored the search's own focus, a restore and not a fresh keyboard).
+//
+//  VM-281 (the VM-260 run, batch 3b) — **THE WALK'S OWN ROAD**
+//  (`testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad`): the order that
+//  REPRODUCED the bar under the keyboard on the old app — the Library's root
+//  with no keyboard before it, a NEW note opened with its keyboard up and the
+//  editor's 52-pt bar riding it, Back with that keyboard up (no field on the
+//  Library held the keyboard when the note was pushed, so UIKit restores none:
+//  the note's keyboard is TAKEN DOWN), the Trash, two bar tabs (Bookcase,
+//  Library), then the Library search tapped — the first FRESH keyboard since.
+//  The oracle is the test above's (each bar door draws as at rest; its frame
+//  ends above the keys), judged at once and again held. **It WRITES one empty
+//  note** (the New Note door mints it, exactly as the walk did) — the dev
+//  store's replaceable content; nothing else is written.
 //
 
 import UIKit
@@ -261,6 +276,93 @@ final class MobileKeyboardRevealUITests: XCTestCase {
                     leg: "LEG 2, the field emptied (the walk's s9)")
 
         // Cleanup: a page change takes the keyboard down (nothing was written).
+        goTab("Bookcase")
+    }
+
+    // MARK: - VM-281 — the walk's road: a new note's keyboard taken down, then a fresh one
+
+    /// **RED ON OLD (predicted): the bar stands 52 pt low — on the keys, under
+    /// the candidate strip's glass — on the search's keyboard after a NEW
+    /// note's keyboard was taken down at Back** (the 1a walk's s5 → s9; the
+    /// consolidated window reproduced it on the old app, and on the F-1a-W1
+    /// floor's tip as well). GREEN on the fixed tip. See the file header; the
+    /// record is VM-281 under BATCH 3b in `notes/plans/fixes/vm-260-phone-look.md`.
+    func testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad() throws {
+        // Every judgement reports; the cleanup at the end always runs.
+        continueAfterFailure = true
+        Self.setHardwareKeyboard(attached: false)
+        app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 20), "the app came up")
+        pause(2.0)
+        passLobby()
+        XCTAssertTrue(button("Bookcase").waitForExistence(timeout: 10), "the shell is up (its bar's Bookcase door)")
+
+        // AT REST — the Library's root, no keyboard before anything (the walk's s4): the bar's own drawing.
+        goTab("Library")
+        pause(0.8)
+        guard app.keyboards.count == 0 else {
+            XCTFail("INCONCLUSIVE: a keyboard is up before the road starts — the road needs none before the note's")
+            goTab("Bookcase")
+            return
+        }
+        let rest = try barShot("at rest (the walk's road)")
+
+        // s5 — a NEW note, opened for writing: its keyboard rises wearing the editor's 52-pt bar.
+        guard tap(button("New Note"), "the Library's New Note glyph") else {
+            XCTFail("INCONCLUSIVE: the Library's New Note door is not on the screen")
+            return
+        }
+        pause(2.0)
+        let notesKeyboard = try softwareKeyboardUp()
+        let editorsBar = app.buttons.matching(NSPredicate(format: "identifier == 'kbar.block'")).firstMatch
+        guard editorsBar.waitForExistence(timeout: 3) else {
+            XCTFail("PREMISE: the new note's keyboard wears the editor's bar (its inputAccessoryView) — kbar.block absent")
+            back()
+            goTab("Bookcase")
+            return
+        }
+        report("the new note's keyboard \(notesKeyboard.frame); the editor's bar cell \(editorsBar.frame)")
+
+        // s6 — Back with that keyboard up. Nothing on the Library held the keyboard when the note was pushed, so
+        // nothing is restored: the note's keyboard is TAKEN DOWN (the road's whole premise).
+        back()
+        pause(1.0)
+        guard app.keyboards.count == 0 else {
+            XCTFail("""
+                INCONCLUSIVE: a keyboard is still up after Back — the road's premise (the note's keyboard taken down, \
+                the next keyboard a fresh one) does not hold
+                """)
+            goTab("Bookcase")
+            return
+        }
+
+        // s7 — the Trash (a pushed list keeps the bar); s8 — two bar tabs: the Library back at its root.
+        XCTAssertTrue(tap(button("Trash"), "the Library's trash door"), "the Library's trash door")
+        pause(1.2)
+        goTab("Bookcase")
+        goTab("Library")
+        pause(0.8)
+
+        // s9 — THE FINDING: the search's keyboard, the first fresh keyboard since the note's.
+        let field = onscreen(app.textFields, wait: 3)
+        guard field.waitForExistence(timeout: 4) else {
+            XCTFail("INCONCLUSIVE: the Library's search field is not on its root")
+            goTab("Bookcase")
+            return
+        }
+        field.tap()
+        let searchKeyboard = try softwareKeyboardUp()
+        pause(0.4)
+        judgeTheBar(try barShot("the walk's road"), rest: rest, keyboard: searchKeyboard,
+                    leg: "THE WALK'S ROAD (the search's fresh keyboard after a new note's was taken down)")
+
+        // …and held (the walk's s9 was a still frame, not a passing animation).
+        pause(1.5)
+        judgeTheBar(try barShot("the walk's road, held"), rest: rest, keyboard: app.keyboards.firstMatch,
+                    leg: "THE WALK'S ROAD, held 1.5 s")
+
+        // Cleanup: a page change takes the keyboard down. (The empty note the door minted stays — see the header.)
         goTab("Bookcase")
     }
 

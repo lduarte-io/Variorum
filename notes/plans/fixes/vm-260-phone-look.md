@@ -2277,7 +2277,7 @@ copied into the tree.
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's binding sections, Batch 3b, F-1a-W1, the two windows; SurfaceContracts "The app" and the note's editor bullets; TEXTKIT2_NOTES in full; the resiliency protocol) and the two traces (below) | DONE (this commit) |
-| 1. VM-281's pin — a UI test on the road that REPRODUCED (the 1a walk's order) | NOT-STARTED |
+| 1. VM-281's pin — a UI test on the road that REPRODUCED (the 1a walk's order): `MobileKeyboardRevealUITests.testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` | DONE (this commit; compiled at piece 3) — the run PENDING the gate |
 | 2. F-her-1's pin (+ the behaviour-neutral rename of the picking door's word static, so the pin's text is byte-identical on both trees) | NOT-STARTED |
 | 3. The red-on-old bundles at piece 2's commit: the UI bundle `vm260-3b-rol-ui` (APFS clone of `vm260-2r-ui`) and the unit bundle `vm260-3b-rol` (clone of `vm260-2r`), incremental, `nice -n 15` | NOT-STARTED |
 | 4. VM-281's fix — the editor drops its keyboard bar as it resigns and puts it back as it becomes first responder | NOT-STARTED |
