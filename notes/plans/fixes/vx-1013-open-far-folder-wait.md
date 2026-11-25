@@ -439,6 +439,8 @@ Confirmed · Wording. VX-524 closes when (a) lands.
 
 ## THE LADDER
 
+**CLOSED 2026-11-25 (the orchestrator): two rounds.** Round 1 — 1 MAJOR · 2 MINOR · 2 NIT; every finding dispositioned, final-called and landed (F-R1-1 fixed+pinned, F-R1-2/-4 fixed, F-R1-3 → VX-1090, F-R1-5 → the bundle). Round 2 — round 1's fixes and the VX-524 rider re-checked HOLDING; NO new BLOCKER/MAJOR, so no round 3 under the cap rule; its two NITs (F-R2-1, F-R2-2) are routed to the sitting bundle above, no code ordered. Next: the gate (the Mac suites + the launch walk under the stage claim), then the merge.
+
 *(round 1: fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, zero framing — RUNNING 2026-11-25; its findings land below)*
 
 ### ROUND 1 FINDINGS (cold reviewer, 2026-11-25)
@@ -769,7 +771,8 @@ lines (dispositions above), not code this ladder orders.
 ## HELD FOR HER SITTING (the away-run bundle)
 
 - P-1013-1 (the lobby may gain roads/rule 27's banner after it draws, when the deferred far walk lands) — PROVISIONAL, built.
-- P-1013-2 (a press that would refuse joins the in-flight far walk before refusing) — PROVISIONAL, built. The round-1 reviewer's F-R1-5 rides this item: the join has no bound and no words — the lobby's controls stay disabled, silent, for as long as the folder blocks (strictly better than the pre-fix blank window, and exactly the ruled wait, but the bundle review should see the unbounded silent disable).
+- P-1013-2 (a press that would refuse joins the in-flight far walk before refusing) — PROVISIONAL, built. The round-1 reviewer's F-R1-5 rides this item: the join has no bound and no words — the lobby's controls stay disabled, silent, for as long as the folder blocks (strictly better than the pre-fix blank window, and exactly the ruled wait, but the bundle review should see the unbounded silent disable). Round 2's F-R2-2 rides it too: a press arriving during the landing's short busy stretch is silently dropped (the pre-existing two-presses posture, extended to a window she didn't start).
 - P-1013-3 (a quiet road the far walk reveals opens the standing lobby as a successful press would) — PROVISIONAL, built.
+- P-1013-5 (VX-524's ruled face, R-1013-A3: each Restore-list row's second line names its place) — PROVISIONAL, built. Round 2's F-R2-1 names its full reach for her review: the place line rides EVERY row of the one list — other libraries' rows and every kind, so a Previous-Libraries row reads "Previous library · beside your library", and the empty-slot sheet's rows say "beside your library" with no library standing (spatially true of the container; word-shaped, hers to re-say).
 - Whether the blank `StoreOpeningView` should carry a quiet "Opening your library…" line after a grace delay — NOT built (taste; Settings' `.opening` arm already says those words).
 - Rider candidates noticed at kickoff, not taken (single-ticket effort): VX-1015 (the "different library" notice at the vx-980 gate — its suspected cause already doubted in the ticket), VX-524 (copy-count vs restore-list row mismatch — same catalogue family).
