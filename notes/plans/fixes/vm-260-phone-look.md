@@ -773,6 +773,26 @@ gate's.
 **Round 1's fixes** (R1-1, R1-3, R1-8, R1-9) go to ONE fresh implementer, briefed by this section, after main's
 PR #31 merges at this boundary. Round 2 (a fresh `opus-reviewer`) re-reads them.
 
+### Round 1 fixes — record (R1-1 · R1-3 · R1-8 · R1-9; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this pass did NOT do (kept current):** NO test has run — the stage is coordinated and the evidence rides the
+merge gate, so every red and green below is PENDING; no walk, no capture; nothing in the table above but the four
+FIX rows (R1-2, R1-4…R1-7, R1-10, R1-11 untouched); no line in `Sources/`, `Sync/`, custody, `StatusCenter`,
+`VoiceTokens`, `MobileEditorTextView`, the editor's typing code or `MobileKeyboardBar`.
+
+#### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, this ladder table, BATCH 4b's record whole, BATCH 4a's record whole, BATCH 3's RECONCILE; the resiliency protocol; the code: `MobileNoteTop.swift`, `MobileRootTop.swift`, `MobileWriteView.swift`'s masthead, `MobileEditorTextView`'s layout/room/scroll-authority lines READ ONLY, `PhoneType.swift`, the three comment sites, the guide's lesson) | DONE (this commit) |
+| 1. The pins on the pre-fix tree — R1-1's mounted pin, R1-9's two-under pin and the step pin it moves — **that commit IS the red-on-old tree** | NOT-STARTED |
+| 2. The red-on-old bundle `vm260-r1-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT-STARTED |
+| 3. R1-1's fix — the leave decided on post-flip geometry (the measured title row) + its tip-only pins | NOT-STARTED |
+| 4. R1-9's fix — Terminal's prose roles derive from Study's rounded step | NOT-STARTED |
+| 5. R1-3 — the guide names the pencil (words DRAFT) | NOT-STARTED |
+| 6. R1-8 — the stale comments (comments only) | NOT-STARTED |
+| 7. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
+
 ## THE CONSOLIDATED WINDOW — results (2026-11-25, claim `vm-260` 04:55–06:01:14; the GO device `vm260-suites` iOS 26.2, DELETED at close; the UI legs on `vm260-walk`)
 
 One window ran batches 1b and 2's full evidence, F-1a-W1's re-evidence, and (added mid-window; nov24 cut it at the
