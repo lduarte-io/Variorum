@@ -283,9 +283,32 @@ VX-445's Lock Now and the idle/sleep monitors) used to read both roots, so a loc
 walk; it now reads the container and lands its own far walk. The lobby vault road's catch-up act (`catchUpThroughTheVault` → `executor.follow`) runs inside the press's scope (its custody
 listings probe the container + the walk once landed) — by construction, no separate change.
 
+## MEMBERS
+
+**VX-524 rides (her word, 2026-11-25: "yeah add vx-524").** Data Safety's header says "5 copies" while the restore
+list shows six rows, one backup listed twice (Bug · Suspected · Castle & sync · Medium; born at VX-510 unit C3 —
+`notes/plans/fixes/vx-510-first-run-sync.md` W-8, where the log's "the picked folder holds this Mac's fresh pair"
+suggests the far copy may be the second listing). Closes individually; commits say "Part of VX-524"; its fix rides
+this branch and round 2's re-review covers it.
+
+**The member brief (batch 2, with round 1's fixes — one fresh implementer session):**
+- The two readers, pre-traced by the orchestrator: the HEADER is `ProtectionCopyCounts.read` → `OwnCopies.summary`
+  per place (retention's own "this Mac's pairs of this library" predicate); the LIST rows are
+  `ProtectionCopyDoors.listing` → `CopyDoorsListing` over `catalog.copies` with its own fences. Two predicates over
+  one catalogue; the suspected shape is the same backup pair standing in BOTH the container and the picked far
+  folder, rowed twice while counted once (or counted per place while rowed per copy).
+- Evidence is SUSPECTED, so the hallucination guard's speculative arm binds: build the PIN FIRST as the confirm — a
+  planted catalogue with the same pair in both places, asserting header and list agree. Red confirms and the fix
+  proceeds (with the pin red-on-old, verified by revert); green means record-only — write what the probe showed,
+  correct the ticket, no fix.
+- If the honest answer is a FACE call (two physical copies ARE two restorable rows — should the header count per
+  place, the list dedupe, or the split be said?), that is a design fork: propose, the architect rules (PROVISIONAL
+  if word-shaped).
+- Same fences as batch 1: headless only, no stage, no canon edit, checkpoint protocol, public-copy wording.
+
 ## THE LADDER
 
-*(after batch 1: fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, zero framing)*
+*(round 1: fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, zero framing — RUNNING 2026-11-25; its findings land below)*
 
 ## HELD FOR HER SITTING (the away-run bundle)
 
