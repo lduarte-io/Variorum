@@ -331,7 +331,7 @@ struct BookMastheadModeRowRuleTests {
         #expect(Self.arrange(terminal, face: 100, width: 336).widthClass == .oneLine,
                 "the navigator's ceiling — the book's own order")
         #expect(Self.arrange(terminal, face: 128, width: 336).widthClass == .twoLines,
-                "the navigator's ceiling — the widest look wraps in Terminal (the accepted cost)")
+                "the navigator's ceiling — the widest look wraps in Terminal (beyond R-1036-29's narrow-navigator wrap — held for her ruling)")
     }
 }
 

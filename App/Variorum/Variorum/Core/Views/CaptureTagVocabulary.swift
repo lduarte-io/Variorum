@@ -10,8 +10,10 @@
 //  neither capture model grows a read.
 //
 //  ONE read per opening of the field, never held (the masthead cluster's
-//  VX-576 posture): the vocabulary is ∝ the wing's tags and the counts ∝ its
-//  tag applications — paid only when she opens the field, nothing at rest.
+//  VX-576 posture): the vocabulary is ∝ the wing's tags and the counts ∝ the
+//  wing's tags × the saturation cap of live applications each
+//  (`Queries.tagUseCountSaturation`; the VX-1036 ladder's R1-2/R2-1) — paid
+//  only when she opens the field, nothing at rest.
 //
 
 import Observation

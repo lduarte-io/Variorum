@@ -47,8 +47,12 @@ final class BookListModel {
 
     /// The read, HELD while the List shows (its `.task(id:)` runs it and
     /// cancels it when the window's notes change or the List leaves). ∝ the
-    /// window's notes; it wakes on a write to those notes' rows (a keystroke
-    /// in another pane moves a stamp — that is the point of the stamp).
+    /// window's notes. The note-id lookup is by TEXT key, so the observation's
+    /// region is the `container` table's selected columns — a write to ANY
+    /// note wakes it, not only to the listed ones (the VX-1036 ladder's R3-5);
+    /// each wake re-reads only the window, and an unchanged answer is dropped
+    /// (`adopt`). A keystroke in another pane moves a stamp — that is the
+    /// point of the stamp.
     func track(session: AppSession, postIDs: [String]) async {
         guard !postIDs.isEmpty else {
             adopt([:])
