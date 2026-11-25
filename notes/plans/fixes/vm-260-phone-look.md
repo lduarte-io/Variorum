@@ -2482,8 +2482,8 @@ gate's: each root at rest and scrolled, both voices); no line in `Sources/`, `Sy
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, R-260-11/-12 verbatim, A-260-15, "Batch 4a", BATCH 1a's VM-253/VM-255 and BATCH 2's tables; the VM-259 mockup §B and its script; SurfaceContracts "The app" in full, the Library's VM-68 bullet and the Bookcase's phone paragraph; the resiliency protocol) | DONE (this commit) |
-| 1. The pins on the pre-fix tree (the Library's slim line, both states' doors, the search glyph's re-open, the ask count; R-260-11's count line moved to its new rule; the rider's label-in-name) — **that commit IS the red-on-old tree** | NOT-STARTED |
-| 2. The red-on-old bundle `vm260-4a-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT-STARTED |
+| 1. The pins on the pre-fix tree (the Library's slim line, both states' doors, the search glyph's re-open, the ask count; R-260-11's count line moved to its new rule; the rider's label-in-name) — **that commit IS the red-on-old tree** | DONE (`0bfd8326c` — the red-on-old tree; only literals and symbols both trees declare) — the runs PENDING the gate |
+| 2. The red-on-old bundle `vm260-4a-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `0bfd8326c` (log `App/Variorum/DerivedData/vm260-4a-rol-build.log`) |
 | 3. The give-way rule, its tracker and the one top line (`MobileRootTop.swift`, phone target only); the Library's top gives way | NOT-STARTED |
 | 4. Bookcase and Starred: the same line, the hairline on scroll; R-260-11's count line removed (`MobileWingPath(detail:)` and `MobileShelfFaces.bookCount` retired) | NOT-STARTED |
 | 5. The rider: the picking door's VoiceOver name "Cancel picking" (C-3b-1, A-260-15) + the pins that ride the old name moved | NOT-STARTED |
