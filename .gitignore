@@ -114,3 +114,5 @@ notes/plans/vm-44/audit/traces/
 notes/plans/vm-47-screens/
 # VM-64: the run's simulator captures (the readout walk) — machine output, never committed
 notes/plans/vm64-screens/
+# VX-1036 — the run's captures (headless renders, walk screens) stay local (the screens convention)
+notes/plans/vx-1036-screens/

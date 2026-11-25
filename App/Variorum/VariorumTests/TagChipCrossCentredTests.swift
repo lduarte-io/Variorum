@@ -12,16 +12,16 @@
 //  `Text`, so ITS baseline went onto the label's baseline: the glyph stood ON
 //  the line, its ink from the baseline up, while the label's lowercase ink —
 //  what the eye centres on — sits around the x-height's middle. Measured on
-//  the pre-fix card at 3×, off-screen, both voices: the ×'s ink centre stood
-//  +0.50 to +0.67 pt BELOW the label's x-height middle (its bottom on the
+//  the pre-fix card at 8×, off-screen, both voices: the ×'s ink centre stood
+//  +0.50 to +0.62 pt BELOW the label's x-height middle (its bottom on the
 //  baseline, its top a point under the x-height).
 //
-//  THE PIN measures INK, the eye's own measure: the card is drawn at 3× in a
+//  THE PIN measures INK, the eye's own measure: the card is drawn at 8× in a
 //  borderless window that is never ordered in (nothing appears on screen),
 //  the label is a tag of x-height-only letters ("season" — no ascender, no
 //  descender, so its ink box IS the x-height band), and the × is the last run
-//  of ink columns. RED ON OLD (+0.50…+0.67 pt, past the one-pixel tolerance);
-//  green once the × is centred on the x-height middle.
+//  of ink columns. RED ON OLD (+0.50…+0.62 pt); GREEN on the fix
+//  (+0.12…+0.19 pt — the drawn × centred on the font's x-height middle).
 //
 
 import AppKit
@@ -34,8 +34,12 @@ import VariorumCore
 @MainActor
 @Suite("VX-1081 — the tag pill's × is centred on its text", .serialized)
 struct TagChipCrossCentredTests {
-    /// One device pixel at the render's 3× — the eye's floor.
-    static let tolerance: CGFloat = 1.0 / 3.0
+    /// Under a third of a point — measured at 8× (a pixel is an eighth of a
+    /// point, so the measure itself is good to a sixteenth): the pre-fix card
+    /// stood +0.50…+0.62 pt off, the fixed card +0.12…+0.19 (the label's round
+    /// letters' overshoot and antialiasing reach a little above the font's
+    /// x-height — the × centres on the font's own middle).
+    static let tolerance: CGFloat = 0.3
 
     @Test(arguments: [ThemeVoice.terminal, .study], [false, true])
     func theCrossInkCentresOnTheLabelsXHeightMiddle(voice: ThemeVoice, dark: Bool) throws {
@@ -55,7 +59,7 @@ struct TagChipCrossCentredTests {
 /// The off-screen ink oracle (a test instrument, shared by nothing else).
 @MainActor
 enum ChipInk {
-    static let scale: CGFloat = 3
+    static let scale: CGFloat = 8
 
     /// AppKit's own drawing path, OFF-SCREEN: a hosting view in a borderless
     /// window that is never ordered in.
@@ -101,8 +105,10 @@ enum ChipInk {
         for y in 0..<h { for x in 0..<w where differs(px(x, y), page, 12) {
             minX = min(minX, x); maxX = max(maxX, x); minY = min(minY, y); maxY = max(maxY, y)
         } }
-        guard maxX - minX > 12, maxY - minY > 12 else { return nil }
-        let x0 = minX + 6, x1 = maxX - 6, y0 = minY + 6, y1 = maxY - 6
+        guard maxX - minX > Int(5 * scale), maxY - minY > Int(5 * scale) else { return nil }
+        // Inset past the 1-pt border and its antialiasing.
+        let inset = Int(2 * scale)
+        let x0 = minX + inset, x1 = maxX - inset, y0 = minY + inset, y1 = maxY - inset
         var counts: [Int: Int] = [:]
         for y in y0...y1 { for x in x0...x1 {
             let p = px(x, y); counts[(p.0 << 16) | (p.1 << 8) | p.2, default: 0] += 1

@@ -34,6 +34,7 @@
 //  are showing.
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -79,6 +80,48 @@ nonisolated enum TagChipShape {
     /// The propose-only set, rendered side by side in the round-4 capture
     /// strip: sharp · barely-eased · shipped · softest-still-boxy.
     static let variants: [CGFloat] = [0, 2, 3, 5]
+}
+
+/// **Where the card's × stands, and what it is** (VX-1081, her R-1036-20 —
+/// *"the x on the tag pill is not centered with the text"*). The card aligns on
+/// the label's first text baseline; the × is DRAWN — two strokes whose ink box
+/// is exactly their frame, so its centre is its frame's centre (a symbol
+/// image's frame is its alignment rect, which sat its ink a third of a point
+/// low inside it: the first fix measured that, and this is why the × is a
+/// shape) — and its baseline is declared half its height plus half the
+/// label's x-height below its top, which puts that centre on the x-height's
+/// middle: the line the eye centres a lowercase label on. Pure, so the rule is
+/// read without a window; the ink pin (`TagChipCrossCentredTests`) holds the
+/// drawn result.
+nonisolated enum TagChipCross {
+    /// The ×'s ink box side — the retired 7-pt bold symbol's own ink, measured.
+    static let side: CGFloat = 5
+    /// Its stroke — the bold symbol's weight at that size.
+    static let stroke: CGFloat = 1.2
+    /// The hit target's padding around the ink, the same on every side, so the
+    /// target's centre is the ink's.
+    static let targetPadding: CGFloat = 2
+
+    /// The baseline guide, from the top of the ×'s frame.
+    static func baseline(height: CGFloat, labelXHeight: CGFloat) -> CGFloat {
+        height / 2 + labelXHeight / 2
+    }
+}
+
+/// The × itself: two diagonals, round-capped, inset by half the stroke so the
+/// ink fills the frame exactly.
+struct TagChipCrossShape: Shape {
+    var stroke: CGFloat = TagChipCross.stroke
+
+    func path(in rect: CGRect) -> Path {
+        let inset = stroke / 2
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX + inset, y: rect.minY + inset))
+        path.addLine(to: CGPoint(x: rect.maxX - inset, y: rect.maxY - inset))
+        path.move(to: CGPoint(x: rect.maxX - inset, y: rect.minY + inset))
+        path.addLine(to: CGPoint(x: rect.minX + inset, y: rect.maxY - inset))
+        return path.strokedPath(StrokeStyle(lineWidth: stroke, lineCap: .round))
+    }
 }
 
 /// The stable per-tag colour (the `LineageStripe` rule, keyed on path).
@@ -199,9 +242,13 @@ struct TagChipCard: View {
     var baselineProbeSpace: String = ""
 
     @Environment(\.colorScheme) private var scheme
+    /// VX-1081: the label's font, resolved where it is drawn — its x-height
+    /// is what the × centres on.
+    @Environment(\.fontResolutionContext) private var fontContext
 
     var body: some View {
         let tint = TagChipColor.color(forPath: tag.path, dark: scheme == .dark)
+        let labelXHeight = (tokens.small.resolve(in: fontContext).ctFont as NSFont).xHeight
         // Rows 10/11: the card's stack aligns on the FIRST TEXT BASELINE,
         // so the baseline a row aligns to IS the chip text's.
         return HStack(alignment: .firstTextBaseline, spacing: 3) {
@@ -214,15 +261,24 @@ struct TagChipCard: View {
             Button {
                 onRemove(tag)
             } label: {
-                // A `Text` around the symbol, not a bare `Image`: a Text
-                // carries a real text baseline, so the ✕ sits on the chip's
-                // line and never becomes the stack's "baseline" itself.
-                Text(Image(systemName: "xmark"))
-                    .font(.system(size: 7, weight: .bold))
-                    .foregroundStyle(tokens.faint)
+                // VX-1081 (her R-1036-20): the × DRAWN, its ink box its frame,
+                // told where its baseline is (`TagChipCross`), so its centre
+                // lands on the label's x-height middle. It used to be a `Text`
+                // around a 7-pt bold symbol, whose baseline sat ON the
+                // label's: the ✕'s ink stood from the line up, half a point
+                // and more under the letters' middle (the pin's measure). The
+                // stack still aligns on the label's text baseline, so a row's
+                // alignment is unchanged.
+                TagChipCrossShape()
+                    .fill(tokens.faint)
+                    .frame(width: TagChipCross.side, height: TagChipCross.side)
+                    .padding(TagChipCross.targetPadding)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .alignmentGuide(.firstTextBaseline) { d in
+                TagChipCross.baseline(height: d.height, labelXHeight: labelXHeight)
+            }
             .help("Take “\(tag.path)” off this note")
         }
         .padding(.horizontal, 7)
