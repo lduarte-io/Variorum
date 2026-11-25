@@ -139,9 +139,9 @@ struct MobileRefusalLeavesItsNoteTests {
                 #expect(line.kind == .refusal)
 
                 await leaveByBack(surface, router: router)
+                let still = session.status.current?.text ?? "nothing"
                 #expect(session.status.current == nil,
-                        "the refusal raised in the note left with the note — still showing: "
-                            + "\(session.status.current?.text ?? "nothing")")
+                        "the refusal raised in the note left with the note — still showing: \(still)")
             }
         }
     }
@@ -209,7 +209,7 @@ struct MobileRefusalLeavesItsNoteTests {
                 await surface.settle(30)
                 #expect(onWindow(surface, "Library")?.accessibilityActivate() == true)
                 await surface.settle(60)
-                func frames() -> [String: CGRect] {
+                @MainActor func frames() -> [String: CGRect] {
                     var found: [String: CGRect] = [:]
                     for title in titles {
                         if let row = onWindow(surface, title) { found[title] = row.accessibilityFrame }
