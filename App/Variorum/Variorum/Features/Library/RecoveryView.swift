@@ -234,7 +234,20 @@ final class RecoveryViewModel {
     /// wings). An empty array cannot say "not yet" and "nothing" at once; this
     /// says which. Lowered whenever the listing's query restarts (a filter, a
     /// sort, a wing), raised by the value that answers it.
-    private(set) var trashListingLoaded = false
+    ///
+    /// **VX-1016 — lowered AT the change, never a beat later.** The filter,
+    /// the order and the words lower it the moment they change
+    /// (`questionChanged`), not when the view's restart runs `startTrash` a
+    /// main-actor job after: the render a change causes must never read the
+    /// new question over the old, still-answered listing ("The Trash is
+    /// empty." over a Trash holding rows). The wing has no door here (the
+    /// view's `.task(id:)` carries it), so the answer remembers the wing it
+    /// answered for and the listing counts as answered only in that wing.
+    var trashListingLoaded: Bool { listingAnswered && answeredWing == session.wing.currentID }
+    /// The listing's own answered half (the flag above is this AND the wing).
+    private var listingAnswered = false
+    /// VX-1016: the wing the adopted answer was asked in ('' = Home).
+    private var answeredWing = ""
     /// …and the unfiltered total's (`startTrashTotal`), which a FILTERED empty
     /// line reads to say whether other kinds are waiting. A failed total
     /// never raises it: the filtered line then stays unsaid rather than guess.
@@ -335,12 +348,20 @@ final class RecoveryViewModel {
     private func ask(_ words: [String]) {
         guard words != askedWords else { return }
         askedWords = words
+        questionChanged()
+    }
+
+    /// **The listing's question changed** — new words, a kind filter, an
+    /// order. ONE home for what every such change owes, so no door can do
+    /// half of it (VX-1016: the filter and the order did only the last line).
+    private func questionChanged() {
         // A new question has not answered yet: the rows on screen stay drawn,
         // but no empty sentence speaks for them (VX-670's walk finding 1).
-        trashListingLoaded = false
+        listingAnswered = false
         // …and the old question's answers are stale NOW, not at the restart's
         // `startTrash` a beat later — an answer already in flight would else
-        // land in that beat (ladder round 1, MINOR-1).
+        // land in that beat (VX-980 ladder round 1, MINOR-1; VX-1016 for the
+        // filter and the order).
         listingQuestion &+= 1
         restartToken &+= 1
     }
@@ -362,11 +383,12 @@ final class RecoveryViewModel {
     /// either restarts the observation, because both are applied IN SQL
     /// (a window applied before a filter would filter the first N of the
     /// wrong set — `observeReading`'s own lesson).
+    /// VX-1016: each is a new question at the change (`questionChanged`).
     var kindFilter: Queries.TrashItem.Kind? {
-        didSet { if kindFilter != oldValue { restartToken &+= 1 } }
+        didSet { if kindFilter != oldValue { questionChanged() } }
     }
     var oldestFirst = false {
-        didSet { if oldestFirst != oldValue { restartToken &+= 1 } }
+        didSet { if oldestFirst != oldValue { questionChanged() } }
     }
     /// Bumped whenever the query's shape changes; the view's `.task(id:)`
     /// restarts on it.
@@ -403,18 +425,21 @@ final class RecoveryViewModel {
         listingQuestion &+= 1
         let question = listingQuestion
         let words = askedWords
+        // VX-1016: the wing this question is asked in — an answer counts only
+        // while the app still stands in it.
+        let wing = session.wing.currentID
         // Walk finding 1: a new query has not answered yet — whatever rows
         // the last one left stay drawn, but no empty sentence speaks for it.
-        trashListingLoaded = false
+        listingAnswered = false
         do {
             if words.isEmpty {
                 // 13i-d U5: the CURRENT WING's Trash (her per-library ruling).
                 for try await value in session.database.observeTrash(
                     now: session.now, kinds: kinds, oldestFirst: oldestFirst,
-                    limit: Self.window + 1, wingID: session.wing.currentID
+                    limit: Self.window + 1, wingID: wing
                 ) {
-                    guard await answers(question) else { return }
-                    await adoptListing(value, passages: [:])
+                    guard await answers(question, in: wing) else { return }
+                    await adoptListing(value, passages: [:], in: wing)
                 }
             } else {
                 // VX-93: the SAME listing (wing, window, purge fence, kinds,
@@ -423,11 +448,11 @@ final class RecoveryViewModel {
                 // named region.
                 for try await answer in session.database.observeTrashSearch(
                     now: session.now, words: words, kinds: kinds, oldestFirst: oldestFirst,
-                    limit: Self.window + 1, wingID: session.wing.currentID,
+                    limit: Self.window + 1, wingID: wing,
                     shows: Self.shownText
                 ) {
-                    guard await answers(question) else { return }
-                    await adoptListing(answer.items, passages: answer.passages)
+                    guard await answers(question, in: wing) else { return }
+                    await adoptListing(answer.items, passages: answer.passages, in: wing)
                 }
             }
         } catch is CancellationError {
@@ -436,18 +461,24 @@ final class RecoveryViewModel {
         }
     }
 
-    /// Does an answer for `question` still answer the listing's question?
-    private func answers(_ question: UInt64) async -> Bool {
+    /// Does an answer for `question`, asked in `wing`, still answer the
+    /// listing's question? VX-1016: a wing switch is a new question the
+    /// model never hears (the view's restart carries it), so the answer's
+    /// own wing must still be the app's.
+    private func answers(_ question: UInt64, in wing: String) async -> Bool {
         #if DEBUG
         if let gate = listingAnswerGate { await gate(question) }
         #endif
-        return question == listingQuestion
+        return question == listingQuestion && wing == session.wing.currentID
     }
 
-    private func adoptListing(_ value: [Queries.TrashItem], passages: [String: String]) async {
+    private func adoptListing(
+        _ value: [Queries.TrashItem], passages: [String: String], in wing: String
+    ) async {
         (trash, trashTruncated) = TrashListing.windowed(value, window: Self.window)
         self.passages = passages
-        trashListingLoaded = true
+        answeredWing = wing
+        listingAnswered = true
         await refreshPoolHomes()
         await refreshBookNoteCounts()
     }
@@ -628,8 +659,10 @@ final class RecoveryViewModel {
     func adopt(archived: [Queries.TimelineItem], trash: [Queries.TrashItem]) {
         self.archived = archived
         self.trash = trash
-        // A delivered listing has answered (walk finding 1).
-        trashListingLoaded = true
+        // A delivered listing has answered (walk finding 1) — for the wing
+        // the app stands in (VX-1016).
+        answeredWing = session.wing.currentID
+        listingAnswered = true
     }
 
     /// **"N days left"** for a row, read against the session's clock.
