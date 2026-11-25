@@ -727,8 +727,10 @@ enum MobileTutorialSeeder {
 
             "3 — THE TRASH: what is leaving. Notes, books and blocks, each "
             + "with \(TrashWindow.days) days on a countdown you can see and "
-            + "Put back on every row; the 🗑 sits on the Library's top line "
-            + "and on the Shelf's. Delete Now, in the Trash, ends the days "
+            // VM-255: the door is the Mac's trash glyph now, and the Library's
+            // alone ("only show the trash icon within library").
+            + "Put back on every row; the trash icon sits on the Library's top "
+            + "line. Delete Now, in the Trash, ends the days "
             + "early — and asks first, every single time.",
 
             "4 — THIS NOTE'S VERSIONS: the moments you saved of the whole "

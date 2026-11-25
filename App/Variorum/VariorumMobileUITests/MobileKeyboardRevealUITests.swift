@@ -170,10 +170,10 @@ final class MobileKeyboardRevealUITests: XCTestCase {
 
     private func openThePocketGuide() {
         goTab("Bookcase")
-        guard tap(button("More"), "the Bookcase's ⋯ menu") else { return }
-        pause(0.8)
+        // VM-255 (the VM-260 run): the roots' ⋯ menu became a Settings gear — one
+        // press opens Settings, no menu between.
         let settings = onscreen(app.buttons.matching(NSPredicate(format: "label ==[c] %@", "Settings")))
-        guard tap(settings, "the menu's Settings") else { return }
+        guard tap(settings, "the Bookcase's Settings gear") else { return }
         pause(1.0)
         if tap(button("Open the pocket guide"), "Settings ▸ Open the pocket guide") {
             pause(4.0)
