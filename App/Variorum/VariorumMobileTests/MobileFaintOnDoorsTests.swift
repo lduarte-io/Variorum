@@ -56,10 +56,14 @@ struct MobileFaintOnDoorsSourceTests {
     }
 
     /// The type roles at 17 pt or more — outside this rule's class (the sheet's
-    /// "under 17 pt"; a disabled 17 pt door may wear the faint).
-    private static let fullSizeRoles: Set<String> = [
-        "control", "rowTitle", "noteBody", "noteTitle", "screenTitle", "mono", "tab",
-    ]
+    /// "under 17 pt"; a disabled 17 pt door may wear the faint). **Read from
+    /// the table, never listed** (MOVED with VM-273's step-down, the VM-260
+    /// run's batch 2: the list named `control` when it was 17; at 15 its words
+    /// are inside the rule — the table is the one place a size is decided).
+    private static let fullSizeRoles: Set<String> = Set(
+        PhoneTypeRole.allCases
+            .filter { PhoneType.spec($0, voice: .study).size >= 17 }
+            .map(\.rawValue))
 
     private static let stringLiteral = try! NSRegularExpression(pattern: #""(?:[^"\\]|\\.)*""#)
     private static let trailingComment = try! NSRegularExpression(pattern: #"(^|\s)//.*$"#)

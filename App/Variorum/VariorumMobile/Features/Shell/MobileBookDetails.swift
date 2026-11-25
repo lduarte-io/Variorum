@@ -668,9 +668,13 @@ struct MobileBookDetailsSheet: View {
             Task { await model.designateDaily() }
         } label: {
             HStack {
+                // VM-273: a `control` word is 15 now, and the faint carries no
+                // word under 17 pt (its 3:1 is for glyphs, edges, placeholders) —
+                // the designated state reads in the corrected muted (4.5:1),
+                // still apart from the accent's live door, the ✓ beside it.
                 Text(tokens.chromeLabel("Use as Daily Journal"))
                     .phoneType(.control, tokens)
-                    .foregroundStyle(model.isDaily ? tokens.phone.faint : tokens.accent)
+                    .foregroundStyle(model.isDaily ? tokens.phone.muted : tokens.accent)
                 Spacer()
                 if model.isDaily {
                     Text(tokens.chromeLabel("daily ✓"))

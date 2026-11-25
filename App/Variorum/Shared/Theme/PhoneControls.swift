@@ -12,31 +12,40 @@
 //
 //  THE NUMBERS are the sizing sheet's §B ("The touch rule") and §E ("The core
 //  components"), on batch 1's layer — the type roles (`PhoneType`), the two
-//  corrected inks (`PhoneInks`) and the metrics (`PhoneMetrics`) — built as
-//  drawn and PROVISIONAL as a set with the sheet's other numbers (P-47-1):
+//  corrected inks (`PhoneInks`) and the metrics (`PhoneMetrics`) — PROVISIONAL
+//  as a set (P-47-1), and since VM-273 (the VM-260 run, batch 2) STEPPED DOWN
+//  inside the same targets: her "ridiculously oversized icons" were wave 1
+//  drawing its controls at or near the size of their targets (a 22 pt glyph,
+//  a 32 pt capsule, boxes the full 44). Now every drawing sits well inside
+//  its target, the chrome words one notch under her words, the corners the
+//  Mac's two (P-260-2a, PROVISIONAL as a set). EVERY TARGET IS AS IT WAS:
 //
-//  · text button — label `control` 17 in the accent, the closing act (Done)
+//  · text button — label `control` 15 in the accent, the closing act (Done)
 //    semibold; 12 inside each side; at least 64 × 44.
-//  · inline act — `controlInline` 15 inside a row; hit area 44 × 44 at least,
+//  · inline act — `controlInline` 13 inside a row; hit area 44 × 44 at least,
 //    the word drawn at its own size.
-//  · icon button — a 22 pt glyph in ink; hit area 44 × 44; neighbours may
-//    touch (centres 44 apart).
-//  · chip — `chip` 15 medium in the accent on the wash, a 32 pt capsule with
-//    12 side padding, inside a 44 pt hit area (6 above and below).
-//  · field — paper on the room, the palette's take line as its edge, radius
-//    12, 12 inside, at least 44 tall.
+//  · icon button — a 17 pt glyph in its tone (was 22 — P-47-12's road (b));
+//    hit area 44 × 44; neighbours may touch (centres 44 apart).
+//  · chip — `chip` 13 medium in the accent on the wash, a near-square 24 pt
+//    shape (corner `Radius.small`, 8 to each side — it was a 32 pt capsule),
+//    inside a 44 × 44 hit area.
+//  · field — paper on the room, the palette's take line as its edge, corner
+//    `Radius.standard`, 12 inside; its box drawn 36 (it was the full 44)
+//    inside a frame at least 44 tall.
 //  · calm button — THE one button with a shape: paper fill, take-line edge,
-//    radius 12, 12 inside, label `control` 17, at least 64 × 44.
+//    corner `Radius.standard`, 12 inside, label `control` 15; its box drawn
+//    36 (it was the full 44) inside a target at least 64 × 44.
 //  · sheet header — the title `screenTitle` 20 at the gutter, Done `control`
-//    17 semibold in the accent with a 64 × 44 hit area 8 from the edge; the
+//    15 semibold in the accent with a 64 × 44 hit area 8 from the edge; the
 //    header row at least 56.
 //  · segmented choice — the SYSTEM control (`UISegmentedControl`), styled by
-//    the layer: `chip` words, at least 44 tall.
+//    the layer: `chip` words, at least 44 tall (its track is the system's own
+//    drawing — a remainder of the step-down, recorded in the run record).
 //  · section header — `sectionHeader` 13 semibold in the corrected muted,
 //    24 above and 8 below.
 //  · menu row — at least 52 (64 with a detail line, 44 with neither a glyph
-//    nor a detail — sheet §C's one-line menu row): an optional 22 pt glyph in
-//    the accent, 12, the label `control` 17 in ink, the detail `meta` 13 in
+//    nor a detail — sheet §C's one-line menu row): an optional 17 pt glyph in
+//    the accent, 12, the label `control` 15 in ink, the detail `meta` 13 in
 //    the corrected muted; a removing act wears the alarm ink.
 //
 //  WHERE IT LIVES. `Shared/` because a shared page's phone arm
@@ -87,12 +96,21 @@ enum PhoneActTone {
 nonisolated enum PhoneControlMetrics {
     /// A text button's minimum hit area: 64 wide, 44 tall (sheet §B).
     static let textButtonMinWidth: CGFloat = 64
-    /// Padding inside a button or a capsule, each side (sheet §C: 12).
+    /// Padding inside a button or a field, each side (sheet §C: 12).
     static let insidePadding: CGFloat = PhoneMetrics.Space.s12
-    /// The chip's drawn capsule (sheet §B/§E).
-    static let chipHeight: CGFloat = 32
-    /// An icon button's glyph at the default text size (sheet §B).
-    static let iconGlyph: CGFloat = 22
+    /// The chip's drawn shape — 24 tall, near-square (VM-273: it was a 32 pt
+    /// capsule), inside its 44 × 44 hit area.
+    static let chipHeight: CGFloat = PhoneMetrics.Space.s24
+    /// The chip's side padding — the scale's 8 (the Mac strip's chip is 9;
+    /// it was 12).
+    static let chipSidePadding: CGFloat = PhoneMetrics.Space.s8
+    /// An icon button's glyph at the default text size — 17 (VM-273, P-47-12's
+    /// road (b): it was 22, half its target).
+    static let iconGlyph: CGFloat = 17
+    /// **A box's drawn height** — the field's and the calm button's shape
+    /// (VM-273): at least 36, growing with its words, inside a target at
+    /// least 44 tall. It was the full 44, the target and the drawing one size.
+    static let boxHeight: CGFloat = 36
     /// The sheet header's row (sheet §E: "header row 56").
     static let sheetHeaderHeight: CGFloat = 56
     /// Done sits 8 from the sheet's edge, so its word lines up at the gutter.
@@ -128,9 +146,10 @@ private struct PhoneControlFeedback<Label: View>: View {
 // MARK: - Text button
 
 /// **The text button** — Done, Cancel, Put back, + new note: a word with no
-/// shape, 17 pt in the accent, answering across at least 64 × 44 (sheet §B:
-/// "Label 17 · hit area 44 tall, at least 64 wide (12 padding each side
-/// inside the button)"). The closing act (Done) is semibold.
+/// shape, 15 pt in the accent (`control` — the sheet's 17, stepped down by
+/// VM-273), answering across at least 64 × 44 (sheet §B: "hit area 44 tall,
+/// at least 64 wide (12 padding each side inside the button)"). The closing
+/// act (Done) is semibold.
 struct PhoneTextButtonStyle: ButtonStyle {
     let tokens: VoiceTokens
     var tone: PhoneActTone = .accent
@@ -165,10 +184,10 @@ struct PhoneTextButtonStyle: ButtonStyle {
 // MARK: - Inline act
 
 /// **The inline act** — an act inside a row (Put back, Edit, Delete, Open
-/// note): the word at 15 (`controlInline`, sheet §B: "Inline acts inside a
-/// row: 15"), answering across at least 44 × 44 without moving the word —
-/// the batch-1 hit-area helper, so a row's acts keep their places and their
-/// drawn sizes. `alignment` keeps a word on its row's edge when the word is
+/// note): the word at 13 (`controlInline` — the sheet's "Inline acts inside a
+/// row: 15", stepped down by VM-273), answering across at least 44 × 44
+/// without moving the word — the batch-1 hit-area helper, so a row's acts
+/// keep their places and their drawn sizes. `alignment` keeps a word on its row's edge when the word is
 /// narrower than 44.
 struct PhoneInlineActStyle: ButtonStyle {
     let tokens: VoiceTokens
@@ -176,7 +195,7 @@ struct PhoneInlineActStyle: ButtonStyle {
     var role: PhoneTypeRole = .controlInline
     var alignment: Alignment = .center
     /// A site's own weight for its word, the size and scaling staying the
-    /// role's — the receipt line's act is 15 SEMIBOLD (sheet §E; the one
+    /// role's — the receipt line's act is the role's size SEMIBOLD (sheet §E; the one
     /// message line, VM-61, at the VM-55 re-land). nil keeps the role's.
     var weight: PhoneTypeSpec.Weight? = nil
 
@@ -200,10 +219,11 @@ struct PhoneInlineActStyle: ButtonStyle {
 
 // MARK: - Icon button
 
-/// **The icon button** — a 22 pt glyph in ink, answering across 44 × 44
-/// (sheet §B: "22 pt glyph in ink · hit area 44 × 44; neighbours may touch
-/// (centres 44 apart)"). The glyph is chrome: it follows the text size to
-/// xxxLarge and holds.
+/// **The icon button** — a 17 pt glyph in its tone, answering across 44 × 44
+/// (sheet §B's touch rule: "hit area 44 × 44; neighbours may touch (centres
+/// 44 apart)"; the glyph stepped down from the sheet's 22 — VM-273, P-47-12's
+/// road (b)). The glyph is chrome: it follows the text size to xxxLarge and
+/// holds.
 struct PhoneIconButtonStyle: ButtonStyle {
     let tokens: VoiceTokens
     var tone: PhoneActTone = .ink
@@ -247,32 +267,34 @@ enum PhoneControlGlyph {
 
 // MARK: - Chip
 
-/// **The chip** — a fact or a filter on a 32 pt capsule: `chip` 15 medium in
-/// the accent on the wash, 12 to each side, inside a 44 pt hit area (6 above
-/// and below — sheet §B: "Capsule 32 tall, hit area 44 tall").
+/// **The chip** — a fact or a filter on a near-square 24 pt shape: `chip` 13
+/// medium in the accent on the wash, 8 to each side, the Mac's chip corner
+/// (`Radius.small`), inside a hit area at least 44 × 44 (VM-273: it was a
+/// 32 pt capsule of 15 pt words with 12 to each side — the sheet's §B).
 ///
 /// A FILTER chip says whether it is chosen (`selected` non-nil): the chosen
 /// one on the wash in her ink, the others with no fill, the take line as
-/// their edge, in the corrected muted — the same capsule either way, so a
-/// row of filters never moves when the choice does (PROVISIONAL P-47-11).
+/// their edge, in the corrected muted — the same shape either way, so a row
+/// of filters never moves when the choice does (PROVISIONAL P-47-11).
 struct PhoneChipStyle: ButtonStyle {
     let tokens: VoiceTokens
     /// nil for a fact chip; true / false for a filter chip.
     var selected: Bool?
 
     func makeBody(configuration: Configuration) -> some View {
-        PhoneControlFeedback(
+        let shape = RoundedRectangle(cornerRadius: PhoneMetrics.Radius.small)
+        return PhoneControlFeedback(
             label: configuration.label
                 .phoneType(.chip, tokens)
                 .foregroundStyle(ink)
                 .lineLimit(1)
-                .padding(.horizontal, PhoneControlMetrics.insidePadding)
+                .padding(.horizontal, PhoneControlMetrics.chipSidePadding)
                 .frame(minHeight: PhoneControlMetrics.chipHeight)
                 .background(
-                    Capsule()
+                    shape
                         .fill(selected == false ? Color.clear : tokens.wash)
                         .overlay(
-                            Capsule().stroke(
+                            shape.stroke(
                                 selected == false ? tokens.takeLine : Color.clear,
                                 lineWidth: 1)))
                 .phoneHitArea(),
@@ -293,9 +315,15 @@ struct PhoneChipStyle: ButtonStyle {
 extension View {
     /// **The field** — the one text field on the phone: paper on the room
     /// (`tokens.surface`), the palette's take line as its edge (sheet §D:
-    /// "field and card edges use the palette's existing takeLine"), radius
-    /// 12, 12 inside, at least 44 tall; the typed text is a control's
-    /// (`control` 17) unless the site holds her prose.
+    /// "field and card edges use the palette's existing takeLine"), the Mac's
+    /// box corner (`Radius.standard`), 12 inside; the typed text is a
+    /// control's (`control` 15) unless the site holds her prose.
+    ///
+    /// **Its box is drawn at least 36 tall inside a frame at least 44**
+    /// (VM-273: the box was the full 44 — the frame and the drawing one size).
+    /// The box grows with its text (her words at the accessibility sizes, or
+    /// a field that wraps), and the frame with it; what answers a touch is
+    /// the text field's own, untouched by the drawing.
     ///
     /// **Its placeholder is the corrected faint** (VM-47, the walk's W-A10 —
     /// sheet §D: placeholders take the corrected faint and need 3:1; iOS's own
@@ -310,13 +338,14 @@ extension View {
             .environment(\.phoneFieldPrompt, tokens.phone.faint)
             .padding(.horizontal, PhoneControlMetrics.insidePadding)
             .padding(.vertical, PhoneMetrics.Space.s8)
-            .frame(minHeight: PhoneMetrics.touchMinimum)
+            .frame(minHeight: PhoneControlMetrics.boxHeight)
             .background(
                 RoundedRectangle(cornerRadius: PhoneMetrics.Radius.standard)
                     .fill(tokens.surface)
                     .overlay(
                         RoundedRectangle(cornerRadius: PhoneMetrics.Radius.standard)
                             .stroke(tokens.takeLine, lineWidth: 1)))
+            .frame(minHeight: PhoneMetrics.touchMinimum)
     }
 }
 
@@ -343,9 +372,13 @@ extension TextField where Label == Text {
 /// **The calm button** — the ONE button with a shape (it replaces the five
 /// separately built ones of audit G §4.4 item 3): paper fill, the take line
 /// as its edge (or the edge alone, `filled: false`, for a door that must
-/// look like a button without weighing like one), radius 12, 12 inside, the
-/// label `control` 17 in its tone, at least 64 × 44; `fullWidth` spans its
-/// container (a sheet's primary act).
+/// look like a button without weighing like one), the Mac's box corner
+/// (`Radius.standard`), 12 inside, the label `control` 15 in its tone;
+/// `fullWidth` spans its container (a sheet's primary act).
+///
+/// **Its box is drawn at least 36 tall inside a target at least 64 × 44**
+/// (VM-273: the box was the full 44, the target and the drawing one size) —
+/// the whole target answers, the box sitting centred in it.
 struct PhoneCalmButtonStyle: ButtonStyle {
     let tokens: VoiceTokens
     var tone: PhoneActTone = .accent
@@ -363,13 +396,14 @@ struct PhoneCalmButtonStyle: ButtonStyle {
                 .frame(
                     minWidth: PhoneControlMetrics.textButtonMinWidth,
                     maxWidth: fullWidth ? .infinity : nil,
-                    minHeight: PhoneMetrics.touchMinimum)
+                    minHeight: PhoneControlMetrics.boxHeight)
                 .background(
                     RoundedRectangle(cornerRadius: PhoneMetrics.Radius.standard)
                         .fill(filled ? tokens.surface : Color.clear)
                         .overlay(
                             RoundedRectangle(cornerRadius: PhoneMetrics.Radius.standard)
                                 .stroke(tokens.takeLine, lineWidth: 1)))
+                .frame(minHeight: PhoneMetrics.touchMinimum)
                 .contentShape(Rectangle()),
             pressed: configuration.isPressed)
     }
@@ -379,7 +413,7 @@ struct PhoneCalmButtonStyle: ButtonStyle {
 
 /// **The sheet header** — one header for every SwiftUI sheet (the ten
 /// hand-rolled copies of audit G T72): the title `screenTitle` 20 at the
-/// gutter, then Done — `control` 17 semibold in the accent, a 64 × 44 hit
+/// gutter, then Done — `control` 15 semibold in the accent, a 64 × 44 hit
 /// area 8 from the sheet's edge — on a row at least 56 tall (sheet §E).
 ///
 /// **It sits INSIDE the sheet's 20 pt gutter** (every sheet pads its content
@@ -474,8 +508,8 @@ struct PhoneMenuRowStyle: ButtonStyle {
     }
 }
 
-/// **The menu row** — an optional 22 pt glyph in the accent, 12, the label
-/// `control` 17 in ink (a removing act in the alarm ink), an optional detail
+/// **The menu row** — an optional 17 pt glyph in the accent, 12, the label
+/// `control` 15 in ink (a removing act in the alarm ink), an optional detail
 /// line `meta` 13 in the corrected muted; at least 52 tall with a glyph, 64
 /// with a detail line, 44 with neither (sheet §E; §C's one-line menu row).
 struct PhoneMenuRow: View {
@@ -568,7 +602,7 @@ nonisolated enum PhoneSegmentWidths {
 
 #if os(iOS)
 /// **The segmented choice** — the system's `UISegmentedControl`, styled by the
-/// layer: each word in the `chip` role (15 medium), the selected word in her
+/// layer: each word in the `chip` role (13 medium), the selected word in her
 /// ink, the others in the corrected muted, the selected segment on the paper;
 /// at least 44 tall. It replaces the rows of plain words that stood in for
 /// segmented choices (audit G §4.4 item 7).

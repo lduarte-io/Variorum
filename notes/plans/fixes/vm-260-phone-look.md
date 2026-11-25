@@ -989,7 +989,7 @@ choice's drawing untouched (a remainder, below); no masthead rebuild (VM-148's).
 | 0. Preflight (CLAUDE.md + canon; this record's binding sections, R-260-2, S-260-2/-3, the adjudications, batches 1a and 1b; the resiliency protocol; SurfaceContracts "The app" in full and the Library's phone bullet; the VM-47 FOR A LATER READER and §5's P-47-1, P-47-12, P-47-21; the sizing sheet; LK-5 in the VM-44 rulings) | DONE (this commit) |
 | 1. The pins on the pre-fix tree — VM-273's drawn sizes, radii and chrome roles; VM-272's note top | DONE (`cdc471fd2`, compile fix — two local helpers main-actor — in the next commit: **that commit IS the red-on-old tree**; two new files, only symbols both trees declare) |
 | 2. The red-on-old tree built headless (`DerivedData/vm260-2-rol`, an APFS clone of `vm260-1b`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` on the compile-fix commit's tree |
-| 3. VM-273 — the central step-down (`PhoneType` chrome roles, `PhoneControls` glyph · chip · box, `PhoneMetrics` radii) | NOT-STARTED — the settled design is the tables below |
+| 3. VM-273 — the central step-down (`PhoneType` chrome roles and the note title's role, `PhoneControls` glyph · chip · box, `PhoneMetrics` radii, the bar's chip corner) + its consequence (`MobileBookDetails`' designated row off the faint) + the pins it moved | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-2`, incremental, `nice -n 15`); the suites PENDING |
 | 4. VM-272 — the note's top (`MobileWriteView`'s chrome only) | NOT-STARTED — the settled design below |
 | 5. Pins MOVED with the rulings | NOT-STARTED |
 | 6. Tip bundles (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`) and READY-FOR-TESTS | NOT-STARTED |
@@ -1114,4 +1114,21 @@ not this pass.
 
 ### Pins MOVED with the rulings
 
-*(written at piece 5)*
+Each moved because the ruled change moved what it holds (batch 1a's pattern); none loosened past its new number.
+- `MobilePhoneLayerTests.theStudyTableIsTheSheetsAsDrawn` — `chip` and `controlInline` 13 / 18 `.footnote`, `control`
+  15 / 20 `.subheadline`, `noteTitle` 20 / 25 `.title3` (the table IS the change).
+- `MobilePhoneLayerTests.terminalIsTheSameRolesInMonoWithItsProseTwoUnder` — Terminal's note title 22 → 18 (still two
+  under Study's).
+- `MobilePhoneMetricsTests.theConstantsAreTheSheets` — the radii 6 / 12 → 4 / 8.
+- `MobilePhoneControlsTests.theIconButtonIsAFortyFourSquareAroundATwentyTwoPointGlyph` → `…SeventeenPointGlyph` — the
+  constant 17, the glyph's frame bounds 12–24 (were 16–30); the 44 × 44 and centres 44 apart unchanged.
+- `MobilePhoneControlsTests.theChipIsAThirtyTwoCapsuleInAFortyFourHitArea` → `…TwentyFourNearSquareInAFortyFourHitArea`
+  — 24 tall, 8 to each side (were 32, 12); the 44 × 44 unchanged.
+- `MobilePhoneControlsTests.theInlineActAnswersAcrossFortyFourWithoutMovingItsWord` — the 13-pt word's drawn height
+  12–24 (was 15–30 for 15 pt); the 44 × 44 unchanged.
+- `MobilePhoneControlsTests.theFieldIsAtLeastFortyFourTallAndGrowsWithItsText` — comment only (15 → 21 at xxxLarge);
+  its assertions derive from the role and still hold: the field's FRAME is ≥ 44 at every size.
+- `MobileFaintOnDoorsSourceTests.fullSizeRoles` — the "17 pt or more" role set is READ FROM THE TABLE (it listed
+  `control` when control was 17). With control at 15 the rule found one site: `MobileBookDetails`' designated "Use as
+  Daily Journal" read in the faint — **C-273-1: it now reads in the corrected muted** (a 15-pt word needs 4.5:1; still
+  apart from the live accent, the "daily ✓" beside it).

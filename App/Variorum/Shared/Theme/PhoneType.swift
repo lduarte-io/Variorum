@@ -24,9 +24,17 @@
 //  system's own bars behave. Nothing on the phone is set below 13 pt.
 //
 //  THE TERMINAL VOICE takes the same roles in SF Mono, its prose roles two
-//  points under Study's as on the Mac (15 · 22 · 18 for body, note title,
+//  points under Study's as on the Mac (15 · 18 · 18 for body, note title,
 //  screen title) — the "two under" applied to the line pitch as well, so a
 //  Terminal line keeps Study's leading (PROVISIONAL, §5 of the run record).
+//
+//  THE STEP-DOWN (VM-273 · VM-272, the VM-260 run's batch 2 — her words:
+//  "everything being too big", "ridiculously oversized icons"): the chrome
+//  roles sit ONE NOTCH UNDER HER WORDS — `control` 15, `chip` and
+//  `controlInline` 13 (they were her words' own 17 and 15) — and the note's
+//  title steps to 20; the bar's words keep LK-5's ruled 17, the floor's two
+//  roles their 13, her other words their sizes (batch 3's, R-260-2).
+//  PROVISIONAL as a set (P-260-2a; `notes/plans/fixes/vm-260-phone-look.md`).
 //
 //  The pure table is platform-neutral (the Mac compiles it and never reads
 //  it); the scaling and the UIKit forms sit behind `os(iOS)`, the folder's
@@ -154,8 +162,12 @@ nonisolated enum PhoneType {
             return PhoneTypeSpec(family: .prose, weight: .regular, size: 17, lineHeight: 27,
                                  anchor: .body, scaling: role.scaling)
         case .noteTitle:
-            return PhoneTypeSpec(family: .prose, weight: .semibold, size: 24, lineHeight: 30,
-                                 anchor: .title2, scaling: role.scaling)
+            // VM-272 (the VM-260 run, batch 2): the note's title steps down to
+            // the scale's 20 — her note's top gives the screen back to writing
+            // (pre-wave-1 drew it at 21; the sheet's 24 is retired). PROVISIONAL
+            // with the set (P-260-2a).
+            return PhoneTypeSpec(family: .prose, weight: .semibold, size: 20, lineHeight: 25,
+                                 anchor: .title3, scaling: role.scaling)
         case .screenTitle:
             return PhoneTypeSpec(family: .prose, weight: .semibold, size: 20, lineHeight: 25,
                                  anchor: .title3, scaling: role.scaling)
@@ -171,15 +183,22 @@ nonisolated enum PhoneType {
         case .sectionHeader:
             return PhoneTypeSpec(family: .chrome, weight: .semibold, size: 13, lineHeight: 18,
                                  anchor: .footnote, scaling: role.scaling)
+        // VM-273 (the VM-260 run, batch 2): CHROME SITS ONE NOTCH UNDER HER
+        // WORDS — a control's word (15) under her body (17), a chip and an
+        // inline act (13) under her previews (15); each anchored to the system
+        // style of its new size. The sheet's 17 / 15 had drawn the chrome at
+        // her words' own sizes. PROVISIONAL as a set (P-260-2a).
         case .chip:
-            return PhoneTypeSpec(family: .chrome, weight: .medium, size: 15, lineHeight: 20,
-                                 anchor: .subheadline, scaling: role.scaling)
+            return PhoneTypeSpec(family: .chrome, weight: .medium, size: 13, lineHeight: 18,
+                                 anchor: .footnote, scaling: role.scaling)
         case .controlInline:
+            return PhoneTypeSpec(family: .chrome, weight: .regular, size: 13, lineHeight: 18,
+                                 anchor: .footnote, scaling: role.scaling)
+        case .control:
             return PhoneTypeSpec(family: .chrome, weight: .regular, size: 15, lineHeight: 20,
                                  anchor: .subheadline, scaling: role.scaling)
-        case .control:
-            return PhoneTypeSpec(family: .chrome, weight: .regular, size: 17, lineHeight: 22,
-                                 anchor: .body, scaling: role.scaling)
+        // The bar's words stay 17: LK-5 is her ruling ("three words at 17 pt,
+        // the current one on a chip, 56 pt targets").
         case .tab:
             return PhoneTypeSpec(family: .chrome, weight: .regular, size: 17, lineHeight: 22,
                                  anchor: .body, scaling: role.scaling)

@@ -24,20 +24,24 @@ import VariorumCore
 @Suite("Phone layer — the type roles (VM-48)")
 struct MobilePhoneTypeTests {
     /// The sheet's table, row by row ("How it is expressed: a phone layer
-    /// over the shared tokens"): family, weight, size / line, anchor, cap.
+    /// over the shared tokens"): family, weight, size / line, anchor, cap —
+    /// MOVED with VM-273 · VM-272 (the VM-260 run, batch 2, P-260-2a): the
+    /// chrome one notch under her words (`chip` and `controlInline` 13 /
+    /// 18 `.footnote`, `control` 15 / 20 `.subheadline`) and the note's title
+    /// 20 / 25 `.title3`; the bar's 17 (LK-5) and her other words as drawn.
     @Test func theStudyTableIsTheSheetsAsDrawn() {
         typealias S = PhoneTypeSpec
         let expected: [PhoneTypeRole: S] = [
             .noteBody: S(family: .prose, weight: .regular, size: 17, lineHeight: 27, anchor: .body, scaling: .fullRange),
-            .noteTitle: S(family: .prose, weight: .semibold, size: 24, lineHeight: 30, anchor: .title2, scaling: .fullRange),
+            .noteTitle: S(family: .prose, weight: .semibold, size: 20, lineHeight: 25, anchor: .title3, scaling: .fullRange),
             .screenTitle: S(family: .prose, weight: .semibold, size: 20, lineHeight: 25, anchor: .title3, scaling: .fullRange),
             .rowTitle: S(family: .prose, weight: .semibold, size: 17, lineHeight: 22, anchor: .headline, scaling: .fullRange),
             .rowPreview: S(family: .prose, weight: .regular, size: 15, lineHeight: 20, anchor: .subheadline, scaling: .fullRange),
             .meta: S(family: .chrome, weight: .regular, size: 13, lineHeight: 18, anchor: .footnote, scaling: .holdsAtXXXLarge),
             .sectionHeader: S(family: .chrome, weight: .semibold, size: 13, lineHeight: 18, anchor: .footnote, scaling: .holdsAtXXXLarge),
-            .chip: S(family: .chrome, weight: .medium, size: 15, lineHeight: 20, anchor: .subheadline, scaling: .holdsAtXXXLarge),
-            .controlInline: S(family: .chrome, weight: .regular, size: 15, lineHeight: 20, anchor: .subheadline, scaling: .holdsAtXXXLarge),
-            .control: S(family: .chrome, weight: .regular, size: 17, lineHeight: 22, anchor: .body, scaling: .holdsAtXXXLarge),
+            .chip: S(family: .chrome, weight: .medium, size: 13, lineHeight: 18, anchor: .footnote, scaling: .holdsAtXXXLarge),
+            .controlInline: S(family: .chrome, weight: .regular, size: 13, lineHeight: 18, anchor: .footnote, scaling: .holdsAtXXXLarge),
+            .control: S(family: .chrome, weight: .regular, size: 15, lineHeight: 20, anchor: .subheadline, scaling: .holdsAtXXXLarge),
             .tab: S(family: .chrome, weight: .regular, size: 17, lineHeight: 22, anchor: .body, scaling: .holdsAtXXXLarge),
             .mono: S(family: .mono, weight: .regular, size: 17, lineHeight: 26, anchor: .body, scaling: .fullRange),
         ]
@@ -48,11 +52,12 @@ struct MobilePhoneTypeTests {
     }
 
     /// Terminal: the same roles in SF Mono; its prose roles two points under
-    /// Study's (15 · 22 · 18 for body, note title, screen title), pitch
-    /// included; chrome and the twelve words keep Study's sizes.
+    /// Study's (15 · 18 · 18 for body, note title, screen title — the note
+    /// title MOVED 22 → 18 with VM-272), pitch included; chrome and the twelve
+    /// words keep Study's sizes.
     @Test func terminalIsTheSameRolesInMonoWithItsProseTwoUnder() {
         #expect(PhoneType.spec(.noteBody, voice: .terminal).size == 15)
-        #expect(PhoneType.spec(.noteTitle, voice: .terminal).size == 22)
+        #expect(PhoneType.spec(.noteTitle, voice: .terminal).size == 18)
         #expect(PhoneType.spec(.screenTitle, voice: .terminal).size == 18)
         for role in PhoneTypeRole.allCases {
             let study = PhoneType.spec(role, voice: .study)
@@ -373,7 +378,8 @@ struct MobilePhoneMetricsTests {
     @Test func theConstantsAreTheSheets() {
         #expect(PhoneMetrics.spacingScale == [4, 8, 12, 16, 20, 24, 32, 48])
         #expect(PhoneMetrics.gutter == 20)
-        #expect(PhoneMetrics.Radius.small == 6 && PhoneMetrics.Radius.standard == 12)
+        // MOVED with VM-273 (the VM-260 run, batch 2): the Mac's two corners.
+        #expect(PhoneMetrics.Radius.small == 4 && PhoneMetrics.Radius.standard == 8)
         #expect(PhoneMetrics.RowHeight.menu == 44)
         #expect(PhoneMetrics.RowHeight.accessory == 52)
         #expect(PhoneMetrics.RowHeight.titleAndMeta == 64)

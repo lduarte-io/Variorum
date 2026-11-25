@@ -12,9 +12,13 @@
 //
 //  The numbers are the sizing sheet's §B and §E (P-47-1, PROVISIONAL as a
 //  set): text button 64 × 44 · inline act and icon button 44 × 44 · chip 44
-//  tall around a 32 pt capsule · field 44 · calm button 64 × 44 · sheet
+//  around a near-square 24 pt shape · field 44 · calm button 64 × 44 · sheet
 //  header 56, Done 8 from the edge · segmented choice 44, its selection
-//  contract · section header 24 + 18 + 8 · menu row 44 / 52 / 64.
+//  contract · section header 24 + 18 + 8 · menu row 44 / 52 / 64. (MOVED with
+//  VM-273, the VM-260 run's batch 2: the drawings stepped down inside the same
+//  targets — the glyph 22 → 17, the chip's capsule 32 → a near-square 24, the
+//  inline act's word 15 → 13; what each now DRAWS is pinned as pixels in
+//  `MobileDrawnStepDownTests`.)
 //
 //  NEW COVERAGE (a design row — the controls are new), not red-on-old pins:
 //  each would fail against the build it replaces (an 11.5 pt plain word's
@@ -121,8 +125,9 @@ struct MobilePhoneControlsTests {
         ) { surface in
             let edit = try frame(surface, "Edit")
             #expect(edit.width >= 43.5 && edit.height >= 43.5, "Edit \(edit)")
-            // The word draws at its own size (15 pt, ~20 tall), inside the 44.
-            #expect(probe.size.height < 30 && probe.size.height > 15, "drawn \(probe.size)")
+            // The word draws at its own size (13 pt, ~16 tall — MOVED with
+            // VM-273 from 15), inside the 44.
+            #expect(probe.size.height < 24 && probe.size.height > 12, "drawn \(probe.size)")
             #expect(probe.size.width < 44, "the word is narrower than its hit area: \(probe.size)")
             let putBack = try frame(surface, "Put back")
             #expect(putBack.height >= 43.5 && putBack.width >= 43.5)
@@ -133,7 +138,9 @@ struct MobilePhoneControlsTests {
 
     // MARK: Icon button
 
-    @Test func theIconButtonIsAFortyFourSquareAroundATwentyTwoPointGlyph() async throws {
+    /// MOVED with VM-273 (the VM-260 run, batch 2 — P-47-12's road (b)): the
+    /// glyph is 17, the target 44 × 44 as it was.
+    @Test func theIconButtonIsAFortyFourSquareAroundASeventeenPointGlyph() async throws {
         let probe = Probe()
         try await hosted(
             HStack(spacing: 0) {
@@ -153,17 +160,21 @@ struct MobilePhoneControlsTests {
             #expect(abs(find.width - 44) <= 0.5 && abs(find.height - 44) <= 0.5, "Find \(find)")
             // Neighbours may touch — centres 44 apart.
             #expect(abs(more.midX - find.midX - 44) <= 0.5, "centres \(find.midX) \(more.midX)")
-            // The glyph is drawn at the 22 pt size, well inside its 44.
-            #expect(probe.size.height > 16 && probe.size.height < 30, "glyph \(probe.size)")
+            // The glyph is drawn at the 17 pt size, well inside its 44.
+            #expect(probe.size.height > 12 && probe.size.height < 24, "glyph \(probe.size)")
         }
-        #expect(PhoneControlGlyph.pointSize(22, at: .large) == 22)
-        #expect(PhoneControlGlyph.pointSize(22, at: .accessibility5)
-                == PhoneControlGlyph.pointSize(22, at: .xxxLarge), "the glyph is chrome: it holds")
+        #expect(PhoneControlMetrics.iconGlyph == 17)
+        #expect(PhoneControlGlyph.pointSize(17, at: .large) == 17)
+        #expect(PhoneControlGlyph.pointSize(17, at: .accessibility5)
+                == PhoneControlGlyph.pointSize(17, at: .xxxLarge), "the glyph is chrome: it holds")
     }
 
     // MARK: Chip
 
-    @Test func theChipIsAThirtyTwoCapsuleInAFortyFourHitArea() async throws {
+    /// MOVED with VM-273 (the VM-260 run, batch 2): a near-square 24 pt shape
+    /// with 8 to each side (it was a 32 pt capsule with 12), the hit area as it
+    /// was.
+    @Test func theChipIsATwentyFourNearSquareInAFortyFourHitArea() async throws {
         let probe = Probe()
         try await hosted(
             HStack(spacing: 0) {
@@ -177,12 +188,12 @@ struct MobilePhoneControlsTests {
         ) { surface in
             let chip = try frame(surface, "Essays")
             #expect(chip.height >= 43.5, "the hit area is 44 tall: \(chip)")
-            // 12 inside each side of the word.
-            #expect(chip.width >= probe.size.width + 24 - 0.5, "chip \(chip) word \(probe.size)")
+            // 8 inside each side of the word.
+            #expect(chip.width >= probe.size.width + 16 - 0.5, "chip \(chip) word \(probe.size)")
             let narrow = try frame(surface, "✎")
             #expect(narrow.width >= 43.5 && narrow.height >= 43.5, "a one-glyph chip still answers across 44: \(narrow)")
         }
-        #expect(PhoneControlMetrics.chipHeight == 32)
+        #expect(PhoneControlMetrics.chipHeight == 24 && PhoneControlMetrics.chipSidePadding == 8)
     }
 
     // MARK: Field
@@ -199,9 +210,10 @@ struct MobilePhoneControlsTests {
             #expect(abs(probe.size.width - (402 - 40)) <= 0.5, "the field spans its row: \(probe.size)")
         }
         // **With the text size.** A field's typed text is the `control`
-        // role — chrome, so it grows to xxxLarge (17 → 23) and holds there.
-        // A 23 pt line (~27.4) and the field's 8 above and below still sit
-        // inside the 44 floor, so a control field is 44 at EVERY size: it
+        // role — chrome, so it grows to xxxLarge (15 → 21 since VM-273; it
+        // was 17 → 23) and holds there. A 21 pt line (~25) and the field's 8
+        // above and below still sit inside the 44 floor, so a control field is
+        // 44 at EVERY size: it
         // holds its grown text without clipping it, and never outgrows the
         // floor. (This case first asserted `> 44` at xxxLarge — which the
         // layer's own numbers cannot reach: the batch-2 window measured

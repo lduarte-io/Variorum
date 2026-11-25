@@ -16,8 +16,9 @@
 //  · the words are the `tab` role — 17 pt, chrome: they follow the text size
 //    to xxxLarge and hold there, and are never under 13 pt;
 //  · the current word is semibold in her ink on a chip — the palette's wash,
-//    radius 12 (the layer's standard radius; the mockup draws 9), 8 above and
-//    below the word, 16 to each side where the cell allows;
+//    near-square: the chips' corner (`Radius.small`, the Mac's 4 — VM-273,
+//    S-260-3: the Bookcase strip's chip; it was 12), 8 above and below the
+//    word, 16 to each side where the cell allows;
 //  · the others are regular in the corrected muted ink (no longer the faint
 //    the ticket names), with no shape;
 //  · each word sits centred in a cell a third of the bar wide and at least
@@ -64,8 +65,9 @@ nonisolated enum MobileTabBarMetrics {
     static let cellVertical: CGFloat = PhoneMetrics.Space.s8
     /// The chip's side padding, widest first (the spacing scale's 16, 8, 4).
     static let chipSides: [CGFloat] = [PhoneMetrics.Space.s16, PhoneMetrics.Space.s8, PhoneMetrics.Space.s4]
-    /// The chip's corner (the layer's standard radius).
-    static let chipRadius: CGFloat = PhoneMetrics.Radius.standard
+    /// The chip's corner — the chips' near-square (VM-273: it was the boxes'
+    /// standard radius, 12).
+    static let chipRadius: CGFloat = PhoneMetrics.Radius.small
     /// The rule above the bar.
     static let hairline: CGFloat = 1
 

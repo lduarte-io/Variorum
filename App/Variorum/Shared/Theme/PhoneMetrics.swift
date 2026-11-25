@@ -3,7 +3,7 @@
 //  Variorum (Shared — the phone layer's metrics)
 //
 //  VM-49's brain (the VM-47 run, batch 1): the sizing sheet's §B and §C as
-//  constants — one spacing scale, the screen gutter, three radii, four row
+//  constants — one spacing scale, the screen gutter, two radii, four row
 //  minimums, the 44 pt touch minimum, and the ONE helper that gives a
 //  control its 44 × 44 hit area without changing its drawn size. Constants
 //  and the helper only; applying them to the phone's controls is batch 2's
@@ -50,14 +50,18 @@ nonisolated enum PhoneMetrics {
 
     // MARK: Radii
 
+    /// **The Mac's own two corners** (VM-273, the VM-260 run's batch 2 — her
+    /// "not matching the mac's app of having more squares"; S-260-3). They were
+    /// 6 and 12, with every chip a capsule. PROVISIONAL as a set (P-260-2a).
     enum Radius {
-        /// Small marks: a swatch, a code chip, the peek's edge.
-        static let small: CGFloat = 6
-        /// Fields, buttons, cards, the quick-entry box, callouts.
-        static let standard: CGFloat = 12
-        // Chips, pills and the keyboard bar's glass are CAPSULES (SwiftUI's
-        // `Capsule()`); sheets wear the system's own corner. Neither is a
-        // number here on purpose.
+        /// A chip's corner — the Mac's near-square chip (`QuietFill.corner`, her
+        /// "very subtle and square"): chips, the bar's chip, small marks.
+        static let small: CGFloat = 4
+        /// A box's corner — the Mac's toast, cards and fields: fields, the calm
+        /// button, cards, the message line's card.
+        static let standard: CGFloat = 8
+        // No control is a capsule any more. The keyboard bar's glass keeps its
+        // own (her ruled strip, R22/R25), and sheets wear the system's corner.
     }
 
     // MARK: Row minimums (rows grow with the text size; these are floors)
