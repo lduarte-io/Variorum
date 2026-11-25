@@ -18,6 +18,12 @@
 //  drawn), and the host lifts the toast ABOVE every such band, at the same
 //  horizontal centre (`StatusToastPlacement`, pure).
 //
+//  VX-1070 (the VX-1082 run): the Bookcase's CARDS band (the tour offer, the
+//  twelve-words card — directly above the quick entry) marks itself the same
+//  way, so a toast sits above whichever card shows. A band laid out at zero
+//  height — a card with nothing to say keeps its container — asks for no
+//  clearance (`StatusToastPlacement.keepClearTops`).
+//
 
 import SwiftUI
 
@@ -41,6 +47,13 @@ nonisolated enum StatusToastPlacement {
         guard let highest = keepClearTops.min() else { return resting }
         return max(resting, hostHeight - highest + clearance)
     }
+
+    /// **The tops a toast keeps clear of, from the bands' frames** (VX-1070):
+    /// a band laid out at zero height — the cards band while no card has
+    /// anything to say — covers nothing, so it asks for nothing.
+    static func keepClearTops(_ bands: [CGRect]) -> [CGFloat] {
+        bands.filter { $0.height > 0 }.map(\.minY)
+    }
 }
 
 /// The bands the toast keeps clear of, as the host's subtree reports them.
@@ -54,7 +67,7 @@ struct StatusToastKeepClearKey: PreferenceKey {
 extension View {
     /// **A band the status toast never covers** (VX-121) — the quick-entry
     /// bar marks itself, so the Bookcase's box and the Library's are both
-    /// kept clear by construction.
+    /// kept clear by construction; the Bookcase's cards band too (VX-1070).
     func statusToastKeepClear() -> some View {
         #if DEBUG
         anchorPreference(key: StatusToastKeepClearKey.self, value: .bounds) { [$0] }
@@ -92,7 +105,7 @@ private struct StatusToastLayer: View {
                 StatusToast(item: item, tokens: tokens, onDismiss: { status.clear() })
                     .padding(.bottom, StatusToastPlacement.bottomInset(
                         hostHeight: proxy.size.height,
-                        keepClearTops: bands.map { proxy[$0].minY },
+                        keepClearTops: StatusToastPlacement.keepClearTops(bands.map { proxy[$0] }),
                         resting: resting))
                     .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottom)
             }
@@ -218,7 +231,13 @@ private struct StatusToastKeepClearProbe: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                StatusToastOracle.recordBand($0, owner: owner)
+                // VX-1070: a zero-height band asks for nothing (the rule's
+                // `keepClearTops`), so the oracle lists it as no band.
+                if $0.height > 0 {
+                    StatusToastOracle.recordBand($0, owner: owner)
+                } else {
+                    StatusToastOracle.releaseBand(owner: owner)
+                }
             }
             .onDisappear { StatusToastOracle.releaseBand(owner: owner) }
     }

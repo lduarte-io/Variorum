@@ -98,8 +98,10 @@ struct OwnershipBadgeTests {
         let shared = Queries.OwnershipFacts(ownedBy: nil, otherBooks: [b])
         let owned = Queries.OwnershipFacts(ownedBy: a, otherBooks: [a])
         typealias Face = OwnershipBadgeFace
-        // INSIDE a book: the shared mark, naming the other books.
-        #expect(Face.badge(shared, placement: .inBook, badgesOn: true) == .shared(["B"]))
+        // INSIDE a book: the shared mark, naming the other books (VX-1075, a
+        // justified edit: by id and name — the mark's list opens each).
+        #expect(Face.badge(shared, placement: .inBook, badgesOn: true)
+                == .shared([SharedBook(id: "b", name: "B")]))
         // OUTSIDE: the owned-by mark — and a merely shared note says nothing.
         #expect(Face.badge(owned, placement: .outside, badgesOn: true) == .ownedBy(a))
         #expect(Face.badge(shared, placement: .outside, badgesOn: true) == nil)
@@ -134,7 +136,8 @@ struct OwnershipBadgeTests {
             let model = OwnershipFactsModel()
             await model.load(
                 session: session, postIDs: [both.id, claimed.id, free.id], inBook: a.id)
-            #expect(model.badge(for: both.id, placement: .inBook, badgesOn: true) == .shared(["B"]))
+            #expect(model.badge(for: both.id, placement: .inBook, badgesOn: true)
+                    == .shared([SharedBook(id: b.id, name: "B")]))  // VX-1075: ids ride the mark
             #expect(model.badge(for: free.id, placement: .inBook, badgesOn: true) == nil)
             await model.load(
                 session: session, postIDs: [both.id, claimed.id, free.id], inBook: nil)
@@ -159,7 +162,7 @@ struct OwnershipBadgeTests {
             try await mountBook(session, db, readingID: a.id, ownership: ownership) {
                 OwnershipBadgeProbe.drawn[both.id] != nil
             }
-            #expect(OwnershipBadgeProbe.drawn[both.id] == .shared(["B"]),
+            #expect(OwnershipBadgeProbe.drawn[both.id] == .shared([SharedBook(id: b.id, name: "B")]),
                     "inside a book: the shared mark, naming the other book")
             #expect(OwnershipBadgeProbe.drawn[sole.id] == nil, "a note only here wears nothing")
         }
@@ -194,7 +197,7 @@ struct OwnershipBadgeTests {
     @Test func aRowsHoverCarriesItsBadgesSentence() {
         let base = "Click to open"
         #expect(OwnershipBadgeCopy.rowHelp(base, badge: nil) == base)
-        #expect(OwnershipBadgeCopy.rowHelp(base, badge: .shared(["B"]))
+        #expect(OwnershipBadgeCopy.rowHelp(base, badge: .shared([SharedBook(id: "b", name: "B")]))
                 == base + "\n" + OwnershipBadgeCopy.sharedHelp(["B"]))
         #expect(OwnershipBadgeCopy.rowHelp(
             base, badge: .ownedBy(Queries.BookRef(id: "a", name: "A")))

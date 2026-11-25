@@ -132,17 +132,19 @@ struct MembershipChip: View {
                             .buttonStyle(.link)
                             .help("Open “\(book.name)” at this note")
                             Spacer()
+                            // The row's doors, from ONE pure rule
+                            // (`rowDoors(for:)` — VX-1034).
+                            let rowDoors = MembershipChip.rowDoors(for: book)
                             // 13f W23 — DIVERGE FOR THIS BOOK, on the row
-                            // that names the book. Rendered on every book
-                            // row, smart included: a smart target REFUSES
-                            // honestly and names the tag road (her ruled
-                            // shape — silence where the row looks actionable
-                            // is the confusion, not the tidiness).
-                            Button("diverge") { diverge(for: book) }
-                                .buttonStyle(.borderless)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .help(DivergeCopy.help(book: book.name))
+                            // that names the book — a BOOK's row only since
+                            // VX-1034 (a gathering always refuses it; P-2).
+                            if rowDoors.contains(.diverge) {
+                                Button("diverge") { diverge(for: book) }
+                                    .buttonStyle(.borderless)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .help(DivergeCopy.help(book: book.name))
+                            }
                             // 13i-c U4 — THE REMOVE/RELEASE VOCABULARY (the
                             // sitting record §20): ONE act whose word follows
                             // the book — "release" on an owned book (the note
@@ -150,7 +152,7 @@ struct MembershipChip: View {
                             // GATHERING has no membership to remove, so it
                             // offers the honest door instead: one "remove
                             // #tag" per rule tag the note wears (`removeTag`).
-                            if book.kind == .book {
+                            if rowDoors.contains(.remove) {
                                 Button(RemoveFromBookCopy.rowWord(owned: book.owned)) {
                                     remove(from: book)
                                 }
@@ -158,7 +160,8 @@ struct MembershipChip: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .help(RemoveFromBookCopy.help(owned: book.owned, book: book.name))
-                            } else {
+                            }
+                            if rowDoors.contains(.removeRuleTags) {
                                 ForEach(wornRuleTags[book.id] ?? [], id: \.id) { tag in
                                     Button(RemoveFromBookCopy.removeTagRowWord(path: tag.path)) {
                                         removeTag(tag, from: book)
@@ -395,13 +398,41 @@ struct MembershipChip: View {
     /// 17y (o): the add picker's options — the open books the note is not
     /// in (an archived one marked), then the open gatherings "by tagging".
     private var addOptions: [SearchPickerOption] {
-        addableBooks.map { book in
-            SearchPickerOption(
-                id: book.id, label: book.name,
-                annotation: book.archivedAt != nil ? BookArchiveCopy.word : nil)
-        } + addableSmartBooks.map { book in
-            SearchPickerOption(id: book.id, label: book.name, annotation: AddToBookCopy.byTagging)
+        (addableBooks + addableSmartBooks).map(Self.addOption(for:))
+    }
+
+    /// **VX-1034 — a membership row's doors, by its book** (pure; the row
+    /// draws exactly these). A gathering's row draws NO Diverge (her call,
+    /// QUESTIONS #279 addendum: "h - agree that mac should hide it"): the
+    /// operation is books only and always refuses a gathering
+    /// (`divergePostForReading`, AppSpec §9), so the door could only refuse
+    /// (P-2 — a door that can never act is not rendered; the phone's W-110
+    /// already drew none). Its honest doors stay: one "remove #tag" per rule
+    /// tag the note wears. (`DivergeCopy.refusal`'s tag-road sentence stays
+    /// as the operation's refusal words, should any road still reach it.)
+    nonisolated static func rowDoors(for book: Reading) -> [MembershipRowDoor] {
+        book.kind == .book ? [.diverge, .remove] : [.removeRuleTags]
+    }
+
+    /// **VX-1034 — one add-picker option** (pure; the picker lists exactly
+    /// these): a book by its name, annotated "archived" when it is; a
+    /// gathering by its name and the road it is joined by ("by tagging") —
+    /// and, when ARCHIVED, "archived" first, as an archived book already says
+    /// (her call, QUESTIONS #279 addendum: "g - agree the mac should show that
+    /// it's archived"; R-13ie-4 — every book selector names an archived book).
+    /// The words are PROVISIONAL ("archived · by tagging" — the Mac picker's
+    /// annotation idiom; the phone's row reads "Quotes (archived) (by
+    /// tagging)").
+    nonisolated static func addOption(for reading: Reading) -> SearchPickerOption {
+        guard reading.kind == .gathering else {
+            return SearchPickerOption(
+                id: reading.id, label: reading.name,
+                annotation: reading.archivedAt != nil ? BookArchiveCopy.word : nil)
         }
+        let road = AddToBookCopy.byTagging
+        return SearchPickerOption(
+            id: reading.id, label: reading.name,
+            annotation: reading.archivedAt != nil ? "\(BookArchiveCopy.word) \u{00B7} \(road)" : road)
     }
 
     /// A pick: a book joins by membership, a gathering by tagging (R98).
@@ -541,6 +572,18 @@ struct MembershipChip: View {
             }
         }
     }
+}
+
+/// The doors a membership row of the chip can draw beside its book's name
+/// (VX-1034 — `MembershipChip.rowDoors(for:)` decides which).
+nonisolated enum MembershipRowDoor: Equatable, Sendable {
+    /// 13f W23 — Diverge for This Book.
+    case diverge
+    /// 13i-c U4 — remove (or "release" on an owned book).
+    case remove
+    /// 13i-c U4 (§20) — a gathering's honest "remove #tag", one per rule tag
+    /// the note wears.
+    case removeRuleTags
 }
 
 /// 13f W23's words, in one place — the act's label, its help, what it says

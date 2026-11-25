@@ -60,6 +60,33 @@ public struct SearchPassage: Equatable, Sendable, Identifiable {
     public let blockName: String?
 }
 
+/// **A chapter the answer lists by its OWN row** (VX-1074 — her report: *"chapter
+/// titles are not being found in search"*; they were found, and drawn as their
+/// book). Read for the chapter hits a page names (`Queries.searchChapterHits`),
+/// so the Books section can say the chapter — its name, the book it is in —
+/// and its door can land the book's Outline at it.
+public struct SearchChapterHit: Equatable, Sendable, Identifiable {
+    public var id: String { sectionID }
+    /// The `reading_section` row.
+    public let sectionID: String
+    /// The chapter's name, exactly as stored (never a snippet's cut).
+    public let name: String
+    /// The book it is in.
+    public let readingID: String
+    public let readingName: String
+    /// Its book is archived (a chapter carries no archived fact of its own —
+    /// the index's own reading, `d.kind = 'chapter' AND r.archived_at`).
+    public let isArchived: Bool
+
+    public init(sectionID: String, name: String, readingID: String, readingName: String, isArchived: Bool) {
+        self.sectionID = sectionID
+        self.name = name
+        self.readingID = readingID
+        self.readingName = readingName
+        self.isArchived = isArchived
+    }
+}
+
 /// One page of passages and the road to the next (R-13o-9 — no capped
 /// listing without a road to the rest).
 public struct SearchPage: Equatable, Sendable {
@@ -484,6 +511,36 @@ extension Queries {
             homes[id] = (isPool, title, note, row["archived"])
         }
         return homes
+    }
+
+    /// **The chapters a search lists by their own row** (VX-1074): the live
+    /// chapters of live BOOKS among `ids` (a `.chapter` passage's `sourceID`),
+    /// in the order asked. A chapter whose reading is not a live book — a
+    /// gathering's stray row (a gathering refuses sections; a residue could
+    /// only arrive by sync or an un-bind) — is not answered: its book's own
+    /// row stands for it, as before, since a gathering's Outline has no
+    /// chapter to land on (P-2).
+    ///
+    /// P1: ∝ the ids (one key seek each, `json_each` driven).
+    public static func searchChapterHits(_ db: Database, ids: [String]) throws -> [SearchChapterHit] {
+        guard !ids.isEmpty else { return [] }
+        let json = String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)
+        return try Row.fetchAll(
+            db,
+            sql: """
+                SELECT s.id, s.name, s.reading_id, r.name AS reading_name,
+                       (r.archived_at IS NOT NULL) AS archived
+                FROM json_each(?) j
+                CROSS JOIN reading_section s ON s.id = j.value AND s.deleted_at IS NULL
+                JOIN reading r ON r.id = s.reading_id AND r.deleted_at IS NULL AND r.kind = 'book'
+                ORDER BY j.key
+                """,
+            arguments: [json]
+        ).map { row in
+            SearchChapterHit(
+                sectionID: row["id"], name: row["name"], readingID: row["reading_id"],
+                readingName: row["reading_name"], isArchived: row["archived"])
+        }
     }
 
     /// One composed hit row → a passage (nil for an unknown kind).

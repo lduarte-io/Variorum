@@ -3,7 +3,8 @@
 //  Variorum (Mac)
 //
 //  **13o U2 — THE ANSWER SHEET** (Direction C, R-13o-15): the Books section
-//  (every book a book or chapter hit names), then ONE ranked stream of
+//  (every book a book hit names — and, since VX-1074, every chapter found by
+//  its own name as its own row), then ONE ranked stream of
 //  GROUPS — a note, or a scraps group, per head — each with its best
 //  passages and an "all N ›" that opens it in place and pages through the
 //  rest (R-13o-9: every "all N ›" a real road; the groups themselves page as
@@ -23,7 +24,7 @@
 import SwiftUI
 import VariorumCore
 
-struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
+struct LibrarySearchSheet<NoteHead: View, BookRow: View, ChapterRow: View>: View {
     let model: LibraryCatalogModel
     let tokens: VoiceTokens
     /// The archived word's door (D4).
@@ -38,6 +39,10 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
     @ViewBuilder let noteHead: (Queries.CatalogHit) -> NoteHead
     /// A Books-section row, built by the catalog.
     @ViewBuilder let bookRow: (Queries.CatalogHit) -> BookRow
+    /// **VX-1074 — a chapter found by its own name**, its own row in the
+    /// Books section, built by the catalog (its door lands the book's Outline
+    /// at the chapter).
+    @ViewBuilder let chapterRow: (SearchChapterHit) -> ChapterRow
 
     private var state: LibrarySearchModel { model.searchState }
 
@@ -47,7 +52,7 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
                 // VX-84a: the sheet shows only for a question WITH WORDS (the
                 // catalog routes a tag typed alone to its own narrowed listing
                 // — D-1), so the words-ask branch for a tag alone is gone.
-                if !state.books.isEmpty {
+                if !state.bookRows.isEmpty {
                     booksSection
                     if !state.groups.isEmpty {
                         Color.clear.frame(height: LibraryListFace.sectionGap)
@@ -55,7 +60,7 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
                 }
                 if !state.groups.isEmpty {
                     Section {
-                        if state.books.isEmpty { LibraryListLead() }
+                        if state.bookRows.isEmpty { LibraryListLead() }
                         ForEach(state.groups) { group in
                             groupView(group)
                                 .onAppear { model.searchGroupAppeared(group) }
@@ -81,7 +86,7 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
                             .librarySearchDrawn(.groupsHeader, title)
                     }
                 }
-                if state.books.isEmpty, state.groups.isEmpty {
+                if state.bookRows.isEmpty, state.groups.isEmpty {
                     // R-980-5: a field of only punctuation or symbols (no tag)
                     // says WHY; any other empty answer keeps "Nothing matches."
                     let empty = tokens.chromeLabel(SearchAnswerCopy.emptyAnswer(
@@ -110,13 +115,19 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
     }
 
     /// The Books section: the associated books first (each row says why —
-    /// the catalog's `bookRow` reads `bookReasons`), then the name hits.
+    /// the catalog's `bookRow` reads `bookReasons`), then the name hits —
+    /// a book by its own name, a chapter by its own (VX-1074).
     private var booksSection: some View {
         Section {
             LibraryListLead()
-            ForEach(state.books, id: \.id) { hit in
-                bookRow(hit)
-                    .libraryPlaceRow(hit.id, memory: model.placeMemory, key: placeKey)
+            ForEach(state.bookRows) { row in
+                Group {
+                    switch row {
+                    case .book(let hit): bookRow(hit)
+                    case .chapter(let chapter): chapterRow(chapter)
+                    }
+                }
+                .libraryPlaceRow(row.id, memory: model.placeMemory, key: placeKey)
             }
         } header: {
             LibraryListHeader(title: tokens.chromeLabel(LibrarySearchCopy.booksHeader))
