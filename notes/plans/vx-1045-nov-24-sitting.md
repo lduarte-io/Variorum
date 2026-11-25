@@ -4,26 +4,29 @@
 
 ## FOR A LATER READER
 
-*(Kept current while the sitting runs; rewritten at its close.)*
+*(Rewritten at the close, 2026-11-24.)*
 
-- **Done:** PR #8 (VX-997, the Variorum side of the Ambient app) merged at her word, merge commit `703c42173`, and
-  cleaned up. A Linear label "Ambient" sits on all fourteen Ambient tickets. VX-1013 (the slow open) sized with
-  measurements; now High, Todo. Apple's agreement accepted by her; the notary service answers again.
-- **Ruled (her words below, "Her rulings"):** QUESTIONS #276 and #278 are closed but for the wording pass and
-  VX-370; the parity audit became the umbrella VX-1046 (twenty-seven members, all Todo at her word) plus VX-1068
-  (Snippets, Needs Lillian); its twelve exceptions are stated in `notes/MCPSpec.md`; the coordinator skill gained the
-  five lines the 2026-11-22 coordinator proposed; VX-1026 rides VX-1036; VX-460 closed; VX-1017 parked.
-- **The 1.5 release's step 0: PASSED** on the code of `703c42173`, 2026-11-24 17:47–17:54, under stage coordinator
-  `nov24` (claim `vx-1045`): FirstRunDrillTests 11 of 11, the first-run walk green in both arms, the dev slot back
-  byte for byte. The evidence lines are in "The release's step 0" below.
-- **Variorum 1.5 (build 13416) is PUBLISHED** (2026-11-24 18:43–18:44, at her word): built from main `83a15ac0e`
-  (PR #22's merge), both notarizations accepted, `Variorum-1.5.dmg` sha256 `5fabddcb…07c7` live and byte-identical,
-  the appcast live and byte-identical, the page showing 1.5. The lines are in the LIVE STATUS rows from 18:26 on.
-- **Still to do at this sitting:** the `/Applications` install on the Pro (requested of `nov24`), then the close in a
-  second, notes-only PR.
-- **Canon touched on this branch:** `notes/SurfaceContracts.md` and `notes/MCPSpec.md` (the ratified calls lose the
-  word PROVISIONAL; the stated exceptions added beside the audit's pointer); `notes/QUESTIONS.md` (two addenda).
-  Neither spec file is in the loaded set.
+- **What the sitting was.** Her dispositions of the VX-980 and VX-981 bundles (QUESTIONS #276 and #278), the
+  2026-11-22 coordinator's held items, the merge of PR #8 (VX-997, the Variorum side of the Ambient app), and the
+  release of Variorum 1.5. No app code was written here.
+- **Her rulings**, verbatim under "The list put to her, and her rulings". In short: everything from the two runs stays
+  as built, except P-980-B1-1 → (b) (VX-1069); the parity audit became the umbrella VX-1046, every buildable member
+  in Todo at her word, renaming a tag over the wire allowed (VX-1050), Snippets left Needs Lillian (VX-1068), the
+  twelve exceptions accepted; the five coordinator skill lines landed; VX-1013 High and Todo; VX-1026 rides VX-1036;
+  VX-460 closed; VX-1017 parked. Not ruled: the wording pass (the listed sentences stay provisional).
+- **Canon as it now stands.** `notes/SurfaceContracts.md` and `notes/MCPSpec.md`: the ratified calls no longer carry
+  the word PROVISIONAL; MCPSpec states the twelve exceptions beside the audit's pointer; `notes/QUESTIONS.md` #276
+  addendum 2 and #278's addendum. The coordinator skill has a section "Lessons the 2026-11-22 window taught".
+- **Variorum 1.5 (build 13416): released.** Step 0 passed on the code of `703c42173` (the drill 11 of 11; the walk
+  green in both arms; the dev slot back with 239 files' md5s identical). Her notes, rewritten plainly at her word and
+  approved. PR #22 merged (`83a15ac0e`), the build from it: both notarizations accepted, 58 of 58 checks on the app
+  inside the DMG, `Variorum-1.5.dmg` sha256 `5fabddcb6777cd658a80b41a187a873a45cb78260e3a5efbaaa2b488ed8007c7`.
+  Published at her word, the DMG and the appcast each verified byte-identical live. Installed in `/Applications` on
+  the Pro behind `A1-20261124-pre-1.5-install`, nothing launched.
+- **Two traps met, both worth keeping.** The site repo on the Pro was 20 commits behind its remote: pull it before
+  any deploy. `release.sh` refuses untracked files: the Nov 22 sitting's local frames folder is now ignored.
+- **Open after it:** her handoff's checklist (`notes/handoffs/vx-1045-handoff.md`); VX-1073 (the field guide's
+  restore on 1.5, the Air's update); the Nov 22 sitting's own close, on its branch.
 
 ## Her words (2026-11-24, verbatim)
 
@@ -224,5 +227,8 @@ canon keeps that word on the Trash line's wording.
 | 18:42 | Her word to publish, verbatim: "ok go ahead and publish this and push it over sparkle and all that." |
 | 18:43 | The site repo (`~/dev/stargazing.tech/stargazing-tech`) was 20 commits behind its remote on this Mac; pulled fast-forward BEFORE anything else, so the deploy carries the site as it stands. The publish preflight (cache-busted) answered 404. The DMG uploaded to the downloads bucket. `verify-published.sh dmg`: PASS — HTTP 200, `application/x-apple-diskimage`, immutable, "the published bytes are IDENTICAL to the local DMG (sha256 5fabddcb6777cd658a80b41a187a873a45cb78260e3a5efbaaa2b488ed8007c7)". |
 | 18:44 | The feed's `appcast.xml` copied into the site byte for byte, `src/data/variorum.json` set to 1.5, the site built and deployed. `verify-published.sh appcast`: PASS — the live appcast BYTE-IDENTICAL to the built one, its newest enclosure live at 33,954,921 bytes, `no-cache, must-revalidate`. The live page shows 1.5 and links `Variorum-1.5.dmg`. Site commits `b74f04d` (the appcast and the version) and `de8734b` (the downloads ledger after `npm run downloads`), both pushed. |
-| 18:46 | REQUEST and READY to `nov24` for the `/Applications` install of build 13416 by its rule card. Her sentence's "and all that" is read as covering it, with the coordinator skill's line that the release run installs the released build; said to her plainly in chat. |
+| 18:45 | REQUEST and READY to `nov24` for the `/Applications` install of build 13416 by its rule card. Her sentence's "and all that" is read as covering it, with the coordinator skill's line that the release run installs the released build; said to her plainly in chat. |
+| 18:45–18:46 | **The install, at `nov24`'s GO, by its rule card** (the stage claimed 18:45:5x, released 18:46:41). Zero-instance checks before every act, all empty. The A1 first: `Backups/safety-copies/A1-20261124-pre-1.5-install/` in her real library's folder, six files, each `cmp` identical to its source. The published DMG mounted read-only, its app staged beside the old one: codesign verify OK, `spctl` accepted (Notarized Developer ID), 1.5 (13416). The swap; the same three again, all good; the installed build equals the live appcast's highest, 13416. The 1.4 app moved to the Trash; the image unmounted. Nothing launched; her library file untouched (its date still 2026-11-10). `nov24` verified it. |
+| 18:47 | VX-1028 closed. VX-1073 minted for what is hers after 1.5 (the field guide's restore, the Air's update). |
+| close | The handoff `notes/handoffs/vx-1045-handoff.md`, the `notes/AppSpecRecord.md` entry and `Tools/canon-size` (`143606  total (harness limit 150000, headroom 6394)`); the second, notes-only PR. |
 
