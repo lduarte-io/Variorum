@@ -261,6 +261,8 @@ install and the #281 dispositions.
 5. VM-272 stays chrome: zero lines in `MobileEditorTextView` or the text-input path; the keyboard-reveal test
    green on the final tree.
 6. The message line: kinds decided at the seam, ink decided at the face; no string-matching on sentences.
+7. Batch 1a's `selectPage` consolidation: the Protection re-open route's pop is covered by construction only
+   (no mounted pin — the bootstrap world is the Protection suites' heavy harness); the reviewer reads that road.
 
 ## Her rulings at kickoff (2026-11-24/25; each a pick from a question-tool batch, her typed words quoted where she typed)
 
@@ -282,6 +284,18 @@ install and the #281 dispositions.
   longer stays open hidden; the QUESTIONS #280 addendum lands at the merge, this run the pointer.
 - **R-260-6 — VM-255's count placement.** Her pick: "Muted line under the wing name" — a quiet second line in
   the phone's muted ink ("12 books"), under the wing's name, the Bookcase only.
+
+## Adjudications (the orchestrator's, repo-first)
+
+- **A-260-1 (on batch 1a's P-260-1a, 2026-11-25).** The built arm (a) STANDS — a note or book asked for on a page
+  she has since left is made and kept, never opened, no page hijacked (P-3 and R-260-5 both hold) — but SILENT
+  does not: a thing made-but-not-opened is "an outcome other than the one she asked for", and the seam's own law
+  gives that a DIRECTION line naming where it landed (SurfaceContracts, the phone line). The one line call lands
+  in BATCH 1b (the message-line batch, where the direction ink is being built anyway), door-side, no new seam
+  kind. P-260-1a still goes to QUESTIONS at the merge for her ratify, the line noted as the built shape.
+- **A-260-2 (batch 1a's C-255-1…3): accepted** — the count inside the wing door's 44-pt box, Terminal's "~/"
+  prefix kept, each glyph keeping the tone of the door it replaced. The Protection re-open route's pop being
+  covered by construction only (no mounted pin) is accepted and added to the review foci.
 
 ## Scope calls made at kickoff (the orchestrator's; each on the ratify list)
 
