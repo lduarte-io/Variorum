@@ -338,8 +338,14 @@ this branch and round 2's re-review covers it.
     text untouched). `git grep containerOnly\|catalog(scope` over `App Sources Tests Tools`: nothing. Harness (with B3's
     comments, below): `✔ Test run with 42 tests in 4 suites passed` (`OpenFarFolderWaitTests`,
     `ProtectionLobbyModelTests`, `RoadLockTests`, `ProtectionOpenRoadPlantedTests`). No pin (not bug-class).
-  - B3 F-R1-4 — NOT-STARTED: the two comments (`AppBootstrap.swift:642`, `ProtectionOpenRoad.swift:472`).
-  - B4 F-R1-3 — NOT-STARTED: the closing disposition line naming VX-1090; no code.
+  - B3 F-R1-4 — DONE (this commit). `AppBootstrap.swift`'s landing comment names both lobbies that carry a walk (the
+    launch road's, whose landing tries the quiet roads again; a lock's, which only re-reads) and says no landing is wired
+    without a walk; `landTheFarWalk`'s doc says a context with NO walk is not a plain re-read (it takes every place and,
+    unless the flag is false, tries the quiet roads over any far key file — hence no landing without a walk). Same stale
+    claim, same file: `RoadContext.far`'s doc no longer lists "the relock's lobby" among the contexts with no walk.
+    Comments only — the harness run under B2 compiled `ProtectionOpenRoad.swift`; `AppBootstrap.swift` builds at B5.
+  - B4 F-R1-3 — DONE (this commit): the closing disposition line under ROUND 1 DISPOSITIONS — DEFERRED to VX-1090; no
+    code.
   - B5 — NOT-STARTED: the Mac target `build-for-testing`, the phone build, the widened headless harness, the core suite.
   - VX-524 — NOT-STARTED: pin first as the confirm (MEMBERS brief).
 
@@ -536,6 +542,10 @@ lobby may claim no key file exists while one sits on an unplugged drive." Option
 unreachable, plus a face line naming the unreachable folder and rule 27's door still offered beside it; (b) today's
 reading kept, rule 27's face saying the backup folder was not reachable; (c) unread for a bounded number of launches,
 then today's reading. The listing-failure seam and the cache's no-retry ride the same ticket.
+*Closing (batch 2, after the final call):* **DEFERRED to VX-1090** (Bug · Suspected · Castle & sync · Low · Needs
+Lillian — minted by the orchestrator with the three face options, the listing-failure seam and the no-retry cache,
+pointing here). No code in this effort: today's reading continues — a picked folder that cannot be resolved at an open
+reads as none picked, for the whole open.
 
 **F-R1-4 (NIT) — AGREE.** `AppBootstrap.swift:642`'s "(a relock's lobby carries no far walk)" is false since piece 6:
 `lockOnNewRoad` (1514–1523) composes through `ProtectionRoadLock.lobbyContext`, which sets `ctx.far` and

@@ -344,8 +344,8 @@ nonisolated struct RoadContext: Sendable {
     /// false in a hosted test run over a real scope: read-only (see the header).
     let writes: Bool
     /// **VX-1013 (D-1013-5) — this open's one far-folder walk**: the launch road's, made by the bootstrap at each open
-    /// (`AppBootstrap.beginOpening`). nil — every other context (a face's door, the relock's lobby, a copy door's) —
-    /// reads both roots at each read, exactly as before.
+    /// (`AppBootstrap.beginOpening`), and a lock's lobby's, one per lock (`ProtectionRoadLock.lobbyContext`, R-1013-A2).
+    /// nil — every other context (a face's door, a copy door's) — reads both roots at each read, exactly as before.
     var far: FarFolderWalk? = nil
     /// **VX-1013 — whether the far walk's landing tries the quiet roads once more** with the far folder's key files in hand
     /// (P-1013-3). true on the launch road, whose route tried them with the container's; false on a LOCK's lobby
@@ -469,8 +469,10 @@ nonisolated enum ProtectionOpenRoad {
     /// them (a store from before this design, or one no longer in the lobby's state, is tried by nothing): one that opens
     /// the slot answers `.opened` (PROVISIONAL P-1013-3). Otherwise the full facts, for the standing lobby to take
     /// (PROVISIONAL P-1013-1). The caller serializes it against the lobby's presses (`ProtectionLobbyModel
-    /// .farWalkLanded`). Over a context with no far walk it is a plain re-read. A lock's lobby
-    /// (`farLandingTriesQuietRoads` false — R-1013-A2) only re-reads: the quiet roads are never tried at a lock.
+    /// .farWalkLanded`). A lock's lobby (`farLandingTriesQuietRoads` false — R-1013-A2) only re-reads: the quiet roads are
+    /// never tried at a lock. Over a context with NO far walk it is not a plain re-read: that read takes every place, so
+    /// where the far folder holds key files the quiet roads are tried once more (unless the flag is false) — which is why
+    /// the bootstrap wires a landing only to a lobby whose context carries a walk.
     static func landTheFarWalk(_ ctx: RoadContext) async -> RoadFarLanding {
         await ctx.scoped {
             await ctx.far?.read()

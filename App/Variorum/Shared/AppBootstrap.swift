@@ -639,7 +639,9 @@ final class AppBootstrap {
                 guard let self else { return nil }
                 return await self.startFreshOverAPreDesignStore()
             },
-            // VX-1013 (D-1013-4): the launch road's lobby only (a relock's lobby carries no far walk).
+            // VX-1013 (D-1013-4, R-1013-A2): a lobby whose context carries a far walk — the launch road's (its landing tries
+            // the quiet roads once more with the far folder's key files) and a lock's (its landing only re-reads: a lock
+            // is never theater). No landing without a walk.
             farLanding: ctx.far == nil ? nil : {
                 await Task.detached(priority: .userInitiated) { await ProtectionOpenRoad.landTheFarWalk(ctx) }.value
             })
