@@ -182,6 +182,110 @@ extension Queries {
         return answer
     }
 
+    /// **Many notes' own live tags at once, as rows** (VX-1038 — the book
+    /// Outline's card pills): `wornTags`' shape with whole `Tag` rows, because
+    /// a pill is drawn from the row (its colour from its path, its × naming
+    /// the tag). Each note's tags by path, then id; a note wearing none is
+    /// absent. ∝ the notes' own applications (`idx_post_tag_post`) — the
+    /// caller hands the notes its window shows, never the book.
+    public static func wornTagRows(_ db: Database, noteIDs: [String]) throws -> [String: [Tag]] {
+        guard !noteIDs.isEmpty else { return [:] }
+        var answer: [String: [Tag]] = [:]
+        let rows = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT pt.post_id AS worn_by, t.* FROM json_each(?) j
+                JOIN post_tag pt ON pt.post_id = j.value AND pt.deleted_at IS NULL
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                ORDER BY pt.post_id, t.path, t.id
+                """,
+            arguments: [String(decoding: try JSONEncoder().encode(noteIDs), as: UTF8.self)])
+        for row in rows {
+            answer[row["worn_by"], default: []].append(try Tag(row: row))
+        }
+        return answer
+    }
+
+    /// **Live tag rows by id** (VX-1038): the tags a gathering's rule names,
+    /// for the pure placing-tags rule's subtree match (`NotePlacingTags`).
+    /// Missing and tombstoned ids are simply absent (a dead term matches
+    /// nothing). ∝ the ids named.
+    public static func liveTags(_ db: Database, ids: [String]) throws -> [Tag] {
+        guard !ids.isEmpty else { return [] }
+        return try Tag.fetchAll(
+            db,
+            sql: """
+                SELECT t.* FROM json_each(?) j
+                JOIN tag t ON t.id = j.value AND t.deleted_at IS NULL
+                ORDER BY t.path, t.id
+                """,
+            arguments: [String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)])
+    }
+
+    /// **Where a tag's use count stops counting** (the VX-1036 ladder's R1-2 —
+    /// PROVISIONAL P-1036-L1-1; the alternative is her ruling that full counts
+    /// at a field's opening are admissible). A suggest list needs "most used
+    /// first", not the exact tally of a tag worn by thousands: past this many
+    /// live wearers a tag reads as this many, so its count costs at most this
+    /// many probes however large the library grows.
+    public static let tagUseCountSaturation = 50
+
+    /// **How many live notes wear each tag of a wing** (VX-576 — "tag pickers
+    /// list most-used first", the rider seated in VX-1036 batch 2): the
+    /// suggest brain's order key. Direct applications on live notes (archived
+    /// notes count — still worn); a tag no live note wears is absent (0).
+    /// Read ONCE when a tag field opens, never inside a held observation.
+    ///
+    /// **SATURATING, and driven from the TAGS** (the VX-1036 ladder's R1-2): a
+    /// count stops at `cap` (`tagUseCountSaturation`), so the most-used order
+    /// is exact up to it and the saturated tags tie (the suggest brain keeps
+    /// the path order among ties). The wing's live tags drive — the vocabulary,
+    /// author-scale metadata (`allTags`' posture) — and each probes its own
+    /// LIVE applications (`CROSS JOIN`, the VX-654 lesson: the application
+    /// drives, the note is probed by its key), at most `cap` of them. The
+    /// first form drove from `post_tag` and filtered on the tag's wing; Home's
+    /// scope (`wing_id = '' OR … NOT IN …`) is unindexable, so it SCANNED every
+    /// live application in the store at each field's opening.
+    ///
+    /// **`INDEXED BY uq_post_tag_live`** (the ladder's round 2, R2-1): the
+    /// probe names the LIVE partial index, which holds the live applications
+    /// alone. Left to itself the stats-free planner (the store never runs
+    /// `ANALYZE`) took `idx_post_tag_tag(tag_id)` — NOT partial — and walked
+    /// every application ever written for the tag, tombstones included (every
+    /// un-tag and every note deletion's cascade leaves one, and none is ever
+    /// cleaned), until it found `cap` live ones: ∝ the tag's whole history.
+    /// Legal because the probe's own `pt.deleted_at IS NULL` is the partial
+    /// index's predicate (`LibraryPaging` names its indexes the same way).
+    /// P1: ∝ the wing's vocabulary × `cap` LIVE applications, never the
+    /// library's applications and never their history (pinned:
+    /// `TagUseCountsP1Tests`).
+    public static func tagUseCounts(
+        _ db: Database, wingID: String, saturatingAt cap: Int = tagUseCountSaturation
+    ) throws -> [String: Int] {
+        let scope = wingScope(column: "t.wing_id", wingID: wingID)
+        // `LIMIT ?` comes first in the statement's text, so its argument leads.
+        let arguments: [(any DatabaseValueConvertible)?] = [max(0, cap)] + scope.arguments
+        var answer: [String: Int] = [:]
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT t.id AS tag_id, (
+                    SELECT COUNT(*) FROM (
+                        SELECT 1 FROM post_tag pt INDEXED BY uq_post_tag_live
+                        CROSS JOIN container c ON c.id = pt.post_id AND c.deleted_at IS NULL
+                        WHERE pt.tag_id = t.id AND pt.deleted_at IS NULL
+                        LIMIT ?)
+                ) AS uses
+                FROM tag t
+                WHERE t.deleted_at IS NULL AND \(scope.sql)
+                """,
+            arguments: StatementArguments(arguments)) {
+            let uses: Int = row["uses"]
+            if uses > 0 { answer[row["tag_id"]] = uses }
+        }
+        return answer
+    }
+
     /// **The live tags at exactly one PATH** (VX-827 U2 — VX-810): in ONE wing
     /// as surfaces read it, or, `wingID` nil, in every wing. VX-892: the wings
     /// compare through THE dangling-wing rule (`effectiveWingID` — a dead wing,

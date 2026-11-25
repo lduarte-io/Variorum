@@ -957,6 +957,23 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // the foot's and the Outline flow's "+ new note"/"+ new entry" are its
     // `.surface` renderers.
     case newNoteInBook
+    // VX-1039 (the VX-1036 run, batch 1 — N-2, her R-1036-8: "a lane's or
+    // chapter's own "+" makes the note there"): a NEW NOTE IN THIS CHAPTER —
+    // the book's one mint act, born at the chapter's end and landed live. Its
+    // own act beside `.newNoteInBook` on the `.newNoteInGathering` grounds:
+    // different words, a different place. `.surface` — the outline page's
+    // chapter heading (and, at VX-1084, the List mode's chapter heading: a
+    // second renderer of the same act).
+    case newNoteInChapter
+    // VX-1040 (the VX-1036 run, batch 1 — D-1, her R-1036-33): SAVE AS THIS
+    // BOOK'S ORDER — `setReadingSort` from the book's order dial. It stood
+    // undeclared as part of the dial's "way of looking" (A31); since D-1 a
+    // pick on a gathering or a non-manual book IS this act, so it is declared
+    // here, once: the dial's saving picks, its "Save as This Book's Order"
+    // row, and the hand-ordered look's "save as this book's order" under the
+    // mode row are its `.surface` renderers. The looks stay undeclared (they
+    // change what she sees, never the store — the Library `sort ▾` class).
+    case saveBookOrder
     // VX-563 (her kickoff ruling 2026-10-28: "⌘↑/⌘↓ step between notes while
     // reading, document start/end while editing" — VX-560's rule; A-648-6):
     // the previous / next note in the book the focused pane shows, in

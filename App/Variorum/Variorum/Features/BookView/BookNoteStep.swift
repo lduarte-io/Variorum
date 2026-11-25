@@ -88,7 +88,9 @@ nonisolated enum BookNoteStep {
     static func steps(in mode: BookStructureModel.ViewMode) -> Bool {
         switch mode {
         case .outline, .spread, .read: true
-        case .index: false
+        // VX-1084 — List keeps the Index's posture (PROVISIONAL P-1036-B3-3):
+        // the stepper's contract names Outline, Read and the spread.
+        case .index, .list: false
         }
     }
 
@@ -122,7 +124,7 @@ nonisolated enum BookNoteStep {
         case (.spread, _): viewed = facts.spreadLeft
         case (.read, .pages): viewed = facts.pagedShown ?? order.first
         case (.read, .flow): viewed = facts.flowViewed
-        case (.index, _): viewed = nil
+        case (.index, _), (.list, _): viewed = nil
         }
         // A note the mode's order no longer holds (a stale report) views
         // nothing — the step then starts from before the first note.

@@ -170,9 +170,10 @@ public enum Tour {
         case write, takes, read, lenses, compare, blocks, canvas
     }
 
-    /// A book's mode (the book masthead's four word-tabs).
+    /// A book's mode (the book masthead's word-tabs — five since the List
+    /// mode, VX-1084; the tour teaches four of them and never waits on List).
     public enum BookMode: String, CaseIterable, Sendable {
-        case outline, index, book, read
+        case outline, list, index, book, read
     }
 
     /// Write's caret, when Write's editor is the one she is writing in.

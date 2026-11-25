@@ -302,7 +302,10 @@ struct TutorialCurrencyTests {
     @Test func theBookLessonCountsEveryViewTheToggleHas() async throws {
         try await withGuide { _, db, guideID in
             let labels = BookView.tabOrder.map(BookView.tabLabel)
-            #expect(labels == ["Outline", "Index", "Book", "Read"], "the masthead's own tabs")
+            // VX-1084 (A JUSTIFIED EDIT — the table grew List, R-1036-29; the
+            // lesson's count and its per-view sentences read the table, as
+            // before).
+            #expect(labels == ["Outline", "List", "Index", "Book", "Read"], "the masthead's own tabs")
             let text = try await prose(db, guideID, "a book from the inside")
             let count = countWord(labels.count)
             let capitalized = count.prefix(1).uppercased() + String(count.dropFirst())

@@ -92,10 +92,14 @@ struct BookMastheadModeRowRuleTests {
         var widest: CGFloat { faces.max() ?? 0 }
     }
 
+    /// VX-1084 (the VX-1036 run, batch 3 — A JUSTIFIED EDIT): the tab row
+    /// re-surveyed with its fifth tab, List (R-1036-29) — 168 → 205 Terminal,
+    /// 151 → 179 Study (`theStableWidthsAreTheSurveysNumbers` measures them);
+    /// the dial's faces are unchanged.
     static func measured(_ voice: ThemeVoice) -> Voice {
         switch voice {
-        case .terminal: Voice(tabs: 168, faces: [100, 114, 100, 100, 79, 79, 114, 114, 128, 128, 100, 100])
-        case .study: Voice(tabs: 151, faces: [81, 93, 78, 78, 65, 65, 93, 93, 98, 98, 75, 78])
+        case .terminal: Voice(tabs: 205, faces: [100, 114, 100, 100, 79, 79, 114, 114, 128, 128, 100, 100])
+        case .study: Voice(tabs: 179, faces: [81, 93, 78, 78, 65, 65, 93, 93, 98, 98, 75, 78])
         }
     }
 
@@ -127,7 +131,8 @@ struct BookMastheadModeRowRuleTests {
         let study = Self.measured(.study)
         let row = Self.arrange(study, face: 81, width: 200)
         #expect(row.widthClass == .twoLines && row.lineCount == 2)
-        #expect(row.tabs == CGRect(x: 0, y: 0, width: 151, height: 14))
+        // VX-1084 (A JUSTIFIED EDIT): the tab line is the re-surveyed 179.
+        #expect(row.tabs == CGRect(x: 0, y: 0, width: 179, height: 14))
         #expect(row.dial == CGRect(x: 200 - 81, y: 14 + Rule.lineSpacing, width: 81, height: 14),
                 "\(row.dial)")
         #expect(row.size == CGSize(width: 200, height: 14 + Rule.lineSpacing + 14))
@@ -278,33 +283,55 @@ struct BookMastheadModeRowRuleTests {
     /// **GUARD — the thresholds at the measured widths** (documents the
     /// margins; the rule is the pins above). **VX-896 — A DELIBERATE RE-WRITE,
     /// the old and new values named:** "Manual order ▾" (81 Study / 100
-    /// Terminal) goes one line at Study 151 + 8 + 81 = **240** pt of masthead
-    /// (was 257 — a navigator ≥ 264, was 281; its 12-pt sides) and Terminal
-    /// 168 + 8 + 100 = **276** (was 304 — ≥ 300, was 328). Her screenshots'
-    /// masthead widths (≈258 and ≈252 pt, Study): BOTH one line now (≈252 was
-    /// two — the record's D-887-4, her VX-896 ask). The widest face, "Major
-    /// revision ↓ ▾" (98 / 128), keeps the old numbers for itself (257 /
-    /// 304); "as collected ▾" (75 / 100) goes at 234 / 276. The navigator's
-    /// floor (166) still wraps in both voices.
+    /// Terminal) went one line at Study 151 + 8 + 81 = **240** pt of masthead
+    /// (was 257) and Terminal 168 + 8 + 100 = **276** (was 304).
+    ///
+    /// **VX-1084 (the VX-1036 run, batch 3) — A DELIBERATE RE-WRITE AGAIN, the
+    /// rule untouched:** the row grew its fifth tab, List (R-1036-29), so the
+    /// tabs measure 179 Study / 205 Terminal and every threshold moves by the
+    /// tab line's growth (+28 / +37). "Manual order ▾" goes one line at Study
+    /// 179 + 8 + 81 = **268** pt of masthead and Terminal 205 + 8 + 100 =
+    /// **313**; "as collected ▾" (75 / 100) at **262** / **313**; the widest
+    /// face, "Major revision ↓ ▾" (98 / 128), at **285** / **341**. THE
+    /// ACCEPTED COST, named at the sitting ("the order dial drops to a second
+    /// line in a narrow one"): her two Study seats (≈252 and ≈258 pt — one
+    /// line since VX-896) draw two lines again, and in Terminal the widest
+    /// look no longer fits one line even at the navigator's 336-pt ceiling.
+    /// The navigator's floor still wraps in both voices — and since the fifth
+    /// tab that floor is the VOICE's (`BookNavigatorFloor`: 229 pt Terminal,
+    /// 203 Study, so the masthead's room there is the tabs' own 205 / 179); 166
+    /// is the shipped 190-pt floor's room, narrower than either now (the
+    /// VX-1036 ladder's N5 re-labelled the two checks that still called 166
+    /// "the navigator's floor", and added the per-voice ones).
     @Test func atTheMeasuredWidthsTheThresholdsAreTheCountedLines() {
         let study = Self.measured(.study)
         let terminal = Self.measured(.terminal)
-        #expect(Self.arrange(study, face: 81, width: 240).widthClass == .oneLine, "Study: 257 → 240")
-        #expect(Self.arrange(study, face: 81, width: 239).widthClass == .twoLines)
-        #expect(Self.arrange(terminal, face: 100, width: 276).widthClass == .oneLine, "Terminal: 304 → 276")
-        #expect(Self.arrange(terminal, face: 100, width: 275).widthClass == .twoLines)
-        #expect(Self.arrange(study, face: 81, width: 258).widthClass == .oneLine, "her -204301 seat")
-        #expect(Self.arrange(study, face: 81, width: 252).widthClass == .oneLine,
-                "her -210400 seat — two lines before VX-896, one line now")
-        #expect(Self.arrange(study, face: 98, width: 257).widthClass == .oneLine, "the widest face keeps 257")
-        #expect(Self.arrange(study, face: 98, width: 256).widthClass == .twoLines)
-        #expect(Self.arrange(terminal, face: 128, width: 304).widthClass == .oneLine, "… and 304")
-        #expect(Self.arrange(terminal, face: 128, width: 303).widthClass == .twoLines)
-        #expect(Self.arrange(study, face: 75, width: 234).widthClass == .oneLine, "as collected, Study")
-        #expect(Self.arrange(study, face: 75, width: 233).widthClass == .twoLines)
-        #expect(Self.arrange(study, face: 81, width: 166).widthClass == .twoLines, "the navigator's floor")
-        #expect(Self.arrange(terminal, face: 100, width: 166).widthClass == .twoLines, "the navigator's floor")
-        #expect(Self.arrange(terminal, face: 128, width: 336).widthClass == .oneLine, "the navigator's ceiling")
+        #expect(Self.arrange(study, face: 81, width: 268).widthClass == .oneLine, "Study: 240 → 268")
+        #expect(Self.arrange(study, face: 81, width: 267).widthClass == .twoLines)
+        #expect(Self.arrange(terminal, face: 100, width: 313).widthClass == .oneLine, "Terminal: 276 → 313")
+        #expect(Self.arrange(terminal, face: 100, width: 312).widthClass == .twoLines)
+        #expect(Self.arrange(study, face: 81, width: 258).widthClass == .twoLines,
+                "her -204301 seat — two lines again with the fifth tab (the accepted cost)")
+        #expect(Self.arrange(study, face: 81, width: 252).widthClass == .twoLines,
+                "her -210400 seat — two lines again with the fifth tab (the accepted cost)")
+        #expect(Self.arrange(study, face: 98, width: 285).widthClass == .oneLine, "the widest face, Study")
+        #expect(Self.arrange(study, face: 98, width: 284).widthClass == .twoLines)
+        #expect(Self.arrange(terminal, face: 128, width: 341).widthClass == .oneLine, "… and Terminal")
+        #expect(Self.arrange(terminal, face: 128, width: 340).widthClass == .twoLines)
+        #expect(Self.arrange(study, face: 75, width: 262).widthClass == .oneLine, "as collected, Study")
+        #expect(Self.arrange(study, face: 75, width: 261).widthClass == .twoLines)
+        #expect(Self.arrange(study, face: 81, width: 179).widthClass == .twoLines,
+                "Study's navigator floor (203 pt — a 179-pt masthead)")
+        #expect(Self.arrange(terminal, face: 100, width: 205).widthClass == .twoLines,
+                "Terminal's navigator floor (229 pt — a 205-pt masthead)")
+        #expect(Self.arrange(study, face: 81, width: 166).widthClass == .twoLines,
+                "the shipped 190-pt floor's room — narrower than either voice's floor now")
+        #expect(Self.arrange(terminal, face: 100, width: 166).widthClass == .twoLines,
+                "the shipped 190-pt floor's room — narrower than either voice's floor now")
+        #expect(Self.arrange(terminal, face: 100, width: 336).widthClass == .oneLine,
+                "the navigator's ceiling — the book's own order")
+        #expect(Self.arrange(terminal, face: 128, width: 336).widthClass == .twoLines,
+                "the navigator's ceiling — the widest look wraps in Terminal (beyond R-1036-29's narrow-navigator wrap — held for her ruling)")
     }
 }
 
@@ -454,13 +481,18 @@ struct BookMastheadStableWidthsTests {
     /// record's survey), within a point: the tabs 151 Study / 168 Terminal;
     /// VX-896 — the dial counted at the shown face: "Manual order" 81 / 100,
     /// the widest ("Major revision ↓") 98 / 128.
+    ///
+    /// VX-1084 (the VX-1036 run, batch 3 — A JUSTIFIED EDIT): the row grew its
+    /// fifth tab, List (R-1036-29), so the tabs' survey is 179 Study / 205
+    /// Terminal (measured windowless, the stable rule's own measure); the
+    /// dial's numbers are unchanged.
     @Test func theStableWidthsAreTheSurveysNumbers() {
         let studyTokens = VoiceTokens.resolve(voice: .study, dark: false)
         let terminalTokens = VoiceTokens.resolve(voice: .terminal, dark: false)
         let study = Self.stable(studyTokens)
         let terminal = Self.stable(terminalTokens)
-        #expect(abs(study.tabs - 151) < 1 && abs(study.dial - 81) < 1, "\(study)")
-        #expect(abs(terminal.tabs - 168) < 1 && abs(terminal.dial - 100) < 1, "\(terminal)")
+        #expect(abs(study.tabs - 179) < 1 && abs(study.dial - 81) < 1, "\(study)")
+        #expect(abs(terminal.tabs - 205) < 1 && abs(terminal.dial - 100) < 1, "\(terminal)")
         #expect(abs(Self.stable(studyTokens, order: "Major revision \u{2193}").dial - 98) < 1)
         #expect(abs(Self.stable(terminalTokens, order: "Major revision \u{2193}").dial - 128) < 1)
     }
@@ -580,14 +612,21 @@ struct BookMastheadModeRowMountedTests {
         }
     }
 
-    /// Ruling 3, mounted: at the navigator's floor (166 pt) the dial wraps
-    /// below the modes, at the row's trailing end.
+    /// Ruling 3, mounted: at the navigator's floor the dial wraps below the
+    /// modes, at the row's trailing end. Since the fifth tab the floor is the
+    /// VOICE's (`BookNavigatorFloor` — 229 pt Terminal, 203 Study, so the
+    /// masthead's room there is the tabs' own 205 / 179): the VX-1036 ladder's
+    /// N5 re-labelled this from 166 — the shipped 190-pt floor's room, which
+    /// five tabs no longer fit — to the voice's own floor (A JUSTIFIED EDIT;
+    /// the claim, two lines with the dial below at the trailing end, is
+    /// unchanged).
     @Test(arguments: [ThemeVoice.terminal, .study])
     func atTheNavigatorsFloorTheDialWrapsBelowTheModes(voice: ThemeVoice) async throws {
-        try await mount(voice: voice, width: 166) { rig in
+        let floorRoom: CGFloat = voice == .terminal ? 205 : 179
+        try await mount(voice: voice, width: floorRoom) { rig in
             #if DEBUG
             let row = try #require(rig.placed, "\(voice): the row reported").arrangement
-            #expect(row.lineCount == 2, "\(voice): two lines at 166 (\(row))")
+            #expect(row.lineCount == 2, "\(voice): two lines at the floor's \(floorRoom) (\(row))")
             #expect(row.dial.minY >= row.tabs.maxY + Rule.lineSpacing - 0.5, "\(voice): below the modes (\(row))")
             #expect(abs(row.dial.maxX - row.size.width) < 0.5, "\(voice): at the trailing end")
             #endif
@@ -1065,8 +1104,20 @@ struct BookMastheadSourceTests {
         // level deeper; the claim — the dial is the row's second view — is
         // unchanged. And the guard itself: the row is composed only once the
         // book's row is held (its first paint counts the real face).
-        #expect(book.contains("                orderControl\n            }\n        }\n"),
-                "the dial is the row's second view")
+        //
+        // VX-1040 (the VX-1036 run, batch 1 — A JUSTIFIED EDIT, the shape
+        // only): the guard now holds a SIBLING after the row — `lookDoors`,
+        // the hand-ordered book's "save as this book's order" / "back to
+        // manual order" pair drawn under the row while a look is on (D-1,
+        // mockup frame 9b). The one-layout claim is unchanged and the text
+        // still proves it: the row's closure still ends at the dial (its
+        // second and last view — the layout lays out exactly two), and the
+        // pair stands OUTSIDE the closure, at the guard's level, so it is no
+        // third subview, never enters the row's wrap decision, and is no
+        // second set of the row's views (its own two buttons, the dial's acts
+        // by the same roads).
+        #expect(book.contains("                orderControl\n            }\n            lookDoors\n        }\n"),
+                "the dial is the row's second view; the look's doors stand outside the row")
         #expect(book.contains("        if let reading = structure.reading {\n"
                               + "            let stable = BookMastheadStableWidths.row("),
                 "the row waits for the book's row (ladder F1)")

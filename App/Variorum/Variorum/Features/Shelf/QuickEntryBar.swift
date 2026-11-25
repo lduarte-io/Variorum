@@ -53,6 +53,26 @@ final class QuickEntryModel {
     /// rendered).
     var suggestedTitle: String? { NoteCardFace.suggestedTitle(forTypedText: text) }
 
+    /// **VX-1078 (her R-1036-37) — the tags she picked with the button beside
+    /// the title suggestion.** Paths until the filing, which applies them
+    /// after the capture's own `{#…}` tokens through the tokens' road
+    /// (`CaptureTagPicks`, `CaptureMicrosyntax.Capture.wearing`). Her
+    /// decision about the capture, like the title chip's: kept by a refusal,
+    /// cleared with the words it filed.
+    var tagPicks = CaptureTagPicks()
+
+    /// The wing this capture lands in — the vocabulary its tag field suggests
+    /// (the mint's own: the wing she stands in, 13i-d U5).
+    var tagVocabularyWing: String { session.wing.currentID }
+
+    /// What the tag field suggests — its own small model (P-9), read once per
+    /// opening of the field (`loadTagVocabulary`), never at rest.
+    @ObservationIgnored let tagVocabulary = CaptureTagVocabulary()
+
+    func loadTagVocabulary() async {
+        await tagVocabulary.load(session: session, wingID: tagVocabularyWing)
+    }
+
     @ObservationIgnored private let session: AppSession
     /// The endorsed defaulted-seam pattern (`tailIdleSleep`, the canary
     /// handlers, `teardown(afterDisarm:)` — mobile round 2 §20(b)):
@@ -106,6 +126,8 @@ final class QuickEntryModel {
     /// a token can do costs her the capture.
     private func fileTypedText() async -> String? {
         let submitted = text
+        // VX-1078: the picks read with the words — what is being FILED.
+        let picked = tagPicks
         let capture = CaptureMicrosyntax.parse(submitted)
         guard !capture.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             // Nothing to keep and nothing to file — and the stale error goes
@@ -115,6 +137,7 @@ final class QuickEntryModel {
             text = ""
             lastError = nil
             titleFromFirstWords = false
+            tagPicks.clear()
             return nil
         }
         lastError = nil
@@ -131,9 +154,10 @@ final class QuickEntryModel {
             let postID = try await mintNow(capture.text, title: title)
             // The note exists; the tokens act on it now. A tag that does not
             // land speaks a refusal (18i: a door that did nothing says so)
-            // and NOTHING is undone.
+            // and NOTHING is undone. VX-1078: the picked tags ride the same
+            // road, after the tokens (`wearing` — the tokens untouched).
             for refusal in await CaptureMicrosyntax.applyTags(
-                capture, toPost: postID, session: session,
+                capture.wearing(picked), toPost: postID, session: session,
                 wording: TagsViewModel.message
             ) {
                 session.status.refuse(refusal)
@@ -147,6 +171,9 @@ final class QuickEntryModel {
             if text == submitted {
                 text = ""
                 titleFromFirstWords = false
+                // VX-1078: only the picks that filed — one picked during the
+                // flight stays for the next note.
+                for path in picked.paths { tagPicks.remove(path) }
             }
             return postID
         } catch {
@@ -335,6 +362,8 @@ struct QuickEntryBar: View {
     /// autofocus mount since VX-332.
     @State private var openingFocusRequest = 0
     @State private var cursorOn = true
+    /// VX-1078: the tag field beside the title suggestion is open.
+    @State private var tagFieldOpen = false
 
     /// **The box's bound** (13u3 UNIT C — the brief's "pick a sane max
     /// height and record it PROVISIONAL"; QUESTIONS #120(c)). Her ruling
@@ -437,18 +466,45 @@ struct QuickEntryBar: View {
             .tourAnchor(.quickEntry)
             // 13u3 UNIT B — the OFFER (her item 4): the first words, one
             // click to take them as the note's title, ignorable forever.
-            if let suggestion = box.suggestedTitle {
-                TitleSuggestionChip(
-                    tokens: tokens, suggestion: suggestion, adopted: box.titleFromFirstWords
-                ) {
-                    box.titleFromFirstWords.toggle()
-                    // 13u3 ladder round 1, R1-6 (SPECULATIVE hardening — the
-                    // acceptance walk's unreproduced first-⏎ miss): deciding
-                    // about the name hands the caret straight back to the
-                    // words, so ⏎ files whatever held keys during the click.
-                    // A no-op when the box never lost them (takeFocus guards).
-                    focusRequest += 1
+            // VX-1078 (her R-1036-37): and beside it the TAG BUTTON — the
+            // picked tags' pills and the ＋ whose field a book's "+" opens —
+            // one leading row that wraps when the band is narrow. Drawn while
+            // there are words to name, or picks to show (a pill never hides
+            // while it is held).
+            if box.suggestedTitle != nil || !box.tagPicks.isEmpty {
+                TrailingFlow(itemSpacing: 6, lineSpacing: 4, alignsLeading: true) {
+                    if let suggestion = box.suggestedTitle {
+                        TitleSuggestionChip(
+                            tokens: tokens, suggestion: suggestion, adopted: box.titleFromFirstWords
+                        ) {
+                            box.titleFromFirstWords.toggle()
+                            // 13u3 ladder round 1, R1-6 (SPECULATIVE hardening —
+                            // the acceptance walk's unreproduced first-⏎ miss):
+                            // deciding about the name hands the caret straight
+                            // back to the words, so ⏎ files whatever held keys
+                            // during the click. A no-op when the box never lost
+                            // them (takeFocus guards).
+                            focusRequest += 1
+                        }
+                    }
+                    CaptureTagItems(
+                        tokens: tokens, picks: box.tagPicks.paths,
+                        vocabulary: box.tagVocabulary.tags, uses: box.tagVocabulary.uses,
+                        fieldOpen: $tagFieldOpen,
+                        // The band sits at the window's foot: the field's
+                        // suggestions hang above it.
+                        suggestionsAbove: true,
+                        onPick: { box.tagPicks.add($0) },
+                        onRemove: { box.tagPicks.remove($0) },
+                        onFieldClosed: { focusRequest += 1 })
                 }
+                .task(id: tagFieldOpen ? box.tagVocabularyWing : nil) {
+                    guard tagFieldOpen else { return }
+                    await box.loadTagVocabulary()
+                }
+                // The row went (the note filed, the box emptied): a field left
+                // open must not reopen — and take the caret — with the next.
+                .onDisappear { tagFieldOpen = false }
             }
             if let lastError = box.lastError {
                 // lineLimit is LOAD-BEARING beside fixedSize — an unlimited

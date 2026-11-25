@@ -135,6 +135,12 @@ struct TourScriptTests {
                          ("now reads Italian. Choose", "now reads Italian. Scroll down if you don't see it. Choose")],
         .readInNote: [("in the rail", "in the sidebar")],
         .lensesLive: [("in the rail", "in the sidebar")],
+        // VX-1084 (the VX-1036 run, batch 3 — A JUSTIFIED EDIT, a departure
+        // added, the draft kept verbatim): the book's row has FIVE views since
+        // the List mode (R-1036-29); the card counts and lists them from the
+        // one table.
+        .upToBook: [("four views of its own along the top: Outline, Index, Book and Read.",
+                     "five views of its own along the top: Outline, List, Index, Book and Read.")],
     ]
 
     /// Every card is its draft — mockup v5's approved text with the
@@ -304,9 +310,11 @@ struct TourScriptTests {
         }
         #expect(PostMode.read.rawValue == "Read" && PostMode.lenses.rawValue == "Lenses")
         #expect(PostMode.compare.rawValue == "Compare" && PostMode.blocks.rawValue == "Blocks")
-        #expect(BookView.tabOrder.map(BookView.tabLabel) == ["Outline", "Index", "Book", "Read"])
+        // VX-1084 (A JUSTIFIED EDIT — the table grew List, R-1036-29; the
+        // claim is unchanged: the card quotes the row that draws the tabs).
+        #expect(BookView.tabOrder.map(BookView.tabLabel) == ["Outline", "List", "Index", "Book", "Read"])
         #expect(try #require(TourScript.card(.upToBook)).body
-                .hasSuffix("along the top: Outline, Index, Book and Read."))
+                .hasSuffix("along the top: Outline, List, Index, Book and Read."))
         #expect(try #require(TourScript.card(.upToBook)).body
                 .contains("back in \(SampleLibraryPrinceBook.name),"))
         // The Settings stop: the count is the strip's, the leading palette

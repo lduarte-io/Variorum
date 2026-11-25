@@ -89,6 +89,19 @@ enum BookOrderChoices {
     static let unloadedName = "book's order"
     /// A gathering's `manual` — it has no hand order (below).
     static let asCollectedName = "as collected"
+    /// The same order as a MENU row on a gathering's dial, where a pick saves
+    /// (VX-1040 — the round-1 mockup's frame 9a leads with it).
+    static let asCollectedLabel = "As collected"
+
+    /// **VX-1040 — the receipt a saved order speaks** (the dial's pick on a
+    /// gathering or a non-manual book, and "Save as This Book's Order"): the
+    /// status seam's receipt kind, her order's name mid-sentence — the mockup's
+    /// words, 'Saved the order for "this week" — created ↓.'
+    static func savedReceipt(bookName: String, order: Queries.ReadingOrder, gathering: Bool) -> String {
+        let name = gathering && order.field == .manual ? asCollectedName : label(for: order)
+        let spoken = name.prefix(1).lowercased() + name.dropFirst()
+        return "Saved the order for \u{201C}\(bookName)\u{201D} \u{2014} \(spoken)."
+    }
 
     /// **Every name `label(for:)` and `storedLabel(for:)` can produce**
     /// (VX-887): every field × direction (the view order is always one of

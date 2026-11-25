@@ -26,6 +26,10 @@
 //  title, the day, the chips and their ＋, the badge, the right-aligned
 //  stamp, the pick's wash and border) is the row's own content, unchanged.
 //
+//  (The VX-1036 run, batch 3: this file moved to the shared home with the
+//  note row it frames — `CatalogNoteLine.swift` — when the book's List mode,
+//  VX-1084, began drawing the same rows; every name kept.)
+//
 
 import AppKit
 import SwiftUI
@@ -61,6 +65,31 @@ extension LibraryListRow where Background == EmptyView {
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
         self.background = { EmptyView() }
+    }
+}
+
+/// **A row's pick, as the List draws it** (row 56 — W8-2: the wash + a tinted
+/// border, never a system highlight): a picked row wears the wash with a quiet
+/// border; the SUBJECT (the row the info panel describes — in a book's List,
+/// the selected note) wears the fuller border. One face for both lists
+/// (VX-1084 — the book's List mode draws the Library's row, its pick included).
+struct LibraryListRowPick: View {
+    let tokens: VoiceTokens
+    let picked: Bool
+    let subject: Bool
+
+    var body: some View {
+        if picked || subject {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(tokens.wash)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(tokens.accent.opacity(subject ? 0.42 : 0.22), lineWidth: 1))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 1)
+        } else {
+            Color.clear
+        }
     }
 }
 
@@ -106,6 +135,12 @@ struct LibraryListSeparator: View {
 struct LibraryListHeader: View {
     /// The words, already voiced (`tokens.chromeLabel`).
     let title: String
+    /// **VX-1084 — a book List's heading** (the round-2 mockup's frame 9: a
+    /// chapter's or a group's name, its count, and the chapter's own
+    /// "+ new note" at the trailing end). Both nil — the Library's headers —
+    /// draw exactly the shipped single line.
+    var count: Int? = nil
+    var trailing: AnyView? = nil
     @State private var pinned = false
     /// Whether the list's content has scrolled under its top edge (the host's
     /// `LibraryListScrollReader`). A host that does not read its scroll keeps
@@ -155,7 +190,7 @@ struct LibraryListHeader: View {
     var body: some View {
         let face = face
         let floating = Self.floats(pinned: pinned, contentBeneath: contentBeneath)
-        return Text(title)
+        return label
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.secondary)
             .lineLimit(1)
@@ -211,6 +246,30 @@ struct LibraryListHeader: View {
                 pinned = $0
             }
             .accessibilityAddTraits(.isHeader)
+    }
+
+    /// The heading's words: the title alone (the Library's), or — a book
+    /// List's — the title, its count in the lighter weight, and the trailing
+    /// door, on one line.
+    @ViewBuilder
+    private var label: some View {
+        if count == nil && trailing == nil {
+            Text(title)
+        } else {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(title)
+                if let count {
+                    Text("\(count)")
+                        .fontWeight(.regular)
+                        .foregroundStyle(.tertiary)
+                }
+                Spacer(minLength: 8)
+                if let trailing {
+                    trailing
+                        .padding(.trailing, LibraryListFace.rowInsets.trailing)
+                }
+            }
+        }
     }
 }
 
