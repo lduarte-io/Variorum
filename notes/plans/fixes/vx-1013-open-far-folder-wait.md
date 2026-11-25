@@ -410,6 +410,15 @@ that is the copies beside the library alone."
 Pin owed with whichever is ruled: (a)'s — a row's words name its place for both places (the probe's scene); (b)'s — the
 fold, and the doors' file choice; (c)'s — the total line's arithmetic.
 
+**R-1013-A3 (the architect's ruling on VX-524's fork, 2026-11-25; PROVISIONAL P-1013-5 for her bundle): option (a).**
+Each Restore-list row's second line names its place — "beside your library" / "in your backup folder", the pane's own
+vocabulary (the count rows already speak it). It is the smallest honest fix for exactly the confusion that filed the
+ticket, it is wording only (no door behaviour changes, so (b)'s fold and its retention mismatch never arise), and the
+counts stay the per-place truths they already are. Built with a pin (a listed pair standing in both places shows each
+row's place line; a container-only pair says beside the library); red-on-old by the line's absence. The ticket is
+corrected on the board (not a count defect; the mechanism as the probe showed it) and relabeled Improvement ·
+Confirmed · Wording. VX-524 closes when (a) lands.
+
 ## THE LADDER
 
 *(round 1: fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, zero framing — RUNNING 2026-11-25; its findings land below)*
