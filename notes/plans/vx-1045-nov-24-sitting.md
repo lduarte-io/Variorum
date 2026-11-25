@@ -190,4 +190,6 @@ canon keeps that word on the Trash line's wording.
 | 17:33 | ANNOUNCE and REQUEST to `nov24` for step 0; queued first. An Opus subagent started on the headless preparation. |
 | 17:34–17:38 | Linear: VX-1013 High and Todo; VX-1026 under VX-1036; the umbrella VX-1046 and its members; VX-1068 to VX-1072; VX-460 and VX-368 closed; VX-1017 parked. |
 | 17:45 | The five skill lines, the ratified canon lines, the stated exceptions and the two QUESTIONS addenda on this branch. |
+| 17:58 | The helper's preparation done, headless: the Debug app built from this worktree (1.5, build 13404, the code of `703c42173`), build-for-testing into the same derived data, the walk's self-test passed (72 cases). FirstRunDrillTests holds 11 tests. The dev slot as found: 239 files, its restore-hold marker present, so it is set aside whole. |
+| 18:00 | READY sent to `nov24`. The walk will run from the main checkout's script (byte-identical `Tools/`), pointed at this worktree's build, because the walk's guard needs main's `.env.supabase.local` and this worktree has none; the 2026-11-19 run took the same road. The drill's result comes back to the orchestrator before the walk starts (the seam). |
 
