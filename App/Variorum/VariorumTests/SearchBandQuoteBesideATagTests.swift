@@ -172,11 +172,19 @@ struct SearchBandQuoteBesideATagTests {
             let alone = try #require(LibrarySearchDrawnOracle.drawn(.countsLine, in: session),
                                      "\(voice): #flora's band draws its counts")
             #expect(!alone.hasPrefix("\u{2014}"), "\(voice): the tag alone's counts lead bare (the premise): \(alone)")
+            #expect(LibrarySearchDrawnOracle.drawn(.echo, in: session) == nil, "\(voice): #flora quotes nothing")
             for text in Self.foldedBesideATag {
                 await ask(text)
                 #expect(LibrarySearchDrawnOracle.drawn(.countsLine, in: session) == alone,
                         "\(voice) \(text): the band draws #flora's counts line, not \(LibrarySearchDrawnOracle.drawn(.countsLine, in: session) ?? "nil")")
+                // The quote itself (the `.echo` slot is VX-1069's own — this
+                // line compiles only with the fix; its red is the revert's).
+                #expect(LibrarySearchDrawnOracle.drawn(.echo, in: session) == nil,
+                        "\(voice) \(text): no quote drawn, not \(LibrarySearchDrawnOracle.drawn(.echo, in: session) ?? "nil")")
             }
+            await ask("red — #flora")
+            #expect(LibrarySearchDrawnOracle.drawn(.echo, in: session) == LibrarySearchCopy.echo("red"),
+                    "\(voice): beside a tag a real word keeps only itself in the quote")
 
             // GUARD: R-980-5's tagless field keeps its quote and its dash.
             await ask("—")
@@ -184,6 +192,8 @@ struct SearchBandQuoteBesideATagTests {
             #expect(LibrarySearchDrawnOracle.drawn(.countsLine, in: session)
                     == tokens.chromeLabel(LibrarySearchFace.countsLead(LibrarySearchCopy.nothingFound, afterEcho: true)),
                     "\(voice): the tagless — still reads “—” — nothing found")
+            #expect(LibrarySearchDrawnOracle.drawn(.echo, in: session) == LibrarySearchCopy.echo("—"),
+                    "\(voice): the tagless — keeps its quote")
         }
         #endif
     }

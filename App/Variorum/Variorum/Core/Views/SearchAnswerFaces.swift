@@ -131,8 +131,19 @@ nonisolated enum SearchAnswerFace {
 nonisolated enum SearchFieldWords {
     /// The band's echo: the words as typed, tags (and the dropped `#/`)
     /// aside.
+    ///
+    /// **VX-1069 — her ruling of P-980-B1-1, option (b) (QUESTIONS #276
+    /// addendum 2): beside a tag, the words that FOLD TO NOTHING drop out of
+    /// the quote** (`SearchComposer.foldsToNothing` — the index's own table).
+    /// The answer was already the tag's (VX-954's `asksWords`), so `— #tag`
+    /// now reads on the band exactly as `#tag` does, and `red — #tag` quotes
+    /// "red". With NO tag the quote is what she typed — R-980-5's field of
+    /// only punctuation keeps its “—” byte for byte.
     static func words(of text: String) -> String {
-        tokens(of: text).filter { !isTagShaped($0) }.joined(separator: " ")
+        let all = tokens(of: text)
+        let words = all.filter { !isTagShaped($0) }
+        guard all.contains(where: isTag) else { return words.joined(separator: " ") }
+        return words.filter { !SearchComposer.foldsToNothing($0) }.joined(separator: " ")
     }
 
     /// The typed `#tag` paths, in the order typed.
