@@ -114,3 +114,5 @@ notes/plans/vm-44/audit/traces/
 notes/plans/vm-47-screens/
 # VM-64: the run's simulator captures (the readout walk) — machine output, never committed
 notes/plans/vm64-screens/
+# VM-260: the run's simulator captures — machine output, never committed
+notes/plans/vm-260-screens/
