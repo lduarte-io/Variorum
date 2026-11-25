@@ -24,6 +24,17 @@
 //  the keyboard moves only the text below it (the keyboard-reveal UI test holds
 //  that road, and the window's capture shows the note with the keyboard up).
 //
+//  **MOVED WITH R-260-13 (the VM-260 run, batch 4b — the note's top as she
+//  picked it):** the title on its own row, ONE row of six icon doors under it
+//  (copy · find · book · # · blocks/lens/more info · ⋯), no separator; the seal
+//  and the date moved into the Note sheet's head; the membership line and the
+//  five chips are gone from the top. So the chrome at rest is the title's row
+//  and one 44 pt row (was three rows — the cap TIGHTENS 137 → 105 at a one-line
+//  title); every door on the top is the title, the six and, while the tags are
+//  open, the strip's add door; the four tools' guard is now the six doors' one
+//  row. The scrolled state (only the row stays) and the new doors' acts are
+//  `MobileNoteTopRowTests`.
+//
 //  Only symbols both trees declare.
 //
 
@@ -37,11 +48,13 @@ import VariorumCore
 @MainActor
 @Suite("VM-272 — the note's top gives the screen back to writing", .serialized)
 struct MobileNoteTopTests {
-    /// The note's top's doors, by the words each speaks.
-    static let doors = [
-        "Rename Note", "Copy Note", "Find in Note", MobileWriteScreen.lockDoorTitle,
-        MobileNoteActionsSheet.doorLabel, "Books holding this note",
-        "Entry Date", "Tags", "More Info", "Blocks", "Lenses",
+    /// The note's top's doors, by the words each speaks (R-260-13: the title,
+    /// then the one row's six, in order).
+    static let doors = ["Rename Note"] + rowDoors
+    /// The one row, in its order: copy · find · book · # · the stack door · ⋯.
+    static let rowDoors = [
+        "Copy Note", "Find in Note", "Books holding this note", "Tags",
+        "Blocks, Lenses and More Info", MobileNoteActionsSheet.doorLabel,
     ]
 
     /// The app's Write screen over a short note, in one voice, at the phone's width.
@@ -73,17 +86,15 @@ struct MobileNoteTopTests {
     }
 
     /// **RED ON OLD — "the top part is so huge".** The chrome between the top
-    /// of the screen's safe area and the top of her text: three rows of 44 pt
-    /// targets and the 4 below them (≤ 137, a point for rounding) — the old
-    /// tree measured 167 / 166.3. And never less than the three rows: the
-    /// targets stay.
+    /// of the screen's safe area and the top of her text, at rest, under a
+    /// one-line title: the title's row (its 44 pt door and at most 12 of air
+    /// above it) and ONE row of 44 pt targets, and the 4 below them (≤ 105, a
+    /// point for rounding) — the old tree measured 136 (three rows of 44 and the
+    /// 4). And never less than the two rows: the targets stay.
     ///
-    /// RECONCILED (the batch-2 window measured the tip at 145.0 / 144.3 against
-    /// a cap of 140 — the arithmetic 136 missed 9 pt, on the old tree too): 8 of
-    /// it was `safeAreaInset`'s default spacing under the masthead (now
-    /// `spacing: 0`), the rest the title row on its title's baseline, the tools
-    /// hanging a point below their 44 (Study 1.0, Terminal 0.3 — now centred).
-    /// Both gone, the layout is exact, so the cap tightened 140 → 137.
+    /// MOVED WITH R-260-13 (batch 4b): it held three rows of 44 + 4 (≤ 137 — the
+    /// batch-2 reconcile's exact cap); her pick folds the membership line and the
+    /// chips into the one row, so the cap TIGHTENS to two rows + the title's air.
     @Test(arguments: [ThemeVoice.study, .terminal])
     func theNoteTopGivesTheScreenBackToWriting(voice: ThemeVoice) async throws {
         try await mounted(voice) { model, surface in
@@ -94,53 +105,70 @@ struct MobileNoteTopTests {
             let title = surface.element(labeled: "Rename Note")?.accessibilityFrame ?? .null
             print("PERF[sim] VM-272 note top \(voice): chrome \(chrome) (text at \(textTop), safe top \(safeTop), "
                   + "title row \(title))")
-            #expect(chrome <= 3 * PhoneMetrics.touchMinimum + MobileWriteScreen.mastheadBottom + 1,
+            #expect(chrome <= 2 * PhoneMetrics.touchMinimum + 12 + MobileWriteScreen.mastheadBottom + 1,
                     "\(voice): the note's top takes \(chrome) pt above her text")
-            #expect(chrome >= 3 * PhoneMetrics.touchMinimum - 0.5,
-                    "\(voice): three rows of 44 pt targets stay (\(chrome))")
+            #expect(chrome >= 2 * PhoneMetrics.touchMinimum - 0.5,
+                    "\(voice): the title's row and the row of 44 pt targets stay (\(chrome))")
         }
     }
 
     /// **RED ON OLD in Study** (the chips were 44 tall only: "tags" ≈ 43 and
     /// "lens" ≈ 41 across at 15 pt — and a step-down alone would take them
     /// under 40). Every door on the note's top answers across 44 × 44, in both
-    /// voices: the title (Rename), the four tools, the membership line, the
-    /// five chips.
+    /// voices: the title (Rename), the row's six — and, while the tags are open,
+    /// the strip's add door.
+    ///
+    /// MOVED WITH R-260-13 (batch 4b): the doors are the title and the one row's
+    /// six (the membership line and the five chips left the top); the strip's
+    /// add door joins while the tags are open. Red on old in BOTH voices now —
+    /// the stack door does not exist there.
     @Test(arguments: [ThemeVoice.study, .terminal])
     func everyDoorOnTheNoteTopAnswersAcrossFortyFour(voice: ThemeVoice) async throws {
         try await mounted(voice) { _, surface in
             var measured: [String] = []
-            for label in Self.doors {
+            func measure(_ label: String) throws {
                 let door = try #require(surface.element(labeled: label),
                                         "\(label) in \(voice): \(surface.visibleLabels)")
                 let frame = door.accessibilityFrame
                 measured.append("\(label) \(Int(frame.width.rounded()))×\(Int(frame.height.rounded()))")
                 #expect(frame.width >= 43.5 && frame.height >= 43.5, "\(label) in \(voice): \(frame)")
             }
+            for label in Self.doors { try measure(label) }
+            #expect(surface.activate("Tags"), "the # door in \(voice): \(surface.visibleLabels)")
+            await surface.settle(30)
+            try measure("Add Tag")
             print("PERF[sim] VM-272 note-top doors \(voice): \(measured.joined(separator: " · "))")
         }
     }
 
-    /// **A GUARD** (green on both trees): the four tools stay one row of
-    /// 44 × 44 targets that touch — centres 44 apart — at the row's trailing
-    /// end; road (b) changes what each draws, never its frame.
+    /// **The six doors are ONE row of 44 × 44 targets that touch — centres 44
+    /// apart, NO separator between them — centred on the screen**, in her order:
+    /// copy · find · book · # · the stack door · ⋯.
+    ///
+    /// MOVED WITH R-260-13 (batch 4b): it was the four tools' GUARD (one row of
+    /// four at the trailing gutter, green on both trees). Her pick: one row of
+    /// six under the title, "I don't think there should be a verticle line
+    /// between the options" — so the centres-44-apart law now also proves there
+    /// is no separator, and the row is centred. RED ON OLD (no stack door, the
+    /// book door and # were lines and chips on rows of their own).
     @Test(arguments: [ThemeVoice.study, .terminal])
-    func theToolsAreOneRowOfFortyFourSquareTargets(voice: ThemeVoice) async throws {
+    func theSixDoorsAreOneRowOfFortyFourSquareTargets(voice: ThemeVoice) async throws {
         try await mounted(voice) { _, surface in
-            let tools = try ["Copy Note", "Find in Note", MobileWriteScreen.lockDoorTitle,
-                             MobileNoteActionsSheet.doorLabel].map { label in
+            let doors = try Self.rowDoors.map { label in
                 try #require(surface.element(labeled: label), "\(label): \(surface.visibleLabels)")
                     .accessibilityFrame
             }
-            for (index, tool) in tools.enumerated() {
-                #expect(abs(tool.width - 44) <= 0.5 && abs(tool.height - 44) <= 0.5, "tool \(index): \(tool)")
-                #expect(abs(tool.midY - tools[0].midY) <= 0.5, "one row: \(tools)")
+            print("PERF[sim] VM-260 4b the row \(voice): \(doors)")
+            for (index, door) in doors.enumerated() {
+                #expect(abs(door.width - 44) <= 0.5 && abs(door.height - 44) <= 0.5, "door \(index): \(door)")
+                #expect(abs(door.midY - doors[0].midY) <= 0.5, "one row: \(doors)")
                 if index > 0 {
-                    #expect(abs(tool.midX - tools[index - 1].midX - 44) <= 0.5, "centres 44 apart: \(tools)")
+                    #expect(abs(door.midX - doors[index - 1].midX - 44) <= 0.5,
+                            "centres 44 apart — no separator: \(doors)")
                 }
             }
-            #expect(abs((tools.last?.maxX ?? 0) - (402 - PhoneMetrics.gutter)) <= 0.5,
-                    "the last tool ends at the gutter: \(tools)")
+            let middle = ((doors.first?.minX ?? 0) + (doors.last?.maxX ?? 0)) / 2
+            #expect(abs(middle - 201) <= 0.5, "the row is centred on the screen: \(doors)")
         }
     }
 }

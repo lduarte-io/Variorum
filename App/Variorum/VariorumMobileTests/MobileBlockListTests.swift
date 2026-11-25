@@ -752,6 +752,11 @@ struct MobileBlockSelectionTests {
                 MobileWriteScreen(session: session, postID: seed.post, editor: editor)
             ) { surface in
                 await surface.settle(60)
+                // R-260-13 (the VM-260 run, batch 4b): blocks sits behind the
+                // note top's one stack door now — the door, then its Blocks row.
+                #expect(surface.activate("Blocks, Lenses and More Info"),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
                 #expect(surface.activate("Blocks"), "labels were \(surface.visibleLabels)")
                 await surface.settle(60)
 

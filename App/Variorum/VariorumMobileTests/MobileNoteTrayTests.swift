@@ -752,6 +752,11 @@ struct MobileNoteTrayTests {
     /// **THE WHOLE ROAD, THROUGH THE REAL SCREEN** — the masthead's blocks
     /// chip opens the real sheet and the tray is in it. A pin that mounts the
     /// section alone proves the section; this proves the DOOR.
+    ///
+    /// MOVED WITH R-260-13 (the VM-260 run, batch 4b): blocks, lens and more
+    /// info share ONE door on the note's top now (C-13-3 — a three-row menu), so
+    /// the road is that door, then its Blocks row; the sheet and the tray are
+    /// the same.
     @Test func theBlocksChipOnTheRealScreenOpensTheTray() async throws {
         try await withEditorWorld { session, _ in
             let seed = try await seedTrayNote(session)
@@ -763,6 +768,9 @@ struct MobileNoteTrayTests {
             try await withHostedSurface(
                 MobileWriteScreen(session: session, postID: seed.postID, editor: model)
             ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate("Blocks, Lenses and More Info"),
+                        "labels were \(surface.visibleLabels)")
                 await surface.settle(40)
                 #expect(surface.activate("Blocks"),
                         "labels were \(surface.visibleLabels)")
@@ -790,6 +798,13 @@ struct MobileNoteTrayTests {
     /// through the lens, close its sheet, see the marker; open blocks ▸
     /// leaving, Put the take back, close that sheet; the marker must be gone
     /// **without reopening the lens sheet**.
+    ///
+    /// MOVED WITH R-260-13 (the VM-260 run, batch 4b): the lens chip is a row
+    /// behind the note top's ONE stack door now (C-13-3). The marker is still
+    /// said on the page the lens drives — the stack door's own value carries
+    /// it ("… — a pick fell back"), and its menu's lens row keeps the chip's
+    /// spoken switch (`lensFallbackChipLabel`) — so the pin reads both, and the
+    /// roads into the lens sheet and the blocks sheet go through the door.
     @Test func puttingATakeBackClearsTheLensChipsFallbackMarker() async throws {
         try await withEditorWorld { session, _ in
             // A lens whose ONE pick is a take this note then deletes.
@@ -810,18 +825,27 @@ struct MobileNoteTrayTests {
                 MobileWriteScreen(session: session, postID: postID, editor: editor)
             ) { surface in
                 await surface.settle(60)
+                let stack = "Blocks, Lenses and More Info"
+                func stackValue() -> String { surface.element(labeled: stack)?.accessibilityValue ?? "" }
                 // Calm before a lens drives the page.
-                #expect(surface.visibleLabels.contains("Lenses"),
+                #expect(surface.visibleLabels.contains(stack),
                         "labels were \(surface.visibleLabels)")
+                #expect(!stackValue().contains("fell back"), "calm: \(stackValue())")
 
-                // Look through it: the pick is deleted, so the chip says so.
-                #expect(surface.activate("Lenses"))
+                // Look through it: the pick is deleted, so the door says so.
+                #expect(surface.activate(stack))
+                await surface.settle(40)
+                #expect(surface.activate("Lenses"), "labels were \(surface.visibleLabels)")
                 await surface.settle(60)
                 #expect(surface.activate(lensName),
                         "labels were \(surface.visibleLabels)")
                 await surface.settle(60)
                 #expect(dismissSheet(surface), "labels were \(surface.visibleLabels)")
                 await surface.settle(60)
+                #expect(stackValue().contains("fell back"),
+                        "the page the lens drives says so: \(stackValue())")
+                #expect(surface.activate(stack))
+                await surface.settle(40)
                 #expect(surface.visibleLabels.contains(
                     MobileWriteScreen.lensFallbackChipLabel),
                         "labels were \(surface.visibleLabels)")
@@ -843,7 +867,10 @@ struct MobileNoteTrayTests {
                 #expect(dismissSheet(surface), "labels were \(surface.visibleLabels)")
                 await surface.settle(60)
 
-                // The marker is gone, and the chip is honest again.
+                // The marker is gone, and the door is honest again.
+                #expect(!stackValue().contains("fell back"), "healed: \(stackValue())")
+                #expect(surface.activate(stack))
+                await surface.settle(40)
                 #expect(!surface.visibleLabels.contains(
                     MobileWriteScreen.lensFallbackChipLabel),
                         "labels were \(surface.visibleLabels)")

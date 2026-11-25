@@ -355,11 +355,22 @@ struct MobileFaintOnDoorsRenderedTests {
         }
     }
 
-    /// **The masthead's empty chips:** on a fresh day's entry the tags, more
-    /// info and lens chips are empty, and each clears 4.5:1 on the paper; the
-    /// set date chip reads in ink, a step above them.
+    /// **The note's top's marks clear their floors** — on a fresh day's entry,
+    /// through the real shell: each of the one row's six glyphs reads at the
+    /// glyph floor (3:1) at least, the book door — the Journal holds the entry —
+    /// in ink; the open tag strip's add door, a word, at the words' 4.5:1; and
+    /// the Note sheet's date door, which shows the entry's day, at 4.5:1 too.
+    ///
+    /// MOVED WITH R-260-13 (the VM-260 run, batch 4b): this held "the
+    /// masthead's empty chips" — the tags, more info and lens WORDS at 4.5:1 on
+    /// a fresh entry, and the set date chip a step above them. Her pick takes
+    /// those words off the top: tags is the # glyph (its strip's words when
+    /// open), more info and lens are rows behind the stack door, the date is the
+    /// Note sheet's head. So every mark the top still draws keeps its floor (the
+    /// glyphs the glyph floor, every word the words'), and the relative clause
+    /// retires with the empty chips it compared against — there are none left.
     @Test(arguments: [false, true])
-    func theMastheadsEmptyChipsClearTheFloor(dark: Bool) async throws {
+    func theNoteTopsMarksClearTheirFloors(dark: Bool) async throws {
         try await withEditorWorld { session, _ in
             let router = MobileShellRouter()
             try await withSceneSurface(
@@ -372,22 +383,41 @@ struct MobileFaintOnDoorsRenderedTests {
                 #expect(await eventually { !router.editors.registeredPostIDs.isEmpty },
                         "a note opened in Write")
                 await surface.settle(60)
-                let pixels = try surface.render()
-                var empties: [Double] = []
-                for chip in ["Tags", "More Info", "Lenses"] {
-                    let element = try #require(surface.onScreen(chip), "the \(chip) chip: \(surface.labels)")
+                var pixels = try surface.render()
+                func ratio(_ label: String, in elements: [NSObject]) throws -> Double {
+                    let bounds = surface.window.bounds.insetBy(dx: 1, dy: 1)
+                    let element = try #require(
+                        elements.first { $0.accessibilityLabel == label && bounds.intersects($0.accessibilityFrame) },
+                        "\(label): \(elements.compactMap(\.accessibilityLabel))")
                     let read = try #require(pixels.inkAndGround(in: element.accessibilityFrame),
-                                            "no word drawn in the \(chip) chip")
-                    let ratio = read.ink.contrast(with: read.ground)
-                    empties.append(ratio)
-                    #expect(ratio >= Self.floor,
-                            "dark \(dark): the empty \(chip) chip reads \(String(format: "%.2f", ratio)):1 (\(read.ink) on \(read.ground))")
+                                            "nothing drawn in \(label)")
+                    return read.ink.contrast(with: read.ground)
                 }
-                let date = try #require(surface.onScreen("Entry Date"), "the date chip: \(surface.labels)")
-                let set = try #require(pixels.inkAndGround(in: date.accessibilityFrame), "no word in the date chip")
-                let setRatio = set.ink.contrast(with: set.ground)
-                #expect(empties.allSatisfy { setRatio > $0 + 1 },
-                        "dark \(dark): the set date chip (\(String(format: "%.2f", setRatio)):1) reads above the empty ones \(empties)")
+                let glyphs = ["Copy Note", "Find in Note", "Books holding this note", "Tags",
+                              "Blocks, Lenses and More Info", MobileNoteActionsSheet.doorLabel]
+                for glyph in glyphs {
+                    let read = try ratio(glyph, in: surface.elements)
+                    #expect(read >= 3.0,
+                            "dark \(dark): the \(glyph) glyph reads \(String(format: "%.2f", read)):1")
+                }
+                let book = try ratio("Books holding this note", in: surface.elements)
+                #expect(book >= Self.floor,
+                        "dark \(dark): the Journal holds the entry, so its book door reads in ink (\(book):1)")
+
+                let hash = try #require(surface.onScreen("Tags"), "the # door: \(surface.labels)")
+                #expect(hash.accessibilityActivate())
+                await surface.settle(30)
+                pixels = try surface.render()
+                let add = try ratio("Add Tag", in: surface.elements)
+                #expect(add >= Self.floor, "dark \(dark): the strip's add door reads \(add):1")
+
+                let actions = try #require(surface.onScreen(MobileNoteActionsSheet.doorLabel))
+                #expect(actions.accessibilityActivate())
+                await surface.settle(50)
+                let sheet = try #require(surface.host.presentedViewController, "the Note sheet is up")
+                pixels = try surface.render()
+                let date = try ratio("Entry Date", in: HostedSurface<EmptyView>.elements(of: sheet.view))
+                #expect(date >= Self.floor, "dark \(dark): the Note sheet's date door reads \(date):1")
             }
         }
     }

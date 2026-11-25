@@ -95,14 +95,23 @@ private func caretAtEndOnTheViewportFoot(
     await surface.settle(50)
     // TK2's estimates settle as the target lays out, so place, lay out, and
     // place again until the caret's line really is the last visible line.
-    for _ in 0..<4 {
-        guard let range = tv.selectedTextRange else { return }
-        let caret = tv.caretRect(for: range.end)
-        tv.setContentOffset(
-            CGPoint(x: 0, y: max(0, caret.maxY - tv.bounds.height + 4)), animated: false)
-        tv.layoutIfNeeded()
+    //
+    // The placement runs TWICE, a settle between (R-260-13, the VM-260 run's
+    // batch 4b): once the page has scrolled, the note's title gives way and the
+    // page takes its height back a turn later, which moves the viewport's foot —
+    // so the caret goes onto the foot of the page as it then stands. Where
+    // nothing moves (the old tree; a page that never left its top) the second
+    // pass finds the caret already there and sets the same offset again.
+    for _ in 0..<2 {
+        for _ in 0..<4 {
+            guard let range = tv.selectedTextRange else { return }
+            let caret = tv.caretRect(for: range.end)
+            tv.setContentOffset(
+                CGPoint(x: 0, y: max(0, caret.maxY - tv.bounds.height + 4)), animated: false)
+            tv.layoutIfNeeded()
+        }
+        await surface.settle(20)
     }
-    await surface.settle(20)
 }
 
 /// The reading line the record quotes.
@@ -188,9 +197,15 @@ struct MobileWriteScrollAuthorityTests {
             let ranges = model.blockRangesByID().values.sorted { $0.location < $1.location }
             let caret = ranges[11].location + ranges[11].length
             tv.selectedRange = NSRange(location: caret, length: 0)
-            let rect = tv.caretRect(for: try #require(tv.selectedTextRange).end)
-            tv.setContentOffset(CGPoint(x: 0, y: rect.maxY - tv.bounds.height + 4), animated: false)
-            await surface.settle(20)
+            // Placed twice, a settle between (R-260-13, batch 4b — the title gives
+            // way once the page scrolls, and the page takes its height back a
+            // turn later, moving the foot): the caret's line sits on the foot of
+            // the page as it then stands.
+            for _ in 0..<2 {
+                let rect = tv.caretRect(for: try #require(tv.selectedTextRange).end)
+                tv.setContentOffset(CGPoint(x: 0, y: rect.maxY - tv.bounds.height + 4), animated: false)
+                await surface.settle(20)
+            }
             let before = PageReading(tv)
 
             tv.insertText("\n")
