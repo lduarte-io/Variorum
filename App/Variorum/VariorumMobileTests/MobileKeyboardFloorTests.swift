@@ -103,8 +103,14 @@ struct MobileKeyboardFloorShellTests {
 
     /// A keyboard top above a band whose avoidance fell short: the one bar's
     /// doors END at it — the bar rides on the keyboard — and the top line has
-    /// not moved (the band is lifted from below, never shifted). A band at rest
-    /// (a keyboard leaving) meets no floor.
+    /// not moved (the band is lifted from below, never shifted). **MOVED at the
+    /// VM-260 merge gate's G-3:** a band at REST under a keyboard reading — one
+    /// SwiftUI's avoidance never met (the harness raises no keyboard, so it never
+    /// does) — rides to the keyboard the same; it used to be read as a keyboard
+    /// leaving and given nothing, which is G-3's defect (the Library's search
+    /// taking its keyboard back during a pop: the bar at rest under the keys).
+    /// RED on the pre-fix tree (this clause's commit), GREEN on the fix. The
+    /// leaving case — SwiftUI HAD met the keyboard — is the pure rule's pin.
     @Test func theBarRidesOnTheKeyboardTopHandedIn() async throws {
         try await withEditorWorld { session, _ in
             let (atRest, restTop): ([String: CGRect], CGRect?) = await withHostedSurface(
@@ -145,18 +151,21 @@ struct MobileKeyboardFloorShellTests {
                 }
             }
 
-            // A band at REST (its foot the resting foot — a keyboard leaving)
-            // meets no floor, however high the old reading stands.
+            // G-3 — a band at REST (its foot the resting foot) under a keyboard
+            // SwiftUI never avoided: the bar rides to the keyboard's top all the
+            // same (it stayed at rest under the keys before the fix).
             await withHostedSurface(
                 MobileShellView(
                     session: session, services: nil, router: MobileShellRouter(),
                     heldKeyboard: MobileKeyboardFloor.Reading(top: keyboardTop, restingFoot: foot))
             ) { surface in
                 await surface.settle(30)
-                let unmoved = barFrames(surface)
-                for (word, frame) in unmoved {
-                    #expect(abs(frame.maxY - (atRest[word]?.maxY ?? -1)) <= 0.5,
-                            "\(word): a band at rest meets no floor (\(frame.maxY))")
+                let lifted = barFrames(surface)
+                print("PERF[sim] VM-260 G-3 a keyboard at \(keyboardTop) over a band at rest — the bar \(lifted)")
+                #expect(lifted.count == MobileShellBand.pages.count)
+                for (word, frame) in lifted {
+                    #expect(abs(frame.maxY - keyboardTop) <= 0.5,
+                            "\(word) ends at \(frame.maxY): a band SwiftUI never lifted rides on the keyboard's top \(keyboardTop)")
                 }
             }
         }
