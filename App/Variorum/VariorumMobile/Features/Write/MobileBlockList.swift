@@ -195,7 +195,9 @@ final class MobileBlockListModel {
 ///   rewritten here.
 nonisolated enum MobileBlockSelectionCopy {
     static let selectTitle = "Select"
-    static let doneSelectingTitle = "Done"
+    /// The word the picking door wears WHILE she picks (the door that leaves
+    /// picking and drops the picks).
+    static let pickingExitTitle = "Done"
     /// The VoiceOver names. They are DISTINCT from the rendered words on
     /// purpose: while picking, this button and the sheet's dismiss both read
     /// "Done", and two identically-named doors in one tree is the shape a
@@ -345,7 +347,7 @@ struct MobileBlockListSheet: View {
                    !model.rows.isEmpty || model.isSelecting {
                     Button(tokens.chromeLabel(
                         model.isSelecting
-                            ? MobileBlockSelectionCopy.doneSelectingTitle
+                            ? MobileBlockSelectionCopy.pickingExitTitle
                             : MobileBlockSelectionCopy.selectTitle)
                     ) {
                         if model.isSelecting { model.exitSelection() }

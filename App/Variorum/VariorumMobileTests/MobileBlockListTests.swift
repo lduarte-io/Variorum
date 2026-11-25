@@ -514,6 +514,59 @@ struct MobileBlockSelectionTests {
         }
     }
 
+    /// **WHILE SHE PICKS, THE HEADER NEVER DRAWS ONE WORD ON TWO DOORS**
+    /// (F-her-1 — her finding in the VM-260 run, a screenshot of the Blocks
+    /// sheet; batch 3b). PR20's picking door swapped "Select" for "Done" while
+    /// picking, beside the sheet's own Done: two doors drawing one word, one
+    /// ending picking (and dropping the picks), the other closing the sheet.
+    ///
+    /// What each door DRAWS is read from where its word comes from: the
+    /// sheet's dismiss carries no re-label (`PhoneSheetHeader`'s contract), so
+    /// its drawn word IS its name in the tree and is found there; the picking
+    /// door wears an explicit VoiceOver name, which keeps its drawn title out
+    /// of the tree, so its drawn word is read from its one declared home
+    /// (`MobileBlockSelectionCopy.pickingExitTitle`, the value the sheet
+    /// renders) — the door itself found in the tree by that name. Both voices
+    /// (Terminal lowercases chrome words, so the comparison folds case); the
+    /// VoiceOver names stay distinct as well.
+    ///
+    /// **Red on old:** both doors draw "Done" — one issue per voice.
+    @Test func whilePickingTheHeaderNeverDrawsOneWordOnTwoDoors() async throws {
+        for tokens in [VoiceTokens.terminalLight, VoiceTokens.studyLight] {
+            try await withEditorWorld { session, _ in
+                let seed = try await seedFourBlockNote(session)
+                let list = MobileBlockListModel(session: session, postID: seed.post)
+                try await withHostedSurface(
+                    MobileBlockListSheet(
+                        model: list, tokens: tokens,
+                        onDeleteBlocks: { _ in true }, onJump: { _ in })
+                ) { surface in
+                    await surface.settle(40)
+                    #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
+                    await surface.settle(40)
+                    #expect(list.isSelecting, "picking mode is on")
+
+                    // Both doors stand in the header, each found by its own name.
+                    let dismissWord = tokens.chromeLabel("Done")
+                    let labels = surface.visibleLabels
+                    #expect(labels.contains(dismissWord), "the sheet's own Done: \(labels)")
+                    #expect(labels.contains(MobileBlockSelectionCopy.doneSelectingLabel),
+                            "the picking door: \(labels)")
+
+                    // THE FACT: the two doors draw two words.
+                    let pickingWord = tokens.chromeLabel(MobileBlockSelectionCopy.pickingExitTitle)
+                    #expect(pickingWord.lowercased() != dismissWord.lowercased(), """
+                        RED — while picking, the picking door draws “\(pickingWord)” beside the sheet's own \
+                        “\(dismissWord)”: two doors, one word
+                        """)
+                    // And their VoiceOver names stay distinct.
+                    #expect(MobileBlockSelectionCopy.doneSelectingLabel.lowercased()
+                        != dismissWord.lowercased())
+                }
+            }
+        }
+    }
+
     /// **THE MODE'S EXIT SURVIVES AN EMPTIED NOTE** (MINOR 1's rider). The
     /// Select/Done chrome used to render only over a non-empty listing, so
     /// if every row left the note WHILE she was picking — a remote delete of
