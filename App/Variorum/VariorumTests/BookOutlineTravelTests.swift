@@ -40,6 +40,22 @@ struct BookOutlineTravelTests {
     private func withModel<T>(
         _ body: @MainActor (AppSession, BookViewModel, _ storyID: String) async throws -> T
     ) async throws -> T {
+        // The Outline's surface memory records a size only while the voice is
+        // KNOWN (`SurfaceSizeMemory.remember` drops a report while
+        // `EditorTypography.fingerprint` is nil, i.e. until the process-global
+        // `EditorTypography.isAdopted` is set — `ThemeStore.start`'s one
+        // door). Every test here stands on the width-matched memory below, so
+        // the suite adopts a typography itself rather than inheriting one
+        // from whatever ran earlier in the host — the house way
+        // (`FocusHandoffTests`, `RestoreLandingTests`): saved, adopted,
+        // restored as found.
+        let typography = EditorTypography.current
+        let adopted = EditorTypography.isAdopted
+        defer {
+            EditorTypography.current = typography
+            EditorTypography.isAdopted = adopted
+        }
+        EditorTypography.adopt(EditorTypography.resolve(voice: .terminal, inlineComments: false))
         let db = try AppDatabase.inMemory()
         // The operations stamp through `\.date` and place through the
         // fractional index's `\.withRandomNumberGenerator`; both are provided
@@ -132,6 +148,16 @@ struct BookOutlineTravelTests {
     /// RED ON OLD: on every turn between the consume and the landing's end the
     /// consult answered false (it read the consumed request).
     @Test func aRevealOnlyLandingHoldsThePreMountUntilItEndsThenLetsGo() async throws {
+        // The same precondition `withModel` sets, the same way: the surface
+        // memory records the width-matched size below only while the voice is
+        // adopted — saved, adopted, restored as found.
+        let typography = EditorTypography.current
+        let adopted = EditorTypography.isAdopted
+        defer {
+            EditorTypography.current = typography
+            EditorTypography.isAdopted = adopted
+        }
+        EditorTypography.adopt(EditorTypography.resolve(voice: .terminal, inlineComments: false))
         let db = try AppDatabase.inMemory()
         // The same two dependencies `withModel` provides, the same way (the
         // VX-91 pin's own harness, `withLandingBook`, provides them too).
