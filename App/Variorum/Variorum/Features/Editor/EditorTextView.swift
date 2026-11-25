@@ -265,6 +265,32 @@ final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface 
         MarkdownActs.indentLists(MarkdownEditing.Act.outdent, in: self) { super.insertBacktab(sender) }
     }
 
+    /// **VX-1076 — ⌥⌫ and ⌥⌦ never take a word from another line** (her
+    /// report: the fourth ⌥⌫ on an emptied checklist item took the line
+    /// above's last word). The ONE rule both surfaces wire
+    /// (`Surface/WordDelete.swift` carries the measured mechanism): where the
+    /// system's range stays on the caret's line `super` runs untouched;
+    /// otherwise the press takes the line's own marker/spaces, or at its edge
+    /// the line break alone — and never a BLOCK seam (P-1076-1: nothing, as at
+    /// the document's start; ⌫ stays the seam key).
+    override func deleteWordBackward(_ sender: Any?) {
+        WordDelete.press(.backward, in: self, isBlockSeam: onLineBreakIsBlockSeam) {
+            super.deleteWordBackward(sender)
+        }
+    }
+
+    override func deleteWordForward(_ sender: Any?) {
+        WordDelete.press(.forward, in: self, isBlockSeam: onLineBreakIsBlockSeam) {
+            super.deleteWordForward(sender)
+        }
+    }
+
+    /// **VX-1076 — is this line break a block seam?** Set by
+    /// `EditorViewModel.attach` and answered by the index's own separator
+    /// geometry (`BlockRangeIndex.interEntrySeparatorPair`, the one the seam
+    /// carves read); nil — a bare surface — means no line break is one.
+    var onLineBreakIsBlockSeam: ((NSRange) -> Bool)?
+
     /// **Act 10 item 12 — typed arrows.** The keystroke itself is untouched
     /// (`super` runs first, so routing, crystallization and every refusal
     /// see exactly the character she typed); the substitution is a SECOND

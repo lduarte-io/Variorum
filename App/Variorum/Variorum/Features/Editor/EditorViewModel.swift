@@ -534,6 +534,11 @@ final class EditorViewModel {
         textView.onNewlineWouldOpenTail = { [weak self] in
             self?.typedNewlineWouldOpenTail() ?? false
         }
+        // VX-1076 (P-1076-1): the word delete asks whether the line break it
+        // would take alone is a block seam — it never takes one.
+        textView.onLineBreakIsBlockSeam = { [weak self] lineBreak in
+            self?.lineBreakIsBlockSeam(lineBreak) ?? false
+        }
         // 13j J7 (her ruling): ⌘Z / ⌘⇧Z with nothing left in the TEXT stack
         // point at the structural one — spoken, never a key stolen.
         textView.onTextUndoUnavailable = { [weak self] in self?.speakUndoHint(.undo) }
@@ -1872,6 +1877,20 @@ final class EditorViewModel {
         return index.verdict(
             replacing: selection, replacementIsSingleNewline: true,
             segmentation: header?.effectiveSegmentation ?? .paragraph) == .openTail
+    }
+
+    /// **VX-1076 (P-1076-1) — is this line break one of the index's
+    /// INTER-BLOCK separators?** The word delete asks before it takes a line
+    /// break alone, and never takes one that is: every road that removes a
+    /// block separator is structural (A7's carve, #34's merge), and the key's
+    /// undo is one text edit. Answered by the seam carves' own geometry
+    /// (`interEntrySeparatorPair` — a lone one-character separator between
+    /// two entries), so the key and the carves can never disagree about
+    /// where a seam is. The open tail's separator is deliberately NOT one
+    /// (it joins no blocks; taking it is the edit ⌫ makes there). Cost: the
+    /// carve's own walk to the offset, asked only at a line's edge.
+    func lineBreakIsBlockSeam(_ lineBreak: NSRange) -> Bool {
+        index.interEntrySeparatorPair(deleting: lineBreak, isDeletion: true) != nil
     }
 
     /// Closes an EMPTY open tail by deleting its separator through the
