@@ -82,6 +82,9 @@ struct BookTagsSwitch: View {
         .menuStyle(.button)
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
+        // P-8: the chip is a one-line label — its line policy stated at the
+        // site the `fixedSize` sizes, not only on the label's own text.
+        .lineLimit(1)
         .fixedSize()
         .help(BookTagsSwitchCopy.help)
     }

@@ -4505,7 +4505,10 @@ private struct OutlinePostRow: View {
                         .fixedSize()
                 }
                 if let badge {
+                    // P-8: the badge is a one-line label (the owned-by words
+                    // carry their own limit inside; the shared mark is a glyph).
                     OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
+                        .lineLimit(1)
                         .fixedSize()
                 }
                 // Sitting 9 batch 7: the door OUT of the book into the post's
@@ -4581,7 +4584,9 @@ private struct OutlinePostRow: View {
                         }
                         // 13i-c U4 (§6): the badge family, beside the title.
                         if let badge {
+                            // P-8: a one-line label, as the header's badge.
                             OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
+                                .lineLimit(1)
                                 .fixedSize()
                         }
                     }
