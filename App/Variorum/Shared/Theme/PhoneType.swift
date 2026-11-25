@@ -48,7 +48,8 @@
 //  fraction) — carried to the SwiftUI form by the environment (`phoneWordsScale`)
 //  and to the UIKit forms by their caller; the chrome, the twelve words and the
 //  13 pt floor never move with it. Terminal's prose stays two under, never under
-//  the floor.
+//  the floor — two under STUDY's rounded step, at every step (ladder round 1,
+//  R1-9), the pitch with it.
 //  PROVISIONAL as a set (P-260-3a/3b).
 //
 //  The pure table is platform-neutral (the Mac compiles it and never reads
@@ -179,25 +180,37 @@ nonisolated enum PhoneType {
     /// preview at Larger, 15.75, came back a quarter point off while the SwiftUI
     /// form drew 15.75), and a whole-point size passes through both forms
     /// unchanged at the default text size — so the two forms agree at every step.
+    ///
+    /// **Terminal takes STUDY's step, two under** (the VM-260 run's ladder round
+    /// 1, R1-9): the step is applied to Study's table and rounded first, and
+    /// Terminal's prose roles are that size less two, never under the floor, the
+    /// pitch with them — the default's own rule (`terminal(of:)`) at every step.
+    /// Scaling Terminal's own table and rounding it drifted off Study's whole
+    /// point (the note's title at Larger: Study 23, Terminal 20 — three under).
     static func spec(
         _ role: PhoneTypeRole, voice: ThemeVoice, wordsScale: CGFloat = 1
     ) -> PhoneTypeSpec {
-        let table = voiceSpec(role, voice: voice)
-        guard wordsScale != 1, role.followsTextSize else { return table }
+        guard wordsScale != 1, role.followsTextSize else { return voiceSpec(role, voice: voice) }
+        let table = studySpec(role)
         let size = max(floorSize, (table.size * wordsScale).rounded())
-        return PhoneTypeSpec(
+        let study = PhoneTypeSpec(
             family: table.family,
             weight: table.weight,
             size: size,
             lineHeight: table.lineHeight * size / table.size,
             anchor: table.anchor,
             scaling: table.scaling)
+        return voice == .terminal ? terminal(of: study) : study
     }
 
     /// One voice's table at the default words scale.
     private static func voiceSpec(_ role: PhoneTypeRole, voice: ThemeVoice) -> PhoneTypeSpec {
         let study = studySpec(role)
-        guard voice == .terminal else { return study }
+        return voice == .terminal ? terminal(of: study) : study
+    }
+
+    /// **Terminal's form of a Study spec** — at the table, or at a step (R1-9).
+    private static func terminal(of study: PhoneTypeSpec) -> PhoneTypeSpec {
         // Terminal: every role in SF Mono; the prose roles two points under
         // Study's, size and pitch alike (the Mac's own rule for its prose) —
         // NEVER UNDER THE FLOOR (VM-254: a row's preview, 14 in Study, holds 13

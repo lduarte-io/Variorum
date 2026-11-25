@@ -67,7 +67,8 @@ nonisolated enum MobileNoteGround: String, CaseIterable, Sendable {
 /// in Study at the system's default size, 14 · 15 · 16 · 17 · 18: the default is
 /// the type table itself (one notch under wave 1's set), "Large" is wave 1's set
 /// back (17), each step one point on the body; every other role takes the same
-/// share, rounded to a whole point (`PhoneType.spec` — the batch-3 reconcile).
+/// share, rounded to a whole point (`PhoneType.spec` — the batch-3 reconcile),
+/// and Terminal's prose is Study's step two under (ladder round 1, R1-9).
 /// PROVISIONAL as a set (P-260-3a).
 nonisolated enum MobileTextSize: String, CaseIterable, Sendable {
     case smaller
