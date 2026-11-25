@@ -310,6 +310,105 @@ this branch and round 2's re-review covers it.
 
 *(round 1: fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, zero framing — RUNNING 2026-11-25; its findings land below)*
 
+### ROUND 1 FINDINGS (cold reviewer, 2026-11-25)
+
+Reviewed: `git diff origin/main...HEAD` (batch 1 + pieces 6a/6b), the record top to bottom, CastleRules in full,
+SurfaceContracts "Library protection", SyncSpec in full (custody-adjacent diff), SessionResiliencyProtocol, and the
+post-state of every touched file plus their reach (`Assess.swift`, `Catalog.swift`, `CatalogLister`, `ProtectionPlaces`,
+`ProtectionFactsGatherer`, `ProtectionSystem`, `ProtectionOpenRoad` whole, `ProtectionRoadActs.searchIfOwed`,
+`KeyFileOffer.searchKeyFiles`, `ProtectionOpenFaces`' faces mapping, `ProtectionLobbyModel`, `ProtectionLobbyFace.derive`,
+`ProtectionRoadLock`, `AppBootstrap`'s open and lock seams, `StoreLockView`'s refresh wiring, `BackupDestination.resolve`,
+both new test files). Ran `swift test --filter FarFolderUnreadTests` myself: 7/7 green.
+
+**F-R1-1 · MAJOR · `App/Variorum/Shared/Protection/ProtectionLobbyModel.swift:208-229` (`refresh()`/`take(_:)`), with
+`AppBootstrap.swift:593-600` and `StoreLockView.swift:71-77`** — a `refresh()` that overlaps the far walk's landing can
+REGRESS the lobby to the partial (container-only) facts after the landing took the full ones: rule 27's banner, or the
+far key file's typed road, appears and then silently vanishes, and `farLandingTaken` means the landing never re-lands —
+the face stays regressed until the next `didBecomeActive` refresh.
+*Mechanism (deterministic, no timing luck needed):* `refresh()` guards `!busy` but never SETS busy, so while its
+detached `lobbyFacts(ctx)` read is in flight (a `.thisOpen` read — PARTIAL before the walk lands), `farWalkLanded()`
+passes its own `!busy` guard, runs the landing and `take(full)`; `refresh()` then resumes and `take(partial)` overwrites
+`standing` wholesale (`take` has no notion of listing width). `rederive()` then drops `noKeyFileAnywhere` (partial ⇒
+`mightOpen` true) and the landed `offeredTyped`. Reachable in production: `refresh()` fires on every
+`NSApplication.didBecomeActive` while the walk may land minutes later on a cold folder — the ticket's own scenario.
+*Pin (red on this tree):* a `ProtectionLobbyModel` test with a GATED `refreshRoad` returning the partial standing —
+start `refresh()`, hold the gate, call `farWalkLanded()` (lands full facts: `face.passphraseField` true / banner up),
+open the gate, assert the face KEPT the landed facts. Today it regresses.
+*Fix shape:* `take(_:)` refuses to narrow — a fresh read whose catalogue `!readsEveryPlace` never overwrites a standing
+whose catalogue `readsEveryPlace` (one guard in `take`, the "a read that failed keeps the face" idiom extended:
+a narrower read never replaces a wider one). Non-launch lobbies are untouched (their reads are always full).
+
+**F-R1-2 · MINOR · `App/Variorum/Shared/Protection/CatalogLister.swift:37-57`** — `CatalogLister.Scope` /
+`.containerOnly` / `catalog(scope:)` is DEAD CODE: zero callers anywhere (production or tests; grep `containerOnly`
+finds only the declaration and its header sentence). The shipped mechanism is `CatalogRead` + `FarFolderWalk`; the
+header comment presents Scope as the design ("a listing has a SCOPE — …"), and D-1013-2 in this record describes it as
+built. Custody-adjacent dead code misleads the next reader into wiring the wrong seam (and `.containerOnly`'s own
+`places.farFolder()` call re-resolves the bookmark per listing, unlike the walk's cached road). *Evidence:* grep;
+compile-level fact, no pin owed (not bug-class). *Fix:* delete the enum and `catalog(scope:)` (keep `catalog()`), or
+wire it where it was meant to serve; align the header and D-1013-2's wording.
+
+**F-R1-3 · MINOR · `App/Variorum/Shared/Protection/CatalogLister.swift` (`FarFolderWalk.standing`/`farFolder`) +
+`App/Variorum/Shared/BackupDestination.swift:115-128`** — a far folder that is PICKED but UNREACHABLE at resolve time
+reads as `.noFarFolder` = "a container listing is a whole listing": `BackupDestination.resolve()` returns nil for
+nothing-picked AND for an unplugged volume/stale bookmark alike, so the fence's own idiom ("could not read ≠ none") is
+not applied to exactly the state it was coined for — rule 27's refusal and `backupHolds…` "no" stay claimable while her
+picked backup folder is merely offline. LARGELY PRE-EXISTING (the pre-fix `if let far = places.farFolder()` had the same
+conflation per listing), but the walk's per-open cache (`resolved = .some(nil)`, never retried) now extends one
+transient resolution failure across the WHOLE open, where the old road re-resolved ~ten times. *Mechanism:* unplugged
+far volume at launch + broken container (live key file gone, no memory/custody) ⇒ partial-listing fence never engages
+(`unreadPlaces` empty) ⇒ `mightOpen` false ⇒ rule 27's lobby refusal over a library whose key file sits on the
+unplugged disk. *Pin:* needs the input distinguished first (`BackupDestination.isSet` already exists), so the honest
+shape is: widen `ProtectionPlaces.farFolder` (or the walk) to know picked-but-unreachable, mark `.farFolder` unread in
+that state, pin red-on-old with the widened input defaulted to today's semantics. Scope call is the orchestrator's —
+this may be its own ticket rather than this ladder's fix (it is not a regression of this diff).
+
+**F-R1-4 · NIT · `App/Variorum/Shared/AppBootstrap.swift:642`** — the comment "the launch road's lobby only (a relock's
+lobby carries no far walk)" is false since piece 6 (R-1013-A2): `ProtectionRoadLock.lobbyContext` sets `ctx.far`, and
+the relock's lobby deliberately gets a `farLanding` road (tries-quiet-roads false). The code is right; the comment
+contradicts it. Likewise `landTheFarWalk`'s doc line "Over a context with no far walk it is a plain re-read" is
+inaccurate for a hypothetical `.everything` context whose catalogue holds far key files (it would try the quiet roads);
+unreachable today (`farLanding` is nil when `ctx.far` is nil) but worth one honest clause for the next wirer.
+
+**F-R1-5 · NIT (for the P-1013-2 sitting bundle, not a code change here)** — a press that joins a HUNG far walk has no
+bound and no words: `busy` disables every lobby control for as long as the folder blocks (gate 1 measured ~nine
+minutes), with no "still looking in your backup folder…" line and no cancel. Strictly better than the pre-fix blank
+window, and exactly P-1013-2's ruled wait — but when her sitting reviews P-1013-2, the unbounded silent disable is the
+part that may want a face word. No pin owed (the behavior is the ruled design).
+
+**CLEAN BILL (checked, found solid):**
+- *Rule 27 indeterminacy (D-1013-3):* all three Assess readings guarded (`lobby.mightOpen` at 223, the two unlocked
+  fault arms at 280/305, the offer's owing at 512 via `backupMightHoldTheCurrentKeyFile` 557); the search's
+  `.noKeyFileAnywhere` reaches the standing faces (`ProtectionOpenFaces` 223-225), so rule 27 after a quiet-road open
+  stays reachable on a partial listing through `searchIfOwed`'s deliberate full walk. Core pins re-run by this reviewer:
+  7/7 green; red-on-old mechanically certain from the diff (the pre-fix arms have no `readsEveryPlace` leg at all).
+- *The sweep table:* every row re-verified against the post-state — including the rows the table calls FULL-WALK CALLER
+  (`opensWith`/`routeFinder`/`useCastleSpec` have no launch-path reader; the launch route reads `assessment.launch`,
+  `repairs`, `faults`, `acts` only) and row 12's R-1013-A1 posture (code untouched, the ruling pin labeled honestly as
+  green-on-both-sides). Counts match (17 rows).
+- *No launch-path far read:* every remaining `.everything` call site enumerated (backup hook/pair, copy counts/doors,
+  `searchIfOwed`, `FileKeyFileStoreLeaf:60`) is a non-launch or deliberately-searching caller; the route, lobbyFacts,
+  the open's expansion (facts handed through — D-1013-5's replumb at 443/624/1203), repairPasses, logSummary and the
+  custody probe all read through the context or `CatalogRead.probing`. The probe's safety reasoning holds: this
+  library's fingerprints are always nameable from the container's live file (rule 4 carries the history), the memory
+  items, the plan and the staged key; far-only names belong to other libraries or to rule-27-broken states, where the
+  launch landing's quiet retry (P-1013-3, pinned) or a press's join covers reachability, and a resumed Castle-entry
+  settle keeps its own `.everything` walk.
+- *Press equivalence (P-1013-2):* `openTypedOnce`'s join extends files, reuses derived Argon2id keys (`reusing:`), and
+  the vault road runs AFTER the join over the extended files — outcome-identical to today on every arm I could
+  construct; `pressTouchIDOnce`'s retry likewise. The N5 hand-forward and rule 21's reach preserved.
+- *The relock (R-1013-A2):* `lobbyContext` + `beginTheFarWalkBehindTheLobby` + `finish(.roadLobby)` arms the same
+  watcher; `farLandingTriesQuietRoads` false keeps "a lock is never theater" (pinned both ways); existing
+  `ProtectionRoadLock.lobby` callers over plain contexts unchanged (the helper no-ops without a walk).
+- *Serialization:* the landing never runs beside a press (`busy`/`farLandingOwed`/`left`, pinned); `left` set on every
+  leaving arm; the bootstrap's watcher identity-checks the standing lobby; one walk per open (double-begin joins).
+- *No sync, no schema, no canon:* the diff touches no `Sources/VariorumCore/Sync/`, no migration (Catalog's
+  `unreadPlaces` is in-memory only), no canon file; CastleRules stays byte-identical; `StoreOpeningView` untouched
+  (D-1013-6).
+- *Parity:* `unreadPlaces` defaults empty, `.everything` the default read; zero edits to any existing test file
+  (diff-stat verified) — the 3C parity pattern held.
+- *Record discipline:* LIVE STATUS leads with what was NOT done; the VX-978 flake disclosed with its re-run; commits
+  per piece, pushed; the Mac-target suites correctly left to the orchestrator's gate.
+
 ## HELD FOR HER SITTING (the away-run bundle)
 
 - P-1013-1 (the lobby may gain roads/rule 27's banner after it draws, when the deferred far walk lands) — PROVISIONAL, built.
