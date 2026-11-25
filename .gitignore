@@ -22,6 +22,7 @@ notes/plans/mobile-d2-screens/
 .env.smtp.local
 .env.*.local
 notes/plans/mobile-round-2-screens/
+notes/plans/textloss-screens/
 notes/plans/phase-13l-act7-screens/
 notes/plans/phase-13l-ladder-p0-screens/
 notes/plans/pre-13u-screens/
@@ -45,6 +46,9 @@ Tools/WalkKit/wl2
 # 18l U-VIS: the visual harness — compiled helpers and run reports (captures) are local
 Tools/VisualWalk/bin/
 Tools/VisualWalk/.build/
+# VX-997: the retired stage ambient (its package moved to its own repo) — an old clone's leftover
+# build folder stays out of every commit and every clean-tree check
+Tools/StageAmbient/
 notes/plans/vis-walks/
 notes/plans/13ib-screens/
 notes/plans/13ic-screens/
