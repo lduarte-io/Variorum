@@ -778,20 +778,171 @@ PR #31 merges at this boundary. Round 2 (a fresh `opus-reviewer`) re-reads them.
 **What this pass did NOT do (kept current):** NO test has run — the stage is coordinated and the evidence rides the
 merge gate, so every red and green below is PENDING; no walk, no capture; nothing in the table above but the four
 FIX rows (R1-2, R1-4…R1-7, R1-10, R1-11 untouched); no line in `Sources/`, `Sync/`, custody, `StatusCenter`,
-`VoiceTokens`, `MobileEditorTextView`, the editor's typing code or `MobileKeyboardBar`.
+`VoiceTokens`, `MobileEditorTextView`, the editor's typing code or `MobileKeyboardBar` (verified:
+`git diff --name-only c13b89ca9..8bbc18d87`). ONE comment line in `MobileShellView` (its `init`, R1-8's third site —
+the brief's fence list named the file; its own commit `d07ee74fa`, revertable alone). **R1-1's finding is not proved
+real headless:** on this surface the page's reach does not follow its viewport, so whether the old tree undoes its
+own top depends on a UIKit ordering only the gate's run can show (below) — the fix is built as ruled either way.
 
 #### LIVE STATUS
 
 | Piece | State |
 |---|---|
-| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, this ladder table, BATCH 4b's record whole, BATCH 4a's record whole, BATCH 3's RECONCILE; the resiliency protocol; the code: `MobileNoteTop.swift`, `MobileRootTop.swift`, `MobileWriteView.swift`'s masthead, `MobileEditorTextView`'s layout/room/scroll-authority lines READ ONLY, `PhoneType.swift`, the three comment sites, the guide's lesson) | DONE (this commit) |
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, this ladder table, BATCH 4b's record whole, BATCH 4a's record whole, BATCH 3's RECONCILE; the resiliency protocol; the code: `MobileNoteTop.swift`, `MobileRootTop.swift`, `MobileWriteView.swift`'s masthead, `MobileEditorTextView`'s layout/room/scroll-authority lines READ ONLY, `PhoneType.swift`, the three comment sites, the guide's lesson) | DONE (`99a0fd510`) |
 | 1. The pins on the pre-fix tree — R1-1's mounted pin, R1-9's two-under pin and the step pin it moves — **that commit IS the red-on-old tree** | DONE (`96e07e2db` — **THE RED-ON-OLD TREE**; only symbols both trees declare) — the runs PENDING the gate |
 | 2. The red-on-old bundle `vm260-r1-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `96e07e2db` (log `App/Variorum/DerivedData/vm260-r1-rol-build.log`); it compiles main's PR #31 merge (`45dad4a5a` — `Shared/AppSession.swift`, `Shared/CaptureTagPicks.swift`, the Core changes) into the phone target with no error: **the merge's phone compile is proved**. ENVIRONMENT NOTE: the first try failed (`There is no XCFramework found at …/DerivedData/vm260-1a/SourcePackages/artifacts/sqlcipher.swift/…`) — the `vm260-1a*` bundles were deleted since batch 4b, and every bundle of the `vm260-2r` lineage (the trio included) names their `SourcePackages` in its `workspace-state.json` (SQLCipher, Sparkle); repointed to the bundle's OWN `SourcePackages` (`sed`, a DerivedData act, nothing in the repo), then green. The trio gets the same repoint at piece 7 |
-| 3. R1-1's fix — the leave decided on post-flip geometry (the measured title row) + its tip-only pins | DONE (this commit) — `MobileTopGiveWay.reach` (4a's arithmetic hoisted, `travel` reads it; 4a's call sites untouched), `MobileNoteTitleGiveWay.gone(_:travel:reachAfter:)` (default: no reading = the old rule), the tracker's measured `titleHeight` (`MobileWriteScreen.titleRow`'s `onGeometryChange`); phone `build-for-testing` green on it (`DerivedData/vm260-2r-r1-build.log`); the pins PENDING the gate |
-| 4. R1-9's fix — Terminal's prose roles derive from Study's rounded step | DONE (this commit) — `PhoneType.spec`: the step on Study's table, rounded, then `terminal(of:)` (the default's own Terminal rule, hoisted; the default byte-unchanged); docs in `PhoneType`'s header and `MobileTextSize`; phone `build-for-testing` green on it (`DerivedData/vm260-2r-r1-build2.log`); the Mac compile is piece 7's; the pins PENDING the gate |
-| 5. R1-3 — the guide names the pencil (words DRAFT) | DONE (this commit) — `MobileTutorialSeeder`'s "getting around" lesson: "The pencil on the shelf's top line — New Note — starts a bookless note…" (spelled "New Note" — the door's `MobileNewNoteDoor.spokenName`; the first spelling interpolated it and failed to compile, main-actor state read from the nonisolated seeder, fixed in the next commit); no pin reads the sentence (grep); compiled green at piece 7 (`vm260-2r-r1-build4.log`); a guide already seeded keeps its text until restored |
-| 6. R1-8 — the stale comments (comments only) | DONE (`adb15dd2e` — `MobileMessageLine.swift`'s anatomy block (13 / 13 semibold, this phone's look) and the two doc comments in the same file naming "the library's look"/"voice"; `Shared/SyncStatusViews.swift`'s doors at the `control` role's 15; and this commit — `MobileShellView.swift:228`, ONE comment in `init` (line 228; `body` starts at 250), kept in its own commit so it reverts alone if the brief's `MobileShellView` fence meant even a comment) — compiled at piece 7 |
-| 7. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
+| 3. R1-1's fix — the leave decided on post-flip geometry (the measured title row) + its tip-only pins | DONE (`3651b2eb7`) — `MobileTopGiveWay.reach` (4a's arithmetic hoisted, `travel` reads it; 4a's call sites untouched), `MobileNoteTitleGiveWay.gone(_:travel:reachAfter:)` (default: no reading = the old rule), the tracker's measured `titleHeight` (`MobileWriteScreen.titleRow`'s `onGeometryChange`); phone `build-for-testing` green on it (`DerivedData/vm260-2r-r1-build.log`); the pins PENDING the gate |
+| 4. R1-9's fix — Terminal's prose roles derive from Study's rounded step | DONE (`a1085f629`) — `PhoneType.spec`: the step on Study's table, rounded, then `terminal(of:)` (the default's own Terminal rule, hoisted; the default byte-unchanged); docs in `PhoneType`'s header and `MobileTextSize`; phone `build-for-testing` green on it (`DerivedData/vm260-2r-r1-build2.log`); the Mac compile is piece 7's; the pins PENDING the gate |
+| 5. R1-3 — the guide names the pencil (words DRAFT) | DONE (`fdfad7437`, the compile fix `8bbc18d87`) — `MobileTutorialSeeder`'s "getting around" lesson: "The pencil on the shelf's top line — New Note — starts a bookless note…" (spelled "New Note" — the door's `MobileNewNoteDoor.spokenName`; the first spelling interpolated it and failed to compile, main-actor state read from the nonisolated seeder, fixed in `8bbc18d87`; `fdfad7437`…`d07ee74fa` do not compile the phone target — none is a red-on-old tree); no pin reads the sentence (grep); compiled green at piece 7 (`vm260-2r-r1-build4.log`); a guide already seeded keeps its text until restored |
+| 6. R1-8 — the stale comments (comments only) | DONE (`adb15dd2e` — `MobileMessageLine.swift`'s anatomy block (13 / 13 semibold, this phone's look) and the two doc comments in the same file naming "the library's look"/"voice"; `Shared/SyncStatusViews.swift`'s doors at the `control` role's 15; and `d07ee74fa` — `MobileShellView.swift:228`, ONE comment in `init` (line 228; `body` starts at 250), kept in its own commit so it reverts alone if the brief's `MobileShellView` fence meant even a comment) — compiled at piece 7 |
+| 7. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` at code tip **`8bbc18d87`** (logs `App/Variorum/DerivedData/vm260-2r-r1-build4.log`, `vm260-2r-ui-r1-build.log`, `vm260-2r-mac-r1-build.log`), each after the same `workspace-state.json` repoint as piece 2 (the trio named the deleted `vm260-1a`, `-1a-ui`, `-1a-mac` package folders; backups of the three files in the session scratchpad); no error, no new warning in a changed file; the Mac bundle compiles `PhoneType.swift`, `SyncStatusViews.swift` and main's PR #31 Mac side; the run list below |
+
+#### R1-1 — the mechanism, corrected (narrower, and conditional on one UIKit ordering)
+
+Re-traced in this session. The reviewer's model — removing the title grows the text view by the title's row h (52 at
+a one-line title: the row's 44 floor + its 8 above), so the page's reach R shrinks by h — leaves out one line of the
+editor: **the typewriter room** (`MobileEditorTextView.updateTypewriterRoom`, `:573-579`, called from its
+`layoutSubviews`, `:340-349`): the text view's bottom `textContainerInset` is one viewport less one line
+(`MobileTypewriterRoom.height`), re-derived from the LIVE height. So a page's reach is R = its text + 8 (the container's
+top inset) − one line L, **independent of the viewport**: after the text view's own layout, a flip changes nothing in
+R. Read against that:
+- **The reviewer's no-clamp branch does not occur.** If UIKit leaves the offset alone as the frame grows, the room
+  regrows by h in the text view's next layout and the offset is back inside its range with no reading needed — no
+  overscroll, no self-undo; the old tree is right there.
+- **The clamp branch is real only if UIKit clamps the offset AT the frame change, before the text view's layout
+  regrows the room.** Then the KVO reading (the clamp is an offset set — heard) sees the shrunk transient range, the
+  offset pulled to max(0, R − h), travel ≤ 8: the title comes back and her page jumps to its top — the reviewer's
+  self-undo. Whether UIKit orders it that way is NOT KNOWN headless; the pin's PERF trace names it.
+- **The band and the road are narrower than the finding says.** The band 24 < R ≤ h + 8 is a page whose text is at
+  most about h + L (≈ 72 pt in Study: two or three lines), and the only road past the leave there is her own drag into
+  the room — a caret reveal stops at the text's foot (`MobileScrollAuthority` rule 1 and the animated
+  `setContentOffset` foot clamp, `:391-401`). "Every note typed with the keyboard up passes through that band" does not
+  hold: a typed note's page first scrolls when its text meets the viewport's foot, where R is about a viewport, far
+  past h + 8.
+- **A long note at its very foot, clamp branch:** the offset clamps to R − h (> 24), the title stays gone, and her text
+  does not move on screen (the frame rises h, the offset falls h). No self-undo.
+
+**The KVO-only question (the brief's):** no bounds or content-size read is needed for correctness — on this surface a
+frame change moves the travel only where UIKit clamps the offset (an offset set, heard), and a page whose content grows
+under a still offset only gains range. Two residuals, both benign and recorded: (i) a leave REFUSED on a short page is
+not re-weighed when the page grows under a still offset — the next scroll weighs it; (ii) between a flip back being
+ruled and its publish a turn later, a reading reads the grown viewport's reach less h (double-counted), which can only
+refuse a leave for that turn.
+
+#### R1-1 — the pin (red-on-old tree `96e07e2db`, bundle `vm260-r1-rol`)
+
+`MobileNoteTopRowTests.aShortPageAtItsFootNeverUndoesItsOwnTop(voice:)`, both voices: the app's Write screen at
+402 × 874 over a one-line note ("Harbor light."); h read off the screen (the chrome at rest less the row's 44 and the 4
+below); **the reach set to exactly 40 by the scroll view's own bottom inset** (`tv.contentInset.bottom`, which no line
+of the editor writes — grep): with the room, a note's text lands R only to within a line's pitch, and the rule and
+UIKit's clamp read the RANGE, never where it comes from; the offset set to its foot; settle one turn by turn (60,
+traced), then two settles of 40. Asserts at every settle: (1) the title's state the same (the reviewer's); (2) the
+offset ≤ the live max + 0.5 (the reviewer's); (3) **added** — the offset still at the foot she set (± 0.5): either UIKit
+branch of a self-undo moves her page; (4) **added** — the top flipped at most once in the trace (a self-undo is two
+flips with no hand on the page). Preconditions (`#require`, harness reds if they fire): 28 < 40 ≤ h + 4, the one-line
+note's own reach under 39, the page at rest with its title before the set.
+- **Predicted on `vm260-r1-rol`:** clamp branch → RED, (3) at all three settles + (4) = **4 issues per voice (8)**,
+  (1)(2) green (the cycle completes inside settle one). No-clamp branch → **GREEN in both voices: the finding is HOLLOW
+  in this harness** — record it, never claim it; the fix then stands only as the conservative rule below (the
+  orchestrator's call to keep or revert `3651b2eb7`). A red at a `#require` is the calibration's, not a verdict. Any
+  other shape: read the `PERF[sim] VM-260 R1-1` line (h, the reach, the trace of title · chrome · offset · max ·
+  content · height) first.
+- **Predicted on the tip:** GREEN (no leave: 40 − 52 = −12, the title stays, the page stays at its foot).
+
+#### R1-1 — the fix (`3651b2eb7`)
+
+- `MobileTopGiveWay.reach(insetTop:insetBottom:content:container:)` — batch 4a's own arithmetic, hoisted; `travel`
+  reads it; every 4a call site and number unchanged; no 4a pin moved (`MobileTopGiveWayRuleTests`,
+  `MobileTopGiveWayTrackerTests`, `MobileRootTopLineStatesTests`, `MobileRootTopGivesWayTests` untouched).
+- `MobileNoteTitleGiveWay.gone(_:travel:reachAfter:)` — past the wobble the title leaves only while `reachAfter` (the
+  reach the page keeps with the title's row given to its viewport) stays past the rest; a title already gone and the
+  return are unchanged; `reachAfter` defaults to `.infinity` — no reading, the rule as it was (so 4b's rule and tracker
+  pins hold unchanged; none moved).
+- `MobileNoteTitleTracker.titleHeight` (unobserved) and `read` → `reachAfter: reach − titleHeight`; zero (unmeasured) is
+  the old rule.
+- `MobileWriteScreen.titleRow` measures its whole height (its 8 above included — exactly what the masthead gives the
+  text view) by `onGeometryChange` into the tracker (unobserved storage: no body re-asked).
+- **New tip-only pins** (`MobileNoteTitleGiveWayTests.swift`): `aLeaveThatWouldUndoItselfIsNotTaken` (the reviewer's pure
+  pin, `gone(false, travel: 40, reachAfter: 40 − 52) == false`), `theTitleLeavesOnlyWhileThePageKeepsAReachPastTheRest`,
+  `theReachAfterTheFlipWeighsOnlyTheLeave`, `theReachIsTheTravelsOwnRange`; tracker:
+  `aMeasuredTitleRowKeepsAShortPagesTitle` (a bare `UIScrollView`: reach 40 under a 52 row stays; unmeasured goes; a
+  long page goes; reach 70 goes).
+- **PROVISIONAL C-R1-1 (for QUESTIONS at the merge):** a page whose whole reach is at most the title's row + 8 keeps its
+  title even scrolled into its room. Alternatives: (b) take the leave and hold the offset against UIKit's clamp (fights
+  UIKit; seam-adjacent); (c) a leave depth tied to the row's height for every page (the same refusal for short pages, a
+  later slide for all).
+
+#### R1-9 — the mechanism, confirmed (and wider than named)
+
+`PhoneType.spec` scaled the VOICE's table and rounded it: Terminal rounded its own table × the step while Study rounded
+its own — two roundings of different bases. Exactly three sizes drift (scratch arithmetic over the five roles × five
+steps): the note's title at Larger (Study 23, Terminal 20 — three under; the one the reviewer named) and the row's
+preview at Large and Larger (Study 15 · 16, Terminal 14 · 15 — ONE under, where two under with the floor is 13 · 14).
+And the pitch: Terminal's scaled pitch was its table pitch × the size ratio, so the header's "a Terminal line keeps
+Study's leading" held at the default only — at every one of the 20 non-default Terminal cases the leading drifted.
+
+#### R1-9 — the pins (red-on-old tree `96e07e2db`) and the fix (`a1085f629`)
+
+- `MobileTextSizeTests.terminalsProseStaysTwoUnderStudysAtEveryStep` (new): Terminal's size = max(13, Study's − 2) at
+  every step × role that follows the text size. **Predicted RED on old: 3 issues** (the three above); prints
+  `PERF[sim] VM-260 R1-9 Terminal off two-under — N: …`.
+- `MobileTextSizeTests.theFiveStepsScaleHerWordsOnly` — MOVED: Terminal's expected spec is Study's rounded step two
+  under, the pitch with it (was: its own table scaled). **Predicted RED on old: 23 issues** (Terminal, the four
+  non-default steps: the 3 sizes + 20 pitches); Study and the default green.
+- The fix: `spec` applies the step to Study's table and rounds, then Terminal is `terminal(of:)` — the default's own
+  Terminal rule, hoisted out of `voiceSpec` — so the default is byte-unchanged. Chrome roles and `mono` untouched (they
+  never follow the text size; Terminal's non-prose roles keep Study's size).
+- **The new Terminal step table** (sizes, Smaller · Small · Default · Large · Larger): note body 13 · 13 · 14 · 15 · 16
+  (unchanged), note title 16 · 17 · 18 · 19 · **21** (was 20), screen title 15 · 16 · 17 · 18 · 19 (unchanged), row title
+  13 · 13 · 14 · 15 · 16 (unchanged), row preview 13 · 13 · 13 · **13 · 14** (was 14 · 15 — it now moves only at Larger:
+  the floor holds the small steps, two-under holds Large). Pitches: every non-default Terminal step moves by under half
+  a point where the size holds (at most 0.48, the body at Smaller), and Terminal's leading now equals Study's at every
+  step. P-260-3a's amended table gains this Terminal column for her bundle.
+- Unchanged and predicted green on the tip: `everyStepIsAWholePoint`, `theTwoFormsAgreeAtEveryStep`,
+  `nothingIsEverBelowThirteenPointsAtAnyStep`, `theEditorFaceTakesTheStep` (Study),
+  `aStepReachesHerWordsOnAMountedScreenAndNotTheChrome` (Study), `aStepChosenOnThePhoneRebasesAnOpenNote` (Study 18),
+  `MobilePhoneOwnLookTests` (Study 18), `MobileHerWordsDefaultTests` (the default).
+
+#### R1-3 and R1-8 — as built
+
+- **R1-3** (`fdfad7437` + `8bbc18d87`): the "getting around" lesson — "The pencil on the shelf's top line — New Note —
+  starts a bookless note and drops you straight into writing;" (was "+ new note starts …"), mirroring the empty
+  Library's line (the glyph, then "starts one", spoken "New Note starts one"). Words DRAFT; a guide already seeded keeps
+  its text until restored.
+- **R1-8** (`adb15dd2e` + `d07ee74fa`, comments only): `MobileMessageLine.swift` — the anatomy block's words 13 and its
+  act 13 semibold (`controlInline` since VM-273; it said SF 15 / 15 semibold) and "this phone's look" (VM-247), plus the
+  same file's doc comments that said "the library's look" / "the library's voice"; `Shared/SyncStatusViews.swift` — the
+  sync row's doors are the `control` role at 15 (it said 17); `MobileShellView.swift:228` — the message line wears this
+  phone's look since VM-247 (in `init`; `body` begins at 250).
+
+#### Round 1 fixes — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`. Phone: `P(folder)=DerivedData/<folder>/Build/Products/
+VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`; UI: `U(folder)=DerivedData/<folder>/Build/
+Products/TK2SpikeUITests_TK2SpikeUITests_iphonesimulator27.1-arm64-x86_64.xctestrun`; Mac: `DerivedData/vm260-2r-mac/
+Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`; `-destination "platform=iOS Simulator,id=$UDID"`. **The
+red-on-old tree is `96e07e2db`; the code tip is `8bbc18d87`.**
+
+- **R-r1 — red on old** (`P(vm260-r1-rol)`, the gate's suite device):
+  `-only-testing:VariorumMobileTests/MobileNoteTopRowTests -only-testing:VariorumMobileTests/MobileTextSizeTests`.
+  Predicted: `aShortPageAtItsFootNeverUndoesItsOwnTop` RED 4 + 4 (clamp branch) or GREEN (hollow — no-clamp branch;
+  record, never claim; read the PERF trace either way); `terminalsProseStaysTwoUnderStudysAtEveryStep` RED 3;
+  `theFiveStepsScaleHerWordsOnly` RED 23; every other case in the two suites GREEN (4b's pins are green on this tree —
+  it carries 4b's code).
+- **The tip** (`8bbc18d87`):
+  - **P** — the whole phone target from `vm260-2r` (`-only-testing:VariorumMobileTests`): predicted green but main's
+    known issues (the previous windows read 6: `MobileFilterRowGeometryTests` ×4, `MobileTrashTests` ×2 — PR #31's merge
+    may move that baseline; read it against main); the R-r1 pins GREEN; the new tip-only pins GREEN
+    (`MobileNoteTitleGiveWayRuleTests` 10, `MobileNoteTitleTrackerTests` 3); 4b's mounted pins GREEN (their pages' reach
+    is far past h + 8 — the leave unchanged for them).
+  - **U** — `U(vm260-2r-ui)`, `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests` (its three tests): the
+    Write screen's layout is unchanged except for short pages, so predicted GREEN as 4b predicted.
+  - **M** — `vm260-2r-mac` (FENCED until her done-looking — nov24): the M3 list; `PhoneType.swift` and
+    `SyncStatusViews.swift` are Shared and compiled there (never rendered on the Mac): predicted green but
+    `IndexTierMetricsTests`' 4 declared.
+- **W — the closing walk's added stop** (the Debug phone app from `vm260-2r`, both voices): a two-line note dragged into
+  its room by a real thumb and released at the foot — the title stays and nothing jumps (the tip); for her eye, a long
+  note's leave at its very foot.
 
 ## THE CONSOLIDATED WINDOW — results (2026-11-25, claim `vm-260` 04:55–06:01:14; the GO device `vm260-suites` iOS 26.2, DELETED at close; the UI legs on `vm260-walk`)
 
