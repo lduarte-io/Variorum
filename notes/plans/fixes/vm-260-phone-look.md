@@ -983,7 +983,7 @@ choice's drawing untouched (a remainder, below); no masthead rebuild (VM-148's).
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's binding sections, R-260-2, S-260-2/-3, the adjudications, batches 1a and 1b; the resiliency protocol; SurfaceContracts "The app" in full and the Library's phone bullet; the VM-47 FOR A LATER READER and §5's P-47-1, P-47-12, P-47-21; the sizing sheet; LK-5 in the VM-44 rulings) | DONE (this commit) |
-| 1. The pins on the pre-fix tree — VM-273's drawn sizes, radii and chrome roles; VM-272's note top | NOT-STARTED |
+| 1. The pins on the pre-fix tree — VM-273's drawn sizes, radii and chrome roles; VM-272's note top | DONE (this commit — **it IS the red-on-old tree**: two new files, only symbols both trees declare) |
 | 2. The red-on-old tree built headless (`DerivedData/vm260-2-rol`) | NOT-STARTED |
 | 3. VM-273 — the central step-down (`PhoneType` chrome roles, `PhoneControls` glyph · chip · box, `PhoneMetrics` radii) | NOT-STARTED — the settled design is the tables below |
 | 4. VM-272 — the note's top (`MobileWriteView`'s chrome only) | NOT-STARTED — the settled design below |
@@ -1076,7 +1076,37 @@ not this pass.
 
 ### Pins (all PENDING the window)
 
-*(written at piece 1)*
+**VM-273 — `VariorumMobileTests/MobileDrawnStepDownTests.swift`** (three suites):
+- `MobileDrawnStepDownTableTests.theChromeSitsOneNotchUnderHerWords` — the table above: `control` 15 / 20
+  `.subheadline`, `controlInline` 13 / 18 `.footnote`, `chip` 13 / 18 medium `.footnote`, `tab` 17 (LK-5), `meta` and
+  `sectionHeader` 13, `noteTitle` 20 / 25 `.title3` (Terminal 18 / 23), her other words unchanged, chrome never "two
+  under" in Terminal. **RED ON OLD predicted** (control 17, controlInline 15, chip 15, noteTitle 24 / 22).
+- `…theNewThirteensNeverDipUnderTheFloor` — `chip` and `controlInline` at xSmall … Large, SwiftUI and UIKit forms,
+  both voices, ≥ 13. A GUARD (green on both: the floor already held 15 pt roles there).
+- `…theCornersAreTheMacsTwo` — `Radius.small` 4, `Radius.standard` 8, the bar's chip on `Radius.small`. **RED ON OLD
+  predicted** (6, 12; the bar's chip on 12).
+- `MobileDrawnStepDownRenderedTests.theDrawingsSitWellInsideTheirTargets(voice:)` — Study and Terminal light, read as
+  pixels off a real scene window (`MobileRenderedPixels`): the icon button's glyph draws within 1 pt of a bare 17-pt
+  symbol's ink box; the chip's shape ≤ 26 tall and its corner pixel (2.5, 2.5) filled — near-square, where a capsule
+  leaves it bare; the calm button's box and the field's box ≤ 38.5 tall; each in its target (44 × 44; 64 × 44; the
+  field's frame 44). **RED ON OLD predicted** (the 22-pt glyph; the 32-pt capsule and its bare corner; the 44-pt
+  boxes). Prints `PERF[sim] VM-273 drawn …` with every measured box for the record.
+- `MobileDrawnStepDownTargetTests.everyControlAnswersAcrossItsWholeTarget(voice:size:)` — **THE REVIEW FOCUS, a GUARD**
+  (green on both): the sheet header's Done, a text button, the calm button ≥ 64 × 44; an inline act, an icon button, a
+  fact chip and a filter chip ≥ 44 × 44; a menu row with a glyph ≥ 52 across its width — both voices, at Large and at
+  xSmall.
+
+**VM-272 — `VariorumMobileTests/MobileNoteTopTests.swift`** (the app's `MobileWriteScreen` with the model it drove,
+402 × 874, both voices):
+- `theNoteTopGivesTheScreenBackToWriting(voice:)` — the chrome between the safe area's top and the text view's top is
+  ≤ 140 (three 44-pt rows + 8) and ≥ 131.5 (the three rows stay). **RED ON OLD predicted** (≈ 158). Prints
+  `PERF[sim] VM-272 note top …`.
+- `everyDoorOnTheNoteTopAnswersAcrossFortyFour(voice:)` — the title (Rename Note), the four tools, the membership
+  line and the five chips, each ≥ 44 × 44. **RED ON OLD predicted in Study only** ("Tags" ≈ 43 and "Lenses" ≈ 41 wide —
+  measured with the Mac's system fonts: "tags" 31, "lens" 29 at 15 medium, plus the 6 + 6 reach); green in Terminal
+  (mono "tags" 38 + 12). Prints every door's size.
+- `theToolsAreOneRowOfFortyFourSquareTargets(voice:)` — a GUARD (green on both): the four tools 44 × 44, one row,
+  centres 44 apart, the last ending at the gutter.
 
 ### Pins MOVED with the rulings
 
