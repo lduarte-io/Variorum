@@ -22,6 +22,20 @@
 //  `Queries.ownershipFacts`, ∝ the page, P1), the FACE (`OwnershipBadgeView`).
 //  Shared home: five features render it.
 //
+//  VX-1075 (her report, 2026-11-24 — "what is this little two boxes symbol? i
+//  can't click on it … looks like the snippets symbol" · "it isn't saying that
+//  on hover … ticket it being given its own symbol and making a click list the
+//  other books"): the SHARED mark wears its own symbol (`sharedSymbol`,
+//  PROVISIONAL A-1082-1) and is a DOOR of its own (`SharedMarkDoor`): a click
+//  opens a small list of the OTHER books holding the note, each row opening
+//  that book at the note (the owned-by badge's ascent); the sentence is the
+//  door's OWN hover. The trace (the run record, `notes/plans/fixes/
+//  vx-1082-nov-24-fixes.md` BATCH B): the old mark was a plain glyph inside
+//  an interaction shell on every host — the folded Outline card (a Button),
+//  the Index row (a tap shell), the unfolded Outline header (a drag shell with
+//  no help) — and a hover is answered by the innermost interactive view under
+//  the pointer, so its own sentence never showed (on the header, nothing did).
+//
 
 import GRDB // AsyncValueObservation iteration
 import SwiftUI
@@ -45,6 +59,18 @@ nonisolated enum OwnershipBadgeCopy {
     static func ownedByHelp(_ book: String) -> String {
         "\(quoted(book)) owns this note \u{2014} click to open the book at it"
     }
+
+    /// VX-1075 — the shared mark's list (PROVISIONAL wording, for her pass):
+    /// its headline over the other books…
+    static func sharedListHeadline(count: Int) -> String {
+        "Also in \(count) other book\(count == 1 ? "" : "s"):"
+    }
+
+    /// …the law under them (the hover's own second clause)…
+    static let sharedListLaw = "Editing it here edits it there too."
+
+    /// …and a row's hover — the membership chip's book-row words.
+    static func openBookHelp(_ book: String) -> String { "Open \(quoted(book)) at this note" }
 
     /// **A ROW's hover, carrying its badge's sentence** (13i-c U4 walk, W-2):
     /// macOS shows the OUTERMOST help on a row whose whole face is one click
@@ -88,8 +114,11 @@ nonisolated enum OwnershipBadgeFace {
     }
 
     /// **VX-1075 — the shared mark's own symbol** (her ask: "ticket it being
-    /// given its own symbol"): never the sidebar's Snippets glyph.
-    static let sharedSymbol = "square.on.square"
+    /// given its own symbol"): never the sidebar's Snippets glyph
+    /// (`square.on.square`, which it wore until VX-1075). PROVISIONAL
+    /// A-1082-1 — "books": the note lives in other books; the alternatives
+    /// for her pick are in the run record.
+    static let sharedSymbol = "books.vertical"
 
     /// **The rule.** Silence the common case: a free note, or a note whose
     /// only book is the one being viewed, wears nothing; the setting off
@@ -142,7 +171,13 @@ final class OwnershipFactsModel {
         _ db: Database, postIDs: [String], inBook readingID: String?
     ) throws -> Snapshot {
         let facts = try Queries.ownershipFacts(db, postIDs: postIDs, inBook: readingID)
-        return Snapshot(facts: facts, archivedBooks: [])
+        // VX-1075: one keyed row read per DISTINCT other book the facts name —
+        // ∝ the facts read's own answer (P1), never the corpus.
+        let others = Set(facts.values.flatMap { $0.otherBooks.map(\.id) })
+        let archived = try others.compactMap { try Queries.reading(db, id: $0) }
+            .filter { $0.archivedAt != nil }
+            .map(\.id)
+        return Snapshot(facts: facts, archivedBooks: Set(archived))
     }
 
     private func adopt(_ snapshot: Snapshot) {
@@ -205,11 +240,8 @@ struct OwnershipBadgeView: View {
         Group {
             switch badge {
             case .shared(let books):
-                Image(systemName: OwnershipBadgeFace.sharedSymbol)
-                    .font(.system(size: 9))
-                    .foregroundStyle(tokens.faint)
-                    .help(OwnershipBadgeCopy.sharedHelp(books.map(\.shownName)))
-                    .accessibilityLabel(OwnershipBadgeCopy.sharedHelp(books.map(\.shownName)))
+                // VX-1075: its own symbol, and a door of its own.
+                SharedMarkDoor(tokens: tokens, books: books, postID: postID)
             case .ownedBy(let book):
                 Button {
                     MembershipChip.ascend(bookID: book.id, postID: postID)
@@ -229,6 +261,105 @@ struct OwnershipBadgeView: View {
         .onAppear { OwnershipBadgeProbe.drawn[postID] = badge }
         .onDisappear { if OwnershipBadgeProbe.drawn[postID] == badge { OwnershipBadgeProbe.drawn[postID] = nil } }
         #endif
+    }
+}
+
+/// **VX-1075 — THE SHARED MARK, A DOOR OF ITS OWN.** The glyph is laid out
+/// exactly as the old mark was (9 pt, faint ink — the badge never moves the
+/// row or the prose); the TARGET is a button riding an overlay centred on it,
+/// grown OUTWARD to `hitSide` (the fold disclosure's VX-291 shape — the
+/// button's own frame IS the square, so a press in the overhang counts, and
+/// the overhang stays inside every host's 6-pt spacing). Being the innermost
+/// interactive view under the pointer, it answers its own hover with the
+/// sentence on every host — the folded card, the Index row, the unfolded
+/// header — and a click lists the other books, each row the ascent.
+private struct SharedMarkDoor: View {
+    let tokens: VoiceTokens
+    let books: [SharedBook]
+    let postID: String
+    @State private var listShown = false
+
+    /// The target's side: the 9-pt glyph's ~10-pt box grown outward by
+    /// ~3 pt a side.
+    static let hitSide: CGFloat = 16
+
+    /// A list row's act: that book, opened at this note (the owned-by
+    /// badge's click-through — `MembershipChip.ascend`).
+    static func open(_ book: SharedBook, at postID: String) {
+        MembershipChip.ascend(bookID: book.id, postID: postID)
+    }
+
+    var body: some View {
+        let help = OwnershipBadgeCopy.sharedHelp(books.map(\.shownName))
+        Image(systemName: OwnershipBadgeFace.sharedSymbol)
+            .font(.system(size: 9))
+            .foregroundStyle(tokens.faint)
+            .accessibilityHidden(true)
+            .overlay {
+                Button {
+                    listShown.toggle()
+                } label: {
+                    Color.clear
+                        .frame(width: Self.hitSide, height: Self.hitSide)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(help)
+                .accessibilityLabel(help)
+                .popover(isPresented: $listShown, arrowEdge: .bottom) {
+                    SharedBooksList(books: books) { book in
+                        listShown = false
+                        Self.open(book, at: postID)
+                    }
+                }
+            }
+            #if DEBUG
+            .onAppear { register(books) }
+            .onChange(of: books) { _, now in register(now) }
+            .onDisappear {
+                if OwnershipBadgeProbe.doors[postID]?.books == books { OwnershipBadgeProbe.doors[postID] = nil }
+            }
+            #endif
+    }
+
+    #if DEBUG
+    /// The door, as the probe's oracle: its hover, its list, and the very
+    /// function a list row's press calls.
+    private func register(_ books: [SharedBook]) {
+        let postID = postID
+        OwnershipBadgeProbe.doors[postID] = .init(
+            help: OwnershipBadgeCopy.sharedHelp(books.map(\.shownName)), books: books,
+            open: { Self.open($0, at: postID) })
+    }
+    #endif
+}
+
+/// The shared mark's list — the OTHER books holding the note, each a door to
+/// that book at the note (the membership chip's popover idiom).
+private struct SharedBooksList: View {
+    let books: [SharedBook]
+    let open: (SharedBook) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(OwnershipBadgeCopy.sharedListHeadline(count: books.count))
+                .font(.callout.weight(.semibold))
+                .lineLimit(1)
+            ForEach(books) { book in
+                // The book's name is hers — never chrome-labelled.
+                Button(book.shownName) { open(book) }
+                    .buttonStyle(.link)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .help(OwnershipBadgeCopy.openBookHelp(book.name))
+            }
+            Text(OwnershipBadgeCopy.sharedListLaw)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: 280, alignment: .leading)
+        .padding(12)
     }
 }
 
