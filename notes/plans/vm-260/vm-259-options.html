@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VM-259 — three options</title>
+<style>
+  /* Local sitting material for VM-259 (the Library's top gives way).
+     Drawn at batch 2's corrected sizes (control 15, chip 13, glyph 17,
+     field box 36 in a 44 frame, corners 4/8). Open the file locally;
+     each phone's list really scrolls — scroll down, then up.
+     Study voice, sea-glass, light. Approximate fonts; the batch-1a
+     captures beside this file are the ground truth for the look. */
+  :root {
+    --band: #E7F0E9;         /* the top band and tab bar */
+    --paper: #FBFDFB;        /* the list's room */
+    --ink: #1D2A24;          /* her words */
+    --door: #52705F;         /* chrome doors' muted green */
+    --accent: #3F7460;
+    --faint: #8FA89B;
+    --hairline: #D4E2D8;
+    --wash: #DCEAE0;         /* a chip's light wash */
+    --fieldline: #BCD4C5;
+  }
+  body { background: #F2F1EC; color: var(--ink); margin: 0;
+         font: 15px/1.5 -apple-system, system-ui, sans-serif; padding: 24px 16px 60px; }
+  header.page { max-width: 1280px; margin: 0 auto 8px; }
+  header.page h1 { font-size: 22px; margin: 0 0 6px; }
+  header.page p { margin: 4px 0; max-width: 72ch; color: #3c4a42; }
+  .row { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center;
+         max-width: 1340px; margin: 24px auto 0; align-items: flex-start; }
+  .option { width: 392px; }
+  .option h2 { font-size: 17px; margin: 0 0 2px; }
+  .option p.sub { margin: 0 0 10px; font-size: 13px; color: #4c5a52; min-height: 58px; }
+  .phone { width: 390px; height: 700px; border-radius: 34px; border: 1px solid #c9c9c2;
+           background: var(--band); overflow: hidden; position: relative;
+           box-shadow: 0 6px 24px rgba(40,60,50,.10); }
+  .statusbar { height: 34px; display: flex; align-items: center; justify-content: space-between;
+               padding: 0 28px; font-size: 14px; font-weight: 600; color: var(--ink); }
+
+  /* ---- the top block, shared bones ---- */
+  .pathline { height: 44px; display: flex; align-items: center; padding: 0 20px; gap: 18px; }
+  .wing { font-size: 15px; color: var(--door); margin-right: auto; }   /* control 15 */
+  .glyph { width: 20px; height: 20px; stroke: var(--door); fill: none; stroke-width: 1.6; }
+  .field { margin: 0 20px 8px; height: 36px; border-radius: 8px; background: #fff;
+           border: 1px solid var(--fieldline); display: flex; align-items: center;
+           padding: 0 12px; color: var(--faint); font-size: 15px; }
+  .filters { display: flex; align-items: center; gap: 6px; padding: 0 20px 10px; }
+  .chip { font-size: 13px; font-weight: 500; color: #44584C; height: 24px; border-radius: 4px;
+          display: flex; align-items: center; padding: 0 8px; }
+  .chip.on { background: var(--wash); color: var(--ink); }
+  .sort { margin-left: auto; }
+
+  /* ---- the list ---- */
+  .scroller { position: absolute; left: 0; right: 0; bottom: 56px; top: 0; overflow-y: auto;
+              background: var(--paper); -webkit-overflow-scrolling: touch; }
+  .listpad { padding: 10px 20px 30px; }
+  .note { font: 600 20px/1.3 ui-serif, Georgia, serif; padding: 15px 0; }
+  .day  { font: 700 20px/1.3 ui-serif, Georgia, serif; padding: 15px 0 5px; }
+
+  /* ---- the tab bar ---- */
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: var(--band);
+            display: flex; align-items: center; justify-content: space-around; font-size: 17px;
+            color: var(--door); border-top: 1px solid var(--hairline); }
+  .tab.on { background: #CBDFD2; color: var(--ink); font-weight: 600;
+            padding: 7px 16px; border-radius: 4px; }
+
+  /* ---- per-option movement ---- */
+  .top { position: absolute; left: 0; right: 0; top: 34px; background: var(--band); z-index: 2;
+         transition: transform .22s ease, opacity .22s ease; border-bottom: 1px solid transparent; }
+  .top.gone { transform: translateY(-110%); opacity: 0; }
+  .top.away .fold { height: 0; opacity: 0; overflow: hidden; margin-bottom: 0; }
+  .fold { transition: height .22s ease, opacity .18s ease; }
+  .slim { position: absolute; left: 0; right: 0; top: 34px; height: 44px; background: var(--band);
+          z-index: 3; display: none; align-items: center; gap: 12px; padding: 0 20px;
+          border-bottom: 1px solid var(--hairline); }
+  .slim.show { display: flex; }
+  .slim .wing { margin-right: 0; font-size: 13px; }
+  .slim .now { font-size: 13px; color: var(--faint); margin-right: auto; }
+  .hint { font-size: 12px; color: #6a776f; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <h1>VM-259 — the Library's top gives way (three options)</h1>
+  <p>Her words: <em>"the top row should also collapse while I'm scrolling — I'm open to ideas on how
+  that should happen… the app just feels like it's fighting for space."</em></p>
+  <p>All three start from the same top at batch 2's corrected sizes (the wing line's 17-pt glyphs, the
+  36-in-44 search box at corner 8, the 13-pt near-square filter chips). <strong>Each phone really
+  scrolls</strong> — scroll the list down, then nudge up. The paging law (VM-68) is untouched by all
+  three; what differs is only what the chrome does.</p>
+</header>
+
+<div class="row">
+
+  <!-- ================= OPTION A ================= -->
+  <section class="option">
+    <h2>A — the whole top slips away</h2>
+    <p class="sub">Scrolling down, the whole top (wing line, search, filters) rides off with the paper;
+    any upward nudge brings it all back at once. Nothing floats while reading — the most room, zero
+    chrome. <strong>Bookcase · Starred:</strong> their top lines slip the same way.
+    <strong>Cost:</strong> New Note and the Trash need one nudge up first.</p>
+    <div class="phone" data-mode="A">
+      <div class="statusbar"><span>3:29</span><span>▪▪ ᯤ ▮</span></div>
+      <div class="top">
+        <div class="pathline">
+          <span class="wing">Home</span>
+          <svg class="glyph" viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13M10 11v6M14 11v6"/></svg>
+          <svg class="glyph" viewBox="0 0 24 24"><rect x="4" y="5" width="15" height="15" rx="2"/><path d="M16 3l3 3-8 8-4 1 1-4z"/></svg>
+          <svg class="glyph" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 4v2.4M12 17.6V20M4 12h2.4M17.6 12H20M6.3 6.3l1.7 1.7M16 16l1.7 1.7M17.7 6.3L16 8M8 16l-1.7 1.7"/></svg>
+        </div>
+        <div class="field">Search notes, books…</div>
+        <div class="filters">
+          <span class="chip on">All</span><span class="chip">Books</span><span class="chip">Notes</span>
+          <span class="chip">Bookless</span><span class="chip">Scraps</span>
+          <svg class="glyph sort" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M8 5v14M8 19l-3-3M8 19l3-3M16 19V5M16 5l-3 3M16 5l3 3"/></svg>
+        </div>
+      </div>
+      <div class="scroller"><div class="listpad" data-pad="A"></div></div>
+      <div class="tabbar"><span class="tab">Starred</span><span class="tab">Bookcase</span><span class="tab on">Library</span></div>
+    </div>
+    <p class="hint">Idiom: Messages' search. The top is part of the paper, not a lid on it.</p>
+  </section>
+
+  <!-- ================= OPTION B ================= -->
+  <section class="option">
+    <h2>B — the slim bar (VM-148's rhyme)</h2>
+    <p class="sub">Scrolling down, the three rows condense into ONE pinned 44-pt line: the wing's name
+    small, the standing filter as a word, a search glyph and New Note. An upward nudge (or the search
+    glyph) re-opens the full top. Every door stays reachable. <strong>Bookcase · Starred:</strong> the
+    same slim line (name + their own doors) — and the note's top gets this bar in VM-148, so the app
+    has one answer everywhere.</p>
+    <div class="phone" data-mode="B">
+      <div class="statusbar"><span>3:29</span><span>▪▪ ᯤ ▮</span></div>
+      <div class="top">
+        <div class="pathline">
+          <span class="wing">Home</span>
+          <svg class="glyph" viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13M10 11v6M14 11v6"/></svg>
+          <svg class="glyph" viewBox="0 0 24 24"><rect x="4" y="5" width="15" height="15" rx="2"/><path d="M16 3l3 3-8 8-4 1 1-4z"/></svg>
+          <svg class="glyph" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 4v2.4M12 17.6V20M4 12h2.4M17.6 12H20M6.3 6.3l1.7 1.7M16 16l1.7 1.7M17.7 6.3L16 8M8 16l-1.7 1.7"/></svg>
+        </div>
+        <div class="field">Search notes, books…</div>
+        <div class="filters">
+          <span class="chip on">All</span><span class="chip">Books</span><span class="chip">Notes</span>
+          <span class="chip">Bookless</span><span class="chip">Scraps</span>
+          <svg class="glyph sort" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M8 5v14M8 19l-3-3M8 19l3-3M16 19V5M16 5l-3 3M16 5l3 3"/></svg>
+        </div>
+      </div>
+      <div class="slim">
+        <span class="wing">Home</span><span class="now">· All</span>
+        <svg class="glyph" viewBox="0 0 24 24" style="width:17px;height:17px"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>
+        <svg class="glyph" viewBox="0 0 24 24" style="width:17px;height:17px"><rect x="4" y="5" width="15" height="15" rx="2"/><path d="M16 3l3 3-8 8-4 1 1-4z"/></svg>
+      </div>
+      <div class="scroller"><div class="listpad" data-pad="B"></div></div>
+      <div class="tabbar"><span class="tab">Starred</span><span class="tab">Bookcase</span><span class="tab on">Library</span></div>
+    </div>
+    <p class="hint">≈140 pt of top chrome becomes 44 while reading; nothing is ever out of reach.</p>
+  </section>
+
+  <!-- ================= OPTION C ================= -->
+  <section class="option">
+    <h2>C — the wing line stays; search &amp; filters fold</h2>
+    <p class="sub">The wing line (name + Trash + New Note + gear) is the one pinned row. The search
+    field and filter row fold away under it on scroll; landing back at the very top unfolds them
+    (the Apple Notes idiom — search lives at the top of the paper). <strong>Bookcase · Starred:</strong>
+    already just a line and a strip; the strip folds the same way. <strong>Cost:</strong> reaching
+    search or a filter mid-list means riding to the top.</p>
+    <div class="phone" data-mode="C">
+      <div class="statusbar"><span>3:29</span><span>▪▪ ᯤ ▮</span></div>
+      <div class="top">
+        <div class="pathline">
+          <span class="wing">Home</span>
+          <svg class="glyph" viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13M10 11v6M14 11v6"/></svg>
+          <svg class="glyph" viewBox="0 0 24 24"><rect x="4" y="5" width="15" height="15" rx="2"/><path d="M16 3l3 3-8 8-4 1 1-4z"/></svg>
+          <svg class="glyph" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 4v2.4M12 17.6V20M4 12h2.4M17.6 12H20M6.3 6.3l1.7 1.7M16 16l1.7 1.7M17.7 6.3L16 8M8 16l-1.7 1.7"/></svg>
+        </div>
+        <div class="fold">
+          <div class="field">Search notes, books…</div>
+          <div class="filters">
+            <span class="chip on">All</span><span class="chip">Books</span><span class="chip">Notes</span>
+            <span class="chip">Bookless</span><span class="chip">Scraps</span>
+            <svg class="glyph sort" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M8 5v14M8 19l-3-3M8 19l3-3M16 19V5M16 5l-3 3M16 5l3 3"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="scroller"><div class="listpad" data-pad="C"></div></div>
+      <div class="tabbar"><span class="tab">Starred</span><span class="tab">Bookcase</span><span class="tab on">Library</span></div>
+    </div>
+    <p class="hint">One pinned 44-pt line always; the doors she named for this page never leave.</p>
+  </section>
+
+</div>
+
+<script>
+  // The list's rows (the dev store's own titles, so the mockup reads true).
+  const titles = ["2026-11-25|day","swipe & choose","loose thought","What's true in every mode",
+    "the two exits","the five places","the voice switch","the seal","comments & callouts","merge",
+    "divide with takes","divide","lenses","the block index","a calm default","what the pool holds",
+    "the day filter","snippets, dragged","the quiet receipt","the long round","two voices",
+    "the sea-glass room","what rides the slide","the corrected muted","a note on corners"];
+  document.querySelectorAll('[data-pad]').forEach(pad => {
+    pad.innerHTML = titles.map(t => {
+      const [w, kind] = t.split('|');
+      return `<div class="${kind === 'day' ? 'day' : 'note'}">${w}</div>`;
+    }).join('');
+  });
+
+  // Shared scroll mechanics: direction with a small hysteresis, per option.
+  document.querySelectorAll('.phone').forEach(phone => {
+    const mode = phone.dataset.mode;
+    const sc = phone.querySelector('.scroller');
+    const top = phone.querySelector('.top');
+    const slim = phone.querySelector('.slim');
+    const topH = () => top.offsetHeight;
+    // The list starts under the top block.
+    const pad = phone.querySelector('.listpad');
+    const setPad = () => pad.style.paddingTop = (topH() + 10) + 'px';
+    setPad();
+    let last = 0, acc = 0;
+    sc.addEventListener('scroll', () => {
+      const y = sc.scrollTop, dy = y - last; last = y;
+      if (Math.sign(dy) !== Math.sign(acc)) acc = 0;
+      acc += dy;
+      const down = acc > 24 && y > 60;   // a real scroll, not a wobble
+      const up = acc < -24 || y <= 8;
+      if (mode === 'A') {
+        if (down) top.classList.add('gone');
+        else if (up) top.classList.remove('gone');
+      } else if (mode === 'B') {
+        if (down) { top.classList.add('gone'); slim.classList.add('show'); }
+        else if (up) { top.classList.remove('gone'); slim.classList.remove('show'); }
+      } else if (mode === 'C') {
+        if (down) top.classList.add('away');
+        else if (y <= 8) top.classList.remove('away');  // unfolds only AT the top
+      }
+    }, { passive: true });
+    if (slim) slim.addEventListener('click', () => {
+      top.classList.remove('gone'); slim.classList.remove('show'); acc = 0;
+    });
+  });
+</script>
+</body>
+</html>
