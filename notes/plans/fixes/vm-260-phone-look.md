@@ -419,6 +419,17 @@ install and the #281 dispositions.
   RECORDED, not patched. The SUSPECTED field-answering item is ticketed — **VM-280** (Bug · Suspected · Low) —
   so it outlives this record's working sections. The red-on-old predictions remain the window's to prove;
   acceptance here is of the design set and the diff's discipline, not the evidence.
+- **A-260-11 (batch 3's hand-back, 2026-11-25): ACCEPTED AS BUILT, PROVISIONAL as its own calls declare
+  (P-260-3a…3e, C-247-1, C-254-1/-2), her judgment riding the W3 captures and the morning sitting.** Grounds,
+  spot-checked against the diff (dae368b4e..54c0d1cc8), not the claims: the fences hold (`Sources/`,
+  `StatusCenter`, `VoiceTokens`, `ThemeStore` — verified empty diff); `MobileEditorStyle`'s diff is fonts,
+  grounds and faces only, zero text-input lines (verified by grep over the diff) — the look file, not the
+  seam; the shared-file lines accepted — `PhoneType`'s `@Entry` rides the established `phoneFieldPrompt`
+  pattern, and the per-device store rides Appearance's own road, the `ThemeStore` kept bound for everything
+  else; VM-254's one-notch default correctly counts the note title's 24 → 20 as already taken (batch 2's
+  flag honored). R3's red-on-old was ESTABLISHED in the consolidated window (all four pins, 19 issues);
+  P3 + M3 run as their own queued window and U3 is already green, so what acceptance still waits on is
+  those two legs plus her eyes.
 - **A-260-10 (the F-1a-W1 fix's hand-back, 2026-11-25): trace and fix ACCEPTED; the orchestrator's suspected
   mechanism stands REFUTED by the captures' own pixels.** The trace is the stronger kind of evidence — two
   independent captures of the same field on the same device class, the 52.0-pt gap equal to
@@ -461,13 +472,41 @@ install and the #281 dispositions.
 | Kickoff sitting: six rulings R-260-1…6 recorded | DONE 2026-11-25 |
 | nov24 coordinator announced; its protocol folded in above | DONE |
 | Riders re-parented under VM-260; batch 1a members In Progress | DONE |
-| Batch 1a (VM-253 · VM-256 · VM-255) | SUITES GREEN; UI test GREEN on the walk device (1/1, 71 s — the Castle-locked no-verdict CLOSED); THE WALK RUN AND READ 2026-11-25 (the orchestrator's read; verdicts below) — every stop PASS in both voices EXCEPT **F-1a-W1, MAJOR, OPEN**: with the Library search holding the keyboard the bar sits ghosted UNDER the keyboard instead of riding above it (SurfaceContracts' bar line; capture `s9-search-keyboard`). Suspected mechanism: the shell's one-bar overlay sits at the band's foot and the band ignores the keyboard (the edge-grounds architecture), where the old in-page bars rode each page's keyboard avoidance. FIX BUILT 2026-11-25 at the boundary (a fresh implementer; the F-1a-W1 section below): the suspected mechanism REFUTED — the real one is SwiftUI's keyboard avoidance 52 pt short after an accessory keyboard (predates the run); fix = `MobileKeyboardFloor` (the band's foot never below UIKit's keyboard layout guide), adjudicated A-260-10. Pin `c4081441c` (= the red-on-old tree, UI bundle `vm260-w1-rol`); fixed tip `dae368b4e`; red/green, the keyboard-reveal re-run and the s9 re-capture PENDING the window |
-| Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | BUILT, READY-FOR-TESTS 2026-11-25 (tip `ca9a8d7be`; adjudications A-260-3…8; the editor-spoken refusals' authored headlines deferred to VM-279, the clip standing in). PENDING: the one window — two red-on-old trees, the tip, the Mac legs, the line's 7-stop walk |
-| Batch 2 (VM-273 · VM-272) | BUILT, READY-FOR-TESTS 2026-11-25 (code tip `ae12e4276`, READY `17775aa42`; red-on-old tree `f99f20818` in `vm260-2-rol`; tip bundles `vm260-2`/`-mac`/`-ui` prebuilt; adjudicated A-260-9 — the set accepted PROVISIONAL, VM-280 filed). PENDING: the window |
-| Batch 3 (VM-247 · VM-254) | NOT STARTED |
-| Batch 4 (VM-259: design → pick → build) | NOT STARTED |
+| Batch 1a (VM-253 · VM-256 · VM-255) | SUITES GREEN; UI test GREEN; the walk READ (verdicts below). F-1a-W1 after THE CONSOLIDATED WINDOW (section below): the defect REPRODUCED red-on-old behaviorally on the original walk road; the pin's own road HOLLOW (leg 2 green on old — the search restores its focus at Back); the tip's floor fix does NOT cure the original road (UIKit's guide carries the stale 52 — the F-1a-W1 NOT KNOWN answered); the floor STAYS as the class guard (U 2/2 and U3 2/2 GREEN, P's floor guards green — no regression); the CURE is an editor-seam line, **VM-281** (Bug · Confirmed · High · Needs Lillian). CLOSED for this run as guarded-not-cured |
+| Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | BUILT (tip `ca9a8d7be`; A-260-3…8) and WINDOW-RUN 2026-11-25: R1 the 13 predicted reds ALL present and `theListNeverMovesWhileTheLineShows` GREEN on old (A-260-5's hollow CONFIRMED); R2 exactly the 5 predicted reds, guard green; the LIVE line walk green at stops 1/2/3/4/6/7 in both passes (clock holds >6 s, ✕ and flick dismiss, leaves-with-its-note, Undo, card above keyboard), stop 5 inconclusive (driver race; semantics pinned green in P). OPEN, owed to this batch's implementer: the leave-note pins' walk step (`back?.accessibilityActivate()` fails in the mounted harness on BOTH trees — the pins never reach their assertion) and `theLineIsACardClearOfTheBarAndTheSides`' mounted lineFrame nil (the live card is RIGHT — capture s1) |
+| Batch 2 (VM-273 · VM-272) | BUILT (code tip `ae12e4276`; A-260-9; VM-280) and WINDOW-RUN 2026-11-25: R red-on-old ESTABLISHED (every predicted red present, note-top doors Study-only exactly as predicted, all guards green); M GREEN (100/100, the 4 declared known). OPEN, owed to this batch's implementer: the field pin — box AND frame measure 39 on the tip (box law ≤38.5, frame law ≥43.5; drawing vs target question, VM-280-adjacent) — and the note top measured 145 vs the pin's 140 cap (the 136 arithmetic missed ~9 pt). Captures banked (18 before + 18 after, `batch-2/`); two throwaway-driver defects (voice carryover — the after run lacks Study shots; a centre-tap fallback opened a full note) — retakes fold into the gate window |
+| Batch 3 (VM-247 · VM-254) | BUILT 2026-11-25 (code tip `54c0d1cc8`, record `5bbff189f`; adjudicated A-260-11); R3 red-on-old ESTABLISHED in the window (all 4 pins red as predicted, 19 issues); P3 + M3 queued as their own window (nov24, at VX-1082's SEAM or after); W3 captures fold into the gate window; U3 already GREEN (2/2, this window) |
+| Batch 4 (VM-259: design → pick → build) | OPTIONS DRAWN (`notes/plans/vm-260/vm-259-options.html`, three live-scrolling frames at batch 2's corrected sizes) — HER PICK at the morning sitting; the build after it |
 | Ladder · gate · walk | NOT STARTED |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
+
+## THE CONSOLIDATED WINDOW — results (2026-11-25, claim `vm-260` 04:55–06:01:14; the GO device `vm260-suites` iOS 26.2, DELETED at close; the UI legs on `vm260-walk`)
+
+One window ran batches 1b and 2's full evidence, F-1a-W1's re-evidence, and (added mid-window; nov24 cut it at the
+boundary when VX-1082's merge-gating window came READY) batch 3's R3. All bundles prebuilt; the window compiled nothing.
+
+| Leg | Result |
+|---|---|
+| M — Mac union, tip bundle `vm260-2-mac` | GREEN: 100/100 in 19 suites, 55.9 s, exactly the 4 declared `IndexTierMetricsTests` known issues |
+| R — batch 2 red-on-old (`f99f20818`) | AS PREDICTED: reds `theChromeSitsOneNotchUnderHerWords`, `theCornersAreTheMacsTwo`, `theDrawingsSitWellInsideTheirTargets` (both voices), `theNoteTopGivesTheScreenBackToWriting` (both voices), `everyDoorOnTheNoteTopAnswersAcrossFortyFour` STUDY ONLY (Terminal green); every guard green |
+| R1 — 1b tranche 1 (`ea3f95831`) | the 13 predicted reds ALL present; `theListNeverMovesWhileTheLineShows` GREEN → **A-260-5's hollow CONFIRMED**; two predicted-green guards (`aLineSaidBeforeTheNoteOpenedOutlivesItsLeaving`, `aRemovalSaidInTheNoteOutlivesItsLeaving`) failed at their shared WALK STEP (`MobileRefusalLeavesItsNoteTests.swift:110` `back?.accessibilityActivate()`, `:115`), never reaching their assertion — harness, owed to 1b's implementer |
+| R2 — VM-277 red-on-old (`c8bfa668f`) | EXACTLY as predicted: the 5 reds, the guard green |
+| R-W1 — the F-1a-W1 pin on old (`c4081441c`) | **PASSED on old — hollow on its road** (the pre-written rule applied): the REVEAL lines show that at Back the search restored its own focus and took the keyboard back, which is not s9's state |
+| THE REPRODUCTION (added) | the ORIGINAL 1a walk road (driver `VM260WalkDriver1a`): OLD app (`vm260-walk1a`) — **s9 REPRODUCED**, the bar's three doors ghosted under the keyboard's glass, the list cut at the hairline beneath it; TIP app (`vm260-walkB`) — **STILL UNDER on the same road**. The F-1a-W1 NOT KNOWN is answered: UIKit's keyboard layout guide carries the stale 52 as well, so the lift-only floor sees no shortfall there. The floor STAYS (class guard; no regression anywhere); the cure is the editor-seam line — **VM-281** filed (Needs Lillian). Shots kept in the window's result bundles (`/tmp/vm260-win/W1aold-shots`, `W1anew-shots` → copied beside the batch-2 captures) |
+| P — the tip (`dae368b4e`), whole phone target, one launch | 1275 tests / 228 suites, 22 issues = the 6 known + 16 unexpected in 7 tests: (1) `theDrawingsSitWellInsideTheirTargets` — the FIELD measures box 39 (law ≤ 38.5) and frame 39 (law ≥ 43.5), both voices (PERF: `field (363.0, 39.0) in (363.0, 39.0)`) — batch 2's implementer owes the reconcile (a drawn 39 vs the designed 36, and where the 44 frame went; VM-280-adjacent); (2) `theNoteTopGivesTheScreenBackToWriting` — chrome measured 145.0 / 144.3 vs the cap 140 (PERF lines in the log; the 136 arithmetic missed ~9 pt) — batch 2's implementer; (3) `theNoteInWriteIsOnThePaper` (source scan) — the Write ground spelling moved; batch 3's ruling ALREADY moved this pin the same night (its P3 proves it); (4) `theLineIsACardClearOfTheBarAndTheSides` — mounted `lineFrame` nil (harness; the LIVE card is right — walk capture s1); (5–7) the leave-note family (`aRefusalRaisedInANoteClearsWhenSheLeavesIt` + the two outlive guards) — all on the `:110` walk step; the LIVE walk proves the behavior (stop 4 green both passes). The F-1a-W1 floor guards rode green (`MobileKeyboardFloorRuleTests` 6, `MobileKeyboardFloorShellTests` 1) |
+| U / U3 — keyboard-reveal, walk device | U (tip bundle `vm260-2-ui`): 2/2 GREEN. U3 (`vm260-3-ui`): 2/2 GREEN |
+| The line walk (driver `VM260WalkDriver1b`, tip app) | both passes: s1 card anatomy RIGHT live (one-line alarm sentence, ›, 44-pt ✕, card clear of sides, above the editor's bar — capture s1); s2 the reason card HOLDS past 6.5 s; s3 ✕ and flick-down both dismiss; s4 a refusal LEAVES WITH ITS NOTE; s6 removal + Undo; s7 the card above the keyboard (line bottom 479 vs keys 583). Stop 5 (the made-not-opened direction) INCONCLUSIVE live — the driver's race lost to the open; the semantics are pinned green in P (`aNoteMadeAfterSheLeftThePageSaysWhereItLanded`). NOTE: both passes ran in Terminal (voice carryover from the capture runs — the driver defect below) |
+| R3 — batch 3 red-on-old (`2e03a6811`) | all 4 pins RED as predicted (19 issues); P3 + M3 cut at nov24's boundary call, re-queued as their own window |
+| Captures | `batch-2/before` (the `vm260-2-rol` app) and `batch-2/after` (the tip app), 18 shots each, named; the line walk's 14 in `batch-1b/`. TWO THROWAWAY-DRIVER DEFECTS, mine: (a) the device keeps the voice between runs, so the AFTER run's "Study" pass ran in Terminal — no Study after-shots; (b) the New Note road's centre-tap fallback opened an existing note, so the after run's refusal-card stop shows a full note (it doubles as a clean Terminal note-top after-frame). The c8 s9-road also never opened the lesson (`typeText` flake — an AutoFill pill ate the search text). RETAKES fold into the gate window's closing walk with the driver fixed (reset the voice at pass start; verify the typed text; verify the opened note is empty) |
+
+Teardown verified at release (nov24's stamp 06:01:14): both devices shut down, `vm260-suites` DELETED, zero booted
+sims, zero Variorum instances. Crash reports in the window by time: `swiftpm-testing-helper` 05:13:41 and 05:14:07
+(during the red legs — expected-red exits), `ListRender` 05:59:30 (during the walk re-runs); none named Variorum.
+
+**What the window leaves OPEN (each owed before the ladder):** the two batch-2 pin reconciles (the field's 39/39,
+the note top's 145); 1b's harness step and the card pin's mounted road; P3 + M3 (queued); the capture retakes at the
+gate. **VM-281** (the keyboard cure, editor seam) and **VM-280** (the field's answering height) wait on her.
+
 
 ## BATCH 1a — record (VM-253 · VM-256 · VM-255; implementer: Opus, 2026-11-25)
 
