@@ -2,7 +2,7 @@
 
 ## 1 · FIRST: the fresh build for your phone (R-260-7)
 
-The app is PRE-BUILT and signed — nothing compiles while you wait. It is the run's code tip **`78ed5b4bb`**
+The app is PRE-BUILT and signed — nothing compiles while you wait. It is the run's code tip **`af449326a`** (rebuilt after batches 3b · 4a · 4b: VM-281, Cancel picking, the slim tops, the note's new top; earlier install: `78ed5b4bb`)
 (rebuilt ~10:5x so it carries the morning's reconciles: batches 1a + 1b + 2 + 3, the keyboard floor, the field
 drawn 36, the note's top at exactly 136, whole-point text-size steps; main merged through PR #28): the new bar,
 the top lines, the message-line card, the whole drawn step-down, the note's top, and Settings ▸ Look
