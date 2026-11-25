@@ -160,6 +160,11 @@ struct NoteTagChips: View {
     /// nothing.
     var baselineProbePrefix: String? = nil
     var baselineProbeSpace: String = ""
+    /// VX-576 (the VX-1036 run, batch 3): how many live notes wear each tag,
+    /// for the popover's most-used-first order — handed by a host that reads
+    /// them (the book's List rows); empty keeps the path order (every other
+    /// caller, byte for byte).
+    var uses: [String: Int] = [:]
 
     @State private var adding = false
     @Environment(\.colorScheme) private var scheme
@@ -182,7 +187,8 @@ struct NoteTagChips: View {
                 onApply: { path in
                     adding = false
                     onApply(path)
-                })
+                },
+                uses: uses)
         }
     }
 
@@ -337,6 +343,8 @@ struct NoteTagsRow: View {
     /// The DEBUG baseline probe, passed through to the chips (rows 10/11).
     var baselineProbePrefix: String? = nil
     var baselineProbeSpace: String = ""
+    /// VX-576: the popover's use counts (`NoteTagChips.uses`); empty by default.
+    var uses: [String: Int] = [:]
 
     /// The chip row's height, RESERVED even when nothing is drawn, so a card
     /// does not jump the moment the pointer arrives (the N40 jumping class:
@@ -352,7 +360,8 @@ struct NoteTagsRow: View {
         onApply: @escaping (String) -> Void, onRemove: @escaping (Tag) -> Void,
         revealsOnHover: Bool = false,
         baselineProbePrefix: String? = nil, baselineProbeSpace: String = "",
-        initiallyHovering: Bool = false
+        initiallyHovering: Bool = false,
+        uses: [String: Int] = [:]
     ) {
         self.tokens = tokens
         self.tags = tags
@@ -362,6 +371,7 @@ struct NoteTagsRow: View {
         self.revealsOnHover = revealsOnHover
         self.baselineProbePrefix = baselineProbePrefix
         self.baselineProbeSpace = baselineProbeSpace
+        self.uses = uses
         _hovering = State(initialValue: initiallyHovering)
     }
 
@@ -400,7 +410,8 @@ struct NoteTagsRow: View {
                 tokens: tokens, tags: tags, allTags: allTags,
                 onApply: onApply, onRemove: onRemove,
                 baselineProbePrefix: baselineProbePrefix,
-                baselineProbeSpace: baselineProbeSpace)
+                baselineProbeSpace: baselineProbeSpace,
+                uses: uses)
         }
     }
 }
@@ -422,6 +433,9 @@ struct TagChipAdder: View {
     let allTags: [Tag]
     let applied: Set<String>
     let onApply: (String) -> Void
+    /// VX-576: the use counts that order the suggestions (empty — the
+    /// default — keeps the path order).
+    var uses: [String: Int] = [:]
 
     @State private var typed = ""
     @FocusState private var focused: Bool
@@ -430,7 +444,7 @@ struct TagChipAdder: View {
     /// already-applied removed, capped so the popover never grows into a
     /// scroll of a whole taxonomy.
     var suggestions: [Tag] {
-        Self.suggestions(allTags, typed: typed, applied: applied)
+        Self.suggestions(allTags, typed: typed, applied: applied, uses: uses)
     }
 
     /// Pure, so the matching rule is pinnable without a popover.

@@ -26,6 +26,10 @@
 //  title, the day, the chips and their ＋, the badge, the right-aligned
 //  stamp, the pick's wash and border) is the row's own content, unchanged.
 //
+//  (The VX-1036 run, batch 3: this file moved to the shared home with the
+//  note row it frames — `CatalogNoteLine.swift` — when the book's List mode,
+//  VX-1084, began drawing the same rows; every name kept.)
+//
 
 import AppKit
 import SwiftUI
