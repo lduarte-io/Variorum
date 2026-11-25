@@ -644,9 +644,18 @@ struct BookView: View {
 
     /// The book's answer sheet — the passages land through the shell's road.
     private var searchSheet: some View {
-        BookSearchSheet(tokens: tokens, model: bookSearch) { postID, blockID, find in
-            onOpenSearchHit?(BookOpenDoor.Landing(postID: postID, blockID: blockID, find: find))
-        }
+        BookSearchSheet(
+            tokens: tokens, model: bookSearch,
+            onOpen: { postID, blockID, find in
+                onOpenSearchHit?(BookOpenDoor.Landing(postID: postID, blockID: blockID, find: find))
+            },
+            // VX-1074 (D-1082-S1): a chapter of this book found by its name —
+            // the field closes (the answer was drawn OVER the mode) and the
+            // book takes its own chapter landing.
+            onOpenChapter: { sectionID in
+                bookSearch.close()
+                landChapter(sectionID)
+            })
     }
 
     /// **Drawn OVER the mode's body while the field holds words** — an
@@ -1471,9 +1480,17 @@ struct BookView: View {
     /// chapter row's own surface) and its one chapter-landing door.
     private func takeChapterRequest() {
         guard let revealSectionID else { return }
-        switchMode(to: .outline)
-        model.requestChapterReveal(revealSectionID)
+        landChapter(revealSectionID)
         onRevealSectionConsumed?()
+    }
+
+    /// **The book's chapter landing** — Outline (her navigator's chapter
+    /// row's own surface) and its one chapter-landing door. The shell's
+    /// request takes it (above), and since VX-1074 (D-1082-S1) so does a
+    /// chapter row in this book's own search answer.
+    private func landChapter(_ sectionID: String) {
+        switchMode(to: .outline)
+        model.requestChapterReveal(sectionID)
     }
 
     // MARK: - VX-553 — the book foot's doors, one per case

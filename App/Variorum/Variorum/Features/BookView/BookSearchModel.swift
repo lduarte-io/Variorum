@@ -59,6 +59,12 @@ final class BookSearchModel {
     /// The words as typed, the `#tags` aside — the band's echo.
     private(set) var words = ""
     private(set) var counts: SearchCounts?
+    /// **The book's own chapters found by their names** (VX-1074, D-1082-S1):
+    /// listed above the note groups, best first, each one click to the
+    /// Outline at it. The engine always FOUND them (they count among the
+    /// composer's `books`), but the band said "nothing in this book matches"
+    /// over them and the sheet drew none.
+    private(set) var chapters: [SearchChapterHit] = []
     private(set) var groups: [SearchGroup] = []
     private(set) var next: SearchComposer.GroupCursor?
     private(set) var loadingMore = false
@@ -91,6 +97,17 @@ final class BookSearchModel {
     var isAnswering: Bool { question.map(SearchComposer.asksWords) ?? false }
 
     var hasMoreGroups: Bool { next != nil }
+
+    /// **The band's counts, as it says them** (VX-1074, D-1082-S1): the
+    /// chapters the sheet lists, then the passages and notes — "1 chapter ·
+    /// 14 passages in 5 notes" — so the band counts what the sheet lists and
+    /// never says "nothing in this book matches" over a found chapter.
+    var bandCounts: String {
+        guard let counts else {
+            return chapters.isEmpty ? BookSearchCopy.nothing : BookSearchCopy.chapterCount(chapters.count)
+        }
+        return BookSearchCopy.counts(counts.kinds(visibility), chapters: chapters.count)
+    }
 
     /// The archived chip is offered where it can act: the facet is on, or
     /// the archive holds matches it would add (P-2).
@@ -140,6 +157,7 @@ final class BookSearchModel {
 
     private func clearAnswer() {
         counts = nil
+        chapters = []
         groups = []
         next = nil
         loadingMore = false
@@ -171,6 +189,7 @@ final class BookSearchModel {
             question = parsed.query
             words = parsed.words
             counts = answer.counts
+            chapters = answer.chapters
             groups = answer.page.groups
             next = answer.page.next
             loadingMore = false
@@ -258,15 +277,44 @@ final class BookSearchModel {
         SearchScope(wingID: try Queries.reading(db, id: readingID)?.wingId ?? "", within: .book(id: readingID))
     }
 
-    /// One read of the answer: the band's counts and a page of groups.
+    /// One read of the answer: the band's counts, the book's own chapters
+    /// found by name (VX-1074, D-1082-S1), and a page of groups.
     nonisolated static func answer(
         _ db: Database, query: SearchQuery, readingID: String, after cursor: SearchComposer.GroupCursor?
-    ) throws -> (counts: SearchCounts?, page: SearchGroupPage) {
+    ) throws -> (counts: SearchCounts?, chapters: [SearchChapterHit], page: SearchGroupPage) {
         let scope = try scope(db, readingID: readingID)
+        let found = try chapters(db, query: query, scope: scope)
         return (try Queries.searchCounts(db, query: query, scope: scope),
+                found,
                 try Queries.searchGroups(
                     db, query: query, scope: scope, after: cursor,
                     limit: groupPageSize, perGroup: linesPerGroup))
+    }
+
+    /// **The book's own chapters its words find by name** (VX-1074,
+    /// D-1082-S1): the one composer's passages, under the book's scope (its
+    /// own chapters — `d.reading_id = ?`; a gathering has none), narrowed to
+    /// chapter docs, best first, each once — then their exact names
+    /// (`Queries.searchChapterHits`). The book's OWN name is no row (searching
+    /// a book for its own name finds nothing in it, as before). P1: ∝ the
+    /// book's chapters that match.
+    nonisolated static func chapters(
+        _ db: Database, query: SearchQuery, scope: SearchScope
+    ) throws -> [SearchChapterHit] {
+        var asked = query
+        let chapter: SearchFilter = .docKind(.chapter)
+        asked.filter = asked.filter.map { .all([$0, chapter]) } ?? chapter
+        var ids: [String] = []
+        var seen: Set<String> = []
+        var cursor: SearchComposer.Cursor?
+        repeat {
+            let page = try Queries.searchPassages(db, query: asked, scope: scope, after: cursor, limit: 200)
+            for passage in page.passages where passage.kind == .chapter && seen.insert(passage.sourceID).inserted {
+                ids.append(passage.sourceID)
+            }
+            cursor = page.next
+        } while cursor != nil
+        return try Queries.searchChapterHits(db, ids: ids)
     }
 
     nonisolated static func page(

@@ -33,10 +33,25 @@ nonisolated enum BookSearchCopy {
     /// **The honest counts** at book scale — "14 passages in 5 notes"
     /// (the mockup's option-2 line, "14 passages in this book", with the
     /// notes the passages group under). PROVISIONAL P-13o-U3-6.
-    static func counts(_ kinds: SearchCounts.Kinds) -> String {
-        if kinds.passages > 0 { return passages(kinds.passages) + " in " + notes(kinds.notes) }
-        return kinds.notes > 0 ? notes(kinds.notes) : nothing
+    ///
+    /// **VX-1074 (D-1082-S1):** the book's own chapters found by name lead,
+    /// as their own kind — "1 chapter · 14 passages in 5 notes" (the chapter
+    /// word PROVISIONAL, for her wording pass); `chapters` 0 says exactly
+    /// what it always said.
+    static func counts(_ kinds: SearchCounts.Kinds, chapters: Int = 0) -> String {
+        var parts: [String] = []
+        if chapters > 0 { parts.append(chapterCount(chapters)) }
+        if kinds.passages > 0 {
+            parts.append(passages(kinds.passages) + " in " + notes(kinds.notes))
+        } else if kinds.notes > 0 {
+            parts.append(notes(kinds.notes))
+        }
+        return parts.isEmpty ? nothing : parts.joined(separator: " \u{00B7} ")
     }
+
+    /// "1 chapter" · "2 chapters" — the book's own chapters its words found
+    /// by name (VX-1074, D-1082-S1; PROVISIONAL wording).
+    static func chapterCount(_ n: Int) -> String { "\(n) \(n == 1 ? "chapter" : "chapters")" }
 
     /// "1 passage" · "7 passages" (a group head's own count, too).
     static func passages(_ n: Int) -> String { "\(n) \(n == 1 ? "passage" : "passages")" }
@@ -102,6 +117,9 @@ struct BookSearchSheet: View {
     let model: BookSearchModel
     /// A passage (or a note's head) lands — the shell's road (D6's).
     let onOpen: (_ postID: String, _ blockID: String?, _ find: EditorFindSeed?) -> Void
+    /// **VX-1074 (D-1082-S1) — a chapter row lands**: the book closes the
+    /// field and takes its own chapter road (Outline, the chapter at the top).
+    var onOpenChapter: (_ sectionID: String) -> Void = { _ in }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -109,6 +127,11 @@ struct BookSearchSheet: View {
             Divider().overlay(tokens.line)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
+                    // VX-1074 (D-1082-S1): the book's own chapters found by
+                    // name, above the note groups.
+                    ForEach(model.chapters) { chapter in
+                        chapterRow(chapter)
+                    }
                     ForEach(model.groups) { group in
                         groupView(group)
                     }
@@ -120,7 +143,7 @@ struct BookSearchSheet: View {
                             .padding(.horizontal, 24)
                             .onAppear { Task { await model.loadMoreGroups() } }
                     }
-                    if model.groups.isEmpty {
+                    if model.groups.isEmpty, model.chapters.isEmpty {
                         // R-980-5: the one decision every answer sheet reads.
                         Text(tokens.chromeLabel(SearchAnswerCopy.emptyAnswer(
                             for: model.question, otherwise: BookSearchCopy.nothingRow)))
@@ -161,9 +184,9 @@ struct BookSearchSheet: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
-            Text(tokens.chromeLabel("\u{2014} " + (model.counts.map {
-                BookSearchCopy.counts($0.kinds(model.visibility))
-            } ?? BookSearchCopy.nothing)))
+            // VX-1074 (D-1082-S1): the band counts what the sheet lists — the
+            // book's own chapters too (`BookSearchModel.bandCounts`).
+            Text(tokens.chromeLabel("\u{2014} " + model.bandCounts))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
@@ -188,6 +211,25 @@ struct BookSearchSheet: View {
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(tokens.wash.opacity(0.5))
+    }
+
+    /// **A chapter of this book found by its name** (VX-1074, D-1082-S1): the
+    /// Library's chapter line without "in ‹book›" (it is this book); one
+    /// click closes the field and lands the Outline at the chapter.
+    private func chapterRow(_ chapter: SearchChapterHit) -> some View {
+        let kind = SearchAnswerCopy.kindWord(.chapter) ?? ""
+        let detail = chapter.isArchived ? "\(kind) \u{00B7} \(SearchAnswerCopy.archivedMark)" : kind
+        return CatalogChapterLine(tokens: tokens, name: chapter.name, detail: detail)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture { onOpenChapter(chapter.sectionID) }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 8)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(tokens.line.opacity(0.5)).frame(height: 1).padding(.horizontal, 24)
+            }
     }
 
     @ViewBuilder

@@ -171,11 +171,9 @@ nonisolated enum LibrarySearchCopy {
         (detail.map { $0 + " \u{00B7} " } ?? "") + archivedMark
     }
 
-    /// **A chapter row's book** (VX-1074 — PROVISIONAL A-1082-2's words):
-    /// "in Video ideas", beside the chapter's name and its kind word
-    /// ("chapter" — `SearchAnswerCopy.kindWord(.chapter)`, the passage line's
-    /// own).
-    static func chapterBook(_ book: String) -> String { "in \(book)" }
+    /// A chapter row's book ("in Video ideas" — VX-1074); its home is
+    /// `SearchAnswerCopy` since the book's own sheet shares the line.
+    static func chapterBook(_ book: String) -> String { SearchAnswerCopy.chapterBook(book) }
 
     static func archivedFoot(_ places: Int) -> String { SearchAnswerCopy.archivedFoot(places) }
     static var showArchived: String { SearchAnswerCopy.showArchived }

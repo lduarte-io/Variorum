@@ -1704,47 +1704,9 @@ struct CatalogBookLine: View {
     }
 }
 
-/// **VX-1074 — a CHAPTER row's line** in the answer's Books section: the
-/// chapter's name · its kind word · "in ‹book›", on ONE text baseline (the
-/// book line's own grammar). The name sits on the book titles' column: the
-/// book line's glyph slot is kept, empty, so a chapter row never reads as a
-/// book row and the names still align.
-struct CatalogChapterLine: View {
-    let tokens: VoiceTokens
-    let name: String
-    /// The kind word ("chapter", or "chapter · archived" under the facet).
-    let detail: String
-    let book: String
-
-    /// The line's words as it reads them (the DEBUG oracle's record and the
-    /// pins' oracle) — her name as stored, the chrome in the voice's case.
-    static func words(tokens: VoiceTokens, name: String, detail: String, book: String) -> String {
-        "\(name) \u{00B7} \(tokens.chromeLabel(detail)) \u{00B7} \(tokens.chromeLabel(LibrarySearchCopy.chapterBook(book)))"
-    }
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            // The book line's glyph slot, empty: the name on the titles' column.
-            Text(Image(systemName: "book"))
-                .font(tokens.body)
-                .hidden()
-            Text(name)
-                .font(tokens.body)
-                .foregroundStyle(tokens.ink)
-                .lineLimit(1)
-            Text(tokens.chromeLabel(detail))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .lineLimit(1)
-                .fixedSize()
-            Text(tokens.chromeLabel(LibrarySearchCopy.chapterBook(book)))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .lineLimit(1)
-            Spacer(minLength: 0)
-        }
-    }
-}
+// (VX-1074, D-1082-S1: `CatalogChapterLine` MOVED to the shared home,
+// `Core/Views/SearchAnswerFaces.swift` — the book's own answer sheet is its
+// second consumer, CLAUDE.md's shared-home rule; name preserved.)
 
 /// **A note row's line** — title · date · the tag cards and their ＋ — on
 /// ONE text baseline. Her report (image 4): *"the tags are also misaligned

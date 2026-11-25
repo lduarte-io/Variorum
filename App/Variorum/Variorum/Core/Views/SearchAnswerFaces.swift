@@ -43,6 +43,12 @@ nonisolated enum SearchAnswerCopy {
         "\u{201C}\(words)\u{201D}"
     }
 
+    /// **A chapter row's book** (VX-1074 — PROVISIONAL A-1082-2's words):
+    /// "in Video ideas", on a Library chapter row beside the chapter's name
+    /// and its kind word ("chapter" — `kindWord(.chapter)`). A book's own
+    /// answer names no book (it is this one).
+    static func chapterBook(_ book: String) -> String { "in \(book)" }
+
     /// "all N ›" — the group's whole road (R-13o-9).
     static func allLines(_ n: Int) -> String { "all \(n) \u{203A}" }
     /// The open group's road closed again.
@@ -236,6 +242,58 @@ struct LibrarySearchChip: View {
             } else {
                 face
             }
+        }
+    }
+}
+
+/// **VX-1074 — a CHAPTER row's line**: the chapter's name · its kind word ·
+/// "in ‹book›", on ONE text baseline (the book line's own grammar). In the
+/// Library's Books section (`book` given) the name sits on the book titles'
+/// column — the book line's glyph slot kept, empty, so a chapter row never
+/// reads as a book row and the names still align. In a book's OWN answer
+/// (`book` nil — D-1082-S1) there is no book to name and no book row to align
+/// with: the name stands where the note groups' heads stand. Moved here from
+/// `LibraryCatalogView.swift` (the book's sheet is its second consumer).
+struct CatalogChapterLine: View {
+    let tokens: VoiceTokens
+    let name: String
+    /// The kind word ("chapter", or "chapter · archived" under the facet).
+    let detail: String
+    /// The book it is in — nil inside that book's own answer.
+    var book: String? = nil
+
+    /// The line's words as it reads them (the DEBUG oracle's record and the
+    /// pins' oracle) — her name as stored, the chrome in the voice's case.
+    static func words(tokens: VoiceTokens, name: String, detail: String, book: String?) -> String {
+        let head = "\(name) \u{00B7} \(tokens.chromeLabel(detail))"
+        guard let book else { return head }
+        return head + " \u{00B7} \(tokens.chromeLabel(SearchAnswerCopy.chapterBook(book)))"
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            if book != nil {
+                // The book line's glyph slot, empty: the name on the titles' column.
+                Text(Image(systemName: "book"))
+                    .font(tokens.body)
+                    .hidden()
+            }
+            Text(name)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(1)
+            Text(tokens.chromeLabel(detail))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .fixedSize()
+            if let book {
+                Text(tokens.chromeLabel(SearchAnswerCopy.chapterBook(book)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
         }
     }
 }
