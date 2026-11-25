@@ -161,6 +161,8 @@ struct BookView: View {
     /// window's notes' pills and the "+" field. Its own model (P-9).
     /// Injectable for `model`'s reason (a pin drives `adopt` by hand).
     @State private var cardTags: BookCardTagsModel
+    /// VX-1080 (T-2) — the book's one title arbiter (P-9, its own model).
+    @State private var titleTicker = BookTitleTickerModel()
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -3152,7 +3154,9 @@ struct BookView: View {
             // VX-802: the note-title menu's asks and roads.
             noteDoors: noteDoors, noteRoads: noteRoads,
             // VX-1038: the header's pills and "+".
-            tags: cardTags)
+            tags: cardTags,
+            // VX-1080: which one long title may move.
+            ticker: titleTicker)
     }
 }
 
@@ -3971,6 +3975,9 @@ private struct OutlinePostRow: View {
     /// VX-1038 (T-1/T-3): the book's tags — the header's pills and "+", drawn
     /// while the book's switch shows tags (nil: a harness mount, no pills).
     let tags: BookCardTagsModel?
+    /// VX-1080 (T-2): the book's one title arbiter — which ONE long title may
+    /// move (nil: a harness mount; titles rest).
+    let ticker: BookTitleTickerModel?
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
@@ -3979,7 +3986,8 @@ private struct OutlinePostRow: View {
         onOpenInWrite: @escaping (String) -> Void = { _ in },
         noteDoors: BookNoteTitleDoors = BookNoteTitleDoors(),
         noteRoads: BookNoteRoads = BookNoteRoads(),
-        tags: BookCardTagsModel? = nil
+        tags: BookCardTagsModel? = nil,
+        ticker: BookTitleTickerModel? = nil
     ) {
         self.session = session
         self.model = model
@@ -3992,6 +4000,7 @@ private struct OutlinePostRow: View {
         self.noteDoors = noteDoors
         self.noteRoads = noteRoads
         self.tags = tags
+        self.ticker = ticker
     }
 
     /// VX-1038 (T-1): where the pills' own row starts — the title's leading
@@ -4271,12 +4280,13 @@ private struct OutlinePostRow: View {
                     tokens: tokens, folded: false, help: "Collapse this note back to its card",
                     probeKey: "header-\(entry.postID)"
                 ) { model.collapse(entry.postID) }
-                Text(outlineEntryTitle(entry))
+                // VX-1080 (T-2 / R-1036-35): one line, "…" at rest; the radio
+                // ticker under the pointer or on the live note, one at a time.
+                BookNoteTitle(
+                    title: outlineEntryTitle(entry), postID: entry.postID,
+                    ticker: ticker, live: model.liveFocusedPostID)
                     .font(tokens.heading)
                     .foregroundStyle(tokens.ink)
-                    // VX-1080 (T-2): one line; the title gives way first.
-                    .lineLimit(1)
-                    .truncationMode(.tail)
                 if let date = entry.entryDate {
                     Text(date)
                         .font(tokens.small)
@@ -4301,6 +4311,8 @@ private struct OutlinePostRow: View {
             headerPills
         }
         .padding(.top, 10)
+        // VX-1080: the pointer on the header claims the ticker for its title.
+        .onHover { ticker?.pointer(entry.postID, isOn: $0) }
         // (The `page-<id>` landing anchor moved to the ROW, at the lazy
         // stack's level — `BookView.outlineAnchor`; the correction round.)
         // VX-802 (A-878-1): the note-title menu.
@@ -4343,12 +4355,13 @@ private struct OutlinePostRow: View {
                             help: "Unfold this note in place — write in it right here",
                             probeKey: "card-\(entry.postID)"
                         ) { model.expand(entry.postID) }
-                        Text(outlineEntryTitle(entry))
+                        // VX-1080 (T-2 / R-1036-35): one line, "…" at rest;
+                        // the ticker under the pointer, one title at a time.
+                        BookNoteTitle(
+                            title: outlineEntryTitle(entry), postID: entry.postID,
+                            ticker: ticker, live: model.liveFocusedPostID)
                             .font(tokens.body.weight(.semibold))
                             .foregroundStyle(tokens.ink)
-                            // VX-1080 (T-2): one line; the title gives way first.
-                            .lineLimit(1)
-                            .truncationMode(.tail)
                         if let date = entry.entryDate {
                             Text(date)
                                 .font(tokens.small)
@@ -4395,6 +4408,8 @@ private struct OutlinePostRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // VX-1080: the pointer on the card claims the ticker for its title.
+        .onHover { ticker?.pointer(entry.postID, isOn: $0) }
         // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
         .help(OwnershipBadgeCopy.rowHelp(
             "Click to open this note in the full editor; ▸ unfolds it here", badge: badge))

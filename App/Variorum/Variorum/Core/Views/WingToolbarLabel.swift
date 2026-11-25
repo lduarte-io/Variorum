@@ -117,10 +117,23 @@ nonisolated enum WingMarqueePlan: Equatable, Sendable {
     /// Sub-point differences are measurement noise, never an overflow.
     static let tolerance: CGFloat = 0.5
 
-    static func plan(words: CGFloat, viewport: CGFloat, reduceMotion: Bool) -> WingMarqueePlan {
-        guard !reduceMotion, viewport > 0, words > viewport + tolerance else { return .still }
+    /// `active` (VX-1080, the book title's arm — R-1036-35): whether these
+    /// words may move NOW. The wing label always may (the default); a book's
+    /// title only under the pointer or on the live note, one at a time
+    /// (`BookTitleTicker`). Inactive is still — no clock.
+    static func plan(
+        words: CGFloat, viewport: CGFloat, reduceMotion: Bool, active: Bool = true
+    ) -> WingMarqueePlan {
+        guard active, !reduceMotion, viewport > 0, words > viewport + tolerance else { return .still }
         let travel = words + gap
         return .ticker(Ticker(travel: travel, duration: Double(travel / speed), rest: rest))
+    }
+
+    /// Whether words of this width overflow this viewport (the plan's own
+    /// test, without the motion gates) — what a book title reports so the
+    /// pointer's claim goes only to a title that would move (VX-1080).
+    static func overflows(words: CGFloat, viewport: CGFloat) -> Bool {
+        viewport > 0 && words > viewport + tolerance
     }
 
     /// Whether this plan runs a loop at all — false is "no standing timer on
@@ -144,17 +157,90 @@ nonisolated enum WingMarqueePlan: Equatable, Sendable {
 struct WingMarquee: View {
     /// The words as drawn (the voice's chrome case already applied).
     let words: String
-    /// The widest the words may draw before they scroll.
+    /// The widest the words may draw before they scroll. (The `.ellipsis`
+    /// rest ignores it: its width is what the layout proposes.)
     let maxWidth: CGFloat
+    /// **VX-1080 (her R-1036-35) — how the words REST.** `.clip` is the wing
+    /// label's (a hard clip at the space's edge, the ellipsis declined there —
+    /// P-828-2 (a)); `.ellipsis` is a book note title's: at rest ONE line cut
+    /// with "…", flexible to the width its row proposes, and the ticker only
+    /// while `active` (*"only under the pointer and on the live note,
+    /// otherwise just ... - and only one at a time scrolling"*). One ticker,
+    /// one plan, one loop — the difference is this parameter, never a copy.
+    var resting: Rest = .clip
+    /// Whether the words may move now (the title's arbiter decides; the wing
+    /// label always may).
+    var active = true
+    /// Reports whether the words overflow their width (the `.ellipsis` rest
+    /// only) — so the pointer's claim goes to a title that would move.
+    var onOverflow: ((Bool) -> Void)? = nil
+
+    enum Rest: Equatable, Sendable { case clip, ellipsis }
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The words' natural width in the environment's face (read, not guessed).
     @State private var wordsWidth: CGFloat?
     @State private var offset: CGFloat = 0
+    /// The `.ellipsis` rest's laid-out width — its viewport, read.
+    @State private var shownWidth: CGFloat?
 
     var body: some View {
+        switch resting {
+        case .clip: clipBody
+        case .ellipsis: ellipsisBody
+        }
+    }
+
+    /// **The title's arm** (VX-1080): the resting words are the layout
+    /// element — one line, "…" at the cut, as wide as the row lets them —
+    /// and while the plan ticks they hide under the ticker, which draws in
+    /// exactly their frame and clips there.
+    private var ellipsisBody: some View {
+        let viewport = shownWidth ?? 0
         let plan = WingMarqueePlan.plan(
-            words: wordsWidth ?? 0, viewport: maxWidth, reduceMotion: reduceMotion)
+            words: wordsWidth ?? 0, viewport: viewport, reduceMotion: reduceMotion, active: active)
+        return Text(words)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .opacity(plan.loops ? 0 : 1)
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { width in
+                if shownWidth != width { shownWidth = width }
+            }
+            .background(alignment: .leading) {
+                Text(words)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .hidden()
+                    .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { width in
+                        if wordsWidth != width { wordsWidth = width }
+                    }
+            }
+            .overlay(alignment: .leading) {
+                if plan.loops {
+                    HStack(spacing: WingMarqueePlan.gap) {
+                        Text(words).lineLimit(1).fixedSize()
+                        Text(words).lineLimit(1).fixedSize()
+                    }
+                    .offset(x: offset)
+                    .frame(width: viewport, alignment: .leading)
+                    .clipped()
+                }
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(words)
+            .onChange(of: WingMarqueePlan.overflows(words: wordsWidth ?? 0, viewport: viewport), initial: true) { _, now in
+                onOverflow?(now)
+            }
+            .task(id: WingMarqueePlan.LoopKey(words: words, space: Int(viewport.rounded()), plan: plan)) {
+                await run(plan)
+            }
+    }
+
+    /// The wing label's arm — unchanged in every line (P-828-2 (a)).
+    @ViewBuilder
+    private var clipBody: some View {
+        let plan = WingMarqueePlan.plan(
+            words: wordsWidth ?? 0, viewport: maxWidth, reduceMotion: reduceMotion, active: active)
         let viewport = max(min(wordsWidth ?? maxWidth, maxWidth), 0)
         HStack(spacing: WingMarqueePlan.gap) {
             Text(words).lineLimit(1).fixedSize()
