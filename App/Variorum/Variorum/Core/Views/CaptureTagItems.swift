@@ -32,6 +32,16 @@ nonisolated enum CaptureTagCopy {
         "Tag this note \u{2014} pick a tag or type one (\u{201C}/\u{201D} nests: life/goals); "
         + "it goes on when the note is filed"
     static let plusAccessibility = "Add a tag"
+
+    /// **A pick's hover words** (the VX-1036 ladder's R2-3): a pick is on no
+    /// note until the filing, so its card never says "Tagged" and its × never
+    /// takes a tag "off" a note — the words a filed note's card says
+    /// (`TagChipHelp.filed`). True of a pick, before and as it is filed.
+    static func pickHelp(_ path: String) -> TagChipHelp {
+        TagChipHelp(
+            card: "\u{201C}\(path)\u{201D} goes on when the note is filed",
+            remove: "Leave \u{201C}\(path)\u{201D} off this note")
+    }
 }
 
 /// **The picked tags' pills, then the ＋ — or, while it is open, the field in
@@ -69,7 +79,10 @@ struct CaptureTagItems: View {
 
     var body: some View {
         ForEach(picks, id: \.self) { path in
-            TagChipCard(tokens: tokens, tag: Self.pill(path), onRemove: { onRemove($0.path) })
+            // R2-3: a pick's own words — it is on no note yet.
+            TagChipCard(
+                tokens: tokens, tag: Self.pill(path), onRemove: { onRemove($0.path) },
+                help: CaptureTagCopy.pickHelp(path))
         }
         if fieldOpen {
             TagInlineField(

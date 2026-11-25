@@ -247,6 +247,10 @@ struct TagChipCard: View {
     /// Rows 10/11's DEBUG baseline probe (nil probes nothing).
     var baselineProbeID: String? = nil
     var baselineProbeSpace: String = ""
+    /// The card's hover words; nil is a FILED note's (`TagChipHelp.filed`).
+    /// A capture pick, on no note until the filing, says its own (the VX-1036
+    /// ladder's R2-3 — `CaptureTagCopy.pickHelp`).
+    var help: TagChipHelp? = nil
 
     @Environment(\.colorScheme) private var scheme
     /// VX-1081: the label's font, resolved where it is drawn — its x-height
@@ -256,6 +260,7 @@ struct TagChipCard: View {
     var body: some View {
         let tint = TagChipColor.color(forPath: tag.path, dark: scheme == .dark)
         let labelXHeight = (tokens.small.resolve(in: fontContext).ctFont as NSFont).xHeight
+        let words = help ?? .filed(tag.path)
         // Rows 10/11: the card's stack aligns on the FIRST TEXT BASELINE,
         // so the baseline a row aligns to IS the chip text's.
         return HStack(alignment: .firstTextBaseline, spacing: 3) {
@@ -286,7 +291,7 @@ struct TagChipCard: View {
             .alignmentGuide(.firstTextBaseline) { d in
                 TagChipCross.baseline(height: d.height, labelXHeight: labelXHeight)
             }
-            .help("Take “\(tag.path)” off this note")
+            .help(words.remove)
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 1)
@@ -296,7 +301,26 @@ struct TagChipCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(tint.opacity(0.45), lineWidth: 1))
-        .help("Tagged \(tag.path)")
+        .help(words.card)
+    }
+}
+
+/// **A tag card's hover words** (public copy, sentence case): the card's own
+/// and its ×'s. A FILED note's by default — the card says the note is tagged,
+/// the × takes the tag off it. The VX-1036 ladder's R2-3: a capture pick is on
+/// no note until the filing, so its card says its own words
+/// (`CaptureTagCopy.pickHelp`) rather than claim a tag that is not there yet.
+nonisolated struct TagChipHelp: Equatable, Sendable {
+    /// The card's hover.
+    var card: String
+    /// The ×'s hover.
+    var remove: String
+
+    /// A tag a note wears — the words every filed card has always said.
+    static func filed(_ path: String) -> TagChipHelp {
+        TagChipHelp(
+            card: "Tagged \(path)",
+            remove: "Take \u{201C}\(path)\u{201D} off this note")
     }
 }
 
