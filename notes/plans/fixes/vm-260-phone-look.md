@@ -328,7 +328,8 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 | 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (this commit) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
 | 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (this commit) — phone `build-for-testing` green; the moved pins PENDING |
 | 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | DONE (this commit) — phone `build-for-testing` green; the suites PENDING |
-| 6. Phone + Mac `build-for-testing` green; READY-FOR-TESTS | NOT-STARTED |
+| 6a. The red-on-old trees built headless (no stage), each into its own DerivedData, so the stage window only runs tests: VM-253 at `b05c45bb0` → `DerivedData/vm260-1a-rol253`; VM-256 at `9edeb6993` → `…-rol256`; VM-255 at `8d7fc32cb` + the two pin files from the tip → `…-rol255`. **While IN-PROGRESS the worktree may be DETACHED at one of those commits — the way back: delete any untracked `MobileTopLineTests.swift` / `MobileSettingsGearTests.swift` in `VariorumMobileTests/`, then `git switch vm-260-phone-look`; nothing uncommitted is at risk (every piece is committed).** | IN-PROGRESS |
+| 6. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | NOT-STARTED |
 | 7. The suites (each pin red on old by behavioural revert, then the batch's suites green) | PENDING (needs the stage GO) |
 | 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (needs the stage GO) |
 
