@@ -1592,6 +1592,19 @@ The split, from the two voices' difference:
   is relative (the tapped line rises above the keyboard bar), so GREEN is predicted.
 - The VM-272 "as built" line above ("158 → 136") reads, measured: **167 → 136** at one chip row.
 
+**The reconcile's re-evidence (the next window — P3 + M3's or the gate's; nothing builds in it):** bundles on code tip
+`2d4670d18`, each an APFS clone of batch 3's, incremental, `nice -n 15`, all `TEST BUILD SUCCEEDED` — phone
+`DerivedData/vm260-2r` (it carries batch 3's code, so it can serve P3 as well), Mac `DerivedData/vm260-2r-mac`, the UI
+test `DerivedData/vm260-2r-ui`.
+- `-only-testing:VariorumMobileTests/MobileDrawnStepDownRenderedTests -only-testing:VariorumMobileTests/MobileNoteTopTests
+  -only-testing:VariorumMobileTests/MobilePhoneControlsTests` — predicted ALL GREEN; read the two `PERF[sim]` lines into
+  this block (the field's box ≈ 37.3 in a 44 frame with its own view's size — VM-280's datapoint; the note top 136.0
+  in both voices). Or the whole phone target on `vm260-2r`, which holds them.
+- The keyboard-reveal UI test on `vm260-2r-ui` (`-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, the
+  walk device) — predicted GREEN.
+- The Mac legs on `vm260-2r-mac` (R1's constant is in `Shared/Theme/PhoneControls.swift`, which the Mac compiles) —
+  predicted GREEN as M was (the 4 declared `IndexTierMetricsTests` known issues).
+
 ## BATCH 3 — record (VM-247 · VM-254; implementer: Opus, a fresh session, 2026-11-25)
 
 **What this batch did NOT do (kept current):** NO suite has run — the stage is coordinated above this session, so every
