@@ -2007,8 +2007,18 @@ struct BookView: View {
         // the landing: it is the closure's own holder.
         let box = landingBox, model = model, structure = structure, authority = landing
         let session = session
+        // VX-96: a landing on ANOTHER row supersedes the travel — the row the
+        // reveal was taking her to is no longer where the page is going.
+        if let travel = model.travelingTo, BookOutlineRows.Row.noteAnchor(travel) != anchorID {
+            model.travelEnded()
+        }
         authority.onFinish = { [weak authority] ended, outcome in
             guard let authority else { return }
+            // VX-96: the travelling note's landing ended — settled, given up,
+            // or handed over to her scroll (the authority's three moments).
+            if let travel = model.travelingTo, BookOutlineRows.Row.noteAnchor(travel) == ended {
+                model.travelEnded()
+            }
             Self.deriveViewedPair(box: box, landing: authority, model: model, structure: structure)
             Self.finishBlockHome(box: box, landing: authority, session: session, ended: ended, outcome: outcome)
         }
@@ -2612,6 +2622,10 @@ struct BookView: View {
             // own act, never by the reveal.
             .onAppear {
                 landOutlineReveal(proxy)
+                // VX-96: an Outline arriving with nothing to land and nothing
+                // parked holds no travel (another mode's surface took the
+                // request and left the travel behind).
+                if model.pendingReveal == nil, !landing.isPending { model.travelEnded() }
                 // VX-562: the first post-layout pass derives what the page
                 // shows even where no row reports (an empty book) — the
                 // rows' own first reports queue the same turn's derivation.
@@ -2627,6 +2641,9 @@ struct BookView: View {
             // authority's own rule. Pinned: `OutlineLandingTeardownTests`.
             .onDisappear {
                 landing.end()
+                // VX-96: the travel dies with the landing (`end()` is silent —
+                // no `onFinish` to end it).
+                model.travelEnded()
                 // VX-562: the page leaves, and with it what it was showing.
                 forgetViewedPair()
             }
@@ -2758,7 +2775,10 @@ struct BookView: View {
         }
         guard let postID = model.pendingReveal else { return }
         guard model.entries.contains(where: { $0.postID == postID }) else {
-            if !model.entries.isEmpty { model.consumeReveal() }
+            if !model.entries.isEmpty {
+                model.consumeReveal()
+                model.travelEnded()   // VX-96: a foreign reveal travels nowhere
+            }
             return
         }
         // VX-680: an Index → Outline click-over parked her block beside the

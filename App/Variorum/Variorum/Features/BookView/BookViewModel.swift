@@ -691,8 +691,17 @@ final class BookViewModel {
     /// calm. Such a row keeps the shipped behavior (placeholder until
     /// near); her steady-state store has a persisted record for every
     /// story it has realized (18d batch 4).
+    ///
+    /// **VX-96 — the reveal's arm is the TRAVEL, not the request.** It read
+    /// `pendingReveal`, which the Outline's landing consumes before it scrolls
+    /// (`BookView.landOutlineReveal`), so on the reveal-WITHOUT-focus roads —
+    /// the mode carry into Outline, the W20 ascent into an open all-expanded
+    /// book — the arm lapsed before the first aim and those roads kept the
+    /// title-over-blank beat (the VX-92 ladder's R1-2). `travelingTo` is set
+    /// with every reveal and held for the landing's lifetime (pinned:
+    /// `BookOutlineTravelTests`).
     func outlineRowPreMounts(_ postID: String) -> Bool {
-        guard liveFocusedPostID == postID || pendingReveal == postID else { return false }
+        guard liveFocusedPostID == postID || travelingTo == postID else { return false }
         guard let remembered = rememberedSurfaceSize(postID),
               abs(remembered.width - outlineContentWidth) <= stableSurfaceWidthTolerance
         else { return false }
@@ -1361,6 +1370,7 @@ final class BookViewModel {
         pendingArrival = nil   // VX-1039: the carry is a later navigation
         standingAnchorPostID = target.postID
         pendingReveal = target.postID
+        travelingTo = target.postID   // VX-96: the carry's road travels too
         // VX-304: leaving Outline with her caret live in the carried note, the
         // BLOCK rides beside the note — the slot the Index consumes (the Read
         // click's road, row 38); every other surface consumes the note half
@@ -1396,10 +1406,34 @@ final class BookViewModel {
         return parked.postID == postID ? parked.blockID : nil
     }
 
+    // MARK: - VX-96 — the note the Outline is ON ITS WAY TO
+
+    /// **The note a reveal is taking the Outline to, for as long as the
+    /// landing travels** (VX-96 — the VX-92 ladder's R1-2 fix sketch: "a
+    /// travelling id set by `requestReveal`/`carryPlace` and cleared where the
+    /// landing settles, gives up, or the user takes over — the `landing`
+    /// authority already knows all three moments"). Set beside `pendingReveal`
+    /// by every road that sets it (a reveal, a carry, a block landing); it
+    /// OUTLIVES the request — `consumeReveal` leaves it, because the Outline
+    /// consumes the request before its landing scrolls. The Outline ends it
+    /// (`travelEnded`) where its landing ends — settled, given up or handed
+    /// over to her scroll (the authority's `onFinish`) — where a landing on
+    /// another row supersedes it, where its foreign-reveal drop finds nothing
+    /// to travel to, where it appears with nothing to land, and where it
+    /// leaves the screen. Observed: the rows' pre-mount consult reads it.
+    private(set) var travelingTo: String?
+
+    /// The Outline's landing for the travelling note is over (or it never
+    /// will travel): the pre-mount's reveal arm lets go.
+    func travelEnded() {
+        travelingTo = nil
+    }
+
     /// An outside door (W20's ascent) asking this book to open AT a post.
     func requestReveal(_ postID: String) {
         standingAnchorPostID = postID
         pendingReveal = postID
+        travelingTo = postID   // VX-96: held past the consume, for the landing's lifetime
         pendingLanding = nil
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
         pendingArrival = nil               // VX-1039: a new navigation (or the arrival's own landing)
@@ -1426,6 +1460,7 @@ final class BookViewModel {
     func requestLanding(_ target: LandingTarget) {
         standingAnchorPostID = target.postID
         pendingReveal = target.postID
+        travelingTo = target.postID   // VX-96
         pendingLanding = target
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
         pendingArrival = nil               // VX-1039: a new navigation
