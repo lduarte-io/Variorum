@@ -1065,8 +1065,20 @@ struct BookMastheadSourceTests {
         // level deeper; the claim — the dial is the row's second view — is
         // unchanged. And the guard itself: the row is composed only once the
         // book's row is held (its first paint counts the real face).
-        #expect(book.contains("                orderControl\n            }\n        }\n"),
-                "the dial is the row's second view")
+        //
+        // VX-1040 (the VX-1036 run, batch 1 — A JUSTIFIED EDIT, the shape
+        // only): the guard now holds a SIBLING after the row — `lookDoors`,
+        // the hand-ordered book's "save as this book's order" / "back to
+        // manual order" pair drawn under the row while a look is on (D-1,
+        // mockup frame 9b). The one-layout claim is unchanged and the text
+        // still proves it: the row's closure still ends at the dial (its
+        // second and last view — the layout lays out exactly two), and the
+        // pair stands OUTSIDE the closure, at the guard's level, so it is no
+        // third subview, never enters the row's wrap decision, and is no
+        // second set of the row's views (its own two buttons, the dial's acts
+        // by the same roads).
+        #expect(book.contains("                orderControl\n            }\n            lookDoors\n        }\n"),
+                "the dial is the row's second view; the look's doors stand outside the row")
         #expect(book.contains("        if let reading = structure.reading {\n"
                               + "            let stable = BookMastheadStableWidths.row("),
                 "the row waits for the book's row (ladder F1)")
