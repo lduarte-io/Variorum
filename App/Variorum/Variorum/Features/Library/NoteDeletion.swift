@@ -31,6 +31,22 @@
 //  nothing collects nothing, and building the entry that would make it
 //  collect something is inventing the ruling.
 //
+//  ── ONE NOTE GOES AT ONCE, WITH AN UNDO TOAST (VX-1077) ─────────────────
+//  Her words (2026-11-24): *"remove confirmations on delete note are too
+//  annoying - an undo toast at the bottom appearing instead would be
+//  sufficient."* Her rulings: *"a multi-select delete of many notes can keep
+//  a confirm"*; the saved-versions line moves into the toast (*"like 'note
+//  deleted - its saved versions are also deleted'"*); ⌥⌘Z does NOT undo a
+//  note delete (*"that doesn't undo note creation. i don't imagine it should
+//  undo this"*); the phone is left as it is. So the ONE host below asks only
+//  when the gesture names more than one note (`NoteDeleteConfirm.asks`) — a
+//  single note's ask fires at once through the host's own `onConfirm` — and
+//  a single note's landed delete speaks an OFFER (it carries a door, so it
+//  toasts under every receipt style) whose Undo is the Trash's own Put back
+//  op for exactly that note (`restoreContainer`, which brings its saved
+//  versions back on the note's exact stamp). The section above stands: the
+//  toast's Undo is the recovery door's road, never a structural-undo entry.
+//
 //  ── THE SEAL DOES NOT REFUSE THIS ────────────────────────────────────────
 //  By design, and it is written down in AppSpec §9: the seal is
 //  content-level, and a sealed note "may still be … deleted (recoverable via
@@ -75,6 +91,12 @@ struct NoteDeleteConfirm: Identifiable, Equatable {
     /// Stable across a re-render of the same ask.
     var id: String { postIDs.joined(separator: "|") }
 
+    /// **Does this ask present the confirm?** (VX-1077, her ruling: *"a
+    /// multi-select delete of many notes can keep a confirm"* — only the
+    /// single-note delete loses it.) A single note's ask is fired at once by
+    /// the host (`deleteNoteConfirmDialog`), and its outcome toasts with Undo.
+    var asks: Bool { postIDs.count > 1 }
+
     var title: String { RecoveryCopy.deleteNotesConfirmTitle(postIDs.count) }
     var detail: String {
         let base = RecoveryCopy.deleteNotesConfirmDetail(postIDs.count)
@@ -104,6 +126,11 @@ enum NoteDeletion {
         let text: String
         /// True when NOTHING happened. `fire` routes on it; `run` drops it.
         let isRefusal: Bool
+        /// **VX-1077 — the one note a SINGLE-note gesture took**, which the
+        /// toast's Undo puts back (exactly it — never a later delete's). nil
+        /// for a refusal and for a gesture that named several notes (that
+        /// one asked first and speaks its receipt as before).
+        var putBack: String? = nil
     }
 
     /// Flush, delete, announce. Returns **the words only** — and three of the
@@ -161,10 +188,20 @@ enum NoteDeletion {
         // IN the list on purpose — `deleteContainer` throws
         // `containerNotFound` for it below, which is the already-gone road
         // this act has always spoken.
-        let notes = try await session.database.read { db in
-            try postIDs.filter { id in
+        //
+        // VX-1077: a SINGLE-note gesture's toast says whether saved versions
+        // went with it (her ruling moves that line from the confirm into the
+        // toast), so the same read counts them — before the tombstone takes
+        // them, exactly as the confirm's ask-time read did.
+        let single = postIDs.count == 1
+        let (notes, versions) = try await session.database.read { db -> ([String], Int) in
+            let notes = try postIDs.filter { id in
                 try Queries.containerHeader(db, containerID: id)?.kind != .pool
             }
+            let versions = single
+                ? try notes.reduce(0) { $0 + (try Queries.noteVersionIDs(db, of: $1).count) }
+                : 0
+            return (notes, versions)
         }
         guard !notes.isEmpty else {
             return Report(text: RecoveryCopy.notADeletableNote, isRefusal: true)
@@ -195,6 +232,12 @@ enum NoteDeletion {
             return Report(
                 text: RecoveryCopy.notesAlreadyGone(postIDs.count), isRefusal: true)
         }
+        // VX-1077: the single-note gesture names the note its Undo puts back.
+        if single, let postID = postIDs.first {
+            return Report(
+                text: NoteDeletionCopy.deleted(versions: versions), isRefusal: false,
+                putBack: postID)
+        }
         return Report(
             text: RecoveryCopy.movedToTrashReceipt(notes: deleted), isRefusal: false)
     }
@@ -219,10 +262,59 @@ enum NoteDeletion {
                 // J29: the outcome's own class — three of the four endings
                 // report that nothing happened, and a refusal always shows.
                 let outcome = try await report(session: session, postIDs: postIDs)
-                session.status.say(outcome.text, refusing: outcome.isRefusal)
+                if let postID = outcome.putBack {
+                    // VX-1077: one note went without a question, so its
+                    // outcome is an OFFER — the toast, under every receipt
+                    // style — whose door puts exactly that note back.
+                    session.status.offer(outcome.text, action: .init(
+                        label: NoteDeletionCopy.undo,
+                        perform: { undo(session: session, postID: postID) }))
+                } else {
+                    session.status.say(outcome.text, refusing: outcome.isRefusal)
+                }
             } catch {
                 session.status.refuse(DeletionRefusal.words(error, act: .delete))
             }
+        }
+    }
+
+    /// **THE TOAST'S UNDO — the Trash's own Put back, for one note**
+    /// (VX-1077). `restoreContainer` is the op `TrashPutBack`'s note arm runs
+    /// (and the phone's delete line's Undo): the note returns with every row
+    /// and saved version that went in on its exact stamp, ownership enforced
+    /// after the revival. It registers nothing on ⌥⌘Z (her ruling), and it
+    /// speaks what the Trash's Put back speaks: the receipt on a landing, the
+    /// deletion story's put-back words on a refusal ("That note is already
+    /// back." when the Trash's own Put back won the race).
+    static func undo(session: AppSession, postID: String) {
+        Task { @MainActor in
+            do {
+                try await session.runner.run { (ops: Operations) in
+                    try ops.restoreContainer(postID)
+                }
+                session.status.receipt(RecoveryCopy.putBackReceipt(.note))
+            } catch {
+                session.status.refuse(DeletionRefusal.words(error, act: .putBack))
+            }
+        }
+    }
+}
+
+/// **VX-1077's words** (the Mac's: the phone's delete line is left as it is —
+/// her word). PROVISIONAL, listed for her wording pass.
+nonisolated enum NoteDeletionCopy {
+    /// The toast's one door — the phone's delete-line word (`MobileLine`).
+    static let undo = "Undo"
+
+    /// What a single note's delete says in its toast. With no saved versions
+    /// it keeps the receipt's own words (where it went, how long to change
+    /// her mind); with some, her shape — *"note deleted - its saved versions
+    /// are also deleted"* — in the app's sentence case, the number agreeing.
+    static func deleted(versions: Int) -> String {
+        switch versions {
+        case ...0: RecoveryCopy.movedToTrashReceipt(.note)
+        case 1: "Note deleted \u{2014} its saved version is also deleted."
+        default: "Note deleted \u{2014} its saved versions are also deleted."
         }
     }
 }
@@ -247,6 +339,12 @@ extension Notification.Name {
 ///
 /// It rides `presenting:` — see `NoteDeleteConfirm`'s doc for why that is the
 /// only shape allowed in this codebase.
+///
+/// **VX-1077 — it asks only when the gesture names several notes.** A single
+/// note's ask (`NoteDeleteConfirm.asks` false) never presents: the host takes
+/// it at once and runs the SAME `onConfirm` the Delete button runs, so every
+/// door keeps its one road (the Library's deselect included) and the rule
+/// lives here, once, for all seven doors.
 extension View {
     func deleteNoteConfirmDialog(
         _ pending: Binding<NoteDeleteConfirm?>,
@@ -255,7 +353,7 @@ extension View {
         confirmationDialog(
             pending.wrappedValue?.title ?? "",
             isPresented: Binding(
-                get: { pending.wrappedValue != nil },
+                get: { pending.wrappedValue?.asks == true },
                 set: { presented in if !presented { pending.wrappedValue = nil } }),
             titleVisibility: .visible,
             presenting: pending.wrappedValue
@@ -267,6 +365,13 @@ extension View {
             Button("Cancel", role: .cancel) { pending.wrappedValue = nil }
         } message: { confirm in
             Text(confirm.detail)
+        }
+        // The value is captured before the slot clears, so the act never
+        // reads back what the clearing took (`NoteDeleteConfirm`'s rule).
+        .onChange(of: pending.wrappedValue) { _, confirm in
+            guard let confirm, !confirm.asks else { return }
+            pending.wrappedValue = nil
+            onConfirm(confirm)
         }
     }
 }
