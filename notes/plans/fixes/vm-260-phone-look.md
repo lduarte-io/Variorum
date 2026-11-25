@@ -711,6 +711,69 @@ or the next window on an unlocked device); the walk (a separate leg).
 DerivedData.
 
 
+### F-1a-W1 — the bar under the Library search's keyboard (MAJOR, the walk's; fixed at batch 2's boundary; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this fix did NOT do (kept current):** NO test has run — the stage is coordinated above this session, so the
+pin's red, the fix's green and the keyboard-reveal re-run are all PENDING the window; the s9 re-capture is the window's;
+no line in `Sources/`, `Sync/`, custody, `MobileEditorTextView`, `MobileKeyboardBar`, the text-input path or
+`MobileWriteView`; the one-bar overlay (VM-253) is NOT changed in kind — the traced mechanism is not the overlay's.
+
+#### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| W1.0 Preflight (CLAUDE.md + canon; this record's binding sections, BATCH 1a in full, BATCH 2; SurfaceContracts' bar line; the resiliency protocol) and the trace (the captures' pixels; the walk's log; one Sonnet lookup for external facts, read-only) | DONE (this commit) — the mechanism below |
+| W1.1 The pin — `MobileKeyboardRevealUITests.testTheBarRidesAboveTheLibrarySearchKeyboard` (the UI test; the defect needs a real keyboard and a real keyboard session before it, which no mounted unit pin can make); its commit IS the red-on-old tree | NOT STARTED |
+| W1.2 The red-on-old tree's UI bundle built headless into `DerivedData/vm260-w1-rol` (APFS clone of `vm260-2-ui`, incremental, `nice -n 15`) | NOT STARTED |
+| W1.3 The fix — the band's foot never below UIKit's keyboard layout guide (`MobileKeyboardFloor`), with its rule pin and a mounted wiring pin | NOT STARTED |
+| W1.4 The tip bundles rebuilt on the fixed tip (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`), `nice -n 15`, incremental; batch 2's READY block updated | NOT STARTED |
+| W1.5 The window — the pin red on the red-on-old tree, green on the tip; the keyboard-reveal test on the tip; the s9 re-capture | PENDING (the GO) |
+
+#### The traced mechanism (from the captures' own pixels — not the suspected one)
+
+Measured off the PNGs (converted to bitmaps in the session scratchpad; points = pixels ÷ 3):
+- **s9** (batch 1a's tip, the walk): the keyboard's glass begins at **y 539.0**; its keys' tops at **591.0**; the one bar's
+  hairline at **535.0**, so the bar stands **535–591** — under the keyboard's candidate strip (539–583) and the key
+  plane's top air, the glass blurring it. The Library's rows are cut AT the bar's hairline.
+- **VM-47's final-tree `c4-library-search`** (main's tree before this run; the same iPhone 17 Pro on iOS 26.2; the same
+  field, "swipe" typed): the bar's hairline at **483.0**, the bar **483–539**, standing exactly on the glass's top.
+- **The difference is 52.0 pt — the note editor's keyboard bar's height** (`MobileKeyboardBar.barHeight`, the editor's
+  `inputAccessoryView`, "measured to 52" in its own comment; the keyboard-reveal run on the walk device logged the
+  accessory's top at 486.67 over the glass at 539 — 52.3).
+- **The walk's order:** s5 opened a NEW note with its keyboard up (the 52-pt bar riding it), Back, the Trash, two tabs,
+  then s9 tapped the search — **the first keyboard after a keyboard that wore an accessory.** Every correct capture
+  (VM-47's c4, c2's capture box, the reveal test's own search) reached the field with no accessory keyboard before it.
+
+**Not the overlay.** The suspected mechanism (the one bar at the band's foot while the band ignores the keyboard, the old
+in-page bars having ridden each page's avoidance) is refuted by the same capture: the Library page's rows run down to the
+bar's hairline, so the page's own foot — its reserved place, `MobileTabBarSpace` — stands exactly under the one bar, 52 pt
+low as well. Had the band alone missed the keyboard, the page would end at the glass with the room's ground showing
+through its empty reserved place above the bar; it does not. The page and the band take ONE keyboard avoidance — the
+root's SwiftUI keyboard safe area (nothing above the band ignores the `.keyboard` region) — and that avoidance came out
+52 pt SHORT. So the bar VM-47 drew inside each page would have stood at the same 535–591 (INFERRED — no capture of
+main's tree in this order exists); the defect predates this run and is not VM-253's.
+
+**The mechanism, as far as the evidence reaches:** after a keyboard session whose first responder wore an
+`inputAccessoryView` (the note editor's 52-pt bar), the NEXT keyboard's SwiftUI avoidance is short by that accessory's
+height, so the shell's band — and every page and the bar on it — keeps its foot on the keys, under the candidate strip.
+External facts (one Sonnet lookup, forum reports only — no Apple documentation found): Apple Developer Forums thread
+802159 (iOS 26, FB20386257) — after a WebView's keyboard (which wears the form-assistant accessory), a SwiftUI
+`TextField`'s keyboard leaves the bottom controls covered; it recovers once the keyboard is dismissed and reopened; the
+reporter suspected a stale saved input-accessory frame; a DTS engineer suspected a known issue. Thread 801685 (iOS
+26.0.x) — the keyboard notification's frame omitted a panel attached to the keyboard's top, and `keyboardLayoutGuide`
+reported it (the posted workaround); Apple's own page for `keyboardFrameEndUserInfoKey` recommends
+`UIKeyboardLayoutGuide`. **NOT KNOWN:** which layer carries the stale 52 — UIKit's reported frame or SwiftUI's own
+avoidance; the window answers it (below).
+
+#### The pin
+
+PENDING (W1.1).
+
+#### The fix
+
+PENDING (W1.3).
+
+
 ## BATCH 1b — record (VM-265 · VM-275 · VM-277 · A-260-1's direction line; implementer: Opus, 2026-11-25)
 
 **What this batch did NOT do (kept current):** NO suite has run (the stage is coordinated above this session — every
