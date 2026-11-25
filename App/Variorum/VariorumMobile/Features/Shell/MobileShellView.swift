@@ -134,6 +134,17 @@ struct MobileShellView: View {
     /// reach with a real finger (a `DragGesture` is not drivable through
     /// `accessibilityActivate`). Clamped by the band's own rule, as a finger is.
     private let heldDrag: CGFloat
+    /// VM-260 F-1a-W1 — **the keyboard as UIKit's keyboard layout guide reads
+    /// it** (its top and the window's resting foot, window points; nil while no
+    /// keyboard is up), reported by the probe behind the band
+    /// (`MobileKeyboardFloorProbe`). The band's foot is never left below it
+    /// (`MobileKeyboardFloor.lift`).
+    @State private var keyboardReading: MobileKeyboardFloor.Reading?
+    /// **A keyboard reading HELD — a TEST SEAM and nothing else** (`heldDrag`'s
+    /// precedent): the app passes nil, so the probe's reading stands; a pin
+    /// hands one in to see the band answer a keyboard the in-process harness
+    /// cannot raise.
+    private let heldKeyboard: MobileKeyboardFloor.Reading?
     /// **THE DIRECTION LATCH**, decided once per gesture and then not
     /// re-asked: `nil` while undecided, `true` for a page, `false` for a
     /// drag this band has declined (a vertical scroll). Without the latch a
@@ -189,13 +200,15 @@ struct MobileShellView: View {
 
     init(
         session: AppSession, services: AppServices?, router: MobileShellRouter,
-        bootstrap: AppBootstrap? = nil, heldDrag: CGFloat = 0
+        bootstrap: AppBootstrap? = nil, heldDrag: CGFloat = 0,
+        heldKeyboard: MobileKeyboardFloor.Reading? = nil
     ) {
         self.session = session
         self.services = services
         self.router = router
         self.bootstrap = bootstrap
         self.heldDrag = heldDrag
+        self.heldKeyboard = heldKeyboard
         _shelfModel = State(initialValue: MobileShelfViewModel(session: session))
         _libraryModel = State(initialValue: MobileLibraryViewModel(session: session))
         _scrapsModel = State(initialValue: MobileScrapsModel(session: session))
@@ -247,6 +260,13 @@ struct MobileShellView: View {
         // undocumented offscreen-page lifetime.
         GeometryReader { proxy in
             let width = proxy.size.width
+            // VM-260 F-1a-W1: how far the band rises so its foot meets the
+            // keyboard — zero wherever SwiftUI's own avoidance already reaches
+            // it (every case but the short one the walk caught).
+            let lift = MobileKeyboardFloor.lift(
+                bandFoot: proxy.frame(in: .global).maxY,
+                reading: heldKeyboard ?? keyboardReading,
+                noteShowing: noteShowing)
             ZStack {
                 page(.starred, width: width) {
                     stack(path: $starredPath, owner: .starred) {
@@ -297,7 +317,11 @@ struct MobileShellView: View {
                     }
                 }
             }
-            .frame(width: proxy.size.width, height: proxy.size.height)
+            // F-1a-W1: lifted off a keyboard its avoidance fell short of — the
+            // pages, the one bar and the clip together (the reader sets this
+            // frame at its top; what the lift leaves below is the shell's edge
+            // grounds, behind the keyboard's glass).
+            .frame(width: proxy.size.width, height: max(0, proxy.size.height - lift))
             // **VM-253 — THE ONE BAR, OUTSIDE THE PAGES.** Her words: "the bar
             // should stay still and just the highlighted pill should change."
             // Laid over the band's foot, where every root and pushed list keeps
@@ -342,6 +366,14 @@ struct MobileShellView: View {
                 board: edgeGrounds, stack: tab, atRoot: pagingAllowed,
                 barGround: barOnScreen ? tokens.room : nil,
                 fallback: tokens.room)
+        }
+        // VM-260 F-1a-W1: the keyboard layout guide's reader — filling the
+        // window behind everything, untouchable and unheard — the band's floor.
+        .background {
+            MobileKeyboardFloorProbe(active: !noteShowing) { reading in
+                withAnimation(.easeOut(duration: 0.25)) { keyboardReading = reading }
+            }
+            .ignoresSafeArea()
         }
         // VM-61: the one message line — its own overlay window over this
         // scene, above every sheet and alert this shell presents; it lifts
@@ -494,6 +526,14 @@ struct MobileShellView: View {
         MobileTabBarPlace.stands(
             over: path(of: tab).last,
             versionsListingShowing: (versionsListingsShowing[tab] ?? 0) > 0)
+    }
+
+    /// VM-260 F-1a-W1: a NOTE is the visible stack's top screen — the keyboard
+    /// floor leaves it alone (its text view rides the keyboard guide itself, and
+    /// its screen ignores the keyboard region).
+    private var noteShowing: Bool {
+        if case .note = path(of: tab).last { return true }
+        return false
     }
 
     /// One stack's screens, by its identity.
