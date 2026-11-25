@@ -284,6 +284,10 @@ install and the #281 dispositions.
   longer stays open hidden; the QUESTIONS #280 addendum lands at the merge, this run the pointer.
 - **R-260-6 — VM-255's count placement.** Her pick: "Muted line under the wing name" — a quiet second line in
   the phone's muted ink ("12 books"), under the wing's name, the Bookcase only.
+- **THE AWAY RULING (2026-11-25, ~03:3x, her words verbatim as relayed by the stage coordinator nov24):** "I'm
+  going to sleep overnight, everyone should rule provisionally." From here this is an away run: undefined
+  product behavior takes the most spec-defensible option, marked PROVISIONAL and logged for QUESTIONS at the
+  merge; anything needing her hands (a phone install included) is HELD and bundled for her morning sitting.
 
 ## Adjudications (the orchestrator's, repo-first)
 
