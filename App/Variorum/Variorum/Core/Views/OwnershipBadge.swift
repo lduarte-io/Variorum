@@ -76,7 +76,10 @@ nonisolated enum OwnershipBadgeCopy {
     /// macOS shows the OUTERMOST help on a row whose whole face is one click
     /// target (a card's Button, a row's tap shell), so a badge's own `.help`
     /// inside it never surfaced — hovering the shared mark said "click to
-    /// open this note". The row's help now says both.
+    /// open this note". The row's help now says both. (VX-1075: the shared
+    /// mark is now its OWN control and answers its own hover — the rule the
+    /// run record traces is "the innermost interactive view under the pointer
+    /// answers"; this second line stays on the rows as a belt.)
     static func rowHelp(_ base: String, badge: OwnershipBadgeFace.Badge?) -> String {
         switch badge {
         case .shared(let books): return base + "\n" + sharedHelp(books.map(\.shownName))
@@ -312,14 +315,16 @@ private struct SharedMarkDoor: View {
                         Self.open(book, at: postID)
                     }
                 }
+                // The probe rides the BUTTON itself: a registered door is a
+                // drawn control.
+                #if DEBUG
+                .onAppear { register(books) }
+                .onChange(of: books) { _, now in register(now) }
+                .onDisappear {
+                    if OwnershipBadgeProbe.doors[postID]?.books == books { OwnershipBadgeProbe.doors[postID] = nil }
+                }
+                #endif
             }
-            #if DEBUG
-            .onAppear { register(books) }
-            .onChange(of: books) { _, now in register(now) }
-            .onDisappear {
-                if OwnershipBadgeProbe.doors[postID]?.books == books { OwnershipBadgeProbe.doors[postID] = nil }
-            }
-            #endif
     }
 
     #if DEBUG
