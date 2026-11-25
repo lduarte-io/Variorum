@@ -54,7 +54,14 @@ final class MobileBookDetailsModel {
     /// VM-61: every value this slot holds is a refusal, so it speaks on the
     /// phone's one line as it is set (nil says nothing); no screen draws it.
     private(set) var lastError: String? {
-        didSet { MobileLine.refuse(lastError, session: session) }
+        get { lastRefusal?.sentence }
+        set { lastRefusal = newValue.map { RefusalWords($0) } }
+    }
+    /// VM-277 (A-260-4 (a)): the refusal behind `lastError` — its sentence and,
+    /// where the refusal table authored one, its short headline — spoken on the
+    /// one line, which draws the headline and keeps the sentence behind a tap.
+    private(set) var lastRefusal: RefusalWords? {
+        didSet { MobileLine.refuse(lastRefusal, session: session) }
     }
     /// VM-81 — the Finish confirm on screen (nil = none asked).
     private(set) var pendingFinish: FinishConfirm?
@@ -144,7 +151,7 @@ final class MobileBookDetailsModel {
             }
             isDaily = dailyID == id
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -311,7 +318,7 @@ final class MobileBookDetailsModel {
             lastError = Self.refusal(error)
             return false
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             return false
         }
     }
@@ -334,7 +341,8 @@ final class MobileBookDetailsModel {
             }
             return true
         } catch {
-            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.sentence(error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusal(for: error, roads: .phone)
+                ?? RefusalWords(DeletionRefusal.sentence(error, roads: .phone))
             return false
         }
     }
@@ -352,7 +360,7 @@ final class MobileBookDetailsModel {
         } catch let error as OperationError {
             lastError = Self.refusal(error)
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
         await refresh()
     }

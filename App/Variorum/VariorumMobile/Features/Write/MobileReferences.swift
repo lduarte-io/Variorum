@@ -41,7 +41,14 @@ final class MobileReferencesModel {
     /// phone's one line as it is set (nil says nothing); the sheet no longer
     /// draws it.
     private(set) var status: String? {
-        didSet { MobileLine.refuse(status, session: session) }
+        get { statusRefusal?.sentence }
+        set { statusRefusal = newValue.map { RefusalWords($0) } }
+    }
+    /// VM-277 (A-260-4 (a)): the refusal behind `status` — its sentence and,
+    /// where the refusal table authored one, its short headline — spoken on the
+    /// one line, which draws the headline and keeps the sentence behind a tap.
+    private(set) var statusRefusal: RefusalWords? {
+        didSet { MobileLine.refuse(statusRefusal, session: session) }
     }
 
     init(session: AppSession, postID: String) {
@@ -129,7 +136,7 @@ final class MobileReferencesModel {
                 try Queries.references(db, containerID: postID)
             }
         } catch {
-            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            statusRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -155,7 +162,7 @@ final class MobileReferencesModel {
             await refresh()
             return true
         } catch {
-            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            statusRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             await refresh()
             return false
         }
@@ -168,7 +175,7 @@ final class MobileReferencesModel {
             }
             status = nil
         } catch {
-            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            statusRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
         await refresh()
     }

@@ -49,7 +49,14 @@ final class MobileBookViewModel {
     /// VM-61: every value this slot holds is a refusal, so it speaks on the
     /// phone's one line as it is set (nil says nothing); no screen draws it.
     private(set) var lastError: String? {
-        didSet { MobileLine.refuse(lastError, session: session) }
+        get { lastRefusal?.sentence }
+        set { lastRefusal = newValue.map { RefusalWords($0) } }
+    }
+    /// VM-277 (A-260-4 (a)): the refusal behind `lastError` — its sentence and,
+    /// where the refusal table authored one, its short headline — spoken on the
+    /// one line, which draws the headline and keeps the sentence behind a tap.
+    private(set) var lastRefusal: RefusalWords? {
+        didSet { MobileLine.refuse(lastRefusal, session: session) }
     }
     /// **A DOOR'S REFUSAL, HELD APART FROM THE SCREEN'S OWN ERROR** (the
     /// batch-10 cold review, MAJOR 2). The two doors sit at the BOTTOM of
@@ -144,7 +151,7 @@ final class MobileBookViewModel {
             }
         } catch is CancellationError {
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 

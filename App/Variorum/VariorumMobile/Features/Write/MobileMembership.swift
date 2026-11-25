@@ -60,6 +60,13 @@ final class MobileMembershipModel {
         status = text
         MobileLine.say(text, as: line, session: session)
     }
+
+    /// VM-277: a refusal with its table's short form — the same record
+    /// (`status`, the sentence) — drawn as its headline on the one line.
+    private func refuse(_ words: RefusalWords) {
+        status = words.sentence
+        MobileLine.refuse(words, session: session)
+    }
     /// The last diverge's landing (R67: the copy is one tap away).
     private(set) var divergedCopyID: String?
     private(set) var divergedBookName: String?
@@ -158,7 +165,7 @@ final class MobileMembershipModel {
                 $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id)
             }
         } catch {
-            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
+            refuse(OpsRefusalCopy.refusalWords(for: error, roads: .phone))
         }
     }
 
@@ -229,7 +236,7 @@ final class MobileMembershipModel {
                 say(Self.refusal(error, bookName: book.name), as: .refusal)
             }
         } catch {
-            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
+            refuse(OpsRefusalCopy.refusalWords(for: error, roads: .phone))
         }
         await refresh()
     }

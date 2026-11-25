@@ -55,7 +55,14 @@ final class MobileScrapsModel {
     /// VM-61: every value this slot holds is a refusal, so it speaks on the
     /// phone's one line as it is set (nil says nothing); no screen draws it.
     private(set) var lastError: String? {
-        didSet { MobileLine.refuse(lastError, session: session) }
+        get { lastRefusal?.sentence }
+        set { lastRefusal = newValue.map { RefusalWords($0) } }
+    }
+    /// VM-277 (A-260-4 (a)): the refusal behind `lastError` — its sentence and,
+    /// where the refusal table authored one, its short headline — spoken on the
+    /// one line, which draws the headline and keeps the sentence behind a tap.
+    private(set) var lastRefusal: RefusalWords? {
+        didSet { MobileLine.refuse(lastRefusal, session: session) }
     }
     private(set) var selectedPoolID: String?
     @ObservationIgnored private var itemsTask: Task<Void, Never>?
@@ -139,7 +146,7 @@ final class MobileScrapsModel {
         } catch is CancellationError {
             itemsTask?.cancel()
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -168,7 +175,7 @@ final class MobileScrapsModel {
                 }
             } catch is CancellationError {
             } catch {
-                self?.lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+                self?.lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             }
         }
     }
@@ -187,7 +194,7 @@ final class MobileScrapsModel {
             self.pools = pools
             adopt(items)
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -219,7 +226,7 @@ final class MobileScrapsModel {
             await refresh()
             return true
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             await refresh()
             return false
         }

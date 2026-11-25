@@ -83,7 +83,14 @@ final class MobileLibraryViewModel {
     /// VM-61: every value this slot holds is a refusal, so it speaks on the
     /// phone's one line as it is set (nil says nothing); no screen draws it.
     private(set) var lastError: String? {
-        didSet { MobileLine.refuse(lastError, session: session) }
+        get { lastRefusal?.sentence }
+        set { lastRefusal = newValue.map { RefusalWords($0) } }
+    }
+    /// VM-277 (A-260-4 (a)): the refusal behind `lastError` — its sentence and,
+    /// where the refusal table authored one, its short headline — spoken on the
+    /// one line, which draws the headline and keeps the sentence behind a tap.
+    private(set) var lastRefusal: RefusalWords? {
+        didSet { MobileLine.refuse(lastRefusal, session: session) }
     }
 
     init(session: AppSession, listingLimit: Int = 200) {
@@ -523,7 +530,7 @@ final class MobileLibraryViewModel {
             land(page, question)
         } catch is CancellationError {
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -555,7 +562,7 @@ final class MobileLibraryViewModel {
             }
         } catch is CancellationError {
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -650,7 +657,7 @@ final class MobileLibraryViewModel {
             land(page, question)
         } catch is CancellationError {
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -674,7 +681,7 @@ final class MobileLibraryViewModel {
             return
         } catch {
             state.loadingMore = false
-            if state.generation == generation { lastError = OpsRefusalCopy.sentence(for: error, roads: .phone) }
+            if state.generation == generation { lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone) }
             return
         }
         state.loadingMore = false
@@ -854,7 +861,7 @@ final class MobileLibraryViewModel {
             // A superseded search's error never lands either (the Mac
             // catch's staleness guard).
             guard activeQuery == trimmed else { return }
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -879,7 +886,7 @@ final class MobileLibraryViewModel {
         do {
             return try await MobileNewNoteDoor.mint(session: session)
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             return nil
         }
     }

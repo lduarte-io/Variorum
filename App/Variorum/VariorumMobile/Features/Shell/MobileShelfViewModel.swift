@@ -34,7 +34,14 @@ final class MobileShelfViewModel {
     /// VM-61: every value this slot holds is a refusal, so it speaks on the
     /// phone's one line as it is set (nil says nothing); no screen draws it.
     private(set) var lastError: String? {
-        didSet { MobileLine.refuse(lastError, session: session) }
+        get { lastRefusal?.sentence }
+        set { lastRefusal = newValue.map { RefusalWords($0) } }
+    }
+    /// VM-277 (A-260-4 (a)): the refusal behind `lastError` — its sentence and,
+    /// where the refusal table authored one, its short headline — spoken on the
+    /// one line, which draws the headline and keeps the sentence behind a tap.
+    private(set) var lastRefusal: RefusalWords? {
+        didSet { MobileLine.refuse(lastRefusal, session: session) }
     }
     /// The Today door's shelving note (not an error — rendered muted), and
     /// the book doors' receipts. VM-61: each write below speaks on the one
@@ -83,7 +90,7 @@ final class MobileShelfViewModel {
                 }
             } catch is CancellationError {
             } catch {
-                lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+                lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             }
         }
     }
@@ -96,7 +103,7 @@ final class MobileShelfViewModel {
                 (try Queries.shelfBookTags($0), try Queries.ruleTagPaths($0))
             }
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
         }
     }
 
@@ -156,7 +163,7 @@ final class MobileShelfViewModel {
         do {
             return try await MobileNewNoteDoor.mint(session: session)
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             return nil
         }
     }
@@ -239,7 +246,8 @@ final class MobileShelfViewModel {
                 lastReport, as: .removal(.unarchiveBook(book.reading.id)), session: session)
         } catch {
             lastReport = nil
-            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.sentence(error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusal(for: error, roads: .phone)
+                ?? RefusalWords(DeletionRefusal.sentence(error, roads: .phone))
         }
     }
 
@@ -256,7 +264,7 @@ final class MobileShelfViewModel {
             MobileLine.say(outcome.note, as: .direction, session: session)
             return outcome.postID
         } catch {
-            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
+            lastRefusal = OpsRefusalCopy.refusalWords(for: error, roads: .phone)
             return nil
         }
     }

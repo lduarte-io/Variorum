@@ -141,6 +141,13 @@ final class MobileLensesModel {
         MobileLine.say(text, as: line, session: session)
     }
 
+    /// VM-277: a refusal with its table's short form — the same record
+    /// (`status`, the sentence) — drawn as its headline on the one line.
+    private func refuse(_ words: RefusalWords) {
+        status = words.sentence
+        MobileLine.refuse(words, session: session)
+    }
+
     /// **ONE ADOPT AT A TIME** (the Fable sweep's finding 1, 2026-08-30).
     /// `adoptView`'s door is a persistent plain `Button { Task { … } }` in
     /// `saveDoors` — not an alert action, not a `UIMenu` row, so nothing
@@ -300,7 +307,7 @@ final class MobileLensesModel {
             }
             viewDiverges = !(editor?.takes.peeks.isEmpty ?? true)
         } catch {
-            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
+            refuse(OpsRefusalCopy.refusalWords(for: error, roads: .phone))
         }
     }
 
@@ -327,7 +334,7 @@ final class MobileLensesModel {
             activeLensName = rows.first { $0.id == lensID }?.name
             viewDiverges = !editor.takes.peeks.isEmpty
         } catch {
-            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
+            refuse(OpsRefusalCopy.refusalWords(for: error, roads: .phone))
         }
     }
 

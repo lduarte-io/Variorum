@@ -250,4 +250,134 @@ struct MobileRefusalLineTests {
             }
         }
     }
+
+    // MARK: The fix's own pins (added with the fix — not part of the red-on-old run)
+
+    /// **(a) — the headline is the line; the sentence is the reason.** A row the
+    /// table authored speaks its headline on the line (the door's spoken name)
+    /// and its whole sentence in the opened card.
+    @Test func aHeadlineIsTheLineAndItsSentenceTheReason() async throws {
+        try await withEditorWorld { session, _ in
+            session.status.dismissAfter = .seconds(60)
+            let model = MobileMessageLineModel(status: session.status, voice: { .study })
+            let words = try #require(OpsRefusalCopy.refusal(
+                for: OperationError.lastActiveVariant(id: "x"), roads: .phone))
+            let headline = try #require(words.headline)
+            try await standing(model) { window in
+                MobileLine.refuse(words, session: session)
+                await settle(window)
+                let line = try #require(element(window, label: headline, button: true),
+                                        "the headline is the line's door")
+                #expect(element(window, label: words.sentence, button: nil) == nil,
+                        "the sentence waits behind the tap")
+                #expect(line.accessibilityActivate())
+                await settle(window, 10)
+                #expect(element(window, label: headline, button: false) != nil, "the card keeps its headline")
+                #expect(element(window, label: words.sentence, button: false) != nil, "and shows the reason whole")
+            }
+        }
+    }
+
+    /// The table answers both halves from one arm: an authored row's headline
+    /// is shorter than its sentence, and its sentence is exactly what the
+    /// table has always said (`words(for:)`, the Mac's and the wire's read);
+    /// an unauthored row answers no headline; an unworded error answers the one
+    /// plain fallback with none.
+    @Test func theTableAnswersBothHalvesFromOneArm() throws {
+        let authored: [OperationError] = [
+            .purgeTargetNotDeleted(table: "variant", id: "x"), .lastActiveVariant(id: "x"),
+            .blocksNotAdjacent(first: "a", second: "b"), .invalidCut(variantID: "v", cut: 3),
+            .gatheringRequiresRule(id: "g"),
+        ]
+        for error in authored {
+            let pair = try #require(OpsRefusalCopy.refusal(for: error, roads: .phone))
+            #expect(pair.sentence == OpsRefusalCopy.words(for: error, roads: .phone))
+            let headline = try #require(pair.headline, "\(error) has its headline")
+            #expect(headline.count < pair.sentence.count, "shorter than its sentence: \(headline)")
+        }
+        for error in [OperationError.blockNotDeleted(id: "x"), .invalidCommentText] {
+            let pair = try #require(OpsRefusalCopy.refusal(for: error, roads: .phone))
+            #expect(pair.headline == nil, "unauthored — the face clips its sentence")
+            #expect(pair.sentence == OpsRefusalCopy.words(for: error, roads: .phone))
+        }
+        struct Unworded: Error {}
+        let fallback = OpsRefusalCopy.refusalWords(for: Unworded(), roads: .phone)
+        #expect(fallback == RefusalWords(OpsRefusalCopy.unexpectedFailure))
+    }
+
+    /// Every authored headline is one short clause that fits the card's one
+    /// line at the default size (a conservative character budget), ends as a
+    /// sentence, and carries no em-dash road (the road is the reason's).
+    @Test func everyAuthoredHeadlineIsOneShortClause() throws {
+        let file = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Shared/OpsRefusalTable.swift")
+        let source = try String(contentsOf: file, encoding: .utf8)
+        let pattern = try NSRegularExpression(pattern: #"headline: "((?:[^"\\]|\\.)*)"\)"#)
+        let found = pattern.matches(in: source, range: NSRange(source.startIndex..., in: source)).map {
+            String(source[Range($0.range(at: 1), in: source)!])
+        }
+        #expect(found.count >= 20, "the authored set is read: \(found.count)")
+        for headline in found {
+            let visible = headline
+                .replacingOccurrences(of: #"\\u\{[0-9A-Fa-f]+\}"#, with: "x", options: .regularExpression)
+                .replacingOccurrences(of: #"\\\([^)]*\)"#, with: "", options: .regularExpression)
+            #expect(visible.count <= 36, "one line on the card: \(headline)")
+            #expect(visible.hasSuffix("."), "a sentence: \(headline)")
+            #expect(!visible.contains("\u{2014}") && !visible.contains("—"), "one clause, no road: \(headline)")
+        }
+    }
+
+    /// The anatomy is the item's facts: a refusal carries its headline, a
+    /// direction is its own, a removal and an offer are plain; only the first
+    /// two take a dismissal.
+    @Test func theAnatomyIsTheItemsFacts() {
+        let refusal = StatusCenter.Item(
+            id: UUID(), text: "Long.", kind: .refusal, refusalHeadline: "Short.")
+        let direction = StatusCenter.Item(id: UUID(), text: "There.", kind: .refusal, isDirection: true)
+        let removal = StatusCenter.Item(
+            id: UUID(), text: "Gone.", action: .init(label: "Undo", perform: {}), kind: .receipt,
+            leavesPage: true)
+        let offer = StatusCenter.Item(
+            id: UUID(), text: "Diverge?", action: .init(label: "Diverge", perform: {}), kind: .offer)
+        #expect(MobileMessageLineModel.anatomy(for: refusal) == .refusal(headline: "Short."))
+        #expect(MobileMessageLineModel.anatomy(for: direction) == .direction)
+        #expect(MobileMessageLineModel.anatomy(for: removal) == .plain)
+        #expect(MobileMessageLineModel.anatomy(for: offer) == .plain)
+        #expect(MobileMessageLineModel.anatomy(for: refusal).isDismissable)
+        #expect(MobileMessageLineModel.anatomy(for: direction).isDismissable)
+        #expect(!MobileMessageLineModel.anatomy(for: removal).isDismissable)
+        #expect(!MobileMessageLineModel.anatomy(for: offer).isDismissable)
+    }
+
+    /// The flick: far enough down, or thrown down — never up, never a nudge.
+    @Test func theFlickDownDismissesAndANudgeDoesNot() {
+        let distance = MobileMessageLineModel.flickDistance
+        let toss = MobileMessageLineModel.flickThrow
+        #expect(MobileMessageLineModel.dismisses(translation: distance, predicted: distance))
+        #expect(MobileMessageLineModel.dismisses(translation: 4, predicted: toss), "thrown down")
+        #expect(!MobileMessageLineModel.dismisses(translation: 6, predicted: 12), "a nudge settles back")
+        #expect(!MobileMessageLineModel.dismisses(translation: -80, predicted: -200), "up never dismisses")
+    }
+
+    /// The whole card takes a touch for a line she can dismiss (the tap, the
+    /// ✕ and the flick live there); any other line only on its door.
+    @Test func theWholeCardTakesATouchOnlyForALineSheCanDismiss() {
+        let card = CGRect(x: 8, y: 700, width: 377, height: 44)
+        let door = CGRect(x: 300, y: 700, width: 60, height: 44)
+        let inside = CGPoint(x: 40, y: 720)
+        let refusal = StatusCenter.Item(id: UUID(), text: "Refused.", kind: .refusal)
+        let direction = StatusCenter.Item(id: UUID(), text: "There.", kind: .refusal, isDirection: true)
+        let removal = StatusCenter.Item(
+            id: UUID(), text: "Gone.", action: .init(label: "Undo", perform: {}), kind: .receipt,
+            leavesPage: true)
+        #expect(MobileMessageLineModel.takesTouch(at: inside, doorFrame: nil, lineFrame: card, showing: refusal))
+        #expect(MobileMessageLineModel.takesTouch(at: inside, doorFrame: nil, lineFrame: card, showing: direction))
+        #expect(!MobileMessageLineModel.takesTouch(at: CGPoint(x: 40, y: 600), doorFrame: nil,
+                                                   lineFrame: card, showing: refusal), "above it is the app's")
+        #expect(!MobileMessageLineModel.takesTouch(at: inside, doorFrame: door, lineFrame: card, showing: removal),
+                "a removal's ground passes the touch through")
+        #expect(MobileMessageLineModel.takesTouch(
+            at: CGPoint(x: door.midX, y: door.midY), doorFrame: door, lineFrame: card, showing: removal))
+    }
 }
