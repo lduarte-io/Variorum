@@ -211,9 +211,11 @@ struct MobilePhoneControlsTests {
         }
         // **With the text size.** A field's typed text is the `control`
         // role — chrome, so it grows to xxxLarge (15 → 21 since VM-273; it
-        // was 17 → 23) and holds there. A 21 pt line (~25) and the field's 8
-        // above and below still sit inside the 44 floor, so a control field is
-        // 44 at EVERY size: it
+        // was 17 → 23) and holds there. A 21 pt line (~25) and the field's
+        // air above and below (`fieldVerticalPadding` — 4 since the batch-2
+        // reconcile, MOVED from 8: its own view is taller than its line)
+        // still sit inside the 44 floor, so a control field is 44 at EVERY
+        // size: it
         // holds its grown text without clipping it, and never outgrows the
         // floor. (This case first asserted `> 44` at xxxLarge — which the
         // layer's own numbers cannot reach: the batch-2 window measured
@@ -237,7 +239,7 @@ struct MobilePhoneControlsTests {
             ) { _ in
                 heights[size] = probe.size.height
                 #expect(probe.size.height >= 43.5, "the field is at least 44 at \(size): \(probe.size)")
-                let needs = lineHeight(.control, size) + 2 * PhoneMetrics.Space.s8
+                let needs = lineHeight(.control, size) + 2 * PhoneControlMetrics.fieldVerticalPadding
                 #expect(probe.size.height >= needs - 0.5,
                         "the field holds its text's line at \(size): \(probe.size) needs \(needs)")
             }
@@ -250,7 +252,7 @@ struct MobilePhoneControlsTests {
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { probe.size = $0 }
                 .dynamicTypeSize(.accessibility5)
         ) { _ in
-            let needs = lineHeight(.noteBody, .accessibility5) + 2 * PhoneMetrics.Space.s8
+            let needs = lineHeight(.noteBody, .accessibility5) + 2 * PhoneControlMetrics.fieldVerticalPadding
             #expect(probe.size.height > 44 && probe.size.height >= needs - 1,
                     "a field holding her words grows with the text size: \(probe.size) needs \(needs)")
         }
@@ -268,7 +270,7 @@ struct MobilePhoneControlsTests {
                 if oneLine == 0 {
                     oneLine = probe.size.height
                 } else {
-                    let needs = 3 * lineHeight(.control, .large) + 2 * PhoneMetrics.Space.s8
+                    let needs = 3 * lineHeight(.control, .large) + 2 * PhoneControlMetrics.fieldVerticalPadding
                     #expect(probe.size.height > oneLine && probe.size.height >= needs - 1,
                             "the field grows with its lines: \(probe.size.height) vs one line \(oneLine), three need \(needs)")
                 }

@@ -130,12 +130,32 @@ private extension RenderedPixels {
     }
 }
 
+/// The field's LAYOUT frame, read where the field is laid out (the batch-2
+/// reconcile): a combined accessibility element's frame covers what its
+/// children DRAW, never an invisible frame around them, so the window's run
+/// read the field's 39 pt box as its "frame". The target is the layout.
+@MainActor
+private final class FieldFrameProbe {
+    var frame: CGRect = .null
+}
+
+/// The first text field's own view under `view` (VM-280's datapoint: what a
+/// field's own view measures, against the box drawn around it).
+@MainActor
+private func firstTextField(in view: UIView) -> UITextField? {
+    if let field = view as? UITextField { return field }
+    for sub in view.subviews {
+        if let found = firstTextField(in: sub) { return found }
+    }
+    return nil
+}
+
 @MainActor
 @Suite("VM-273 — the controls draw well inside their targets (rendered)", .serialized)
 struct MobileDrawnStepDownRenderedTests {
     /// The probe: each control once, apart, on the paper; and a bare 17 pt
     /// symbol — the size the icon button's glyph must draw at.
-    private func probe(_ tokens: VoiceTokens) -> some View {
+    private func probe(_ tokens: VoiceTokens, field: FieldFrameProbe) -> some View {
         VStack(alignment: .leading, spacing: 24) {
             Button {} label: { Image(systemName: "magnifyingglass") }
                 .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
@@ -151,8 +171,7 @@ struct MobileDrawnStepDownRenderedTests {
             TextField("Search", text: .constant(""))
                 .textFieldStyle(.plain)
                 .phoneField(tokens)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Field probe")
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { field.frame = $0 }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 20)
@@ -166,10 +185,19 @@ struct MobileDrawnStepDownRenderedTests {
     /// chip's shape is 24 tall (32) and near-square — its corner pixel filled,
     /// where a capsule leaves it bare; the calm button's box and the field's box
     /// are 36 (they filled their 44). Each still sits in a 44 pt target.
+    ///
+    /// RECONCILED at the tip (the batch-2 window: the field read box 39 in a
+    /// "frame" of 39): the box WAS 39 — a text field's own view is 23 pt for a
+    /// 15 pt field, so 8 + 8 of air drew 39; the field's air is now 4 + 4 and
+    /// its 36 floor binds — and the frame was the probe's error: a combined
+    /// accessibility element reports what it draws, so the field's frame is now
+    /// read from its layout (`FieldFrameProbe`), where the 44 has been all along
+    /// (`MobilePhoneControlsTests` holds it, green in the window).
     @Test(arguments: [ThemeVoice.study, .terminal])
     func theDrawingsSitWellInsideTheirTargets(voice: ThemeVoice) async throws {
         let tokens: VoiceTokens = voice == .study ? .studyLight : .terminalLight
-        try await withSceneSurface(probe(tokens), dark: false) { surface in
+        let fieldProbe = FieldFrameProbe()
+        try await withSceneSurface(probe(tokens, field: fieldProbe), dark: false) { surface in
             await surface.settle(30)
             let pixels = try surface.render()
             let ground = PixelColor(UIColor(tokens.surface), traits: surface.traits)
@@ -186,10 +214,16 @@ struct MobileDrawnStepDownRenderedTests {
             let reference = try drawn("Reference glyph")
             let chip = try drawn("Essays")
             let calm = try drawn("Open")
-            let field = try drawn("Field probe")
+            let fieldFrame = fieldProbe.frame
+            try #require(!fieldFrame.isNull && fieldFrame.height > 0, "the field was laid out: \(fieldFrame)")
+            let fieldBox = try #require(pixels.drawnBox(in: fieldFrame, ground: ground),
+                                        "nothing drawn in the field (\(fieldFrame))")
+            let field = (frame: fieldFrame, box: fieldBox)
+            let ownView = firstTextField(in: surface.host.view)?.bounds.size ?? .zero
             print("PERF[sim] VM-273 drawn \(tokens.voice): glyph \(icon.box.size) vs 17 pt \(reference.box.size) "
                   + "in \(icon.frame.size) · chip \(chip.box.size) in \(chip.frame.size) · calm \(calm.box.size) "
-                  + "in \(calm.frame.size) · field \(field.box.size) in \(field.frame.size)")
+                  + "in \(calm.frame.size) · field \(field.box.size) in \(field.frame.size), "
+                  + "the text field's own view \(ownView) (VM-280)")
 
             // The icon button: a 17 pt glyph inside its 44 × 44.
             #expect(abs(icon.box.height - reference.box.height) <= 1

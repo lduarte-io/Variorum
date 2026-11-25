@@ -111,6 +111,13 @@ nonisolated enum PhoneControlMetrics {
     /// (VM-273): at least 36, growing with its words, inside a target at
     /// least 44 tall. It was the full 44, the target and the drawing one size.
     static let boxHeight: CGFloat = 36
+    /// **A field's air above and below its text** — the scale's 4 (it was 8).
+    /// The batch-2 window measured why (the reconcile, VM-273): a text field's
+    /// own view is TALLER than its text's line — 23 pt for a 15 pt `control`
+    /// field, where the line is 18 — so 8 + 8 drew the box 39, past the 36 it
+    /// was meant to be. With 4 + 4 the 36 floor binds at the default size, and
+    /// the box still grows with its text above it.
+    static let fieldVerticalPadding: CGFloat = PhoneMetrics.Space.s4
     /// The sheet header's row (sheet §E: "header row 56").
     static let sheetHeaderHeight: CGFloat = 56
     /// Done sits 8 from the sheet's edge, so its word lines up at the gutter.
@@ -320,10 +327,12 @@ extension View {
     /// control's (`control` 15) unless the site holds her prose.
     ///
     /// **Its box is drawn at least 36 tall inside a frame at least 44**
-    /// (VM-273: the box was the full 44 — the frame and the drawing one size).
-    /// The box grows with its text (her words at the accessibility sizes, or
-    /// a field that wraps), and the frame with it; what answers a touch is
-    /// the text field's own, untouched by the drawing.
+    /// (VM-273: the box was the full 44 — the frame and the drawing one size),
+    /// the text field centred in it with at least 4 above and below
+    /// (`fieldVerticalPadding`). The box grows with its text (her words at the
+    /// accessibility sizes, or a field that wraps), and the frame with it; what
+    /// answers a touch is the text field's own view, untouched by the drawing
+    /// (VM-280's question).
     ///
     /// **Its placeholder is the corrected faint** (VM-47, the walk's W-A10 —
     /// sheet §D: placeholders take the corrected faint and need 3:1; iOS's own
@@ -337,7 +346,7 @@ extension View {
             .foregroundStyle(tokens.ink)
             .environment(\.phoneFieldPrompt, tokens.phone.faint)
             .padding(.horizontal, PhoneControlMetrics.insidePadding)
-            .padding(.vertical, PhoneMetrics.Space.s8)
+            .padding(.vertical, PhoneControlMetrics.fieldVerticalPadding)
             .frame(minHeight: PhoneControlMetrics.boxHeight)
             .background(
                 RoundedRectangle(cornerRadius: PhoneMetrics.Radius.standard)

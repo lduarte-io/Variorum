@@ -1531,6 +1531,42 @@ light):
    52 pt low there is batch 1b's finding, not F-1a-W1's.
 
 
+### Batch 2 — RECONCILE (the consolidated window's two tip reds; implementer: Opus, the batch-2 session resumed, 2026-11-25)
+
+The window (its section above): red-on-old ESTABLISHED as predicted, M green, U green; on the tip two of this batch's
+pins red. Each settled from the window's own `PERF[sim]` lines (`/tmp/vm260-win/R.log`, `P.log`). No test has run on
+the reconciled tree — the re-evidence rides the next window (P3 + M3's, or the gate's). Batch 3's tree is underneath
+(`PhoneType`'s words scale, `MobileLook`, the editor face): nothing of it is touched beyond the two pieces below.
+
+**Piece R1 — the field: (a) AND (c), never (b).** The window: `field (363.0, 39.0) in (363.0, 39.0)` both voices — the
+box 39 and the "frame" 39.
+- *(a) the drawn box really was 39.* A text field's own view is TALLER than its text's line: 39 − 8 − 8 = **23 pt** for
+  a 15-pt `control` field, where my arithmetic counted the 18-pt line (18 + 16 = 34 → the 36 floor). So 8 + 8 of air
+  drew 39 and the 36 floor never bound. **The drawing moves to the design, not the law:** the field's air above and
+  below is now the scale's 4 (`PhoneControlMetrics.fieldVerticalPadding`): 23 + 8 = 31, the 36 floor binds, the box
+  draws 36 at the default size — the calm button's box (it measured 37.33 in the window: 36 and the edge's outer half)
+  — and still grows with its text above that. P-260-2d unchanged.
+- *(c) the "frame" was the probe's error.* The pin read the field's target as the accessibility frame of an
+  `.accessibilityElement(children: .ignore)` container — and a combined element reports what its children DRAW (the
+  box), never the invisible `.frame(minHeight: 44)` around them. The 44 layout frame was there all along:
+  `MobilePhoneControlsTests.theFieldIsAtLeastFortyFourTallAndGrowsWithItsText` measures the layout and was GREEN in the
+  window's P. The pin now reads the field's layout frame (`onGeometryChange`, global — `FieldFrameProbe`), and prints
+  the text field's own view size for VM-280.
+- *(b) not the case:* no target moved; the field's frame is ≥ 44 (pinned green on the tip).
+- **VM-280 trail (the field's answering height, Suspected):** the window's numbers are the first measured datapoint —
+  the field's own view (the thing that takes the touch) is **23 pt tall** at the default size (39 − 16), inside a 39
+  box (now 36) inside a 44 frame. If VM-280 is right, a phone field answers across about 23 pt, not 44 — the gap is the
+  frame's 21, not the box's. The reconciled pin's `PERF[sim] VM-273 drawn …` line now prints that view's size
+  directly, so the next window confirms it with no extra run.
+- MOVED (the ruling's own number): `MobilePhoneControlsTests.theFieldIsAtLeastFortyFourTallAndGrowsWithItsText` — its
+  "holds its text's line" floor reads `2 × fieldVerticalPadding` (was `2 × 8`); its 44 floor and its growth
+  assertions unchanged.
+- **Predicted at the next window:** `theDrawingsSitWellInsideTheirTargets` GREEN both voices — the field's box ≈ 37.3
+  (36 + the edge's outer half, the calm button's measured shape), its frame 44, the text field's own view 23 tall;
+  `theFieldIsAtLeastFortyFourTallAndGrowsWithItsText` GREEN (the frame 44 at every chrome size; her words' field at AX5
+  grows: its own view ≥ its line, + 8); every other field pin untouched (the placeholder's pixel pin reads inside the
+  text field's own view). Build: `DerivedData/vm260-2r` (an APFS clone of `vm260-3`, incremental, `nice -n 15`) — `TEST BUILD SUCCEEDED`.
+
 ## BATCH 3 — record (VM-247 · VM-254; implementer: Opus, a fresh session, 2026-11-25)
 
 **What this batch did NOT do (kept current):** NO suite has run — the stage is coordinated above this session, so every
