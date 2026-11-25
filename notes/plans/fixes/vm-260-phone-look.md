@@ -325,7 +325,7 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 | 0. Preflight (CLAUDE.md + canon, this record's binding sections, the resiliency protocol, SurfaceContracts' phone bullets, the VM-47 FOR A LATER READER, the three tickets' bodies); the screens folder made gitignored | DONE (this commit) |
 | 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (this commit) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
 | 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (this commit) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) PENDING |
-| 3. VM-256 — the trace; the pins on the pre-fix tree | NOT-STARTED |
+| 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (this commit) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
 | 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | NOT-STARTED |
 | 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | NOT-STARTED |
 | 6. Phone + Mac `build-for-testing` green; READY-FOR-TESTS | NOT-STARTED |
@@ -372,3 +372,31 @@ Moved pins: `MobileNavigationTests.theTabBarCarriesThreeDoorsAndEachOneMovesTheB
 **A consequence, recorded (no ruling needed unless she objects at the walk):** a push into a NOTE takes the bar away at
 the push (the route says so at once) — the page sliding out keeps its empty reserved place at its foot; before, its
 own copy slid out with it. A pop back to a root or list brings the bar back at the pop. Captured at the walk.
+
+
+### VM-256 — a page she leaves returns to its root (R-260-5)
+
+**Traced mechanism.** Her report names no road, so the trace walked every road that changes a page or fills a stack.
+The BAR road already held the law on her wave-1 build: the bar shows only on roots and lists, a tab from a list
+returns the stack it leaves to its root (`tabSelected` → `popToRoot(leaving)`, P-47-19), and a swipe starts only on a
+root (`pagingAllowed`). Two roads did not:
+1. **A note asked for, landing after she left the page.** Every door that mints and then opens — the Library's and the
+   Bookcase's New Note, Today, a created book, a diverged copy — pushes when its mint returns, onto the stack it was
+   asked from (`libraryPath.append`, `shelfPath.append`, `push(_:in:)`), whatever page shows by then. A lagging runner
+   (VM-64's lags) is the window: New Note, nothing happens, Bookcase — the note is pushed onto the HIDDEN Library stack,
+   mounts, registers with the liveness authority and takes the pen while hidden (the authority's own forbidden state),
+   and it is what Library shows when she returns. This is the road that produces her sentence on this tree.
+2. **A page change that is not the bar's** — `adoptProtectionRequest` calls `selectPage(.shelf)` directly, so the page
+   left kept whatever stood on it (the bar's pop lived in `tabSelected`, not in the one page road).
+
+**Pins** (`VariorumMobileTests/MobilePageLeavingTests`):
+- `aNoteAskedForOnAPageSheLeftNeverStandsThere` — the Library's New Note then Bookcase in ONE turn (the door only
+  spawns its mint, so the page changes before it lands — the lag's window made deterministic, no store hold): no editor
+  registered and none live on the hidden page; the minted note kept; Library by the bar shows its root ("All" on the
+  window). Expected RED on old (a live editor on the hidden stack; the note where the Library should be). PENDING.
+- `leavingAPageClosesItsNoteAndSavepointsItOnce` — the ruling's sentence on the bar road: a note with unsaved words
+  opened from the Library, Versions over it, Bookcase by the bar → the note closes, exactly ONE quiet leaving
+  savepoint (`commit_point.kind = 'auto'`), Library shows its root, still one. A GUARD, expected GREEN on old (the bar
+  road already popped) — recorded as such, not as a red. PENDING.
+- The Protection-ask road (2) is not mounted in a pin (a bootstrap world is the Protection suites' heavy harness); it
+  is covered by construction — the pop moves INTO `selectPage`, the one page road every road takes.
