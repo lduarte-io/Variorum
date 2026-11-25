@@ -848,12 +848,25 @@ struct ShelfView: View {
     /// The ⌘K hint at the window's foot — and, at its trailing end, the
     /// board's QUIET RECEIPT home (18i's one slot; rows 103/108: the old
     /// report overlay drew over these words).
+    ///
+    /// **VX-409 (PROVISIONAL A-1082-3) — the hint YIELDS while the line
+    /// speaks.** The bar's static layout never overlapped (measured: the line
+    /// truncates in its room and ends before the hint), but the line ANIMATES
+    /// its arrival and leaving (`QuietReceiptLine.fade`) while the hint stayed
+    /// put, and for that beat her words ran onto it (VX-306's walk, W-7). So
+    /// while a receipt — or a standing ask — holds the line the hint is not
+    /// drawn and the line has the bar's trailing room to itself (a message
+    /// that still overflows truncates there, the whole sentence its hover);
+    /// when the line goes the hint returns at once in the layout but fades in
+    /// only after the line's own fade is over, so the leaving words never
+    /// cross it. No hairline: nothing follows a speaking line here now.
     private var hintBar: some View {
-        HStack(spacing: 12) {
+        let lineSpeaks = session.status.lineItem != nil
+        return HStack(spacing: 12) {
             Text(tokens.chromeLabel("⌘K — find anything: notes, books, commands"))
                 .lineLimit(1)
             Spacer(minLength: 12)
-            QuietReceiptLine(status: session.status, tokens: tokens, separated: true)
+            QuietReceiptLine(status: session.status, tokens: tokens)
                 #if DEBUG
                 // VX-409: where the quiet line sits in the bar (the pin reads
                 // it against the bar's own edge).
@@ -861,18 +874,24 @@ struct ShelfView: View {
                     BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintLineKey, $0, in: session, owner: oracleOwner)
                 }
                 #endif
-            Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
-                .lineLimit(1)
-                .fixedSize()
-                #if DEBUG
-                // VX-409: whether — and where — the ⌘J · ⌘N hint is drawn.
-                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintWordsKey, $0, in: session, owner: oracleOwner)
-                }
-                .onDisappear {
-                    BookcaseRowOracle.withdrawFrame(BookcaseRowOracle.hintWordsKey, in: session, owner: oracleOwner)
-                }
-                #endif
+            if !lineSpeaks {
+                Text(tokens.chromeLabel("⌘J today · ⌘N new note"))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .transition(.asymmetric(
+                        insertion: .opacity.animation(
+                            .easeIn(duration: QuietReceiptLine.fade).delay(QuietReceiptLine.fade)),
+                        removal: .identity))
+                    #if DEBUG
+                    // VX-409: whether — and where — the ⌘J · ⌘N hint is drawn.
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                        BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintWordsKey, $0, in: session, owner: oracleOwner)
+                    }
+                    .onDisappear {
+                        BookcaseRowOracle.withdrawFrame(BookcaseRowOracle.hintWordsKey, in: session, owner: oracleOwner)
+                    }
+                    #endif
+            }
         }
         .font(tokens.small)
         .foregroundStyle(tokens.faint)

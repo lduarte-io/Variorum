@@ -80,13 +80,19 @@
 import SwiftUI
 
 struct QuietReceiptLine: View {
+    /// The line's fade in and out (its arrival and leaving) — named so a bar
+    /// that times something to it reads the one number (VX-409: the
+    /// Bookcase's hint returns only after it).
+    static let fade: Double = 0.18
+
     let status: StatusCenter
     let tokens: VoiceTokens
-    /// 13n-c UX walk W-UX-15: a bar whose hint TEXT follows this slot (the
-    /// Bookcase's "⌘J today · ⌘N new note", a reading bar's page line) asks
-    /// for a hairline after a SPEAKING receipt, so its words — and its door's
-    /// "Open ›" — never run into the hint's. Drawn only while it speaks: an
-    /// idle slot still asks for zero width (the weightless claim).
+    /// 13n-c UX walk W-UX-15: a bar whose hint TEXT follows this slot (a
+    /// reading bar's page line) asks for a hairline after a SPEAKING receipt,
+    /// so its words — and its door's "Open ›" — never run into the hint's.
+    /// Drawn only while it speaks: an idle slot still asks for zero width
+    /// (the weightless claim). (The Bookcase's ⌘J · ⌘N hint asks for none
+    /// since VX-409: it yields while the line speaks.)
     var separated = false
 
     var body: some View {
@@ -169,7 +175,7 @@ struct QuietReceiptLine: View {
             }
         }
         .opacity(item == nil ? 0 : 1)
-        .animation(.easeInOut(duration: 0.18), value: item?.id)
+        .animation(.easeInOut(duration: Self.fade), value: item?.id)
         .accessibilityHidden(item == nil)
         .layoutPriority(-1)
     }
