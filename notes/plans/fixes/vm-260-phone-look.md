@@ -617,10 +617,12 @@ DerivedData.
 
 ## BATCH 1b — record (VM-265 · VM-275 · VM-277 · A-260-1's direction line; implementer: Opus, 2026-11-25)
 
-**What this batch did NOT do (kept current):** VM-277 is NOT BUILT — its design waits on the architect's ruling (the
-proposal subsection below; the brief's stop-and-propose); NO suite has run (the stage is coordinated above this
-session — every test claim below is PENDING until the GO); the walk and its captures are not done; no line in
-`Sources/`, `Sync/`, custody, `MobileEditorTextView` or the text-input path; the Mac's seam face and words untouched.
+**What this batch did NOT do (kept current):** NO suite has run (the stage is coordinated above this session — every
+test claim below is PENDING until the one window at this batch's close, A-260-7); the walk and its captures are not
+done; VM-277's headline does NOT yet reach the refusals spoken from the editor's own files (`MobileEditorViewModel`,
+`MobileStructural` — the gate's cross-block route, her recording's join refusal among them): those keep handing the
+plain sentence and draw through the ruled one-line clip (owner and road below); no line in `Sources/`, `Sync/`, custody,
+`MobileEditorTextView` or the text-input path; the Mac's seam face and words untouched.
 
 ### LIVE STATUS
 
@@ -633,11 +635,16 @@ session — every test claim below is PENDING until the GO); the walk and its ca
 | 4. VM-275 half 1 — a refusal raised in a note clears when she leaves it | DONE (`f3c310ef3`) — compiles; the suites PENDING |
 | 5. VM-275 half 2 — the squeeze, traced | TRACED: no row moves (a guard pin, expected GREEN on both trees ⇒ the literal mechanism HOLLOW — PENDING its run); what she saw is the line's face, whose cure is VM-277's anatomy — carried in the proposal below, NOT built |
 | 6. A-260-1 — the push door's made-but-not-opened outcome speaks a direction | DONE (`982390ada`) — compiles; the suites PENDING |
-| 7. VM-277 — the proposal (stop-and-propose) | DONE (this commit) — WAITING on the architect's ruling |
-| 8. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | DONE — phone `DerivedData/vm260-1b` (tip `1f005a89a`), Mac `DerivedData/vm260-1b-mac` (`85874a1b3`; the later commit touched phone-only files), both incremental clones of batch 1a's warm trees under `nice -n 15` (the coordinator's quiet window); the Mac guard `85874a1b3` added to the Mac leg; the run list below |
-| 9. The suites at the GO (red-on-old, the tip, the Mac legs) | PENDING |
-| 10. VM-277 built, after the ruling | WAITING (the ruling) |
-| 11. The walk (a refusal, a direction, a receipt; both voices) | PENDING |
+| 7. VM-277 — the proposal (stop-and-propose) | DONE (`68dc4b946`) — RULED A-260-4 (build as proposed); `isDirection` ACCEPTED A-260-3; half 2 HOLLOW A-260-5; C-275-1 accepted A-260-6 |
+| 8. Tranche 1's bundles and run list | DONE (`469dcae16`) — superseded by 14 |
+| 9. VM-277 pins on the pre-fix tree (+ the face's `lineFrame` seam) | DONE (`7199d7d9a`, compile fix `c8bfa668f` — **`c8bfa668f` IS VM-277's red-on-old tree**); built `DerivedData/vm260-1b-rol277` |
+| 10. VM-277 seam: `Item.refusalHeadline`, `refuse(headline:sentence:)`, `holdForReading(_:)`; the VM-61 fence extended; the seam's pins | DONE (`a7bcd326f`, its own commit ahead of the code) |
+| 11. VM-277 (a): the refusal table answers `RefusalWords` from each arm; 27 DRAFT headlines | DONE (`fe24082f8`) |
+| 12. VM-277 (b)–(e): the card, the refusal's one line with "›", the reason card held, the ✕ and the flick | DONE (`e81e3df68`) |
+| 13. VM-277 (a) wired: ten models' refusal slots carry the pair; membership and lenses speak it; the fix's own pins | DONE (`aac68d986`, pin margin `ca9a8d7be`) |
+| 14. The full batch's bundles: phone tip `vm260-1b` (`ca9a8d7be`), Mac tip `vm260-1b-mac` (`aac68d986` — the later commit is phone-test-only), red-on-old `vm260-1b-rol` + `vm260-1b-rol277`; READY-FOR-TESTS | DONE — all incremental, under `nice -n 15` (the quiet window) |
+| 15. The suites at the ONE window (R1, R2, P, M) | PENDING |
+| 16. The walk — the whole line (A-260-7) | PENDING |
 
 
 ### VM-265 — a direction reads in a neutral ink (P-55-19 → (b))
@@ -826,14 +833,77 @@ each door 44 × 44, the card clear of the bar and sides — the touch rule, the 
 reason); captures of a refusal (the line, the reason opened, dismissed), a direction and a receipt, both voices.
 
 
-### Batch 1b — READY-FOR-TESTS (the commands for the GO; nothing builds in the window)
+### VM-277 — as built (ruled A-260-4; PROVISIONAL (e) and every DRAFT word for her pass)
 
-All from `App/Variorum/`, zsh, `test-without-building` against the bundles already built; `UDID` = the device the GO
-names (iOS 26.2), booted fresh inside the claim, settled, shut down before release. Phone plans:
-`P=DerivedData/<folder>/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
+**(a) The short form, from one arm.** `Shared/RefusalWords.swift` — a sentence and an optional headline.
+`OpsRefusalCopy.refusal(for:roads:)` is the table's one switch, each arm answering `RefusalWords`; `words(for:roads:)`
+forwards `.sentence`, so the Mac, the MCP door and every String reader read byte-identical sentences. 27 DRAFT
+headlines sit on the long rows, in their own arms. Every row is one clause of at most 36 characters, pinned by a source walk. **The headline list
+for the closeout's Wording bundle is exactly those 27 `headline:` literals in `Shared/OpsRefusalTable.swift`, plus the
+rows still unauthored (they clip).** `OpsRefusalCopy.refusalWords(for:roads:)` is the phone's never-a-dump road as a pair.
+The seam: `refuse(headline:sentence:)` → `Item.refusalHeadline`, read by the phone's face alone (`text` stays the whole
+sentence for VoiceOver, pins and `spoken`). The phone: `MobileLine.refuse(_ words:)`. **Wired:** ten models' refusal
+slots (`MobileBookViewModel`, `MobileLibraryViewModel`, `MobileCreateBook`, `MobileScraps`, `MobileTagManager`,
+`MobileBookDetails`, `MobileShelfViewModel` — `lastError`; `MobileReferences`, `MobileNoteTags`, `MobileBlockList` —
+`status`) keep their String slot as a computed read of a stored pair (`lastRefusal`/`statusRefusal`), so every pin that
+reads them is unchanged, and their 30 table assignments hand the pair; `MobileMembership` and `MobileLenses` speak it
+through a `refuse(_:)` twin of their own `say`.
+- **NOT wired — fenced, with its owner:** the editor's own files speak table and cross-block sentences as plain strings
+  (`MobileEditorViewModel` — 9 table sites and the gate's cross-block route, her recording's join refusal among them;
+  `MobileStructural` — 2; `MobileComments` and `MobileTakesController` speak through the editor model's `report`). The
+  brief fences the text-input path and the editor seam, so they draw through the ruled clip: one line, "›", the whole
+  sentence on the tap, the ✕. Wiring each is one expression at its call. For the join refusal: a pair composed from
+  `CrossBlockRefusal`'s cause and road, whose nine causes need short forms. **Owner: the editor-seam work under a Fable
+  review (VM-271's core), or an orchestrator exception at the merge.** For the ticket list at closeout.
+- The Settings sheet's own notes (`tutorialNote`, `perfNote`) are in-sheet text, not the line — untouched.
+
+**(b) Dismissal.** A 44 × 44 ✕ (`xmark`, `PhoneIconButtonStyle`, the muted; spoken "Dismiss") plus a flick down
+(`MobileMessageLineModel.dismisses` — 24 pt of travel or a 64 pt throw; never up), on refusals and directions. P-55-3's
+refusal arm superseded (canon at the merge). Removals and offers keep their door and their fade.
+
+**(c) The reason on demand.** The whole one-line refusal is a button: its headline (or its sentence clipped with "…"),
+then "›" (`U+203A`, the muted); spoken as the headline, hint "Double-tap for the reason." (DRAFT), a Dismiss custom
+action. The arrival announcement reads the WHOLE sentence.
+
+**(d) The reason card.** The tap opens the card upward: the headline (semibold, the refusal's ink) over the whole
+sentence (her ink), or the sentence alone where unauthored; the ✕ top-right. The tap calls `holdForReading(id)`, so the
+seam's clock stops for that item. It closes on the ✕, a flick down, leaving the note (`MobileLine.leaveNote` → `clear()`),
+or a newer message (the face drops an open reason whose line is no longer the one showing). The reason wraps to at most
+eight lines (the table's longest is about four); no scroll was built (recorded against the proposal's "scrolling past a
+cap").
+
+**(e) The card — PROVISIONAL** (VM-275 half 2's cure). Every line floats `cardMargin` (8) clear of the screen's sides
+and of what it stands on — the bar, the keyboard, the home indicator. It is the room's ground with a hairline all
+round, corner `PhoneMetrics.Radius.standard` (batch 2's squarer step reaches it centrally), the words still at the 20 pt
+gutter (8 + 12). No shadow (a literal colour). A dismissable line's whole card takes a touch (the tap, the ✕, the
+flick); any other line only its door (`takesTouch(at:doorFrame:lineFrame:showing:)`).
+
+**Pins.** Red-on-old tree `c8bfa668f` (`MobileRefusalLineTests`): `aLongRefusalTakesOneLine`,
+`aRefusalCarriesItsDismissDoorAcrossFortyFour`, `aTapOpensTheReasonAndItStaysWhileSheReads`,
+`theLineIsACardClearOfTheBarAndTheSides` (both voices), `aDirectionIsDismissableAndReadsWhole` — RED ON OLD predicted;
+`aRemovalAndAnOfferKeepTheirDoorsAndNoDismiss` — a GUARD, green on both. The fix's own (tip only):
+`aHeadlineIsTheLineAndItsSentenceTheReason`, `theTableAnswersBothHalvesFromOneArm`,
+`everyAuthoredHeadlineIsOneShortClause`, `theAnatomyIsTheItemsFacts`, `theFlickDownDismissesAndANudgeDoesNot`,
+`theWholeCardTakesATouchOnlyForALineSheCanDismiss`; the seam's `MobileRefusalSeamTests` (3); the Mac's
+`VM61MacStatusSeamPinTests` scan now forbids `refusalHeadline`, `refuse(headline:` and `holdForReading`. One pin MOVED
+with (e): `MobileMessageLineFaceTests.theLinesActAnswersAcrossFortyFourOnAFortyFourLine` (the foot less `cardMargin`).
+The reason-hold pin runs a 250 ms clock read at 600 ms on the red-on-old tree (it fails at the missing door before any
+timing) and 500 ms read at 1.2 s at the tip (margin under load). All PENDING the window.
+
+**Canon owed at the merge** (the merging session's, two-file shape): SurfaceContracts' phone-line bullet — a refusal's
+one short line with its reason behind a tap, the ✕ and the flick, the card clear of the bar and sides, a direction's
+muted ink and ✕, a refusal raised in a note clearing as she leaves it. Plus the QUESTIONS #277 addendum: P-55-3's
+refusal arm superseded, P-55-19 → (b) built, C-275-1, A-260-1's line, P-260-1a. This run is the pointer.
+
+
+### Batch 1b — READY-FOR-TESTS (the FULL batch, both tranches — ONE window runs everything, A-260-7)
+
+All from `App/Variorum/`, zsh, `test-without-building` against the bundles already built (nothing builds in the window);
+`UDID` = the device the GO names (iOS 26.2), booted fresh inside the claim, settled, shut down before release. Phone plan:
+`DerivedData/<folder>/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`,
 `-destination "platform=iOS Simulator,id=$UDID"`.
 
-**R — red on old** (`vm260-1b-rol`, the pins tree `ea3f95831` — ONE run for every member):
+**R1 — red on old, tranche 1** (`vm260-1b-rol`, tree `ea3f95831`):
 `-only-testing:VariorumMobileTests/MobileLineDirectionTests -only-testing:VariorumMobileTests/MobileNoteClipboardTests
 -only-testing:VariorumMobileTests/MobileRefusalLeavesItsNoteTests -only-testing:VariorumMobileTests/MobilePushLandingDirectionTests`
 - Predicted RED (13): VM-265 — `MobileLineDirectionTests`: `aDirectionReadsMutedAndARefusalKeepsTheAlarm`,
@@ -846,26 +916,46 @@ names (iOS 26.2), booted fresh inside the claim, settled, shut down before relea
   A-260-1 — `aNoteMadeAfterSheLeftThePageSaysWhereItLanded`.
 - Predicted GREEN: `theDirectionsAreTheLandingsThatAreNotItsPlace`; every other `MobileNoteClipboardTests` test; the
   guards `aLineSaidBeforeTheNoteOpenedOutlivesItsLeaving`, `aRemovalSaidInTheNoteOutlivesItsLeaving`,
-  `aNoteMadeWhereSheStandsOpensAndSaysNothing`; and **`theListNeverMovesWhileTheLineShows` — green here is VM-275
-  half 2's HOLLOW verdict** (a red here would mean the trace is wrong: STOP and report, do not dispose it).
+  `aNoteMadeWhereSheStandsOpensAndSaysNothing`; and **`theListNeverMovesWhileTheLineShows` — green here confirms
+  A-260-5 (VM-275 half 2 hollow)**. A red there means the trace is wrong: STOP and report.
 
-**P — the tip, the whole phone target, one launch** (`vm260-1b`): `-only-testing:VariorumMobileTests` — read against
-main's known reds (batch 1a's run: 6 known issues, all pre-existing — `MobileFilterRowGeometryTests`' two Display-Zoom
-pins × 2, `MobileTrashTests`' empty-tree diagnostic × 2). Every suite that mounts the shell, a note or the line is in it.
+**R2 — red on old, VM-277** (`vm260-1b-rol277`, tree `c8bfa668f`): `-only-testing:VariorumMobileTests/MobileRefusalLineTests`
+- Predicted RED (5): `aLongRefusalTakesOneLine`, `aRefusalCarriesItsDismissDoorAcrossFortyFour`,
+  `aTapOpensTheReasonAndItStaysWhileSheReads`, `theLineIsACardClearOfTheBarAndTheSides`, `aDirectionIsDismissableAndReadsWhole`.
+- Predicted GREEN (1): `aRemovalAndAnOfferKeepTheirDoorsAndNoDismiss` (a guard).
+
+**P — the tip, the whole phone target, one launch** (`vm260-1b`, tip `ca9a8d7be`): `-only-testing:VariorumMobileTests`
+— read against main's known reds (batch 1a's run: 6 known issues, all pre-existing — `MobileFilterRowGeometryTests`' two
+Display-Zoom pins × 2, `MobileTrashTests`' empty-tree diagnostic × 2). It holds every new and moved pin above
+(`MobileRefusalLineTests` 12, `MobileRefusalSeamTests` 3, `MobileRefusalLeavesItsNoteTests` 5,
+`MobilePushLandingDirectionTests` 3, `MobileLineDirectionTests` 13) and every suite that mounts the shell, a note or the
+line, plus the ten rewired models' suites.
 
 **M — the Mac legs** (`DerivedData/vm260-1b-mac/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`,
-`-destination 'platform=macOS'`): `-only-testing:VariorumTests/<type>` for VM61MacStatusSeamPinTests StatusCenterTests
-StatusSeamVocabularyTests StatusToastPlacementRuleTests StatusToastPlacementShellTests WordsBandSurfaceTests (the suites
-over the one shared file this batch changed, `Shared/StatusCenter.swift`) and batch 1a's nine — ThemeTokenTests
-NoLiteralColourTests PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
-OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests (the token pins and every Mac suite that
-walks the whole phone tree, which this batch changed). Expected green but `IndexTierMetricsTests`' 4 declared known
-issues.
+`-destination 'platform=macOS'`): `-only-testing:VariorumTests/<type>` for:
+- the seam — VM61MacStatusSeamPinTests StatusCenterTests StatusSeamVocabularyTests StatusToastPlacementRuleTests
+  StatusToastPlacementShellTests WordsBandSurfaceTests;
+- the refusal table, whose arms now answer pairs (the sentences must read byte-identical) — OpsRefusalTableIntegrityTests
+  RefusalTableConvergenceTests VM62MacRefusalWordsPinTests MCPWireRefusalSweepTests;
+- batch 1a's nine — ThemeTokenTests NoLiteralColourTests PaletteDerivationTests BadgeFamilySplitTests
+  DataSafetySearchIndexTests OneInputPathTests OneRefreshAuthorityCompositionTests DeadVocabularyTests
+  IndexTierMetricsTests (the token pins and every Mac suite that walks the phone tree).
 
-**U — not owed:** the keyboard-reveal UI test's trigger is the Write screen's LAYOUT; this batch's `MobileWriteView.swift`
-edit is two calls on the note screen's appear/disappear (no layout, nothing in the editor host). Batch 2 runs it.
+Expected green, except `IndexTierMetricsTests`' 4 declared known issues.
 
-**W — the walk (a later GO, after VM-277 is built, so one walk covers the whole line):** the Debug phone app on a
-dedicated simulator, captures to `notes/plans/vm-260-screens/batch-1b/`, Study and Terminal: a refusal raised in a note,
-then Back — the Library with no line; a direction (the Trash's put back of an archived take, and A-260-1's line) in the
-muted; a removal's line with Undo; VM-277's line, its reason opened and dismissed.
+**U — not owed:** the keyboard-reveal UI test's trigger is the Write screen's LAYOUT. This batch's `MobileWriteView.swift`
+edit is two calls on the note screen's appear/disappear. The line is its own window, so its card above the keyboard
+moves no page. Batch 2 runs it.
+
+**W — the walk of the whole line** (A-260-7; the Debug phone app built from the tip on the same simulator, under the same
+claim or its own; captures to `notes/plans/vm-260-screens/batch-1b/`; Study and Terminal, light; stop list):
+1. A refusal in a note: an empty note's Copy (copy icon) → the one-line card, "›" and ✕ — capture.
+2. A tap on it: the reason card, the whole sentence — capture. Wait past six seconds — still there.
+3. The ✕ closes it. Raise it again, then flick it down — gone.
+4. A refusal raised in a note, then Back: the Library with no line (VM-275) — capture.
+5. A direction, muted, with its ✕ — the Trash's Put back of an archived take, or A-260-1's line (Library ▸ New Note,
+   then Bookcase at once) — capture.
+6. A removal's line with Undo (delete a note from its ⋯ — "Note moved to the Trash." with Undo), the card clear of the
+   bar — capture.
+7. With the keyboard up in a note, a refusal's card sits above the keyboard — capture.
+
