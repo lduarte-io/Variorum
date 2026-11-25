@@ -200,6 +200,20 @@ nonisolated enum ProtectionWords {
         case .adoptionSafetyCopy: return "Opened copy"
         }
     }
+    /// VX-524 (R-1013-A3, PROVISIONAL P-1013-5) — a Restore-list row's second line: its kind and where it sits, so a
+    /// backup standing both beside the library and in the picked folder reads as the two copies it is. The places are
+    /// Data Safety's own words (its count rows: "Beside your library", and the second folder); lower case after the
+    /// separator, as the pane's own count line continues ("Newest: … · 5 copies · back to …").
+    static func copyRowLine(kind: CopyKind, place: CatalogPlace) -> String {
+        "\(copyKind(kind)) \u{00B7} \(copyPlace(place))"
+    }
+    /// Where a listed copy sits.
+    static func copyPlace(_ place: CatalogPlace) -> String {
+        switch place {
+        case .container: return "beside your library"
+        case .farFolder: return "in your backup folder"
+        }
+    }
     /// The copy field's quiet note (an empty field tries your own pair — rule 4: your current secrets open older
     /// backups of the same library).
     static let makeMineCopySecretNote = "Leave it empty if your own passphrase and words open it."

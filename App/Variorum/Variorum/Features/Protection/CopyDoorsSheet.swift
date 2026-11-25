@@ -135,14 +135,14 @@ struct CopyDoorsSheet: View {
         return false
     }
 
-    /// One copy of the listing: its day and kind, and its doors — VX-309 U1c: *Delete…* where its library has a delete
-    /// choice (another library this Mac holds copies of — rule 19).
+    /// One copy of the listing: its day, its kind and where it sits (VX-524 — R-1013-A3), and its doors — VX-309 U1c:
+    /// *Delete…* where its library has a delete choice (another library this Mac holds copies of — rule 19).
     private func listingRow(_ row: CopyDoorRow, delete: CopyDeleteChoice?) -> some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.asOf.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? ProtectionWords.offerUnknownDay)
                     .font(.callout)
-                Text(ProtectionWords.copyKind(row.kind))
+                Text(ProtectionWords.copyRowLine(kind: row.kind, place: row.copy.place))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -316,7 +316,7 @@ struct RoadRestoreRows: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.asOf.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? ProtectionWords.offerUnknownDay)
                     .font(.callout)
-                Text(ProtectionWords.copyKind(row.kind))
+                Text(ProtectionWords.copyRowLine(kind: row.kind, place: row.copy.place))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
