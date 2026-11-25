@@ -10,6 +10,7 @@
 
 *(Written whole at closeout. Until then, the state in four lines.)*
 
+- **A successor orchestrator starts at `notes/plans/vx-1036-orchestrator-handoff.md`** (written 2026-11-24 at the first orchestrator's context seam). Sitting 2 is answered in part (rulings through R-1036-28); §4d amends §4b; the round-2 mockup is delivered; sitting 3 opens on it.
 - Sitting 1 is answered: §5 holds her reply and the rulings R-1036-1…9. §4b is the design as it stands (lanes L-1…L-11, tags T-A…T-D, new notes N-1…N-3, the dial D-1, Read titles RT-1, wings W-1…W-6); §4c is the round-1 mockup brief; §4 is the first read it grew from, kept as written.
 - The tickets: VX-1037 lanes · VX-1038 tags inside a book · VX-1039 the new-note defect and landing · VX-1040 the order dial · VX-1041 wings · VX-881 titles in Read — all sub-issues of VX-1036.
 - One schema event is accepted in principle (R-1036-5: the lanes column); its mirror deploy runs only at her go. Nothing is built.
@@ -405,6 +406,18 @@ And, sent while the reply was being worked:
 | R-1036-28 | **A Library-like view inside a book — asked, not ruled** — "maybe we just need to bring this library esque view into book somehow?" BL-1…BL-5, drawn on round 2 with the choice A / B. |
 
 **Still hers after this reply:** the lane-move rule (confirm §4d's four steps; the "not" refusal) · BL-4's A or B · T-6 (which pills a laned gathering leaves off) · T-2's when-it-moves · RT-1's weight · the order dial D-1 as drawn · all-wings Starred's order · whether Home can be reordered · which capture doors Q-1 means · the PROPOSED lines of §4b she has not spoken to (the empty lane, the move's undo, lane doors, bind → chapters).
+
+### Round-2 mockup — delivered 2026-11-24
+
+- `notes/plans/vx-1036/mockup-3-round-2.html` (`28fa116ff`) — frames 9 (first), 1, 2, 3, 4, 5, 6, 7, 8, 10; drawn by an Opus worker from §4e, on the round-1 files' CSS.
+- **Verified by the orchestrator:** committed and pushed; no external resource in the source; every frame id of §4e present; the removed Library line and her own tag words absent (the one match on a search is the Settings window's title); three frames rendered off-screen and looked at — frame 9 (the list mode) and frame 1 (header pills) in light, frame 5 (All wings) in dark. The builder reports looking at every frame in light and five in dark, and names what it did not re-view after a last edit (9b in dark, three crop-height changes, 1f's rename in light, 4c's lower edge; the on-hover scroll cannot be exercised headlessly — the always-moving copy was measured instead).
+- **What the builder had to choose** (drawn, none ruled): the list frames' navigator at 230 pt with the order dial on a second line; the list's headings on the Library's own header face with a count and a muted "+ new note"; "also: thursday" after the title; the dated word only where a note has a stated day; the edited stamp trailing whatever the book's order; on an open note "open ↗" stays after the title and the pills trail at the far right; wrapped pills right-aligned; the own-row pills under the title's start; the "+" field opening to the left of the pills in a header and to the right in a capture box, with "⏎ makes "rhubarb" a new tag."; six wing colour tokens (sea, clay, ochre, plum, slate, rose — the star's own blue left out); a colour dot per wing in the dropdown as the legend; "All wings" as the wing list's last row; the All Wings Library's masthead reading "all wings ▾" while the sidebar still says "in home"; rows wearing a small colour dot and no wing name; the search band's chip reading "in: all wings"; one merged answer with no per-wing groups; Starred in her one star order; the Wings pane's cards as grip · ⌘-number · swatch · name; the capture boxes' pills row under the typed words, one row taller at rest.
+- **What drawing it exposed:**
+  1. *The list wants width.* At the navigator's 300 pt a Library row with "also", three pills and a stamp overflows, and five modes cannot share the dial's line. Feeds BL-5 — HERS with BL-4.
+  2. *A title that fits while title + "also" + pills do not:* the pills wrap inside the trailing area. PROPOSED.
+  3. *Colour needs a legend:* the dots in the wing dropdown are it. PROPOSED.
+  4. *One switch or two for All wings:* the "take part in all-wings search" switch is read as also deciding who is in the All Wings Library. HERS to confirm.
+  5. *The search band's wing chip* reading "in: all wings" — kept as drawn; hers on sight.
 
 ---
 
