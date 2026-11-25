@@ -180,6 +180,20 @@ nothing).
 **The wording pass** was not ruled: she sent no edit. The sentences listed in the two handoffs stay provisional, and
 canon keeps that word on the Trash line's wording.
 
+## After the close (2026-11-24, her words)
+
+On the Air: "ok i've now installed 1.5 on sparkle on my air." Both Macs are on 1.5 (build 13416); VX-1073 narrows to
+the field guide's restore.
+
+On what was left for her: "the twelve exceptions seem fine to me for now. it's good that they're noted explicitly, if
+I want to change them later it's good to have them explicitly noted now. and 1046 being High is good. I don't want to
+handle snippets grant for AI right now - that should remain in backlog. the symbol-search design sitting can just be
+in to-do, stay as tagged lillian. with that all done, are we good on everything here?"
+
+What each became: the exceptions stand as stated; VX-1046 stays High; VX-1068 moved to Backlog, still seated under
+VX-1046; VX-1009 left in the Needs Lillian state (a ticket holds one state, and that one marks it as hers), with the
+question put back to her whether she wants the Todo state instead. QUESTIONS #278 addendum 2.
+
 ## The release's step 0
 
 - **What is owed:** FirstRunDrillTests and `Tools/WalkKit/first-run-walk.sh std` (both arms) on the code being

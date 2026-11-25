@@ -25,15 +25,15 @@ merged with its tickets tagged, and the coordinator's held items dealt with. All
   change to the library's local database, so 1.4 cannot open that library afterwards. A safety copy from just before
   the install is in your library's `Backups/safety-copies/A1-20261124-pre-1.5-install/`.
 - [ ] **Restore the field guide** (VX-1073): Help ▸ Restore Field Guide… on 1.5. Its AI chapter changed.
-- [ ] **The Air:** take the 1.5 update when Sparkle offers it.
+- [x] **The Air:** on 1.5 by Sparkle, the same evening (your word).
 - [ ] **The wording pass.** You sent no edits, so every new sentence from the two runs is still provisional. The lists
   are in `notes/handoffs/vx-980-handoff.md` and QUESTIONS #278.
-- [ ] **The twelve exceptions.** You agreed to them and asked what they were; they were listed for you in chat and are
-  in `notes/MCPSpec.md` beside the audit's pointer. Say so if you want one struck.
-- [ ] **VX-1046's priority.** I set the umbrella to High on your "important to get done soon". Change it if that reads
-  too strong.
-- [ ] **Still yours from the two runs:** VX-370 (a second MCP client on the Pro), VX-1009 (searching for symbols, a
-  design sitting), VX-1068 (what a Snippets grant for AI would name).
+- [x] **The twelve exceptions:** confirmed after you saw the list ("seem fine to me for now"). They stay written in
+  `notes/MCPSpec.md` beside the audit's pointer, so a later change has something explicit to change.
+- [x] **VX-1046's priority:** High, confirmed.
+- [ ] **Still yours from the two runs:** VX-370 (a second MCP client on the Pro) and VX-1009 (searching for symbols, a
+  design sitting; it stays marked as yours). VX-1068 (what a Snippets grant for AI would name) went to Backlog at your
+  word.
 - [ ] **Ambient, from its own handoff** (`~/dev/ambient/notes/vx-1035-handoff.md`): name the version, install it on
   the Air, and the taste list. None blocks anything.
 - [ ] **The Nov 22 sitting** (branch `vx-1033-nov-22-sitting`) still owes its close, and whether it merges is yours to
