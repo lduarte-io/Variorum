@@ -15,7 +15,8 @@
 //  · the slots behave as shipped (toast · quiet · off, one message at a time,
 //    the 6 s clock, the standing offer on the quiet line);
 //  · no Mac door says `removal`, `withdraw`s, or sets the placement — nor reads
-//    the phone face's direction fact (VM-265, `Item.isDirection`).
+//    the phone face's direction fact (VM-265, `Item.isDirection`), says or
+//    reads a refusal's headline, or holds the clock (VM-277).
 //
 //  **How a regression trips it:** a Mac build defaulting to the phone's
 //  placement reds the first pin and the slot pins (a quiet receipt would be
@@ -149,8 +150,11 @@ struct VM61MacStatusSeamPinTests {
             files.append(file)
         }
         // VM-265: `isDirection` is the phone face's fact — no Mac face reads it.
+        // VM-277: the refusal's short form and the reading hold are the phone's
+        // too — no Mac door says a headline, reads one, or holds the clock.
         let forbidden = [
             "status.removal(", ".withdraw(owner:", "status.placement =", ".phoneLine", "isDirection",
+            "refusalHeadline", "refuse(headline:", "holdForReading",
         ]
         var hits: [String] = []
         for file in files {

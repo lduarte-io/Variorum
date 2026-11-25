@@ -128,6 +128,14 @@ final class StatusCenter {
         /// its muted rather than the alarm. The Mac's face never reads it.
         /// Defaulted, so every other item reads unchanged.
         var isDirection: Bool = false
+        /// **VM-277 — a refusal's SHORT FORM** (A-260-4 (a)): the headline its
+        /// composer answered beside its sentence, from the same arm, so the
+        /// two cannot drift. Set by `refuse(headline:sentence:)` alone; `text`
+        /// stays the whole sentence for every reader (VoiceOver, pins,
+        /// `spoken`). Only the phone's FACE reads it — the one line's headline,
+        /// the sentence behind a tap; the Mac never says or reads it.
+        /// Defaulted nil (an unauthored refusal: the face clips its sentence).
+        var refusalHeadline: String? = nil
 
         struct Action: Equatable {
             let label: String
@@ -246,6 +254,32 @@ final class StatusCenter {
     /// behaviour — both still deliver exactly what `speak` delivered.)*
     func refuse(_ text: String) {
         deliver(text, kind: .refusal)
+    }
+
+    /// **VM-277 — REFUSE, with the composer's short form** (A-260-4 (a)).
+    /// Exactly `refuse(_:)` — the same trim, guard, slot and clock — with the
+    /// item carrying its headline (`Item.refusalHeadline`) for the phone's face.
+    /// A blank headline is no headline. The phone's alone: no Mac door calls it
+    /// (`VM61MacStatusSeamPinTests`).
+    func refuse(headline: String?, sentence: String) {
+        let trimmed = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let short = headline?.trimmingCharacters(in: .whitespacesAndNewlines)
+        place(Item(
+            id: UUID(), text: trimmed, kind: .refusal,
+            refusalHeadline: (short?.isEmpty ?? true) ? nil : short))
+    }
+
+    /// **VM-277 — the clock HOLDS while she reads** (A-260-4 (d): "the seam
+    /// gains `hold(_:)` — a lifetime door, not a kind; the seam owns the
+    /// clock"). The phone's face calls it as she opens a refusal's reason: the
+    /// item named stays until her ✕ or flick, her leaving the note (`clear()`),
+    /// or a newer message (which arms its own clock). Only the item showing is
+    /// held — an older id holds nothing. The phone's alone: no Mac door calls it.
+    func holdForReading(_ id: UUID) {
+        guard current?.id == id else { return }
+        dismissTask?.cancel()
+        dismissTask = nil
     }
 
     /// **OFFER — it carries a button; it is a question.** Always the toast,
