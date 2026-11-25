@@ -309,7 +309,14 @@ this branch and round 2's re-review covers it.
 
 ## BATCH 2 LIVE STATUS (the implementer's — round 1's fixes, then the VX-524 rider)
 
-*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight.*
+**NOT DONE BY THIS SESSION (first, per the contract):** (1) VX-524's face — the fork below is PROPOSED, not built; the
+architect rules (and the board's ticket text is the orchestrator's to correct). (2) The Mac target's suites under
+`xcodebuild test` — the gate's, under a stage claim; this session built the test bundle (`build-for-testing`) and ran
+the planted Protection suites HEADLESS in the harness instead. (3) No walk, no stage, no store touched, no Castle posture
+changed. (4) F-R1-3 has no code here by its final call (DEFERRED to VX-1090).
+
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. BATCH 2 DONE — every piece
+below is committed and pushed; round 2 (a fresh reviewer) reads it.*
 
 - PHASE A — DONE (`8f5f1f538`): the round-1 dispositions, each from this session's own read of the named code, under
   THE LADDER ▸ ROUND 1 DISPOSITIONS below. The reviewer's final calls landed at `30caec3fa` (ROUND 1 FINAL CALLS).
@@ -346,8 +353,17 @@ this branch and round 2's re-review covers it.
     Comments only — the harness run under B2 compiled `ProtectionOpenRoad.swift`; `AppBootstrap.swift` builds at B5.
   - B4 F-R1-3 — DONE (this commit): the closing disposition line under ROUND 1 DISPOSITIONS — DEFERRED to VX-1090; no
     code.
-  - B5 — NOT-STARTED: the Mac target `build-for-testing`, the phone build, the widened headless harness, the core suite.
-  - VX-524 — IN-PROGRESS. THE CONFIRM, pin first (this commit): `App/Variorum/VariorumTests/Protection/
+  - B5 — DONE (this commit; the runs at the batch's END, on `71410a6ab`, nothing else running): Mac target
+    `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` ⇒ `** TEST BUILD SUCCEEDED **`, zero
+    warnings in a file this batch touched. Phone target (`VariorumMobile`, `generic/platform=iOS Simulator`, a build — no
+    simulator booted) ⇒ `** BUILD SUCCEEDED **`. Headless harness, every planted suite it carries (the new
+    `CopyCountsAndRestoreListTests` linked in) ⇒ `✔ Test run with 214 tests in 36 suites passed` (batch 1's 210 + this
+    batch's 4; every pre-existing suite UNMODIFIED). Core package, full `swift test` (batch 2 changed NO core source —
+    `git diff 30caec3fa..HEAD -- Sources/` is empty) ⇒ `✔ 746 tests in 139 suites`, `━ 4204 tests in 579 suites passed …
+    with 5 known issues` (the VX-529 suites' own `withKnownIssue`s, untouched), `✔ 32 tests in 4 suites`, `EXIT 0`.
+    Parity: `git diff origin/main...HEAD -- Tests/ App/Variorum/VariorumTests/` shows only three NEW files
+    (`FarFolderUnreadTests`, `OpenFarFolderWaitTests`, `CopyCountsAndRestoreListTests`) — zero edits to an existing test.
+  - VX-524 — DONE AS FAR AS IT GOES WITHOUT A RULING (record-only + the fork). THE CONFIRM, pin first (`d9b91c896`): `App/Variorum/VariorumTests/Protection/
     CopyCountsAndRestoreListTests.swift` (new; 1 test) replays W-8's scene on a planted road through the REAL pair road
     (`takePairReporting` — the day's first pair beside the library AND, the picked folder due, its far copy; a second
     pair the same day beside the library only), the real lister and both real readers (`ProtectionCopyCounts.read`,
