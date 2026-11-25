@@ -216,8 +216,11 @@ public enum AssessRules {
         let rememberedCopies = facts.rememberedKeyFileCopies.map { !$0.isEmpty } ?? !facts.rememberedLibraryIDs.isEmpty
         // A key file of another library can't open the one this Mac remembers
         // (the other Mac's backups in a shared folder — census class (D)'s second
-        // road); with nothing remembered, any key file might.
-        let mightOpen = facts.catalog.keyFiles.contains { file in
+        // road); with nothing remembered, any key file might. VX-1013 (D-1013-3):
+        // a place the listing did not read might hold one — rule 27 is never
+        // claimed on a partial listing (the launch road's container-only read);
+        // the full listing that lands later decides.
+        let mightOpen = !facts.catalog.readsEveryPlace || facts.catalog.keyFiles.contains { file in
             guard let document = file.document else { return false }
             return facts.rememberedLibraryIDs.isEmpty || facts.rememberedLibraryIDs.contains(document.libraryID)
         }
@@ -275,10 +278,12 @@ public enum AssessRules {
                 // follows it (rule 1 — census class (K), VX-378 U4).
                 stale = true
             } else if liveKeyFile(facts, unlocked) == nil, unlocked.thisMac.actInFlight == nil,
-                      !backupHoldsTheCurrentKeyFile(facts, unlocked) {
+                      !backupMightHoldTheCurrentKeyFile(facts, unlocked) {
                 // RULE 27: opened (by a quiet road) with no key file anywhere —
                 // nothing to write back; said, never rebuilt. (A backup holding
-                // the current key's file is rule 21's offer — `acts`.)
+                // the current key's file is rule 21's offer — `acts`; one that
+                // MIGHT, in a place this listing did not read, owes the offer's
+                // search, which reads every place — VX-1013.)
                 faults.append(.noKeyFileAnywhere(NoKeyFileAnywhere(accountRoad: record.account != nil)))
             }
             if stale { repairs.append(.refreshMemory) }
@@ -298,7 +303,8 @@ public enum AssessRules {
             // RULE 27: and no home holds the library's own key file, nor does the
             // stray reach it through its history — said, never rebuilt.
             if unlocked.memory?.keyFileMirror?.fingerprint != unlocked.currentFingerprint,
-               !backupHoldsTheCurrentKeyFile(facts, unlocked), !rawLive.heldFingerprints.contains(unlocked.currentFingerprint) {
+               !backupMightHoldTheCurrentKeyFile(facts, unlocked),
+               !rawLive.heldFingerprints.contains(unlocked.currentFingerprint) {
                 faults.append(.noKeyFileAnywhere(NoKeyFileAnywhere(accountRoad: record.account != nil)))
             }
         }
@@ -499,9 +505,13 @@ public enum AssessRules {
         // copy can write back — and a home the app keeps key files in holds the
         // library's own (this Mac's keychain copy, a backup's): an offer, never a
         // refusal (nothing in flight).
+        // VX-1013 (D-1013-3): a backup that MIGHT hold it — in a place this
+        // listing did not read — owes the search too; the search reads every
+        // place and answers (the offer, or rule 27's refusal), so nothing here
+        // concludes from a place never read.
         if !ownActInFlight, liveKeyFile(facts, unlocked)?.fingerprint != unlocked.currentFingerprint,
            unlocked.memory?.keyFileMirror?.fingerprint == unlocked.currentFingerprint
-               ? liveKeyFile(facts, unlocked) != nil : backupHoldsTheCurrentKeyFile(facts, unlocked) {
+               ? liveKeyFile(facts, unlocked) != nil : backupMightHoldTheCurrentKeyFile(facts, unlocked) {
             acts.append(.offerKeyFile)
         }
         if touchID.rearmQuestion { acts.append(.touchIDRearmQuestion) }
@@ -537,6 +547,15 @@ public enum AssessRules {
     /// offer's search verifies it against the library (rule 21).
     static func backupHoldsTheCurrentKeyFile(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> Bool {
         facts.catalog.keyFiles.contains { $0.role != .live && $0.fingerprint == unlocked.currentFingerprint }
+    }
+
+    /// VX-1013 (D-1013-3) — the same question, never answered "no" on a
+    /// PARTIAL listing: a place the listing did not read might hold such a
+    /// file (the road's standing idiom — could not read is not "none"). Every
+    /// "none anywhere" reading of the fact (rule 27's two unlocked faults, the
+    /// offer's owing) reads this; a full listing answers exactly as before.
+    static func backupMightHoldTheCurrentKeyFile(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> Bool {
+        !facts.catalog.readsEveryPlace || backupHoldsTheCurrentKeyFile(facts, unlocked)
     }
 
     /// RULE 3: a library with no passphrase is asked for one right before its

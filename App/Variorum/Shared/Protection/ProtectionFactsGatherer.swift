@@ -39,14 +39,19 @@ nonisolated struct ProtectionFactsGatherer {
     let leaves: ExecutorLeaves
     let lister: CatalogLister
 
+    /// `catalog` (VX-1013, D-1013-2): the catalogue state the caller reads under — `.everything` (both roots, now) for
+    /// every caller but the launch road, whose reads take `.thisOpen` (the container now, the far folder as the open's
+    /// one walk has it). The custody listing's probe-by-name reads under the same state (`CatalogRead.probing`), so a
+    /// facts read never walks a folder its catalogue did not.
     func facts(
-        session: SessionFact, unlocked: UnlockedLibrary? = nil, touchIDPress: TouchIDPress? = nil
+        session: SessionFact, unlocked: UnlockedLibrary? = nil, touchIDPress: TouchIDPress? = nil,
+        catalog read: CatalogRead = .everything
     ) throws -> ProtectionFacts {
-        let catalog = lister.catalog()
+        let catalog = lister.catalog(read)
         let storeFile = Self.storeFileFact(at: places.slot)
         let custody: [CustodyItemFact]
         do {
-            custody = try leaves.custody.custodyItems()
+            custody = try CatalogRead.$probing.withValue(read) { try leaves.custody.custodyItems() }
         } catch {
             throw GatherError.custodyUnlistable(String(describing: error))
         }
