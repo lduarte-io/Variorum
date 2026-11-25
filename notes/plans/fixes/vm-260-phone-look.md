@@ -432,6 +432,23 @@ present):**
   sheet's header shows "Done" (end picking) beside "Done" (close the sheet). Pre-existing (PR20's picking
   door, `MobileBlockList.swift`; the code itself documents the collision), not this run's regression.
 
+**Her next words (2026-11-25 ~11:3x, in session, verbatim):**
+> "i also don't like the "2 books" under Home. we don't have shelves on here yet, but eventually each shelves
+> should have the numbers. in the meantime we just don't need numbers of the books i suppose until the shelves
+> are added. i also choose this one: B — the slim bar (VM-148's rhyme). i'll look at the top bar options now."
+
+- **R-260-11 — the Bookcase's count line GOES (supersedes R-260-1's "but it should have its count").** No book
+  count under the wing's name until the phone has shelves; when shelves come, each shelf carries its own
+  number. Built in batch 4 (the Bookcase's top line is batch 4's surface anyway: VM-259's option B gives
+  Bookcase and Starred the same slim line). The shelf-count half goes to the phone's shelves ticket as her
+  word, not built here.
+- **R-260-12 — VM-259 PICKED: option B, the slim bar** (`notes/plans/vm-260/vm-259-options.html` §B):
+  scrolling down, the Library's three rows (wing line, search, filters) condense into ONE pinned 44-pt line
+  (the wing's name small, the standing filter as a word, a search glyph, New Note); an upward nudge or the
+  search glyph re-opens the full top; every door stays reachable; Bookcase and Starred get the same slim line
+  (their name and their own doors). It rhymes with the note's top, whose pick (R-260-8, A or B) she is making
+  now. **Batch 4 builds both tops together after that pick.**
+
 ## Adjudications (the orchestrator's, repo-first)
 
 - **A-260-1 (on batch 1a's P-260-1a, 2026-11-25).** The built arm (a) STANDS — a note or book asked for on a page
@@ -586,7 +603,7 @@ present):**
 | Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | BUILT (tip `ca9a8d7be`; A-260-3…8) and WINDOW-RUN 2026-11-25: R1 the 13 predicted reds ALL present and `theListNeverMovesWhileTheLineShows` GREEN on old (A-260-5's hollow CONFIRMED); R2 exactly the 5 predicted reds, guard green; the LIVE line walk green at stops 1/2/3/4/6/7 in both passes (clock holds >6 s, ✕ and flick dismiss, leaves-with-its-note, Undo, card above keyboard), stop 5 inconclusive (driver race; semantics pinned green in P). RECONCILED 2026-11-25 (A-260-13; commits `39e608327` + `d3356f04e`): the leave step now pops the note's stack (Back's own act — the activation road never worked mounted), the card pin reads each class's first geometry in its own window; **VM-275 half 1's red-on-old moved to the corrected old tree `vm260-1b-rol-r`** (the amended window's R1r leg — red at the pin's own assertion predicted; a red at the walk step is a harness red again: stop and report). The trio rebuilt at `d3356f04e`; these pins' first green will be their first ever, said plainly; **FINAL WINDOW 2026-11-25 (09:53–10:14): R1r RED at the pin's OWN assertion (`:170`, `session.status.current == nil`), the three guards GREEN → VM-275 half 1 NOW FAILS CORRECTLY ON THE OLD CODE; on the tip the leave family and the card pin are GREEN, their first greens ever.** DONE pending the ladder |
 | Batch 2 (VM-273 · VM-272) | BUILT (code tip `ae12e4276`; A-260-9; VM-280) and WINDOW-RUN 2026-11-25: R red-on-old ESTABLISHED (every predicted red present, note-top doors Study-only exactly as predicted, all guards green); M GREEN (100/100, the 4 declared known). RECONCILED 2026-11-25 (A-260-12; commits `e39903b7d` + `2d4670d18`): the field draws 36 as designed and its pin reads the layout frame (the 44 was always there); the note top is exact at 136 (the 9 pt was invisible air on both trees), the cap TIGHTENED to 137, C-272-2 to her bundle; re-evidence bundles `vm260-2r{,-mac,-ui}` prebuilt, predicted green, riding the P3 window. Captures banked (18 before + 18 after, `batch-2/`); two throwaway-driver defects (voice carryover — the after run lacks Study shots; a centre-tap fallback opened a full note) — retakes fold into the gate window; **FINAL WINDOW: both reconciles GREEN on the tip: the field box 37.3 in a 44 frame (its own view 22, the VM-280 datapoint), the note top 136.0 in both voices; U 2/2 GREEN on `vm260-2r-ui`.** DONE pending the ladder |
 | Batch 3 (VM-247 · VM-254) | BUILT 2026-11-25 (code tip `54c0d1cc8`, record `5bbff189f`; adjudicated A-260-11); R3 red-on-old ESTABLISHED in the window (all 4 pins red as predicted, 19 issues); P3 + M3 queued as their own window (nov24, at VX-1082's SEAM or after); W3 captures fold into the gate window; U3 already GREEN (2/2, this window); **FINAL WINDOW: M3 GREEN (53/53 in 9 suites, the 4 declared known); P3 ONE unexpected red, `MobileTextSizeTests.theEditorFaceTakesTheStep` (`:145`, the UIKit row preview at the Larger step ≠ 14 × 1.125), owed to this batch's implementer, traced headless (hypotheses in the final-window section)** |
-| Batch 4 (VM-259: design → pick → build) | OPTIONS DRAWN (`notes/plans/vm-260/vm-259-options.html`, three live-scrolling frames at batch 2's corrected sizes) — HER PICK at the morning sitting; the build after it |
+| Batch 4 (VM-259 + the note's top + R-260-11) | VM-259 PICKED: B, the slim bar (R-260-12); the note's top drawn (`notes/plans/vm-260/note-top-options.html`, A or B — her pick pending, R-260-8); the Bookcase count line goes (R-260-11). Builds after batch 3b and her note-top pick |
 | Her phone (R-260-7) | INSTALLED 2026-11-25 ~11:0x at her word (*"install the build on my phone now"*): the signed device build at code tip `78ed5b4bb` (`DerivedData/vm260-device`, Release-iphoneos), `devicectl` to her iPhone 17 Pro, same bundle id (her store carried over). Her assessment on the phone is the run's real close |
 | Ladder · gate · walk | NOT STARTED |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
