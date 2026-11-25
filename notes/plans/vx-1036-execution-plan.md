@@ -204,6 +204,22 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 
 **Scope fences:** no schema, no `Sync/`, no custody, no editor-seam line (`EditorTextView`/`BlockRangeIndex`/`PaneSurface`) — the pills, switch and title live in BookView's SwiftUI card chrome and the shared chip; if you find you need an editor-seam line, STOP and report. Headless `swift build`/`swift test` freely — under `nice -n 15`, one heavy command at a time, until the orchestrator says "load cleared". You do NOT run `xcodebuild test`: name the two-tier suite list for the stage in LIVE STATUS (grep the tests for every touched type). All rendered words sentence case, public-copy quality. Tests at the END of each piece. When done: LIVE STATUS flipped with DONE(hash) + evidence per piece, PROVISIONALs listed with alternatives, everything pushed, report back — including the headless-rendered captures' paths for HER morning checklist (the three-position switch and the "…"-at-rest title are two of the run's owed faces).
 
+#### BATCH 2 — LIVE STATUS (the implementer's; flipped per piece in the same commit as the piece)
+
+*Base: `5725055a0`. Required reading done in full before any code: this file's §1, §2, §3 batch 2, §7 rows 3–5/12/15, §8's batch 1 LIVE STATUS, §9; the design record's §4b (tags T-A…T-D, N-1…N-3), §4d (T-1…T-6), §4f, §5 (sittings 1–3 and the build kickoff, R-1036-18/-19/-20/-30/-34/-35/-39/-46 and the abeyance line), §9 P-1…P-9; `notes/SessionResiliencyProtocol.md`; mockup-3 frames 1 (all six states + the 3× crop), 2 and 10, rendered headless into the scratchpad (never a window on her screen).*
+
+**Machinery and adjudications so far:** the ⌘⇧H collision sweep ran BEFORE any wiring (the chord table, every `.keyboardShortcut(` call site, NSMenuItem equivalents, both `performKeyEquivalent` overrides, all 15 local key monitors) — ⌘⇧H is FREE; but it found that T-4's act already exists with a chord (`.tagNote`, ⌘⇧I). Reported to the orchestrator mid-run; its call (committed `5725055a0`): **P5 builds option (B), PROVISIONAL P-1036-B2-P5** — ⌘⇧I extends to the book surface; nothing is wired to ⌘⇧H; no guide lesson, helper line or pin moves.
+
+| Piece | Status |
+|---|---|
+| P1 — VX-1081 the pill's × (pin/trace first) + the chip's move to `Core/Views` (3C parity) | IN-PROGRESS — the trace and the geometry oracle next |
+| P2 — T-1 pills in the card header (collapsed card + open header) | NOT-STARTED |
+| P3 — T-3 the "+" field (adopt-or-mint, the one road) + rider VX-576 most-used-first | NOT-STARTED |
+| P4 — T-5/R-1036-39 the three-position per-book switch + the pure placing-tags Domain rule | NOT-STARTED |
+| P5 — T-4 as (B): `.tagNote` (⌘⇧I) reaches the book's "+" field on the note she is on | NOT-STARTED |
+| P6 — VX-1080 the radio-scroll long title (`WingMarquee` extended, "…" at rest) | NOT-STARTED |
+| P7 — ledger row 15: a mint in Read switches to Outline and lands live | NOT-STARTED |
+
 ## 9. The kickoff sitting (2026-11-25, answered by dialog)
 
 Her picks, verbatim from the dialog: the batch cut — **"Approve the four batches"**; the ladder — **"opus-reviewer"** (escalates to Fable if any batch unexpectedly touches the editor seam); the riders — **VX-1091, VX-576, VX-96** (VX-1032, VX-312 and VX-410 offered, not taken); Index — **"Confirm — Index gets nothing"** (the List mode is the managing face; cheap to add later if she misses it in use). The riders became sub-issues of VX-1036 at the sitting (the roster stays the listing). The add-tag chord (T-4) still comes to her mid-run from batch 2. The nov24 coordinator's merge-order note, recorded: VX-1082 is two batches further along and likely merges first — after its merge this run merges main in and re-runs the BookView/Library suites before its own merge REQUEST.
