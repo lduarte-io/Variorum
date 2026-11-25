@@ -1358,7 +1358,8 @@ not this pass.
   accent when sealed) with only the 44 × 44 frame, centres 44 apart (road (b), the central style).
 - **The chips** read `chip` at 13; each chip's hit area is now at least **44 × 44** (it was 44 tall only).
 - **The rows sit on one another**: the gaps 4 → 0, the air above 10 → 0 (the title row's own 44 carries its air, the
-  system bar sits above), below 8 → 4. **158 → 136 pt at one chip row** (202 → 180 wrapped).
+  system bar sits above), below 8 → 4. **158 → 136 pt at one chip row** (202 → 180 wrapped) — as MEASURED, 167 → 136:
+  the reconcile (R2, below) found `safeAreaInset`'s default 8 and a baseline point on both trees, and took them out.
 - **What is left is the targets themselves** — three rows of 44. More room is VM-148's road (the mockup P-47-20
   describes: the tools in the top row beside the back button, the chips in one sideways row) — not built here.
 - **For batch 3 (R-260-2):** the note title already stepped 24 → 20 here; its one-notch default drop should read
@@ -1566,6 +1567,30 @@ box 39 and the "frame" 39.
   `theFieldIsAtLeastFortyFourTallAndGrowsWithItsText` GREEN (the frame 44 at every chrome size; her words' field at AX5
   grows: its own view ≥ its line, + 8); every other field pin untouched (the placeholder's pixel pin reads inside the
   text field's own view). Build: `DerivedData/vm260-2r` (an APFS clone of `vm260-3`, incremental, `nice -n 15`) — `TEST BUILD SUCCEEDED`.
+
+**Piece R2 — the note's top: the 9 pt was air, on both trees; taken out (C-272-1 means it), the cap tightened to the
+exact arithmetic.** The window: tip `chrome 145.0` (Study) / `144.33` (Terminal), the title row at (20, 54, 44, 44) —
+it starts at the safe area's top, so nothing sits above it; and the OLD tree's line, `chrome 167.0` / `166.33` with the
+title row at y 64 (its 10 above). My arithmetic said 158 → 136; both trees measured exactly **9.0 pt more in Study and
+8.33 in Terminal** — so the miss was never this batch's change (167 − 145 = 22 = the padding it removed, to the point).
+The split, from the two voices' difference:
+- **8 pt fixed — `safeAreaInset`'s default spacing.** `.safeAreaInset(edge: .top) { masthead }` takes `spacing: nil`,
+  the system's default gap between the inset and the content: 8 pt of air between the last chip row and her text,
+  under the masthead's own 8 (now 4) — invisible in the source, counted by neither number. (The bar's place already
+  spells it out for the same reason: `.safeAreaInset(edge: .bottom, spacing: 0) { barSpace }`.) Now `spacing: 0`.
+- **1.0 / 0.33 pt font-dependent — the title row on the title's baseline.** `HStack(alignment: .firstTextBaseline)`
+  aligned the four tools' glyph baselines to the title's, so the 44-pt tool targets hung below the title's 44 (Iowan
+  20: 1.0; SF Mono 18: 0.33) — the only row whose height depends on a font (the membership line and the chip row are a
+  13-pt word inside a 44 frame). Now `alignment: .center`: every door on the row is a 44 target, so the row is 44
+  exactly, the glyphs centred on the title's line. **C-272-2 (PROVISIONAL, with the set):** the title and its tools
+  align by centre, not baseline — a point's difference in where the glyphs sit, her eye's at the captures.
+- **Predicted at the next window:** `theNoteTopGivesTheScreenBackToWriting` GREEN both voices at **136.0** (44 + 44 + 44
+  + 4, no font in the sum); its cap MOVED 140 → **137** (`3 × 44 + mastheadBottom + 1`) — the layout is now exact, so
+  the pin states the design to the point; it stays red on old (167, measured). `everyDoorOnTheNoteTopAnswersAcrossFortyFour`
+  and `theToolsAreOneRowOfFortyFourSquareTargets` GREEN (unchanged targets; the tools' centres still 44 apart, one row).
+  The keyboard-reveal UI test (U) owes a re-run on this tree — the Write screen's layout moved (8 pt more page): its law
+  is relative (the tapped line rises above the keyboard bar), so GREEN is predicted.
+- The VM-272 "as built" line above ("158 → 136") reads, measured: **167 → 136** at one chip row.
 
 ## BATCH 3 — record (VM-247 · VM-254; implementer: Opus, a fresh session, 2026-11-25)
 

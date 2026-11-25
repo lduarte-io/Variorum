@@ -14,7 +14,8 @@
 //
 //  THE PINS, on the app's own screen (`MobileWriteScreen` with the model it
 //  drove — the screen's own test seam), in both voices:
-//  · the chrome above the text — RED ON OLD (158 against ≤ 140);
+//  · the chrome above the text — RED ON OLD (measured 167 / 166.3 in the
+//    batch-2 window; the cap now 137 since the reconcile, below);
 //  · every door on the note's top answers across 44 × 44 — RED ON OLD in Study
 //    (the tags and lens chips' widths);
 //  · the four tools are one 44 pt row of 44 × 44 targets, centres 44 apart — a
@@ -72,9 +73,17 @@ struct MobileNoteTopTests {
     }
 
     /// **RED ON OLD — "the top part is so huge".** The chrome between the top
-    /// of the screen's safe area and the first line of her text: three rows of
-    /// 44 pt targets and no more than 8 pt besides (≤ 140) — it was 158. And
-    /// never less than the three rows: the targets stay.
+    /// of the screen's safe area and the top of her text: three rows of 44 pt
+    /// targets and the 4 below them (≤ 137, a point for rounding) — the old
+    /// tree measured 167 / 166.3. And never less than the three rows: the
+    /// targets stay.
+    ///
+    /// RECONCILED (the batch-2 window measured the tip at 145.0 / 144.3 against
+    /// a cap of 140 — the arithmetic 136 missed 9 pt, on the old tree too): 8 of
+    /// it was `safeAreaInset`'s default spacing under the masthead (now
+    /// `spacing: 0`), the rest the title row on its title's baseline, the tools
+    /// hanging a point below their 44 (Study 1.0, Terminal 0.3 — now centred).
+    /// Both gone, the layout is exact, so the cap tightened 140 → 137.
     @Test(arguments: [ThemeVoice.study, .terminal])
     func theNoteTopGivesTheScreenBackToWriting(voice: ThemeVoice) async throws {
         try await mounted(voice) { model, surface in
@@ -85,7 +94,7 @@ struct MobileNoteTopTests {
             let title = surface.element(labeled: "Rename Note")?.accessibilityFrame ?? .null
             print("PERF[sim] VM-272 note top \(voice): chrome \(chrome) (text at \(textTop), safe top \(safeTop), "
                   + "title row \(title))")
-            #expect(chrome <= 3 * PhoneMetrics.touchMinimum + 8,
+            #expect(chrome <= 3 * PhoneMetrics.touchMinimum + MobileWriteScreen.mastheadBottom + 1,
                     "\(voice): the note's top takes \(chrome) pt above her text")
             #expect(chrome >= 3 * PhoneMetrics.touchMinimum - 0.5,
                     "\(voice): three rows of 44 pt targets stay (\(chrome))")

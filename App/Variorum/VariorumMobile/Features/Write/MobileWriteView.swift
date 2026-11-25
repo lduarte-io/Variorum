@@ -211,7 +211,12 @@ struct MobileWriteScreen: View {
             // band — the note's ground at both edges, so with the keyboard up the
             // keyboard and its bar sit over her page, never the bare window.
             .mobileEdgeGrounds(top: noteGround, bottom: noteGround)
-            .safeAreaInset(edge: .top) { masthead }
+            // VM-272 (the batch-2 reconcile): no hidden gap under the masthead.
+            // `safeAreaInset`'s default spacing put the system's 8 pt between
+            // it and her text — air under air, uncounted by the 158 / 136
+            // arithmetic and measured by the window (167 / 145). Its 4 below
+            // is the note's top's one gap.
+            .safeAreaInset(edge: .top, spacing: 0) { masthead }
             .task {
                 // Wiring COMPLETES before the infinite observation loops
                 // (S3 ladder, MAJOR 2 — `start()` never returns while the
@@ -282,10 +287,15 @@ struct MobileWriteScreen: View {
         // VM-272 (the VM-260 run, batch 2 — her "the top part is so huge it
         // takes up half of the area"): the rows sit on one another. Each row is
         // its doors' 44 pt targets, and a 44 already carries its word's air, so
-        // the 4 pt gaps between them (and the 10 above, the 8 below) were air
-        // stacked on air — 158 pt at one chip row, now 136.
+        // the 4 pt gaps between them (and the 10 above, the 8 below — and the
+        // inset's own 8, the reconcile's) were air stacked on air: 167 pt at
+        // one chip row as measured, now 136.
         return VStack(alignment: .leading, spacing: Self.mastheadRowGap) {
-            HStack(alignment: .firstTextBaseline) {
+            // The reconcile: the title row's doors align by their CENTRES —
+            // every one is a 44 pt target, so the row is exactly 44. On the
+            // title's baseline the tools hung a point below it (Study 1.0,
+            // Terminal 0.3 — the window's 145 against 144.3).
+            HStack(alignment: .center) {
                 // Rename note (parity C2 — "full app functionality"): the
                 // title IS the door; an alert confirms, so a stray tap
                 // costs nothing. The field edits the STORED title (the
