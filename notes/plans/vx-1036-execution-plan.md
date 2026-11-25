@@ -147,6 +147,21 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 
 **The order of work:** pins FIRST (Pin A reveal:false doors · Pin B the reveal race, SUSPECTED — if the pin is GREEN on old code the finding is hollow: record it, don't fix it · VX-96's own pin · the wire-placement pin green-on-old as the unchanged-behavior baseline), then the fixes and N-1/N-2/N-3/D-1, then the suite for every file you touched. Tests at the END of each piece, never a full suite at the start. Headless `swift build`/`swift test` freely; you do NOT run `xcodebuild test` — name the suites you'd run and the orchestrator takes them through the nov24 stage. UI acceptance is the ORCHESTRATOR'S walk, not yours; your "done" is a claim with evidence lines. Refusal copy for any new door (the chapter "+") is declared in the registry (P-1) and worded as public copy, sentence case. When done: flip LIVE STATUS, state per piece DONE(hash)/evidence, list anything PENDING honestly, push, report.
 
+#### BATCH 1 — LIVE STATUS (the implementer's; flipped per piece in the same commit as the piece)
+
+*Base: `dd5c2f646`. Required reading done in full before any code (this file's §1/§2/§3 batch 1/§8/§9; the design record's §3a, §4b N-1…N-3 + D-1, §4f, §5 R-1036-8/-33, §9 P-1…P-9; `notes/MCPSpec.md` whole; `notes/SessionResiliencyProtocol.md`; the VX-92 record + its round-1/2 report; mockup-1 frames 8 and 9). The trace's coordinates re-verified on this tree: the navigator foot's three `reveal: false` doors at `BookView.swift:1162` (gathering) · `:1494` (+ new entry) · `:1503` (+ new note); the race at `:2714–2717`; `newPostInReading` at `Operations+Reading.swift:872`; the dial's save door at `BookMastheadModeRow.swift:391–394`; VX-96's consume at `BookView.swift:2724` (`landOutlineReveal`), the consult at `BookViewModel.swift:609–615`.*
+
+**A finding from the reading, before any pin:** the wire's `create_note` with `book_id` does NOT file through `newPostInReading` — it mints through `mintNoteEntry` → `addPostToReading(db, …, at: .end)` + the section write (`Operations+MCPWrites.swift:696–705`). So the op change cannot reach the wire by construction; Pin D proves it stays so (green before and after).
+
+| Piece | Status |
+|---|---|
+| P0 — pins first: A (source pin, the doors' landing) · B (hosted, the reveal race — the CONFIRM) · C (VX-96, the consult across the consume) · D (the wire's mint placement, headless) | NOT-STARTED |
+| P1 — `newPostInReading` placement (`at:` anchor + section; defaults byte-for-byte today's) + the pure Domain placement rule + state tests (headless) | NOT-STARTED |
+| P2 — N-1/N-2/N-3: the ONE mint act lands every door's note (live, caret in it) after the entries deliver it; "the note she is on"; the window widens to hold it; the chapter's own "+ new note" on the outline page heading, declared once (P-1) | NOT-STARTED |
+| P3 — VX-96: `travelingTo` held for the landing's lifetime (set with the reveal, cleared at settle / give-up / hand-over, a superseding landing, the Outline leaving) | NOT-STARTED |
+| P4 — D-1: the dial saves at once on a gathering and a non-manual book; a hand-ordered book's look shows "Save as This Book's Order" + "Back to manual order"; a finished book looks only | NOT-STARTED |
+| P5 — the Mac-app suites named for the stage run; the revert recipes for the app-target pins | NOT-STARTED |
+
 ## 9. The kickoff sitting (2026-11-25, answered by dialog)
 
 Her picks, verbatim from the dialog: the batch cut — **"Approve the four batches"**; the ladder — **"opus-reviewer"** (escalates to Fable if any batch unexpectedly touches the editor seam); the riders — **VX-1091, VX-576, VX-96** (VX-1032, VX-312 and VX-410 offered, not taken); Index — **"Confirm — Index gets nothing"** (the List mode is the managing face; cheap to add later if she misses it in use). The riders became sub-issues of VX-1036 at the sitting (the roster stays the listing). The add-tag chord (T-4) still comes to her mid-run from batch 2. The nov24 coordinator's merge-order note, recorded: VX-1082 is two batches further along and likely merges first — after its merge this run merges main in and re-runs the BookView/Library suites before its own merge REQUEST.
