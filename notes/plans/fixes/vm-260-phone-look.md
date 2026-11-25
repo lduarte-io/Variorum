@@ -323,7 +323,7 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon, this record's binding sections, the resiliency protocol, SurfaceContracts' phone bullets, the VM-47 FOR A LATER READER, the three tickets' bodies); the screens folder made gitignored | DONE (this commit) |
-| 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | NOT-STARTED |
+| 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (this commit) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
 | 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | NOT-STARTED |
 | 3. VM-256 — the trace; the pins on the pre-fix tree | NOT-STARTED |
 | 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | NOT-STARTED |
@@ -331,3 +331,26 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 | 6. Phone + Mac `build-for-testing` green; READY-FOR-TESTS | NOT-STARTED |
 | 7. The suites (each pin red on old by behavioural revert, then the batch's suites green) | PENDING (needs the stage GO) |
 | 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (needs the stage GO) |
+
+
+### VM-253 — the bar rides the page slide
+
+**Traced mechanism.** The bar was never the shell's: each root drew its own copy at the foot of its VStack
+(`tabBar()` in `MobileStarredView`, `MobileShelfView`, `MobileLibraryView`; the shell handed each `{ tabBar }`), and
+each root sits inside `MobileShellView.page(_:width:)`, whose `.offset(x:)` moves the whole page by the band's live
+drag and by the settle's animation of `tab` — so a swipe slid the Bookcase's copy out and the Library's copy in, two
+half-bars meeting at the seam (a pushed list wore a fourth copy inside its stack, `listBar`).
+
+**The seam the pins need.** `MobileShellView(heldDrag:)` — a band drag held at an offset, zero in the app (the
+`MobileWriteScreen(editor:)` test-seam precedent), clamped by the band's own rule: a real `DragGesture` is not
+drivable in process, and mid-flight is where the defect lives. Committed with the pins, so the pre-fix tree for the
+red-on-old run is exactly this commit.
+
+**Pins** (`VariorumMobileTests/MobileTabBarStaysStillTests`):
+- `theBarIsDrawnOnceByTheShell` — one copy of each bar door in the whole walk, at rest and with the Library's Trash
+  pushed, at the same frames. Expected RED on old: three copies at rest, four with the list. PENDING.
+- `midSwipeTheBarHasNotMoved` — the band held 160 pt toward the Library: the Library's "All" door is on the window
+  (the band moved) and every bar door is on the window once, at its resting frame, the chip still on the Bookcase.
+  Expected RED on old: "Bookcase" on the window twice, "Library" and "Starred" 160 pt off. PENDING.
+- `aPageChangeMovesOnlyTheChip` — a guard (green on both by construction: at rest the old copies coincide; the motion
+  was mid-flight). PENDING.

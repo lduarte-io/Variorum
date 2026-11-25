@@ -123,6 +123,13 @@ struct MobileShellView: View {
     /// glides forward, or the band's most frequent release is its ugliest.
     @GestureState(resetTransaction: Transaction(animation: MobileShellView.settle))
     private var bandDrag: CGFloat = 0
+    /// **A band drag HELD at this offset — a TEST SEAM and nothing else** (VM-253;
+    /// `MobileWriteScreen`'s `editor:` precedent): the app passes nothing, so it is
+    /// zero and the band is exactly the finger's. A pin hands in a value to draw the
+    /// band MID-SWIPE — the frame VM-253 is about — which no in-process harness can
+    /// reach with a real finger (a `DragGesture` is not drivable through
+    /// `accessibilityActivate`). Clamped by the band's own rule, as a finger is.
+    private let heldDrag: CGFloat
     /// **THE DIRECTION LATCH**, decided once per gesture and then not
     /// re-asked: `nil` while undecided, `true` for a page, `false` for a
     /// drag this band has declined (a vertical scroll). Without the latch a
@@ -178,12 +185,13 @@ struct MobileShellView: View {
 
     init(
         session: AppSession, services: AppServices?, router: MobileShellRouter,
-        bootstrap: AppBootstrap? = nil
+        bootstrap: AppBootstrap? = nil, heldDrag: CGFloat = 0
     ) {
         self.session = session
         self.services = services
         self.router = router
         self.bootstrap = bootstrap
+        self.heldDrag = heldDrag
         _shelfModel = State(initialValue: MobileShelfViewModel(session: session))
         _libraryModel = State(initialValue: MobileLibraryViewModel(session: session))
         _scrapsModel = State(initialValue: MobileScrapsModel(session: session))
@@ -420,7 +428,7 @@ struct MobileShellView: View {
         content()
             .offset(
                 x: MobileShellBand.offset(
-                    for: owner, current: tab, drag: bandDrag, width: width))
+                    for: owner, current: tab, drag: drag(width: width), width: width))
             .allowsHitTesting(tab == owner)
             .accessibilityHidden(tab != owner)
             // VM-47 (the walk's W-C2): what a page's fields read so a page that
@@ -441,7 +449,13 @@ struct MobileShellView: View {
     /// held page's first fetch re-asks it.
     private func libraryOnScreen(width: CGFloat) -> Bool {
         libraryPath.isEmpty
-            && MobileShellBand.isDrawn(.library, current: tab, drag: bandDrag, width: width)
+            && MobileShellBand.isDrawn(.library, current: tab, drag: drag(width: width), width: width)
+    }
+
+    /// The band's drag as the pages read it: the finger's (already clamped by the
+    /// gesture), plus the held test seam, clamped by the same rule (zero in the app).
+    private func drag(width: CGFloat) -> CGFloat {
+        bandDrag + MobileShellBand.clampedDrag(heldDrag, current: tab, width: width)
     }
 
     /// **THE ROOT-SURFACES-ONLY RULE.** The band pages only while the
