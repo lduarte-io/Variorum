@@ -966,3 +966,117 @@ claim or its own; captures to `notes/plans/vm-260-screens/batch-1b/`; Study and 
    bar — capture.
 7. With the keyboard up in a note, a refusal's card sits above the keyboard — capture.
 
+
+
+## BATCH 2 — record (VM-273 · VM-272; implementer: Opus, 2026-11-25)
+
+**What this batch did NOT do (kept current):** NO suite has run — the stage is coordinated above this session (the quiet
+window), so every test claim below is PENDING its window; no capture is taken (the window's stops are listed at the
+READY block); no line in `Sources/`, `Sync/`, custody, `MobileEditorTextView`, the text-input path or the keyboard bar
+(`MobileKeyboardBar` keeps its own ruled numbers, R22/R25); `VoiceTokens.swift` untouched; `Shared/StatusCenter.swift`
+untouched; her words' sizes untouched except the note title (VM-272's — flagged for batch 3 below); the segmented
+choice's drawing untouched (a remainder, below); no masthead rebuild (VM-148's).
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's binding sections, R-260-2, S-260-2/-3, the adjudications, batches 1a and 1b; the resiliency protocol; SurfaceContracts "The app" in full and the Library's phone bullet; the VM-47 FOR A LATER READER and §5's P-47-1, P-47-12, P-47-21; the sizing sheet; LK-5 in the VM-44 rulings) | DONE (this commit) |
+| 1. The pins on the pre-fix tree — VM-273's drawn sizes, radii and chrome roles; VM-272's note top | NOT-STARTED |
+| 2. The red-on-old tree built headless (`DerivedData/vm260-2-rol`) | NOT-STARTED |
+| 3. VM-273 — the central step-down (`PhoneType` chrome roles, `PhoneControls` glyph · chip · box, `PhoneMetrics` radii) | NOT-STARTED — the settled design is the tables below |
+| 4. VM-272 — the note's top (`MobileWriteView`'s chrome only) | NOT-STARTED — the settled design below |
+| 5. Pins MOVED with the rulings | NOT-STARTED |
+| 6. Tip bundles (`vm260-2`, `vm260-2-mac`, `vm260-2-ui`) and READY-FOR-TESTS | NOT-STARTED |
+| 7. The window — red-on-old, the whole phone target, the Mac legs, the keyboard-reveal UI test, the captures | PENDING (the GO) |
+
+### The traced mechanism — "ridiculously oversized icons", "the top part is so huge it takes up half of the area"
+
+The targets were never what she saw: `phoneHitArea` and the 44-pt frames are invisible. What she saw is that wave 1
+drew most controls at or near the size of their targets (the sizing sheet's §B/§E, built as drawn, P-47-1):
+- **the icon button** drew a 22-pt glyph in ink inside its 44 (`PhoneControlMetrics.iconGlyph`) — on the note's top the
+  four tools went from pre-wave-1's 11.5-pt faint glyphs to 22-pt ink ones, about twice the size (P-47-12 built (a));
+- **the chip** drew a 32-pt capsule inside its 44; **the calm button and the field** drew their box at the full 44 —
+  the target and the drawing the same size; the **segmented choice** is the system's track stretched to 44;
+- **chrome words** went from 11.5 to 17 (`control`) and 15 (`chip`, `controlInline`), the same sizes as her own words
+  (17 body, 15 previews), so nothing on a screen reads as quieter than her writing;
+- **corners**: 12 on every box and capsules on every chip, where the Mac's chips are 4 ("very subtle and square",
+  `QuietFill.corner`) and its toast, cards and fields 8;
+- **the note's top** (`MobileWriteScreen.masthead`) stacks three rows of 44-pt targets — the title with its four tools,
+  the membership line, the chip flow — and puts 26 pt of padding on top of them (10 above, 4 + 4 between, 8 below)
+  under a 24-pt title: **158 pt at one chip row** (202 when the chips wrap), against pre-wave-1's ≈ 82 (a 21-pt title,
+  11.5-pt glyphs and chips on 14-pt lines). Under the system bar's back button, with the keyboard up, that is her
+  "about half".
+- And one real defect under it: the note-top chips are 44 TALL only (`mastheadChipHitArea` pads 6 each side), so in
+  Study "tags" (≈ 43 wide at 15 pt) and "lens" (≈ 41) already answer under 44 across — and a step-down alone would take
+  them to ≈ 40 and ≈ 38. The fix gives every chip a 44 × 44 floor.
+
+### The step-down as built — P-260-2a, PROVISIONAL as a set (the P-47-1 pattern; she judges the whole)
+
+The principle: **chrome sits one notch under her words** (17 body → 15 controls; 15 previews → 13 chips and inline
+acts), on the same five-size scale, the 13-pt floor holding; **drawings sit inside their targets** (a box 36 in a 44,
+a glyph 17 in a 44, a chip 24 in a 44); **corners are the Mac's two** (4 for chips, 8 for boxes). Every target is
+exactly what it was.
+
+**Type — the chrome roles (`Shared/Theme/PhoneType.swift`; Study and Terminal alike, chrome is never "two under"):**
+
+| Role | Old (size / pitch, anchor) | New | What reads it |
+|---|---|---|---|
+| `control` | 17 / 22, `.body` | **15 / 20, `.subheadline`** | text buttons (Done, Cancel), the calm button, menu-row labels, a field's typed text (P-47-14), standalone door words (+ New Book, Archived) |
+| `controlInline` | 15 / 20, `.subheadline` | **13 / 18, `.footnote`** | inline acts (Put back, Edit, Undo), the one message line's words (P-47-8) |
+| `chip` | 15 / 20 medium, `.subheadline` | **13 / 18 medium, `.footnote`** | chips, the note's facts on its top, the segmented choice's words |
+| `tab` | 17 / 22 | 17 / 22 — **unchanged: LK-5 is her ruling** ("three words at 17 pt … 56 pt targets") | the bottom bar |
+| `meta`, `sectionHeader` | 13 / 18 | 13 / 18 — unchanged (the floor) | stamps, counts, paths, section heads |
+| `noteTitle` (VM-272) | Study 24 / 30 `.title2`; Terminal 22 / 28 | **Study 20 / 25 `.title3`; Terminal 18 / 23** (pre-wave-1: 21 and 19) | the note's title on its top — the role's only reader |
+| her other words (`noteBody`, `screenTitle`, `rowTitle`, `rowPreview`, `mono`) | — | unchanged — batch 3's (R-260-2) | — |
+
+**Glyphs and shapes (`Shared/Theme/PhoneControls.swift`):**
+
+| Control | Old drawing | New drawing | Target (unchanged) |
+|---|---|---|---|
+| Icon button (the note's tools, trash, New Note, the gear, the line's ✕) | 22-pt glyph | **17-pt glyph** (P-47-12's road (b)); chrome scaling kept (follows `.body` to xxxLarge, holds) | 44 × 44 |
+| Menu row's glyph | 22 pt, a 22-pt column | **17 pt**, a 17-pt column | the row's 44 / 52 / 64 |
+| Chip (Today, the Trash's kinds) | 32-pt capsule, 12 each side, 15 medium | **24 tall, corner 4, 8 each side, 13 medium** | 44 × 44 |
+| Calm button | its box 44 tall, corner 12, 17 | **box 36 (grows with its words), corner 8, 15** — the box sits inside the target | at least 64 × 44 |
+| Field | its box 44 tall, corner 12, typed 17 | **box 36 (grows with its text), corner 8, typed 15**, inside a 44 frame | the frame 44 (the text field's own answering region is untouched) |
+| The bar's chip | corner 12 | **corner 4** (the Bookcase strip's near-square chip, S-260-3); its padding, words (17) and cells (56) unchanged | 56-pt cells |
+| The line's card (batch 1b) | corner 12 | corner 8, by construction (`Radius.standard`) | unchanged |
+
+**Radii (`Shared/Theme/PhoneMetrics.swift`) — the Mac's own two:**
+
+| Radius | Old | New | The Mac's source | Wears it |
+|---|---|---|---|---|
+| `small` | 6 | **4** | `QuietFill.corner` (her "very subtle and square") | chips, the bar's chip, small marks |
+| `standard` | 12 | **8** | `StatusToast` 8, its cards and fields 8 (its calm button 7) | fields, the calm button, cards, the line's card |
+| capsule | the chip | **none** — no capsule is left in the controls | — | — |
+
+**Unchanged on purpose:** every target (the 44 × 44 floor, the text button's 64 wide, the bar's 56, the menu rows'
+44 / 52 / 64, the sheet header's 56, the Library rows' 88); the spacing scale and the 20-pt gutter; the inks; her words.
+
+**Remainders, recorded:** (1) the **segmented choice** keeps the system's track at its 44-pt height and the system's
+corner — shrinking the drawing needs a UIKit hit-area container around a system control, and squaring the track is a
+hand-built control (P-47-30's fence, hers); its words step down with `chip`. Not on her three capture stops (Settings,
+Create Book, the block list). (2) Hand-built radii outside the central files (the quick-entry box 8, the Read page 12,
+Protection's cards 10, the overlays' sheets 22, the take cards 10) are left as they stand — moving them is per-site,
+not this pass.
+
+### VM-272 — the note's top as built (P-47-12's road (b); `MobileWriteView` chrome only)
+
+- **The title** reads `noteTitle` at its new 20 (Terminal 18).
+- **The four tools** are the icon button — 17-pt glyphs in their ink (copy, find, ⋯ in ink; the seal in ink, the
+  accent when sealed) with only the 44 × 44 frame, centres 44 apart (road (b), the central style).
+- **The chips** read `chip` at 13; each chip's hit area is now at least **44 × 44** (it was 44 tall only).
+- **The rows sit on one another**: the gaps 4 → 0, the air above 10 → 0 (the title row's own 44 carries its air, the
+  system bar sits above), below 8 → 4. **158 → 136 pt at one chip row** (202 → 180 wrapped).
+- **What is left is the targets themselves** — three rows of 44. More room is VM-148's road (the mockup P-47-20
+  describes: the tools in the top row beside the back button, the chips in one sideways row) — not built here.
+- **For batch 3 (R-260-2):** the note title already stepped 24 → 20 here; its one-notch default drop should read
+  today's set as including that.
+
+### Pins (all PENDING the window)
+
+*(written at piece 1)*
+
+### Pins MOVED with the rulings
+
+*(written at piece 5)*
