@@ -1169,6 +1169,17 @@ the gate's tip legs (a known-red pin cannot ride a green merge); the cure (the t
 the clamp, an editor-seam change) is **VM-284** (Bug · Confirmed · Editor · Low), under VM-271's editor rework.
 The hop is minor and visible: on the closing walk (R1-1's stop, R2-1's look) and in her bundle.
 
+## THE MERGE GATE — simulator legs (2026-11-25, claim `vm-260` from 14:57, renewed at 15:29; final code tip `6afaf255a`; device `vm260-gate` iOS 26.2; the UI legs on `vm260-walk`)
+
+| Leg | Result |
+|---|---|
+| R-r2 (`vm260-r2-rol`, measure only) | AS PREDICTED: `closingTheTagsLeavesAShortPageWhereItStood` RED, 6 issues (3 + 3, the foot clause); PERF: h 52, strip 88, reach 70, the leave landing at 56.3 of 70 (the hop ≈ 13.7), title changes 0 — the numbers go to **VM-284** |
+| U (`vm260-2r-ui`, walk device) | **3/3 GREEN**: `testAMidNoteTapRisesAboveTheKeyboard` 65 s, `testTheBarRidesAboveTheLibrarySearchKeyboard` 87 s, **`testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` 61 s — VM-281 PROVEN on the tip** (red on old: 12 failures; green here) |
+| P (`vm260-2r`, the whole phone target) | **NOT GREEN — two findings.** The session ended `TEST EXECUTE FAILED`; its closing line ("1049 tests in 178 suites passed … 2 known issues") is the SECOND launch's summary only (against 1293/232 this morning). **G-1:** the test host CRASHED (15:11:41, `VariorumMobile-2026-11-25-151141.ips`, `EXC_BREAKPOINT`) in `MobileFilterRowGeometryTests.theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` — the faulting frame is the harness's `HostedSurface.frameDump` ("Double value cannot be converted to Int because it is either infinite or NaN") on a mounted `MobileLibraryView`: some element of the Library's new top (batch 4a) reports a NON-FINITE frame at Display Zoom; the restart left ≈ 240 tests unrun. **G-2:** `MobileFaintCarriesNoWordsSourceTests.theFaintCarriesNoWordsUnderSeventeenPoints` RED at `MobileNoteTop.swift:211` (`bookInk`'s `tokens.phone.faint` — on its face a GLYPH ink, which the faint rule allows; whether the scan misreads a glyph or the ink reaches a word is the trace) |
+| W (the closing walk) | RUNNING |
+
+**Owed before the gate can pass:** G-1 and G-2 to ONE fresh fix implementer (trace before fix; G-1: find the element with the non-finite frame — a real layout defect in 4a's top is fixed at its source, and the harness's `frameDump` made tolerant only IN ADDITION, never instead; G-2: read the scan's rule and the site, fix the ink or the scan's reading with the reason stated, never loosening the rule), then P re-run whole on the fixed tip.
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
