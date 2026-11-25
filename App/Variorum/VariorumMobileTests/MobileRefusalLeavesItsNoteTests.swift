@@ -46,6 +46,15 @@
 //    stands) is not a refusal and outlives the leaving.
 //  · `theListNeverMovesWhileTheLineShows` — the half-2 GUARD above.
 //
+//  RECONCILED after the consolidated window (2026-11-25): the first three
+//  leave by Back, and their Back step (`leaveByBack`) pressed the system Back
+//  by accessibility activation — which the mounted harness does not deliver, on
+//  either tree — so none of them reached its own assertion in that window (the
+//  first's red on old was the harness's, not her defect's; the guards' "green"
+//  was never reached). The step now takes the Back's own act (the note's stack
+//  pops its top screen). Their first green, and the first's real red on old,
+//  are their first ever — the next window's.
+//
 
 import Dependencies
 import Foundation
@@ -102,17 +111,44 @@ struct MobileRefusalLeavesItsNoteTests {
         #expect(router.editors.registeredPostIDs == [postID], "the note is open")
     }
 
-    /// The pushed note's system Back, then the leaving road run to its end.
-    private func leaveByBack<V: View>(_ surface: HostedSurface<V>, router: MobileShellRouter) async {
-        let back = surface.visibleElements.first {
-            $0.accessibilityLabel == "Back" && $0.accessibilityTraits.contains(.button)
-        }
-        #expect(back?.accessibilityActivate() == true, "the note's Back: \(surface.visibleLabels)")
+    /// **The pushed note's Back, then the leaving road run to its end.**
+    ///
+    /// *RECONCILED (the consolidated window, 2026-11-25):* this step first
+    /// pressed the system Back by `accessibilityActivate()` on its bar button —
+    /// a road the mounted harness does not deliver (the window: `:110` false on
+    /// BOTH trees, so the three pins that leave by it never reached their own
+    /// assertion; the live walk proved the behaviour, stop 4). It now takes the
+    /// Back's own act: the note's stack — the one navigation controller holding
+    /// a pushed screen — pops its top screen, exactly what the system Back
+    /// performs, and the note's leaving road (its `onDisappear`) runs as it does
+    /// for her. The pins' meaning is unchanged: she leaves the note by Back.
+    private func leaveByBack<V: View>(
+        _ surface: HostedSurface<V>, router: MobileShellRouter
+    ) async throws {
+        let stack = try #require(Self.stackHoldingAPushedScreen(under: surface.host),
+                                 "the note's stack (a navigation controller holding a pushed screen)")
+        stack.popViewController(animated: false)
         for _ in 0..<200 where !router.editors.registeredPostIDs.isEmpty {
             await surface.settle(1)
         }
         await surface.settle(30)
         #expect(router.editors.registeredPostIDs.isEmpty, "the note left")
+    }
+
+    /// The navigation controller (a shell page's `NavigationStack`) holding a
+    /// pushed screen — at most one at a time: a hidden page always stands at its
+    /// root (VM-256).
+    private static func stackHoldingAPushedScreen(under root: UIViewController) -> UINavigationController? {
+        var queue: [UIViewController] = [root]
+        while !queue.isEmpty {
+            let next = queue.removeFirst()
+            if let navigation = next as? UINavigationController, navigation.viewControllers.count > 1 {
+                return navigation
+            }
+            queue.append(contentsOf: next.children)
+            if let presented = next.presentedViewController { queue.append(presented) }
+        }
+        return nil
     }
 
     /// **RED ON OLD — her rule.** A refusal raised IN a note (the note's own
@@ -138,7 +174,7 @@ struct MobileRefusalLeavesItsNoteTests {
                 #expect(line.text == refused)
                 #expect(line.kind == .refusal)
 
-                await leaveByBack(surface, router: router)
+                try await leaveByBack(surface, router: router)
                 let still = session.status.current?.text ?? "nothing"
                 #expect(session.status.current == nil,
                         "the refusal raised in the note left with the note — still showing: \(still)")
@@ -161,7 +197,7 @@ struct MobileRefusalLeavesItsNoteTests {
                 session.status.refuse("That couldn't be done.")
                 let before = try #require(session.status.current)
                 await openFromTheLibrary(surface, router: router, title: "Plain", postID: postID)
-                await leaveByBack(surface, router: router)
+                try await leaveByBack(surface, router: router)
                 #expect(session.status.current?.id == before.id,
                         "a line from before the note opened is not the note's to clear")
             }
@@ -184,7 +220,7 @@ struct MobileRefusalLeavesItsNoteTests {
                 session.status.removal(
                     "Note moved to the Trash.", undo: .init(label: MobileLine.undoLabel, perform: {}))
                 let removal = try #require(session.status.current)
-                await leaveByBack(surface, router: router)
+                try await leaveByBack(surface, router: router)
                 #expect(session.status.current?.id == removal.id, "the removal's line stands")
             }
         }
