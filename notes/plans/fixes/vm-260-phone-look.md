@@ -956,8 +956,9 @@ is PENDING the gate); no walk, no capture; nothing in the round-2 table but R2-1
 text-input path, or `MobileShellView` code. **R2-1's FIX IS NOT BUILT — STOPPED at the pin, by the hallucination
 guard:** the pin is landed (its own red-on-old tree), but the traced mechanism is UIKit's clamp of the OFFSET, which
 the tracker only reads; neither rule the brief offers (ignore the turn's readings, or re-read after the next layout)
-can move an offset back, so neither can turn the pin green. The trace, the predictions and the options are below;
-the decision is the orchestrator's.
+can move an offset back, so neither can turn the pin green. The trace, the predictions and the options are below.
+**Decided A-260-19: road (b) then (a)** — the pin measured at the gate on its frozen tree (`vm260-r2-rol`), taken
+off the branch (`6afaf255a`); the cure is **VM-284**.
 
 #### LIVE STATUS
 
@@ -966,10 +967,11 @@ the decision is the orchestrator's.
 | 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, THE LADDER — round 1 with A-260-18, round 1's fixes block whole, THE RED-ON-OLD WINDOW, round 2's table; the resiliency protocol; the code: `MobileNoteTop.swift` whole, `MobileWriteView.swift`'s masthead and title row, `MobileNoteTopRowTests.swift` whole, the harness's `settle`; **the red-on-old window's own log `/tmp/vm260-win3/R-r1.log` — R1-1's PERF trace on old**, which settles R2-1's mechanism; the ten R2-5 sites; `PhoneType.swift` whole) | DONE |
 | 1. R2-1's pin on the current code — **that commit IS R2-1's red-on-old tree** | DONE (`2b8b50e8c` — **THE RED-ON-OLD TREE**) — `MobileNoteTopRowTests.closingTheTagsLeavesAShortPageWhereItStood(voice:)`; R1-1's pin and every 4b/4a pin byte-unchanged (the diff adds one test, one static and two header lines); the runs PENDING the gate |
 | 2. R2-1's bundle `vm260-r2-rol` (APFS clone of `vm260-2r`, its `workspace-state.json` checked/repointed to its own `SourcePackages`, incremental `build-for-testing`, `nice -n 15`) | DONE — the clone named `vm260-2r/SourcePackages` (4 references, the lineage trap) → repointed to `vm260-r2-rol/SourcePackages` (`sed`; zero `vm260-2r/` left; the original in the session scratchpad); `TEST BUILD SUCCEEDED` at `2b8b50e8c` (log `App/Variorum/DerivedData/vm260-r2-rol-build.log`; the new test's symbol is in the built `VariorumMobileTests` binary). The build's only new warnings are "Stale file … `vm260-2r/…/MobileNoteTopRowTests.o` is located outside of the allowed root paths" — the clone's build database naming its parent's objects, which the build system REFUSES to delete (so `vm260-2r` is untouched) |
-| 3. R2-1's fix | **STOPPED — decision owed to the orchestrator** (the trace and the options below) |
+| 3. R2-1's fix | **STOPPED at the pin; DECIDED A-260-19 — (b) then (a):** no fix in this run; measured at the gate on `vm260-r2-rol`, then off the branch (piece 7); the cure is **VM-284** (editor seam, under VM-271) |
 | 4. R2-5 — the ten stale comments (comments only) | DONE (this commit) — the ten sites below; `git diff` of the commit: every changed line a `//` or `///` line (checked mechanically); no source-scan pin reads a comment line in these files (the scans read code lines or signatures — `MobilePhoneControlsSourceTests`' patterns, `MobileLookSourceTests`' code lines, `TutorialProtectionRecoveryTests`' `AuthViews` door literal) |
 | 5. R2-6 — the Read page's exception beside the whole-point rule (`PhoneType.swift`, a comment) | DONE (this commit) — the header, right after the whole-point paragraph: the Read page is the rule's ONE exception (P-260-3b, its own table): her text size reaches its words unrounded (`size × wordsScale` through `scaledValue`), harmlessly, its SwiftUI font and the UIKit font it measures its line with built from that one value with no `UIFontMetrics.scaledFont` between them; and one clause on `PhoneReadingModifier`'s `wordsScale` doc pointing at it. Comments only (checked mechanically); no pin reads `PhoneType.swift`'s comments |
 | 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), package paths checked; READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` at code tip **`1b4c436ee`** (logs `App/Variorum/DerivedData/vm260-2r-r2-build.log`, `vm260-2r-ui-r2-build.log`, `vm260-2r-mac-r2-build.log`), each bundle's `workspace-state.json` naming its OWN `SourcePackages` before and after (4 references each; no repoint needed — round 1's held); no error; no warning in a changed file (the Mac's 8 are `PaneSurface`/`EditorTypography`/the AppIntents processor, untouched files); the run list below |
+| 7. A-260-19 — R2-1's pin OFF the branch; `vm260-2r` rebuilt | DONE — **`6afaf255a` = THE FINAL CODE TIP**: a NEW commit (not a revert of `2b8b50e8c`, which carries this record's block) removing the test function, the `twoRowTags` static only it used, and the two header lines describing it; `MobileNoteTopRowTests.swift` is byte-identical to `16562ede2` (`git diff 16562ede2 HEAD -- App/Variorum/VariorumMobileTests/` empty), so R1-1's pin and every other pin are unchanged. `vm260-2r` rebuilt incrementally, `nice -n 15`, package paths its own: `TEST BUILD SUCCEEDED` (log `App/Variorum/DerivedData/vm260-2r-r2off-build.log`); the built `VariorumMobileTests` binary carries NO `closingTheTagsLeavesAShortPageWhereItStood` symbol (R1-1's still there); the frozen `vm260-r2-rol` still carries it. `vm260-2r-ui` and `vm260-2r-mac` not rebuilt (a unit-test-only change; both stand at `1b4c436ee`, whose app and Shared code are the tip's) |
 
 #### R2-1 — the mechanism, as the old tree's own trace shows it
 
@@ -1092,31 +1094,33 @@ behaviour change.
 #### Round 2 fixes — READY-FOR-TESTS: the merge gate (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
 
 All from `App/Variorum/`, zsh, `test-without-building`, round 1's `P(folder)` / `U(folder)` / Mac paths (above);
-`-destination "platform=iOS Simulator,id=$UDID"`. **R2-1's red-on-old tree is `2b8b50e8c`; the code tip is
-`1b4c436ee`** (`2b8b50e8c..1b4c436ee` is comments only — so the tip's code is the red-on-old tree's code, and the P leg
-on the tip shows R2-1's result too, for as long as the pin is on the branch).
+`-destination "platform=iOS Simulator,id=$UDID"`. **THE FINAL CODE TIP is `6afaf255a`** (A-260-19: R2-1's pin off the
+branch). R2-1's frozen tree is `2b8b50e8c` (`vm260-r2-rol`); `2b8b50e8c..6afaf255a` is comments plus the pin's removal,
+so the frozen tree's app code is the tip's.
 
-- **R-r2 — R2-1 on its red-on-old tree** (`P(vm260-r2-rol)`, the gate's suite device):
+- **R-r2 — R2-1, MEASURE ONLY, predicted RED; the cure is VM-284** (`P(vm260-r2-rol)`, the gate's suite device):
   `-only-testing:VariorumMobileTests/MobileNoteTopRowTests`. Predicted: `closingTheTagsLeavesAShortPageWhereItStood`
   **RED 3 + 3** — the foot clause (`abs(settled.offset - foot) <= 0.5`) at all three settles, the page ≈ 15 pt above its
   foot; its title, range and strip clauses GREEN. Every other case in the suite GREEN — `aShortPageAtItsFootNeverUndoes
   ItsOwnTop` GREEN in both voices (this tree carries R1-1's fix) and the 4b pins GREEN. **Read the `PERF[sim] VM-260
   R2-1` line first**: h, s, "after the leave … of …" (the leave's own first-frame drift — R1-1's residual class), the
-  trace. A red at a `#require` is calibration (s under two rows, the reach off 70), not a verdict. A title-clause red
-  too means the strip's change landed in one frame on that runtime — the brief's model; the decision's roads are the
-  same.
-- **The final tip** (`1b4c436ee`):
-  - **P** — the whole phone target from `vm260-2r` (`-only-testing:VariorumMobileTests`), one launch: predicted as
-    round 1's block predicted at `8bbc18d87` (no code has changed since but comments and R2-1's test) — main's known
-    issues as the previous windows read them (6: `MobileFilterRowGeometryTests` ×4, `MobileTrashTests` ×2 — PR #31/#32
-    may move that baseline; read it against main), R1-1's pin and the round-1 pins GREEN, the new give-way suites GREEN,
-    3b/4a/4b's pins GREEN — **plus R2-1's 6 while its pin is on the branch** (road (a) reverts it first).
-  - **U** — the keyboard-reveal class, its THREE tests: `U(vm260-2r-ui)`,
+  trace; those numbers go to VM-284. A red at a `#require` is calibration (s under two rows, the reach off 70), not a
+  verdict. A title-clause red too means the strip's change landed in one frame on that runtime — still VM-284's. This
+  leg's red gates nothing: it is the measurement, not a regression.
+- **The final tip** (`6afaf255a`):
+  - **P** — the whole phone target from `vm260-2r` (rebuilt at `6afaf255a`; `-only-testing:VariorumMobileTests`), one
+    launch: predicted **main's 6 known issues and nothing else** (`MobileFilterRowGeometryTests` ×4, `MobileTrashTests`
+    ×2, as the previous windows read them — PR #31/#32 may move that baseline; read it against main), **nothing of
+    R2-1's** (the pin is not in this bundle). As round 1's block predicted at `8bbc18d87` (no code has changed since but
+    comments): R1-1's pin and the round-1 pins GREEN, the new give-way suites GREEN, 3b/4a/4b's pins GREEN.
+  - **U** — the keyboard-reveal class, its THREE tests: `U(vm260-2r-ui)` (built at `1b4c436ee`; the tip differs only
+    in a unit-test file),
     `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, the walk device (~6 min):
     `testAMidNoteTapRisesAboveTheKeyboard`, `testTheBarRidesAboveTheLibrarySearchKeyboard`,
     `testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` — predicted GREEN (the last is VM-281's claim; RED with frames
     near 591 is model P: STOP, VM-271's road).
-  - **M — FENCED until her "done looking"** (nov24; the dev-store fence): `vm260-2r-mac`, the M3 list (ThemeTokenTests
+  - **M — FENCED until her "done looking"** (nov24; the dev-store fence): `vm260-2r-mac` (built at `1b4c436ee`; the
+    Mac compiles nothing the tip's last commit touched), the M3 list (ThemeTokenTests
     NoLiteralColourTests PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
     OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests) — predicted green but
     `IndexTierMetricsTests`' 4 declared. Since round 1 the Mac compiles only comment changes (`Shared/AuthViews.swift`,
