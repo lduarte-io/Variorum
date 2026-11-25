@@ -68,4 +68,34 @@ struct CopyCountsAndRestoreListTests {
         #expect(Set(sameDay.map(\.asOf)).count == 1, "both rows read the same day and time")
         #expect(Set(sameDay.map { ProtectionWords.copyKind($0.kind) }) == ["Backup"], "and the same kind")
     }
+
+    /// THE RULING'S PIN (R-1013-A3, PROVISIONAL P-1013-5 — option (a)): each Restore-list row's second line names where
+    /// the copy sits, in Data Safety's own words. The same scene: the pair standing in both places is two rows with two
+    /// different place lines; the pair beside the library only says so. RED BEFORE THE RULING: the line was the kind
+    /// alone ("Backup"), so the two rows of one pair read identically.
+    @Test func eachRestoreRowSaysWhereItsCopySits() async throws {
+        let road = PlantedRoad(farFolder: true)
+        let (session, _) = try await road.created()
+        let now = Date()
+        let first = ProtectionBackupHook.takePairReporting(session, now: now)
+        guard case .written? = first.far else {
+            Issue.record("the day's first pair lands in the picked folder too — \(String(describing: first.far))")
+            return
+        }
+        let second = ProtectionBackupHook.takePairReporting(session, now: now)
+        #expect(second.far == .notDue)
+        let rows = ProtectionCopyDoors.listing(session).thisLibrary
+        func line(_ row: CopyDoorRow) -> String { ProtectionWords.copyRowLine(kind: row.kind, place: row.copy.place) }
+
+        let firstStem = try #require(first.snapshotName)
+        let bothPlaces = rows.filter { $0.copy.name == firstStem }
+        #expect(bothPlaces.count == 2)
+        #expect(Set(bothPlaces.map(line)) == ["Backup · beside your library", "Backup · in your backup folder"],
+                "the pair in both places, one line per place: \(bothPlaces.map(line))")
+
+        let secondStem = try #require(second.snapshotName)
+        let besideOnly = rows.filter { $0.copy.name == secondStem }
+        #expect(besideOnly.map(line) == ["Backup · beside your library"],
+                "the pair beside the library only: \(besideOnly.map(line))")
+    }
 }

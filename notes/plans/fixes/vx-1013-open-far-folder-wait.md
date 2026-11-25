@@ -309,14 +309,15 @@ this branch and round 2's re-review covers it.
 
 ## BATCH 2 LIVE STATUS (the implementer's — round 1's fixes, then the VX-524 rider)
 
-**NOT DONE BY THIS SESSION (first, per the contract):** (1) VX-524's face — the fork below is PROPOSED, not built; the
-architect rules (and the board's ticket text is the orchestrator's to correct). (2) The Mac target's suites under
+**NOT DONE BY THIS SESSION (first, per the contract):** (1) VX-524's face is BUILT to R-1013-A3 (option (a)) — the
+other two options (the fold, the total line) are not; the board's ticket is the orchestrator's. (2) The Mac target's suites under
 `xcodebuild test` — the gate's, under a stage claim; this session built the test bundle (`build-for-testing`) and ran
 the planted Protection suites HEADLESS in the harness instead. (3) No walk, no stage, no store touched, no Castle posture
 changed. (4) F-R1-3 has no code here by its final call (DEFERRED to VX-1090).
 
-*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. BATCH 2 DONE — every piece
-below is committed and pushed; round 2 (a fresh reviewer) reads it.*
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. NEXT: the ruling's piece
+verified by revert from its committed state (`copyRowLine` answering the kind alone), restored by `git checkout --` on
+`ProtectionWords.swift`; then the closing builds and the harness.*
 
 - PHASE A — DONE (`8f5f1f538`): the round-1 dispositions, each from this session's own read of the named code, under
   THE LADDER ▸ ROUND 1 DISPOSITIONS below. The reviewer's final calls landed at `30caec3fa` (ROUND 1 FINAL CALLS).
@@ -376,9 +377,21 @@ below is committed and pushed; round 2 (a fresh reviewer) reads it.*
     3 issues` (no copy rowed twice; rows = the counts' sum; the first pair's two rows); `ProtectionCopyCounts.read`
     counting the picked folder's row from the container ⇒ `✘ … with 2 issues` (the far count; the sum). So the probe
     WOULD catch either defect the ticket suspected, and there is none.
-  - VX-524 OUTCOME — RECORD-ONLY AS A CODE DEFECT (the pin green on the tree it was written against: the row is HOLLOW,
-    no fix built) + A FACE FORK PROPOSED (below), STOPPED for the architect's ruling. Nothing in the app's code changed
-    for VX-524; the probe stays as the agreement's regression pin.
+  - VX-524 OUTCOME — HOLLOW AS A CODE DEFECT (the probe green on the tree it was written against; no count or listing
+    change) + THE FACE BUILT TO RULING R-1013-A3 (option (a), PROVISIONAL P-1013-5 — this commit): each Restore-list
+    row's second line names where its copy sits. `ProtectionWords.copyRowLine(kind:place:)` = the kind, " · ", and
+    `ProtectionWords.copyPlace` — "beside your library" (the container) / "in your backup folder" (the picked folder);
+    lower case after the separator, as the pane's own count line continues ("Newest: … · 5 copies · back to …"), the
+    count row's title "Beside your library" being a line of its own. Both row views of the "Restore from Backup" list
+    read it — Data Safety's (`RoadRestoreRows.rowView`) and the same list's empty-slot host (`CopyDoorsSheet
+    .listingRow`, the missing face's and rule 27's lobby's *Open Library…*), so the list never says two things. Wording
+    only: no fold, no reorder, no door changed; the look's own header line (`LookInsideModel.kindLine`) is not a row and
+    keeps the kind alone. PIN `CopyCountsAndRestoreListTests.eachRestoreRowSaysWhereItsCopySits` (the probe's scene: the
+    pair in both places is two rows with the two place lines; the pair beside the library only says so). PIN BEFORE THE
+    WORDS (the seam `copyRowLine` answering `copyKind` alone — the line's absence, both views already reading it):
+    `✘ Test run with 2 tests in 1 suite failed … with 2 issues` (lines 93 and 98 — both place expectations; the probe
+    test green). With the words: `✔ Test run with 6 tests in 2 suites passed` (`CopyCountsAndRestoreListTests` 2 and
+    the `ProtectionWordsVX307Tests` words suite, unmodified). VERIFIED BY REVERT from the committed state: PENDING.
 
 **VX-524 — what the probe showed (the mechanism, settled).** Data Safety draws, in this order: "Copies of your library"
 with ONE count row, "Beside your library" (`DataSafetyModel.primary` ← `RoadCopyCounts.container`); then the Restore list
