@@ -4,8 +4,19 @@
 
 ## FOR A LATER READER
 
-*(Kept current while the sitting runs; rewritten at its close. Last rewritten just before a context compaction,
-2026-11-22 late afternoon.)*
+**CLOSED 2026-11-24 (PR #25, by the Nov 24 mobile-untangling session, at her word: "it's fine for us to close the
+nov22 sitting branch, I'll have to pick it up later in any case.").** The day's rulings are written into
+`notes/QUESTIONS.md` as the #277, #279, #280, #281 and #282 addenda (#276's P-980-3 was recorded by the VX-1045
+sitting); the dated entry is in `notes/AppSpecRecord.md`. Supersessions at the close, her words to that session:
+**P-55-2's "Home · Library" ratification is LIFTED** ("the top line - I do not want Home * Library.") — VM-255
+carries the change; **her first-look feedback regrouped under the look umbrella VM-260** ("the phone's look — the
+explicit changes": VM-272 and VM-273 born, VM-247 re-pointed at a per-device look with the cream background kept as
+an option, no separate design session); **the VM-17 · VM-239 · VM-179 chrome run is HELD** until VM-271's design
+settles; VM-271's ticket cleaned of the stale "page is the truth" framing. The editor design session is hers to
+start; it reads `notes/plans/vm-271-design-session-brief.md` first. Her checklist: `notes/handoffs/vx-1033-handoff.md`.
+
+*(What follows is the sitting's own record as it stood, kept verbatim; the close supersedes its RESUME HERE where
+they differ.)*
 
 - **The editor design has LEFT this sitting (2026-11-22, late).** After the second round of reviews she moved VM-271's
   design to a fresh, standalone design session that starts from the ground up. Everything that session needs is in
@@ -407,3 +418,4 @@ In short:
 | ~16:15 | The sync review landed, read whole, spot-checked, copied to `notes/plans/vm-271-plan-sync-review.md`. The general review still running. |
 | ~16:50 | The general review landed, read whole, spot-checked, copied to `notes/plans/vm-271-plan-cold-review-2.md`. Both reviews put to her in chat with one position (for structure, the library leads). v3 not written: it waits for her word on that. |
 | ~17:20 | She leaned against that direction and moved VM-271's design to a fresh standalone design session. `notes/plans/vm-271-design-session-brief.md` written for it; plan v2 marked not approved; a kickoff prompt for the new session given to her in chat. |
+| 2026-11-24 | The close, by the Nov 24 mobile-untangling session at her word: main merged in (the one SurfaceContracts conflict resolved keeping both sides' corrections), the QUESTIONS addenda written, the dated entry appended, the in-flight row for VM-271 added, the VM-17 kickoff's hold banner, her handoff; PR #25 merged. Board at the close: VM-260 reshaped into the look umbrella with VM-272/VM-273 born and VM-247 re-pointed; VM-17 blocked by VM-271; VM-271's ticket cleaned. |
