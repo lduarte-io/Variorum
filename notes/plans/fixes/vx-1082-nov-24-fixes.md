@@ -231,9 +231,9 @@ Either ruling is a small follow-on piece for this session (resume me) — the Li
 | Member | Batch | Status |
 |---|---|---|
 | VX-1076 ⌥⌫ cross-line word delete | E | **DONE pending ladder** (fix 74bd0a399; green pass 6627e7401 — 404 tests / 47 types, 0 failed, the capture harness's skip by design; revert 23f00e61b — 19/19 red by name, guards green, restored 43/43; window released 23:27, nov24 verified). P-1076-1 adjudicated (a) |
-| VX-1074 chapter search results | S | IN-PROGRESS — batch S spawned |
-| VX-1069 the dash in the band | S | IN-PROGRESS — batch S spawned |
-| VX-1014 narrow-column field overflow | S | IN-PROGRESS — batch S spawned |
+| VX-1074 chapter search results | S | Library half BUILT (c0a6cd8aa), pins + revert PENDING the window; the book's own 🔍 and ⌘K: FORK PROPOSED (batch S record, FOR THE ARCHITECT) |
+| VX-1069 the dash in the band | S | BUILT (ed1f0512d), pins + revert PENDING the window |
+| VX-1014 narrow-column field overflow | S | TRACED REAL (not hollow) and BUILT (8077255ec), pins + revert PENDING the window; P-1014-1 |
 | VX-1077 delete without a confirm | D | NOT-STARTED |
 | VX-1070 toast vs the cards band | D | NOT-STARTED |
 | VX-409 the hint collision | D | NOT-STARTED |
