@@ -120,6 +120,41 @@ struct FarFolderUnreadTests {
         #expect(partial.acts.contains(.offerKeyFile))
     }
 
+    // MARK: - Rule 3's no-backup-yet moment (R-1013-A1 — option (a): the container answers it on a partial listing)
+
+    static func owesTheFirstBackupMoment(_ assessment: Assessment) -> Bool {
+        assessment.acts.contains(.askPassphrase(.beforeFirstBackup))
+    }
+
+    /// R-1013-A1: a library with no passphrase and no backup of it in this Mac's CONTAINER — the place every backup run
+    /// lands first — still owes rule 3's "always right before the first backup" moment when the far folder is unread (the
+    /// launch road's creation and Make this my library's reopen keep it: no later assessment feeds the reminder). Read in
+    /// full with no backup anywhere: owed (today's). A container backup of the library: not owed, read or unread. A ruling
+    /// pin, green on both sides of the fix by construction (row 12 is untouched); the record's option (b) — not owed while
+    /// the far folder is unread — turns it red (the mutation run in LIVE STATUS).
+    @Test func theNoBackupYetMomentIsOwedOnAPartialListing() throws {
+        var world = try AWorld(.standard)
+        world.passphraseSet = false
+        var facts = try world.facts()
+        facts.catalog = Catalog.build(try world.entries())
+        #expect(Self.owesTheFirstBackupMoment(assess(facts)), "read in full, no backup anywhere: owed — today's")
+
+        facts.catalog = Catalog.build(try world.entries(), unreadPlaces: [.farFolder])
+        #expect(Self.owesTheFirstBackupMoment(assess(facts)),
+                "the far folder unread, no backup in the container: still owed (R-1013-A1) — rule 3's always")
+
+        let backup = CF.macFolder(world.world.library, CF.macA)
+        let pair = [
+            CatalogEntry(place: .container, folders: backup, name: CF.snapshotName(CF.stamp(1), world.key)),
+            CatalogEntry(place: .container, folders: backup, name: CF.pairName(CF.stamp(1), world.key),
+                         bytes: try CF.format3(library: world.world.library, key: world.key)),
+        ]
+        facts.catalog = Catalog.build(try world.entries() + pair, unreadPlaces: [.farFolder])
+        #expect(!Self.owesTheFirstBackupMoment(assess(facts)), "a container backup of the library: not owed")
+        facts.catalog = Catalog.build(try world.entries() + pair)
+        #expect(!Self.owesTheFirstBackupMoment(assess(facts)), "read in full with a backup: not owed — today's")
+    }
+
     /// The healthy open never meets the indeterminate readings: a live key file of the current key reads the same
     /// faults, repairs and acts whether or not the far folder was read (the launch road's happy path changes nothing).
     @Test func aHealthyLibraryAssessesTheSameReadOrUnread() throws {
