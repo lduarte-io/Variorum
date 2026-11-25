@@ -103,4 +103,45 @@ struct TagUseCountsP1Tests {
                     "\(wing): non-vacuity — the read does reach the applications; plan was:\n\(plan)")
         }
     }
+
+    /// **What the saturating read answers** (P-1036-L1-1, k = 50): live notes
+    /// wearing each tag of the wing, EXACT up to the cap and the cap beyond it
+    /// (so two much-worn tags tie, and the suggest brain keeps them in path
+    /// order — `TagSuggestOrderTests`); a taken-off application and a dead
+    /// note's are not uses; a tag nobody wears is absent; another wing's
+    /// vocabulary is its own.
+    @Test func theCountsAreExactUpToTheCapAndTheCapBeyondIt() throws {
+        try withOperations { ops, db in
+            #expect(Queries.tagUseCountSaturation == 50, "P-1036-L1-1 — k, named once")
+            let often = try ops.createTag(name: "often")
+            let also = try ops.createTag(name: "also")
+            let rare = try ops.createTag(name: "rare")
+            let never = try ops.createTag(name: "never")
+            let notes = try (0..<56).map { try ops.createPost(title: "note \($0)") }
+            for note in notes.prefix(55) { try ops.applyTag(often.id, toPost: note.id) }
+            for note in notes.prefix(52) { try ops.applyTag(also.id, toPost: note.id) }
+            for note in notes.suffix(4) { try ops.applyTag(rare.id, toPost: note.id) }
+            try ops.removeTag(rare.id, fromPost: notes[52].id)   // taken off: not a use
+            try ops.deleteContainer(notes[53].id)                // a dead note's: not a use
+
+            let counts = try db.read { try Queries.tagUseCounts($0, wingID: "") }
+            #expect(counts[often.id] == 50, "55 wearers read as the cap: \(String(describing: counts[often.id]))")
+            #expect(counts[also.id] == 50, "52 wearers read as the cap too — the two tie")
+            #expect(counts[rare.id] == 2, "exact below the cap: \(String(describing: counts[rare.id]))")
+            #expect(counts[never.id] == nil, "no live note wears it")
+
+            // The cap is the caller's to name (the default is k).
+            let low = try db.read { try Queries.tagUseCounts($0, wingID: "", saturatingAt: 3) }
+            #expect(low[often.id] == 3 && low[also.id] == 3 && low[rare.id] == 2)
+
+            let kitchen = try ops.createWing(name: "Kitchen")
+            let bread = try ops.createTag(name: "bread", wingID: kitchen.id)
+            let loaf = try ops.createPost(title: "a loaf", wingId: kitchen.id)
+            try ops.applyTag(bread.id, toPost: loaf.id)
+            #expect(try db.read { try Queries.tagUseCounts($0, wingID: kitchen.id) } == [bread.id: 1],
+                    "a named wing counts its own vocabulary only")
+            #expect(try db.read { try Queries.tagUseCounts($0, wingID: "") }[bread.id] == nil,
+                    "…and Home never counts another wing's")
+        }
+    }
 }

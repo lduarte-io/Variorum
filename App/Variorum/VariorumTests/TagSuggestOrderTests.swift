@@ -47,6 +47,18 @@ struct TagSuggestOrderTests {
         #expect(capped.count == 6)
     }
 
+    /// The VX-1036 ladder's R1-2: the counts SATURATE at k
+    /// (`Queries.tagUseCountSaturation`, PROVISIONAL P-1036-L1-1), so two
+    /// much-worn tags both read k — and tie, in path order, ahead of every
+    /// tag counted below the cap.
+    @Test func saturatedTagsTieInPathOrderAheadOfTheCountedOnes() {
+        let k = Queries.tagUseCountSaturation
+        let uses = ["id-week": k, "id-water": k, "id-weeds": k - 1]
+        let paths = TagChipAdder.suggestions(taxonomy, typed: "w", applied: [], uses: uses).map(\.path)
+        #expect(paths == ["water", "week", "weeds", "wednesday"],
+                "water and week tie at the cap in path order; weeds below it; an unused tag last")
+    }
+
     @Test func whatTheNoteWearsIsNeverSuggested() {
         let uses = ["id-week": 30]
         let paths = TagChipAdder.suggestions(taxonomy, typed: "we", applied: ["week"], uses: uses).map(\.path)

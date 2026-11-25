@@ -222,26 +222,55 @@ extension Queries {
             arguments: [String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)])
     }
 
+    /// **Where a tag's use count stops counting** (the VX-1036 ladder's R1-2 —
+    /// PROVISIONAL P-1036-L1-1; the alternative is her ruling that full counts
+    /// at a field's opening are admissible). A suggest list needs "most used
+    /// first", not the exact tally of a tag worn by thousands: past this many
+    /// live wearers a tag reads as this many, so its count costs at most this
+    /// many probes however large the library grows.
+    public static let tagUseCountSaturation = 50
+
     /// **How many live notes wear each tag of a wing** (VX-576 — "tag pickers
     /// list most-used first", the rider seated in VX-1036 batch 2): the
     /// suggest brain's order key. Direct applications on live notes (archived
     /// notes count — still worn); a tag no live note wears is absent (0).
-    /// ∝ the wing's tag applications — read ONCE when a tag field opens, never
-    /// inside a held observation.
-    public static func tagUseCounts(_ db: Database, wingID: String) throws -> [String: Int] {
+    /// Read ONCE when a tag field opens, never inside a held observation.
+    ///
+    /// **SATURATING, and driven from the TAGS** (the VX-1036 ladder's R1-2): a
+    /// count stops at `cap` (`tagUseCountSaturation`), so the most-used order
+    /// is exact up to it and the saturated tags tie (the suggest brain keeps
+    /// the path order among ties). The wing's live tags drive — the vocabulary,
+    /// author-scale metadata (`allTags`' posture) — and each probes its own
+    /// applications through the tag's index (`CROSS JOIN`, the VX-654 lesson:
+    /// the application drives, the note is probed by its key), at most `cap`
+    /// of them. The first form drove from `post_tag` and filtered on the tag's
+    /// wing; Home's scope (`wing_id = '' OR … NOT IN …`) is unindexable, so it
+    /// SCANNED every live application in the store at each field's opening.
+    /// P1: ∝ the wing's vocabulary × `cap`, never the library's applications
+    /// (pinned: `TagUseCountsP1Tests`).
+    public static func tagUseCounts(
+        _ db: Database, wingID: String, saturatingAt cap: Int = tagUseCountSaturation
+    ) throws -> [String: Int] {
         let scope = wingScope(column: "t.wing_id", wingID: wingID)
+        // `LIMIT ?` comes first in the statement's text, so its argument leads.
+        let arguments: [(any DatabaseValueConvertible)?] = [max(0, cap)] + scope.arguments
         var answer: [String: Int] = [:]
         for row in try Row.fetchAll(
             db,
             sql: """
-                SELECT pt.tag_id AS tag_id, COUNT(*) AS uses FROM post_tag pt
-                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
-                JOIN container c ON c.id = pt.post_id AND c.deleted_at IS NULL
-                WHERE pt.deleted_at IS NULL AND \(scope.sql)
-                GROUP BY pt.tag_id
+                SELECT t.id AS tag_id, (
+                    SELECT COUNT(*) FROM (
+                        SELECT 1 FROM post_tag pt
+                        CROSS JOIN container c ON c.id = pt.post_id AND c.deleted_at IS NULL
+                        WHERE pt.tag_id = t.id AND pt.deleted_at IS NULL
+                        LIMIT ?)
+                ) AS uses
+                FROM tag t
+                WHERE t.deleted_at IS NULL AND \(scope.sql)
                 """,
-            arguments: StatementArguments(scope.arguments)) {
-            answer[row["tag_id"]] = row["uses"]
+            arguments: StatementArguments(arguments)) {
+            let uses: Int = row["uses"]
+            if uses > 0 { answer[row["tag_id"]] = uses }
         }
         return answer
     }
