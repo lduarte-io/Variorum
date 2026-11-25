@@ -18,6 +18,17 @@
 //  answers: exact counts up to the cap, the cap beyond it (PROVISIONAL
 //  P-1036-L1-1 — k = 50, `Queries.tagUseCountSaturation`).
 //
+//  **Round 2 — R2-1 (MAJOR).** R1-2's tag-first probe resolved through
+//  `idx_post_tag_tag(tag_id)`, which is NOT partial (`Migrations.swift`): each
+//  tag's probe walked EVERY application row ever written for the tag —
+//  tombstones included (every un-tag, every note deletion's cascade; never
+//  cleaned) — until it found `cap` live ones. The store never runs `ANALYZE`,
+//  so the stats-free planner picks it. The probe now reads the LIVE partial
+//  index `uq_post_tag_live(tag_id, post_id) WHERE deleted_at IS NULL`, which
+//  holds the live rows alone; the plan pin says so, in Home and in a named
+//  wing, and the tombstone-heavy case holds the counts exact through a long
+//  history of dead applications.
+//
 
 import Dependencies
 import Foundation
@@ -142,6 +153,85 @@ struct TagUseCountsP1Tests {
                     "a named wing counts its own vocabulary only")
             #expect(try db.read { try Queries.tagUseCounts($0, wingID: "") }[bread.id] == nil,
                     "…and Home never counts another wing's")
+        }
+    }
+
+    /// **RED ON OLD — round 2, R2-1.** Each tag's probe walks the LIVE
+    /// applications only: it reads `uq_post_tag_live` — the partial index
+    /// that holds live rows alone — and NEVER `idx_post_tag_tag`, which holds
+    /// every application ever written, tombstones included, so a probe
+    /// through it costs the tag's whole history until it finds `cap` live
+    /// rows. Library rows with dead applications in it, so the plan is read
+    /// against a history that has tombstones to walk (the planner is
+    /// stats-free — the store never runs `ANALYZE` — so this is its real
+    /// choice, data or not).
+    @Test(arguments: ["home", "named"])
+    func eachTagsProbeReadsTheLiveApplicationsIndexNeverTheWholeHistory(wing: String) throws {
+        try withOperations { ops, db in
+            let kitchen = try library(ops)
+            // A history to walk: Home's and the kitchen's tags taken off and
+            // put back, leaving dead applications behind the live ones.
+            for (tagWing, title) in [("", "home churn"), (kitchen.id, "kitchen churn")] {
+                let tag = try ops.createTag(name: "churn", wingID: tagWing)
+                let note = try ops.createPost(title: title, wingId: tagWing)
+                for _ in 0..<4 {
+                    try ops.applyTag(tag.id, toPost: note.id)
+                    try ops.removeTag(tag.id, fromPost: note.id)
+                }
+                try ops.applyTag(tag.id, toPost: note.id)
+            }
+            let wingID = wing == "home" ? "" : kitchen.id
+            let plan = try capturedPlans(db) { database in
+                _ = try Queries.tagUseCounts(database, wingID: wingID)
+            }
+            let lines = plan.split(separator: "\n").map(String.init)
+            #expect(lines.contains { $0.hasPrefix("SEARCH pt") && $0.contains("uq_post_tag_live") },
+                    "\(wing): the probe reads the live partial index; plan was:\n\(plan)")
+            #expect(!lines.contains { $0.contains("idx_post_tag_tag") },
+                    "\(wing): never the index of every application ever written; plan was:\n\(plan)")
+            #expect(!lines.contains { $0.hasPrefix("SCAN pt") || $0.hasPrefix("SCAN post_tag") },
+                    "\(wing): and never a scan of the applications; plan was:\n\(plan)")
+        }
+    }
+
+    /// **What a long history of dead applications leaves the counts** (R2-1's
+    /// semantics case): a tag worn by three live notes, after hundreds of
+    /// applications taken off and put back and notes deleted wearing it,
+    /// counts exactly its three; a small cap is filled by live wearers only,
+    /// never by tombstones; the deleted notes' cascade rows are not uses.
+    @Test func aTagWithALongDeadHistoryStillCountsItsLiveWearersExactly() throws {
+        try withOperations { ops, db in
+            let worn = try ops.createTag(name: "worn")
+            let wearers = try (0..<3).map { try ops.createPost(title: "wearer \($0)") }
+            // Dead applications written BEFORE the live ones, so any walk
+            // that does not skip tombstones meets them first.
+            let churned = try (0..<20).map { try ops.createPost(title: "churned \($0)") }
+            for note in churned {
+                for _ in 0..<10 {
+                    try ops.applyTag(worn.id, toPost: note.id)
+                    try ops.removeTag(worn.id, fromPost: note.id)
+                }
+            }
+            let gone = try (0..<10).map { try ops.createPost(title: "gone \($0)") }
+            for note in gone {
+                try ops.applyTag(worn.id, toPost: note.id)
+                try ops.deleteContainer(note.id)   // the cascade tombstones its application
+            }
+            for note in wearers { try ops.applyTag(worn.id, toPost: note.id) }
+
+            let history = try db.read { database in
+                try Int.fetchOne(database, sql: """
+                    SELECT COUNT(*) FROM post_tag WHERE tag_id = ? AND deleted_at IS NOT NULL
+                    """, arguments: [worn.id]) ?? 0
+            }
+            try #require(history == 210, "the premise: 200 taken off + 10 cascaded, got \(history)")
+
+            #expect(try db.read { try Queries.tagUseCounts($0, wingID: "") }[worn.id] == 3,
+                    "three live wearers, whatever lies dead behind them")
+            #expect(try db.read { try Queries.tagUseCounts($0, wingID: "", saturatingAt: 5) }[worn.id] == 3,
+                    "a cap above the live wearers is never filled by tombstones")
+            #expect(try db.read { try Queries.tagUseCounts($0, wingID: "", saturatingAt: 2) }[worn.id] == 2,
+                    "a cap below them saturates on live wearers")
         }
     }
 }

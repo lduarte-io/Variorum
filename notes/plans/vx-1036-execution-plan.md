@@ -491,6 +491,22 @@ The reviewer re-checked every round-1 fix and found them sound (R1-1's stamp and
 
 **THE ROUND-2 FIX (a fresh `opus-implementer`, briefed by this table):** R2-1 (pin first, red on this tree headless) · R2-2 (pin commit ALONE first, then the fix commit — its confirm is the stage's) · R2-3 · R2-4. Rules as the round-1 fix: §2's traps; `nice -n 15`, one heavy command at a time; its OWN DerivedData tag (`vx1036l2`); commit by pathspec, push each; LIVE STATUS appended under this paragraph from the first commit; no `xcodebuild test`; no schema, no `Sync/`, no custody, no editor-seam line; `BookNavigatorFloor.width` and `BookOutlineTravelTests` untouched; stage list as suite TYPE names; the final `build-for-testing` run AFTER the last code commit, its log named (round 2 noted round 1's last build log predated its last commits). **Round 3** (a fresh `opus-reviewer`) follows the fix.
 
+#### THE ROUND-2 FIX — LIVE STATUS (the implementer's; flipped per piece in the same commit as the piece)
+
+**NOT DONE BY THE IMPLEMENTER (read first):** PENDING — written at the close.
+
+*Base: `836b252b3` (round 2 recorded). Required reading done in full before any code: this file's §8 "THE LADDER" (round 2's table and "THE ROUND-2 FIX" — the brief; round 1's table and the round-1 fix's LIVE STATUS for the code touched), §2 (the environment traps), `notes/SessionResiliencyProtocol.md`; plus QUESTIONS #115 (the re-land's guards). Headless runs and `build-for-testing` only, under `nice -n 15`, one at a time, into this fix's own derived-data path (`App/Variorum/DerivedData/vx1036l2`). Untouched, as briefed: `BookNavigatorFloor.width`, `BookOutlineTravelTests`; no schema, no `Sync/`, no custody, no editor-seam line.*
+
+| Piece | Status |
+|---|---|
+| R2-1a — the pin: the probe reads `uq_post_tag_live`, never `idx_post_tag_tag` (Home and a named wing) + the tombstone-heavy semantics case | DONE (this commit — the PIN alone). `TagUseCountsP1Tests.eachTagsProbeReadsTheLiveApplicationsIndexNeverTheWholeHistory` RED headless on this tree in BOTH wings (4 issues — the plan read `SEARCH pt USING INDEX idx_post_tag_tag (tag_id=?)`; `App/Variorum/DerivedData/vx1036l2-r2-1-red.log`); `aTagWithALongDeadHistoryStillCountsItsLiveWearersExactly` green on this tree (a semantics case — the counts were right, only the walk was long: 3 live wearers behind 210 dead applications, 200 taken off + 10 cascaded by note deletion, read 3; cap 5 reads 3; cap 2 reads 2) |
+| R2-1b — the fix: `INDEXED BY uq_post_tag_live` in the probe; the doc comment and the round-1 record's P1 sentence corrected | NOT-STARTED |
+| R2-2a — the hosted pin ALONE (a pins-only commit; the stage's confirm) | NOT-STARTED |
+| R2-2b — the fix: the switch's move re-lands the top row (#115(b)'s guarded line) | NOT-STARTED |
+| R2-3 — capture picks carry their own hover words | NOT-STARTED |
+| R2-4 — the chapter row's mint door reads its own "+" | NOT-STARTED |
+| P-final — the final `build-for-testing` (after the last code commit), the stage list (TYPES), the revert recipes | NOT-STARTED |
+
 ## 9. The kickoff sitting (2026-11-25, answered by dialog)
 
 Her picks, verbatim from the dialog: the batch cut — **"Approve the four batches"**; the ladder — **"opus-reviewer"** (escalates to Fable if any batch unexpectedly touches the editor seam); the riders — **VX-1091, VX-576, VX-96** (VX-1032, VX-312 and VX-410 offered, not taken); Index — **"Confirm — Index gets nothing"** (the List mode is the managing face; cheap to add later if she misses it in use). The riders became sub-issues of VX-1036 at the sitting (the roster stays the listing). The add-tag chord (T-4) still comes to her mid-run from batch 2. The nov24 coordinator's merge-order note, recorded: VX-1082 is two batches further along and likely merges first — after its merge this run merges main in and re-runs the BookView/Library suites before its own merge REQUEST.
