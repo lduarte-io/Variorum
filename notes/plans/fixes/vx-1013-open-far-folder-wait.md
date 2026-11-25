@@ -81,7 +81,27 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
 
 ## LIVE STATUS (the implementer's, from the first commit)
 
-*(empty — batch 1 not yet started)*
+*Batch 1, opus-implementer, session 1 (2026-11-24). No behavioural revert is in flight.*
+
+**Read first (own context, not delegated):** CLAUDE.md + the auto-canon; `notes/CastleRules.md` in full; this record;
+`notes/SessionResiliencyProtocol.md`; SurfaceContracts "Library protection"; the named source files (`CatalogLister`,
+`ProtectionFactsGatherer`, `ProtectionOpenRoad`, `ProtectionSystem`, `AppBootstrap`'s open seam, core `Catalog`, `Assess`,
+`RouteFinder`, `OwnCopies`, `Retention`) plus what they reach (`KeychainCustodyLeaf`'s probe, `FileKeyFileStoreLeaf`,
+`ProtectionRoadActs.searchIfOwed`, `ProtectionLobbyModel`, `ProtectionRoadLock.lobby`, the executor's custody listings).
+
+**Trace corrections (read in the code, for the record's mechanism section at closeout):**
+- Trace item 7 is mis-attributed: `executor.unlock` reads only the live key file. The executor reaches the full catalogue
+  through `FileKeyFileStoreLeaf.catalogedKeyFiles` only from Castle entry's sweep and `keyFileGoneEverywhere` (acts, not
+  the open). What DOES walk the far folder inside an open's executor work is every executor `custodyItems()` listing
+  (a repair that lists custody — `remakeOnDeviceItem`, `deleteSilentItem` — and a settle's plan runner): the Keychain
+  custody leaf's probe-by-name closure (`ProtectionSystem.touchIDCandidates`) walks both roots per listing.
+
+**Pieces:**
+1. NOT-STARTED — core: `Catalog.unreadPlaces` (D-1013-1) and `assess`'s indeterminate handling (D-1013-3) with core pins.
+2. NOT-STARTED — app: the lister's scope, the per-open far state, the facts' catalogue parameter, the scoped custody probe.
+3. NOT-STARTED — app: the road's plumbing (route, open, presses' join, the lobby's far landing) + the bootstrap wiring.
+4. NOT-STARTED — app pins (route zero far reads, walk count, press equivalence, lobby landing).
+5. NOT-STARTED — the sweep table (D-1013-3) below.
 
 ## THE LADDER
 
