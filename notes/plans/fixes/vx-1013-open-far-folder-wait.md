@@ -42,7 +42,7 @@ So the blank window is: first-frame-color → N × (far-folder byte reads of 155
 - **D-1013-2 — The launch route runs on container-only facts.** `CatalogLister` gains a scope (`.everything` — today's, the default everywhere — and `.containerOnly`, which lists the container and marks `.farFolder` unread). `ProtectionFactsGatherer.facts`/`ProtectionSystem.facts` take the catalogue state from the caller with `.everything` the default: the copy doors, copy counts, backup hook/pair, crossing and account acts, Data Safety — every non-launch caller — are byte-identical by default. Only `ProtectionOpenRoad`'s launch-route facts reads (lobbyFacts, open's, repairPasses', logSummary's, openTyped's first leg) run on the per-open far state (D-1013-5).
 - **D-1013-3 — Unread-far is indeterminate, by the road's standing idiom** ("could not read ≠ opens nothing", `ProtectionFactsGatherer`; "anything that might still open it says nothing", `AssessRules.lobby`). Concretely:
   - Rule 27 is NEVER claimed on a partial listing: `AssessRules.lobby`'s `mightOpen` treats an unread far place as possibly-holding ⇒ `noKeyFileAnywhere` stays nil until a full listing proves it; the unlocked `noKeyFileAnywhere` fault and `backupHoldsTheCurrentKeyFile` (Assess.repairs ~278/~301) likewise do not fire while far is unread.
-  - The no-backup-yet consult (Assess ~551) does not claim "no backup exists" on a partial listing; its act waits for a full-listing assessment (the backup hook's own moment walks everything anyway).
+  - The no-backup-yet consult: **superseded by R-1013-A1 (the fork's ruling, below)** — the container's copies answer it on a partial listing. The original line here ("its act waits for a full-listing assessment — the backup hook's own moment walks everything anyway") rested on a false parenthetical the implementer traced: no post-open assessment feeds the reminder, so the literal reading would lose rule 3's "always" moment. The fork section carries the full trace and options.
   - **The implementer sweeps EVERY consumer of `facts.catalog` / `catalog.` in `Sources/VariorumCore/Protection/Assess/`** and lands a sweep table in this file: each row UNAFFECTED (container-only fact) · INDETERMINATE-HANDLED (with its pin) · FULL-WALK CALLER (never sees an unread place). The closing form is the 13b sweep-table law.
 - **D-1013-4 — Where the far folder IS read:**
   - An `.opened`/`.created` route: not at all during the open. Post-open consumers keep their own fresh `.everything` walks, unchanged.
@@ -234,6 +234,22 @@ first backup runs and the moment is never owed again. Options:
 Until the ruling the tree is (a) by construction (row 12 untouched); on (a) the batch adds one pin (a partial listing
 with no container backup owes the moment — the creation keeps rule 3's "always"); on (b) or (c) the implementer builds it
 with its pin.
+
+**R-1013-A1 (the architect's ruling, 2026-11-25; PROVISIONAL for her bundle as P-1013-4): option (a).** Rule 3's
+"always right before the first backup" outranks the design note's parenthetical, which the trace showed false. The
+container is the place every backup run lands FIRST (`runPair`), so the container-only listing answers "has this Mac
+made a backup of this library" authoritatively in every undamaged state; the one miss — container pairs removed by
+hand while far pairs survive — costs one extra calm reminder whose words say nothing about backups. No face overclaims
+(D-1013-3's fence was about rule-27-class claims of fact). Row 12's verdict becomes UNAFFECTED-BY-RULING with (a)'s pin.
+
+**R-1013-A2 (the architect's, same sitting): the relock's lobby joins the batch — the class completed in-effort.**
+The "noticed, not taken" item is the same class (a lobby blocked on the far walk, reached by Lock Now or the idle/sleep
+monitors instead of launch); left as-is, every lock on an evicted far folder lands behind `.opening` for one full walk —
+the ticket's blank-window class at every idle lock. Build it as piece 6 BY REUSING the per-open plumbing (the relock's
+lobby context gets its own `FarFolderWalk`, container-only facts, the landing's refresh — P-1013-1/2/3 apply unchanged),
+with a pin (the relock's lobby facts perform no far read; the landing refreshes). IF it turns out to be more than
+plumbing reuse — any new design surface — stop and report instead; it then becomes its own ticket. Evidence stays
+headless (the gate's walk covers the launch only; no Castle posture change on the dev store for this).
 
 **Noticed, not taken (scope):** the relock's lobby (`ProtectionRoadLock.lobby` — VX-445's Lock Now and the idle/sleep
 monitors) reads both roots as before: its context carries no far walk (D-1013-2's default for non-launch callers), so a
