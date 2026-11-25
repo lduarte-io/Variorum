@@ -225,8 +225,9 @@ struct MobileShellView: View {
             }))
         _messageLine = State(initialValue: MobileMessageLineModel(
             status: session.status, voice: { [router] in router.voice },
-            // VM-51 (the VM-47 run): the line wears the library's look —
-            // voice, palette and tint, the shell's own settings road.
+            // VM-51 (the VM-47 run): the line wears the shell's look — voice,
+            // palette and tint, the shell's own settings road; since VM-247
+            // this phone's own look, laid over the library's settings.
             look: { [router] dark in router.tokens(dark: dark) }))
         // The quick-note box's session (round 2, M5). Bound HERE and not
         // in a `.task` deliberately: `bind` is idempotent and writes only
