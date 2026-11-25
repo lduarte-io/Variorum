@@ -318,8 +318,8 @@ install and the #281 dispositions.
 | Kickoff sitting: six rulings R-260-1…6 recorded | DONE 2026-11-25 |
 | nov24 coordinator announced; its protocol folded in above | DONE |
 | Riders re-parented under VM-260; batch 1a members In Progress | DONE |
-| Batch 1a (VM-253 · VM-256 · VM-255) | NOT STARTED |
-| Batch 1b (VM-265 · VM-275 · VM-277) | NOT STARTED |
+| Batch 1a (VM-253 · VM-256 · VM-255) | BUILT + SUITES GREEN 2026-11-25 (every red-on-old as predicted; the whole phone target and the 9 Mac suites green; code tip `19b31c4c3`). PENDING: the walk leg, and the keyboard-reveal UI test on a device whose library opens (the window's device was Castle-locked — no verdict, not a regression) |
+| Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | IN PROGRESS 2026-11-25 — implementer spawned; VM-277's gesture/short-form design comes back as a proposal before that half builds |
 | Batch 2 (VM-273 · VM-272) | NOT STARTED |
 | Batch 3 (VM-247 · VM-254) | NOT STARTED |
 | Batch 4 (VM-259: design → pick → build) | NOT STARTED |
