@@ -521,6 +521,36 @@ the flag's default true, tries the quiet roads. Unreachable today (the bootstrap
 re-reads); 472 says a context with no walk reads every place and, unless it is a lock's, tries the quiet roads once
 more over any far key file, which is why the bootstrap wires a landing only where a walk exists. Comments only, no pin.
 
+### ROUND 1 FINAL CALLS (the round-1 reviewer, 2026-11-25 — the cross-model flow's final word on each)
+
+*Each disposition re-checked against the code before the call; F-R1-3's three-point trace verified line by line
+(`BackupDestination.resolve`'s double-nil, `CatalogLister.list`'s `guard let top = try? contentsOfDirectory else
+{ return [] }`, `FarFolderWalk.farFolder`'s `resolved = .some(now)` cache). No FINDER-FIXES: nothing here needs the
+reviewer's own hands — no `Sync/` line, and every confirmed fix is small and fully specified. The implementer builds;
+round 2 re-checks.*
+
+- **F-R1-1 (MAJOR) — CONFIRMED-AS-PROPOSED.** The width guard in `take(_:)` (a fresh read whose catalogue
+  `!readsEveryPlace` never replaces a standing whose catalogue reads every place), exactly as dispositioned — the
+  guard must leave the nil-facts standing arm alone (a `standing.facts` of nil takes anything with facts, as today).
+  The implementer's two notes accepted: the narrow production window does not soften the severity (the loss is
+  silent, in the custody lobby, and the pin is deterministic); the phone's inertness is noted, no phone leg owed.
+  Generation counter rejected in favor of the width guard, as dispositioned. Pin as described (the gated
+  refreshRoad), red on this tree by the guard's revert, run headless in the VX-306 harness recipe.
+- **F-R1-2 (MINOR) — CONFIRMED-AS-PROPOSED.** Delete `Scope` and `catalog(scope:)`; the header rewritten to the
+  shipped seam; an as-built line beneath D-1013-2 (the design text itself stays the orchestrator's). No pin owed; the
+  build and the harness suites are the proof.
+- **F-R1-3 (MINOR) — TICKET-INSTEAD CONFIRMED.** The mechanism stands as found; the fix is genuinely not one seam, and
+  the direction of the lean — unread-forever's dead end (rule 27's face and its only door never offerable over a
+  gone-for-good folder) against today's bounded overclaim (whose *Start a New Library* sets the library aside WHOLE,
+  recoverable) — is a product call the spec is silent on, so it is hers, never this ladder's. Mint the ticket as
+  drafted (Bug · Suspected · Castle & sync · Low), carrying all three face options PLUS the listing-failure seam and
+  the no-retry cache in the same ticket's body, and the pointer here. One addition: the ticket takes the "Needs
+  Lillian" state (the face choice is hers; today's reading continues meanwhile — option (b) minus the face line, the
+  status quo, acceptable at Low).
+- **F-R1-4 (NIT) — CONFIRMED-AS-PROPOSED.** The two comments corrected as dispositioned; comments only.
+- **F-R1-5 (NIT) — already routed:** rides P-1013-2's bundle item, as recorded above. Nothing owed from the
+  implementer.
+
 ## HELD FOR HER SITTING (the away-run bundle)
 
 - P-1013-1 (the lobby may gain roads/rule 27's banner after it draws, when the deferred far walk lands) — PROVISIONAL, built.
