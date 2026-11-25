@@ -22,11 +22,15 @@ nonisolated struct ProtectionFarFolder: Sendable {
     let picked: URL
     /// Whether the scope must be claimed (a security-scoped bookmark — production); tests pass false.
     let scoped: Bool
+    /// VX-1013 — a test's witness: told at each claim of the folder (every read of it goes through `withAccess`, so a
+    /// planted far folder counts the reads an open makes). nil in production.
+    var accessed: (@Sendable () -> Void)? = nil
 
     /// `<picked>/Variorum` — the catalogue's far root.
     var variorum: URL { picked.appendingPathComponent(CatalogNames.variorumFolderName, isDirectory: true) }
 
     func withAccess<T>(_ body: (URL) throws -> T) rethrows -> T {
+        accessed?()
         guard scoped else { return try body(variorum) }
         let claimed = picked.startAccessingSecurityScopedResource()
         defer { if claimed { picked.stopAccessingSecurityScopedResource() } }
