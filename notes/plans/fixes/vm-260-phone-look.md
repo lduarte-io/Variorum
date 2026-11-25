@@ -773,6 +773,28 @@ gate's.
 **Round 1's fixes** (R1-1, R1-3, R1-8, R1-9) go to ONE fresh implementer, briefed by this section, after main's
 PR #31 merges at this boundary. Round 2 (a fresh `opus-reviewer`) re-reads them.
 
+**A-260-18 (round 1's fixes handed back, 2026-11-25, orchestrator on Opus): ACCEPTED, R1-1 conditional.**
+Verified against the diff (`c13b89ca9..8bbc18d87`): the fenced files untouched; 4a's three roots untouched (its
+rule extended by a defaulted parameter, `.infinity` = the old rule, so no 4a or 4b pin moved); the one line in
+`MobileShellView` is a COMMENT (R1-8's third, its own commit `d07ee74fa`) — accepted, the fence is a code fence.
+**R1-1's mechanism is CORRECTED and narrower** than the finding: the editor's typewriter room
+(`MobileEditorTextView.updateTypewriterRoom`) makes a page's reach independent of the viewport, so the no-clamp
+branch is benign and the self-undo needs UIKit to clamp the offset at the frame change before the text view's
+next layout; the band is short pages (about two or three lines) dragged into their room by her thumb — "every
+note typed with the keyboard up" does not hold. **THE RULE, decided now so the gate doesn't decide it:** if the
+R1-1 pin (`aShortPageAtItsFootNeverUndoesItsOwnTop`) is GREEN on `vm260-r1-rol` in both voices, the finding is
+HOLLOW and `3651b2eb7` REVERTS (the hallucination guard: record it, don't fix it), C-R1-1 with it; if RED, it
+stands and C-R1-1 (a page whose reach is ≤ the title row + 8 keeps its title) goes to QUESTIONS. R1-9 is
+CONFIRMED WIDER (three Terminal sizes and every non-default leading drifted); Terminal now derives from Study's
+rounded step by the default's own rule — the new Terminal sizes go to her bundle. R1-3's lesson words are DRAFT.
+
+**An environment fault the orchestrator caused (recorded; fixed in the build folders, no repo change):** the
+DerivedData cleanup at nov24's disk ask deleted `vm260-1a*`, but every APFS-cloned bundle in that lineage kept
+ABSOLUTE package-artifact paths into `vm260-1a/SourcePackages/` in its `workspace-state.json`, so rebuilds
+failed ("no XCFramework found"). The implementer repointed the trio; the orchestrator repointed the five
+remaining red-on-old trees and the walk drivers' bundle (each at its own `SourcePackages`, every reference
+verified zero). Lesson: before deleting a cloned DerivedData ancestor, repoint its descendants.
+
 ### Round 1 fixes — record (R1-1 · R1-3 · R1-8 · R1-9; implementer: Opus, a fresh session, 2026-11-25)
 
 **What this pass did NOT do (kept current):** NO test has run — the stage is coordinated and the evidence rides the
