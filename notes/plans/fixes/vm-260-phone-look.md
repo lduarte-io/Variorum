@@ -1499,7 +1499,11 @@ test claim below is PENDING its window; no capture is taken (the window's stops 
 line in `Sources/`, `Sync/`, custody, `MobileEditorTextView`, the text-input path, `MobileKeyboardBar`,
 `Shared/StatusCenter.swift` or `Shared/Theme/VoiceTokens.swift`; `Shared/Theme/ThemeStore.swift` untouched (the phone
 still binds it and simply stops taking the look from it); the synced `setting` rows untouched and never written by the
-phone's Look; the Mac's sources untouched; no canon edited (the deltas are drafted for the closeout below).
+phone's Look; the Mac's sources untouched; no canon edited (the deltas are drafted for the closeout below);
+`notes/QUESTIONS.md` not touched (the calls P-260-3a…3e, C-247-1, C-254-1/-2 are listed for the merge's QUESTIONS); the
+orchestrator's own LIVE STATUS table not flipped (its row is the orchestrator's). Machinery: the harness moved two long
+`xcodebuild` runs to its background after 180 s; each was waited on in the foreground by polling its log, never left
+running across a turn.
 
 ### LIVE STATUS
 
