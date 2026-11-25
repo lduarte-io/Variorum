@@ -96,6 +96,11 @@ struct BookCardTagsTests {
             $0.database = db
             $0.uuid = .incrementing
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            // A living book's backfill and the seat place through the
+            // fractional index's `\.withRandomNumberGenerator`: provided the
+            // house way (a seeded generator), so the host's test context never
+            // meets an unimplemented dependency.
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1038))
         } operation: { @MainActor in
             try await body(AppSession(database: db))
         }

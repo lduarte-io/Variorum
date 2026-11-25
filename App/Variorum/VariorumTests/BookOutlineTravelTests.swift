@@ -41,9 +41,25 @@ struct BookOutlineTravelTests {
         _ body: @MainActor (AppSession, BookViewModel, _ storyID: String) async throws -> T
     ) async throws -> T {
         let db = try AppDatabase.inMemory()
+        // The operations stamp through `\.date` and place through the
+        // fractional index's `\.withRandomNumberGenerator`; both are provided
+        // here the BookView neighbours' way (`withLandingBook`,
+        // `withMintLandingBook`) — a one-second ticking clock and a seeded
+        // generator — so the host's test context never meets an
+        // unimplemented dependency.
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
         return try await withDependencies {
             $0.database = db
             $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 96))
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let book = try session.operations.createReading(name: "the adventures", kind: .book)
@@ -117,9 +133,21 @@ struct BookOutlineTravelTests {
     /// consult answered false (it read the consumed request).
     @Test func aRevealOnlyLandingHoldsThePreMountUntilItEndsThenLetsGo() async throws {
         let db = try AppDatabase.inMemory()
+        // The same two dependencies `withModel` provides, the same way (the
+        // VX-91 pin's own harness, `withLandingBook`, provides them too).
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
         try await withDependencies {
             $0.database = db
             $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 96))
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let book = try session.operations.createReading(name: "the adventures", kind: .book)
