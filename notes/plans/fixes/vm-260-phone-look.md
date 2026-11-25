@@ -419,6 +419,25 @@ install and the #281 dispositions.
   RECORDED, not patched. The SUSPECTED field-answering item is ticketed — **VM-280** (Bug · Suspected · Low) —
   so it outlives this record's working sections. The red-on-old predictions remain the window's to prove;
   acceptance here is of the design set and the diff's discipline, not the evidence.
+- **A-260-10 (the F-1a-W1 fix's hand-back, 2026-11-25): trace and fix ACCEPTED; the orchestrator's suspected
+  mechanism stands REFUTED by the captures' own pixels.** The trace is the stronger kind of evidence — two
+  independent captures of the same field on the same device class, the 52.0-pt gap equal to
+  `MobileKeyboardBar.barHeight` exactly, and the page's rows cut at the bar's hairline (which falsifies the
+  band-ignores-keyboard story: the page's own reserved place sits 52 low too). The finding reclassifies: the
+  defect PREDATES this run (inferred — the stale avoidance after an accessory keyboard; wave 1's in-page bars
+  would have stood in the same place), exposed only by the walk's s5→s9 keyboard order. It stays MAJOR and
+  stays this run's to fix — the bar under the keyboard is the look's break, and SurfaceContracts' bar line
+  binds. C-W1-1 accepted: the guide as a FLOOR under SwiftUI's avoidance is the least-reach correction (zero
+  wherever the avoidance is right); (c) — dropping the editor's accessory at resign — is the editor seam,
+  correctly not taken, and is the NEXT road (Fable-reviewed, its own ticket) only if the window shows the guide
+  carries the stale 52 as well. C-W1-2/-3 accepted. The UI-test pin accepted with its stated reason (no
+  mounted pin can make a real keyboard after a real accessory keyboard); its red-on-old runs in the window on
+  `vm260-w1-rol`, with the implementer's falsification conditions standing as written (leg 1 red ⇒ mechanism
+  wrong; leg 2 green on old ⇒ hollow on this road, record not claim). WATCH, carried to the window: the one
+  message line reads the keyboard from its own notifications — if the stale 52 lives in the notification
+  frame, the line could sit 52 low on that keyboard (1b's surface; stop 6 checks opportunistically; a confirm
+  is a ticket, not this run's silent fix). The speed-suite note (one extra shell body evaluation per keyboard
+  show/hide outside a note) is read at the gate.
 
 ## Scope calls made at kickoff (the orchestrator's; each on the ratify list)
 
@@ -442,7 +461,7 @@ install and the #281 dispositions.
 | Kickoff sitting: six rulings R-260-1…6 recorded | DONE 2026-11-25 |
 | nov24 coordinator announced; its protocol folded in above | DONE |
 | Riders re-parented under VM-260; batch 1a members In Progress | DONE |
-| Batch 1a (VM-253 · VM-256 · VM-255) | SUITES GREEN; UI test GREEN on the walk device (1/1, 71 s — the Castle-locked no-verdict CLOSED); THE WALK RUN AND READ 2026-11-25 (the orchestrator's read; verdicts below) — every stop PASS in both voices EXCEPT **F-1a-W1, MAJOR, OPEN**: with the Library search holding the keyboard the bar sits ghosted UNDER the keyboard instead of riding above it (SurfaceContracts' bar line; capture `s9-search-keyboard`). Suspected mechanism: the shell's one-bar overlay sits at the band's foot and the band ignores the keyboard (the edge-grounds architecture), where the old in-page bars rode each page's keyboard avoidance. FIX OWED by batch 1a's implementer AT BATCH 2'S BOUNDARY (one writer per tree — batch 2 is live in the worktree); its re-evidence = a contract pin (red on the current tree), the s9 capture re-taken, and the keyboard-reveal UI test again (MobileShellView will change) |
+| Batch 1a (VM-253 · VM-256 · VM-255) | SUITES GREEN; UI test GREEN on the walk device (1/1, 71 s — the Castle-locked no-verdict CLOSED); THE WALK RUN AND READ 2026-11-25 (the orchestrator's read; verdicts below) — every stop PASS in both voices EXCEPT **F-1a-W1, MAJOR, OPEN**: with the Library search holding the keyboard the bar sits ghosted UNDER the keyboard instead of riding above it (SurfaceContracts' bar line; capture `s9-search-keyboard`). Suspected mechanism: the shell's one-bar overlay sits at the band's foot and the band ignores the keyboard (the edge-grounds architecture), where the old in-page bars rode each page's keyboard avoidance. FIX BUILT 2026-11-25 at the boundary (a fresh implementer; the F-1a-W1 section below): the suspected mechanism REFUTED — the real one is SwiftUI's keyboard avoidance 52 pt short after an accessory keyboard (predates the run); fix = `MobileKeyboardFloor` (the band's foot never below UIKit's keyboard layout guide), adjudicated A-260-10. Pin `c4081441c` (= the red-on-old tree, UI bundle `vm260-w1-rol`); fixed tip `dae368b4e`; red/green, the keyboard-reveal re-run and the s9 re-capture PENDING the window |
 | Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | BUILT, READY-FOR-TESTS 2026-11-25 (tip `ca9a8d7be`; adjudications A-260-3…8; the editor-spoken refusals' authored headlines deferred to VM-279, the clip standing in). PENDING: the one window — two red-on-old trees, the tip, the Mac legs, the line's 7-stop walk |
 | Batch 2 (VM-273 · VM-272) | BUILT, READY-FOR-TESTS 2026-11-25 (code tip `ae12e4276`, READY `17775aa42`; red-on-old tree `f99f20818` in `vm260-2-rol`; tip bundles `vm260-2`/`-mac`/`-ui` prebuilt; adjudicated A-260-9 — the set accepted PROVISIONAL, VM-280 filed). PENDING: the window |
 | Batch 3 (VM-247 · VM-254) | NOT STARTED |
