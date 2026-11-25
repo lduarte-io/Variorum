@@ -218,6 +218,23 @@ hard-stopped), make sure it cleaned up, and finish what it missed:
   and no her-word asks about content. Still binding: the stage discipline, signed out and never
   pressing Resume, `dev-castle.env`, the prod-test-road fences, and the A1 rail on her real store.
 
+## Lessons the 2026-11-22 window taught (`notes/handoffs/coordinator-2026-11-22-handoff.md`)
+- **A session outside Variorum (Fragments) stages like any other.** A GO for every simulator boot
+  or use, anything on the screen and anything to her phone; headless builds are free. It addresses
+  its own simulator by id, never runs a command that reaches every simulator, shuts its device down
+  before each release, and claims with `~/dev/variorum/Tools/stage` run by absolute path. You never
+  read or clean its repo.
+- **An iOS 27.0 simulator on this Mac:** disable `intelligencetasksd` inside the device
+  (`launchctl disable system/com.apple.intelligencetasksd`, then `bootout`, run in the device; the
+  setting persists across its boots) and wait five minutes after boot before any timing-sensitive
+  run. Read the load at the end of the wait and do not start in double figures.
+- **A zero-executed simulator launch is a retry after one fresh boot,** never a verdict. A no-seam
+  window carries six to eight minutes for that recovery.
+- **Watchers confirm "free" twice,** a few seconds apart: one read can land between a bridge's
+  release and the taker's claim. A bridge claim comes before any investigation.
+- **"Quiet" means:** freeze the other sessions' headless work by message, get the confirmation, and
+  name in the GO whatever cannot be paused.
+
 ## Ambient, the stage ambient (VX-458, VX-997)
 `Tools/ambient on|off|status|next|log` puts Ambient on the built-in screen while you hold the stage and
 nobody is READY: twenty-four living pixel scenes, black and white and colour, playing in a set order
