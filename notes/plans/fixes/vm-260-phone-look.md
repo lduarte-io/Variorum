@@ -1490,3 +1490,26 @@ light):
 6. **If a line is on screen in stop 4** (any message the road raised), its place over the bar — the one line tracks the
    keyboard from its own notifications (`MobileMessageLineController`) and is NOT touched by this fix; a line standing
    52 pt low there is batch 1b's finding, not F-1a-W1's.
+
+
+## BATCH 3 — record (VM-247 · VM-254; implementer: Opus, a fresh session, 2026-11-25)
+
+**What this batch did NOT do (kept current):** NO suite has run — the stage is coordinated above this session, so every
+test claim below is PENDING its window; no capture is taken (the window's stops are listed at the READY block); no
+line in `Sources/`, `Sync/`, custody, `MobileEditorTextView`, the text-input path, `MobileKeyboardBar`,
+`Shared/StatusCenter.swift` or `Shared/Theme/VoiceTokens.swift`; `Shared/Theme/ThemeStore.swift` untouched (the phone
+still binds it and simply stops taking the look from it); the synced `setting` rows untouched and never written by the
+phone's Look; the Mac's sources untouched; no canon edited (the deltas are drafted for the closeout below).
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's binding sections — What binds every batch, the 13b constitution, her kickoff rulings R-260-2/-3, the adjudications incl. A-260-3's procedural note and A-260-9's flag, the Batch 3 section, the BATCH 2 record; SurfaceContracts "The app" in full incl. the phone's Settings bullet; the resiliency protocol; QUESTIONS #281 and its addendum (P-47-16's "the cream background stays an option"); the VM-47 record's P-47-15/-16/-17/-24/-25/-26 rows; TEXTKIT2_NOTES §3) | DONE (this commit) |
+| 1. The pins on the pre-fix tree — VM-247's fence (a Look change writes no row; a library's look moves the phone nothing) and VM-254's default (her words one notch under today's, the editor's body with them) | NOT STARTED |
+| 2. The red-on-old tree built headless (`DerivedData/vm260-3-rol`, an APFS clone of `vm260-2`, incremental, `nice -n 15`) | NOT STARTED |
+| 3. VM-247 — this phone's own look (voice · palette · background · appearance on the device; the router's overlay; the editor face's ground; Settings ▸ Look's rows) | NOT STARTED |
+| 4. VM-254 — the text-size row and the smaller default (the type layer's table and its words scale; the editor face's body; the environment at the roots) | NOT STARTED |
+| 5. Pins MOVED with the rulings + the tip's new pins | NOT STARTED |
+| 6. Tip bundles (`vm260-3`, `vm260-3-mac`, `vm260-3-ui`) and READY-FOR-TESTS | NOT STARTED |
+| 7. The window — red-on-old, the whole phone target, the Mac legs, the keyboard-reveal UI test, the captures | PENDING (the GO) |
