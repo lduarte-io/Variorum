@@ -6,17 +6,19 @@
 
 *(Kept current while the sitting runs; rewritten at its close.)*
 
-- **Done at the sitting so far:** PR #8 (VX-997, the Variorum side of the Ambient app) merged at her word, merge
-  commit `703c42173`; its worktree, branch and the old tool's build folder removed. A new Linear label, "Ambient",
-  sits on all fourteen Ambient tickets. VX-1013 (the slow open) was sized, with measurements (below).
-- **Waiting on her:** Apple's developer agreement (the notary service still answered 403 at 14:40 on 2026-11-24);
-  her answers on the open calls of QUESTIONS #276 and #278; the five proposed stage-coordinator skill lines; the
-  label and notes of 1.5.
-- **Owed before 1.5 is built:** the first-run gate again, on main's tip. It passed on `ad5053002`; the phone runs
-  that merged afterwards changed shared and core code (among it the local migration v1_38, which is not a lockstep
-  event; the marker stays 15).
-- **Rulings:** none recorded yet. They land here in her words, then in `notes/QUESTIONS.md` as bundle addenda at
-  the close.
+- **Done:** PR #8 (VX-997, the Variorum side of the Ambient app) merged at her word, merge commit `703c42173`, and
+  cleaned up. A Linear label "Ambient" sits on all fourteen Ambient tickets. VX-1013 (the slow open) sized with
+  measurements; now High, Todo. Apple's agreement accepted by her; the notary service answers again.
+- **Ruled (her words below, "Her rulings"):** QUESTIONS #276 and #278 are closed but for the wording pass and
+  VX-370; the parity audit became the umbrella VX-1046 (twenty-seven members, all Todo at her word) plus VX-1068
+  (Snippets, Needs Lillian); its twelve exceptions are stated in `notes/MCPSpec.md`; the coordinator skill gained the
+  five lines the 2026-11-22 coordinator proposed; VX-1026 rides VX-1036; VX-460 closed; VX-1017 parked.
+- **In flight:** the 1.5 release's step 0 (FirstRunDrillTests and the scripted first-run walk) on main's tip code,
+  through stage coordinator `nov24` (session `variorum-ca`), claim name `vx-1045`, run by one Opus subagent.
+- **Still hers before 1.5 is built:** the 1.5 notes and label (put to her in chat for approval).
+- **Canon touched on this branch:** `notes/SurfaceContracts.md` and `notes/MCPSpec.md` (the ratified calls lose the
+  word PROVISIONAL; the stated exceptions added beside the audit's pointer); `notes/QUESTIONS.md` (two addenda).
+  Neither spec file is in the loaded set.
 
 ## Her words (2026-11-24, verbatim)
 
@@ -108,9 +110,71 @@ the five-round cap is answered as the standing rule), and the Ambient repo's `no
   `v1_38_owner_adoption_index`. The gate is owed again on the tip that is built.
 - `ReleaseNotes-1.5.md` and the label 1.5 are still provisional.
 
-## Her rulings
+## The list put to her, and her rulings
 
-*(None yet.)*
+The list, as put to her in chat (each letter with the orchestrator's recommendation):
+
+- **A. VX-980, search.** A1 keep everything as built (the Search index row's place, no confirm before Rebuild, the
+  answer lasting only while the pane is open; the "say why" sentence also in a book's search; the Trash search's
+  reach, the whole Trash with archived takes, untitled notes answering to their day, the one passage line, the
+  180 ms pause, the click-only field, clearing on leaving). A2 one change: when a dash sits beside a tag the band
+  stops quoting the dash (P-980-B1-1, option (b)), a Low ticket. A3 park VX-1017.
+- **B. VX-981, the AI door.** B1 keep everything as built (a Journal entry's Private row ticked and locked even
+  with its own mark; pressing the eye says why; a note deleted at the instant an AI moves her to it answers as
+  missing, and every road clears that place's rows and the last-change door; only `tools/list` and `tools/call`
+  count as a client being ready; a client that stops reading keeps its notices waiting and is never closed; the
+  new status-line sentences). B2 ticket the toast covering the cards band. B3 ticket the two client-side frictions.
+- **C. The parity audit.** C1 renaming a tag over the wire: allow it as the tag's act, Edit on the whole wing, the
+  answer naming nothing hidden. C2 Snippets for AI: a design question, Needs Lillian, nothing built. C3 the other
+  proposed tickets under one Backlog umbrella, Medium for the structural ones, Low for the rest. C4 the twelve
+  exceptions accepted as stated.
+- **D. The coordinator's items.** Land the five skill lines; no simulator ticket; her word on watchman.
+- **E. Tickets.** E1 VX-1013 to High and Todo. E2 VX-1026 rides VX-1036. E3 close VX-460.
+
+**Her answer (2026-11-24, verbatim; her numbers follow the report's sections):**
+
+"1. good. 2. I accepted the apple agreement. 3. agreed that 1013 should be raised to High, Todo. I will do it in my
+next umbrella. 4. agreed on landing all 5 improvements. I did brew reinstall watchman already. simulator ticket - I
+don't think we need one. 5. agreed - seat this on the vx-1036 ticket, if that's the book improvement umbrella. 6. A.
+agreed B. Agreed. C. c1 - ticket this, should be allowed. c2 - leave as needslillian. c3 - agreed, put these into
+todo though. they are important to get done soon. C4 - agreed, but what are the rest? and are there any library
+level acts approved right now? I suppose moving between libraries is. D. handled. E. yes, close vx-460. 7. that's
+fine on the first run check being owed again, I started nov24 the stage coordinator so you can contact them for
+that."
+
+**What each became.**
+
+| Her word | What was done |
+|---|---|
+| "I accepted the apple agreement." | `xcrun notarytool history --keychain-profile VariorumNotary` answers with the submission history (the last entry 1.4's DMG). Noted on VX-1028. |
+| VX-1013 "raised to High, Todo" | Done on the ticket. Hers to seat in her next umbrella. |
+| "landing all 5 improvements" | A new section in `.claude/skills/stage-coordinator/SKILL.md`, "Lessons the 2026-11-22 window taught", the five lines in the coordinator's own words. |
+| watchman, the simulator ticket | She reinstalled watchman herself. No simulator ticket. |
+| VX-1026 on VX-1036 | VX-1036 is the book umbrella ("Organizing inside a book"); VX-1026 is its sub-issue. |
+| "A. agreed" | P-980-B1-1 (b) is VX-1069 (Low, Backlog). VX-1017 is Parked with its reason. Everything else stays as built. QUESTIONS #276 addendum 2. |
+| "B. Agreed" | VX-1070 (the toast over the cards band), VX-1071 and VX-1072 (the two client-side frictions), all Low, Backlog. Everything else stays as built. QUESTIONS #278 addendum. |
+| "c1 - ticket this, should be allowed." | VX-1050. |
+| "c2 - leave as needslillian" | VX-1068, Needs Lillian, under the umbrella. |
+| "c3 - agreed, put these into todo though." | The umbrella VX-1046 (High, Todo). New members VX-1047 to VX-1067; seated members VX-159 (now Medium), VX-145, VX-146, VX-147, VX-148. All Todo. Medium: VX-1047 (extract), VX-1048 (a passage into a new take), VX-1049 (takes into blocks), VX-159 (the divide and merge presets). The umbrella's own priority, High, is the orchestrator's reading of "important to get done soon", hers to change. VX-368 closed with the outcome. |
+| "C4 - agreed, but what are the rest? …" | The twelve are stated in `notes/MCPSpec.md` beside the audit's pointer, and were listed for her in chat with the answer to her question: no act above a wing is on the wire today; between wings the wire has `list_wings`, `move_note_to_wing`, `move_book_to_wing` and `copy_note_to_wing` (a gathering and the daily Journal refuse the move). If she strikes one after reading the list, the MCPSpec line changes before this branch merges. |
+| "yes, close vx-460" | Done, with her word on the ticket. |
+| "you can contact them for that" | REQUEST sent to `nov24`; queued first. See "The release's step 0". |
+
+**The wording pass** was not ruled: she sent no edit. The sentences listed in the two handoffs stay provisional, and
+canon keeps that word on the Trash line's wording.
+
+## The release's step 0
+
+- **What is owed:** FirstRunDrillTests and `Tools/WalkKit/first-run-walk.sh std` (both arms) on the code being
+  released. It last passed on `ad5053002`.
+- **What does not need re-running:** the whole Mac test target. It ran green on VM-47's merged tree (6,435 tests in
+  1,114 suites, the coordinator's 2026-11-19 handoff), and `git diff 226edf626 HEAD` shows no change since that
+  merge in the Mac app, `Shared/`, the core or their tests.
+- **The tip gated:** `703c42173`. Commits after it on the way to the build change only notes, the coordinator
+  skill and, if she edits them, the release notes' words; none of that is code the gate exercises.
+- **The road:** stage coordinator `nov24` grants the window (claim `vx-1045`, 45 minutes, seams after the test run
+  and between the walk's arms). An Opus subagent prepares headless (the Debug build, build-for-testing, the walk's
+  self-test), and runs the gate only after the orchestrator has taken the claim line.
 
 ## LIVE STATUS
 
@@ -122,3 +186,8 @@ the five-round cap is answered as the standing rule), and the Ambient repo's `no
 | 14:49 | PR #8 merged (`703c42173`); cleanup done. |
 | 14:50 | The "Ambient" label made and applied to fourteen tickets. |
 | 14:52 | VX-1045 minted; this record opened. |
+| 17:30 | Her answers arrived. The notary check passes. |
+| 17:33 | ANNOUNCE and REQUEST to `nov24` for step 0; queued first. An Opus subagent started on the headless preparation. |
+| 17:34–17:38 | Linear: VX-1013 High and Todo; VX-1026 under VX-1036; the umbrella VX-1046 and its members; VX-1068 to VX-1072; VX-460 and VX-368 closed; VX-1017 parked. |
+| 17:45 | The five skill lines, the ratified canon lines, the stated exceptions and the two QUESTIONS addenda on this branch. |
+
