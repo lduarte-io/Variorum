@@ -57,9 +57,10 @@ public enum BookTagsShown: String, CaseIterable, Equatable, Sendable {
 ///   comes back to truth (`NOT NOT #a` is `#a`);
 /// - a branch that does NOT hold places nothing (`(#a AND #x) OR #b` wearing
 ///   `a` and `b` but not `x`: only `b` places it);
-/// - star and legacy terms witness no tag. A legacy term's value is the
-///   caller's (`legacy`); unknown (nil, the default) is three-valued — it
-///   neither holds nor fails, so it never blocks a witness the rest supports.
+/// - star and legacy terms witness no tag. Their VALUES are the caller's
+///   (`starred`, `legacy`); unknown (nil, the default — a book's entries do
+///   not carry the star) is three-valued: it neither holds nor fails, so it
+///   never blocks a witness the rest of the tree supports.
 /// A dead or missing term tag (absent from `ruleTags`) matches nothing.
 public enum NotePlacingTags {
     /// The ids of the worn tags that place the note under ANY of `rules`
@@ -68,7 +69,7 @@ public enum NotePlacingTags {
         rules: [RuleTerm],
         worn: [Tag],
         ruleTags: [String: Tag],
-        starred: Bool = false,
+        starred: Bool? = nil,
         legacy: (RuleTerm) -> Bool? = { _ in nil }
     ) -> Set<String> {
         var witnesses: Set<String> = []
@@ -91,7 +92,7 @@ public enum NotePlacingTags {
 
     /// The term's value for the note — Kleene's three values (nil unknown).
     static func value(
-        _ term: RuleTerm, worn: [Tag], ruleTags: [String: Tag], starred: Bool,
+        _ term: RuleTerm, worn: [Tag], ruleTags: [String: Tag], starred: Bool?,
         legacy: (RuleTerm) -> Bool?
     ) -> Bool? {
         switch term {
@@ -130,7 +131,7 @@ public enum NotePlacingTags {
     /// is known to take the other value. Unknown (nil) is let through: it
     /// never blocks a witness the rest of the tree supports.
     static func walk(
-        _ term: RuleTerm, want: Bool, worn: [Tag], ruleTags: [String: Tag], starred: Bool,
+        _ term: RuleTerm, want: Bool, worn: [Tag], ruleTags: [String: Tag], starred: Bool?,
         legacy: (RuleTerm) -> Bool?
     ) -> Set<String> {
         let v = value(term, worn: worn, ruleTags: ruleTags, starred: starred, legacy: legacy)

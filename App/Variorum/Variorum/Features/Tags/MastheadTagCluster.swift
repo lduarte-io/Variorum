@@ -77,6 +77,10 @@ struct MastheadTagCluster: View {
     /// 13i-d U3 (KnownIssues row 112): the cluster's two reads live in ONE
     /// small model, the row-104 shape (`NoteMembershipModel`).
     @State private var store = MastheadTagsModel()
+    /// VX-576 (the rider seated in VX-1036 batch 2): how many live notes wear
+    /// each tag of the note's wing — read ONCE each time the field opens
+    /// (never inside the held read), so the field suggests most-used first.
+    @State private var uses: [String: Int] = [:]
     private var tags: [Tag] { store.tags(for: postID) }
     private var allTags: [Tag] { store.allTags }
 
@@ -148,7 +152,8 @@ struct MastheadTagCluster: View {
                                 // words are about the already-tagged case.
                                 if !tags.isEmpty { fieldOpen = false }
                             },
-                            onDismiss: { fieldOpen = false })
+                            onDismiss: { fieldOpen = false },
+                            uses: uses)
                             .offset(x: -Self.fieldGap)
                             .transition(.move(edge: .trailing).combined(with: .opacity))
                             .mastheadGeometryProbe(.field, in: geometryProbeSpace)
@@ -157,6 +162,14 @@ struct MastheadTagCluster: View {
         }
         .animation(.easeInOut(duration: 0.18), value: fieldOpen)
         .task(id: postID) { await store.track(session: session, postID: postID) }
+        // VX-576: the counts, once per opening (a closed field reads nothing).
+        .task(id: fieldOpen ? postID : nil) {
+            guard fieldOpen else { return }
+            let counts = try? await session.database.read { db in
+                try Queries.tagUseCounts(db, wingID: try MastheadTagsModel.noteWing(db, postID: postID))
+            }
+            if let counts { uses = counts }
+        }
     }
 
     /// Row 59 (the Act 10 correction round, batch G — the orchestrator's walk

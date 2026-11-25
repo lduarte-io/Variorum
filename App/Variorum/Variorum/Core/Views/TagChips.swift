@@ -434,15 +434,30 @@ struct TagChipAdder: View {
     }
 
     /// Pure, so the matching rule is pinnable without a popover.
+    ///
+    /// **VX-576 — most-used first** (the rider seated in VX-1036 batch 2):
+    /// given `uses` (how many live notes wear each tag, by id —
+    /// `Queries.tagUseCounts`), the matches order by it, most first, BEFORE
+    /// the cap — so a much-worn tag deep in the alphabet still makes the
+    /// list; ties (and every tag when `uses` is empty — the callers that hand
+    /// none) keep the taxonomy's own path order, byte for byte today's.
     static func suggestions(
-        _ all: [Tag], typed: String, applied: Set<String>, limit: Int = 8
+        _ all: [Tag], typed: String, applied: Set<String>, limit: Int = 8,
+        uses: [String: Int] = [:]
     ) -> [Tag] {
         let needle = typed.trimmingCharacters(in: .whitespaces).lowercased()
-        return all
+        let matches = all
             .filter { !applied.contains($0.path) }
             .filter { needle.isEmpty || $0.path.lowercased().contains(needle) }
-            .prefix(limit)
-            .map { $0 }
+        let ordered = uses.isEmpty
+            ? matches
+            : matches.enumerated()
+                .sorted { a, b in
+                    let (ua, ub) = (uses[a.element.id] ?? 0, uses[b.element.id] ?? 0)
+                    return ua != ub ? ua > ub : a.offset < b.offset
+                }
+                .map(\.element)
+        return Array(ordered.prefix(limit))
     }
 
     var body: some View {

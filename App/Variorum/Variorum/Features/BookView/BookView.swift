@@ -147,6 +147,10 @@ struct BookView: View {
     /// own model (P-9) — the masthead's 🔍 and the answer drawn over the
     /// mode's body. Injectable for `model`'s reason.
     @State private var bookSearch: BookSearchModel
+    /// VX-1038 — the book's TAGS (T-1…T-5): the per-book switch, the
+    /// window's notes' pills and the "+" field. Its own model (P-9).
+    /// Injectable for `model`'s reason (a pin drives `adopt` by hand).
+    @State private var cardTags: BookCardTagsModel
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -176,7 +180,8 @@ struct BookView: View {
         onBookMode: ((String, BookStructureModel.ViewMode?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
         onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil,
-        noteRoads: BookNoteRoads = BookNoteRoads()
+        noteRoads: BookNoteRoads = BookNoteRoads(),
+        cardTags: BookCardTagsModel? = nil
     ) {
         self.session = session
         self.readingID = readingID
@@ -213,6 +218,7 @@ struct BookView: View {
         _grouping = State(initialValue: grouping ?? BookIndexGroupingModel(readingID: readingID))
         _bookSearch = State(
             initialValue: bookSearch ?? BookSearchModel(session: session, readingID: readingID))
+        _cardTags = State(initialValue: cardTags ?? BookCardTagsModel(readingID: readingID))
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -464,6 +470,14 @@ struct BookView: View {
         .task(id: ownershipKey) {
             await ownership.observe(
                 session: session, postIDs: model.entries.map(\.postID), inBook: readingID)
+        }
+        // VX-1038 — the pills' read, keyed on whether the switch shows tags,
+        // WHICH notes the window holds, the book's wing and its rule. Hidden
+        // reads nothing.
+        .task(id: cardTagsKey) {
+            await cardTags.track(
+                session: session, key: cardTagsKey,
+                isGathering: structure.reading?.kind == .gathering)
         }
         // 13f batch 4: the pane's focus reaches the book's own focus
         // authority. `onChange` alone would miss the initial value, and a
@@ -2501,9 +2515,13 @@ struct BookView: View {
                                         ) {
                                             postRow(entry)
                                         }
+                                        .zIndex(tagFieldLift([entry.postID]))
                                     }
                                 }
                             }
+                            .zIndex(tagFieldLift(rows.compactMap {
+                                if case .note(let entry) = $0 { entry.postID } else { nil }
+                            }))
                         case .expanded(let entry):
                             // An expanded note stands on its own — the row
                             // virtualizes its surface (near the viewport ⇒
@@ -2512,6 +2530,7 @@ struct BookView: View {
                             // and only near-viewport text surfaces exist.
                             postRow(entry)
                                 .outlineAnchor(segment.id, in: self, proxy)
+                                .zIndex(tagFieldLift([entry.postID]))
                         }
                     }
                     if structure.chaptersActive {
@@ -3036,6 +3055,22 @@ struct BookView: View {
     /// 13i-c U4: the badge facts' task key — the ids the book shows.
     private var ownershipKey: [String] { model.entries.map(\.postID) }
 
+    /// VX-1038: the pills' read key (`BookCardTagsModel.Key`).
+    private var cardTagsKey: BookCardTagsModel.Key {
+        BookCardTagsModel.Key(
+            shows: cardTags.position != .hidden,
+            postIDs: cardTags.position != .hidden ? model.entries.map(\.postID) : [],
+            wingID: structure.reading?.wingId ?? "",
+            querySpec: structure.reading?.kind == .gathering ? structure.reading?.querySpec : nil)
+    }
+
+    /// VX-1038: the row whose "+" field is open stands above its neighbours,
+    /// so the field's suggestions hang over the rows below it.
+    func tagFieldLift(_ postIDs: [String]) -> Double {
+        guard let open = cardTags.fieldPostID else { return 0 }
+        return postIDs.contains(open) ? 1 : 0
+    }
+
     /// **The badge a row wears** (§6's direction): inside a BOOK, the shared
     /// mark; a GATHERING's view is outside every book, so its rows wear the
     /// owned-by mark. The setting silences the set (P-13ic-10).
@@ -3058,7 +3093,9 @@ struct BookView: View {
             // "open ↗", the collapsed card's body and its "open ↗").
             onOpenInWrite: { openInWrite($0) },
             // VX-802: the note-title menu's asks and roads.
-            noteDoors: noteDoors, noteRoads: noteRoads)
+            noteDoors: noteDoors, noteRoads: noteRoads,
+            // VX-1038: the header's pills and "+".
+            tags: cardTags)
     }
 }
 
@@ -3874,6 +3911,9 @@ private struct OutlinePostRow: View {
     /// its roads beyond the book — the header's and the card's right-click.
     let noteDoors: BookNoteTitleDoors
     let noteRoads: BookNoteRoads
+    /// VX-1038 (T-1/T-3): the book's tags — the header's pills and "+", drawn
+    /// while the book's switch shows tags (nil: a harness mount, no pills).
+    let tags: BookCardTagsModel?
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
@@ -3881,7 +3921,8 @@ private struct OutlinePostRow: View {
         badge: OwnershipBadgeFace.Badge? = nil,
         onOpenInWrite: @escaping (String) -> Void = { _ in },
         noteDoors: BookNoteTitleDoors = BookNoteTitleDoors(),
-        noteRoads: BookNoteRoads = BookNoteRoads()
+        noteRoads: BookNoteRoads = BookNoteRoads(),
+        tags: BookCardTagsModel? = nil
     ) {
         self.session = session
         self.model = model
@@ -3893,6 +3934,21 @@ private struct OutlinePostRow: View {
         self.onOpenInWrite = onOpenInWrite
         self.noteDoors = noteDoors
         self.noteRoads = noteRoads
+        self.tags = tags
+    }
+
+    /// VX-1038 (T-1): where the pills' own row starts — the title's leading
+    /// edge, past the fold disclosure and the header's spacing.
+    static let titleIndent = BookFoldDisclosure.footprint.width + 6
+
+    /// The header's pills and "+" (nothing while the book hides tags).
+    @ViewBuilder
+    private var headerPills: some View {
+        if let tags {
+            BookCardPills(
+                session: session, tags: tags, postID: entry.postID,
+                wingID: structure.reading?.wingId ?? "", tokens: tokens)
+        }
     }
 
     /// Row 53: is this row near the viewport? An EXPANDED row far from it
@@ -3966,6 +4022,9 @@ private struct OutlinePostRow: View {
                     postHeader
                         .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                         .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                        // VX-1038: the "+" field's suggestions hang over the
+                        // note's text below the header.
+                        .zIndex(1)
                     // VX-91: `nearViewport` alone left the clicked far
                     // story's row a placeholder until the scroll ARRIVED —
                     // the title-alone-over-blank beat. The row she is on
@@ -4141,32 +4200,48 @@ private struct OutlinePostRow: View {
     /// recede to quiet chrome beside it, because this is a page she writes
     /// on, not a catalog row.
     private var postHeader: some View {
-        HStack(spacing: 6) {
-            // 13b 3E (D1): the ONE collapse door — it releases focus too,
-            // so collapsing the post you're typing in actually collapses it.
-            // VX-291: the card's ▸ and this ▾ are ONE control (the 22-pt
-            // target, grown outward).
-            BookFoldDisclosure(
-                tokens: tokens, folded: false, help: "Collapse this note back to its card",
-                probeKey: "header-\(entry.postID)"
-            ) { model.collapse(entry.postID) }
-            Text(outlineEntryTitle(entry))
-                .font(tokens.heading)
-                .foregroundStyle(tokens.ink)
-            if let date = entry.entryDate {
-                Text(date)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+        // VX-1038 (T-1, the round-2 mockup's frame 1): ONE header line — the
+        // title and its doors lead; the note's pills trail at the far right,
+        // wrapping there when many, or taking their own row under a title that
+        // fills the line (`BookCardHeaderLine`).
+        BookCardHeaderLine(ownRowIndent: Self.titleIndent) {
+            HStack(spacing: 6) {
+                // 13b 3E (D1): the ONE collapse door — it releases focus too,
+                // so collapsing the post you're typing in actually collapses it.
+                // VX-291: the card's ▸ and this ▾ are ONE control (the 22-pt
+                // target, grown outward).
+                BookFoldDisclosure(
+                    tokens: tokens, folded: false, help: "Collapse this note back to its card",
+                    probeKey: "header-\(entry.postID)"
+                ) { model.collapse(entry.postID) }
+                Text(outlineEntryTitle(entry))
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.ink)
+                    // VX-1080 (T-2): one line; the title gives way first.
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                if let date = entry.entryDate {
+                    Text(date)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+                if let badge {
+                    OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
+                        .fixedSize()
+                }
+                // Sitting 9 batch 7: the door OUT of the book into the post's
+                // full editor (modes, takes, lenses — everything). VX-303: the
+                // book's ONE open door, carrying her place in this note.
+                Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help("Open this note in the full editor (Write · Takes · Lenses · …)")
+                .lineLimit(1)
+                .fixedSize()
             }
-            if let badge {
-                OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
-            }
-            // Sitting 9 batch 7: the door OUT of the book into the post's
-            // full editor (modes, takes, lenses — everything). VX-303: the
-            // book's ONE open door, carrying her place in this note.
-            Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help("Open this note in the full editor (Write · Takes · Lenses · …)")
+            .bookCardHeaderRole(.lead)
+            headerPills
         }
         .padding(.top, 10)
         // (The `page-<id>` landing anchor moved to the ROW, at the lazy
@@ -4196,33 +4271,51 @@ private struct OutlinePostRow: View {
             onOpenInWrite(entry.postID)
         } label: {
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    // VX-291 (her "that one little triangle could stand to
-                    // just be a bit bigger"): a 22-pt target grown OUTWARD —
-                    // the card lays out what it always did, so its learned
-                    // height holds, and a near miss no longer opens the note.
-                    BookFoldDisclosure(
-                        tokens: tokens, folded: true,
-                        help: "Unfold this note in place — write in it right here",
-                        probeKey: "card-\(entry.postID)"
-                    ) { model.expand(entry.postID) }
-                    Text(outlineEntryTitle(entry))
-                        .font(tokens.body.weight(.semibold))
-                        .foregroundStyle(tokens.ink)
-                    if let date = entry.entryDate {
-                        Text(date)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                // VX-1038 (T-1): the card's header line — the title leads,
+                // "open ↗" stands at the far end, and the note's pills sit just
+                // before it (wrapping there, or on their own row under a title
+                // that fills the line — `BookCardHeaderLine`).
+                BookCardHeaderLine(ownRowIndent: Self.titleIndent) {
+                    HStack(spacing: 6) {
+                        // VX-291 (her "that one little triangle could stand to
+                        // just be a bit bigger"): a 22-pt target grown OUTWARD —
+                        // the card lays out what it always did, so its learned
+                        // height holds, and a near miss no longer opens the note.
+                        BookFoldDisclosure(
+                            tokens: tokens, folded: true,
+                            help: "Unfold this note in place — write in it right here",
+                            probeKey: "card-\(entry.postID)"
+                        ) { model.expand(entry.postID) }
+                        Text(outlineEntryTitle(entry))
+                            .font(tokens.body.weight(.semibold))
+                            .foregroundStyle(tokens.ink)
+                            // VX-1080 (T-2): one line; the title gives way first.
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        if let date = entry.entryDate {
+                            Text(date)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                                .lineLimit(1)
+                                .fixedSize()
+                        }
+                        // 13i-c U4 (§6): the badge family, beside the title.
+                        if let badge {
+                            OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
+                                .fixedSize()
+                        }
                     }
-                    // 13i-c U4 (§6): the badge family, beside the title.
-                    if let badge {
-                        OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
-                    }
-                    Spacer()
+                    .bookCardHeaderRole(.lead)
+                    headerPills
                     Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     .help("Open this note in the full editor (Write · Takes · Lenses · …)")
+                    .lineLimit(1)
+                    .fixedSize()
+                    .bookCardHeaderRole(.trailing)
                 }
+                // The "+" field's suggestions hang over the excerpt below.
+                .zIndex(1)
                 // Wave 2c (W8-5): the excerpt stays on the card, and the
                 // note's facts are not under it. They were in the details
                 // gutter to the right until 18d batch 1 retired it (U-17);

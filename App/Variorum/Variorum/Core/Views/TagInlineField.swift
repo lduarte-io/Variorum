@@ -27,6 +27,9 @@ struct TagInlineField: View {
     /// that means, because only it knows whether the note carries a tag.
     let onFocusLost: () -> Void
     let onDismiss: () -> Void
+    /// VX-576: how many live notes wear each tag (by id) — the suggestions
+    /// order most-used first; empty (the default) keeps the path order.
+    var uses: [String: Int] = [:]
 
     @State private var typed = ""
     @FocusState private var focused: Bool
@@ -35,7 +38,7 @@ struct TagInlineField: View {
     static let width: CGFloat = 190
 
     private var suggestions: [Tag] {
-        TagChipAdder.suggestions(allTags, typed: typed, applied: applied, limit: 6)
+        TagChipAdder.suggestions(allTags, typed: typed, applied: applied, limit: 6, uses: uses)
     }
 
     var body: some View {

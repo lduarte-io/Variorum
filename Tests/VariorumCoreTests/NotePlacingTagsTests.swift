@@ -40,7 +40,7 @@ struct NotePlacingTagsTests {
         Dictionary(uniqueKeysWithValues: [week, monday, tuesday, todo, done, video, ideas, kitchenVideo].map { ($0.id, $0) })
     }
 
-    private func placing(_ rule: RuleTerm, _ worn: [Tag], starred: Bool = false) -> Set<String> {
+    private func placing(_ rule: RuleTerm, _ worn: [Tag], starred: Bool? = nil) -> Set<String> {
         NotePlacingTags.placing(rules: [rule], worn: worn, ruleTags: ruleTags, starred: starred)
     }
 
@@ -86,6 +86,10 @@ struct NotePlacingTagsTests {
     @Test func theStarAndTheLegacyTermsPlaceNoTag() {
         #expect(placing(.star, [todo], starred: true).isEmpty)
         #expect(placing(.or([.star, .tag("todo")]), [todo], starred: true) == ["todo"])
+        #expect(placing(.and([.star, .tag("todo")]), [todo], starred: false).isEmpty,
+                "a known un-starred note fails the star's AND: its tag places nothing")
+        #expect(placing(.and([.star, .tag("todo")]), [todo]) == ["todo"],
+                "the star unknown (a book's entries do not carry it): never blocks")
         #expect(placing(.and([.legacyProfile("journal"), .tag("todo")]), [todo]) == ["todo"],
                 "an unknown legacy term neither holds nor fails — it never blocks the tag the rest supports")
         let known = NotePlacingTags.placing(
