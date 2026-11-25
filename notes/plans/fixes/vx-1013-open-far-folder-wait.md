@@ -676,6 +676,96 @@ round 2 re-checks.*
 - **F-R1-5 (NIT) — already routed:** rides P-1013-2's bundle item, as recorded above. Nothing owed from the
   implementer.
 
+### ROUND 2 FINDINGS (fresh cold reviewer, 2026-11-25)
+
+Reviewed: `git diff origin/main...HEAD` whole (batch 1 + batch 2 + the VX-524 rider), this record top to bottom,
+CastleRules in full, SurfaceContracts "Library protection", SyncSpec in full (custody-adjacent diff; the diff touches
+no `Sync/`, no schema, no canon — re-verified), SessionResiliencyProtocol, and the post-state of every touched file
+plus their reach (`Catalog`/`Assess` core, `CatalogLister` with `CatalogRead`/`FarFolderWalk`, `ProtectionPlaces`,
+`ProtectionFactsGatherer`, `ProtectionSystem`, `ProtectionOpenRoad` whole — route/landing/presses/vault road/
+`heldKeyFiles`/`quietCandidates`, `ProtectionRoadActs.searchIfOwed`, `ProtectionRoadLock`, `ProtectionLobbyModel`
+whole, `AppBootstrap`'s open and lock seams, `CommonSteps`/`KeyDoors`' `catalogedKeyFiles` callers, the copy
+counts/doors readers, `CopyDoorsSheet`, `ProtectionWords`, all three new test files). Ran myself (headless, core):
+`FarFolderUnreadTests` 7/7 green; the Assess/Catalog/Lobby filter 90 tests green. `git diff 30caec3fa..HEAD --
+Sources/` is empty, so round 1's sweep-table verification stands for this tree.
+
+**Round 1's fixes, re-checked:**
+- **F-R1-1 (the width guard) — HOLDS.** `ProtectionLobbyModel.take(_:)` refuses to narrow exactly as the final call
+  ordered (`standing.facts` read-every-place is never replaced by a `!readsEveryPlace` read), the nil-facts standing
+  arm is left alone (the `if let before` guard falls through, so a lobby with no facts takes any read with facts),
+  and the landing itself is never refused by it (a partial standing takes the full landing; after the landing every
+  launch-road read composes the landed walk, so later refreshes are full and taken). The three pins exist as the
+  final call described (two gated-refresh races plus the nil-facts edge), and the recorded red/green/mutation runs
+  match the guard's one-line shape.
+- **F-R1-2 (the dead Scope) — DONE.** `git grep containerOnly|catalog(scope` over App/Sources/Tests/Tools: nothing;
+  `catalog()` is main's body; the file header and the `CatalogRead`/`FarFolderWalk` docs name the shipped seam and
+  the lock's lobby; the as-built line sits beneath D-1013-2.
+- **F-R1-3 — DEFERRED as its final call ordered** (VX-1090, Needs Lillian; no code here; today's reading continues).
+- **F-R1-4 (the two comments) — DONE.** `AppBootstrap`'s landing comment names both lobbies and says no landing is
+  wired without a walk; `landTheFarWalk`'s doc now states the no-walk context's real behavior; `RoadContext.far`'s
+  doc no longer lists the relock's lobby.
+
+**VX-524, re-checked:** the probe's mechanism holds in the code as written (the counts are per-place `OwnCopies`
+summaries; the rows are `CopyDoorsListing` over the catalogue's copies of the library, both places; the day's first
+pair really is two physical copies via the backup hook's far leg) — HOLLOW as a code defect is the right call, and
+the confirm-first posture honored the speculative-evidence rule. The R-1013-A3 face is built as ruled: `copyRowLine`
+read by both row views, pinned red-on-old by the line's absence, wording only.
+
+**New findings (no new BLOCKER or MAJOR):**
+
+**F-R2-1 · NIT (a line for the P-1013-5 bundle item, not a code change this ladder orders) ·
+`App/Variorum/Variorum/Features/Protection/CopyDoorsSheet.swift:113/140 and 296/308` +
+`App/Variorum/Shared/Protection/ProtectionWords.swift:208`** — the ruled place line rides more rows than the
+ruling's sentence names: `listingRow` renders `listing.all` (other libraries' copies too) and `RoadRestoreRows`
+renders the `otherLibraries` fold through the same `rowView`, and the line rides every KIND — so a Previous-Libraries
+row now reads "Previous library · beside your library" (it sits in Previous Libraries, not beside the live library),
+and in the EMPTY-SLOT host (the missing face's and rule 27's lobby's *Open Library…*) a row says "beside your
+library" while no library stands in the slot. Not false — the container is the place the words name, and the record's
+own "the list never says two things" argues for the uniform line — but the reach is wider than R-1013-A3's text, and
+the wording is hers (the whole face is PROVISIONAL P-1013-5). *Disposition owed:* one sentence added to the
+P-1013-5 bundle item naming the full reach (all kinds, both folds, the empty-slot host's phrasing), so her review
+sees what actually ships. No pin owed (word-shaped, ruled-provisional).
+
+**F-R2-2 · NIT (rides F-R1-5's bundle line; no code change) ·
+`App/Variorum/Shared/Protection/ProtectionLobbyModel.swift:244-251`** — during `farWalkLanded()`'s own busy stretch
+(the landing road: a container re-list, assess, at most one quiet retry — short, since the walk has already landed) a
+typed press or Touch ID press is silently dropped (`guard !busy`, no message), the pre-existing two-presses posture
+extended to a window the user didn't start. Bounded and rare; strictly part of the busy-silence class F-R1-5 already
+sends to P-1013-2's sitting review. No pin owed.
+
+**CLEAN BILL (checked, found solid):**
+- *The launch route:* container-only reads throughout (`lobbyFacts`, the open's expansion with facts handed through,
+  `repairPasses`, `logSummary`, the custody probe under `CatalogRead.probing`); the walk begins only on a `.lobby`
+  verdict; `.opened`/`.created` never touch the far folder; `searchIfOwed` keeps its deliberate full walk; the
+  bookmark is resolved off the main actor only (the watcher reads lock-guarded flags).
+- *The landing:* serialized against presses (busy/owed/left, `farLandingTaken` once-only); the bootstrap watcher
+  identity-checks the standing lobby; the pre-design and missing arms try nothing (`assess(facts).launch` guard —
+  rule 26/VX-329 U4 honored at the landing too); a lock's landing never tries the quiet roads
+  (`farLandingTriesQuietRoads` false); a landing whose facts read fails keeps the face and the next refresh heals
+  (the standing failed-read idiom).
+- *Press equivalence (P-1013-2):* the join fires only on `.noneOpens`; the retry extends files with dedupe, reuses
+  derived Argon2id keys (`reusing:`), and the vault road runs after the join over the extended files, so a far-only
+  master lock still reaches it — outcome-identical to the pre-fix road on every arm I could construct, with the wait
+  only where the old road would have read the far folder anyway.
+- *Rule 27 and the indeterminate readings:* `mightOpen`'s unread leg, the two unlocked fault arms and the offer's
+  owing through `backupMightHoldTheCurrentKeyFile`; `launch`/`preDesignStore` read container facts only, so no launch
+  verdict can shift on a partial listing; rule 3's moment kept per R-1013-A1 (row 12 untouched, the ruling pin green
+  on both sides as labeled).
+- *The executor's full-catalogue doors:* `catalogedKeyFiles` reached only from Castle entry's sweep and the
+  new-words door's gone-everywhere check (acts, never the open) — the record's trace correction verified in
+  `CommonSteps.swift:202/289` and `KeyDoors.swift:449`.
+- *The relock (R-1013-A2):* `lobbyContext` + the shared begin helper + `finish(.roadLobby)`'s watcher; existing
+  `ProtectionRoadLock.lobby` callers over plain contexts unchanged (the helper no-ops without a walk).
+- *The phone:* `ctx.far` is made there too but no far folder is ever picked on iOS, so the walk reads `.noFarFolder`,
+  every listing is whole, the watcher never arms — byte-identical behavior.
+- *Parity and hygiene:* zero edits to any existing test (diff-stat verified: three new files only); `unreadPlaces`
+  defaults empty and `.everything` is the default read; no `Sync/`, no schema, no canon edit; CastleRules
+  byte-identical; `StoreOpeningView` untouched (D-1013-6); commits per piece, pushed, no attribution trailers,
+  public-copy wording throughout.
+
+**Verdict: no new BLOCKER or MAJOR — round 2 earns no round 3 under the ladder rule.** The two NITs are bundle
+lines (dispositions above), not code this ladder orders.
+
 ## HELD FOR HER SITTING (the away-run bundle)
 
 - P-1013-1 (the lobby may gain roads/rule 27's banner after it draws, when the deferred far walk lands) — PROVISIONAL, built.
