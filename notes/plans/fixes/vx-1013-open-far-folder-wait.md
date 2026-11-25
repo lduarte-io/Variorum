@@ -101,7 +101,12 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
    entries dropped) (D-1013-1); `assess` (D-1013-3): the lobby's `mightOpen` counts an unread place; the plain fact
    `backupHoldsTheCurrentKeyFile` gains `backupMightHoldTheCurrentKeyFile` (true on a partial listing), read by rule 27's
    two unlocked fault arms and by rule 21's offer owing (the search reads every place and answers). Pins
-   `Tests/VariorumCoreTests/Protection/FarFolderUnreadTests.swift` (6 tests) GREEN; red-on-old PENDING (next commit).
+   `Tests/VariorumCoreTests/Protection/FarFolderUnreadTests.swift` (6 tests) GREEN. RED-ON-OLD by behavioural revert
+   (`Assess.swift` set to its pre-fix text `006072617`, `Catalog.swift` kept so the pins compile): `✘ Test run with 6
+   tests in 1 suite failed … with 7 issues` — every partial-listing expectation red (the lobby's two, the gone-file's
+   fault + offer, the stray's fault + offer, the far-key-file lobby one); green on both sides as designed: the
+   catalogue default pin and the healthy-library parity pin. Restored (`git checkout --`), `git diff` clean, `✔ 6 tests
+   passed`.
    The no-backup-yet consult (Assess ~551) is NOT changed — see THE FORK below.
 2. NOT-STARTED — app: the lister's scope, the per-open far state, the facts' catalogue parameter, the scoped custody probe.
 3. NOT-STARTED — app: the road's plumbing (route, open, presses' join, the lobby's far landing) + the bootstrap wiring.
