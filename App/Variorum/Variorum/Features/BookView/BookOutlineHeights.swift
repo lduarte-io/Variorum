@@ -28,7 +28,10 @@
 //  **Everything is per WIDTH and per VOICE, and nothing survives either
 //  moving** — a card wraps differently at another measure, and Study's 16-pt
 //  Iowan is not Terminal's 14-pt monospace. The stamp is the same shape
-//  `SurfaceSizeMemory.Record` carries, and for the same reason.
+//  `SurfaceSizeMemory.Record` carries, and for the same reason. **And per the
+//  book's TAGS SWITCH** (the VX-1036 ladder's R1-1): a card's header holds its
+//  pills when the book shows tags, so nothing learned survives the switch
+//  moving either (`tagsShown`, with the residual it leaves).
 //
 //  Not observed, deliberately: it is written at GEOMETRY cadence (every
 //  report while a column loads) and read at a row's own body — an observed
@@ -46,11 +49,33 @@ import VariorumCore
 final class BookOutlineHeights {
     typealias Shape = BookOutlineHeightModel.Shape
 
-    /// The width + voice these answers stand at. When it changes, everything
-    /// learned under the old one is dropped in the same breath — a height
-    /// measured at another measure is not this row's height here.
+    /// The width + voice + tags position these answers stand at. When it
+    /// changes, everything learned under the old one is dropped in the same
+    /// breath — a height measured at another measure is not this row's height
+    /// here.
     private var stamp = ""
     private(set) var width: CGFloat = 0
+    /// **The book's tags switch** (VX-1038 — hidden · other tags · all tags)
+    /// these answers stand at — the VX-1036 ladder's R1-1. A card's HEADER
+    /// holds its pills under a shown position (beside the title, wrapping
+    /// there, or on their own row under a title that fills the line —
+    /// `BookCardHeaderPlan`), so a card measured under one position is not
+    /// that card under another, and neither is the shape it taught. It rides
+    /// the stamp exactly as the voice does: a move drops what was learned and
+    /// the column re-learns from what it draws.
+    ///
+    /// **What the stamp does NOT do (the recorded residual):** the card's
+    /// SHAPE stays its preview's line count. Keying the shape by the header's
+    /// pill-row count as well would need each card's title line width — the
+    /// title in the card's face, its day, its badge (a view: a glyph or the
+    /// owning book's name), the fold disclosure, and on the open header its
+    /// "open ↗" — which this model cannot know without measuring the views; a
+    /// font-derived model of them would be a guess replacing a measurement
+    /// (`metrics(columnWidth:)`'s own rule), and a wrong guess would be
+    /// learned under the wrong key. So within one shown position, cards of one
+    /// preview shape whose pills sit differently (beside a short title, under
+    /// a long one) teach their shape each other's height until each realizes.
+    private(set) var tagsShown: BookTagsShown = .initial
     private(set) var metrics = BookOutlineHeightModel.Metrics()
     /// What each ROW reported while rendering real content — **with the
     /// SHAPE it was wearing at the time**, because a row's height is a fact
@@ -73,15 +98,18 @@ final class BookOutlineHeights {
 
     /// Stand at this width (and the voice now in force), re-measuring the
     /// type and dropping what was learned elsewhere. Idempotent: the same
-    /// width and voice re-stamps nothing.
+    /// width, voice and tags position re-stamps nothing.
+    ///
+    /// `tags` — the book's tags switch (R1-1), when the caller is the one
+    /// that knows it moved; nil (the width's and the voice's roads) keeps the
+    /// position in force.
     ///
     /// Returns whether anything moved, so the caller can decide whether the
     /// column owes itself a re-land.
     @discardableResult
     func stand(at width: CGFloat, tags: BookTagsShown? = nil) -> Bool {
-        // The VX-1036 ladder R1-1 — the PINS-ONLY tree: the book's tags
-        // switch is accepted here and not yet part of the stamp (the pin's red).
-        let stamp = Self.stamp(width: width)
+        if let tags { tagsShown = tags }
+        let stamp = Self.stamp(width: width, tags: tagsShown)
         guard stamp != self.stamp else { return false }
         self.stamp = stamp
         self.width = width
@@ -167,8 +195,8 @@ final class BookOutlineHeights {
 
     // MARK: - The type, measured off the real font
 
-    private static func stamp(width: CGFloat) -> String {
-        "\(Int(width.rounded()))|\(EditorTypography.fingerprint ?? "-")"
+    private static func stamp(width: CGFloat, tags: BookTagsShown) -> String {
+        "\(Int(width.rounded()))|\(EditorTypography.fingerprint ?? "-")|\(tags.rawValue)"
     }
 
     /// The metrics at a column width. Only the WIDTH-dependent numbers and

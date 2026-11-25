@@ -948,6 +948,17 @@ final class BookViewModel {
         indexPaneHeights.stand(at: indexContentWidth)
     }
 
+    /// **The book's TAGS SWITCH moved — or the book mounted with it** (the
+    /// VX-1036 ladder's R1-1): the cards' headers hold other pills now, so what
+    /// the column learned under the old position is dropped through the same
+    /// one door (`stand` — the position rides its stamp, as the voice does).
+    /// The book hands it at mount too, so a book remembered at "all tags" never
+    /// learns under the default's stamp. The Index pane's rows wear no pills
+    /// (the design gives them none), so only the Outline re-stands.
+    func outlineTagsShown(_ position: BookTagsShown) {
+        outlineHeights.stand(at: outlineContentWidth, tags: position)
+    }
+
     // MARK: - 13u4 UNIT F3 — THE INDEX PANE'S HEIGHTS
     //
     // The same idea as the Outline's above, on the surface UNIT F1 left with

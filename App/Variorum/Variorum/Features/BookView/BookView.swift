@@ -2909,6 +2909,14 @@ struct BookView: View {
             // landing is in flight — `tokens` flips once at mount on a Study
             // store) and why the pin could not be built honestly yet.
             .onChange(of: tokens) { _, _ in model.restandOutlineHeights() }
+            // The VX-1036 ladder's R1-1: the book's TAGS SWITCH is the
+            // stamp's third fact — a card's header holds its pills when the
+            // book shows tags, so a move drops what the column learned under
+            // the old position. Handed at mount too (`initial`), so a book
+            // remembered at "all tags" never learns under the default's stamp.
+            .onChange(of: cardTags.position, initial: true) { _, position in
+                model.outlineTagsShown(position)
+            }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes
             // no sense to have a horizontal scrollbar on a vertical page")

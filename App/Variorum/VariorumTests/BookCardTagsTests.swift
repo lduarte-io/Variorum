@@ -9,6 +9,7 @@
 //  pins are state, not red-on-old.
 //
 
+import AppKit
 import Dependencies
 import Foundation
 import GRDB
@@ -189,6 +190,66 @@ struct BookCardTagsTests {
             #expect(try await session.database.read { db in
                 try Queries.allTags(db, wingID: "").map(\.path)
             }.contains("garden"), "the missing parent was made on the way (the typed-path road)")
+        }
+    }
+
+    // MARK: - The Outline's heights hear the switch (the VX-1036 ladder, R1-1)
+
+    /// R1-1's wiring, mounted: the book hands its switch to the Outline's
+    /// heights AT MOUNT (a book remembered at "all tags" never learns under
+    /// the default's stamp) and on every move — the stamp's third fact
+    /// (`BookOutlineHeightsTests.aTagsSwitchMoveForgetsWhatTheCardsTaughtUnderTheOldPosition`
+    /// pins what a move drops). The fix's own state test, not the red pin.
+    @Test func theOutlinesHeightsStandAtTheBooksTagsPositionFromTheMountOn() async throws {
+        try await world { session in
+            let ops = session.operations
+            let reading = try ops.createReading(name: "the allotment year", kind: .book)
+            for i in 0..<3 {
+                let note = try ops.createPost(title: "note \(i)")
+                try ops.addPostToReading(note.id, to: reading.id)
+            }
+            let model = BookViewModel(session: session, readingID: reading.id)
+            await model.adopt(try await session.database.read {
+                try Queries.assembleReading($0, readingID: reading.id)
+            })
+            let suite = "BookCardTagsTests.heights.\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let tags = BookCardTagsModel(readingID: reading.id, defaults: defaults)
+            tags.setPosition(.allTags)   // remembered at "all tags" before the book opens
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1100, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.contentView = nil
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: BookView(session: session, readingID: reading.id, model: model, cardTags: tags)
+                    .environment(ThemeStore(session: session)))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            @MainActor func turn() {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                RunLoop.main.run(until: Date().addingTimeInterval(0.02))
+            }
+            @MainActor func settle(until done: () -> Bool) async {
+                for _ in 0..<80 where !done() {
+                    turn()
+                    try? await Task.sleep(for: .milliseconds(10))
+                }
+            }
+            await settle { model.outlineHeights.tagsShown == .allTags && model.outlineContentWidth > 0 }
+            #expect(model.outlineHeights.tagsShown == .allTags, "handed at mount")
+            tags.setPosition(.hidden)
+            await settle { model.outlineHeights.tagsShown == .hidden }
+            #expect(model.outlineHeights.tagsShown == .hidden, "…and on every move")
+            tags.setPosition(.otherTags)
+            await settle { model.outlineHeights.tagsShown == .otherTags }
+            #expect(model.outlineHeights.tagsShown == .otherTags)
         }
     }
 
