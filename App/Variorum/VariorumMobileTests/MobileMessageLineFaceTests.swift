@@ -85,9 +85,12 @@ struct MobileMessageLineFaceTests {
                     #expect(door.width >= 43.5 && door.height >= 43.5,
                             "the act answers across 44 × 44 in \(voice): \(door)")
                     #expect(door.height <= 44.5, "one 44 pt line in \(voice): \(door)")
-                    let foot = window.bounds.maxY - 34 - 56
+                    // MOVED at VM-277 (A-260-4 (e), PROVISIONAL): the line is a
+                    // card standing `cardMargin` clear of the bar, so its act's
+                    // foot is the bar's top less that air (was: flush on it).
+                    let foot = window.bounds.maxY - 34 - 56 - MobileMessageLineModel.cardMargin
                     #expect(abs(door.maxY - foot) <= 0.5,
-                            "the act fills the line to its foot (above the bar and the inset): \(door), foot \(foot)")
+                            "the act fills the line to its foot (the card's air above the bar and the inset): \(door), foot \(foot)")
                     session.status.clear()
                 }
             }

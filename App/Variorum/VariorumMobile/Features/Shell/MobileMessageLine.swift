@@ -97,13 +97,65 @@ final class MobileMessageLineModel {
         max(keyboardOverlap, safeBottom + chromeInset, safeBottom)
     }
 
-    /// **Does this point take a touch?** Only the shown line's own door does
-    /// (P-2: a door that is drawn acts; everything else falls through). Pure
-    /// over its inputs, pinned.
-    static func takesTouch(at point: CGPoint, doorFrame: CGRect?, showing: StatusCenter.Item?) -> Bool {
-        guard let showing, showing.action != nil, let doorFrame else { return false }
+    /// **Does this point take a touch?** A line she can dismiss — a refusal or
+    /// a direction (VM-277) — takes it across its whole card: the tap that
+    /// opens a refusal's reason, its ✕, and the flick down all live there. Any
+    /// other line takes it only on its own door (P-2: a door that is drawn
+    /// acts; everything else falls through to the app). Pure over its inputs,
+    /// pinned.
+    static func takesTouch(
+        at point: CGPoint, doorFrame: CGRect?, lineFrame: CGRect? = nil,
+        showing: StatusCenter.Item?
+    ) -> Bool {
+        guard let showing else { return false }
+        if anatomy(for: showing).isDismissable, let lineFrame {
+            return lineFrame.contains(point)
+        }
+        guard showing.action != nil, let doorFrame else { return false }
         return doorFrame.contains(point)
     }
+
+    /// **VM-277 — which reason is open** (A-260-4 (d)): the id of the refusal
+    /// whose whole sentence the card shows now, else nil. Cleared when the line
+    /// shows anything else.
+    var openReason: UUID?
+
+    /// **VM-277 — what a line IS on the face** (A-260-4 and the proposal's
+    /// scope call): a REFUSAL is one short line — its composer's headline, or
+    /// its sentence clipped to one line — with "›", its reason behind a tap,
+    /// and a ✕; a DIRECTION keeps its whole sentence (it is information, not a
+    /// complaint) and gains the ✕; a removal and an offer keep their door and
+    /// their fade. Decided from the item's facts, never its words. Pure, pinned.
+    enum Anatomy: Equatable {
+        case refusal(headline: String?)
+        case direction
+        case plain
+
+        /// A refusal and a direction take a dismissal (P-55-3 superseded for
+        /// them); a removal's Undo and an offer's door are their own way out.
+        var isDismissable: Bool { self != .plain }
+    }
+
+    static func anatomy(for item: StatusCenter.Item) -> Anatomy {
+        switch item.kind {
+        case .refusal: return item.isDirection ? .direction : .refusal(headline: item.refusalHeadline)
+        case .offer, .receipt: return .plain
+        }
+    }
+
+    /// **The flick down dismisses** (A-260-4 (b)) once the card has travelled
+    /// a little way down, or is thrown that way. Downward is positive. Pure,
+    /// pinned.
+    static let flickDistance: CGFloat = PhoneMetrics.Space.s24
+    static let flickThrow: CGFloat = PhoneMetrics.Space.s48 + PhoneMetrics.Space.s16
+
+    static func dismisses(translation: CGFloat, predicted: CGFloat) -> Bool {
+        translation >= flickDistance || predicted >= flickThrow
+    }
+
+    /// The card's air: clear of the screen's sides and of what it stands on
+    /// (the bar, the keyboard, the home indicator) — A-260-4 (e), PROVISIONAL.
+    static let cardMargin: CGFloat = PhoneMetrics.Space.s8
 
     /// The keyboard's overlap of a window's foot, from a notification's end
     /// frame (screen coordinates — Apple's documented conversion). Zero when
@@ -143,6 +195,15 @@ final class MobileMessageLineModel {
 struct MobileMessageLineView: View {
     let model: MobileMessageLineModel
     @Environment(\.colorScheme) private var scheme
+    /// The card's live travel under her finger (the flick down), never up.
+    @State private var drag: CGFloat = 0
+
+    /// VM-277: the ✕'s name (spoken, and the pins' handle).
+    static let dismissLabel = "Dismiss"
+    /// VM-277: the refusal line's hint — its reason is behind the tap. DRAFT.
+    static let reasonHint = "Double-tap for the reason."
+    /// VM-277 (A-260-4 (c)): the signpost after the headline.
+    static let reasonSignpost = "\u{203A}"
 
     var body: some View {
         let dark = scheme == .dark
@@ -151,14 +212,14 @@ struct MobileMessageLineView: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
                 if let item = model.status.current {
-                    line(item, tokens: tokens)
+                    card(item, tokens: tokens)
                         .transition(.opacity)
                 }
             }
             .padding(.bottom, MobileMessageLineModel.footOffset(
                 keyboardOverlap: model.keyboardOverlap,
                 safeBottom: model.safeBottom,
-                chromeInset: model.chromeInset))
+                chromeInset: model.chromeInset) + MobileMessageLineModel.cardMargin)
         }
         // The face fills the WINDOW, so the door's frame below is in the
         // window's own coordinates (the hosting view sits at its origin) and
@@ -167,16 +228,140 @@ struct MobileMessageLineView: View {
         // no safe-area region — the keyboard's included — lifts it twice.
         .ignoresSafeArea()
         .animation(.easeOut(duration: 0.18), value: model.status.current?.id)
-        .onChange(of: model.status.current?.id) { _, _ in
+        .animation(.easeOut(duration: 0.18), value: model.openReason)
+        .onChange(of: model.status.current?.id) { _, now in
+            // VM-277: an open reason belongs to its own line only.
+            if model.openReason != now { model.openReason = nil }
+            drag = 0
             // The line lives in its own window, so an assistive reader is
-            // told rather than left to find it (MobileSoul §5.6).
+            // told rather than left to find it (MobileSoul §5.6) — the WHOLE
+            // sentence, so a VoiceOver reader never needs the extra step.
             if let words = model.status.current?.text, !words.isEmpty {
                 UIAccessibility.post(notification: .announcement, argument: words)
             }
         }
     }
 
-    private func line(_ item: StatusCenter.Item, tokens: VoiceTokens) -> some View {
+    /// **The card** (VM-277 (e), PROVISIONAL — VM-275 half 2's cure): every
+    /// line floats clear of the screen's sides and of what it stands on, on the
+    /// room under a hairline all round, so it reads as something passing over
+    /// the page, never as the bar grown. The words keep the 20 pt gutter (the
+    /// card's 8 outside and 12 inside).
+    private func card(_ item: StatusCenter.Item, tokens: VoiceTokens) -> some View {
+        let anatomy = MobileMessageLineModel.anatomy(for: item)
+        let shape = RoundedRectangle(cornerRadius: PhoneMetrics.Radius.standard, style: .continuous)
+        return Group {
+            switch anatomy {
+            case .refusal(let headline):
+                if model.openReason == item.id {
+                    reasonCard(item, headline: headline, tokens: tokens)
+                } else {
+                    refusalLine(item, headline: headline, tokens: tokens)
+                }
+            case .direction:
+                directionLine(item, tokens: tokens)
+            case .plain:
+                plainLine(item, tokens: tokens)
+            }
+        }
+        .padding(.horizontal, PhoneMetrics.Space.s12)
+        .frame(maxWidth: .infinity, minHeight: PhoneMetrics.touchMinimum, alignment: .leading)
+        .background(tokens.room, in: shape)
+        .overlay(shape.stroke(tokens.line, lineWidth: 1))
+        .contentShape(shape)
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            model.lineFrame = frame
+        }
+        .offset(y: drag)
+        .simultaneousGesture(anatomy.isDismissable ? flick(item) : nil)
+        .accessibilityElement(children: .contain)
+        .padding(.horizontal, MobileMessageLineModel.cardMargin)
+    }
+
+    /// **A refusal's one line** (VM-277 (a) and (c)): its headline — or its
+    /// sentence clipped to one line until her wording pass — then "›"; a tap
+    /// anywhere on it opens the reason. Then its ✕.
+    private func refusalLine(
+        _ item: StatusCenter.Item, headline: String?, tokens: VoiceTokens
+    ) -> some View {
+        HStack(alignment: .center, spacing: PhoneMetrics.Space.s8) {
+            Button {
+                model.openReason = item.id
+                model.status.holdForReading(item.id)
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: PhoneMetrics.Space.s4) {
+                    Text(headline ?? item.text)
+                        .phoneType(.controlInline, tokens)
+                        .foregroundStyle(ink(item, tokens: tokens))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Text(Self.reasonSignpost)
+                        .phoneType(.controlInline, tokens)
+                        .foregroundStyle(tokens.phone.muted)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .accessibilityHidden(true)
+                }
+                .frame(maxWidth: .infinity, minHeight: PhoneMetrics.touchMinimum, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(headline ?? item.text)
+            .accessibilityHint(Self.reasonHint)
+            .accessibilityAction(named: Self.dismissLabel) { dismiss(item) }
+            dismissDoor(item, tokens: tokens)
+        }
+    }
+
+    /// **The reason, opened** (VM-277 (d)): the card grown upward — the
+    /// headline over the whole sentence (the sentence alone where none is
+    /// authored) — held while she reads; it closes on its ✕, a flick down, her
+    /// leaving the note, or a newer message.
+    private func reasonCard(
+        _ item: StatusCenter.Item, headline: String?, tokens: VoiceTokens
+    ) -> some View {
+        HStack(alignment: .top, spacing: PhoneMetrics.Space.s8) {
+            VStack(alignment: .leading, spacing: PhoneMetrics.Space.s4) {
+                if let headline {
+                    Text(headline)
+                        .phoneType(.controlInline, tokens, weight: .semibold)
+                        .foregroundStyle(ink(item, tokens: tokens))
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityLabel(headline)
+                }
+                Text(item.text)
+                    .phoneType(.controlInline, tokens)
+                    .foregroundStyle(headline == nil ? ink(item, tokens: tokens) : tokens.ink)
+                    .lineLimit(8)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(item.text)
+            }
+            .padding(.vertical, PhoneMetrics.Space.s12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            dismissDoor(item, tokens: tokens)
+        }
+    }
+
+    /// **A direction** (VM-265's ink; VM-277's ✕ — the proposal's scope call):
+    /// its whole sentence, growing by lines, and a ✕.
+    private func directionLine(_ item: StatusCenter.Item, tokens: VoiceTokens) -> some View {
+        HStack(alignment: .center, spacing: PhoneMetrics.Space.s8) {
+            Text(item.text)
+                .phoneType(.controlInline, tokens)
+                .foregroundStyle(ink(item, tokens: tokens))
+                .lineLimit(4)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.vertical, PhoneMetrics.Space.s12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(item.text)
+            dismissDoor(item, tokens: tokens)
+        }
+    }
+
+    /// **A removal or an offer** — VM-61's line, in the card: its words and
+    /// its door, gone as its door acts or on the seam's clock.
+    private func plainLine(_ item: StatusCenter.Item, tokens: VoiceTokens) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: PhoneMetrics.Space.s12) {
             if !item.text.isEmpty {
                 Text(words(item, tokens: tokens))
@@ -208,16 +393,45 @@ struct MobileMessageLineView: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, minHeight: PhoneMetrics.touchMinimum, alignment: .leading)
-        .padding(.horizontal, PhoneMetrics.gutter)
-        .background(tokens.room)
-        .overlay(alignment: .top) {
-            Rectangle().fill(tokens.line).frame(height: 1)
+    }
+
+    /// **The ✕** (VM-277 (b)): the muted glyph on the icon button, answering
+    /// across 44 × 44 — the dismissal's visible, VoiceOver-reachable door.
+    private func dismissDoor(_ item: StatusCenter.Item, tokens: VoiceTokens) -> some View {
+        Button {
+            dismiss(item)
+        } label: {
+            Image(systemName: "xmark")
         }
-        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-            model.lineFrame = frame
-        }
-        .accessibilityElement(children: .contain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: .muted))
+        .accessibilityLabel(Self.dismissLabel)
+    }
+
+    /// **The flick down** (VM-277 (b)): the card follows her finger downward
+    /// and goes once it has travelled or been thrown far enough; otherwise it
+    /// settles back.
+    private func flick(_ item: StatusCenter.Item) -> some Gesture {
+        DragGesture(minimumDistance: PhoneMetrics.Space.s8)
+            .onChanged { value in
+                drag = max(0, value.translation.height)
+            }
+            .onEnded { value in
+                if MobileMessageLineModel.dismisses(
+                    translation: value.translation.height,
+                    predicted: value.predictedEndTranslation.height) {
+                    dismiss(item)
+                } else {
+                    withAnimation(.easeOut(duration: 0.18)) { drag = 0 }
+                }
+            }
+    }
+
+    /// She dismissed it: gone now — never left to its clock — and only if it
+    /// is still the line showing.
+    private func dismiss(_ item: StatusCenter.Item) {
+        model.openReason = nil
+        drag = 0
+        if model.status.current?.id == item.id { model.status.clear() }
     }
 
     /// A removal wears the phone receipts' chrome casing; a refusal and an
@@ -342,7 +556,8 @@ final class MobileMessageLineController: UIViewController {
 
         override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
             guard MobileMessageLineModel.takesTouch(
-                at: point, doorFrame: model.doorFrame, showing: model.status.current)
+                at: point, doorFrame: model.doorFrame, lineFrame: model.lineFrame,
+                showing: model.status.current)
             else { return nil }
             let hit = super.hitTest(point, with: event)
             return hit === self ? nil : hit

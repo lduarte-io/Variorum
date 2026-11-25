@@ -110,6 +110,17 @@ enum MobileLine {
         say(text, as: .refusal, session: session)
     }
 
+    /// **VM-277 — a refusal WITH its composer's short form** (A-260-4 (a)):
+    /// the one line draws the headline and keeps the whole sentence behind a
+    /// tap (`StatusCenter.refuse(headline:sentence:)`). A pair with no headline
+    /// draws exactly as `refuse(_:)` does (the face clips it to one line).
+    /// `door`: as `say` — the note's standing Undo line is taken back first.
+    static func refuse(_ words: RefusalWords?, session: AppSession, door: MobileUndoDoor? = nil) {
+        guard let words else { return }
+        if let door { withdrawNoteLine(of: door, session: session) }
+        session.status.refuse(headline: words.headline, sentence: words.sentence)
+    }
+
     /// **The note screen is going away** — its structural Undo goes with it,
     /// so a line still offering it is taken back. Anything else said since
     /// (a refusal, the delete's Put back line) stands.
