@@ -50,6 +50,12 @@
 //  13 pt floor never move with it. Terminal's prose stays two under, never under
 //  the floor — two under STUDY's rounded step, at every step (ladder round 1,
 //  R1-9), the pitch with it.
+//  THE READ PAGE IS THE WHOLE-POINT RULE'S ONE EXCEPTION (P-260-3b: it keeps its
+//  own table, `PhoneReadingModifier`): her text size reaches its words
+//  UNROUNDED (`size × wordsScale` through `scaledValue`), harmlessly — its
+//  SwiftUI font and the UIKit font it measures its line with are built from
+//  that one value, and no `UIFontMetrics.scaledFont` stands between them, so
+//  its two forms cannot disagree (ladder round 2, R2-6).
 //  PROVISIONAL as a set (P-260-3a/3b).
 //
 //  The pure table is platform-neutral (the Mac compiles it and never reads
@@ -688,7 +694,8 @@ struct PhoneReadingModifier: ViewModifier {
     @Environment(\.dynamicTypeSize) private var typeSize
     /// VM-254: her text-size setting reaches the Read page's words too — her
     /// words on a calm page are still hers to size; its own table (R2's page) is
-    /// NOT stepped down by default (PROVISIONAL P-260-3b).
+    /// NOT stepped down by default (PROVISIONAL P-260-3b), and its step is not
+    /// rounded to a whole point — the header's stated exception (R2-6).
     @Environment(\.phoneWordsScale) private var wordsScale
 
     func body(content: Content) -> some View {
