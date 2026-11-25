@@ -81,7 +81,26 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
 
 ## LIVE STATUS (the implementer's, from the first commit)
 
+**NOT DONE BY THIS SESSION (first, per the contract):** (1) THE FORK's half — row 12, the no-backup-yet consult — NOT
+built, awaiting the architect's ruling (proposal below; the tree is option (a) by construction). (2) The use-shaped
+acceptance — the launch walk on the dev store and its captures — is the orchestrator's under a stage claim; this session
+held no claim, launched nothing and walked nothing. (3) The Mac target's suites under `xcodebuild test` — the gate's; this
+session ran the planted Protection suites HEADLESS instead (the SwiftPM harness below: 208 tests in 35 suites). (4) The
+relock's lobby (noticed, not taken — below).
+
 *Batch 1, opus-implementer, session 1 (2026-11-24). No behavioural revert is in flight.*
+
+**BATCH 1 STATE — built and verified, but for THE FORK (commits `006072617` → `1635b1f2f`, all pushed):**
+- Core suite: `swift test` (full) GREEN — `✔ 746 tests in 139 suites`, `━ 4203 tests in 579 suites passed … with 5 known
+  issues` (the VX-529 suites' own `withKnownIssue`s, untouched), `✔ 32 tests in 4 suites`; `EXIT 0`; the new suite among
+  them. (Run before the coordinator's 2026-11-24 load-window note arrived; nothing full has run since.)
+- Mac target: `xcodebuild … build` and `build-for-testing` → `** BUILD SUCCEEDED **` / `** TEST BUILD SUCCEEDED **`, no
+  warning in a touched file. Phone target (`VariorumMobile`, `generic/platform=iOS Simulator`, a build — no simulator
+  booted): `** BUILD SUCCEEDED **` (the shared bootstrap and lobby model compile there too).
+- Headless harness (the VX-306 recipe, piece 4 below), widened for parity: every planted-road Protection suite that
+  compiles there without the app's bootstrap — `✔ Test run with 208 tests in 35 suites passed` (the 8 new + 200 existing,
+  UNMODIFIED). Zero edits to any existing test file anywhere (`git diff e364f151b -- Tests/ App/Variorum/VariorumTests/`
+  shows only the two new files).
 
 **Read first (own context, not delegated):** CLAUDE.md + the auto-canon; `notes/CastleRules.md` in full; this record;
 `notes/SessionResiliencyProtocol.md`; SurfaceContracts "Library protection"; the named source files (`CatalogLister`,
