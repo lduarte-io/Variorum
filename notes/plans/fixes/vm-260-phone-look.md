@@ -2721,19 +2721,269 @@ swipe), not a code change.
 
 **What this batch did NOT do (kept current):** NO test has run — the stage is coordinated through nov24 and this
 batch's evidence rides the run's merge gate, so every red and green below is PENDING; no walk and no capture (the
-gate's: at rest, scrolled, tags open, the Note sheet — both voices); no line in `Sources/`, `Sync/`, custody,
-`StatusCenter`, `VoiceTokens`, `Shared/`, `MobileShellView`, `MobileEditorTextView`, `MobileKeyboardBar` or the
-text-input path (the text view keeps riding its own keyboard guide; batch 3b's VM-281 overrides untouched); VM-148's
-rename-in-place and title quickfill are NOT built (the title's rename door is the alert it always was).
+gate's: at rest, scrolled, tags open, the stack menu, the Note sheet — both voices); no line in `Sources/`, `Sync/`,
+custody, `StatusCenter`, `VoiceTokens`, `Shared/`, `MobileShellView`, `MobileEditorTextView`, `MobileKeyboardBar` or
+the text-input path (verified: `git diff --name-only d73715323..af449326a` lists only phone-target `Features/Write/`
+files, the guide's seeder, the record and tests) — the text view keeps riding its own keyboard guide and batch 3b's
+VM-281 overrides are untouched; VM-148's rename-in-place and title quickfill are NOT built (the title's rename door is
+the alert it always was). **The one drawn mechanic NOT built as drawn: the title does not ride inside her text frame
+by frame** — it leaves on a flip once the page has scrolled and is back at its top (C-4b-1 below, with the seam road
+that would draw it exactly).
 
 ### LIVE STATUS
 
 | Piece | State |
 |---|---|
-| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, R-260-8/-13/-14 verbatim, "Batch 4b"; BATCH 2's VM-272 record and its RECONCILE, BATCH 3b, BATCH 4a; the mockup `notes/plans/vm-260/note-top-options.html` frame P and its script; SurfaceContracts "The app" in full and every note/Write bullet; the resiliency protocol; TEXTKIT2_NOTES skimmed for the phone's resize findings — none bears on a top-edge frame change) | DONE (this commit) |
-| 1. The pins on the pre-fix tree — new behaviour (red on old) and the pins the ruling moved; that commit IS the red-on-old tree | NOT STARTED |
-| 2. The red-on-old bundle `vm260-4b-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT STARTED |
-| 3. The note's top as drawn (`MobileWriteView`'s masthead + a new phone-target file for the title's give-way, the row, the strip, the stack door) | NOT STARTED |
-| 4. The Note sheet's head (Seal · Date tiles; the date's alert moves with its door) | NOT STARTED |
-| 5. The guide's lessons that name the moved doors (P-6 — the tutorial is the executable spec) | NOT STARTED |
-| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT STARTED |
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, R-260-8/-13/-14 verbatim, "Batch 4b"; BATCH 2's VM-272 record and its RECONCILE, BATCH 3b, BATCH 4a; the mockup `notes/plans/vm-260/note-top-options.html` frame P and its script; SurfaceContracts "The app" in full and every note/Write bullet; the resiliency protocol; TEXTKIT2_NOTES skimmed for the phone's resize findings — none bears on a top-edge frame change) | DONE (`8019df9f3`) |
+| 1. The pins on the pre-fix tree — new behaviour (red on old) and the pins the ruling moved | DONE (`55ac28bd0`, two compile fixes `82483018c`, `4be933b0e` — **`4be933b0e` IS THE RED-ON-OLD TREE**: only literals and symbols both trees declare) — the runs PENDING the gate |
+| 2. The red-on-old bundle `vm260-4b-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `4be933b0e` (log `App/Variorum/DerivedData/vm260-4b-rol-build.log`) |
+| 3. The note's top as drawn (`MobileWriteView`'s masthead + the new `MobileNoteTop.swift`: the title's give-way rule and tracker, the doors' words, the tag strip, the stack menu; `MobileChipFlow` gains centred rows) | DONE (`ebfe9b291`; the rule's own pins and the menu's ground `f288bb407`) — phone `build-for-testing` green; the pins PENDING the gate |
+| 4. The Note sheet's head (Lock · Date doors; the Entry Date alert moved with its door; the sheet scrolls) | DONE (`ebfe9b291`, with piece 3 — one compiling change: the seal and the date leave the top in the same commit they arrive in the sheet) |
+| 5. The guide's lessons that name the moved doors (P-6) | DONE (`af449326a` = **the code tip**) — words DRAFT |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | DONE — all three `TEST BUILD SUCCEEDED` at `af449326a` (logs `App/Variorum/DerivedData/vm260-2r-4b-build3.log`, `vm260-2r-ui-4b-build.log`, `vm260-2r-mac-4b-build.log`); no warning in a changed file; the run list below |
+
+### The traced shape (what "takes up too much room as you scroll" is on this tree)
+
+The note's top is `MobileWriteScreen.masthead`, laid out as the screen's `.safeAreaInset(edge: .top, spacing: 0)` over
+the editor's representable: three rows of 44 pt targets and 4 below (136 pt, batch 2's exact arithmetic) — the title
+with the four tools, the membership line, the five chips — and none of it ever leaves, because an inset is not
+content: the text view (`MobileEditorTextView`, a `UITextView` in `MobileWriteSurfaceView`, its bottom on the keyboard
+layout guide) scrolls under its own frame, which starts below the inset. The title is one line (`lineLimit(1)`) on the
+tools' row, leading, cut — "the title is quite cut off when it's long". Nothing here is a defect: R-260-13 is a change
+of rule (her pick), pinned red-on-old where the old rule shows.
+
+### As built (her pick A, frame P; the phone target only)
+
+- **The title on its own row** (`titleRow`): the rename door (the alert, unchanged), the note title's role, centred,
+  wrapping (no line limit — never cut), 8 above it (`titleTop`) and 8 further in than the gutter each side
+  (`titleInset` — the drawing's 28), a 44 × 44 floor.
+- **ONE row of six doors** (`doorRow`): the phone's icon button each (17 pt glyph, 44 × 44 target), touching (centres
+  44 apart — no separator), centred, in her order: copy (`doc.on.doc`, "Copy Note") · find (`magnifyingglass`, "Find
+  in Note") · book (`book` — the Mac's book door's glyph, "Books holding this note") · # (`number` — the Mac
+  masthead's ＃, "Tags") · the stack door (`square.3.layers.3d`, "Blocks, Lenses and More Info") · ⋯ (`ellipsis`,
+  "Note Actions").
+- **Only the row stays** (`MobileNoteTitleTracker` + `MobileNoteTitleGiveWay`, `MobileNoteTop.swift`): the tracker
+  READS the text view's `contentOffset` by key-value observation (`model.textView`, the VM's existing weak handle — no
+  delegate, no line of the editor), turns each reading into batch 4a's travel (`MobileTopGiveWay.travel`, the clamp
+  that makes a rubber-band no travel) and feeds the pure rule: the title is gone once the page stands past 24 pt from
+  its rest, back within 8, unchanged between (batch 4a's numbers, P-260-4a-1 — one set). Only the flip is observed and
+  it is published a turn later (a flip inside a UIKit layout pass never writes the screen's state from inside it), with
+  a 0.2 s ease (none under Reduce Motion). The title is removed from the inset, so the inset shrinks by the title's
+  row and the text view's frame grows upward by it: **the title and her text move together at the flip**, and while
+  it is gone the row holds the top with a hairline at its foot (the drawing's `.edge`). **Batch 4a's rule is reused
+  for its numbers and its clamp, not its re-open:** the roots re-open on an upward nudge; the note's title is the top of
+  her text, so it comes back only with the top (re-opening mid-note would push the line she is reading down a title's
+  height — the jump 4a's spacer exists to avoid).
+- **book:** the membership line's act (the same `MobileMembershipSheet`: add it to a book, take it out, diverge), its
+  glyph in the corrected faint while the note is in no book (the faint is for glyphs; it clears 3:1 on every shipped
+  ground — `MobileNoteTopDoors.bookInk`, outside any door's braces so the faint scan reads it as the glyph tone it is),
+  ink in one book, the accent in several (the line's own "accent when it appears in several"); its value speaks the
+  line's old words ("in no book" · "in Poems" · "in 3 books"); its read is the line's (`membership.refreshChip`, VM-69).
+- **#:** toggles the note's tags OPEN in place — `MobileNoteTagStrip` under the row, part of the top that stays, so it
+  travels with the row (C-13-2) — and the same # closes them; the accent while open (the Mac ＃'s open state), its
+  value the tag leaves (or "no tags"). The strip: the tags as near-square chips in her ink on the wash (the phone's
+  chip), then "+ tag" (spoken "Add Tag"); every one opens the note's tags sheet, where tags are applied and taken off
+  (adding stays one press away). Centred rows: `MobileChipFlow` gains `centred` (the row brain untouched; off by
+  default, every existing flow byte-unchanged). Its read is the chip's (`noteTags.refreshChip`, VM-69).
+- **The stack door:** a popover of three of the phone's menu rows (`MobileNoteStackMenu`, on the room) — blocks · lens ·
+  more info — each opening its chip's own sheet once the popover has gone (`stackChoice` + `onDisappear` + a turn's hop:
+  the Note sheet's Settings-row precedent, so two presentations never overlap). The rows draw the chips' own words
+  ("blocks", "lens" / "lens: ‹name›" and " ⚠" in the alarm on a fallback, "more info" / "more info · N") and speak the
+  chips' names ("Blocks", "Lenses" / `lensFallbackChipLabel`, "More Info"). The door keeps the lens chip's states: the
+  accent while a lens drives the page, the ALARM while the active lens has a pick that fell back (PR14's marker), its
+  value naming the lens and "— a pick fell back". The more-info count's read stays at the open (`references.refresh`).
+- **⋯ — the Note sheet, now headed by two doors** (`MobileNoteActionsSheet.headDoors`): two of the phone's calm buttons
+  side by side, each a glyph over its word, half the sheet wide and well over 44 tall — **Lock / Unlock** (`lock.open`
+  in ink → `lock.fill` in the accent; the seal's own act, both ways, the sheet staying up; spoken "Lock Note" / "Unlock
+  Note") and **the date** (`calendar`, the day in ink or "no date" in the muted; spoken "Entry Date", valued the day;
+  it opens the Entry Date alert, moved here with its door, byte-identical) — above the existing rows (Save a Version,
+  Versions…, Undo/Redo, Settings, Delete Note…). The sheet now SCROLLS (its head grew; Delete Note… stays reachable at
+  the medium detent without a drag).
+- **The sealed note's state line** ("This note is locked — reading only." + its Unlock act) stays in the masthead,
+  under the row and the strip — in the part of the top that stays — so a sealed note always says so; only the seal's
+  door moved.
+- **Unchanged on purpose:** every target (44 × 44); the reads at a note's open (the book, # and stack doors carry the
+  chips' three `.task(id:)` reads exactly — `MobileNoteOpenOnceTests`' "the chips read what they show" holds); the
+  receipt off the masthead (VM-61); the rename alert; the masthead on the note's ground (the look scan's lines
+  byte-present); `MobileEditorTextView` and the text-input path (zero lines).
+- **The guide** (`MobileTutorialSeeder`, P-6): the four lessons that named the old doors' places ("the books line under
+  it", "the date beside it", "the magnifier up by the title", "the masthead's second line", "lens … at the line's end",
+  "the lock lives on the masthead, up by the title", "tap blocks on the masthead") now name them where they stand.
+  Words DRAFT; a guide already seeded keeps its text until restored.
+
+### Pins (all PENDING the gate)
+
+**Red on old — tree `4be933b0e`, bundle `vm260-4b-rol`** (literals and symbols both trees declare; the pre-fix app):
+- `MobileNoteTopRowTests.theIconRowIsWhatStaysAsSheScrolls(voice:)` — 30 paragraphs, 402 × 874: at rest the title
+  stands above the row and the chrome is the title's row + one 44 row + 4; scrolled 300 pt the title has left, the row
+  holds the top, the chrome is the row alone (≤ 49); back at the top the title returns where it stood. **Predicted RED
+  4 issues per voice (8)**: the title on the row's line, 136 > 105, the title still on screen scrolled, 136 > 49.
+- `…aLongTitleWrapsCentredAndIsNeverCut(voice:)` — "XXII. Concerning the secretaries of princes, and how they should be
+  chosen": the door's frame ≥ 2 lines (2 × line − 2), centred (midX 201 ± 1), inside the gutter. **Predicted RED: Study
+  2 issues (44 < 48; leading), Terminal 1 (leading only — the height clause passes on old by 0 pt in Terminal: its
+  18 / 23 role's 2 × 23 − 2 equals the 44 floor; the centring clause carries the red there, recorded rather than
+  re-cut, since re-cutting would move the red-on-old tree).**
+- `…theHashOpensTheTagsInPlaceAndTheSameHashClosesThem(voice:)` — # opens the strip in place (no sheet), the tag shows,
+  the strip under the row, the add door 44 × 44; scrolled, the strip travels with the row at the top; # again closes it;
+  # then "Add Tag" opens the tags sheet. **Predicted RED 2 issues per voice (4)**: the old chip opens a SHEET
+  (`presentedViewController != nil`), then a `#require` stops the case (Study: "Add Tag" absent; Terminal: "Tags"
+  absent in the sheet, whose header reads "tags").
+- `…theSealAndTheDateHeadTheNoteSheet(voice:)` — the Note sheet: "Lock Note" and "Entry Date" side by side above "Save a
+  Version", each ≥ 44 × 44; the seal locks the note and the door flips to "Unlock Note"; the date opens the Entry Date
+  alert. **Predicted RED 1 issue per voice (2)** — the `#require` for "Lock Note" in the sheet.
+- `…theBookDoorIsGreyWhileTheNoteIsInNoBook(dark:)` — pixels off a scene window: a bookless note's book door ≥ 2.95:1,
+  a held note's ≥ 4.5:1, and the held one ≥ 2 above the bookless one. **Predicted RED 1 issue per case (2)** — the old
+  line drew the same muted words either way (the difference ≈ 0).
+- MOVED to R-260-13 in the pins' commit (so the red-on-old tree carries their new rule; none loosened):
+  - `MobileNoteTopTests.theNoteTopGivesTheScreenBackToWriting(voice:)` — the cap TIGHTENS 137 → 105 (two rows + the
+    title's 12 + 4 + 1, at a one-line title), the floor 131.5 → 87.5 (two rows). **RED 1 per voice (2)** (136).
+  - `…everyDoorOnTheNoteTopAnswersAcrossFortyFour(voice:)` — the doors are the title and the row's six, then the
+    strip's "Add Tag" (the membership line and the five chips left the top). **RED 1 per voice (2)** (the stack door).
+  - `…theToolsAreOneRowOfFortyFourSquareTargets` → `…theSixDoorsAreOneRowOfFortyFourSquareTargets(voice:)` — the four
+    tools' GUARD becomes the six doors' one row: 44 × 44, one row, centres 44 apart (so no separator), the row centred.
+    **RED 1 per voice (2)** (the stack door).
+  - `MobileFaintOnDoorsRenderedTests.theMastheadsEmptyChipsClearTheFloor` → `…theNoteTopsMarksClearTheirFloors(dark:)`
+    — through the real shell's Today door: the row's six glyphs ≥ 3:1 (the glyph floor), the book door in ink ≥ 4.5
+    (the Journal holds the entry), the open strip's "Add Tag" ≥ 4.5, the Note sheet's date door (the entry's day)
+    ≥ 4.5. The old pin's relative clause (the set date chip a step above the EMPTY chips' words) retires with the
+    empty-word chips it compared — none is left on the top. **RED 1 per case (2)** (the stack door).
+  - `MobileNoteTrayTests.theBlocksChipOnTheRealScreenOpensTheTray` — the road is the stack door, then its Blocks row.
+    **RED 1** (the door; the old chip's "Blocks" then carries the rest green).
+  - `MobileNoteTrayTests.puttingATakeBackClearsTheLensChipsFallbackMarker` — the marker read off the stack door's VALUE
+    and its menu's lens row; both roads in go through the door. **RED 5** (the door absent ×3 activations, its value
+    absent ×2 reads that expect it; the old chip's own labels carry the rest).
+  - `MobileBlockListTests.theRealScreenWiresPickingToTheOneDeleteRoad` — the stack door, then Blocks. **RED 1.**
+  - `MobileWriteScrollAuthorityTests` — the helper `caretAtEndOnTheViewportFoot` and
+    `aReturnMidDocumentStillRevealsTheCaretMinimally`'s setup place the caret TWICE, a settle between (the title gives
+    way a turn after the scroll and the page takes its height back, which moves the viewport's foot — without the
+    second placement `aReturnMidDocument…`'s "a reveal happened" would read a page with the title's height of slack
+    below the caret). The assertions are byte-unchanged. **A GUARD: GREEN on old** (the second pass re-sets the same
+    offset where nothing moved).
+- **Totals predicted on `vm260-4b-rol`: 34 issues in 21 test cases** (8 + 3 + 4 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + 5 + 1);
+  every other test in those suites GREEN. Where a `#require` stops a case sooner than predicted the case is still RED —
+  read the case, not only the count. A GREEN among the predicted reds is a hollow pin on old: record it, never claim it.
+
+**New behaviour's pins — tip only** (`MobileNoteTitleGiveWayTests.swift`; the types did not exist before):
+- `MobileNoteTitleGiveWayRuleTests` (pure, 6): the numbers are 4a's; at rest the title stays (and comes back); a real
+  scroll takes it; between the two nothing changes; an upward nudge mid-note never brings it back; the travel is 4a's
+  clamp (a pull past the top is no travel, a bounce past the foot is the reach).
+- `MobileNoteTitleTrackerTests` (2): readings publish only the flips (`withObservationTracking` — P3's claim); the
+  tracker reads a real `UIScrollView`'s offset by KVO (a programmatic set reaches the rule).
+
+### Calls made in the batch (for the merge's QUESTIONS; none gates the core; R-260-14 ratified the drawing, so these are only where the drawing is silent or could not be built as drawn)
+
+- **C-4b-1 — the title leaves on a FLIP, not frame by frame inside her text (PROVISIONAL; the one place the drawing
+  was not built exactly).** The drawing's title is content of the scroller (CSS sticky). Here the scroller is the
+  editor's own `UITextView`; for the title to ride inside it frame by frame it must live in the text view's content (a
+  top room — `textContainerInset.top` or `contentInset.top` — with the title placed in it and the row positioned from
+  the offset), and VM-10's place/restore arithmetic (`currentPlace`, `restore`, `jumpToBlock`, the reveal clamps) read
+  against that room: lines in `MobileEditorTextView`, the fenced seam. Built instead, chrome-only: the title leaves
+  past 24 pt and returns within 8, sliding with her text at the flip. The cost, for her eye at the walk: as she leaves
+  the top her text slides up a title's height once (and back down when she returns to the top). **Alternatives:** (b)
+  the frame-by-frame ride as a seam change (a top content room on `MobileEditorTextView` + a scroll callback; editor
+  seam ⇒ Fable-reviewed, TEXTKIT2_NOTES at preflight — the orchestrator's go); (c) a lower leave point tied to the
+  title's own height (the slide later, the same jump).
+- **C-4b-2 — no up-nudge re-open** (4a's rule reused for its numbers and clamp only; the reason above).
+- **C-4b-3 — Reduce Motion: the title goes and comes back at once** (4a fades the Library's top, which never moves the
+  list; here the text's frame moves with the title, so a fade alone would still move her text — none is drawn).
+- **C-4b-4 — the stack door's menu is a popover of the phone's menu rows, not the system `Menu`** — a `Menu`'s rows
+  present into a context-menu hierarchy no pin can reach (`MobileNoteActionsSheet`'s recorded probe), and every moved
+  door keeps a pin that drives it. On the room (R-47-1: chrome on the room).
+- **C-4b-5 — the menu rows draw the chips' own lowercase words** ("blocks", "lens", "more info"), not the drawing's
+  capitals, so the composed road phrases ("blocks ▸ leaving") and the guide still name a word on screen; the spoken
+  names are the chips'. (Residual: the road phrase omits the stack door's step.)
+- **C-4b-6 — the merged door's name is "Blocks, Lenses and More Info"** (P-1's "where a door merges, say which name
+  answers"): the door names all three; the three OLD names answer one level in, at the rows ("Blocks", "Lenses", "More
+  Info"), exactly as their chips did; the lens fallback's spoken switch lives on the lens row, and the door's VALUE
+  carries the active lens and "— a pick fell back".
+- **C-4b-7 — the book door's ink: faint (no book) · ink (one) · accent (several)**; its value the line's old words.
+- **C-4b-8 — #: the accent while open; every chip in the strip and "+ tag" open the tags sheet**; the strip centred.
+- **C-4b-9 — the sealed note's state line stays in the part of the top that stays**, centred with it (it was leading
+  under the chips); its Unlock act kept beside it.
+- **C-4b-10 — the Note sheet's head: two calm buttons, "Lock"/"Unlock" and the day/"no date"** — the drawn words are
+  the act in the app's own word ("Lock Note"/"Unlock Note" hold them: label in name; the drawing's "Seal" is the
+  mockup's word, not the phone's), the sealed state in the glyph and the accent; the sheet scrolls.
+- **C-4b-11 — the title's room as a set (P-260-4b-1):** 8 above, 8 further in than the gutter (the drawing's 28), the
+  row's own 44 below, 4 under the row: the top is 100 pt at rest under a one-line title (8 + 44 + 44 + 4) and 48
+  scrolled — it was 136, always. Alternative: 12 above (the drawing's 14) — 104 at rest.
+- **C-4b-12 — the hairline under the row while the title is gone** (the drawing's edge; the bar's hairline).
+- **C-4b-13 — while the title is gone, the rename door is reachable only at the top** (VoiceOver included): the
+  drawing scrolls it away; scrolling to the top brings it back.
+- **Words DRAFT for her pass:** "Blocks, Lenses and More Info"; "+ tag" / "Add Tag"; "Lock" / "Unlock"; "— a pick fell
+  back"; the guide's six rewritten sentences.
+
+### Canon owed at closeout (drafts — the orchestrator's to land, two-file shape)
+
+- SurfaceContracts, The note (a phone bullet beside the keystroke fence's): "**The phone's note top** (R-260-13): the
+  title on its own row — centred, wrapping, never cut, the rename door — and under it ONE row of six 44 pt icon doors,
+  no separator: copy · find · book · # · blocks/lens/more info · ⋯. Only the row stays as she scrolls (with the open
+  tag strip and a sealed note's state line): the title leaves once the page has really scrolled and is back at its
+  top. The book door is grey while the note is in no book; # opens the note's tags in place and the same # closes
+  them; the stack door's menu opens blocks · lens · more info; the Note sheet is headed by Lock / Unlock and the date
+  (VM-260, PROVISIONAL P-260-4b-1, C-4b-1…13)."
+- `notes/MobileSoul.md`'s row for the note top (if it carries one) — the orchestrator's read.
+- QUESTIONS at the merge: P-260-4b-1, C-4b-1…13 (C-4b-1 first — the only undrawn mechanic).
+
+### Batch 4b — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`. Phone: `P(folder)=DerivedData/<folder>/Build/Products/
+VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`; UI: `U(folder)=DerivedData/<folder>/Build/
+Products/TK2SpikeUITests_TK2SpikeUITests_iphonesimulator27.1-arm64-x86_64.xctestrun`; `-destination
+"platform=iOS Simulator,id=$UDID"`. **The red-on-old tree is `4be933b0e`; the code tip is `af449326a`.**
+
+**R-4b — red on old** (`P(vm260-4b-rol)`, the gate's suite device):
+`-only-testing:VariorumMobileTests/MobileNoteTopRowTests -only-testing:VariorumMobileTests/MobileNoteTopTests
+-only-testing:VariorumMobileTests/MobileFaintOnDoorsRenderedTests -only-testing:VariorumMobileTests/MobileNoteTrayTests
+-only-testing:VariorumMobileTests/MobileBlockListTests -only-testing:VariorumMobileTests/MobileWriteScrollAuthorityTests`
+- Predicted: the 21 cases above RED (≈ 34 issues); every other case in those six suites GREEN (the scroll-authority
+  suite whole — its two re-placed setups are guards).
+
+**The tip** (`af449326a`):
+- **P** — the gate's whole phone target from `vm260-2r` (`-only-testing:VariorumMobileTests`): predicted green but
+  main's known issues as the previous windows read them; every pin above GREEN; the new suites GREEN
+  (`MobileNoteTitleGiveWayRuleTests` 6, `MobileNoteTitleTrackerTests` 2). The suites that open the Note sheet and drive
+  its rows (`MobileVersionsTests`, `MobileUndoDoorTests`, `MobileDeletionTests`, `MobileTrashTests`,
+  `MobileMenuVocabularyTests`, `MobileSettingsGearTests`, `MobilePageLeavingTests`, `MobileTabBarTests`) GREEN — the
+  sheet's rows are the same Buttons, now inside a scroll view; `MobileNoteOpenOnceTests` GREEN (the open's reads are
+  the chips' three, carried by the book, # and stack doors).
+- **U** — `U(vm260-2r-ui)`, `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, the walk device, its
+  THREE tests (~6 min): the Write screen's layout changed (the masthead is the title + one row, and the title gives way
+  when the reveal scrolls the page), so `testAMidNoteTapRisesAboveTheKeyboard` is the leg that matters — predicted
+  GREEN (its law is relative: the typed letter lands above the keyboard bar; `tv.frame` is read after the reveal and
+  the flip have settled — the flip is 0.2 s, the test pauses 1.0 s); the two Library-search legs GREEN as 4a predicted.
+- **M** — `DerivedData/vm260-2r-mac` (rebuilt at the tip): the M3 list (ThemeTokenTests NoLiteralColourTests
+  PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
+  OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests) — this batch changes no file the Mac
+  compiles (nothing in `Shared/`); its scans walk the phone tree (the new `MobileNoteTop.swift` among it): predicted
+  green but `IndexTierMetricsTests`' 4 declared.
+
+**W-4b — the closing walk's added stops** (the Debug phone app from `vm260-2r`, both voices, light, to
+`notes/plans/vm-260-screens/batch-4b/`):
+1. **A note at rest** — the title centred on its own row, the six doors under it, no separator; then a note with a
+   long title (it wraps, never cut).
+2. **The same note scrolled down a screen** — only the row at the top with its hairline, the title gone; **watch the
+   slide as she leaves the top** (C-4b-1: her text moves up a title's height once) and as she returns to it.
+3. **A note with the keyboard up** (her screenshot's frame) — at rest and after typing low enough that the page
+   scrolls: the title gives the room back.
+4. **# opened, then scrolled** — the strip under the row, travelling with it; # again closes it; "+ tag" opens the
+   tags sheet.
+5. **The book door** — a bookless note (grey) and a note in a book (ink); a note in several books (accent); the tap
+   opens the membership sheet either way.
+6. **The stack door's menu** — the three rows; each opens its sheet (blocks, lens, more info); a lens active (the door
+   in the accent) and a lens with a fallen-back pick (the door in the alarm, the row's ⚠).
+7. **The Note sheet** — Lock and the date at its head; Lock seals (the door flips to Unlock, the accent; the masthead's
+   state line appears with its Unlock); the date opens Entry Date; the sheet scrolls to Delete Note… at the medium
+   detent.
+8. **VM-281's two looks, re-taken on the new top** (3b's W-3b stops 2–3): Back from a note with the keyboard up; the
+   drag-down dismiss.
+
+**Read before the gate — the two mechanisms no run has seen.** (1) **The stack door's popover in the hosted harness**:
+the tray, block-list and lens-marker pins drive the door, then a row inside a SwiftUI `.popover` presented with
+`.presentationCompactAdaptation(.popover)` from a free key window (`HostedSurface`). If those cases are RED at the
+ROW after the door activated (the door present, the row absent), read it as the harness's first: check that
+`host.presentedViewController` is the popover's controller in one of them before touching the menu — a sheet-class
+presentation there is the harness's, and the menu's rows are ordinary Buttons either way. (2) **The title's flip under
+the mounted pins** leans on KVO hearing `setContentOffset(_:animated: false)` on the text view (UIKit's own setter;
+the tracker's own pin `itReadsAScrollViewsOwnOffset` proves the road on a bare `UIScrollView`): if
+`theIconRowIsWhatStaysAsSheScrolls` is RED at "the title rode away" on the tip while the tracker's pin is GREEN, the
+flip fired and SwiftUI's animated removal outlasted the settle — read the case's printed frames first.
