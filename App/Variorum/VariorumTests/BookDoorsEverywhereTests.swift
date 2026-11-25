@@ -293,6 +293,57 @@ struct BookDoorsEverywhereTests {
         }
     }
 
+    /// **VX-1027 (her ruling, 2026-11-24: "it should show use as daily
+    /// journal already ticked")** — the table-level pin (one table, both
+    /// faces): on THE daily Journal's own row the door STAYS and reads ticked,
+    /// not pressable (PROVISIONAL A-1082-4); on any other journal-trait book it
+    /// stays the plain press. An archived Journal (the Archived books group)
+    /// reads the same. Red on the pre-fix tree: every row read `.offer`.
+    @Test func theDailyJournalsOwnRowReadsTickedOnBothFacesAndOtherJournalsOffer() {
+        let daily = Self.reading("daily", profile: Queries.dailyJournalBookProfile)
+        let archivedDaily = Self.reading("old daily", profile: Queries.dailyJournalBookProfile, archived: true)
+        let journal = Self.reading("journal", profile: Queries.journalTraitProfile)
+        for face in [BookMenuFace.bookcase, .elsewhere] {
+            #expect(BookRowMenuTable.doors(BookMenuFacts(reading: daily), face: face).contains(.useAsDailyJournal),
+                    "\(face): the row stays on the Journal's own menu")
+            #expect(BookRowMenuTable.doors(BookMenuFacts(reading: journal), face: face).contains(.useAsDailyJournal),
+                    "\(face): and on every other journal-trait book")
+        }
+        #expect(BookRowMenuTable.doors(BookMenuFacts(reading: archivedDaily), face: .elsewhere)
+                    .contains(.useAsDailyJournal),
+                "the Archived books group's row keeps it too")
+        #expect(BookRowMenuTable.dailyJournalRow(for: daily) == .ticked, "THE daily Journal reads ticked")
+        #expect(BookRowMenuTable.dailyJournalRow(for: archivedDaily) == .ticked, "archived, it is still THE Journal")
+        #expect(BookRowMenuTable.dailyJournalRow(for: journal) == .offer, "another journal: the plain press")
+    }
+
+    /// VX-1027 over a real store: the ticked row is the book
+    /// `Queries.dailyJournalBookID` names — the face reads the row's own
+    /// marker, and the designation moving moves the tick with it.
+    @Test func theTickedRowFollowsTheBookTheDailyJournalReadNames() async throws {
+        try await withDoorsWorld { session, db in
+            let ops = session.operations
+            let diary = try ops.createReading(name: "Diary", kind: .book, profile: Queries.journalTraitProfile)
+            let log = try ops.createReading(name: "Log", kind: .book, profile: Queries.journalTraitProfile)
+            func faces() async throws -> (diary: DailyJournalRowFace, log: DailyJournalRowFace, named: String?) {
+                try await db.read { db in
+                    let d = try #require(try Queries.reading(db, id: diary.id))
+                    let l = try #require(try Queries.reading(db, id: log.id))
+                    return (BookRowMenuTable.dailyJournalRow(for: d), BookRowMenuTable.dailyJournalRow(for: l),
+                            try Queries.dailyJournalBookID(db))
+                }
+            }
+            try ops.setDailyJournalBook(diary.id)
+            var now = try await faces()
+            #expect(now.named == diary.id)
+            #expect(now.diary == .ticked && now.log == .offer, "the named Journal's row is the ticked one")
+            try ops.setDailyJournalBook(log.id)
+            now = try await faces()
+            #expect(now.named == log.id)
+            #expect(now.diary == .offer && now.log == .ticked, "the tick moves with the designation")
+        }
+    }
+
     /// P-1's walk, per face: every door a face draws is one of the face's
     /// declared acts (or one of the three doors that were never acts — Open
     /// and the two exports), and every declared act is drawn for SOME row —

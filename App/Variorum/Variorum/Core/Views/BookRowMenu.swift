@@ -129,6 +129,21 @@ nonisolated enum BookRowDoor: Hashable, Sendable {
     }
 }
 
+/// **VX-1027 — how the Use as Daily Journal row reads** (her ruling,
+/// 2026-11-24: "it should show use as daily journal already ticked"): the
+/// TABLE decides whether the row is drawn (a journal-trait book); this decides
+/// what it says once drawn — so the menu says which book IS the Journal.
+nonisolated enum DailyJournalRowFace: Equatable, Sendable {
+    /// A journal-trait book that is not the daily Journal: a plain press
+    /// moves the designation here.
+    case offer
+    /// THE daily Journal: the row reads ticked and is not pressable, since
+    /// pressing it would change nothing (PROVISIONAL A-1082-4 — the note ▾
+    /// menu's Private row on a Journal note is the precedent: ticked and
+    /// locked).
+    case ticked
+}
+
 /// Which face of the one menu a host draws.
 nonisolated enum BookMenuFace: Sendable {
     /// The Bookcase's book row — the shelf-placement family included.
@@ -259,6 +274,13 @@ nonisolated enum BookRowMenuTable {
         // row (an open gathering has no state door).
         return [placing, configure, state, [.exportMarkdown, .exportPDF], archive]
             .filter { !$0.isEmpty }
+    }
+
+    /// **VX-1027 — the Use as Daily Journal row's face, for the row's book**
+    /// (both faces draw it through the one renderer, so one rule covers the
+    /// Bookcase and every row beyond it).
+    static func dailyJournalRow(for reading: Reading) -> DailyJournalRowFace {
+        .offer
     }
 
     /// **Every registry act a face can draw** (P-1's walk lines). The
@@ -601,8 +623,17 @@ struct BookRowMenuItems<Placement: View>: View {
         case .extent:
             if let reading { Button(verb(.setBookExtent)) { doors.openExtent(reading) } }
         case .useAsDailyJournal:
-            Button(verb(.useAsDailyJournal)) {
-                Task { await doors.designateDailyJournal(readingID) }
+            // VX-1027: the table's face for the row's book — on THE daily
+            // Journal a ticked row that cannot be pressed (the note ▾ menu's
+            // locked Private row's shape: a disabled ticked toggle), on any
+            // other journal-trait book the plain press.
+            if let reading, BookRowMenuTable.dailyJournalRow(for: reading) == .ticked {
+                Toggle(verb(.useAsDailyJournal), isOn: .constant(true))
+                    .disabled(true)
+            } else {
+                Button(verb(.useAsDailyJournal)) {
+                    Task { await doors.designateDailyJournal(readingID) }
+                }
             }
         case .exportMarkdown:
             if let reading {

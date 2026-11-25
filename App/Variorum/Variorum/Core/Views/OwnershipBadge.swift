@@ -53,7 +53,7 @@ nonisolated enum OwnershipBadgeCopy {
     /// open this note". The row's help now says both.
     static func rowHelp(_ base: String, badge: OwnershipBadgeFace.Badge?) -> String {
         switch badge {
-        case .shared(let books): return base + "\n" + sharedHelp(books)
+        case .shared(let books): return base + "\n" + sharedHelp(books.map(\.shownName))
         case .ownedBy(let book): return base + "\n" + ownedByHelp(book.name)
         case nil: return base
         }
@@ -62,6 +62,19 @@ nonisolated enum OwnershipBadgeCopy {
 
 // MARK: - The rule (which badge a row wears)
 
+/// **One other book a shared note lives in** — what the shared mark names
+/// and, since VX-1075, opens: the book's id (the door's destination), her name
+/// for it, and whether it is archived (R-13ie-4 — every membership face names
+/// an archived book "(archived)").
+nonisolated struct SharedBook: Equatable, Sendable, Identifiable {
+    let id: String
+    let name: String
+    var archived = false
+
+    /// Her name, marked "(archived)" when it is.
+    var shownName: String { BookArchiveCopy.name(name, archived: archived) }
+}
+
 nonisolated enum OwnershipBadgeFace {
     /// Where the row is drawn: inside a BOOK (its own view), or outside one
     /// (a gathering's view, the Pool, a tag listing, the Library).
@@ -69,21 +82,30 @@ nonisolated enum OwnershipBadgeFace {
 
     enum Badge: Equatable, Sendable {
         /// The note also lives in these OTHER books (the book view's badge).
-        case shared([String])
+        case shared([SharedBook])
         /// An owned book holds the note (the outside badge — click-through).
         case ownedBy(Queries.BookRef)
     }
 
+    /// **VX-1075 — the shared mark's own symbol** (her ask: "ticket it being
+    /// given its own symbol"): never the sidebar's Snippets glyph.
+    static let sharedSymbol = "square.on.square"
+
     /// **The rule.** Silence the common case: a free note, or a note whose
     /// only book is the one being viewed, wears nothing; the setting off
-    /// silences the family as a SET (P-13ic-10).
+    /// silences the family as a SET (P-13ic-10). `archivedBooks` names the
+    /// other books that are archived (the facts model reads them with the
+    /// facts).
     static func badge(
-        _ facts: Queries.OwnershipFacts?, placement: Placement, badgesOn: Bool
+        _ facts: Queries.OwnershipFacts?, placement: Placement, badgesOn: Bool,
+        archivedBooks: Set<String> = []
     ) -> Badge? {
         guard badgesOn, let facts else { return nil }
         switch placement {
         case .inBook:
-            return facts.otherBooks.isEmpty ? nil : .shared(facts.otherBooks.map(\.name))
+            return facts.otherBooks.isEmpty ? nil : .shared(facts.otherBooks.map { book in
+                SharedBook(id: book.id, name: book.name, archived: archivedBooks.contains(book.id))
+            })
         case .outside:
             return facts.ownedBy.map(Badge.ownedBy)
         }
@@ -101,21 +123,45 @@ nonisolated enum OwnershipBadgeFace {
 @Observable
 final class OwnershipFactsModel {
     private(set) var facts: [String: Queries.OwnershipFacts] = [:]
+    /// VX-1075: which of the facts' OTHER books are archived — read in the
+    /// same statement set as the facts, so the shared mark's list (and its
+    /// hover) name an archived book "(archived)".
+    private(set) var archivedBooks: Set<String> = []
 
     init() {}
+
+    /// What one read lands: the facts, and the archived other books.
+    nonisolated struct Snapshot: Equatable, Sendable {
+        var facts: [String: Queries.OwnershipFacts] = [:]
+        var archivedBooks: Set<String> = []
+    }
+
+    /// **The read** — the page's facts (`Queries.ownershipFacts`, ∝ the ids
+    /// passed) and the archived state of the other books they name.
+    nonisolated static func read(
+        _ db: Database, postIDs: [String], inBook readingID: String?
+    ) throws -> Snapshot {
+        let facts = try Queries.ownershipFacts(db, postIDs: postIDs, inBook: readingID)
+        return Snapshot(facts: facts, archivedBooks: [])
+    }
+
+    private func adopt(_ snapshot: Snapshot) {
+        facts = snapshot.facts
+        archivedBooks = snapshot.archivedBooks
+    }
 
     /// Observe the facts of `postIDs` (`inBook`: the book being viewed, left
     /// out of each note's other books). Hosted by `.task(id:)` on the ids.
     func observe(session: AppSession, postIDs: [String], inBook readingID: String?) async {
         guard !postIDs.isEmpty else {
-            facts = [:]
+            adopt(Snapshot())
             return
         }
         do {
             for try await value in session.database.observe({ db in
-                try Queries.ownershipFacts(db, postIDs: postIDs, inBook: readingID)
+                try Self.read(db, postIDs: postIDs, inBook: readingID)
             }) {
-                facts = value
+                adopt(value)
             }
         } catch {
             // A failed read draws no badge — silence, never a wrong mark.
@@ -126,18 +172,19 @@ final class OwnershipFactsModel {
     /// test host), and a host that wants the facts without holding them.
     func load(session: AppSession, postIDs: [String], inBook readingID: String?) async {
         guard !postIDs.isEmpty else {
-            facts = [:]
+            adopt(Snapshot())
             return
         }
-        facts = (try? await session.database.read { db in
-            try Queries.ownershipFacts(db, postIDs: postIDs, inBook: readingID)
-        }) ?? [:]
+        adopt((try? await session.database.read { db in
+            try Self.read(db, postIDs: postIDs, inBook: readingID)
+        }) ?? Snapshot())
     }
 
     func badge(
         for postID: String, placement: OwnershipBadgeFace.Placement, badgesOn: Bool
     ) -> OwnershipBadgeFace.Badge? {
-        OwnershipBadgeFace.badge(facts[postID], placement: placement, badgesOn: badgesOn)
+        OwnershipBadgeFace.badge(
+            facts[postID], placement: placement, badgesOn: badgesOn, archivedBooks: archivedBooks)
     }
 }
 
@@ -158,11 +205,11 @@ struct OwnershipBadgeView: View {
         Group {
             switch badge {
             case .shared(let books):
-                Image(systemName: "square.on.square")
+                Image(systemName: OwnershipBadgeFace.sharedSymbol)
                     .font(.system(size: 9))
                     .foregroundStyle(tokens.faint)
-                    .help(OwnershipBadgeCopy.sharedHelp(books))
-                    .accessibilityLabel(OwnershipBadgeCopy.sharedHelp(books))
+                    .help(OwnershipBadgeCopy.sharedHelp(books.map(\.shownName)))
+                    .accessibilityLabel(OwnershipBadgeCopy.sharedHelp(books.map(\.shownName)))
             case .ownedBy(let book):
                 Button {
                     MembershipChip.ascend(bookID: book.id, postID: postID)
@@ -192,6 +239,19 @@ struct OwnershipBadgeView: View {
 @MainActor
 enum OwnershipBadgeProbe {
     static var drawn: [String: OwnershipBadgeFace.Badge] = [:]
-    static func reset() { drawn = [:] }
+    /// **VX-1075 — each drawn shared mark's DOOR, by note** (the
+    /// `MembershipChipProbe` shape): registered by the mark's own control —
+    /// its hover, the books its list names, and the very function a list
+    /// row's press calls. Absent = no door was drawn for that note.
+    struct SharedDoor {
+        let help: String
+        let books: [SharedBook]
+        let open: (SharedBook) -> Void
+    }
+    static var doors: [String: SharedDoor] = [:]
+    static func reset() {
+        drawn = [:]
+        doors = [:]
+    }
 }
 #endif

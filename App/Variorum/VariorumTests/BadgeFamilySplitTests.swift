@@ -201,7 +201,8 @@ struct BadgeFamilySplitTests {
             await off.poll(timeout: 0.6) { false }  // room for an icon or an eye to (wrongly) arrive
             #expect(booksDrew, "the book marks drew (\(drawnBadges(a)))")
             #expect(drawnBadges(a)[a.ownedNote] == .ownedBy(owner), "the owned-by chip still draws")
-            #expect(drawnBadges(a)[a.sharedNote] == .shared(["another book"]), "the in-book mark still draws")
+            #expect(drawnBadges(a)[a.sharedNote] == .shared([SharedBook(id: other.id, name: other.name)]),
+                    "the in-book mark still draws")  // VX-1075 (a justified edit): the mark carries its books' ids now
             #expect(MCPSharedIconProbe.faces(in: off.window).isEmpty, "AI switch off: no shared icon")
             #expect(drawnEyes(a).isEmpty, "AI switch off: no eye on a note, a via-book note or a book (\(drawnEyes(a)))")
             off.close()
