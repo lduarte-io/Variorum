@@ -587,7 +587,9 @@ nonisolated enum BookNavigatorMark {
         // A `switch`, not `==`: `ViewMode`'s synthesized Equatable is
         // main-actor isolated (it is nested in the structure model).
         switch mode {
-        case .outline, .read:
+        case .outline, .read, .list:
+            // VX-1084: List's "viewed" note is its selected row
+            // (`BookViewModel.navigatorViewedPair`'s list arm).
             return viewedPostID == postID
         case .spread:
             return focusedPostID == postID || spreadPostIDs.contains(postID)
@@ -600,7 +602,7 @@ nonisolated enum BookNavigatorMark {
         mode: BookStructureModel.ViewMode, sectionID: String, viewedSectionID: String?
     ) -> Bool {
         switch mode {
-        case .outline, .read, .spread: return viewedSectionID == sectionID
+        case .outline, .read, .spread, .list: return viewedSectionID == sectionID
         case .index: return false
         }
     }

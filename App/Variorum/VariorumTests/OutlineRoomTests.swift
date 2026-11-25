@@ -295,8 +295,18 @@ struct OutlineRoomTests {
             let (first, _) = await mountBook(book)
             #if DEBUG
             let fresh = try #require(BookOutlineGeometry.navigatorFrames[book.readingID])
-            #expect(abs(fresh.width - BookNavigatorLayout.idealWidth) <= 1,
-                    "a book with nothing remembered opens at the shipped width: \(fresh.width)")
+            // VX-1091 (the VX-1036 run, batch 3 — A JUSTIFIED EDIT): the
+            // shipped width is the ideal held to the navigator's floor in the
+            // voice the book drew, and the floor now holds the mode row's
+            // stable tabs (five since the List mode: 229 pt Terminal, 203
+            // Study — both past the 190 ideal). The claim is unchanged:
+            // nothing remembered opens at the shipped width, whatever she
+            // drags afterwards.
+            let tabs = try #require(BookMastheadProbe.placed[book.readingID]?.tabsWidth,
+                                    "the mode row reported the tabs it counted")
+            let shipped = max(BookNavigatorLayout.idealWidth, BookNavigatorLayout.minimumWidth(tabs: tabs))
+            #expect(abs(fresh.width - shipped) <= 1,
+                    "a book with nothing remembered opens at the shipped width \(shipped): \(fresh.width)")
             #endif
             first.orderOut(nil); first.close()
 

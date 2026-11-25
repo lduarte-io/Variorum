@@ -93,7 +93,7 @@ nonisolated enum BookNoteBox {
         case .index: .indexColumnFooter
         case .spread: modeBarShown ? .modeBottomBar : .pageFoot
         case .read: pagedRead && modeBarShown ? .modeBottomBar : .pageFoot
-        case .outline: .pageFoot
+        case .outline, .list: .pageFoot
         }
         guard reviewing else { return home }
         return home == .indexColumnFooter ? home : .reviewBar
@@ -107,7 +107,7 @@ nonisolated enum BookNoteBox {
         // so its synthesized `Equatable` is isolated and unavailable here —
         // the same reason `BookAnchor` switches (its own file's shape).
         switch mode {
-        case .outline, .index, .spread: return true
+        case .outline, .index, .spread, .list: return true
         case .read: return false
         }
     }
@@ -126,19 +126,36 @@ nonisolated enum BookNoteBox {
         mode: BookStructureModel.ViewMode,
         focusedPostID: String?,
         spreadPostIDs: [String],
-        indexPostID: String?
+        indexPostID: String?,
+        listPostID: String? = nil
     ) -> String? {
         switch mode {
         case .outline:
             return focusedPostID
         case .index:
             return indexPostID
+        case .list:
+            // VX-1084 (BL-3): a List row's click selects the note into this
+            // box — the List's own selection, as it reports it.
+            return listPostID
         case .spread:
             if let focusedPostID, spreadPostIDs.contains(focusedPostID) { return focusedPostID }
             return spreadPostIDs.first
         case .read:
             return nil
         }
+    }
+
+    /// **VX-1039 (N-2) — the note a general mint door makes its note BESIDE**
+    /// ("after the note she is on, in its chapter" — the navigator foot, the
+    /// page foot, ⌥⌘N): the note the caret is in, else the note the box calls
+    /// selected (its two facts, this mode's own — `livePost`, `selectedPost`),
+    /// else the note the navigator marks as viewed (VX-562/VX-645's pair); with
+    /// none of them, nil — the end. PROVISIONAL, named in the design record's
+    /// §4f ("the note she is on" is the live or selected note, else the
+    /// navigator's viewed note; with neither, the end).
+    static func mintNeighbour(live: String?, selected: String?, viewed: String?) -> String? {
+        live ?? selected ?? viewed
     }
 
     /// The note the caret is IN, or nil.
@@ -158,7 +175,8 @@ nonisolated enum BookNoteBox {
         switch mode {
         case .outline, .spread: return liveFocusedPostID
         case .index: return indexLivePostID
-        case .read: return nil
+        // VX-1084: List, like Read, mounts no editor — nothing is live there.
+        case .read, .list: return nil
         }
     }
 }

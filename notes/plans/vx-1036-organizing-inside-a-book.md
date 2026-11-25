@@ -2,7 +2,7 @@
 
 **Ticket** VX-1036 (Umbrella, Books) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov22 · **Mockups** `notes/plans/vx-1036/`
 
-**STATUS — OPEN: THE DESIGN IS CLOSED (2026-11-25, R-1036-42) and cut into three umbrellas (R-1036-44): VX-1036 inside a book · VX-1085 lanes · VX-1086 wings. §4f is the design as closed, over §4d and §4b; rulings R-1036-1…45 are in §5. Nothing is built. Owed next: one execution plan per umbrella, at its kickoff.**
+**STATUS — OPEN for VX-1085 (lanes) and VX-1086 (wings): THE DESIGN IS CLOSED (2026-11-25, R-1036-42) and cut into three umbrellas (R-1036-44); the first, VX-1036 inside a book, is BUILT AND MERGED (PR #31, 2026-11-25 — its record `notes/plans/vx-1036-execution-plan.md`). §4f is the design as closed, over §4d and §4b; rulings R-1036-1…45 are in §5. VX-1036's build kicked off 2026-11-25 — its execution plan is `notes/plans/vx-1036-execution-plan.md`. VX-1085 and VX-1086 still owe theirs, at their kickoffs.**
 
 ---
 
@@ -319,7 +319,7 @@ What stands today: the Library's List row already carries a note's title, its da
 - **Wings.** One per-wing switch decides both all-wings search and the All Wings Library (R-1036-36). Home reorders and takes a colour like any wing; all-wings Starred keeps her one star order; a search in the All Wings Library shows the "in: all wings" chip (R-1036-41).
 - **Lanes.** An empty lane keeps its heading; a lane move is one undo step; binding a laned gathering turns each lane into a chapter (R-1036-41).
 - **Four faces exist only in words** — no mockup shows them, and the owning run's first walk shows them to her before it merges: the confirm before a tag-removing lane move; the three-position tags switch; the tag button beside the title suggestion; the "…" on a long title at rest.
-- **Not yet picked:** the add-tag chord (brought to her at the build from the registry's free chords); the lanes run's cast (hers at its kickoff — it carries a `Sync/` constant and a §12 event).
+- **The add-tag chord is ⌘⇧I** — the standing `.tagNote` act, extended to books (R-1036-46 as resolved at her check-in: "Keep ⌘⇧I"; the ⌘⇧H pick was premise-broken and lapsed, ⌘⇧H stays free — §5 carries the story). **Not yet picked:** the lanes run's cast (hers at its kickoff — it carries a `Sync/` constant and a §12 event).
 
 ---
 
@@ -480,6 +480,16 @@ The cut, approved (2026-11-25):
 | R-1036-44 | **Three umbrellas** — "yes, these three look good." **VX-1036 — Inside a book** (kept): VX-1039 · VX-1040 · VX-881 · VX-1080 · VX-1081 · VX-1038 · VX-1084 · VX-1078; no schema change. **VX-1085 — Lanes in gatherings**: VX-1037 · VX-1079 · VX-1026; carries the one §12 event (her deploy go) and a Fable cold review. **VX-1086 — Wings**: VX-1041 (the All Wings Library, its search, the ⌘K row, the Library line removed) · VX-1087 (Starred by wing colour) · VX-1088 (Settings ▸ Wings) — the wider wings ticket split in three. Proposed order, not ruled: VX-1036, then VX-1085, with VX-1086 able to run beside either. This file stays the ONE design record for all three; each umbrella writes its own execution plan at its kickoff. |
 | R-1036-45 | **The design goes to main by a docs-only PR, the coordinator told first** — "go ahead and merge a docs only PR, but message nov24 coordinator before you do so." |
 
+### The build kickoff sitting — 2026-11-25 (the VX-1036 run; its record is `notes/plans/vx-1036-execution-plan.md` §9)
+
+Her dialog picks at the run's kickoff: the four batches approved · the ladder's reviewer `opus-reviewer` · riders VX-96, VX-576, VX-1091 seated · Index's header rows get nothing this run. Then, preparing an overnight run before sleep:
+
+| id | Ruling |
+|---|---|
+| R-1036-46 | **The add-tag chord is ⌘⇧H** — the dialog's pick ("H for hashtag"; recommended) over ⌃⌘T (a fifth T chord beside takes' four) and ⌥⌘3 (a third digit family). T-4 is settled; the build's collision sweep still verifies before wiring. **HELD IN ABEYANCE the same night — the pick's premise was WRONG (the orchestrator's survey error, found by batch 2's collision sweep):** T-4's act already exists and already carries a chord — `.tagNote` ("Tag Note", ⌘⇧I since the Act 10 correction round) opens the masthead's inline tag field in Write, is taught in two field-guide lessons and the ⌘/ helper, and is pinned by four suites. She was asked "which free chord should the new act take?" when the true question was "keep ⌘⇧I, or re-point to something else?" — a question she has not seen. **The overnight build ships T-4's SUBSTANCE on the standing chord: ⌘⇧I extends to the book surface (opening the header's "+" field on the note she is on); nothing is retired, no guide text moves.** **RESOLVED the same night, asked with the full picture at her check-in — her dialog pick: "Keep ⌘⇧I". T-4's chord IS ⌘⇧I (the standing act, now reaching books); the ⌘⇧H arm lapses; ⌘⇧H stays free.** |
+| R-1036-47 | **The overnight run MERGES if fully green** — the dialog's pick "Merge too if fully green": after the ladder and the nov24 coordinator's gate, the PR merges overnight; §4f's three faces-in-words owed at a first walk are WAIVED TO THE HANDOFF — she reviews them as captures in her morning checklist. Anything NOT fully green (an unresolved ladder finding, a failed gate, a material rebase conflict with VX-1082's merge) HOLDS the merge and bundles for her sitting instead. |
+| R-1036-48 | **The overnight mandate, in her words at her check-in (2026-11-25, verbatim):** "I want you to continue overnight ruling provisionally. I'm going to sleep and will review all the choices in the morning. A fresh version of the latest main can be installed on my pro (on the debug store if it's easier) so that I can see what the tag rework looks like. A release should be made ready, but I'll only release it if I like how everything is after debug, there might be some changes needed once I see it live." Read as: rule-provisionally continues (R-1036-47 stands); after the merge the DEBUG app is rebuilt from latest main on the Pro (the dev store — her "if it's easier" arm; /Applications stays releases-only, VX-931), with the walk's sample content left in place so the tag rework shows; a RELEASE is MADE READY — the build at a zero-instance window plus drafted notes — and is NOT published, NOT installed: her word after her debug look releases it, and changes may come first. |
+
 ---
 
 ## 6. Ledger
@@ -501,6 +511,8 @@ The cut, approved (2026-11-25):
 | 12 | A too-long title scrolls | VX-1080 | RULED (R-1036-19); when it moves is hers |
 | 13 | The tag pill's × centred | VX-1081 | RULED (R-1036-20) |
 | 14 | A list mode for the book | VX-1084 | RULED (R-1036-29, -38): a fifth mode, rows only; BL-1…BL-3 as drawn |
+
+| 15 | Main's copy of the handoff has a wrong sentence in its kickoff line | VX-1036's PR | FIXED ON THE BRANCH (`cde7ea279`); reaches main with this umbrella's merge — the run's plan lists it and the closeout checks main |
 
 *(Rows 1–2 are now T-1…T-6; row 8 is W-2′…W-10.)*
 

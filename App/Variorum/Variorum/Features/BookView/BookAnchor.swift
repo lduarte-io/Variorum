@@ -53,6 +53,10 @@ nonisolated enum BookAnchor {
         /// (VX-645's follower — `BookViewModel.viewedFlowPair.postID`), nil
         /// when nothing is viewed.
         var flowViewedPostID: String? = nil
+        /// **VX-1084 — List's selected note**, reported by the List the way
+        /// the index column reports its selection (`noteListSelection`); nil
+        /// when nothing is selected there.
+        var listPostID: String? = nil
         /// VX-304: Outline's LIVE note and the block her caret stands in —
         /// read from the editor under the caret at the switch (`BookView
         /// .switchMode`), only when it is the book's live note. VX-630: the
@@ -99,6 +103,10 @@ nonisolated enum BookAnchor {
             // The index's place is its selected note (reported, like the
             // paginated reader's address).
             return place.indexPostID ?? place.standingPostID
+        case .list:
+            // VX-1084: List's place is its selected row (reported, like the
+            // index's selection); none, where she arrived.
+            return place.listPostID ?? place.standingPostID
         }
     }
 
@@ -132,7 +140,7 @@ nonisolated enum BookAnchor {
                 return LandingTarget(postID: post)
             }
             return LandingTarget(postID: post, blockID: block)
-        case .spread, .read:
+        case .spread, .read, .list:
             return LandingTarget(postID: post)
         }
     }

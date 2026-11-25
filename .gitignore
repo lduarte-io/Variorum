@@ -116,3 +116,5 @@ notes/plans/vm-47-screens/
 notes/plans/vm64-screens/
 # VM-260: the run's simulator captures — machine output, never committed
 notes/plans/vm-260-screens/
+# VX-1036 — the run's captures (headless renders, walk screens) stay local (the screens convention)
+notes/plans/vx-1036-screens/

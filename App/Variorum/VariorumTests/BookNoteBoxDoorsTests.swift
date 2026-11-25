@@ -265,8 +265,10 @@ private func makeBlockTwoLive(
                     == BookOpenDoor.Place(blockID: second, offsetInBlock: inside)
         })
         #expect(mounted.model.indexLiveBlockID == second, "index: the premise — block 2 is live")
-    case .read:
-        Issue.record("Read has no live place")
+    // VX-1084 (A JUSTIFIED EDIT — the enum grew a case; no subject or
+    // expectation moved): List, like Read, mounts no editor.
+    case .read, .list:
+        Issue.record("\(mode) has no live place")
     }
 }
 

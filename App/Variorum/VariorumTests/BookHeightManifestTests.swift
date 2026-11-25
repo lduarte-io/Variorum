@@ -278,6 +278,50 @@ struct BookOutlineHeightsTests {
         #expect(!heights.stand(at: 500), "standing at the same width again changes nothing")
     }
 
+    /// **The VX-1036 ladder, round 1 — R1-1 (MAJOR; RED ON OLD).** The book's
+    /// tags switch (VX-1038 — hidden · other tags · all tags) changes what a
+    /// card's HEADER holds: under "all tags" a card wears its pills beside its
+    /// title, wrapping there, or on their own row under a title that fills the
+    /// line (`BookCardHeaderPlan` — the `.ownRow` arrangement adds a whole pill
+    /// row). The column learned card A — and through it every card of A's
+    /// shape — under HIDDEN, and the switch moving re-stood nothing: A's
+    /// pill-less height kept standing for A (and its twins) while they were far,
+    /// and the manifest kept calling it MEASURED, so `isExactAbove` vouched for
+    /// a column that would grow under the landing as the rows realized (13u2b's
+    /// drift class). The position joins the stand's stamp — the voice-change
+    /// precedent: what was learned under one position is not a fact under
+    /// another, and the column re-learns from what it draws.
+    @Test func aTagsSwitchMoveForgetsWhatTheCardsTaughtUnderTheOldPosition() {
+        let heights = heights()   // 696 pt, tags hidden (the book's default)
+        let shape = BookOutlineHeights.Shape.card(lines: 3)
+        let modelled = BookOutlineHeightModel.modelled(shape, metrics: heights.metrics)
+        // Card A, measured with no pills (a long title: its pills, once shown,
+        // take their own row under it).
+        heights.learn("page-a", shape: shape, height: 103)
+        #expect(heights.height("page-b", shape: shape) == 103, "the premise: A taught its twins")
+
+        // All tags: A's header now carries a pill row its 103 pt never held.
+        #expect(heights.stand(at: 696, tags: .allTags), "a position change re-stands the column")
+        let a = heights.input("page-a", shape: shape)
+        #expect(a.measured == nil, "A's hidden-era height no longer answers for A: \(String(describing: a.measured))")
+        #expect(a.remembered == nil, "…nor for its twins: \(String(describing: a.remembered))")
+        let resolved = BookHeightManifest.resolve(a)
+        #expect(resolved.0 == modelled && resolved.1 == .derived,
+                "the manifest stops calling it measured — arithmetic until A is drawn again: \(resolved)")
+
+        // A realizes under all tags, its pill row included, and teaches its twins.
+        heights.learn("page-a", shape: shape, height: 125)
+        #expect(heights.height("page-b", shape: shape) == 125)
+        // Back to hidden: the pill-row height is not hidden's either.
+        #expect(heights.stand(at: 696, tags: .hidden))
+        #expect(heights.height("page-b", shape: shape) == modelled)
+        // A re-stand that names no position (the width's and the voice's
+        // roads) keeps the one in force: nothing moved, nothing forgotten.
+        heights.learn("page-a", shape: shape, height: 103)
+        #expect(!heights.stand(at: 696), "the same width, voice and position re-stand nothing")
+        #expect(heights.height("page-b", shape: shape) == 103)
+    }
+
     /// A placeholder's height is never learned — the row reports it, but the
     /// caller only teaches from real content (and this is the door that
     /// rejects the nonsense).

@@ -868,10 +868,22 @@ extension Operations {
     /// same guard. Optional chapter assignment rides the membership row.
     /// No undo entry (createPost's class — deleteContainer is the inverse,
     /// recoverable via restoreContainer).
+    ///
+    /// **`at` — WHERE in the book's one position list the note is born**
+    /// (VX-1039, the VX-1036 run's N-2: her book doors make a note where the
+    /// door stands — a chapter's own "+" at that chapter's end, the general
+    /// doors after the note she is on; the door decides, through the pure
+    /// `BookMintPlacement`). `.end` — the default — is today's behaviour byte
+    /// for byte (the same resolver call, after the same mint). An anchor that
+    /// is not a live row of this book refuses `postNotInReading` and the whole
+    /// mint rolls back — never a stray note. The wire's `create_note` does NOT
+    /// file through here (`mintNoteEntry` → `addPostToReading(…, at: .end)`),
+    /// so its placement is untouched (pinned: `MCPCreateNotePlacementServerTests`).
     @discardableResult
     public func newPostInReading(
         _ readingID: String, section sectionID: String? = nil,
-        title: String? = nil, profile: Profile? = nil, entryDate: String? = nil
+        title: String? = nil, profile: Profile? = nil, entryDate: String? = nil,
+        at insert: InsertPosition = .end
     ) throws -> Container {
         if let entryDate, !JournalDay.isValid(entryDate) {
             throw OperationError.invalidEntryDate(entryDate)
@@ -912,7 +924,7 @@ extension Operations {
             let now = date.now
             try ReadingPost(
                 id: newID(), readingId: readingID, postId: post.id,
-                position: try readingPosition(db, readingID: readingID, at: .end),
+                position: try readingPosition(db, readingID: readingID, at: insert),
                 sectionId: sectionID,
                 createdAt: now)
                 .insert(db)
@@ -922,6 +934,29 @@ extension Operations {
             // tagging act is heard by the OTHER living books.
             try applyAutoTag(db, book: reading, postID: post.id, now: now)
             return post
+        }
+    }
+
+    /// **`newPostInReading` at a door's place** (VX-1039): the pure rule's
+    /// answer (`BookMintPlacement`) handed to the op — its anchor in the
+    /// book's one position list and its chapter. A door whose anchor left the
+    /// book between the page's read and the write (another device, an undo)
+    /// is not refused for it: the note is born at the end — every door's place
+    /// before the rule — still in the chapter the placement named (a chapter
+    /// that died meanwhile still refuses in the op's own words).
+    @discardableResult
+    public func newPostInReading(
+        _ readingID: String, placedAt placement: BookMintPlacement.Placement,
+        title: String? = nil, profile: Profile? = nil, entryDate: String? = nil
+    ) throws -> Container {
+        do {
+            return try newPostInReading(
+                readingID, section: placement.sectionID, title: title, profile: profile,
+                entryDate: entryDate, at: InsertPosition(placement.anchor))
+        } catch OperationError.postNotInReading where placement.anchor != .end {
+            return try newPostInReading(
+                readingID, section: placement.sectionID, title: title, profile: profile,
+                entryDate: entryDate, at: .end)
         }
     }
 

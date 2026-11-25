@@ -28,6 +28,18 @@
 //  Index column at its 240-pt floor, 245 pt in 212). GUARD, green on both
 //  trees: the field CLOSED never widens either column.
 //
+//  **VX-1091 (the VX-1036 run, at its merge of VX-1082 — A JUSTIFIED EDIT):**
+//  the navigator's floor is PER VOICE now — the shipped 190 held up to the
+//  mode row's stable tabs plus the navigator's padding
+//  (`BookNavigatorLayout.minimumWidth(tabs:)` → `BookNavigatorFloor`; with the
+//  List mode's fifth tab, 229 pt Terminal and 203 Study) — so the navigator's
+//  room is 205 / 179, not the old floor's 166. The navigator pins read that
+//  room from the same input `BookView` hands `SideColumn` (`navigatorRoom`),
+//  and the tabs' `max` the room carried while VX-1091 was open collapses to
+//  it, as its own note said it would. The CLAIM is unchanged: the title line
+//  never widens its column. The red-on-old numbers above are VX-1082's, at
+//  the old floor; the Index column's room is untouched.
+//
 
 import AppKit
 import Dependencies
@@ -149,7 +161,10 @@ struct BookMastheadFitsItsColumnTests {
     }
 
     /// The two remembered column widths, put back as found (the test host is
-    /// the dev-store app — its defaults are real).
+    /// the dev-store app — its defaults are real). VX-1091: the navigator's
+    /// remembered 190 sits under both voices' floors, and the column holds a
+    /// remembered width up to its floor (`SideColumnLayout.width`), so the
+    /// navigator lays out AT its floor in the voice the book draws.
     private func withColumnsAtTheirFloors<T>(_ body: () async throws -> T) async rethrows -> T {
         let defaults = UserDefaults.standard
         let navigator = defaults.object(forKey: BookNavigatorLayout.widthKey)
@@ -181,33 +196,40 @@ struct BookMastheadFitsItsColumnTests {
         #endif
     }
 
-    /// The room each column gives its masthead line: the navigator's floor
-    /// less its `.padding(12)` each side (`BookView.navigator`); the Index
-    /// column's floor less the masthead's `.padding(.horizontal, 14)`
-    /// (`BookIndexView.column`).
-    static let navigatorRoom: CGFloat = BookNavigatorLayout.minimumWidth - 24
+    /// The room the Index column gives its masthead line: the column's floor
+    /// less the masthead's `.padding(.horizontal, 14)` (`BookIndexView.column`).
     static let indexRoom: CGFloat = BookIndexColumn.minimumWidth - 28
 
-    /// **The room the column's OTHER children leave the title line** (the
-    /// window's scoped re-run, 00:54 — D-1082-S3's measured read): the
-    /// panel's room, or — where they are wider — the mode row's tabs at their
-    /// fixed width. A stack places every child at its widest child's width,
-    /// so where the tabs outgrow the room (Terminal at the 190-pt navigator:
-    /// tabs 167 pt in 166 — VX-1091) the title line FILLS that point too
-    /// (measured: title line 167, navigator 191; Study 166 and 190). The tabs
-    /// do not depend on the title line, so this isolates the line's own
-    /// contribution: the old HStack's open line (190–220 pt) is still red
-    /// against it, its resting line (which fills) still green. When VX-1091
-    /// is fixed the max collapses to the panel's room.
-    private func roomBesideTheTabs(_ readingID: String, room: CGFloat) -> CGFloat {
+    /// The room the navigator gives its masthead line, IN THE VOICE THE BOOK
+    /// DREW: the navigator's floor less its `.padding(12)` each side
+    /// (`BookView.navigator`, `BookNavigatorLayout.contentInset`).
+    ///
+    /// VX-1091 (the VX-1036 run — A JUSTIFIED EDIT): this was
+    /// `BookNavigatorLayout.minimumWidth - 24` (the old single 190-pt floor,
+    /// 166) and the pins took `max` of it and the mode row's placed tabs —
+    /// **the room the column's OTHER children leave the title line** (D-1082-S3's
+    /// measured read: a stack places every child at its widest child's width,
+    /// so where the tabs outgrew the room — Terminal, 167 pt in 166 — the title
+    /// line filled that point too; "When VX-1091 is fixed the max collapses to
+    /// the panel's room"). VX-1091 is fixed by the floor itself: it holds the
+    /// tabs' stable width plus the padding, so the tabs fit the room by
+    /// construction (`BookNavigatorFloorTests`) and the `max` is the room. The
+    /// floor is read from the input `BookView` hands `SideColumn` — the mode
+    /// row's own probe's STABLE tab width (`OutlineRoomTests`' precedent) —
+    /// never from the navigator's laid-out width, which would let a widened
+    /// navigator widen its own oracle. A child that outgrows the room now
+    /// fails here, as the claim wants.
+    private func navigatorRoom(_ readingID: String) throws -> CGFloat {
         #if DEBUG
-        max(room, BookMastheadProbe.placed[readingID]?.arrangement.tabs.width ?? 0)
+        let tabs = try #require(BookMastheadProbe.placed[readingID]?.tabsWidth,
+                                "the mode row reported the tabs it counted")
+        return BookNavigatorLayout.minimumWidth(tabs: tabs) - 2 * BookNavigatorLayout.contentInset
         #else
-        room
+        return BookNavigatorLayout.minimumWidth - 2 * BookNavigatorLayout.contentInset
         #endif
     }
 
-    // MARK: - The navigator at its 190-pt floor
+    // MARK: - The navigator at its floor in the voice (VX-1091: 229 Terminal, 203 Study)
 
     /// Her sighting's shape — a short-named GATHERING — and her own book's
     /// name, nothing waiting; and a book whose Arrivals door shows a count.
@@ -230,7 +252,7 @@ struct BookMastheadFitsItsColumnTests {
                     let window = await mount(book, theme)
                     defer { window.orderOut(nil); window.close() }
                     let width = try #require(titleLineWidth(book.readingID), "\(voice) \(name): the title line reported")
-                    let room = roomBesideTheTabs(book.readingID, room: Self.navigatorRoom)
+                    let room = try navigatorRoom(book.readingID)
                     #expect(width <= room + 0.5,
                             "\(voice) \(name) (\(kind), \(waiting) waiting): the open title line drew \(width) pt in a \(room)-pt room")
                 }
@@ -251,7 +273,7 @@ struct BookMastheadFitsItsColumnTests {
                     let window = await mount(book, theme)
                     defer { window.orderOut(nil); window.close() }
                     let width = try #require(titleLineWidth(book.readingID), "\(voice) \(name): the title line reported")
-                    let room = roomBesideTheTabs(book.readingID, room: Self.navigatorRoom)
+                    let room = try navigatorRoom(book.readingID)
                     #expect(width <= room + 0.5,
                             "\(voice) \(name): the resting title line drew \(width) pt in a \(room)-pt room")
                     // D-1082-S3's ONE measured read (printed, never asserted —
@@ -260,7 +282,7 @@ struct BookMastheadFitsItsColumnTests {
                     // row's own placement at this floor, beside the navigator
                     // and the title line, for the record.
                     if let placed = BookMastheadProbe.placed[book.readingID] {
-                        print("D-1082-S3 MEASURED READ \(voice) \(name): room \(Self.navigatorRoom) · "
+                        print("D-1082-S3 MEASURED READ \(voice) \(name): room \(room) · "
                               + "mode row bounds \(placed.boundsWidth) · tabs \(placed.arrangement.tabs.width) "
                               + "(stable \(placed.tabsWidth)) · navigator \(BookOutlineGeometry.navigatorFrames[book.readingID]?.width ?? -1) "
                               + "· title line \(width)")
@@ -287,7 +309,10 @@ struct BookMastheadFitsItsColumnTests {
                 let window = await mount(book, theme)
                 defer { window.orderOut(nil); window.close() }
                 let width = try #require(titleLineWidth(book.readingID), "\(voice): the Index column's title line reported")
-                let room = roomBesideTheTabs(book.readingID, room: Self.indexRoom)
+                // VX-1091 (A JUSTIFIED EDIT): the tabs' `max` collapses here
+                // too — five tabs (205 / 179 pt) sit inside the column's
+                // 212-pt room in both voices; the room is the column's own.
+                let room = Self.indexRoom
                 #expect(width <= room + 0.5,
                         "\(voice): the open title line drew \(width) pt in the Index column's \(room)-pt room")
             }

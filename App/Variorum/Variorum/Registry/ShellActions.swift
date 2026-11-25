@@ -46,7 +46,16 @@ struct ShellActions {
     /// **⌘⇧I — tag this note** (the Act 10 correction round, row 15): opens
     /// the mounted detail's inline tag field through the router's seam; with
     /// no note under it the registry's honest note speaks (P-2).
+    ///
+    /// **VX-1038 (T-4 — her pick 2026-11-25, "Keep ⌘⇧I"):** with a BOOK in the
+    /// focused pane the same act opens that book's card "+" field on the note
+    /// she is on (the book takes the request — `BookView.takeTagRequest`).
+    /// Write's road is unchanged.
     func tagNote() {
+        if case .reading(let bookID) = shell.workspace.focusedSelection {
+            shell.bookTagRequest = ShellRouter.BookTagRequest(bookID: bookID, token: UUID())
+            return
+        }
         if !session.commandRouter.requestTagField() {
             status.refuse(CapabilityRegistry.capability(.tagNote).unavailableNote)
         }

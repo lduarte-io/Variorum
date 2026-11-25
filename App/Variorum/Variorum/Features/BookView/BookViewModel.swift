@@ -179,12 +179,97 @@ final class BookViewModel {
         // anchoring above, a spread-focused post can only leave the spread
         // by leaving the book (or the window), which is exactly this test.
         releaseFocusIfItLeftTheBook()
+        // VX-1039: a note made here lands once the entries hold it.
+        takeArrivalIfDelivered()
     }
 
     private func releaseFocusIfItLeftTheBook() {
         guard let focused = focusedPostID,
+              // VX-1039: a note just made here is not "gone" — its entries
+              // have not arrived yet (a delivery read before the write can
+              // land after the mint's own turn).
+              focused != pendingArrival,
               !entries.contains(where: { $0.postID == focused }) else { return }
         focus(nil)
+    }
+
+    // MARK: - VX-1039 — a note made here ARRIVES on the page (N-1, N-3)
+
+    /// **The note a mint door just made, on its way onto the page** (VX-1039,
+    /// the VX-1036 run's N-1 — her report: "it's made at the bottom of a long
+    /// list sometimes and then you can't actually see the new note ready to be
+    /// edited"). The act FOCUSES it at once (the keyboard leaves the note she
+    /// was in, as it always did) and parks its landing HERE until the entries
+    /// hold it. The design record's §3a traced why: the act used to ask for the
+    /// reveal in the turn the mint returned, while the entries — published only
+    /// after the write's re-fetch and the card-preview prime read — still held
+    /// the book as it was, so the Outline's landing found the note missing from
+    /// a non-empty list, dropped the reveal as foreign, and the entries' arrival
+    /// found nothing parked (pinned: `BookMintLandingTests`). Asking only once
+    /// the note is delivered serves every mode's landing at once (the Outline,
+    /// the spread, Read and the Index each land a reveal their own way), and
+    /// none of them has to learn a second parking rule.
+    ///
+    /// A later navigation lets it go — another reveal, landing or chapter
+    /// landing, a focus elsewhere (a click-out included), a collapse of the
+    /// note, a mode carry, collapse-all — so a slow delivery never yanks the
+    /// page from where she has since gone. Not observed: no view draws it.
+    @ObservationIgnored private(set) var pendingArrival: String?
+
+    /// **The mint's landing** (every door's — the navigator foot's, the page
+    /// foot's, a chapter's own "+", ⌥⌘N's): focus the new note now, land it
+    /// when the entries deliver it, and — N-3 — widen the window to hold a
+    /// note born past it.
+    ///
+    /// The window question is answered by ONE read of the book as this view
+    /// reads it (its look, its filter — `assembleReading`'s one ORDER BY),
+    /// and only where the answer is not already known: the filter may hide the
+    /// note, or the window is full (a note born past it would never be
+    /// delivered). Otherwise the note is surely delivered — a member is never
+    /// archived at birth and a gathering's mint wears what its rule needs (the
+    /// planner's belt) — and nothing is read. The read is ∝ the book, never
+    /// the corpus, and only for a book already as long as the window: the
+    /// widened observation then reads that many rows itself (P1's deliberate
+    /// widening — "show more ›"'s class, asked for by her mint).
+    func arrive(at postID: String) async {
+        focus(postID)
+        pendingArrival = postID   // after the focus: a focus elsewhere lets an arrival go
+        if viewFilter != nil || truncated || entries.count + 1 > window {
+            let order = viewOrder, filter = viewFilter, readingID = readingID
+            do {
+                let index = try await session.database.read { db in
+                    try Queries.assembleReading(db, readingID: readingID, order: order, filter: filter)
+                        .firstIndex { $0.postID == postID }
+                }
+                guard pendingArrival == postID else { return }   // she has gone elsewhere meanwhile
+                guard let index else {
+                    // This view does not show the note (the Index's filter
+                    // hides it): nothing to land, nothing to keep focused.
+                    pendingArrival = nil
+                    releaseFocusIfItLeftTheBook()
+                    return
+                }
+                window = Self.window(holding: index, current: window)
+            } catch {
+                // The read failed: the arrival still waits for the entries.
+            }
+        }
+        takeArrivalIfDelivered()
+    }
+
+    /// N-3 — the window that holds the entry at `index` (0-based): the one in
+    /// hand when it already does, else widened by whole windows — "show more
+    /// ›"'s own step, so a later "show more" continues the same grid.
+    nonisolated static func window(holding index: Int, current: Int) -> Int {
+        guard index >= current else { return current }
+        return (index / entryWindow + 1) * entryWindow
+    }
+
+    private func takeArrivalIfDelivered() {
+        guard let arriving = pendingArrival,
+              entries.contains(where: { $0.postID == arriving }) else { return }
+        pendingArrival = nil
+        requestReveal(arriving)
     }
 
     // MARK: - 13u2 UNIT A2 — THE CARDS' PREVIEWS, PRIMED WITH THE ENTRIES
@@ -606,8 +691,17 @@ final class BookViewModel {
     /// calm. Such a row keeps the shipped behavior (placeholder until
     /// near); her steady-state store has a persisted record for every
     /// story it has realized (18d batch 4).
+    ///
+    /// **VX-96 — the reveal's arm is the TRAVEL, not the request.** It read
+    /// `pendingReveal`, which the Outline's landing consumes before it scrolls
+    /// (`BookView.landOutlineReveal`), so on the reveal-WITHOUT-focus roads —
+    /// the mode carry into Outline, the W20 ascent into an open all-expanded
+    /// book — the arm lapsed before the first aim and those roads kept the
+    /// title-over-blank beat (the VX-92 ladder's R1-2). `travelingTo` is set
+    /// with every reveal and held for the landing's lifetime (pinned:
+    /// `BookOutlineTravelTests`).
     func outlineRowPreMounts(_ postID: String) -> Bool {
-        guard liveFocusedPostID == postID || pendingReveal == postID else { return false }
+        guard liveFocusedPostID == postID || travelingTo == postID else { return false }
         guard let remembered = rememberedSurfaceSize(postID),
               abs(remembered.width - outlineContentWidth) <= stableSurfaceWidthTolerance
         else { return false }
@@ -854,6 +948,22 @@ final class BookViewModel {
         indexPaneHeights.stand(at: indexContentWidth)
     }
 
+    /// **The book's TAGS SWITCH moved — or the book mounted with it** (the
+    /// VX-1036 ladder's R1-1): the cards' headers hold other pills now, so what
+    /// the column learned under the old position is dropped through the same
+    /// one door (`stand` — the position rides its stamp, as the voice does).
+    /// The book hands it at mount too, so a book remembered at "all tags" never
+    /// learns under the default's stamp. The Index pane's rows wear no pills
+    /// (the design gives them none), so only the Outline re-stands.
+    ///
+    /// Returns `stand`'s answer — whether anything moved — so the book can
+    /// re-land the row at the top of the page (the VX-1036 ladder's R2-2: the
+    /// width road's re-land, wearing QUESTIONS #115(b)'s guards).
+    @discardableResult
+    func outlineTagsShown(_ position: BookTagsShown) -> Bool {
+        outlineHeights.stand(at: outlineContentWidth, tags: position)
+    }
+
     // MARK: - 13u4 UNIT F3 — THE INDEX PANE'S HEIGHTS
     //
     // The same idea as the Outline's above, on the surface UNIT F1 left with
@@ -1017,6 +1127,9 @@ final class BookViewModel {
         // One line covers all twelve call sites — the reason this rides the
         // model rather than being threaded through the views.
         if postID != nil, !paneFocused { onPaneFocusRequest?() }
+        // VX-1039: a focus anywhere else is a later navigation — a note on its
+        // way onto the page no longer lands.
+        if postID != pendingArrival { pendingArrival = nil }
         caretSeed = postID == nil ? nil : (caret ?? 0)
         caretSeedIsHers = postID != nil && caret != nil
         caretBlockSeed = nil
@@ -1062,6 +1175,7 @@ final class BookViewModel {
     func collapse(_ postID: String) {
         expandedPosts.remove(postID)
         if pendingOutlineBlockLanding?.postID == postID { pendingOutlineBlockLanding = nil }
+        if pendingArrival == postID { pendingArrival = nil }   // VX-1039
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
@@ -1081,6 +1195,7 @@ final class BookViewModel {
         let wereOpen = Array(expandedPosts)
         expandedPosts.removeAll()
         pendingOutlineBlockLanding = nil
+        pendingArrival = nil   // VX-1039
         focusedPostID = nil
         caretSeed = nil
         caretSeedIsHers = false
@@ -1144,6 +1259,18 @@ final class BookViewModel {
 
     func noteIndexSelection(_ postID: String?) {
         indexSelectedPostID = postID
+    }
+
+    /// **VX-1084 — the List's SELECTION** (BL-3: a row's click selects the
+    /// note into the sidebar's box), reported by the List the way the index
+    /// column reports its own — a report, not a decision. It is also List's
+    /// PLACE for the click-over (`BookAnchor.Place.listPostID`) and the note
+    /// the navigator marks while List shows (`navigatorViewedPair`).
+    private(set) var listSelectedPostID: String?
+
+    func noteListSelection(_ postID: String?) {
+        guard postID != listSelectedPostID else { return }
+        listSelectedPostID = postID
     }
 
     /// **The index's LIVE note** (18d batch 1): the note whose block the
@@ -1233,7 +1360,9 @@ final class BookViewModel {
             standingPostID: standingAnchorPostID,
             // VX-681: Read ▸ Scroll's place is the story its page shows — the
             // flow's own slot (empty whenever the flow is not on screen).
-            flowViewedPostID: viewedFlowPair.postID)
+            flowViewedPostID: viewedFlowPair.postID,
+            // VX-1084: List's place is its selected row.
+            listPostID: listSelectedPostID)
     }
 
     /// THE CARRY (her round-8 ruling): capture where the DEPARTING mode is
@@ -1268,8 +1397,10 @@ final class BookViewModel {
         place.liveBlockID = liveBlockID
         guard let target = BookAnchor.landing(mode: mode, readForm: readForm, place: place)
         else { return }
+        pendingArrival = nil   // VX-1039: the carry is a later navigation
         standingAnchorPostID = target.postID
         pendingReveal = target.postID
+        travelingTo = target.postID   // VX-96: the carry's road travels too
         // VX-304: leaving Outline with her caret live in the carried note, the
         // BLOCK rides beside the note — the slot the Index consumes (the Read
         // click's road, row 38); every other surface consumes the note half
@@ -1305,12 +1436,37 @@ final class BookViewModel {
         return parked.postID == postID ? parked.blockID : nil
     }
 
+    // MARK: - VX-96 — the note the Outline is ON ITS WAY TO
+
+    /// **The note a reveal is taking the Outline to, for as long as the
+    /// landing travels** (VX-96 — the VX-92 ladder's R1-2 fix sketch: "a
+    /// travelling id set by `requestReveal`/`carryPlace` and cleared where the
+    /// landing settles, gives up, or the user takes over — the `landing`
+    /// authority already knows all three moments"). Set beside `pendingReveal`
+    /// by every road that sets it (a reveal, a carry, a block landing); it
+    /// OUTLIVES the request — `consumeReveal` leaves it, because the Outline
+    /// consumes the request before its landing scrolls. The Outline ends it
+    /// (`travelEnded`) where its landing ends — settled, given up or handed
+    /// over to her scroll (the authority's `onFinish`) — where a landing on
+    /// another row supersedes it, where its foreign-reveal drop finds nothing
+    /// to travel to, where it appears with nothing to land, and where it
+    /// leaves the screen. Observed: the rows' pre-mount consult reads it.
+    private(set) var travelingTo: String?
+
+    /// The Outline's landing for the travelling note is over (or it never
+    /// will travel): the pre-mount's reveal arm lets go.
+    func travelEnded() {
+        travelingTo = nil
+    }
+
     /// An outside door (W20's ascent) asking this book to open AT a post.
     func requestReveal(_ postID: String) {
         standingAnchorPostID = postID
         pendingReveal = postID
+        travelingTo = postID   // VX-96: held past the consume, for the landing's lifetime
         pendingLanding = nil
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
+        pendingArrival = nil               // VX-1039: a new navigation (or the arrival's own landing)
     }
 
     /// The arriving surface took the landing. Idempotent. A block-precise
@@ -1334,8 +1490,10 @@ final class BookViewModel {
     func requestLanding(_ target: LandingTarget) {
         standingAnchorPostID = target.postID
         pendingReveal = target.postID
+        travelingTo = target.postID   // VX-96
         pendingLanding = target
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
+        pendingArrival = nil               // VX-1039: a new navigation
     }
 
     // MARK: - Outline's CHAPTER landing (the Act 10 correction round, rows
@@ -1353,6 +1511,7 @@ final class BookViewModel {
     func requestChapterReveal(_ sectionID: String) {
         pendingChapterReveal = sectionID
         pendingOutlineBlockLanding = nil   // VX-680: a new navigation
+        pendingArrival = nil               // VX-1039: a new navigation
     }
 
     /// Outline took the chapter landing. Idempotent.
@@ -1438,6 +1597,10 @@ final class BookViewModel {
             BookOutlineViewed.pagePair(postID: pagedAnchorPostID, chapterOf: chapterOf)
         case (.spread, _):
             BookOutlineViewed.pagePair(postID: leftPage?.postID, chapterOf: chapterOf)
+        // VX-1084: List's selected row and its chapter — a selection is
+        // discrete (the Pages arm's reason), so nothing follows between picks.
+        case (.list, _):
+            BookOutlineViewed.pagePair(postID: listSelectedPostID, chapterOf: chapterOf)
         case (.index, _): .nothingViewed
         }
     }

@@ -44,6 +44,15 @@ struct BookView: View {
         // same two places) — ⌥⌘N's act, its `.surface` renderers, declared at
         // last (they were undeclared since Sitting 9).
         + [.newNoteInBook]
+        // VX-1039 — a chapter's own "+" on the outline page's chapter heading.
+        + [.newNoteInChapter]
+        // VX-1040 — the order dial's save (a saving pick, the Save row, the
+        // hand-ordered look's masthead door).
+        + [.saveBookOrder]
+        // VX-1038 — the card headers' "+" field and their pills' × are the
+        // note-tagging act's book renderer (the masthead's ＃ and the
+        // Library's rows are the others).
+        + [.tagNote]
         // VX-563 — ⌘↑ / ⌘↓: the book's key monitor is the step's one door
         // (`BookNoteStepKeyMonitor`).
         + [.previousNoteInBook, .nextNoteInBook]
@@ -81,6 +90,12 @@ struct BookView: View {
     /// door runs (`footMint(for:)`) — and clears it.
     var mintRequest: UUID?
     var onMintRequestConsumed: (() -> Void)?
+    /// **VX-1038 (T-4 — her pick 2026-11-25, "Keep ⌘⇧I") — the tagging act's request**
+    /// (`ShellRouter.BookTagRequest`'s token, ⌘⇧I in a book): this book
+    /// takes it once — the card "+" field opens on the note she is on — and
+    /// clears it.
+    var tagRequest: UUID?
+    var onTagRequestConsumed: (() -> Void)?
     /// **18d batch 1 (her U-10): what this book's sidebar note box shows.**
     /// A VALUE and a DOOR, published upward — the sidebar never constructs or
     /// holds this book's model, and `RootView` composes the box from what
@@ -142,6 +157,18 @@ struct BookView: View {
     /// own model (P-9) — the masthead's 🔍 and the answer drawn over the
     /// mode's body. Injectable for `model`'s reason.
     @State private var bookSearch: BookSearchModel
+    /// VX-1038 — the book's TAGS (T-1…T-5): the per-book switch, the
+    /// window's notes' pills and the "+" field. Its own model (P-9).
+    /// Injectable for `model`'s reason (a pin drives `adopt` by hand).
+    @State private var cardTags: BookCardTagsModel
+    /// VX-881 — the per-book note-titles switch on Read's controls (P-9, its
+    /// own model; `BookReadTitles.swift`).
+    @State private var readTitles: BookReadTitlesModel
+    /// VX-1080 (T-2) — the book's one title arbiter (P-9, its own model).
+    @State private var titleTicker = BookTitleTickerModel()
+    /// VX-1084 — the List mode's rows' edited stamps (P-9, its own model; its
+    /// read is held only while List shows).
+    @State private var listModel = BookListModel()
 
     /// `model` is injectable for tests (hosted `.task` appearance callbacks
     /// don't fire under the test host — tests drive `adopt` by hand).
@@ -167,11 +194,15 @@ struct BookView: View {
         onRevealSectionConsumed: (() -> Void)? = nil,
         mintRequest: UUID? = nil,
         onMintRequestConsumed: (() -> Void)? = nil,
+        tagRequest: UUID? = nil,
+        onTagRequestConsumed: (() -> Void)? = nil,
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
         onBookMode: ((String, BookStructureModel.ViewMode?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
         onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil,
-        noteRoads: BookNoteRoads = BookNoteRoads()
+        noteRoads: BookNoteRoads = BookNoteRoads(),
+        cardTags: BookCardTagsModel? = nil,
+        readTitles: BookReadTitlesModel? = nil
     ) {
         self.session = session
         self.readingID = readingID
@@ -184,6 +215,8 @@ struct BookView: View {
         self.onRevealSectionConsumed = onRevealSectionConsumed
         self.mintRequest = mintRequest
         self.onMintRequestConsumed = onMintRequestConsumed
+        self.tagRequest = tagRequest
+        self.onTagRequestConsumed = onTagRequestConsumed
         self.onNoteBox = onNoteBox
         self.onBookMode = onBookMode
         self.onOpenSearchHit = onOpenSearchHit
@@ -208,6 +241,8 @@ struct BookView: View {
         _grouping = State(initialValue: grouping ?? BookIndexGroupingModel(readingID: readingID))
         _bookSearch = State(
             initialValue: bookSearch ?? BookSearchModel(session: session, readingID: readingID))
+        _cardTags = State(initialValue: cardTags ?? BookCardTagsModel(readingID: readingID))
+        _readTitles = State(initialValue: readTitles ?? BookReadTitlesModel(readingID: readingID))
     }
 
     // Optional: test hosts (and future embeddings) may lack the
@@ -309,7 +344,9 @@ struct BookView: View {
             subjectKey: readingID,
             edge: .leading,
             ideal: BookNavigatorLayout.idealWidth,
-            minimum: BookNavigatorLayout.minimumWidth,
+            // VX-1091: the floor holds the mode row's tabs in this voice.
+            minimum: BookNavigatorLayout.minimumWidth(
+                tabs: BookMastheadStableWidths.tabs(tokens: tokens, in: fontContext)),
             maximum: BookNavigatorLayout.maximumWidth
         ) {
             // The mode's own body. Nothing wraps it: Outline's prose column
@@ -375,6 +412,32 @@ struct BookView: View {
                         archivedCount: archived.door.count, tokens: tokens)
                 }
                 .overlay { contentOverlay }
+            case .list:
+                // VX-1084 — the List mode (R-1036-29, R-1036-38): the book's
+                // notes as the Library's own rows (`BookListView`), the
+                // Outline's frame around them — the archived line atop, the
+                // receipt at the page's foot, the bottom bar's counts and,
+                // for the List's selected note, its place ("note 4 of 11 ·
+                // tuesday" — the round-2 mockup's frame 9a).
+                VStack(spacing: 0) {
+                    BookArchivedLine(model: archived, structure: structure)
+                    BookListView(
+                        session: session, model: model, structure: structure,
+                        tags: cardTags, list: listModel, tokens: tokens,
+                        noteDoors: noteDoors, noteRoads: noteRoads,
+                        badge: { ownershipBadge($0) },
+                        onOpen: { openInWrite($0) },
+                        chapterDoor: { chapterMintDoor($0) })
+                        .overlay(alignment: .bottomTrailing) { pageFootReceipt }
+                    OutlineBottomBar(
+                        readingID: readingID, model: model, structure: structure,
+                        archivedCount: archived.door.count, tokens: tokens,
+                        pair: model.navigatorViewedPair(
+                            mode: .list, readForm: structure.readForm,
+                            chapterOf: { structure.chapterID(of: $0) }),
+                        records: false)
+                }
+                .overlay { contentOverlay }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
                 // TWO-UP spread — each page a whole scrollable post, the
@@ -416,7 +479,10 @@ struct BookView: View {
                         extentsCache: model.flowExtents,
                         // VX-645: what the page shows — the navigator's
                         // follow-highlight and ⌘↑/⌘↓'s seam read it.
-                        onViewed: { model.noteFlowViewed($0) })
+                        onViewed: { model.noteFlowViewed($0) },
+                        // VX-881: each note's quiet title line, behind the
+                        // per-book switch beside Scroll · Pages.
+                        noteTitles: readTitles.shown)
                     // WA-1: the receipt at the page's foot, trailing.
                     .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                     .overlay { contentOverlay }
@@ -460,6 +526,14 @@ struct BookView: View {
             await ownership.observe(
                 session: session, postIDs: model.entries.map(\.postID), inBook: readingID)
         }
+        // VX-1038 — the pills' read, keyed on whether the switch shows tags,
+        // WHICH notes the window holds, the book's wing and its rule. Hidden
+        // reads nothing.
+        .task(id: cardTagsKey) {
+            await cardTags.track(
+                session: session, key: cardTagsKey,
+                isGathering: structure.reading?.kind == .gathering)
+        }
         // 13f batch 4: the pane's focus reaches the book's own focus
         // authority. `onChange` alone would miss the initial value, and a
         // book that mounts into an unfocused pane must not bring a live
@@ -469,6 +543,7 @@ struct BookView: View {
             model.onPaneFocusRequest = onPaneFocusRequest
             takeAscentRequest()
             takeChapterRequest()
+            takeTagRequest()
         }
         .onChange(of: paneFocused) { _, focused in
             model.paneFocused = focused
@@ -569,8 +644,11 @@ struct BookView: View {
         .onChange(of: revealSectionID) { _, _ in takeChapterRequest() }
         // VX-570 (the VX-439 run): ⌥⌘N's request, taken once — or as soon as
         // the book's row has arrived to choose the act by.
-        .onChange(of: mintRequest) { _, _ in takeMintRequest() }
-        .onChange(of: structure.reading?.id) { _, _ in takeMintRequest() }
+        // VX-1038 (T-4): …and the tagging act's request, the same shape —
+        // one hook for both (the body's chain is at the type-checker's limit).
+        .onChange(of: BookShellRequests(mint: mintRequest, tag: tagRequest, readingID: structure.reading?.id)) { _, _ in
+            takeShellRequests()
+        }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? structure.lastError ?? bookSearch.lastError {
                 Text(error)
@@ -821,6 +899,9 @@ struct BookView: View {
                 }
                 orderControl
             }
+            // VX-1040: a hand-ordered book's look keeps Save and Back in
+            // plain sight, under the row (two short lines while a look is on).
+            lookDoors
         }
         // 13c 2C: READ's pair of faces (her direction — "the
         // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
@@ -828,17 +909,29 @@ struct BookView: View {
         // faces (the flow) is a vertical scroll and carries no bottom
         // chrome at all — the A6 argument. Surface-local, so
         // recorded rather than declared (Stage 4 lesson 10).
+        //
+        // VX-881 (RT-1, R-1036-21/-40): beside it, in Scroll, the per-book
+        // note-titles switch (the round-1 mockup's frame 10d) — one layout
+        // over the two, the switch under the picker when the navigator is too
+        // narrow for both at their stable widths (`BookReadControlsRow`).
+        // Pages draws no switch: each note already starts under its title.
         if structure.mode == .read {
-            Picker("", selection: Binding(
-                get: { structure.readForm },
-                set: { switchReadForm(to: $0) })) {
-                Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
-                Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
+            BookReadControlsRow {
+                Picker("", selection: Binding(
+                    get: { structure.readForm },
+                    set: { switchReadForm(to: $0) })) {
+                    Text(tokens.chromeLabel("Scroll")).tag(BookStructureModel.ReadForm.flow)
+                    Text(tokens.chromeLabel("Pages")).tag(BookStructureModel.ReadForm.pages)
+                }
+                .pickerStyle(.segmented)
+                .controlSize(.small)
+                .help("Read the book as one continuous scroll, or as real pages "
+                    + "with the text flowing across them")
+                if structure.readForm == .flow {
+                    BookReadTitlesSwitch(
+                        tokens: tokens, shown: readTitles.shown, toggle: { readTitles.toggle() })
+                }
             }
-            .pickerStyle(.segmented)
-            .controlSize(.small)
-            .help("Read the book as one continuous scroll, or as real pages "
-                + "with the text flowing across them")
         }
         // 13i-d U3 — THE GROUPED-BY CONTROL (the sitting record §17(f), ruled:
         // "the Index masthead"): drawn only while the Index is the mode.
@@ -877,23 +970,21 @@ struct BookView: View {
     }
 
     /// **The book's mode row, in order, and each tab's word** — named once
-    /// so the onboarding tour's step 11 quotes the four views it teaches
+    /// so the onboarding tour's step 11 quotes the views it teaches
     /// (VX-292 U3; 13u4 UNIT S3's rule — a door's name is its constant).
-    static let tabOrder: [BookStructureModel.ViewMode] = [.outline, .index, .spread, .read]
+    /// The table is `BookModeTabs` (the VX-1036 run, batch 3 — hoisted so the
+    /// mode row's measure compiles on its own); these names forward.
+    static var tabOrder: [BookStructureModel.ViewMode] { BookModeTabs.order }
 
     static func tabLabel(_ mode: BookStructureModel.ViewMode) -> String {
-        switch mode {
-        case .outline: "Outline"
-        case .index: "Index"
-        case .spread: "Book"
-        case .read: "Read"
-        }
+        BookModeTabs.label(mode)
     }
 
     /// 13s-b U2: a book mode in the tour's vocabulary.
     static func tourMode(_ mode: BookStructureModel.ViewMode) -> Tour.BookMode {
         switch mode {
         case .outline: .outline
+        case .list: .list
         case .index: .index
         case .spread: .book
         case .read: .read
@@ -903,6 +994,7 @@ struct BookView: View {
     private func modeHelp(_ mode: BookStructureModel.ViewMode) -> String {
         switch mode {
         case .outline: "The book's writing surface — every note in one column"
+        case .list: "The book's notes as rows — each one's day, tags and last edit, in the book's order"
         case .index: "The book's index — chapters and notes beside the whole text"
         case .spread: "The two-up spread — each page a whole note"
         case .read: "Read the book as pure text"
@@ -977,11 +1069,18 @@ struct BookView: View {
                                         mode: structure.mode, readForm: structure.readForm,
                                         section: section,
                                         collapsedNote: collapsedNote, tokens: tokens,
-                                        follow: navigatorFollow)
+                                        follow: navigatorFollow,
+                                        trailingRoom: chapterMintKind == nil
+                                            ? 0 : BookNavigatorLayout.chapterDoorRoom)
                                         .contentShape(Rectangle())
                                         .navigatorRowFrame(section.id, chapter: true)
                                 }
                                 .buttonStyle(.plain)
+                                // VX-1039/ledger row 14 — the chapter's own "+"
+                                // (mockup-1 frame 8b), a further renderer of
+                                // `.newNoteInChapter`: its own button over the
+                                // row's trailing end, never the row's act.
+                                .overlay(alignment: .trailing) { navigatorChapterMintDoor(section) }
                                 // VX-646: the row's scroll identity (the follow's reveal).
                                 .id(BookNavigatorFollow.chapterRowID(section.id))
                                 .contextMenu {
@@ -1180,7 +1279,7 @@ struct BookView: View {
                                 tokens: tokens, word: GatheringNoteDoorCopy.navigatorWord,
                                 face: structure.gatheringMint
                             ) {
-                                mint(.gathering, reveal: false)
+                                mint(.gathering, door: generalMintDoor)
                             }
                         }
                     }
@@ -1190,7 +1289,7 @@ struct BookView: View {
                 // the 13n-a walk's WA-1: ~200 pt truncated every real
                 // receipt. `BookNoteBox.quietReceiptHome` says where.)
             }
-            .padding(12)
+            .padding(BookNavigatorLayout.contentInset)
             // 18d batch 3: NO fixed width any more — `SideColumn` gives the
             // panel the width she dragged (190 … 360, remembered).
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -1253,7 +1352,8 @@ struct BookView: View {
             mode: structure.mode,
             focusedPostID: model.focusedPostID,
             spreadPostIDs: model.spreadEntries.map(\.postID),
-            indexPostID: model.indexSelectedPostID)
+            indexPostID: model.indexSelectedPostID,
+            listPostID: model.listSelectedPostID)
         let live = BookNoteBox.livePost(
             mode: structure.mode,
             liveFocusedPostID: model.liveFocusedPostID,
@@ -1382,6 +1482,19 @@ struct BookView: View {
                     postID: postID, blockID: blockID,
                     offsetInBlock: remembered?.utf16Offset ?? 0)
             }
+            model.focus(postID)
+            model.requestReveal(postID)
+        case .list:
+            // VX-1084 (PROVISIONAL P-1036-B3-5): List mounts no editor, so
+            // "edit here" turns the book to the Outline and makes the note
+            // live there at her remembered block — the mint's own choreography
+            // out of a mode with no editor (P-2's fire-and-DO; ledger row 15).
+            if let blockID = remembered?.blockID {
+                session.commandRouter.pendingWriteIntent = WriteIntent(
+                    postID: postID, blockID: blockID,
+                    offsetInBlock: remembered?.utf16Offset ?? 0)
+            }
+            structure.mode = .outline
             model.focus(postID)
             model.requestReveal(postID)
         case .read:
@@ -1520,7 +1633,7 @@ struct BookView: View {
             // the model's in-closure gate covers the concurrent-lock race the
             // hidden button can't; `BookFootDoors` drops it when finished).
             Button(tokens.chromeLabel("+ new entry")) {
-                mint(.entry, reveal: false)
+                mint(.entry, door: generalMintDoor)
             }
             .buttonStyle(.borderless)
             .font(tokens.small)
@@ -1529,7 +1642,7 @@ struct BookView: View {
             // Sitting 9 (R62/R75): "it needs to be easy to make a post inside
             // of a book" — the non-journal door.
             Button(tokens.chromeLabel("+ new note")) {
-                mint(.note, reveal: false)
+                mint(.note, door: generalMintDoor)
             }
             .buttonStyle(.borderless)
             .font(tokens.small)
@@ -1564,32 +1677,120 @@ struct BookView: View {
     }
 
     /// **The act behind every mint door this book draws** — the navigator
-    /// foot's, the Outline flow's, and ⌥⌘N's: the structure model's mint (one
-    /// transaction; refusals mint no stray and land on the model's own
-    /// line, the operations layer's words), then the new note focused —
-    /// revealed where the door sits in the flow or the key asked.
-    private func mint(_ kind: FootMint, reveal: Bool) {
+    /// foot's, the Outline flow's, a chapter heading's own "+", and ⌥⌘N's: the
+    /// structure model's mint (one transaction; refusals mint no stray and land
+    /// on the model's own line, the operations layer's words), born where its
+    /// door stands (N-2 — `BookMintPlacement`, over the page as she sees it at
+    /// the press), then the note ARRIVES: focused, landed on the page once the
+    /// entries hold it, the window widened to hold it (N-1, N-3 —
+    /// `BookViewModel.arrive`).
+    ///
+    /// **VX-1039 — every door lands its note; no door can ask it not to.** The
+    /// navigator foot's three doors passed `reveal: false` (the design record's
+    /// §3a): the note was minted and focused, and the page never went to it —
+    /// her "you can't actually see the new note ready to be edited". The
+    /// switch is gone (pinned at the source: `BookMintDoorsLandSourceTests`).
+    private func mint(_ kind: FootMint, door: BookMintPlacement.Door) {
+        // Read at the press — the page as she sees it — never after the write.
+        let placement = mintPlacement(door)
+        // VX-1036 P7 (ledger row 15 — P-1036-B1-2's alternative, ruled in): a
+        // door pressed in READ turns the book to the Outline at the press, so
+        // the note arrives LIVE with the caret in it (N-1's letter; P-2's
+        // fire-and-DO choreography) — Read itself stays read-only. The
+        // navigator note door's own road (no carry: the arrival IS the
+        // landing, and a carried reveal landing after it would let it go).
+        if BookReadMint.turnsToOutline(structure.mode) {
+            arrivals.setReviewOpen(false)
+            structure.mode = .outline
+        }
         Task {
             let id: String?
             switch kind {
-            case .note: id = await structure.newPost()
-            case .entry: id = await structure.newEntry()
+            case .note: id = await structure.newPost(placedAt: placement)
+            case .entry: id = await structure.newEntry(placedAt: placement)
+            // A gathering has no hand order and no chapters: the place is
+            // the order's (its planner mints the note; N-2's stamp-order arm).
             case .gathering: id = await structure.newPostInGathering()
             }
             guard let id else { return }
-            model.focus(id)
-            if reveal { model.requestReveal(id) }
+            await model.arrive(at: id)
         }
     }
 
-    /// ⌥⌘N's request, taken ONCE: the book's own foot act, revealed. The
-    /// shell hands it only to a book the focused pane already shows; one that
-    /// lands before the book's first observation (no row to choose the act
-    /// by yet) waits, and the row's arrival re-asks.
+    /// N-2 — where the door's note is born, by the pure rule, over the notes
+    /// the page shows (each one's chapter and pin, in the order drawn) and
+    /// whether that order IS the hand order (no stamp order stored, no look).
+    private func mintPlacement(_ door: BookMintPlacement.Door) -> BookMintPlacement.Placement {
+        let field = model.viewOrder?.field ?? structure.reading?.sortField ?? .manual
+        return BookMintPlacement.placement(
+            for: door,
+            shown: model.entries.map {
+                BookMintPlacement.Shown(postID: $0.postID, sectionID: $0.sectionID, pinned: $0.pinned)
+            },
+            manualOrder: field == .manual)
+    }
+
+    /// N-2's general doors (the navigator foot, the page foot, ⌥⌘N): beside
+    /// the note she is on — this mode's live or selected note, else the note
+    /// the navigator marks as viewed (`BookNoteBox.mintNeighbour`, PROVISIONAL).
+    private var generalMintDoor: BookMintPlacement.Door {
+        .general(onNote: noteSheIsOn)
+    }
+
+    /// **The note she is on** — P-1036-B1-1's one rule (this mode's live note,
+    /// else its selected note, else the navigator's viewed note), read by the
+    /// general mint doors and by the tagging act's request (VX-1038's T-4).
+    private var noteSheIsOn: String? {
+        let mode = structure.mode
+        return BookNoteBox.mintNeighbour(
+            live: BookNoteBox.livePost(
+                mode: mode, liveFocusedPostID: model.liveFocusedPostID,
+                indexLivePostID: model.indexLivePostID),
+            selected: BookNoteBox.selectedPost(
+                mode: mode, focusedPostID: model.focusedPostID,
+                spreadPostIDs: model.spreadEntries.map(\.postID),
+                indexPostID: model.indexSelectedPostID,
+                listPostID: model.listSelectedPostID),
+            viewed: model.navigatorViewedPair(
+                mode: mode, readForm: structure.readForm,
+                chapterOf: { structure.chapterID(of: $0) }).postID)
+    }
+
+    /// ⌥⌘N's request, taken ONCE: the book's own foot act. The shell hands it
+    /// only to a book the focused pane already shows; one that lands before
+    /// the book's first observation (no row to choose the act by yet) waits,
+    /// and the row's arrival re-asks.
     private func takeMintRequest() {
         guard mintRequest != nil, let reading = structure.reading else { return }
         onMintRequestConsumed?()
-        mint(Self.footMint(for: reading), reveal: true)
+        mint(Self.footMint(for: reading), door: generalMintDoor)
+    }
+
+    /// ⌥⌘N's and the tagging act's requests, each taken once (each guards
+    /// on its own token) — or as soon as the book's row has arrived.
+    private func takeShellRequests() {
+        takeMintRequest()
+        takeTagRequest()
+    }
+
+    /// **VX-1038 (T-4 — ruled at her 2026-11-25 check-in: "Keep ⌘⇧I") — the tagging act in a
+    /// book**, taken ONCE: the card "+" field opens on the note she is on.
+    /// P-2's fire-and-DO: the field lives on the Outline's cards, so another
+    /// mode turns to the Outline first (the tabs' own road, carrying her
+    /// place); a book hiding its tags shows them — all tags — so the field has
+    /// its "+" (P-1036-B2-P5b). No note to stand on: the registry's honest
+    /// refusal, said.
+    private func takeTagRequest() {
+        guard tagRequest != nil, structure.reading != nil else { return }
+        onTagRequestConsumed?()
+        guard let postID = noteSheIsOn else {
+            session.status.refuse(BookTagChordCopy.noNote)
+            return
+        }
+        let action = BookTagChord.act(mode: structure.mode, position: cardTags.position)
+        if action.switchesToOutline { switchMode(to: .outline) }
+        if let shown = action.showsTags { cardTags.setPosition(shown) }
+        cardTags.openField(on: postID, session: session, wingID: structure.reading?.wingId ?? "")
     }
 
     // MARK: - W21 — the mode click-over CARRIES your place
@@ -1666,24 +1867,57 @@ struct BookView: View {
     /// order alone ("Manual order ▾" — the doubled "order" gone). The acts
     /// are the book view's, unchanged: a pick sets the view order, the adopt
     /// door saves it and drops the override.
+    ///
+    /// **VX-1040 (D-1, her R-1036-33 — "the order dial as drawn"):** what a
+    /// pick MEANS is the book's (`BookOrderDial.Grammar.of` over the pure
+    /// `BookOrderPick`): on a gathering and on a book whose order is not
+    /// manual a pick IS the book's order at once (`setReadingSort` — the
+    /// wire's `set_book_order` road, unchanged); on a hand-ordered book it
+    /// stays a look with Save and Back in plain sight (`lookDoors`); a
+    /// finished book looks and cannot save, as before. Every landed save
+    /// speaks the receipt kind; a refusal is the structure model's line.
     private var orderControl: some View {
+        let reading = structure.reading
         let dial = BookOrderDial(
             tokens: tokens,
-            stored: BookOrderChoices.storedLabel(for: structure.reading),
+            stored: BookOrderChoices.storedLabel(for: reading),
             viewOrder: model.viewOrder,
-            canSave: structure.reading?.locked != true,
+            canSave: reading?.locked != true,
             onLook: { model.viewOrder = $0 },
-            onSave: { order in
-                Task {
-                    await structure.saveOrder(order)
-                    // Saved IS the book's order now — drop the override
-                    // so the menu stops claiming a separate way of
-                    // looking (and every other reader agrees).
-                    model.viewOrder = nil
-                }
-            })
+            onSave: { saveOrder($0) },
+            grammar: BookOrderDial.Grammar.of(reading),
+            storedOrder: reading.map { Queries.ReadingOrder(field: $0.sortField, direction: $0.sortDir) },
+            gathering: reading?.kind == .gathering)
         return dial
             .bookOrderDialProbe(readingID, face: BookOrderDial.face(tokens, order: dial.shownOrder))
+    }
+
+    /// The one save every dial road runs (a pick that saves, the Save row,
+    /// the masthead's "save as this book's order").
+    private func saveOrder(_ order: Queries.ReadingOrder) {
+        let name = bookName
+        let gathering = structure.reading?.kind == .gathering
+        Task {
+            guard await structure.saveOrder(order) else { return }
+            // Saved IS the book's order now — drop the override so the menu
+            // stops claiming a separate way of looking (and every other
+            // reader agrees).
+            model.viewOrder = nil
+            session.status.receipt(BookOrderChoices.savedReceipt(
+                bookName: name, order: order, gathering: gathering))
+        }
+    }
+
+    /// **VX-1040 — the hand-ordered book's look, its two doors in plain
+    /// sight** under the mode row (mockup frame 9b), only while a look is on
+    /// and the book can save.
+    @ViewBuilder private var lookDoors: some View {
+        if BookOrderDial.Grammar.of(structure.reading) == .handOrdered, let look = model.viewOrder {
+            BookOrderLookDoors(
+                tokens: tokens,
+                onSave: { saveOrder(look) },
+                onBack: { model.viewOrder = nil })
+        }
     }
 
     // MARK: - Outline's landing (the Act 10 correction round, rows 9/12/14/44/47 — and row 53)
@@ -1991,8 +2225,18 @@ struct BookView: View {
         // the landing: it is the closure's own holder.
         let box = landingBox, model = model, structure = structure, authority = landing
         let session = session
+        // VX-96: a landing on ANOTHER row supersedes the travel — the row the
+        // reveal was taking her to is no longer where the page is going.
+        if let travel = model.travelingTo, BookOutlineRows.Row.noteAnchor(travel) != anchorID {
+            model.travelEnded()
+        }
         authority.onFinish = { [weak authority] ended, outcome in
             guard let authority else { return }
+            // VX-96: the travelling note's landing ended — settled, given up,
+            // or handed over to her scroll (the authority's three moments).
+            if let travel = model.travelingTo, BookOutlineRows.Row.noteAnchor(travel) == ended {
+                model.travelEnded()
+            }
             Self.deriveViewedPair(box: box, landing: authority, model: model, structure: structure)
             Self.finishBlockHome(box: box, landing: authority, session: session, ended: ended, outcome: outcome)
         }
@@ -2239,6 +2483,12 @@ struct BookView: View {
             // expansion is untouched: what you unfolded stays unfolded.
             model.focus(nil)
             model.requestChapterReveal(section.id)
+        case .list:
+            // VX-1084: List brings the chapter's heading into view (it takes
+            // the chapter reveal, as the Outline does); a chapter is a click
+            // OUT of the selected note there too.
+            model.noteListSelection(nil)
+            model.requestChapterReveal(section.id)
         case .index:
             // Ladder R1-16: nothing in Index consumes a chapter reveal
             // (`BookIndexView.landOrSeed` reads `pendingReveal` only) and the
@@ -2364,6 +2614,11 @@ struct BookView: View {
                                 model.collapseAll()
                             }
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                            // VX-1038 (T-5 / R-1036-39): the per-book tags
+                            // switch — hidden · other tags · all tags.
+                            BookTagsSwitch(
+                                tokens: tokens, position: cardTags.position,
+                                choose: { cardTags.setPosition($0) })
                         }
                     }
                     .padding(.bottom, 22)
@@ -2436,9 +2691,13 @@ struct BookView: View {
                                         ) {
                                             postRow(entry)
                                         }
+                                        .zIndex(tagFieldLift([entry.postID]))
                                     }
                                 }
                             }
+                            .zIndex(tagFieldLift(rows.compactMap {
+                                if case .note(let entry) = $0 { entry.postID } else { nil }
+                            }))
                         case .expanded(let entry):
                             // An expanded note stands on its own — the row
                             // virtualizes its surface (near the viewport ⇒
@@ -2447,6 +2706,7 @@ struct BookView: View {
                             // and only near-viewport text surfaces exist.
                             postRow(entry)
                                 .outlineAnchor(segment.id, in: self, proxy)
+                                .zIndex(tagFieldLift([entry.postID]))
                         }
                     }
                     if structure.chaptersActive {
@@ -2462,7 +2722,7 @@ struct BookView: View {
                     if structure.reading?.locked != true {
                         if Queries.hasJournalTrait(structure.reading?.profile) {
                             Button(tokens.chromeLabel("+ new entry")) {
-                                mint(.entry, reveal: true)
+                                mint(.entry, door: generalMintDoor)
                             }
                             .buttonStyle(.borderless)
                             .font(tokens.small)
@@ -2470,7 +2730,7 @@ struct BookView: View {
                             .padding(.top, 12)
                         } else if structure.reading?.kind == .book {
                             Button(tokens.chromeLabel("+ new note in this book")) {
-                                mint(.note, reveal: true)
+                                mint(.note, door: generalMintDoor)
                             }
                             .buttonStyle(.borderless)
                             .font(tokens.small)
@@ -2488,7 +2748,7 @@ struct BookView: View {
                             tokens: tokens, word: GatheringNoteDoorCopy.flowWord,
                             face: structure.gatheringMint
                         ) {
-                            mint(.gathering, reveal: true)
+                            mint(.gathering, door: generalMintDoor)
                         }
                         .padding(.top, 12)
                     }
@@ -2596,6 +2856,10 @@ struct BookView: View {
             // own act, never by the reveal.
             .onAppear {
                 landOutlineReveal(proxy)
+                // VX-96: an Outline arriving with nothing to land and nothing
+                // parked holds no travel (another mode's surface took the
+                // request and left the travel behind).
+                if model.pendingReveal == nil, !landing.isPending { model.travelEnded() }
                 // VX-562: the first post-layout pass derives what the page
                 // shows even where no row reports (an empty book) — the
                 // rows' own first reports queue the same turn's derivation.
@@ -2611,6 +2875,9 @@ struct BookView: View {
             // authority's own rule. Pinned: `OutlineLandingTeardownTests`.
             .onDisappear {
                 landing.end()
+                // VX-96: the travel dies with the landing (`end()` is silent —
+                // no `onFinish` to end it).
+                model.travelEnded()
                 // VX-562: the page leaves, and with it what it was showing.
                 forgetViewedPair()
             }
@@ -2671,6 +2938,28 @@ struct BookView: View {
             // landing is in flight — `tokens` flips once at mount on a Study
             // store) and why the pin could not be built honestly yet.
             .onChange(of: tokens) { _, _ in model.restandOutlineHeights() }
+            // The VX-1036 ladder's R1-1: the book's TAGS SWITCH is the
+            // stamp's third fact — a card's header holds its pills when the
+            // book shows tags, so a move drops what the column learned under
+            // the old position. Handed at mount too (`initial`), so a book
+            // remembered at "all tags" never learns under the default's stamp.
+            //
+            // R2-2 — A MOVE KEEPS HER PLACE, as a width change does: every card
+            // drawn above the top gains or loses its pill row, so the offset
+            // kept through the move points at other rows. The column re-lands
+            // the row that was at the top (the width road's anchor, 13u2b
+            // UNIT 1), wearing QUESTIONS #115(b)'s two guards — only when
+            // `stand` says something moved, and never over a landing already
+            // in flight (a reveal in the same breath keeps its own target) —
+            // and a third: only for a MOVE while the Outline shows, never the
+            // mount's `initial` call (old == new there), whose arrival is the
+            // mode switch's own landing to make.
+            .onChange(of: cardTags.position, initial: true) { previous, position in
+                let moved = model.outlineTagsShown(position)
+                guard moved, previous != position, !landing.isPending,
+                      let top = landingBox.topRow?.id else { return }
+                landOutline(top, proxy)
+            }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes
             // no sense to have a horizontal scrollbar on a vertical page")
@@ -2742,7 +3031,10 @@ struct BookView: View {
         }
         guard let postID = model.pendingReveal else { return }
         guard model.entries.contains(where: { $0.postID == postID }) else {
-            if !model.entries.isEmpty { model.consumeReveal() }
+            if !model.entries.isEmpty {
+                model.consumeReveal()
+                model.travelEnded()   // VX-96: a foreign reveal travels nowhere
+            }
             return
         }
         // VX-680: an Index → Outline click-over parked her block beside the
@@ -2790,16 +3082,23 @@ struct BookView: View {
             // even TRYING to navigate"): the heading is a DOOR too — a
             // click puts the chapter at the top of the page, exactly as the
             // navigator's row does; the drag handle stays a handle.
-            Button {
-                navigateToChapter(section)
-            } label: {
-                Text(tokens.chromeLabel(section.name))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.accent)
-                    .contentShape(Rectangle())
+            // VX-1039 (N-2): the heading's own "+" stands on the title's
+            // baseline at the line's trailing end (the round-1 mockup's frame
+            // 8b); the grip keeps its place beside the pair.
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Button {
+                    navigateToChapter(section)
+                } label: {
+                    Text(tokens.chromeLabel(section.name))
+                        .font(tokens.title)
+                        .foregroundStyle(tokens.accent)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Put this chapter at the top of the page")
+                Spacer(minLength: 12)
+                chapterMintDoor(section)
             }
-            .buttonStyle(.plain)
-            .help("Put this chapter at the top of the page")
         }
         .padding(.top, 28)
         // The drop indicator rides as an overlay rather than a sibling row,
@@ -2831,6 +3130,69 @@ struct BookView: View {
             } else if bodyChapterDropTarget == section.id {
                 bodyChapterDropTarget = nil
             }
+        }
+    }
+
+    /// **VX-1039 (N-2, her R-1036-8) — a chapter's own "+"**: a new note made
+    /// in THIS chapter, at its end, and landed on the page live with the caret
+    /// in it — the book's one mint act (`.newNoteInChapter`, declared once in
+    /// the registry). The book's own foot word ("+ new entry" on a
+    /// journal-trait book, which mints an entry, as its foot does). Drawn only
+    /// where it can act (P-2): a FINISHED book draws no mint door anywhere
+    /// (the foot's rule); a refusal it can still meet (a full book, a chapter
+    /// deleted meanwhile) is the operations layer's words on the book's line.
+    /// Nor on THE daily Journal: its entries file through ⌘J's own gate
+    /// (`shelveInDailyJournalBook` — at the end, in no chapter), so a chapter
+    /// door there could never put its entry in the chapter (PROVISIONAL
+    /// P-1036-B1-3, the batch record).
+    @ViewBuilder
+    private func chapterMintDoor(_ section: ReadingSection) -> some View {
+        if let kind = chapterMintKind {
+            Button(tokens.chromeLabel(kind == .entry ? "+ new entry" : "+ new note")) {
+                mint(kind, door: .chapter(section.id))
+            }
+            .buttonStyle(.borderless)
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .lineLimit(1)
+            .fixedSize()
+            .help(ChapterMintDoorCopy.help)
+        }
+    }
+
+    /// **The chapter door's one fence** (VX-1039, P-2 — drawn only where it can
+    /// act): a book's own chapters, an unfinished book, never THE daily
+    /// Journal; the kind is the book's foot mint (an entry on a journal-trait
+    /// book). nil = no chapter door draws, on any of its renderers.
+    private var chapterMintKind: FootMint? {
+        guard let reading = structure.reading, reading.kind == .book, !reading.locked,
+              reading.profile != Queries.dailyJournalBookProfile
+        else { return nil }
+        return Self.footMint(for: reading)
+    }
+
+    /// **Ledger row 14 — the navigator chapter row's "+"** (mockup-1 frame 8b:
+    /// "a chapter's + (its navigator row, or '+ new note' on its heading line)
+    /// makes the note at the end of that chapter and shows it ready to type"):
+    /// a further renderer of the ONE declared act (`.newNoteInChapter`), the
+    /// same mint (`mint(kind, door: .chapter(id))`) under the same fence.
+    @ViewBuilder
+    private func navigatorChapterMintDoor(_ section: ReadingSection) -> some View {
+        if let kind = chapterMintKind {
+            Button {
+                mint(kind, door: .chapter(section.id))
+            } label: {
+                // The ladder's R2-4: its own copy home's glyph — never the
+                // tags header's constant.
+                Text(ChapterMintDoorCopy.plus)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    .frame(width: BookNavigatorLayout.chapterDoorRoom, alignment: .center)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(ChapterMintDoorCopy.help)
         }
     }
 
@@ -2891,7 +3253,8 @@ struct BookView: View {
     /// The same list over the two models alone (VX-562: the viewed pair's
     /// derivation runs from a queued hop and a landing's finish, which hold
     /// the models, never the view; the pinned line reads it too).
-    fileprivate static func outlineRows(
+    /// (Internal since VX-1084: the List groups the same rows — `BookListRows`.)
+    static func outlineRows(
         structure: BookStructureModel, entries: [Queries.ReadingEntry]
     ) -> [BookOutlineRows.Row] {
         structure.chaptersActive
@@ -2925,6 +3288,22 @@ struct BookView: View {
     /// 13i-c U4: the badge facts' task key — the ids the book shows.
     private var ownershipKey: [String] { model.entries.map(\.postID) }
 
+    /// VX-1038: the pills' read key (`BookCardTagsModel.Key`).
+    private var cardTagsKey: BookCardTagsModel.Key {
+        BookCardTagsModel.Key(
+            shows: cardTags.position != .hidden,
+            postIDs: cardTags.position != .hidden ? model.entries.map(\.postID) : [],
+            wingID: structure.reading?.wingId ?? "",
+            querySpec: structure.reading?.kind == .gathering ? structure.reading?.querySpec : nil)
+    }
+
+    /// VX-1038: the row whose "+" field is open stands above its neighbours,
+    /// so the field's suggestions hang over the rows below it.
+    func tagFieldLift(_ postIDs: [String]) -> Double {
+        guard let open = cardTags.fieldPostID else { return 0 }
+        return postIDs.contains(open) ? 1 : 0
+    }
+
     /// **The badge a row wears** (§6's direction): inside a BOOK, the shared
     /// mark; a GATHERING's view is outside every book, so its rows wear the
     /// owned-by mark. The setting silences the set (P-13ic-10).
@@ -2947,7 +3326,11 @@ struct BookView: View {
             // "open ↗", the collapsed card's body and its "open ↗").
             onOpenInWrite: { openInWrite($0) },
             // VX-802: the note-title menu's asks and roads.
-            noteDoors: noteDoors, noteRoads: noteRoads)
+            noteDoors: noteDoors, noteRoads: noteRoads,
+            // VX-1038: the header's pills and "+".
+            tags: cardTags,
+            // VX-1080: which one long title may move.
+            ticker: titleTicker)
     }
 }
 
@@ -3248,10 +3631,20 @@ nonisolated enum BookNavigatorLayout {
     /// until she drags it.
     static let idealWidth: CGFloat = 190
     static let minimumWidth: CGFloat = 190
+    /// The navigator's own padding on each side (its content's `.padding`).
+    static let contentInset: CGFloat = 12
+    /// **VX-1091 — the floor the column is given in a voice**: the shipped
+    /// floor, read through the one rule (`BookNavigatorFloor`) with the mode
+    /// row's stable tab width in that voice (`BookMastheadStableWidths.tabs`).
+    static func minimumWidth(tabs: CGFloat) -> CGFloat {
+        BookNavigatorFloor.width(tabs: tabs, shipped: minimumWidth, inset: contentInset)
+    }
     /// *"a bit bigger"* — a chapter list dragged half the window wide is not
     /// a chapter list; the note's panels keep the brain's own 640.
     static let maximumWidth: CGFloat = 360
     static let chapterRowHeight: CGFloat = 30
+    /// Ledger row 14: the chapter row's "+" — its hit width at the row's end.
+    static let chapterDoorRoom: CGFloat = 18
     static let noteRowHeight: CGFloat = 24
     /// Inside a group the rows touch — a chapter and its notes belong
     /// together, and their own pitches carry the air.
@@ -3373,7 +3766,7 @@ private struct NavigatorNoteLabel: View {
         // Read their viewed note (VX-645 — `navigatorViewedPair`); the spread
         // its pages and the focus for the MARK, its left page for the follow;
         // Index the focus (its navigator is hidden — nothing follows).
-        let follows = mode == .outline || mode == .read
+        let follows = mode == .outline || mode == .read || mode == .list
         let viewed = mode == .index
             ? .nothingViewed
             : model.navigatorViewedPair(mode: mode, readForm: readForm, chapterOf: { _ in nil })
@@ -3424,6 +3817,9 @@ private struct NavigatorChapterLabel: View {
     let tokens: VoiceTokens
     /// VX-646: the list's follow (the note label's reason).
     let follow: BookNavigatorFollowMemory
+    /// Ledger row 14: the room the chapter's "+" takes at the row's trailing
+    /// end (0 where no door draws), so a long name truncates before it.
+    var trailingRoom: CGFloat = 0
 
     var body: some View {
         // VX-645: every mode but Index has a viewed pair now — Outline's and
@@ -3433,7 +3829,7 @@ private struct NavigatorChapterLabel: View {
             ? .nothingViewed
             : model.navigatorViewedPair(
                 mode: mode, readForm: readForm, chapterOf: { structure.chapterID(of: $0) })
-        let follows = mode == .outline || mode == .read
+        let follows = mode == .outline || mode == .read || mode == .list
         let noteMarked = collapsedNote.map { note in
             BookNavigatorMark.note(
                 mode: mode, postID: note.postID,
@@ -3455,6 +3851,7 @@ private struct NavigatorChapterLabel: View {
                 .foregroundStyle(BookNavigatorLayout.chapterNameInk(tokens, viewed: washed))
                 .lineLimit(1)
         }
+        .padding(.trailing, trailingRoom)
         .frame(
             maxWidth: .infinity,
             minHeight: BookNavigatorLayout.chapterRowHeight,
@@ -3543,20 +3940,27 @@ private struct OutlineBottomBar: View {
     /// line's last piece.
     let archivedCount: Int
     let tokens: VoiceTokens
+    /// VX-1084: the pair the bar's position names — nil, the Outline's viewed
+    /// pair (as shipped); the List hands its selected note's.
+    var pair: BookOutlineViewed.Pair? = nil
+    /// VX-1084: whether the Outline's DEBUG bar oracles record this bar (the
+    /// List's copy records nothing there — they are the Outline's).
+    var records = true
     #if DEBUG
     @Environment(\.debugOracleOwner) private var owner
     #endif
 
     var body: some View {
+        let pair = pair ?? model.viewedOutlinePair
         let bar = BookOutlineViewed.bar(
             gathering: structure.reading?.kind == .gathering,
             chapters: structure.sections.count, archived: archivedCount,
             total: BookOutlineViewed.NoteTotal(
                 count: model.entries.count, isAtLeast: model.truncated),
-            pair: model.viewedOutlinePair,
+            pair: pair,
             // The rows are read only while a pair is viewed (the position's
             // ordinal and chapter name); at rest the bar is the counts alone.
-            rows: model.viewedOutlinePair == .nothingViewed
+            rows: pair == .nothingViewed
                 ? [] : BookView.outlineRows(structure: structure, entries: model.entries),
             chaptered: structure.chaptersActive,
             filtered: model.viewFilter != nil)
@@ -3585,9 +3989,10 @@ private struct OutlineBottomBar: View {
                 .frame(height: 1)
         }
         #if DEBUG
-        .onAppear { record(bar) }
-        .onChange(of: bar) { _, new in record(new) }
+        .onAppear { if records { record(bar) } }
+        .onChange(of: bar) { _, new in if records { record(new) } }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            guard records else { return }
             BookOutlineGeometry.recordOutlinePinFrame(
                 readingID, frame, owner: owner ?? DebugOracleOwner.unowned)
         }
@@ -3777,6 +4182,12 @@ private struct OutlinePostRow: View {
     /// its roads beyond the book — the header's and the card's right-click.
     let noteDoors: BookNoteTitleDoors
     let noteRoads: BookNoteRoads
+    /// VX-1038 (T-1/T-3): the book's tags — the header's pills and "+", drawn
+    /// while the book's switch shows tags (nil: a harness mount, no pills).
+    let tags: BookCardTagsModel?
+    /// VX-1080 (T-2): the book's one title arbiter — which ONE long title may
+    /// move (nil: a harness mount; titles rest).
+    let ticker: BookTitleTickerModel?
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
@@ -3784,7 +4195,9 @@ private struct OutlinePostRow: View {
         badge: OwnershipBadgeFace.Badge? = nil,
         onOpenInWrite: @escaping (String) -> Void = { _ in },
         noteDoors: BookNoteTitleDoors = BookNoteTitleDoors(),
-        noteRoads: BookNoteRoads = BookNoteRoads()
+        noteRoads: BookNoteRoads = BookNoteRoads(),
+        tags: BookCardTagsModel? = nil,
+        ticker: BookTitleTickerModel? = nil
     ) {
         self.session = session
         self.model = model
@@ -3796,6 +4209,22 @@ private struct OutlinePostRow: View {
         self.onOpenInWrite = onOpenInWrite
         self.noteDoors = noteDoors
         self.noteRoads = noteRoads
+        self.tags = tags
+        self.ticker = ticker
+    }
+
+    /// VX-1038 (T-1): where the pills' own row starts — the title's leading
+    /// edge, past the fold disclosure and the header's spacing.
+    static let titleIndent = BookFoldDisclosure.footprint.width + 6
+
+    /// The header's pills and "+" (nothing while the book hides tags).
+    @ViewBuilder
+    private var headerPills: some View {
+        if let tags {
+            BookCardPills(
+                session: session, tags: tags, postID: entry.postID,
+                wingID: structure.reading?.wingId ?? "", tokens: tokens)
+        }
     }
 
     /// Row 53: is this row near the viewport? An EXPANDED row far from it
@@ -3869,6 +4298,9 @@ private struct OutlinePostRow: View {
                     postHeader
                         .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                         .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                        // VX-1038: the "+" field's suggestions hang over the
+                        // note's text below the header.
+                        .zIndex(1)
                     // VX-91: `nearViewport` alone left the clicked far
                     // story's row a placeholder until the scroll ARRIVED —
                     // the title-alone-over-blank beat. The row she is on
@@ -4044,34 +4476,56 @@ private struct OutlinePostRow: View {
     /// recede to quiet chrome beside it, because this is a page she writes
     /// on, not a catalog row.
     private var postHeader: some View {
-        HStack(spacing: 6) {
-            // 13b 3E (D1): the ONE collapse door — it releases focus too,
-            // so collapsing the post you're typing in actually collapses it.
-            // VX-291: the card's ▸ and this ▾ are ONE control (the 22-pt
-            // target, grown outward).
-            BookFoldDisclosure(
-                tokens: tokens, folded: false, help: "Collapse this note back to its card",
-                probeKey: "header-\(entry.postID)"
-            ) { model.collapse(entry.postID) }
-            Text(outlineEntryTitle(entry))
-                .font(tokens.heading)
-                .foregroundStyle(tokens.ink)
-            if let date = entry.entryDate {
-                Text(date)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+        // VX-1038 (T-1, the round-2 mockup's frame 1): ONE header line — the
+        // title and its doors lead; the note's pills trail at the far right,
+        // wrapping there when many, or taking their own row under a title that
+        // fills the line (`BookCardHeaderLine`).
+        BookCardHeaderLine(ownRowIndent: Self.titleIndent) {
+            HStack(spacing: 6) {
+                // 13b 3E (D1): the ONE collapse door — it releases focus too,
+                // so collapsing the post you're typing in actually collapses it.
+                // VX-291: the card's ▸ and this ▾ are ONE control (the 22-pt
+                // target, grown outward).
+                BookFoldDisclosure(
+                    tokens: tokens, folded: false, help: "Collapse this note back to its card",
+                    probeKey: "header-\(entry.postID)"
+                ) { model.collapse(entry.postID) }
+                // VX-1080 (T-2 / R-1036-35): one line, "…" at rest; the radio
+                // ticker under the pointer or on the live note, one at a time.
+                BookNoteTitle(
+                    title: outlineEntryTitle(entry), postID: entry.postID,
+                    ticker: ticker, live: model.liveFocusedPostID)
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.ink)
+                if let date = entry.entryDate {
+                    Text(date)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+                if let badge {
+                    // P-8: the badge is a one-line label (the owned-by words
+                    // carry their own limit inside; the shared mark is a glyph).
+                    OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+                // Sitting 9 batch 7: the door OUT of the book into the post's
+                // full editor (modes, takes, lenses — everything). VX-303: the
+                // book's ONE open door, carrying her place in this note.
+                Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help("Open this note in the full editor (Write · Takes · Lenses · …)")
+                .lineLimit(1)
+                .fixedSize()
             }
-            if let badge {
-                OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
-            }
-            // Sitting 9 batch 7: the door OUT of the book into the post's
-            // full editor (modes, takes, lenses — everything). VX-303: the
-            // book's ONE open door, carrying her place in this note.
-            Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help("Open this note in the full editor (Write · Takes · Lenses · …)")
+            .bookCardHeaderRole(.lead)
+            headerPills
         }
         .padding(.top, 10)
+        // VX-1080: the pointer on the header claims the ticker for its title.
+        .onHover { ticker?.pointer(entry.postID, isOn: $0) }
         // (The `page-<id>` landing anchor moved to the ROW, at the lazy
         // stack's level — `BookView.outlineAnchor`; the correction round.)
         // VX-802 (A-878-1): the note-title menu.
@@ -4099,33 +4553,54 @@ private struct OutlinePostRow: View {
             onOpenInWrite(entry.postID)
         } label: {
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    // VX-291 (her "that one little triangle could stand to
-                    // just be a bit bigger"): a 22-pt target grown OUTWARD —
-                    // the card lays out what it always did, so its learned
-                    // height holds, and a near miss no longer opens the note.
-                    BookFoldDisclosure(
-                        tokens: tokens, folded: true,
-                        help: "Unfold this note in place — write in it right here",
-                        probeKey: "card-\(entry.postID)"
-                    ) { model.expand(entry.postID) }
-                    Text(outlineEntryTitle(entry))
-                        .font(tokens.body.weight(.semibold))
-                        .foregroundStyle(tokens.ink)
-                    if let date = entry.entryDate {
-                        Text(date)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
+                // VX-1038 (T-1): the card's header line — the title leads,
+                // "open ↗" stands at the far end, and the note's pills sit just
+                // before it (wrapping there, or on their own row under a title
+                // that fills the line — `BookCardHeaderLine`).
+                BookCardHeaderLine(ownRowIndent: Self.titleIndent) {
+                    HStack(spacing: 6) {
+                        // VX-291 (her "that one little triangle could stand to
+                        // just be a bit bigger"): a 22-pt target grown OUTWARD —
+                        // the card lays out what it always did, so its learned
+                        // height holds, and a near miss no longer opens the note.
+                        BookFoldDisclosure(
+                            tokens: tokens, folded: true,
+                            help: "Unfold this note in place — write in it right here",
+                            probeKey: "card-\(entry.postID)"
+                        ) { model.expand(entry.postID) }
+                        // VX-1080 (T-2 / R-1036-35): one line, "…" at rest;
+                        // the ticker under the pointer, one title at a time.
+                        BookNoteTitle(
+                            title: outlineEntryTitle(entry), postID: entry.postID,
+                            ticker: ticker, live: model.liveFocusedPostID)
+                            .font(tokens.body.weight(.semibold))
+                            .foregroundStyle(tokens.ink)
+                        if let date = entry.entryDate {
+                            Text(date)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                                .lineLimit(1)
+                                .fixedSize()
+                        }
+                        // 13i-c U4 (§6): the badge family, beside the title.
+                        if let badge {
+                            // P-8: a one-line label, as the header's badge.
+                            OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
+                                .lineLimit(1)
+                                .fixedSize()
+                        }
                     }
-                    // 13i-c U4 (§6): the badge family, beside the title.
-                    if let badge {
-                        OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
-                    }
-                    Spacer()
+                    .bookCardHeaderRole(.lead)
+                    headerPills
                     Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     .help("Open this note in the full editor (Write · Takes · Lenses · …)")
+                    .lineLimit(1)
+                    .fixedSize()
+                    .bookCardHeaderRole(.trailing)
                 }
+                // The "+" field's suggestions hang over the excerpt below.
+                .zIndex(1)
                 // Wave 2c (W8-5): the excerpt stays on the card, and the
                 // note's facts are not under it. They were in the details
                 // gutter to the right until 18d batch 1 retired it (U-17);
@@ -4148,6 +4623,8 @@ private struct OutlinePostRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // VX-1080: the pointer on the card claims the ticker for its title.
+        .onHover { ticker?.pointer(entry.postID, isOn: $0) }
         // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
         .help(OwnershipBadgeCopy.rowHelp(
             "Click to open this note in the full editor; ▸ unfolds it here", badge: badge))
@@ -4237,6 +4714,10 @@ enum BookNavigatorDoor {
             // Batch B's row 50 road: the flow consumes the reveal and lands
             // the story (its chapter's heading when it opens the chapter).
             model.requestReveal(entry.postID)
+        case .showInList:
+            // VX-1084: List takes the reveal — the row selected and brought
+            // into view, as her click on it would select it.
+            model.requestReveal(entry.postID)
         }
     }
 
@@ -4272,7 +4753,7 @@ enum BookNoteStepDoor {
             return grouped.map(\.postID)
         case (.spread, _), (.read, .pages):
             return entries.map(\.postID)
-        case (.index, _):
+        case (.index, _), (.list, _):
             return []
         }
     }
@@ -4336,7 +4817,7 @@ enum BookNoteStepDoor {
             // landing's target at its start (VX-645), so the next press steps
             // on from it.
             model.requestReveal(postID)
-        case (.index, _):
+        case (.index, _), (.list, _):
             break
         }
     }
@@ -4425,4 +4906,51 @@ nonisolated enum BookFootDoors {
     static func gathering() -> [BookFootDoor] {
         [.newNote]
     }
+}
+
+// MARK: - VX-1036 P7 — a mint in Read lands live
+
+/// **Which book modes a mint door turns to the Outline** (the VX-1036 run,
+/// batch 2 — ledger row 15): READ, a mode with no live editor of its own (A43 —
+/// Read is read-only), so its doors' notes arrive live on the Outline instead
+/// of shown on the page — and, since batch 3, LIST, the other (VX-1084: rows
+/// only, no editor; N-1's letter, "every mint door ends with the new note on
+/// the page, live" — PROVISIONAL P-1036-B3-2) — and, since the run's ladder
+/// (round 1, R1-3), the INDEX: it makes a note live only by a BLOCK landing
+/// (`pendingLanding` → its pane's `takePendingLiveBlock`), and a note born in a
+/// book has no block yet (`newPostInReading` mints the note alone; the
+/// Outline's editor holds an empty note as its open tail, the Index's pane has
+/// nothing to go live on), so a mint there was selected, never live. Outline
+/// and the spread land a minted note their own way (batch 1's arrival).
+enum BookReadMint {
+    static func turnsToOutline(_ mode: BookStructureModel.ViewMode) -> Bool {
+        mode == .read || mode == .list || mode == .index
+    }
+}
+
+// MARK: - VX-1039 — a chapter's own "+" (N-2)
+
+/// **The chapter door's words** (VX-1039, her R-1036-8): the registry's verb
+/// and refusal note (`.newNoteInChapter`, P-1) and the heading door's hover.
+/// Its refusals while drawn are the operations layer's own (a full book, a
+/// chapter deleted meanwhile — `ReadingsViewModel.message`, the book's line);
+/// a finished book draws no mint door at all.
+nonisolated enum ChapterMintDoorCopy {
+    static let verb = "New Note in This Chapter"
+    static let unavailableNote =
+        "A note is made in a chapter from the \u{201C}+ new note\u{201D} on its heading, in a book that isn\u{2019}t finished."
+    static let help = "A new note at the end of this chapter"
+    /// The navigator chapter row's door (ledger row 14 — mockup-1 frame 8b's
+    /// "a chapter's +"). Its own constant (the VX-1036 ladder's R2-4): it
+    /// used to draw the tags header's "+" (`BookCardTagsCopy.plus`), so a
+    /// change to one door's glyph would have moved the other's.
+    static let plus = "+"
+}
+
+/// The shell's one-shot requests a book takes, as ONE value its hook watches
+/// (⌥⌘N's mint, VX-1038's tagging act, and the book's row arriving).
+struct BookShellRequests: Equatable {
+    var mint: UUID?
+    var tag: UUID?
+    var readingID: String?
 }

@@ -41,6 +41,13 @@ struct TrailingFlow: Layout {
     /// Room every line keeps free at its leading edge (the inline tag
     /// field's width plus its gap). Zero for a plain wrapping row.
     var leadingReserve: CGFloat = 0
+    /// VX-1078 (the VX-1036 run, batch 4): lay each line from the LEADING
+    /// edge instead of the trailing one — the capture doors' tag row (the
+    /// title suggestion, the picked tags' pills, the ＋ and its field), which
+    /// reads left to right under the box. The row-breaking rule is the same
+    /// one; only where a line starts differs. false (the default) is the
+    /// masthead's and the book header's right-aligned row, unchanged.
+    var alignsLeading = false
 
     /// Marks the ONE subview the layout places at the last line's leading
     /// edge with zero width (an overlay anchor); it never counts as an item.
@@ -240,7 +247,7 @@ struct TrailingFlow: Layout {
             // an item that would still run past the trailing edge is
             // PROPOSED the width that remains, so a chrome label truncates
             // (P-8) instead of covering its neighbour.
-            var x = max(bounds.minX, bounds.maxX - line.width)
+            var x = alignsLeading ? bounds.minX : max(bounds.minX, bounds.maxX - line.width)
             lastLineLeading = x
             lastLineTop = y
             lastLineHeight = line.height
