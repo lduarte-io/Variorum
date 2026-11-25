@@ -2,7 +2,7 @@
 
 **Ticket** VX-1036 (Umbrella, Books) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov22 · **Mockups** `notes/plans/vx-1036/`
 
-**STATUS — OPEN: THE DESIGN IS CLOSED (2026-11-25, R-1036-42). §4f is the design as closed, over §4d and §4b; rulings R-1036-1…43 are in §5. Nothing is built. Owed next, at her word: the umbrella composition (R-1036-43), then one execution plan per run.**
+**STATUS — OPEN: THE DESIGN IS CLOSED (2026-11-25, R-1036-42) and cut into three umbrellas (R-1036-44): VX-1036 inside a book · VX-1085 lanes · VX-1086 wings. §4f is the design as closed, over §4d and §4b; rulings R-1036-1…45 are in §5. Nothing is built. Owed next: one execution plan per umbrella, at its kickoff.**
 
 ---
 
@@ -473,6 +473,13 @@ Batch 3 of the dialog:
 | R-1036-42 | **THE DESIGN IS CLOSED** — the pick "Close the design now" (2026-11-25). The four faces that exist only in words (§4f) are shown to her at their run's first walk. |
 | R-1036-43 | **How the work is cut is NOT yet ruled** — asked to choose among run orders, she typed: "hmm. how many tickets are there? 2 or 3 umbrella tickets would be ideal." Twelve tickets sit under VX-1036 today. The composition is proposed to her in chat and is written here only once she approves it (her standing rule: no unapproved plan in the repo; umbrellas are minted at her word). |
 
+The cut, approved (2026-11-25):
+
+| id | Ruling |
+|---|---|
+| R-1036-44 | **Three umbrellas** — "yes, these three look good." **VX-1036 — Inside a book** (kept): VX-1039 · VX-1040 · VX-881 · VX-1080 · VX-1081 · VX-1038 · VX-1084 · VX-1078; no schema change. **VX-1085 — Lanes in gatherings**: VX-1037 · VX-1079 · VX-1026; carries the one §12 event (her deploy go) and a Fable cold review. **VX-1086 — Wings**: VX-1041 (the All Wings Library, its search, the ⌘K row, the Library line removed) · VX-1087 (Starred by wing colour) · VX-1088 (Settings ▸ Wings) — the wider wings ticket split in three. Proposed order, not ruled: VX-1036, then VX-1085, with VX-1086 able to run beside either. This file stays the ONE design record for all three; each umbrella writes its own execution plan at its kickoff. |
+| R-1036-45 | **The design goes to main by a docs-only PR, the coordinator told first** — "go ahead and merge a docs only PR, but message nov24 coordinator before you do so." |
+
 ---
 
 ## 6. Ledger
@@ -497,7 +504,7 @@ Batch 3 of the dialog:
 
 *(Rows 1–2 are now T-1…T-6; row 8 is W-2′…W-10.)*
 
-**Sizing (2026-11-25):** twelve member tickets, more than one run. Her word: "2 or 3 umbrella tickets would be ideal." The composition is hers to approve (R-1036-43); the four-run cut written here on 2026-11-24 was a proposal and is withdrawn.
+**The cut (2026-11-25, R-1036-44):** three umbrellas — VX-1036 (rows 1, 2, 4, 5, 7, 10, 12, 13, 14) · VX-1085 (rows 3, 9, 11) · VX-1086 (row 8). The lanes umbrella is the largest and sits at the sizing guidance's cap; its plan says how it batches.
 
 ---
 

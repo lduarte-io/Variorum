@@ -20,12 +20,13 @@
 
 **The design is closed** (R-1036-42). The plan's §4f is the design as closed; §5 holds rulings R-1036-1…43. Members now also include VX-1084 (the list mode).
 
+The cut is approved (R-1036-44): **VX-1036 — Inside a book** (VX-1039, VX-1040, VX-881, VX-1080, VX-1081, VX-1038, VX-1084, VX-1078) · **VX-1085 — Lanes in gatherings** (VX-1037, VX-1079, VX-1026; the §12 event; Fable cold review) · **VX-1086 — Wings** (VX-1041, VX-1087, VX-1088). List each umbrella's sub-issues on Linear at kickoff — that listing is the roster. The plan file is the one design record for all three and reaches main by a docs-only PR (R-1036-45); each umbrella writes its own execution plan and takes its own branch, worktree and in-flight row at its kickoff (VX-1036 keeps this branch and worktree).
+
 Open with her:
-1. **The umbrella composition** (R-1036-43). She wants 2 or 3 umbrella tickets for the twelve members. A three-umbrella cut was proposed to her in chat — the book view (VX-1036 kept: the small fixes, pills on cards, the list mode, tags on new notes) · lanes with their schema event and the wire · wings (VX-1041 split into its pieces). Nothing is minted or re-parented until she says so; write the composition into the plan only once she approves it.
-2. **Getting the design onto main.** The record and the mockups live on this branch; a run that branches from main cannot read them. A docs-only PR was proposed to her. If it merges under a `VX-1036:` title, Linear closes VX-1036 — reopen it with a one-line comment.
-3. The add-tag chord (at the build) and the lanes run's cast (at its kickoff).
-4. Four faces exist only in words (§4f's list); each is shown to her at its run's first walk.
-5. Ticket bodies are pointers and some still say "drawn for her to choose"; the plan's §5 is the truth.
+1. The order the umbrellas run in (proposed: VX-1036, then VX-1085, VX-1086 beside either) and who kicks each off.
+2. The add-tag chord (at the build) and the lanes run's cast (at its kickoff).
+3. Four faces exist only in words (§4f's list); each is shown to her at its run's first walk.
+4. Ticket bodies are pointers and some still say "drawn for her to choose"; the plan's §5 is the truth.
 
 ## Owed before the first implementer spawn
 
@@ -40,4 +41,4 @@ Open with her:
 
 ## Paste-ready kickoff
 
-> /architect-phase vx-1036 — you are taking over as architect/orchestrator from a session that reached its context seam. Read `notes/plans/vx-1036-orchestrator-handoff.md` first, then `notes/plans/vx-1036-organizing-inside-a-book.md` whole, in the worktree `~/dev/variorum-vx-1036`. The design is not closed and nothing is built: the design is closed (§4f) and nothing is built. Start from the handoff's open list: settle the umbrella composition with me, then write the first run's execution plan. Do not spawn an implementer before that plan is in the repo.
+> /architect-phase vx-1036 (or vx-1085, or vx-1086) — you are taking over as architect/orchestrator from a session that reached its context seam. Read `notes/plans/vx-1036-orchestrator-handoff.md` first, then `notes/plans/vx-1036-organizing-inside-a-book.md` whole, in the worktree `~/dev/variorum-vx-1036`. The design is not closed and nothing is built: the design is closed (§4f) and nothing is built. The work is cut into three umbrellas (the handoff lists them). Write this umbrella's execution plan first and bring me its batches and their evidence. Do not spawn an implementer before that plan is in the repo.
