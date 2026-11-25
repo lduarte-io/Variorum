@@ -408,6 +408,19 @@ chip=(AddToBookMintTests AscentDoorTests AscentRoutingTests BookAnchorTests Book
 
 **THE LADDER CLOSED (05:2x).** The cross-model flow ran whole: the implementer AGREED on all three nits with exact shapes; the reviewer CONFIRMED all three, nit 2 amended (the shared glyph helper lives beside `CatalogChapterLine` in the shared file — the dependency arrow points feature → shared); the implementer applied them as confirmed (36b612586 · efac0674d · bfc11fc17, one per nit, build-for-testing green under the nice rule); and the orchestrator's LINE-BY-LINE CHECK against each finding passed by its own read of the three diffs — the whole modifier gated with `:1197` untouched; `CatalogChapterLine.bookGlyph` drawn `.hidden()` by the chapter line and muted by the book line at both verified call sites; the first-note read with the at-most-one comment, behavior-identical. Clarity-class, no red-on-old owed (the reviewer's call); the guard suites ride the merge gate's full Mac target. Dispositions: every finding CONFIRMED-AND-FIXED; none disputed; none hollow. Every speculative suspicion it raised traced to no mechanism and was dropped, named in the file. The walk-owed evidence rows stand apart from the ladder (the gate walk's).
 
+## THE MERGE GATE
+
+**Window 1 (nov24's GO at 06:07, claim `vx-1082`, 120 min; tested SHA `d65254b80`, containing main `1a7b0d444`).**
+- **The WHOLE Mac target** (no -only-testing, 06:08→07:04): "Test run with 6532 tests in 1132 suites failed after 3208.818 seconds with 20 issues (including 14 known issues)" — the 14 the standing withKnownIssue set. **Three red tests, six issues, each classified pre-existing or flake-shaped and untouched by this diff:**
+  1. `SpellingDoorTests.aCheckStepsToTheNextMisspellingAndTurnsNothingOn` (write arm, 2 issues) — VX-953's documented flaky class; the same red VX-1013's gate recorded at main's baseline the same night, green when re-run alone there; no spelling or command line in this diff.
+  2. `MastheadLayoutTests.thePathChipAndTheTagClusterNeverIntersectInStudy` (3 issues, `!field.intersects(card)`) — the known full-target flake VX-499/614 (VX-926's dissolve set; VX-714 its duplicate ticket); it measures the NOTE masthead, which no batch here touches (batch S's masthead is the book's).
+  3. `SidebarSectionWindowTests.theNinthStarIsClearTheMomentTheBeatEnds` (1 issue, `:904 !soon.isEmpty`) — only the sample-COVERAGE line failed (no sample landed in its 100–150 ms window: a ≥ 50-ms main-thread stall under the 53-minute run); its substantive settled-offset assertions passed; no diff line reaches the sidebar's starred section.
+  Each still owes a SOLO re-run before its classification stands (re-requested).
+- **The WHOLE phone target: NOT RUN in window 1.**
+- **Machinery honesty — the orchestrator's budget death.** The orchestrator session (Fable) hit the author's Fable usage limit right after the Mac target finished (~07:04): it could neither ping SEAM nor release, and the claim expired unreleased at 08:08 (nov24's 07:41 status check went unanswered). Nothing was lost — the log on disk held the run whole, nothing was mid-revert, the walk had not started, the dev store was never touched. The session continued on Opus at her word ("continue - I hit my fable limit but I have opus credits"). Nothing Fable-owed remained: the Fable-mandatory ladder (the editor-seam class) had already closed. Machine state at the resume: zero instances, no Problem Reporter, 0 new `Variorum-*.ips` since 06:07.
+
+**Window 2 (re-requested ~09:55, first after vm-260):** the three reds re-run alone · the WHOLE phone target · SEAM · the gate walk. PENDING.
+
 ## CLOSEOUT
 
 PENDING.
