@@ -37,10 +37,13 @@ nonisolated enum BookTagsSwitchCopy {
         case .allTags: "All tags"
         }
     }
+    /// True on BOTH kinds (the VX-1036 ladder's N3): "other tags" leaves off
+    /// the tags that place a note only in a GATHERING; in a plain book it shows
+    /// everything (R-1036-39's letter, `BookCardTagsModel.pills(for:)`).
     static let help =
         "Show each note\u{2019}s tags on its card \u{2014} all of them, or the other tags only "
-        + "(leaving off the ones that place a note in this gathering). A way of looking: "
-        + "remembered for this book on this Mac."
+        + "(in a gathering, every tag but the ones that place the note there; in a book, all of them). "
+        + "A way of looking: remembered for this book on this Mac."
 }
 
 /// **The per-book switch** — a chip beside "expand all · collapse all" (the

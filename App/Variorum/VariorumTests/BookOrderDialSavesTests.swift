@@ -188,4 +188,14 @@ struct BookOrderDialSavesTests {
         #expect(CapabilityRegistry.all.filter { $0.id == .saveBookOrder }.count == 1)
         #expect(BookView.surfaceCapabilities.contains(.saveBookOrder))
     }
+
+    /// The VX-1036 ladder's N4 (13u4 UNIT S3's rule — a door's name is its
+    /// constant): the masthead's quiet button says the registry verb, cased
+    /// for a face — never a second literal that a rename would leave behind.
+    @Test func theMastheadsSaveButtonSaysTheRegistrysVerbInSentenceCase() {
+        #expect(BookOrderDialCopy.saveDoor == "Save as this book's order", "the face's words, unchanged")
+        #expect(BookOrderDialCopy.saveDoor.lowercased()
+                == CapabilityRegistry.capability(.saveBookOrder).verb.lowercased(),
+                "…and they are the declared verb's")
+    }
 }

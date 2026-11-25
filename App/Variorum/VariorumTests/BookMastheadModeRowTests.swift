@@ -297,7 +297,12 @@ struct BookMastheadModeRowRuleTests {
     /// line in a narrow one"): her two Study seats (≈252 and ≈258 pt — one
     /// line since VX-896) draw two lines again, and in Terminal the widest
     /// look no longer fits one line even at the navigator's 336-pt ceiling.
-    /// The navigator's floor still wraps in both voices.
+    /// The navigator's floor still wraps in both voices — and since the fifth
+    /// tab that floor is the VOICE's (`BookNavigatorFloor`: 229 pt Terminal,
+    /// 203 Study, so the masthead's room there is the tabs' own 205 / 179); 166
+    /// is the shipped 190-pt floor's room, narrower than either now (the
+    /// VX-1036 ladder's N5 re-labelled the two checks that still called 166
+    /// "the navigator's floor", and added the per-voice ones).
     @Test func atTheMeasuredWidthsTheThresholdsAreTheCountedLines() {
         let study = Self.measured(.study)
         let terminal = Self.measured(.terminal)
@@ -315,8 +320,14 @@ struct BookMastheadModeRowRuleTests {
         #expect(Self.arrange(terminal, face: 128, width: 340).widthClass == .twoLines)
         #expect(Self.arrange(study, face: 75, width: 262).widthClass == .oneLine, "as collected, Study")
         #expect(Self.arrange(study, face: 75, width: 261).widthClass == .twoLines)
-        #expect(Self.arrange(study, face: 81, width: 166).widthClass == .twoLines, "the navigator's floor")
-        #expect(Self.arrange(terminal, face: 100, width: 166).widthClass == .twoLines, "the navigator's floor")
+        #expect(Self.arrange(study, face: 81, width: 179).widthClass == .twoLines,
+                "Study's navigator floor (203 pt — a 179-pt masthead)")
+        #expect(Self.arrange(terminal, face: 100, width: 205).widthClass == .twoLines,
+                "Terminal's navigator floor (229 pt — a 205-pt masthead)")
+        #expect(Self.arrange(study, face: 81, width: 166).widthClass == .twoLines,
+                "the shipped 190-pt floor's room — narrower than either voice's floor now")
+        #expect(Self.arrange(terminal, face: 100, width: 166).widthClass == .twoLines,
+                "the shipped 190-pt floor's room — narrower than either voice's floor now")
         #expect(Self.arrange(terminal, face: 100, width: 336).widthClass == .oneLine,
                 "the navigator's ceiling — the book's own order")
         #expect(Self.arrange(terminal, face: 128, width: 336).widthClass == .twoLines,
@@ -601,14 +612,21 @@ struct BookMastheadModeRowMountedTests {
         }
     }
 
-    /// Ruling 3, mounted: at the navigator's floor (166 pt) the dial wraps
-    /// below the modes, at the row's trailing end.
+    /// Ruling 3, mounted: at the navigator's floor the dial wraps below the
+    /// modes, at the row's trailing end. Since the fifth tab the floor is the
+    /// VOICE's (`BookNavigatorFloor` — 229 pt Terminal, 203 Study, so the
+    /// masthead's room there is the tabs' own 205 / 179): the VX-1036 ladder's
+    /// N5 re-labelled this from 166 — the shipped 190-pt floor's room, which
+    /// five tabs no longer fit — to the voice's own floor (A JUSTIFIED EDIT;
+    /// the claim, two lines with the dial below at the trailing end, is
+    /// unchanged).
     @Test(arguments: [ThemeVoice.terminal, .study])
     func atTheNavigatorsFloorTheDialWrapsBelowTheModes(voice: ThemeVoice) async throws {
-        try await mount(voice: voice, width: 166) { rig in
+        let floorRoom: CGFloat = voice == .terminal ? 205 : 179
+        try await mount(voice: voice, width: floorRoom) { rig in
             #if DEBUG
             let row = try #require(rig.placed, "\(voice): the row reported").arrangement
-            #expect(row.lineCount == 2, "\(voice): two lines at 166 (\(row))")
+            #expect(row.lineCount == 2, "\(voice): two lines at the floor's \(floorRoom) (\(row))")
             #expect(row.dial.minY >= row.tabs.maxY + Rule.lineSpacing - 0.5, "\(voice): below the modes (\(row))")
             #expect(abs(row.dial.maxX - row.size.width) < 0.5, "\(voice): at the trailing end")
             #endif

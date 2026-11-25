@@ -540,6 +540,12 @@ struct BookOrderDial: View {
 /// declaration reads the very words the dial draws — `.saveBookOrder`).
 nonisolated enum BookOrderDialCopy {
     static let saveVerb = "Save as This Book's Order"
+    /// The save act's words on a BUTTON — the registry verb itself (13u4 UNIT
+    /// S3's rule: a door's name is its constant — the VX-1036 ladder's N4),
+    /// cased for a face rather than a menu: its first letter as the verb has
+    /// it, the rest lowered ("Save as this book's order"), the sentence case
+    /// every rendered word wears. A rename of the verb renames the face.
+    static var saveDoor: String { saveVerb.prefix(1) + saveVerb.dropFirst().lowercased() }
     static let backToManual = "Back to manual order"
     static let unavailableNote =
         "A finished book\u{2019}s order can\u{2019}t be saved \u{2014} reopen the book to change its order."
@@ -558,7 +564,7 @@ struct BookOrderLookDoors: View {
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 3) {
-            Button(tokens.chromeLabel("Save as this book's order"), action: onSave)
+            Button(tokens.chromeLabel(BookOrderDialCopy.saveDoor), action: onSave)
                 .foregroundStyle(tokens.accent)
                 .help("Save this look as the order every reader of the book sees")
             Button(tokens.chromeLabel(BookOrderDial.backToManual), action: onBack)
