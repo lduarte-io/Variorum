@@ -328,8 +328,8 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 | 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (this commit) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
 | 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (this commit) — phone `build-for-testing` green; the moved pins PENDING |
 | 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | DONE (this commit) — phone `build-for-testing` green; the suites PENDING |
-| 6a. The red-on-old trees built headless (no stage), each into its own DerivedData, so the stage window only runs tests: VM-253 at `b05c45bb0` → `DerivedData/vm260-1a-rol253`; VM-256 at `9edeb6993` → `…-rol256`; VM-255 at `8d7fc32cb` + the two pin files from the tip → `…-rol255`. **While IN-PROGRESS the worktree may be DETACHED at one of those commits — the way back: delete any untracked `MobileTopLineTests.swift` / `MobileSettingsGearTests.swift` in `VariorumMobileTests/`, then `git switch vm-260-phone-look`; nothing uncommitted is at risk (every piece is committed).** | IN-PROGRESS |
-| 6. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | NOT-STARTED |
+| 6a. The red-on-old trees built headless (no stage), each into its own DerivedData: VM-253 at `b05c45bb0` → `DerivedData/vm260-1a-rol253`; VM-256 at `9edeb6993` → `…-rol256`; VM-255 at `8d7fc32cb` + the two pin files from `f8aa3f6f4` → `…-rol255` | DONE — all three `TEST BUILD SUCCEEDED`; the worktree is back on `vm-260-phone-look`, clean (the two copied files removed before the switch) |
+| 6. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | DONE (this commit) — phone `DerivedData/vm260-1a`, Mac `…-mac`, the keyboard-reveal UI bundle `…-ui`; the run list below |
 | 7. The suites (each pin red on old by behavioural revert, then the batch's suites green) | PENDING (needs the stage GO) |
 | 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (needs the stage GO) |
 
@@ -492,3 +492,41 @@ bullet ("It opens from the ⋯ menu all three roots carry" → the gear), and "T
 paragraph ("The Bookcase root's top line reads the wing's name, "Bookcase" and the count…" → the name alone, the count
 a muted line under it on the Bookcase, the trash on the Library only, P-47-27's ⋯ last → the gear last); QUESTIONS
 #281's P-47-9, P-47-22, P-47-27, P-47-31 answered by this member.
+
+
+### READY-FOR-TESTS (the stage window's commands; every result PENDING until run)
+
+All from `App/Variorum/`, zsh, `test-without-building` against the bundles already built (nothing builds in the
+window); `UDID` = the device the GO names (iOS 26.2), booted fresh inside the claim, settled, shut down before release.
+Plans: `P=DerivedData/<folder>/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`.
+
+**R — red on old (each pin's pre-fix tree, expected RED where named):**
+- R1 `rol253`: `-only-testing:VariorumMobileTests/MobileTabBarStaysStillTests` — RED: `theBarIsDrawnOnceByTheShell`,
+  `midSwipeTheBarHasNotMoved`; green (guard): `aPageChangeMovesOnlyTheChip`.
+- R2 `rol256`: `-only-testing:VariorumMobileTests/MobilePageLeavingTests` — RED: `aNoteAskedForOnAPageSheLeftNeverStandsThere`;
+  green (guard, the bar road already popped): `leavingAPageClosesItsNoteAndSavepointsItOnce`.
+- R3 `rol255`: `-only-testing:VariorumMobileTests/MobileTopLineTests -only-testing:VariorumMobileTests/MobileSettingsGearTests`
+  — RED: `onlyTheLibrarysTopLineCarriesTheTrash`, `theLineIsTheWingsNameAloneAndTheBookcaseCountsUnderIt`,
+  `theGlyphsAreTheMacsSymbols`, `everyRootCarriesTheGearOnItsTopLine`, `theShellsRootsCarryTheGearAndTheMenuIsGone`,
+  `theGearOpensSettingsThroughTheWholeShell`; green on both: `noShellNoGear`, `aNotesActionsOpenSettingsThroughTheWholeShell`.
+
+**P — the tip, the whole phone target, one launch** (`vm260-1a`): `-only-testing:VariorumMobileTests` — read against
+main's known reds. (The shell and all three roots changed; every suite that mounts the shell or a root is in it.)
+
+**M — the Mac legs** (`DerivedData/vm260-1a-mac/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`,
+`-destination 'platform=macOS'`): `-only-testing:VariorumTests/<type>` for ThemeTokenTests NoLiteralColourTests
+PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
+OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests (the token pins and every Mac suite that
+walks the whole phone tree; `Shared/` and the Mac's sources are byte-unchanged by this batch).
+
+**U — optional, the keyboard-reveal UI test** (`DerivedData/vm260-1a-ui`, scheme TK2SpikeUITests' plan,
+`-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, a dedicated simulator): `MobileShellView.body`
+changed — the one bar's overlay sits in the band's chain, inside its frame and before its clip, neither moved — so the
+rule's letter ("any change to the band's clip or frame") is arguably not met; run it here if the window allows, else
+batch 2's run covers it.
+
+**W — the walk** (the Debug phone app from `vm260-1a` on the same simulator, ~20 min, captures to
+`notes/plans/vm-260-screens/batch-1a/`, Study and Terminal, light): the three roots at rest (the name alone, the
+Bookcase's count line, the Library's trash · glyph · gear, Starred's gear); a swipe held mid-flight Bookcase → Library
+(the bar unmoved, two pages showing above it); a push to a list (the Library's Trash — the bar unmoved) and into a note
+(the bar gone); the gear opening Settings; the empty Library's glyph line.
