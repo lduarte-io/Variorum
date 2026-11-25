@@ -653,6 +653,20 @@ present):**
   VoiceOver name becomes "Cancel picking"** — Voice Control matches the VISIBLE word, so a spoken name that
   doesn't contain "Cancel" breaks "tap Cancel" (WCAG 2.5.3, label in name); it stays distinct from the
   sheet's "Done". A one-line rider on batch 4a, with any pin that rides the old name moved.
+- **A-260-16 (batch 4a's hand-back, 2026-11-25, orchestrator on Opus): ACCEPTED, the proof is the gate's.**
+  Checked against the diff (`640fb6d73..262f5115e`), not the claims: the reach is the phone's Shell files plus
+  the rider in `MobileBlockList` (13 files); `Sources/`, `Shared/`, `MobileShellView` and the editor family
+  are untouched (verified empty diff), so the one bar, the band and the keyboard floor didn't move; **VM-68's
+  discipline holds** — the Library's three listing tasks (`.task(id: hold)`, `.task(id: holdsScraps)`,
+  `.task(id: [model.wingID, query])`) are byte-identical before and after, and the full top lies OVER the
+  listing's head with a measured spacer, so condensing moves no row and asks the listing nothing (pinned). The
+  give-way rule is pure and reads only the list's own scroll (P-4), with hysteresis; the root redraws only
+  when the flag flips. R-260-11's count line is retired at its source. The rider landed ("Cancel picking", six
+  pin references moved). Its gate note is ADOPTED as the gate's rule: if the mounted slim-line pins are red at
+  "the top never gave way" while the R-4a reds land as predicted, it's a harness red (the pins lean on
+  `onScrollGeometryChange` hearing an unanimated `setContentOffset`); read the closing walk's real-thumb
+  stop before touching the rule. P-260-4a-1 (the 24/60/8 numbers) and C-4a-1…8 join her bundle; "Search"
+  and "· All" are drafts for her wording pass.
 - **A-260-10 (the F-1a-W1 fix's hand-back, 2026-11-25): trace and fix ACCEPTED; the orchestrator's suspected
   mechanism stands REFUTED by the captures' own pixels.** The trace is the stronger kind of evidence — two
   independent captures of the same field on the same device class, the 52.0-pt gap equal to
@@ -700,6 +714,7 @@ present):**
 | Batch 2 (VM-273 · VM-272) | BUILT (code tip `ae12e4276`; A-260-9; VM-280) and WINDOW-RUN 2026-11-25: R red-on-old ESTABLISHED (every predicted red present, note-top doors Study-only exactly as predicted, all guards green); M GREEN (100/100, the 4 declared known). RECONCILED 2026-11-25 (A-260-12; commits `e39903b7d` + `2d4670d18`): the field draws 36 as designed and its pin reads the layout frame (the 44 was always there); the note top is exact at 136 (the 9 pt was invisible air on both trees), the cap TIGHTENED to 137, C-272-2 to her bundle; re-evidence bundles `vm260-2r{,-mac,-ui}` prebuilt, predicted green, riding the P3 window. Captures banked (18 before + 18 after, `batch-2/`); two throwaway-driver defects (voice carryover — the after run lacks Study shots; a centre-tap fallback opened a full note) — retakes fold into the gate window; **FINAL WINDOW: both reconciles GREEN on the tip: the field box 37.3 in a 44 frame (its own view 22, the VM-280 datapoint), the note top 136.0 in both voices; U 2/2 GREEN on `vm260-2r-ui`.** DONE pending the ladder |
 | Batch 3 (VM-247 · VM-254) | BUILT 2026-11-25 (code tip `54c0d1cc8`, record `5bbff189f`; adjudicated A-260-11); R3 red-on-old ESTABLISHED in the window (all 4 pins red as predicted, 19 issues); P3 + M3 queued as their own window (nov24, at VX-1082's SEAM or after); W3 captures fold into the gate window; U3 already GREEN (2/2, this window); **FINAL WINDOW: M3 GREEN (53/53 in 9 suites, the 4 declared known); P3 ONE unexpected red, `MobileTextSizeTests.theEditorFaceTakesTheStep` (`:145`, the UIKit row preview at the Larger step ≠ 14 × 1.125), owed to this batch's implementer, traced headless (hypotheses in the final-window section)** |
 | Batch 3b (VM-281 · F-her-1) | BUILT 2026-11-25 (red-on-old `b48b391e2` — `vm260-3b-rol` + `vm260-3b-rol-ui`; fixes `dc8312a89` VM-281, `9bf8e6b55` F-her-1 = code tip; trio rebuilt); ADJUDICATED A-260-15 (C-3b-1 ruled "Cancel picking", a 4a rider). PENDING the gate: both pins red on old; the walk's-road keyboard test GREEN on the tip is the VM-281 claim — red with frames near 591 means model P: STOP, VM-271's road |
+| Batch 4a (VM-259 B · R-260-11 · the C-3b-1 rider) | BUILT 2026-11-25 (red-on-old `0bfd8326c` in `vm260-4a-rol`; code tip `262f5115e`; trio rebuilt, compiling main's merged Core); ADJUDICATED A-260-16. PENDING the gate: R-4a's 12 predicted issues in 8 cases on old, the tip green |
 | Batch 4 (VM-259 + the note's top + R-260-11) | BOTH PICKS IN: VM-259 B, the slim bar (R-260-12); the note's top A as picked, ratified with no further checkpoint (R-260-13, R-260-14); the Bookcase count line goes (R-260-11). 4a then 4b after batch 3b and the main merge; her judgment is the phone install after 4b |
 | Her phone (R-260-7) | INSTALLED 2026-11-25 ~11:0x at her word (*"install the build on my phone now"*): the signed device build at code tip `78ed5b4bb` (`DerivedData/vm260-device`, Release-iphoneos), `devicectl` to her iPhone 17 Pro, same bundle id (her store carried over). Her assessment on the phone is the run's real close |
 | Ladder · gate · walk | NOT STARTED |
