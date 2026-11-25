@@ -81,37 +81,46 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
 
 ## LIVE STATUS (the implementer's, from the first commit)
 
-**NOT DONE BY THIS SESSION (first, per the contract):** (1) THE FORK's half — row 12, the no-backup-yet consult — NOT
-built, awaiting the architect's ruling (proposal below; the tree is option (a) by construction). (2) The use-shaped
-acceptance — the launch walk on the dev store and its captures — is the orchestrator's under a stage claim; this session
-held no claim, launched nothing and walked nothing. (3) The Mac target's suites under `xcodebuild test` — the gate's; this
-session ran the planted Protection suites HEADLESS instead (the SwiftPM harness below: 208 tests in 35 suites). (4) The
-relock's lobby (noticed, not taken — below).
+**NOT DONE BY THIS SESSION (first, per the contract):** (1) The use-shaped acceptance — the launch walk on the dev store
+and its captures — is the orchestrator's under a stage claim; this session held no claim, launched nothing and walked
+nothing (and no Castle posture changed anywhere). (2) The Mac target's suites under `xcodebuild test` — the gate's; this
+session ran the planted Protection suites HEADLESS instead (the SwiftPM harness: 210 tests in 35 suites). Nothing else:
+the fork is ruled and built (R-1013-A1), the relock's lobby is built (R-1013-A2, piece 6).
 
 *Batch 1, opus-implementer, session 1 (2026-11-24; resumed 2026-11-25 for the two ruled pieces). No behavioural revert is
 in flight.*
 
-**RESUMED (R-1013-A1, R-1013-A2):** 6a DONE (`9a4f64544`) — core pin
-`FarFolderUnreadTests.theNoBackupYetMomentIsOwedOnAPartialListing` (the suite now 7): GREEN `✔ 7 tests`; a RULING pin,
-green on both sides by construction — on the pre-fix `Assess.swift` (`006072617`) `✔ 1 test passed`; the record's option
-(b) as a mutation (`passphraseAsks` skipped while `!readsEveryPlace`) ⇒ `✘ 1 test failed with 1 issue` (the partial-listing
-expectation); restored, `git status` clean, `✔ 7 tests`. Row 12 flipped to UNAFFECTED-BY-RULING. 6b NOT-STARTED — the relock's lobby on
-the per-open plumbing (piece 6): `ProtectionRoadLock.lobbyContext(road)` (its own `FarFolderWalk`), the lobby beginning
-the walk through the route's one helper, the landing's refresh; the relock's landing NEVER retries the quiet roads (the
-lock's own rule — "the quiet roads are NOT tried at a lock", `ProtectionRoadLock.swift` header — so P-1013-3 has nothing
-to retry there and what the lock does is unchanged; a context flag carries it). Full `swift test` held (the coordinator's
-load window) — targeted `--filter` runs only.
+**RESUMED (R-1013-A1, R-1013-A2):**
+- 6a DONE (`9a4f64544`, record `ac6d0ea28`) — core pin `FarFolderUnreadTests.theNoBackupYetMomentIsOwedOnAPartialListing`
+  (the suite now 7): GREEN `✔ 7 tests`; a RULING pin, green on both sides by construction — on the pre-fix `Assess.swift`
+  (`006072617`) `✔ 1 test passed`; the record's option (b) as a mutation (`passphraseAsks` skipped while
+  `!readsEveryPlace`) ⇒ `✘ 1 test failed with 1 issue` (the partial-listing expectation); restored, `git status` clean,
+  `✔ 7 tests`. Row 12 flipped to UNAFFECTED-BY-RULING.
+- 6b DONE (`c09196e7d`) — piece 6, the relock's lobby, BY PLUMBING REUSE ONLY: `ProtectionRoadLock.lobbyContext(road)` (a
+  freshly composed road's context with its OWN `FarFolderWalk`, one per lock), `ProtectionRoadLock.lobby(ctx)` reads the
+  container's facts and begins the walk through the route's one helper (`RoadContext.beginTheFarWalkBehindTheLobby`, the
+  route now uses it too), `AppBootstrap.lockOnNewRoad` composes through `lobbyContext`, and `finish(.roadLobby)`'s existing
+  far landing lands it (P-1013-1 and P-1013-2 apply unchanged). What the lock does is unchanged: its landing NEVER tries the
+  quiet roads (`RoadContext.farLandingTriesQuietRoads` false — the lock's own rule, "the quiet roads are NOT tried at a
+  lock", so P-1013-3 has nothing to retry there); nothing it says changed. Existing callers of `ProtectionRoadLock.lobby`
+  over a plain context read exactly as before (no far walk ⇒ the helper does nothing). Pins (app, in
+  `OpenFarFolderWaitTests`, now 10): `aLocksLobbyReadsNoFarFolderAndItsLandingRefreshesItsRoads` (container facts, the walk
+  begun, the landing adds the far file's passphrase road, ONE far read in all) and
+  `aLocksLobbyNeverTriesTheQuietRoadsWhenItsWalkLands` (a far Apple wrap that opens the launch road's landing leaves a
+  lock's lobby standing). Headless harness: GREEN `✔ 10 tests`; RED BEFORE PIECE 6 by behavioural revert (`lobbyContext`
+  returning `road.context()` — the lock's lobby as before): `✘ 2 tests failed with 5 issues` (unread places, drawn roads,
+  the walk begun, the read count; the no-theater pin opened); MUTATION (the landing's flag ignored, `lobbyContext`
+  kept) ⇒ the no-theater pin RED alone; restored, `git status` clean, the harness `✔ 210 tests in 35 suites passed`.
 
-**BATCH 1 STATE — built and verified, but for THE FORK (commits `006072617` → `1635b1f2f`, all pushed):**
-- Core suite: `swift test` (full) GREEN — `✔ 746 tests in 139 suites`, `━ 4203 tests in 579 suites passed … with 5 known
-  issues` (the VX-529 suites' own `withKnownIssue`s, untouched), `✔ 32 tests in 4 suites`; `EXIT 0`; the new suite among
-  them. (Run before the coordinator's 2026-11-24 load-window note arrived; nothing full has run since.)
-- Mac target: `xcodebuild … build` and `build-for-testing` → `** BUILD SUCCEEDED **` / `** TEST BUILD SUCCEEDED **`, no
-  warning in a touched file. Phone target (`VariorumMobile`, `generic/platform=iOS Simulator`, a build — no simulator
-  booted): `** BUILD SUCCEEDED **` (the shared bootstrap and lobby model compile there too).
+**BATCH 1 STATE — built and verified (commits `006072617` → HEAD, all pushed):**
+- Core suite (full `swift test`, after the load window cleared): PENDING — running now.
+- Mac target (after piece 6): `build-for-testing` → `** TEST BUILD SUCCEEDED **` (app + test bundle), no warning in a
+  touched file. Phone target (`VariorumMobile`, `generic/platform=iOS Simulator`, a build — no simulator booted):
+  `** BUILD SUCCEEDED **`.
 - Headless harness (the VX-306 recipe, piece 4 below), widened for parity: every planted-road Protection suite that
-  compiles there without the app's bootstrap — `✔ Test run with 208 tests in 35 suites passed` (the 8 new + 200 existing,
-  UNMODIFIED). Zero edits to any existing test file anywhere (`git diff e364f151b -- Tests/ App/Variorum/VariorumTests/`
+  compiles there without the app's bootstrap — `✔ Test run with 210 tests in 35 suites passed` (the 10 new + 200 existing,
+  UNMODIFIED — `RoadLockTests` and `LobbyTouchIDReaskTests`, which read `ProtectionRoadLock.lobby` over plain contexts,
+  among them). Zero edits to any existing test file anywhere (`git diff e364f151b -- Tests/ App/Variorum/VariorumTests/`
   shows only the two new files).
 
 **Read first (own context, not delegated):** CLAUDE.md + the auto-canon; `notes/CastleRules.md` in full; this record;
@@ -264,10 +273,9 @@ with a pin (the relock's lobby facts perform no far read; the landing refreshes)
 plumbing reuse — any new design surface — stop and report instead; it then becomes its own ticket. Evidence stays
 headless (the gate's walk covers the launch only; no Castle posture change on the dev store for this).
 
-**Noticed, not taken (scope):** the relock's lobby (`ProtectionRoadLock.lobby` — VX-445's Lock Now and the idle/sleep
-monitors) reads both roots as before: its context carries no far walk (D-1013-2's default for non-launch callers), so a
-lock lands behind `.opening` for one full walk — a follow-up candidate if the architect wants the lock on the same road.
-The lobby vault road's catch-up act (`catchUpThroughTheVault` → `executor.follow`) runs inside the press's scope (its custody
+**Noticed at first, then TAKEN by R-1013-A2 (piece 6 — 6b above):** the relock's lobby (`ProtectionRoadLock.lobby` —
+VX-445's Lock Now and the idle/sleep monitors) used to read both roots, so a lock landed behind `.opening` for one full
+walk; it now reads the container and lands its own far walk. The lobby vault road's catch-up act (`catchUpThroughTheVault` → `executor.follow`) runs inside the press's scope (its custody
 listings probe the container + the walk once landed) — by construction, no separate change.
 
 ## THE LADDER
