@@ -30,6 +30,12 @@ struct TagInlineField: View {
     /// VX-576: how many live notes wear each tag (by id) — the suggestions
     /// order most-used first; empty (the default) keeps the path order.
     var uses: [String: Int] = [:]
+    /// VX-1078 (the VX-1036 run, batch 4): the matches hang ABOVE the field
+    /// rather than under it — for a host at the window's foot (the capture
+    /// band at the bottom of the Bookcase and the Library), where a list under
+    /// the field would run off the window. false (the default) is every
+    /// earlier host, unchanged.
+    var suggestionsAbove = false
 
     @State private var typed = ""
     @FocusState private var focused: Bool
@@ -63,8 +69,9 @@ struct TagInlineField: View {
                 if !nowFocused { onFocusLost() }
             }
             // The matches hang UNDER the field, over whatever sits below the
-            // masthead (the masthead's z-order lifts them above the page).
-            .overlay(alignment: .topLeading) {
+            // masthead (the masthead's z-order lifts them above the page) — or,
+            // for a host at the window's foot, ABOVE it (VX-1078).
+            .overlay(alignment: suggestionsAbove ? .bottomLeading : .topLeading) {
                 if focused, !suggestions.isEmpty {
                     VStack(alignment: .leading, spacing: 0) {
                         ForEach(suggestions, id: \.id) { tag in
@@ -86,7 +93,7 @@ struct TagInlineField: View {
                     }
                     .background(tokens.card, in: RoundedRectangle(cornerRadius: 7))
                     .overlay(RoundedRectangle(cornerRadius: 7).stroke(tokens.line, lineWidth: 1))
-                    .offset(y: 26)
+                    .offset(y: suggestionsAbove ? -26 : 26)
                     // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
                     // states its own line policy, so its IDEAL width can never be a
                     // wrapped one (the b6dae25 class's window-sizing hazard).

@@ -1045,6 +1045,10 @@ final class QuickNotePark {
         /// words and her decision about its name, so the next summon restores
         /// all three (PROVISIONAL P-915-B3-1).
         var landingWingID: String = ""
+        /// **VX-1078 — the tags she picked for it** (the button beside the
+        /// title suggestion): her decision about the capture rides the park
+        /// with the rest, so the next summon restores the pills too.
+        var tagPaths: [String] = []
     }
 
     private(set) var held: Held?
@@ -1060,7 +1064,10 @@ final class QuickNotePark {
     init() {}
 
     /// A refusal that reached a road with no pad left.
-    func park(text: String, titleFromFirstWords: Bool, message: String, landingWingID: String = "") {
+    func park(
+        text: String, titleFromFirstWords: Bool, message: String, landingWingID: String = "",
+        tagPaths: [String] = []
+    ) {
         // The one call site (`take()`'s `.refused` arm) fires only after
         // `QuickNoteMint.mints` passed, so a blank capture cannot arrive
         // here — and the silent early-out that used to stand on this line
@@ -1083,7 +1090,7 @@ final class QuickNotePark {
         if held == nil { declineSpent = false }
         held = Held(
             text: text, titleFromFirstWords: titleFromFirstWords, message: message,
-            landingWingID: landingWingID)
+            landingWingID: landingWingID, tagPaths: tagPaths)
     }
 
     /// The next summon takes it — and the park lets go in the same breath
