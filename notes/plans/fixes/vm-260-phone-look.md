@@ -290,6 +290,32 @@ kinds are untouched everywhere — ink, clearing and anatomy are the FACE's.
   the phone's exception; SurfaceContracts "The app" (the phone bullet rewritten); `notes/MobileSoul.md`. Applied
   at the merge in the two-file shape, VM-247 the pointer.
 
+### Batch 3b — two fixes she called (VM-281 · F-her-1; written 2026-11-25 ~11:2x, orchestrator on Opus)
+
+- **VM-281 — the keyboard after a note's keyboard (R-260-9, sanctioned).** The defect and its evidence are
+  the F-1a-W1 block and THE CONSOLIDATED WINDOW's reproduction row: after a keyboard session whose first
+  responder wore the editor's 52-pt `inputAccessoryView` (`MobileKeyboardBar`), the next keyboard is reported
+  52 pt short by BOTH SwiftUI's avoidance and UIKit's keyboard layout guide, so the band and the bar sit under
+  the keyboard's glass. The traced cure (to be re-traced by the implementer, not taken on trust): the editor's
+  text view drops its accessory as it resigns, so no stale accessory frame survives into the next keyboard
+  session. **This is an editor-seam line** (`MobileEditorTextView` or its accessory host): the implementer
+  reads `notes/TEXTKIT2_NOTES.md` at preflight, touches the fewest lines possible, and stays out of the
+  text-input path's other behaviour (the typed-Return model, crystallization, the keyboard bar's own
+  numbers R22/R25). **The pin is a UI test on the road that REPRODUCED** (the 1a walk's s5→s9 order: a NEW
+  note opened with its keyboard up, Back, the Trash, two bar tabs, then the Library search), NOT the
+  `testTheBarRidesAboveTheLibrarySearchKeyboard` road, which was HOLLOW on old (the search restored its own
+  focus at Back). The oracle is that test's pixel oracle (the bar's doors draw as at rest; their frames end
+  above the keys). Its commit is the red-on-old tree. `MobileKeyboardFloor` STAYS (the class guard).
+- **F-her-1 — the duplicate "Done" (her finding).** While picking blocks, the Blocks sheet's picking door
+  reads **"Cancel"** instead of "Done" — PROVISIONAL (P-260-3b-1; alternatives: (b) the sheet's own Done hides
+  while picking, so one Done ends picking and a second closes; (c) one Done that ends picking AND closes).
+  Why (a): iOS's own select-mode exit is "Cancel" where leaving drops the picks, which `exitSelection` does;
+  no two doors in one header render one word. Pin: in picking mode the sheet header never renders two
+  buttons with the same word (red on old). The VoiceOver names stay distinct as they are.
+- Evidence: both pins red-on-old in the gate window; the keyboard-reveal class re-run (the editor's text view
+  changes); the whole phone target. Review focus added: VM-281's line, read against TEXTKIT2_NOTES and the
+  keyboard bar's rulings.
+
 ### Batch 4 — the Library's top gives way (VM-259)
 
 - **Design first:** two or three drawn options (local HTML mockups beside real captures; never published) for how
@@ -368,6 +394,43 @@ install and the #281 dispositions.
   posture-safe either way. On VM-259 she asked tonight whether the drawn options were ready; answered:
   deliberately not — they draw on batch 2's corrected sizes and join the morning bundle if batch 2 lands
   overnight.
+
+**Her words after the install (2026-11-25 ~11:1x, in session, verbatim; her away ruling ENDS here — she is
+present):**
+> "and give me a command to open the library's top on my air please. also - looks mucuh better. however, in
+> no book should be replaced with a book icon that you can tap on to add it to a book, maybe greyed out when
+> there's no book. I don't want this whole header to be sticky, it takes up too much room as you scroll. maybe
+> just the top bar? I also feel like tags could be replaced with a #, no date could be replaced with a calendar
+> icon. i think that the top four icons are actually good, but maybe there should be another four beneath them?
+> blcoks and lens and more info could probably go together. or maybe it would be best for the title to get more
+> space on top and then there's one row of icons, and just that row of icons is what stays with you as you
+> scroll. i think that might be best. there's also a duplicate done [Image #2] and the title is quite cut off
+> when it's long - which having a row of icons below it might fix, then the title could be more centered. i do
+> actually like the current four icons on the upper right though, it looks clean, so i'll have to see how the
+> icon bar looks... and vm-281 can be fixed. we can also just continue moving forward with opus review rounds
+> for now and you can make a ticket for a fable round over the whole diff later."
+
+- **R-260-8 — the note's top, her DIRECTION (not yet a pick; she wants to SEE the icon bar first).** Her
+  leading idea: **the title gets more room on top (more centred, no longer cut off), ONE row of icons below
+  it, and ONLY that icon row stays with her as she scrolls** — never the whole header ("it takes up too much
+  room as you scroll"). The icon row's members, from her words: the four current tools (copy, find, seal,
+  ⋯ — "they look clean"); "in no book" → a BOOK icon that opens adding the note to a book, greyed when the
+  note is in no book; "tags" → "#"; "no date" → a calendar icon; blocks, lens and more info "could probably
+  go together" (one door). The alternative she floated: the current top row kept, four more icons beneath
+  it. **Next: the orchestrator DRAWS both (local HTML, never published) for her to see; the build follows
+  her pick, as batch 4's second half** (the Library's top and the note's top are one question — what stays
+  and what gives way when she scrolls). This supersedes VM-148's "both scroll away and a slim bar with the
+  title stays" for the sticky part; VM-148's rename-in-place and title quickfill are untouched.
+- **R-260-9 — VM-281 SANCTIONED:** "vm-281 can be fixed." The editor-seam line (drop the editor's accessory as
+  its text view resigns) is built IN THIS RUN; VM-281 joins as a member.
+- **R-260-10 — the ladder's reviewer:** "continue moving forward with opus review rounds for now and you can
+  make a ticket for a fable round over the whole diff later." The ladder runs on fresh `opus-reviewer`s;
+  **VM-282** carries the owed Fable round over the whole diff (VM-281's editor line and `MobileEditorStyle`
+  named). This waives the Fable-review requirement for the editor-seam line for THIS merge, at her word; it
+  is not waived for the code.
+- **F-her-1 — the duplicate "Done" on the Blocks sheet (her finding, screenshot):** while she picks blocks the
+  sheet's header shows "Done" (end picking) beside "Done" (close the sheet). Pre-existing (PR20's picking
+  door, `MobileBlockList.swift`; the code itself documents the collision), not this run's regression.
 
 ## Adjudications (the orchestrator's, repo-first)
 
