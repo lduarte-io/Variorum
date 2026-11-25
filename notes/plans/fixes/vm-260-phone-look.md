@@ -45,11 +45,11 @@ leaves standing is dispositioned at this run's close.
 | VM-254 | Text size: a setting to choose it, or a smaller default | Feature · High |
 | VM-259 | Library: the top rows give way while scrolling (design first: two or three drawn options, then her pick) | Improvement · High |
 
-Riders offered at kickoff (open tickets in the Areas this run touches, their files open anyway): VM-256 (tapping
-Library on the bar opens the Library root, not the note last open there — the tab road, VM-253's file), VM-275 (a
-refusal line stays up after leaving the note and squeezes the list — the message line, VM-265's file), VM-277
-(refusals: a much shorter line, dismissable, the full reason behind a tap or a swipe — the message line's anatomy).
-Her answer is recorded under "Her rulings at kickoff" below.
+**Riders — SHE TOOK ALL THREE (R-260-4):** VM-256 (tapping Library on the bar opens the Library root, not the
+note last open there — the tab road, VM-253's file), VM-275 (a refusal line clears on leaving its note and never
+squeezes the list — the message line, VM-265's file), VM-277 (refusals: a much shorter line, dismissable, the
+full reason behind a tap or a swipe — the message line's anatomy). All three re-parented as VM-260 sub-issues at
+kickoff; the roster is eleven members in five batches.
 
 ## The cast
 
@@ -120,9 +120,18 @@ ink; P-3 on the phone means the Write screen's chrome never grows a second liven
   batch 2 changes `MobileWriteView`'s chrome, so batch 2 runs it. No unit target's whole run includes it.
 - **Pin before fix, per member.** Bug-class members land red-on-old, verified by revert. Look-class members pin
   what is pinnable (source scans, geometry, ink resolution) and otherwise verify by capture.
-- **Stage:** EVERY `xcodebuild test` run (simulator) and every walk needs a HELD `Tools/stage` claim, with a GO
-  from the `nov24` coordinator first. Headless `swift build`/`swift test` on the core package runs freely (this
-  run should barely touch it).
+- **Stage (the nov24 coordinator's protocol, received at kickoff):** EVERY `xcodebuild test` run (Mac or
+  simulator) and every walk needs a HELD `Tools/stage` claim — claim name `vm-260` — and a GO from `nov24`
+  first; a FREE stage is never an invitation. REQUEST early (what, minutes); READY as its own ping once able to
+  start NOW (keep building headless meanwhile); RELEASE the claim then one result line: executed/passed/failed
+  with EVERY failing test named, zero Variorum instances, Problem Reporter, new crash reports counted by time.
+  Headless `swift build`/`swift test`, `xcodebuild build` and `build-for-testing` need no stage. Simulators: our
+  own device by UDID only, never an every-simulator command; shut it down before RELEASE ("no booted
+  simulators" in the line); phone suites have run on the coordinator's named iOS 26.2 device (`<simulator-udid>` — nov24 hands the
+  id at the GO); an iOS 27 device first gets intelligencetasksd disabled inside it, then 5 min settle after
+  boot, no timing-sensitive run with load in double figures; "Executed 0" or a hung runner is NO VERDICT — one fresh boot, settle, retry once (~8 min
+  budget). The queue as of kickoff: vx-1013's ~50-min gate window outranks us when READY; then short before
+  long. The Sync/-custody slot is vx-1013's tonight (we need none).
 - **Mac legs early (the VM-64 lesson):** this run touches `Shared/Theme/` — the Mac source-scan suites and the
   Mac token pins run at batch 1's gate, not only at the end.
 - **Resiliency:** `notes/SessionResiliencyProtocol.md` binds — commit per piece, LIVE STATUS from the first
@@ -131,27 +140,51 @@ ink; P-3 on the phone means the Write screen's chrome never grows a second liven
 
 ## The batches (each one acceptance unit, one fresh implementer)
 
-### Batch 1 — the mechanical trio (VM-253 · VM-265 · VM-255) + any riders she takes
+### Batch 1a — the bar and the top line (VM-253 · VM-256 · VM-255)
 
-- **VM-253 (Bug):** the bar (`VariorumMobile/Features/Shell/MobileTabBar.swift`) rides the page slide because it
-  is composed per page by the destination builder (the agent note's suspicion — TRACE FIRST, the note is not a
-  trace). Fix: the bar drawn once by the shell, outside the paged band; only the highlighted chip changes. Pin
-  before fix: the bar is drawn once, outside the paged band — red on old.
-- **VM-265 (ruled, P-55-19 → (b)):** the phone face (`Shell/MobileLine.swift` / `MobileMessageLine.swift`) draws a
-  DIRECTION in a neutral colour (the phone's muted ink family), refusals keep the alarm. The seam's kinds are
-  untouched. Extend `MobileLineDirectionTests`; pin the ink class.
-- **VM-255 (her four changes, verbatim in the ticket):** the page word leaves the roots' top line (P-55-2
-  UNRATIFIED — the top line per her kickoff ruling below); the ⋯ becomes a Settings gear; the trash door only on
-  the Library; the Mac's trash glyph (monochrome, replacing the 🗑 emoji — supersedes P-47-31's (a)) and a writing
-  glyph for new note (the Mac's idiom). Today: `Shell/MobileRootMenu.swift` (the ⋯, one item), the 🗑 door on all
-  three roots, "+ New Note" as a 15-pt word. The Mac's glyphs are in its sidebar and masthead code — reuse the
-  symbol names, not the Mac views.
-- Riders, if taken: VM-256 (the tab road — a hidden page stands at its root, P-47-19's law; same file as VM-253),
-  VM-275 (the line clears on leaving its page and never squeezes the list — the overlay window is the face's law
-  already; trace why it squeezes), VM-277 (the shorter dismissable line — only if she takes it; it is the largest
-  rider and may be its own batch if its design grows).
-- Evidence: pins red-on-old per member; a targeted capture set (the three roots, a swipe mid-flight, a direction
-  line) on a dedicated simulator under a stage claim; the Mac source-scan suites + Mac token pins green.
+- **VM-253 (Bug):** the bar (`VariorumMobile/Features/Shell/MobileTabBar.swift`) rides the page slide — the
+  agent note's suspicion is that it is composed per page by the destination builder. TRACE FIRST, the note is
+  not a trace. Fix: the bar drawn once by the shell, outside the paged band; only the highlighted chip changes.
+  Pin before fix: the bar is drawn once, outside the paged band — red on old.
+- **VM-256 (rider, R-260-5 ruled):** leaving a page returns it to its root, a pushed NOTE included — tap or
+  swipe; arriving anywhere always shows the page itself. The quiet savepoint rides the existing leaving occasion
+  (the note stops being shown ⇒ `closeAutoCommit`'s own rule; the phone's leaving road already exists — VM-71's
+  read-then-write shape). P-71-1 retires with its premise (recorded in R-260-5; the ledger addendum at the
+  merge). Pin: a note pushed on a root's stack is gone from it after leaving and returning; the leaving
+  savepoint written exactly once.
+- **VM-255 (her four changes, verbatim in the ticket; R-260-1/-6 ruled):** the page word leaves the roots' top
+  line — the line is the wing's name alone (the wing door; P-55-2 was already unratified); the Bookcase's count
+  moves to a quiet muted second line under the wing's name, Bookcase only ("12 books"); the ⋯ becomes a Settings
+  gear (S-260-1); the trash door only on the Library; the Mac's trash glyph (monochrome, replacing the 🗑 emoji
+  — supersedes P-47-31's (a)) and a writing glyph for new note (the Mac's idiom). Today:
+  `Shell/MobileRootMenu.swift` (the ⋯, one item), the 🗑 door on all three roots, "+ New Note" as a 15-pt word.
+  The Mac's glyphs are in its sidebar and masthead code — reuse the SYMBOL choices, not the Mac views.
+- Evidence: pins red-on-old per member (VM-255's look lines pin what is pinnable — the gear's door, the trash
+  door's fence to the Library, the glyph names; the rest by capture); a targeted capture set (the three roots, a
+  swipe mid-flight) on a dedicated simulator under a stage claim; the Mac source-scan suites + Mac token pins
+  green AT THIS BATCH (the VM-64 lesson — this run touches files both targets compile).
+
+### Batch 1b — the message line (VM-265 · VM-275 · VM-277)
+
+One design pass over the phone's refusal face takes all three (VM-277's ticket says exactly this). The seam's
+kinds are untouched everywhere — ink, clearing and anatomy are the FACE's.
+
+- **VM-265 (ruled, P-55-19 → (b)):** a DIRECTION draws in a neutral colour (the phone's muted ink family);
+  refusals keep the alarm. Extend `MobileLineDirectionTests`; pin the ink class.
+- **VM-275 (Bug; her rule in the ticket):** a refusal raised in a note clears when she leaves that note — only
+  the clearing learns about navigation; P-55-3's fade stands otherwise. AND the line never squeezes the list:
+  it overlays or reserves without moving rows (the face is already an overlay window — trace why the list
+  shrinks; her recording's facts are in the ticket). Pins red-on-old for both halves.
+- **VM-277 (her ruling in the ticket, verbatim):** "refusals should be dismissable and they should be much
+  shorter. maybe you even have to click on it for the reason (or it's clear that you could swipe upwards for
+  the reason on it)". So: a refusal's line carries a SHORT headline (the refusal table gains a short form per
+  sentence — propose the mechanism, don't fork the table's one-brain law); a dismissal gesture joins the fade
+  (P-55-3 superseded for refusals); the full reason opens on demand — the gesture and its signpost are this
+  batch's design call (the implementer proposes, the architect rules, BEFORE building that half — the in-batch
+  fork rule). Scoped to the phone's one line; the Mac's toasts are untouched (hers to say later).
+- Evidence: pins per member; captures of a refusal (short line, dismissal, the reason opened), a direction, and
+  a receipt, both voices; canon notes for the merge — SurfaceContracts' phone-line bullet and the QUESTIONS
+  #277 addendum (P-55-3's refusal arm superseded), this run the pointer.
 
 ### Batch 2 — the drawn step-down, phone-wide and the note's top (VM-273 · VM-272)
 
@@ -200,9 +233,10 @@ ink; P-3 on the phone means the Write screen's chrome never grows a second liven
 - Evidence: her pick recorded verbatim; scroll captures before/after; the paging law untouched (the listing's
   re-ask discipline, VM-68's contract).
 
-Order: 1 → 2 → 3 → 4. Batch 4's mockups may be drawn (by the orchestrator, as sitting material, or a design-only
-implementer) while batch 2 or 3 builds, so her pick is ready when its build slot arrives — but only one
-implementer session runs at a time.
+Order: 1a → 1b → 2 → 3 → 4. Batch 4's mockups may be drawn (by the orchestrator, as sitting material, or a
+design-only implementer) while an earlier batch builds, so her pick is ready when its build slot arrives — but
+only one implementer session runs at a time. VM-254's text-size row waits for batch 2's chrome step-down to
+land first, so its "one notch smaller" default is judged against the corrected chrome.
 
 ## The ladder and the gate
 
@@ -228,10 +262,26 @@ install and the #281 dispositions.
    green on the final tree.
 6. The message line: kinds decided at the seam, ink decided at the face; no string-matching on sentences.
 
-## Her rulings at kickoff (2026-11-24/25, verbatim; recorded the turn they land)
+## Her rulings at kickoff (2026-11-24/25; each a pick from a question-tool batch, her typed words quoted where she typed)
 
-*(Pending — the kickoff questions are out to her: VM-255's top line, VM-254's shape, VM-247's before-any-choice
-look, and the riders.)*
+- **R-260-1 — VM-255's top line.** Her typed answer: "bookcase shouldn't have its count on the same line, but it
+  should have its count". So: the line shows the wing's name alone (the wing door) on every root; the Bookcase
+  keeps its count OFF the line.
+- **R-260-2 — VM-254's shape.** Her pick: "Setting + smaller default" — a text-size row in Settings ▸ Look
+  (about five steps) scaling HER WORDS only, AND the default drops one notch from today's set; the chrome stays
+  fixed (batch 2 owns chrome sizes). The exact step values are the implementer's to propose, PROVISIONAL as a
+  set (the P-47-1 pattern); the 13-pt floor stands.
+- **R-260-3 — VM-247's seed.** Her pick: "Sea-glass default" — the phone starts at the app's own fresh default,
+  Study under the sea-glass, until she picks; the library's synced look is simply no longer read on the phone,
+  so the synced purple goes away on update. No seed-from-library copy.
+- **R-260-4 — the riders.** Her pick: VM-256, VM-275 AND VM-277 all ride.
+- **R-260-5 — VM-256's leaving semantics.** Her pick: "Note closes on leaving" — the uniform law: leaving a page
+  (tap or swipe) returns it to its root, a pushed NOTE included, so arriving anywhere always shows the page
+  itself; the quiet savepoint fires when the note stops being shown (the existing `closeAutoCommit` occasion —
+  no new operation). **P-71-1 ("switching tabs is not leaving a note") retires with its premise** — the note no
+  longer stays open hidden; the QUESTIONS #280 addendum lands at the merge, this run the pointer.
+- **R-260-6 — VM-255's count placement.** Her pick: "Muted line under the wing name" — a quiet second line in
+  the phone's muted ink ("12 books"), under the wing's name, the Bookcase only.
 
 ## Scope calls made at kickoff (the orchestrator's; each on the ratify list)
 
@@ -251,11 +301,13 @@ look, and the riders.)*
 | Preflight (canon, master plan, TICKETS, QUESTIONS #277/#281, SurfaceContracts in full, resiliency protocol, vm-47/vm-55/vx-1033 FOR A LATER READER, vm-44 plan, MobileSoul) | DONE 2026-11-24 |
 | Workspace: branch `vm-260-phone-look`, worktree `~/dev/variorum-vm-260`, in-flight row (main `6e36f3c95`) | DONE |
 | Linear: VM-260 In Progress | DONE |
-| Kickoff sitting: the four questions to her; rulings recorded | IN PROGRESS |
-| nov24 coordinator announced | IN PROGRESS |
-| Batch 1 | NOT STARTED |
-| Batch 2 | NOT STARTED |
-| Batch 3 | NOT STARTED |
-| Batch 4 (design → pick → build) | NOT STARTED |
+| Kickoff sitting: six rulings R-260-1…6 recorded | DONE 2026-11-25 |
+| nov24 coordinator announced; its protocol folded in above | DONE |
+| Riders re-parented under VM-260; batch 1a members In Progress | DONE |
+| Batch 1a (VM-253 · VM-256 · VM-255) | NOT STARTED |
+| Batch 1b (VM-265 · VM-275 · VM-277) | NOT STARTED |
+| Batch 2 (VM-273 · VM-272) | NOT STARTED |
+| Batch 3 (VM-247 · VM-254) | NOT STARTED |
+| Batch 4 (VM-259: design → pick → build) | NOT STARTED |
 | Ladder · gate · walk | NOT STARTED |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
