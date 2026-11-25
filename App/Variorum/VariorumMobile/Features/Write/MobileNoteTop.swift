@@ -253,8 +253,10 @@ struct MobileNoteStackMenu: View {
         .padding(.horizontal, PhoneMetrics.Space.s16)
         .padding(.vertical, PhoneMetrics.Space.s4)
         .frame(minWidth: MobileNoteStackMenu.width)
-        .background(tokens.surface)
-        .presentationBackground(tokens.surface)
+        // Chrome, so the room (R-47-1: bars, sheets and bands sit on the room;
+        // her words on the paper) — the Note sheet's own ground.
+        .background(tokens.room)
+        .presentationBackground(tokens.room)
         .presentationCompactAdaptation(.popover)
     }
 
