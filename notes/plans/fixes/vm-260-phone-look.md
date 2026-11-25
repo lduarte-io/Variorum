@@ -437,7 +437,7 @@ install and the #281 dispositions.
 |---|---|
 | Preflight (canon, master plan, TICKETS, QUESTIONS #277/#281, SurfaceContracts in full, resiliency protocol, vm-47/vm-55/vx-1033 FOR A LATER READER, vm-44 plan, MobileSoul) | DONE 2026-11-24 |
 | Workspace: branch `vm-260-phone-look`, worktree `~/dev/variorum-vm-260`, in-flight row (main `6e36f3c95`) | DONE |
-| Merges of main owed: `ba42ddc53` (PR #26, notes) MERGED at `edae67935` · `5ca093319` (PR #27, VX-1013 — Protection/AppBootstrap, compiles into the phone, no shared code files, trial-merges clean) DUE at batch 2's boundary; the run's FINAL merge-gate legs run on a tree containing it (the coordinator's requirement) | OPEN |
+| Merges of main owed: `ba42ddc53` (PR #26, notes) MERGED at `edae67935` · `1a7b0d444` (PR #28, notes — contains `5ca093319`, PR #27, VX-1013 Protection/AppBootstrap) MERGED at `18b01675e`, 2026-11-25, batch 2's boundary — PR #27 verified in-tree (`merge-base --is-ancestor`); the run's FINAL merge-gate legs run on this tree or later | DONE |
 | Linear: VM-260 In Progress | DONE |
 | Kickoff sitting: six rulings R-260-1…6 recorded | DONE 2026-11-25 |
 | nov24 coordinator announced; its protocol folded in above | DONE |
