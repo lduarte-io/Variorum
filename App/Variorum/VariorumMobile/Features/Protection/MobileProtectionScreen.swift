@@ -230,7 +230,8 @@ struct MobileRoadAccountSection: View {
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        // VM-50: an inline act at 17 with a 44 pt hit area.
+        // VM-50: an inline act at the `control` role's 15 (VM-273; it was 17)
+        // with a 44 pt hit area.
         .buttonStyle(PhoneInlineActStyle(tokens: tokens, role: .control, alignment: .leading))
         .accessibilityLabel(label)
         .disabled(model.presenter.sheet != nil)

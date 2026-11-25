@@ -964,10 +964,10 @@ the decision is the orchestrator's.
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, THE LADDER — round 1 with A-260-18, round 1's fixes block whole, THE RED-ON-OLD WINDOW, round 2's table; the resiliency protocol; the code: `MobileNoteTop.swift` whole, `MobileWriteView.swift`'s masthead and title row, `MobileNoteTopRowTests.swift` whole, the harness's `settle`; **the red-on-old window's own log `/tmp/vm260-win3/R-r1.log` — R1-1's PERF trace on old**, which settles R2-1's mechanism; the ten R2-5 sites; `PhoneType.swift` whole) | DONE |
-| 1. R2-1's pin on the current code — **that commit IS R2-1's red-on-old tree** | DONE (this commit) — `MobileNoteTopRowTests.closingTheTagsLeavesAShortPageWhereItStood(voice:)`; R1-1's pin and every 4b/4a pin byte-unchanged; the runs PENDING the gate |
-| 2. R2-1's bundle `vm260-r2-rol` (APFS clone of `vm260-2r`, its `workspace-state.json` checked/repointed to its own `SourcePackages`, incremental `build-for-testing`, `nice -n 15`) | IN-PROGRESS |
+| 1. R2-1's pin on the current code — **that commit IS R2-1's red-on-old tree** | DONE (`2b8b50e8c` — **THE RED-ON-OLD TREE**) — `MobileNoteTopRowTests.closingTheTagsLeavesAShortPageWhereItStood(voice:)`; R1-1's pin and every 4b/4a pin byte-unchanged (the diff adds one test, one static and two header lines); the runs PENDING the gate |
+| 2. R2-1's bundle `vm260-r2-rol` (APFS clone of `vm260-2r`, its `workspace-state.json` checked/repointed to its own `SourcePackages`, incremental `build-for-testing`, `nice -n 15`) | DONE — the clone named `vm260-2r/SourcePackages` (4 references, the lineage trap) → repointed to `vm260-r2-rol/SourcePackages` (`sed`; zero `vm260-2r/` left; the original in the session scratchpad); `TEST BUILD SUCCEEDED` at `2b8b50e8c` (log `App/Variorum/DerivedData/vm260-r2-rol-build.log`; the new test's symbol is in the built `VariorumMobileTests` binary). The build's only new warnings are "Stale file … `vm260-2r/…/MobileNoteTopRowTests.o` is located outside of the allowed root paths" — the clone's build database naming its parent's objects, which the build system REFUSES to delete (so `vm260-2r` is untouched) |
 | 3. R2-1's fix | **STOPPED — decision owed to the orchestrator** (the trace and the options below) |
-| 4. R2-5 — the ten stale comments (comments only) | NOT-STARTED |
+| 4. R2-5 — the ten stale comments (comments only) | DONE (this commit) — the ten sites below; `git diff` of the commit: every changed line a `//` or `///` line (checked mechanically); no source-scan pin reads a comment line in these files (the scans read code lines or signatures — `MobilePhoneControlsSourceTests`' patterns, `MobileLookSourceTests`' code lines, `TutorialProtectionRecoveryTests`' `AuthViews` door literal) |
 | 5. R2-6 — the Read page's exception beside the whole-point rule (`PhoneType.swift`, a comment) | NOT-STARTED |
 | 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), package paths checked; READY-FOR-TESTS | NOT-STARTED |
 
@@ -1037,6 +1037,26 @@ reach under 69; the reach 70; the title gone; the strip open; the page at its fo
   chrome · offset · max · content · height). **If instead the title flips back** (the strip's change landing in one
   frame on that runtime), the red widens to the title clauses too — the brief's model; the cure question is the same.
 - **Predicted under any tracker-only rule (either of the brief's): the same 6** — which is why piece 3 stopped.
+
+#### R2-5 — the ten comments, as built (comments only)
+
+Each now says what is true on this tree (the change that falsified it named):
+1. `MobileWing.swift` (the `doorParts` doc) — the count's own line under the wing's name went too (batch 4a, R-260-11);
+   nothing sits under the name.
+2. `MobileTrashView.swift` (the header) — the door is the trash glyph on the LIBRARY's top line (`MobileTrashDoor`, the
+   Mac's icon since VM-255); the Shelf carried it until VM-255 (her words, quoted as `MobileRecoveryDoors` records
+   them).
+3. `MobileSettingsView.swift` (the header) — opened from the roots' gear (VM-255), beside this phone's own voice
+   (VM-247).
+4. `MobileAppearance.swift` (the header) — after her LK-1/LK-2 quote (unchanged): the voice and palette were the
+   library's then; since VM-247 the whole look is this phone's (`MobileLook.swift`).
+5. `MobileWriteView.swift` (`MobileWriteScreen.init`) — the look reaching `MobileEditorStyle` is this phone's own since
+   VM-247, laid over the library's settings.
+6. `Shared/Theme/SharedPageStyle.swift` (the phone arm's doc) — an inline door is the `control` role's 15 (VM-273).
+7. `Shared/AuthViews.swift` (the account sheet's Close) — Done's control is the `control` role's 15 semibold (VM-273).
+8. `MobileShelfView.swift` (the Today chip) — a 24 pt near-square chip, 13 medium, in a 44 pt hit area (VM-273).
+9. `MobileProtectionScreen.swift` (`door(_:_:)`) — an inline act at the `control` role's 15 (VM-273).
+10. `MobileProtectionDoors.swift` (`door(_:_:action:)`) — the same.
 
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 

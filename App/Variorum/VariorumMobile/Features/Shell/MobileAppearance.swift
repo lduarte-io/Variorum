@@ -5,8 +5,10 @@
 //  VM-53 (the VM-47 run, batch 5) — **this phone's light · dark · follow-the-
 //  system choice**, and the ONE root it is applied at. Her ruling (LK-1, LK-2):
 //  "follow the library but if the phone has dark mode on, that shouldn't change
-//  what your mac is like (the device dark mode)" — the voice and the palette
-//  are the LIBRARY's (synced, `ThemeStore`); light or dark is each device's own.
+//  what your mac is like (the device dark mode)" — light or dark is each
+//  device's own. (The voice and the palette were the LIBRARY's then, synced
+//  through `ThemeStore`; since VM-247 — the VM-260 run, batch 3 — the whole of
+//  the look is this phone's own too, `MobileLook.swift`.)
 //  AppSpec §12: "appearance (follow system, light, dark) is a local preference".
 //
 //  THE RULE is the Mac's (`AppearanceChoice`, `Shared/Theme/AppearanceChoice

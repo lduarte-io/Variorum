@@ -20,9 +20,10 @@
 //  walk suites drive those seams headlessly.
 //
 //  VM-53 + VM-27 (the VM-47 run, batch 5): ONE scrolling, grouped list on the
-//  phone's shared controls (the body's doc says how), opened from the roots' ⋯
-//  menu and a note's ⋯ sheet; this phone's light · dark · follow-the-system
-//  choice (LK-2 — a local preference) beside the library's voice; and ONE
+//  phone's shared controls (the body's doc says how), opened from the roots'
+//  gear (VM-255; a ⋯ menu until then) and a note's ⋯ sheet; this phone's light ·
+//  dark · follow-the-system choice (LK-2 — a local preference) beside its voice
+//  (this phone's own since VM-247; the library's until then); and ONE
 //  Protection door (VM-27 — the sync row is handed none of its own here).
 //
 

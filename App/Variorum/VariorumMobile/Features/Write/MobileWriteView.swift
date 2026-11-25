@@ -178,8 +178,9 @@ struct MobileWriteScreen: View {
         self.onDeleted = onDeleted
         self.onOpenVersions = onOpenVersions
         // (VM-51: this initializer no longer writes the editor's voice — the
-        // library's look reaches `MobileEditorStyle` where it LANDS, through
-        // the router's theme seam, its one app writer; QUESTIONS #195 MINOR 3.)
+        // look reaches `MobileEditorStyle` where it LANDS, through the router's
+        // theme seam, its one app writer; QUESTIONS #195 MINOR 3. Since VM-247
+        // that look is this phone's own, laid over the library's settings.)
     }
 
     /// The SwiftUI chrome's tokens — this PHONE's voice and palette (VM-247;

@@ -198,8 +198,9 @@ struct AccountView: View {
                 }
                 Spacer()
                 // The closing act is the sheet header's own (Done's control:
-                // 17 semibold in the accent, a 64 × 44 target) — its word
-                // stays Close; `tokens.small` drew it at 11.5 pt.
+                // the `control` role's 15 semibold in the accent — VM-273; it
+                // was 17 — a 64 × 44 target) — its word stays Close;
+                // `tokens.small` drew it at 11.5 pt.
                 Button(style.chrome("Close")) {
                     dismiss()
                 }

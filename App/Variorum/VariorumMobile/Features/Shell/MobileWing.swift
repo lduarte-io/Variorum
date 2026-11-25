@@ -125,7 +125,8 @@ nonisolated enum MobileWingTitle {
     /// byte, `VoiceTokens.path` over `components` — the line a root without a
     /// door draws — so making the name a door changes no letter (pinned).
     /// (VM-255: the page and the Bookcase's count that once trailed it left
-    /// the line — the count is its own quiet line under the name.)
+    /// the line; the count's own quiet line under the name went too — batch
+    /// 4a, R-260-11 — so nothing sits under the name.)
     @MainActor
     static func doorParts(_ tokens: VoiceTokens, wing: String) -> (lead: String, door: String) {
         (lead: tokens.pathPrefix, door: tokens.chromeLabel(wing))

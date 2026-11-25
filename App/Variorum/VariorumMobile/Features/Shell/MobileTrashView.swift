@@ -14,11 +14,13 @@
 //  Archived section — was known-interim BY HER WORD, and this is its close.
 //  The two promises it held apart in one scroll are now two rooms:
 //  everything here is on the 30-day clock, and `MobileArchiveView` is the
-//  kept-forever one. **Its door is the LIBRARY's path line 🗑**
-//  (`MobileRecoveryDoors`), the analogue of her Mac B1 ruling — the masthead
-//  trash icon that replaced a ⋯ menu — and the SHELF renders the same door
-//  from the same declaration, because a deleted BOOK rows here while books
-//  live on the Shelf (the design record's finding 1).
+//  kept-forever one. **Its door is the trash glyph on the LIBRARY's top
+//  line** (`MobileRecoveryDoors`, `MobileTrashDoor` — the Mac's own trash
+//  icon since VM-255, where it was a 🗑 on the path line), the analogue of
+//  her Mac B1 ruling — the masthead trash icon that replaced a ⋯ menu. The
+//  SHELF carried the same door too (a deleted BOOK rows here while books live
+//  on the Shelf — the design record's finding 1) until VM-255, her words: "let's
+//  just only show the trash icon within library."
 //
 //  **Both purge doors live here and nowhere else** (her round-3 rider), and
 //  the split is where that could have been lost: `MobileArchiveModel` has no

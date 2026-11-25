@@ -319,7 +319,8 @@ private struct PageDoorLabel: View {
     /// VM-50: the phone's controls — a primary act is THE calm button (a
     /// destructive one in the voice's alarm, which replaces the literal red
     /// — sheet §D), the CF-3 reveal class the calm button's edge alone, an
-    /// inline door a 17 pt act with a 44 pt hit area.
+    /// inline door an act at the `control` role's 15 (VM-273; it was 17) with a
+    /// 44 pt hit area.
     @ViewBuilder
     private var styled: some View {
         switch form {

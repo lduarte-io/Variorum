@@ -422,8 +422,9 @@ struct MobileShelfView<TabBar: View>: View {
         } label: {
             Text(tokens.chromeLabel(MobileShelfFaces.todayDoorTitle))
         }
-        // VM-50: the chip (sheet §E's Today door — a 32 pt capsule, 15
-        // medium, a 44 pt hit area), replacing the badge's own calm build.
+        // VM-50: the chip (sheet §E's Today door — since VM-273 a 24 pt
+        // near-square chip, 13 medium, in a 44 pt hit area; it was a 32 pt
+        // capsule at 15), replacing the badge's own calm build.
         .buttonStyle(PhoneChipStyle(tokens: tokens))
         .accessibilityLabel(MobileShelfFaces.todayDoorSpoken)
     }
