@@ -343,6 +343,7 @@ kinds are untouched everywhere — ink, clearing and anatomy are the FACE's.
   chrome, never a listing change); one bar, never moving (VM-253); the keyboard floor untouched; the search
   field's VM-47 focus rules intact; no state lives in the view beyond the scroll's own (the slim/full flag is
   derived from scroll offset and direction, P-4).
+- **Rider (A-260-15, C-3b-1):** the Blocks sheet's picking door's VoiceOver name `doneSelectingLabel`/its successor becomes "Cancel picking" (label-in-name); move any pin that rides the old name.
 - **Pins:** the slim line's appearance on a scroll past the threshold and the full top's return on an upward
   nudge (mounted, driven by the scroll position), every door ≥ 44 × 44 in both states, the Bookcase shows no
   count line (red on old), the listing's ask count unchanged by condensing (P1/VM-68). Captures at the gate:
@@ -631,6 +632,27 @@ present):**
   amended whole-point table (halves round up; two steps coinciding where the floor meets the small end)
   joins her bundle. Red-on-old tree `defecf3a9` (`vm260-3r-rol`); tip `78ed5b4bb` (`vm260-2r`, `-mac`
   rebuilt); the R-b3r leg and the re-run tip legs ride the merge gate.
+- **A-260-15 (batch 3b's hand-back, 2026-11-25, orchestrator on Opus): VM-281 and F-her-1 ACCEPTED, the
+  VM-281 proof conditional on the gate.** VM-281, read line by line by the orchestrator (the editor-seam
+  rule; `b48b391e2..dc8312a89`, `MobileEditorTextView` only): two overrides and one stored property —
+  `resignFirstResponder` takes the bar out of UIKit's input views (`nil` + `reloadInputViews()`) while the
+  view still holds the keyboard, parks the SAME bar on a landed resign and restores it on a refused one;
+  `becomeFirstResponder` restores the parked bar before super unless a voice switch installed a fresh one.
+  Checked: the ONLY readers of `inputAccessoryView` in the phone tree are the install
+  (`applyVoiceChrome`, `:993`) and this code (grep), so nothing reads the bar while it's parked, and the
+  controller's weak `bar` stays alive through the park; the typed-Return model, crystallization,
+  `MobileKeyboardBar` and `MobileKeyboardFloor` are untouched. The trace is the implementer's own (the 52 is
+  the accessory, 591 = 539 + 52; a lost suggestion strip would read 583), with its NOT KNOWN carried
+  honestly: if UIKit captures the stale frame during the pop's transition BEFORE the resign (model P), the
+  tip stays red, and the next road is VM-271's accessory-host rework and her call — **the gate stops there
+  rather than iterating**. The cost is named for the review and the closing walk: every editor resign reloads
+  its input views once (the bar may leave a beat before the keys). Review focus added:
+  `Spike/SpikeScenarios.swift:718` reads `tv.inputAccessoryView?.window` (Debug-only spike), which would
+  now read nil after a resign. F-her-1 accepted: "Cancel" PROVISIONAL (P-260-3b-1), the pin red on old in
+  both voices. **C-3b-1 RULED by the orchestrator (an accessibility law, not taste): the picking door's
+  VoiceOver name becomes "Cancel picking"** — Voice Control matches the VISIBLE word, so a spoken name that
+  doesn't contain "Cancel" breaks "tap Cancel" (WCAG 2.5.3, label in name); it stays distinct from the
+  sheet's "Done". A one-line rider on batch 4a, with any pin that rides the old name moved.
 - **A-260-10 (the F-1a-W1 fix's hand-back, 2026-11-25): trace and fix ACCEPTED; the orchestrator's suspected
   mechanism stands REFUTED by the captures' own pixels.** The trace is the stronger kind of evidence — two
   independent captures of the same field on the same device class, the 52.0-pt gap equal to
@@ -677,6 +699,7 @@ present):**
 | Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | BUILT (tip `ca9a8d7be`; A-260-3…8) and WINDOW-RUN 2026-11-25: R1 the 13 predicted reds ALL present and `theListNeverMovesWhileTheLineShows` GREEN on old (A-260-5's hollow CONFIRMED); R2 exactly the 5 predicted reds, guard green; the LIVE line walk green at stops 1/2/3/4/6/7 in both passes (clock holds >6 s, ✕ and flick dismiss, leaves-with-its-note, Undo, card above keyboard), stop 5 inconclusive (driver race; semantics pinned green in P). RECONCILED 2026-11-25 (A-260-13; commits `39e608327` + `d3356f04e`): the leave step now pops the note's stack (Back's own act — the activation road never worked mounted), the card pin reads each class's first geometry in its own window; **VM-275 half 1's red-on-old moved to the corrected old tree `vm260-1b-rol-r`** (the amended window's R1r leg — red at the pin's own assertion predicted; a red at the walk step is a harness red again: stop and report). The trio rebuilt at `d3356f04e`; these pins' first green will be their first ever, said plainly; **FINAL WINDOW 2026-11-25 (09:53–10:14): R1r RED at the pin's OWN assertion (`:170`, `session.status.current == nil`), the three guards GREEN → VM-275 half 1 NOW FAILS CORRECTLY ON THE OLD CODE; on the tip the leave family and the card pin are GREEN, their first greens ever.** DONE pending the ladder |
 | Batch 2 (VM-273 · VM-272) | BUILT (code tip `ae12e4276`; A-260-9; VM-280) and WINDOW-RUN 2026-11-25: R red-on-old ESTABLISHED (every predicted red present, note-top doors Study-only exactly as predicted, all guards green); M GREEN (100/100, the 4 declared known). RECONCILED 2026-11-25 (A-260-12; commits `e39903b7d` + `2d4670d18`): the field draws 36 as designed and its pin reads the layout frame (the 44 was always there); the note top is exact at 136 (the 9 pt was invisible air on both trees), the cap TIGHTENED to 137, C-272-2 to her bundle; re-evidence bundles `vm260-2r{,-mac,-ui}` prebuilt, predicted green, riding the P3 window. Captures banked (18 before + 18 after, `batch-2/`); two throwaway-driver defects (voice carryover — the after run lacks Study shots; a centre-tap fallback opened a full note) — retakes fold into the gate window; **FINAL WINDOW: both reconciles GREEN on the tip: the field box 37.3 in a 44 frame (its own view 22, the VM-280 datapoint), the note top 136.0 in both voices; U 2/2 GREEN on `vm260-2r-ui`.** DONE pending the ladder |
 | Batch 3 (VM-247 · VM-254) | BUILT 2026-11-25 (code tip `54c0d1cc8`, record `5bbff189f`; adjudicated A-260-11); R3 red-on-old ESTABLISHED in the window (all 4 pins red as predicted, 19 issues); P3 + M3 queued as their own window (nov24, at VX-1082's SEAM or after); W3 captures fold into the gate window; U3 already GREEN (2/2, this window); **FINAL WINDOW: M3 GREEN (53/53 in 9 suites, the 4 declared known); P3 ONE unexpected red, `MobileTextSizeTests.theEditorFaceTakesTheStep` (`:145`, the UIKit row preview at the Larger step ≠ 14 × 1.125), owed to this batch's implementer, traced headless (hypotheses in the final-window section)** |
+| Batch 3b (VM-281 · F-her-1) | BUILT 2026-11-25 (red-on-old `b48b391e2` — `vm260-3b-rol` + `vm260-3b-rol-ui`; fixes `dc8312a89` VM-281, `9bf8e6b55` F-her-1 = code tip; trio rebuilt); ADJUDICATED A-260-15 (C-3b-1 ruled "Cancel picking", a 4a rider). PENDING the gate: both pins red on old; the walk's-road keyboard test GREEN on the tip is the VM-281 claim — red with frames near 591 means model P: STOP, VM-271's road |
 | Batch 4 (VM-259 + the note's top + R-260-11) | BOTH PICKS IN: VM-259 B, the slim bar (R-260-12); the note's top A as picked, ratified with no further checkpoint (R-260-13, R-260-14); the Bookcase count line goes (R-260-11). 4a then 4b after batch 3b and the main merge; her judgment is the phone install after 4b |
 | Her phone (R-260-7) | INSTALLED 2026-11-25 ~11:0x at her word (*"install the build on my phone now"*): the signed device build at code tip `78ed5b4bb` (`DerivedData/vm260-device`, Release-iphoneos), `devicectl` to her iPhone 17 Pro, same bundle id (her store carried over). Her assessment on the phone is the run's real close |
 | Ladder · gate · walk | NOT STARTED |
