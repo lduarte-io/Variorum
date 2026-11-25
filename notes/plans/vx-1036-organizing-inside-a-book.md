@@ -441,6 +441,15 @@ Then the question dialog, batch 1 (her picks; one answer typed in her own words)
 
 **Her question, answered in chat:** what keeps a note tagged monday and thursday under monday is the LANE ORDER (first lane in order wins — R-1036-6); the order is set in the gathering's lanes list. It is reversed by dragging the note to thursday (which takes #monday off) or taking #monday off by its ×; putting #monday back files it under monday again. Nothing is stored per note.
 
+Batch 2 of the dialog (her picks):
+
+| id | Ruling |
+|---|---|
+| R-1036-38 | **List is rows only; outline is the cards** — the pick "No, outline is the cards". List gets no cards face of its own. VX-1084. |
+| R-1036-39 | **The per-book tags switch has three positions: hidden · other tags · all tags** — the pick "Third position on the switch". "Other tags" leaves off the tags that place a note (the gathering's own and its lane's); "all tags" shows them. T-6 is settled. |
+| R-1036-40 | **A note's title while reading is a quiet line** — the pick "A quiet line". RT-1 is settled. |
+| R-1036-41 | **Six defaults stand as drawn** — the pick "All six are fine": an empty lane keeps its heading (L-4); a lane move is one undo step (L-6e); binding a laned gathering turns each lane into a chapter (L-10); Home can be reordered and coloured like any wing; all-wings Starred keeps her one star order; a search in the All Wings Library shows the "in: all wings" chip. |
+
 ---
 
 ## 6. Ledger
@@ -461,7 +470,7 @@ Then the question dialog, batch 1 (her picks; one answer typed in her own words)
 | 11 | Agents make and organize gatherings on the wire; a book's listing in her order | VX-1079 · VX-1026 | RULED IN (R-1036-16); M-1…M-4 PROPOSED; MCPSpec in full before the build |
 | 12 | A too-long title scrolls | VX-1080 | RULED (R-1036-19); when it moves is hers |
 | 13 | The tag pill's × centred | VX-1081 | RULED (R-1036-20) |
-| 14 | A List mode for the book | — (no ticket until she rules it) | ASKED (R-1036-28); BL-1…BL-5 on round 2 |
+| 14 | A list mode for the book | VX-1084 | RULED (R-1036-29, -38): a fifth mode, rows only; BL-1…BL-3 as drawn |
 
 *(Rows 1–2 are now T-1…T-6; row 8 is W-2′…W-10.)*
 
