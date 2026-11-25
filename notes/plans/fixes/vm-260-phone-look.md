@@ -462,6 +462,21 @@ install and the #281 dispositions.
   — each class now stands in its own fresh window; the law unchanged. The implementer's stop condition is
   ADOPTED as the window's: a red at "the note's stack" or "the note left" is a harness red again — stop and
   report, never dispose the pin. Diff verified: the two pin files and the record only.
+- **A-260-14 (batch 3's RECONCILE hand-back, 2026-11-25, orchestrator on Opus): H1 ACCEPTED, H2 REFUTED; the
+  fix ACCEPTED.** The orchestrator's own H2 (a cross-suite race) is refuted on two independent grounds the
+  orchestrator checked: the test is synchronous `@MainActor` code over a main-actor face (nothing can
+  interleave), and a stray face would read 1.75 off, not the 0.25 the window's own log expansion shows
+  (verified in `/tmp/vm260-win2/P3.log`: `… - 14 * 1.125) → 0.25`). The mechanism: `UIFontMetrics.scaledFont`
+  does not keep a fractional size while `scaledValue` (the SwiftUI form) does, so VM-254's fractional step
+  sizes (27 of 100 role × voice × step cases) split the two type forms by up to half a point. That is a real
+  product mismatch, not a harness one, and it was invisible at the default size because every table size is
+  a whole point. The fix is ONE line (`PhoneType.spec` rounds the scaled size before the floor; verified by
+  diff, plus comment-only lines in `MobileLook.swift`), the default byte-unchanged. The new
+  `theTwoFormsAgreeAtEveryStep` is the mechanism's own pin, with its falsification condition written in
+  (green on the pre-fix tree ⇒ H1 refuted, the fix does not ship), adopted as the gate's rule. P-260-3a's
+  amended whole-point table (halves round up; two steps coinciding where the floor meets the small end)
+  joins her bundle. Red-on-old tree `defecf3a9` (`vm260-3r-rol`); tip `78ed5b4bb` (`vm260-2r`, `-mac`
+  rebuilt); the R-b3r leg and the re-run tip legs ride the merge gate.
 - **A-260-10 (the F-1a-W1 fix's hand-back, 2026-11-25): trace and fix ACCEPTED; the orchestrator's suspected
   mechanism stands REFUTED by the captures' own pixels.** The trace is the stronger kind of evidence — two
   independent captures of the same field on the same device class, the 52.0-pt gap equal to
