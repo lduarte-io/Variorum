@@ -572,16 +572,23 @@ struct NoteDeleteConfirmEdgeTests {
         return shown.isEmpty ? ask.title : shown
     }
 
+    /// **VX-1077 (her ruling, 2026-11-24) — A RULED CHANGE to this pin and
+    /// the next:** a SINGLE note's ask presents no confirm any more (it goes
+    /// at once, with an Undo toast — `NoteDeleteUndoTests`); the confirm is the
+    /// MULTI-note ask's ("a multi-select delete of many notes can keep a
+    /// confirm"). The dialog edge these two pin is unchanged, so they press it
+    /// on a two-note ask now.
     @Test func pressingDeleteInTheRealDialogRunsTheDeletion() async throws {
         try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let other = try editor.session.operations.createPost(title: "the second pick").id
             let fired = LockIsolated<[String]>([])
             let presented = await press(
-                "Delete", ask: NoteDeleteConfirm(postIDs: [editor.postID])
+                "Delete", ask: NoteDeleteConfirm(postIDs: [editor.postID, other])
             ) { picked in
                 fired.withValue { $0 = picked }
             }
             #expect(presented != nil, "the confirm must present — her ruling's first half")
-            #expect(fired.value == [editor.postID],
+            #expect(fired.value == [editor.postID, other],
                     "and the press must reach the act (the item-2 edge, one act over)")
         }
     }
@@ -590,9 +597,10 @@ struct NoteDeleteConfirmEdgeTests {
     /// hollow pin: it must write nothing at all.
     @Test func pressingCancelInTheRealDialogDeletesNothing() async throws {
         try await withEditor(seedBlocks: ["Alpha one."]) { editor in
+            let other = try editor.session.operations.createPost(title: "the second pick").id
             let fired = LockIsolated(false)
             let presented = await press(
-                "Cancel", ask: NoteDeleteConfirm(postIDs: [editor.postID])
+                "Cancel", ask: NoteDeleteConfirm(postIDs: [editor.postID, other])
             ) { _ in fired.setValue(true) }
             #expect(presented != nil)
             #expect(fired.value == false)
