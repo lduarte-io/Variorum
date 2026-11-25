@@ -598,15 +598,201 @@ session — every test claim below is PENDING until the GO); the walk and its ca
 
 | Piece | State |
 |---|---|
-| 0. Preflight (CLAUDE.md + canon; this record's binding sections, A-260-1, batch 1a's record; the resiliency protocol; SurfaceContracts "The app" incl. the status-seam bullet; the VM-55 FOR A LATER READER + its batch 2 brief; QUESTIONS #277; the three tickets' bodies) | DONE |
-| 1. The pins on the pre-fix tree, with the zero-behaviour seams they need | IN-PROGRESS |
-| 2. The red-on-old tree built headless (`DerivedData/vm260-1b-rol`) | NOT-STARTED |
-| 3. VM-265 — a direction draws in the muted ink | NOT-STARTED |
-| 4. VM-275 half 1 — a refusal raised in a note clears when she leaves it | NOT-STARTED |
-| 5. VM-275 half 2 — the squeeze, traced | NOT-STARTED |
-| 6. A-260-1 — the push door's made-but-not-opened outcome speaks a direction | NOT-STARTED |
-| 7. VM-277 — the proposal (stop-and-propose) | NOT-STARTED |
-| 8. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | NOT-STARTED |
+| 0. Preflight (CLAUDE.md + canon; this record's binding sections, A-260-1, batch 1a's record; the resiliency protocol; SurfaceContracts "The app" incl. the status-seam bullet; the VM-55 FOR A LATER READER + its batch 2 brief; QUESTIONS #277; the three tickets' bodies) | DONE (`f85e9fb54`) |
+| 1. The pins on the pre-fix tree, with the one zero-behaviour seam they need (the face's ink choice as a pure rule, `MobileMessageLineModel.ink(for:)`) | DONE (`eb677c6a8`, compile fixes `ea3f95831` — **`ea3f95831` IS the red-on-old tree**) |
+| 2. The red-on-old tree built headless | DONE — `DerivedData/vm260-1b-rol` from `ea3f95831` (a clone of `vm260-1a`, built incrementally): `TEST BUILD SUCCEEDED` |
+| 3. VM-265 — a direction draws in the muted ink | DONE (`fc51f0f8e`) — phone `build-for-testing` green on the tip; the suites PENDING |
+| 4. VM-275 half 1 — a refusal raised in a note clears when she leaves it | DONE (`f3c310ef3`) — compiles; the suites PENDING |
+| 5. VM-275 half 2 — the squeeze, traced | TRACED: no row moves (a guard pin, expected GREEN on both trees ⇒ the literal mechanism HOLLOW — PENDING its run); what she saw is the line's face, whose cure is VM-277's anatomy — carried in the proposal below, NOT built |
+| 6. A-260-1 — the push door's made-but-not-opened outcome speaks a direction | DONE (`982390ada`) — compiles; the suites PENDING |
+| 7. VM-277 — the proposal (stop-and-propose) | DONE (this commit) — WAITING on the architect's ruling |
+| 8. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | PHONE DONE (`DerivedData/vm260-1b`, tip `982390ada`, incremental, under `nice`); MAC NOT-STARTED — held for the coordinator's "cleared" (its quiet window from 02:06: no cold or full builds); the run list below is drafted |
 | 9. The suites at the GO (red-on-old, the tip, the Mac legs) | PENDING |
 | 10. VM-277 built, after the ruling | WAITING (the ruling) |
 | 11. The walk (a refusal, a direction, a receipt; both voices) | PENDING |
+
+
+### VM-265 — a direction reads in a neutral ink (P-55-19 → (b))
+
+**Traced mechanism.** A direction rides the refusal CLASS at the seam on purpose (always drawn — P-55-7/P-55-11): every
+phone direction door said `MobileLine.say(…, as: .refusal)` → `StatusCenter.refuse` → an `Item(kind: .refusal)`, and the
+face inked by kind alone (`.refusal → tokens.alarm`). The item carried no fact that told the face a direction from a
+refusal, so a line such as "Already collected — …" or "Entry saved. Your daily journal book is finished…" drew in the
+alarm red.
+
+**The fix, as built.** The ruled option's own shape — "a new item fact and a face arm":
+- `StatusCenter.Item.isDirection` (defaulted false), set by the seam's EXISTING `direct(_:)` door alone (it delivers
+  exactly what it delivered — the same trim, guard, slot and clock — with the fact set). **The seam's kinds and slot
+  rule are untouched; this is the batch's one line of `Shared/StatusCenter.swift`.** The Mac's face never reads the fact
+  (its toast inks by kind), so the Mac's words and face are unchanged; `VM61MacStatusSeamPinTests`' forbidden words are
+  not touched (the Mac legs re-run it — PENDING).
+- The phone's line vocabulary gains `MobileLine.Class.direction` → `status.direct`.
+- The face's ink is one pure rule, `MobileMessageLineModel.ink(for:)` (`.refusal` → muted when `isDirection`, else the
+  alarm; an offer her ink; a receipt the muted) — the role the face resolves against the library's look.
+- Every direction door speaks `.direction`: the Trash's put back (`MobileTrashModel`), the tray's and the Block
+  History's put backs and restores (`report(direction:)` — a refusal stays a refusal first), the lens's archived pick
+  (`MobileLenses`), the collect-by-tagging and "Already collected" (`MobileMembership.collect` — P-55-7's own example and
+  the ticket's), the Today door's unfiled entry (`MobileShelfViewModel.openToday`), the copy that could not follow the
+  screen (`MobileNoteClipboard.Outcome.copiedSavedTakes`), and A-260-1's new line.
+
+**Pins.** `MobileLineDirectionTests`: every direction door's existing pin also asks the face's ink rule (`expectMutedInk`,
+9 sites in 8 tests) — RED ON OLD predicted for all 8 (the alarm); new `aDirectionReadsMutedAndARefusalKeepsTheAlarm`
+(the seam's `direct` beside `refuse`, an offer, a removal) — RED ON OLD predicted (one issue: the direction); new
+`theTodayDoorsUnfiledEntryReadsMuted` (a finished Journal, the entry opened not filed) — RED ON OLD predicted;
+`theDirectionsAreTheLandingsThatAreNotItsPlace` unchanged (green on both). `MobileNoteClipboardTests.
+aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking` gains the ink check — RED ON OLD predicted. MOVED with the ruling:
+`MobileLineShowRuleTests.theCopyOutcomesSayTheirClass` (`.copiedSavedTakes.line` is `.direction`, was `.refusal`).
+All PENDING the GO.
+
+### VM-275 — a refusal leaves with its note; the line never squeezes the list
+
+**Half 1 — traced mechanism.** The line's item lives in the seam (`StatusCenter.current`) until its 6 s clock or a newer
+message. The note screen's leaving road (`MobileWriteScreen`'s `onDisappear`: teardown, the leaving savepoint, the hold
+given back — and since VM-256 every page change takes it) withdrew only what the note's own UNDO DOOR said
+(`MobileLine.withdrawNoteLine(of:)` → `withdraw(owner:)`); a refusal carries no owner, so a refusal raised in the note
+rode on over the Library for the rest of its clock (her recording: about 5 s of 8.5 — the 8.5 is her repeated
+backspaces re-raising the refusal, each re-arming the clock).
+
+**Half 1 — the fix.** The clearing rides that SAME leaving road — no second navigation observer: the screen notes which
+line was showing as it arrived (`lineWhenShown`, written on appear), and on disappear `MobileLine.leaveNote(session:
+lineWhenShown:)` clears the line when the pure `MobileLine.clearsOnLeavingNote` says so — a refusal-class line raised
+while the note showed. Kept: a line from before the note opened (the Today door's direction is said just before its
+note is pushed), a removal (the note's delete pops the screen while its Put back line stands), an offer. P-55-3's fade
+otherwise stands. The edit in `MobileWriteView.swift` is two calls on the screen's appear/disappear — no layout, nothing
+in `MobileWriteView` (the editor host), `MobileEditorTextView` or the text-input path.
+- **PROVISIONAL C-275-1 — a DIRECTION raised in the note clears on leaving too** (it rides the refusal class; a direction
+  about the note — "Already collected", a copy that could not follow the screen, a put back that landed elsewhere — is
+  stale once she has left it). Alternative: only refusals proper clear, a direction keeps its fade.
+
+**Half 2 — traced mechanism: the rows never move.** The line is its own passthrough window over the scene
+(`MobileMessageLineHost`), raised ONCE when the shell joins its window — never per message — and nothing in the app's
+window reads the line: a whole-tree search finds no reader of `status.current`/`spoken`/`lineItem` outside the face. So
+no row can move or shrink when a line shows. What reads as "shrinking the list to make room above the tab bar" is the
+line's FACE: a full-width band on the bar's own ground (the room) under the bar's own hairline, standing flush on the
+bar — so the bar appears to GROW over the list's foot — and the join refusal she saw is three to four lines at 15 pt,
+about 100 pt, more than a Library row (88 pt). The cure is the face's anatomy, which is VM-277's design pass (one
+short line, and a shape that reads as an overlay — fork (e) of the proposal below), so it is proposed there and NOT
+built here.
+- Pin: `MobileRefusalLeavesItsNoteTests.theListNeverMovesWhileTheLineShows` — a GUARD, expected GREEN on both trees:
+  Library rows' frames at rest, with a four-line refusal showing, and after it went, all equal. Green on old disposes the
+  half's literal mechanism (rows squeezed) as **HOLLOW** (PENDING its run). The pin measures the app's window, which is
+  the claim: whether the hosted surface also raised the overlay window does not change it (the overlay is a separate
+  window raised once, never per line).
+
+**Pins** (`MobileRefusalLeavesItsNoteTests`): `aRefusalRaisedInANoteClearsWhenSheLeavesIt` — the note's real Copy door
+on a note with no words refuses; Back; the line is gone — RED ON OLD predicted; `aLineSaidBeforeTheNoteOpenedOutlivesItsLeaving`
+and `aRemovalSaidInTheNoteOutlivesItsLeaving` — GUARDS, green on both predicted; `theClearingRuleClearsOnlyTheNotesOwnRefusals`
+(the pure rule; added with the fix, tip only); the half-2 guard above. All PENDING the GO.
+
+### A-260-1 — a note made but not opened says where it landed
+
+**As built.** The one push door's refused branch (`MobileShellView.push(_:in:)` — the owning page is not showing) now
+says `MobilePushLanding.direction(for: route)` as `.direction`: a note — "That note didn't open because you'd moved on
+— it's in the Library."; a book — "…it's on the Bookcase." The room words are the bar's own (`MobileTabBar.word`,
+derived). Every note lists in the Library and every book on the Bookcase, so the line is true whichever door asked
+(the door knows the route, nothing of the mint — a Today entry may have stood already, so it never says "new"). The
+other routes (a book's Read, the Trash, Archived, Versions, Protection) are never made by the door that asks for them
+and say nothing. No Undo, never a refusal, no new seam kind. **The words are DRAFT — PROVISIONAL for her pass** (with
+P-260-1a at the merge).
+
+**Pins** (`MobilePushLandingDirectionTests`): `aNoteMadeAfterSheLeftThePageSaysWhereItLanded` (batch 1a's one-turn
+window: Library's New Note then Bookcase; the mint lands, nothing opens, the line names the Library, muted, no Undo) —
+RED ON OLD predicted (nothing said); `aNoteMadeWhereSheStandsOpensAndSaysNothing` — a GUARD, green on both predicted;
+`theWordsNameTheRoomAndOnlyMadeThingsSpeak` (the pure copy; tip only). All PENDING the GO.
+
+
+### Batch 1b — the VM-277 proposal (stop-and-propose; WAITING on the architect's ruling — nothing below is built)
+
+Her ruling (2026-11-24, verbatim in the ticket): "refusals should be dismissable and they should be much shorter. maybe
+you even have to click on it for the reason (or it's clear that you could swipe upwards for the reason on it)". The
+fences this proposal keeps: the refusal tables stay THE words (no fork, no string matching on sentences); the seam's
+kinds and slot rule untouched; the Mac's toasts untouched (hers to say later); `PhoneControls`/`PhoneType`/
+`PhoneMetrics` only; every target 44 × 44; the 13 pt floor. **Two forks below need a seam-side line (an Item fact, a
+clock hold); each states its case — the architect rules whether it may land.**
+
+**What the phone's line says today, by source** (the inventory the mechanism must cover): the shared table
+`OpsRefusalCopy` (≈ 67 operation-error rows; most one line, a handful two — the purge row, the chosen-take row);
+`CrossBlockRefusal` (already TWO parts: `causeClause` + `roadClause` — the join refusal of her recording is
+"This keystroke can't join these two blocks." + "Merge the blocks deliberately instead (··· → Merge with Previous),
+which brings every take along."); `SealedNoteCopy` (two parts: state + verb); `DeletionRefusal`; and model-local
+sentences (the copy door's "This note has no text to copy.", the keystroke fence's "Another structural change is still
+landing.", the lens and history copy, the plain fallback "That couldn't be done."). Most fit one line at 15 pt on a
+393-pt phone; the long ones are a known few.
+
+**(a) The short form — how a refusal gets a headline without forking the one brain.**
+- **(a1) RECOMMENDED — headline and reason from the ONE composer.** A composer answers a two-part value
+  (`RefusalWords(headline:sentence:)`) from the SAME switch arm that answers its sentence today, so a row's two halves
+  can never drift; the sentence stays the row's existing literal, byte for byte, and is what the Mac keeps reading
+  (`sentence(for:)` = `.sentence`). Where a composer already builds from parts, the headline IS its first part — no new
+  words: `CrossBlockRefusal.causeClause` ("This keystroke can't join these two blocks."), `SealedNoteCopy`'s state
+  clause. Rows longer than one line get a DRAFT headline (her wording pass — e.g. the purge row "Only the Trash deletes
+  for good."); a row with no headline draws as (a3) below. The phone's door hands the pair; the seam carries the full
+  sentence as `text` (every reader unchanged — VoiceOver, pins, `spoken`) plus ONE defaulted Item fact, `headline`,
+  which only the phone's face reads (VM-265's `isDirection` precedent). *Why first:* the one-brain law holds literally
+  (the headline lives in its sentence's own arm), nothing is matched on words, the Mac is byte-identical, and the
+  cost is bounded to the long rows. *Seam case:* the face can draw only what the item carries; deriving a headline from
+  the sentence would be string matching. A pin walks the composers: every row whose sentence exceeds one line at the
+  default size has a headline that fits one.
+- **(a2) The door names its act as the headline; the table's sentence is the reason** ("Can't join these blocks." /
+  "Can't delete this take."). No table change; but ≈ 80 phone refusal sites each gain an act line — a second vocabulary
+  beside the table, the drift class the table exists to end.
+- **(a3) The same sentence, clamped to ONE line ("…"), the whole behind the tap.** No table change, no seam fact, no
+  copy — but the cut falls wherever the width says ("This keystroke can't join these two blo…"), which reads broken
+  rather than short, and less fits at larger text sizes. **Kept as (a1)'s per-row fallback**, so she gets one line
+  everywhere on day one while headlines land row by row.
+
+**(b) The dismissal gesture** (joins the fade — P-55-3's refusal arm superseded).
+- **(b1) RECOMMENDED — a ✕ at the line's trailing end plus a flick DOWN on the line.** The ✕ is the signpost (she
+  never has to discover a gesture; VoiceOver and Switch Control reach it): `xmark` on `PhoneIconButtonStyle`, the
+  muted, a 44 × 44 target. The flick down — toward the bar or keyboard the line sits on — is the fast road and the
+  natural opposite of (c)'s "up for more".
+- (b2) The ✕ alone — simplest, one more drawn door, no gesture.
+- (b3) A sideways swipe — rejected: the band pages sideways just above the bar, and the two would read alike.
+
+**(c) The reason on demand — the gesture and its signpost.**
+- **(c1) RECOMMENDED — a TAP anywhere on the line opens the reason; the signpost is a disclosure "›" right after the
+  headline** (her first suggestion, "click on it for the reason"; the iOS disclosure idiom — "more behind this" — at no
+  fixed width, so the headline keeps its room). The line's whole frame then takes a touch while a refusal with a reason
+  shows (today only its door does — the passthrough rule widens for that line alone; the rows beneath it are covered for
+  its life, 44 pt, and it is dismissable). VoiceOver: the element's label is the headline, its hint "Double-tap for the
+  reason", custom actions Why and Dismiss; the arrival announcement reads the FULL sentence, so a VoiceOver reader is
+  never made to take the extra step.
+- (c2) A pull UP on the line, signposted by a small grabber capsule on its top edge (the system sheet's grabber — "it's
+  clear that you could swipe upwards", her parenthesis), with the tap as its accessible twin. Pairs symmetrically with
+  (b1)'s flick down; costs a drawn grabber and a gesture to learn.
+- (c3) Both (c1) and (c2): the tap, and the pull up for those who try it — no grabber drawn.
+
+**(d) What the opened reason looks like, and how it closes.**
+- **(d1) RECOMMENDED — the line grows upward in place into a card**: the headline (semibold) on top, the full sentence
+  under it in the line's own 15 pt words (wrapping, scrolling past a cap of about a third of the screen), the ✕ staying
+  top-right. **While open, the fade's clock holds** (she is reading); it closes on the ✕, a flick down, a tap on the
+  headline, leaving the note (VM-275 — `leaveNote` clears it), or a newer message replacing it. *Seam case:* the clock
+  lives in the seam (`StatusCenter.place`'s one dismiss task), so holding it is one seam door — `hold(_ id:)`, cancelling
+  the item's clock while it is `current`; no kind or slot change, the Mac never calls it (added to the VM-61 scan's
+  forbidden words). The face-only alternative — the face keeps drawing an opened item after the seam's clock clears it —
+  splits "what is on screen" from `status.spoken` and cannot tell a fade from VM-275's clear, so it is not recommended.
+- (d2) A system sheet at a medium detent (headline as title, the sentence as body) — heavy, and the line's window never
+  becomes key, so the sheet would have to present from the main window (a feature-to-shell route for a one-line read).
+- (d3) A callout balloon above the line — (d1) drawn differently; no gain.
+
+**(e) The line's shape — VM-275 half 2's cure, carried here because it is the same face.**
+- **(e1) RECOMMENDED — a floating card clear of the bar** (the Mac toast's own idiom, in phone tokens): inset `s8` from
+  the screen's sides and `s8` above the bar or keyboard, the room's ground under a hairline stroke all round, corner
+  `PhoneMetrics.Radius.standard` (so batch 2's squarer step reaches it centrally), the words still aligned at the 20 pt
+  gutter (8 outside + 12 inside). It reads as something passing over the list, never as the bar grown; with (a)'s one
+  line it covers 44 pt of the list, not ~100. No shadow (a literal colour; the phone's scans forbid one).
+- (e2) Keep today's full-width band flush on the bar — (a) alone shrinks it to one line, but it still reads as the bar's
+  own chrome.
+
+**Scope calls inside the proposal (for the ruling):** the new anatomy applies to REFUSALS; a DIRECTION gets (b)'s
+dismissal and (e)'s shape but keeps its whole sentence (it is information, not a complaint — PROVISIONAL); removals
+(words + Undo) and offers keep today's anatomy and fade, in (e)'s shape. Canon at the merge (unchanged from the plan):
+SurfaceContracts' phone-line bullet and the QUESTIONS #277 addendum (P-55-3's refusal arm superseded), this run the
+pointer.
+
+**If ruled as recommended, the build is:** the `RefusalWords` value in `Shared/` and the composers' second column
+(CrossBlockRefusal and SealedNoteCopy free, the long `OpsRefusalCopy`/`DeletionRefusal` rows DRAFT); the Item fact and
+`hold(_:)` (one seam commit ahead of the code, its case recorded); the face (headline + "›" + ✕, the card, the
+expanded reason, the widened touch rule); the pins (the composers' headline walk, the face's geometry — one 44 pt line,
+each door 44 × 44, the card clear of the bar and sides — the touch rule, the clock hold, VM-275's clear of an opened
+reason); captures of a refusal (the line, the reason opened, dismissed), a direction and a receipt, both voices.
