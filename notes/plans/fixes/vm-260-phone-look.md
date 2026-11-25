@@ -406,6 +406,19 @@ install and the #281 dispositions.
   is authored headlines: one expression per site plus nine short forms, in editor-family files VM-271 will
   rework. Verified by the orchestrator: the final 1b diff touches no editor-family file. The new seam spellings
   (`refusalHeadline`, `refuse(headline:sentence:)`, `holdForReading(_:)`) are fenced off the Mac by the VM61 scan.
+- **A-260-9 (batch 2's hand-back, 2026-11-25): the step-down ACCEPTED AS BUILT, PROVISIONAL as one set
+  (P-260-2a…2d with C-273-1 and C-272-1), her judgment of the whole riding the captures at the morning sitting
+  (the P-47-1 pattern).** Grounds, each spot-checked against the diff (05f7ded32..ae12e4276), not the claims:
+  chrome one notch under her words is R-260-2's "smaller default" applied to batch 2's chrome-only scope; every
+  invisible target byte-unchanged (review focus 1) and one real defect fixed under her report — the note-top
+  chips were 44 tall only, now a 44 × 44 floor; the 13-pt floor and LK-5's bar words held; the radii trace to
+  the Mac's own two (`QuietFill.corner` 4, the toast's 8 — S-260-3 satisfied); no fenced file touched
+  (`Sources/`, `VoiceTokens`, `StatusCenter`, `MobileKeyboardBar`, the editor family — verified empty diff).
+  The note title's 24 → 20 stands as VM-272's scope with batch 3 counting its one-notch default from today's
+  set (the batch's own flag). The segmented choice (P-47-30's fence, hers) and the per-site radii stand
+  RECORDED, not patched. The SUSPECTED field-answering item is ticketed — **VM-280** (Bug · Suspected · Low) —
+  so it outlives this record's working sections. The red-on-old predictions remain the window's to prove;
+  acceptance here is of the design set and the diff's discipline, not the evidence.
 
 ## Scope calls made at kickoff (the orchestrator's; each on the ratify list)
 
@@ -431,7 +444,7 @@ install and the #281 dispositions.
 | Riders re-parented under VM-260; batch 1a members In Progress | DONE |
 | Batch 1a (VM-253 · VM-256 · VM-255) | SUITES GREEN; UI test GREEN on the walk device (1/1, 71 s — the Castle-locked no-verdict CLOSED); THE WALK RUN AND READ 2026-11-25 (the orchestrator's read; verdicts below) — every stop PASS in both voices EXCEPT **F-1a-W1, MAJOR, OPEN**: with the Library search holding the keyboard the bar sits ghosted UNDER the keyboard instead of riding above it (SurfaceContracts' bar line; capture `s9-search-keyboard`). Suspected mechanism: the shell's one-bar overlay sits at the band's foot and the band ignores the keyboard (the edge-grounds architecture), where the old in-page bars rode each page's keyboard avoidance. FIX OWED by batch 1a's implementer AT BATCH 2'S BOUNDARY (one writer per tree — batch 2 is live in the worktree); its re-evidence = a contract pin (red on the current tree), the s9 capture re-taken, and the keyboard-reveal UI test again (MobileShellView will change) |
 | Batch 1b (VM-265 · VM-275 · VM-277 + A-260-1's direction line) | BUILT, READY-FOR-TESTS 2026-11-25 (tip `ca9a8d7be`; adjudications A-260-3…8; the editor-spoken refusals' authored headlines deferred to VM-279, the clip standing in). PENDING: the one window — two red-on-old trees, the tip, the Mac legs, the line's 7-stop walk |
-| Batch 2 (VM-273 · VM-272) | IN PROGRESS 2026-11-25 — implementer spawned (headless under the quiet window) |
+| Batch 2 (VM-273 · VM-272) | BUILT, READY-FOR-TESTS 2026-11-25 (code tip `ae12e4276`, READY `17775aa42`; red-on-old tree `f99f20818` in `vm260-2-rol`; tip bundles `vm260-2`/`-mac`/`-ui` prebuilt; adjudicated A-260-9 — the set accepted PROVISIONAL, VM-280 filed). PENDING: the window |
 | Batch 3 (VM-247 · VM-254) | NOT STARTED |
 | Batch 4 (VM-259: design → pick → build) | NOT STARTED |
 | Ladder · gate · walk | NOT STARTED |
