@@ -126,6 +126,60 @@ struct MobileTextSizeTests {
                 "the chrome never moves with her words' size")
     }
 
+    /// **RECONCILE — every step is a whole point** (the final evidence window's red;
+    /// the trace is the record's batch-3 RECONCILE): a role's size at every step, in
+    /// both voices, is a whole number of points — the kind every size in the sheet
+    /// is, and the kind UIKit's `UIFontMetrics.scaledFont` keeps unchanged at the
+    /// default text size. RED ON THE PRE-FIX TREE (27 issues: Study's note title and
+    /// screen title at four steps each and its row preview at three; Terminal's note
+    /// body, row title at three, note title and screen title at four, row preview at
+    /// two).
+    @Test func everyStepIsAWholePoint() {
+        var fractional: [String] = []
+        for step in MobileTextSize.allCases {
+            for voice in ThemeVoice.allCases {
+                for role in PhoneTypeRole.allCases where role.followsTextSize {
+                    let size = PhoneType.spec(role, voice: voice, wordsScale: step.wordsScale).size
+                    if size != size.rounded() { fractional.append("\(role) \(voice) \(step) \(size)") }
+                    #expect(size == size.rounded(), "\(role) \(voice) at \(step): \(size)")
+                }
+            }
+        }
+        print("PERF[sim] VM-254 fractional step sizes — \(fractional.count): \(fractional.joined(separator: " · "))")
+    }
+
+    /// **RECONCILE — the two forms agree at every step** (the window's red, at its
+    /// root): at the default text size, a role's UIKit font (`PhoneType.uiFont` —
+    /// the editor face's roles, the comments sheet's draft, the take browser's and
+    /// History's titles) is the same size as its SwiftUI form (`PhoneType.pointSize`
+    /// — every `phoneType` line), at every step, both voices, every role that follows
+    /// the text size. RED ON THE PRE-FIX TREE at every fractional size — 27 if UIKit
+    /// snaps to a whole point, 25 if to a half (Study's note title at 17.5 and 22.5
+    /// would then agree); the printed list says which grid. (Away from the default
+    /// text size the two forms keep VM-47's measured third-of-a-point gap — not this
+    /// pin's, unchanged.)
+    @Test func theTwoFormsAgreeAtEveryStep() {
+        let large = UITraitCollection(preferredContentSizeCategory: .large)
+        var disagreements: [String] = []
+        for step in MobileTextSize.allCases {
+            for voice in ThemeVoice.allCases {
+                for role in PhoneTypeRole.allCases where role.followsTextSize {
+                    let spec = PhoneType.spec(role, voice: voice, wordsScale: step.wordsScale)
+                    let swiftUI = PhoneType.pointSize(spec, at: .large)
+                    let uiKit = PhoneType.uiFont(
+                        role, voice: voice, compatibleWith: large, wordsScale: step.wordsScale).pointSize
+                    if abs(swiftUI - uiKit) >= 0.01 {
+                        disagreements.append("\(role) \(voice) \(step) SwiftUI \(swiftUI) UIKit \(uiKit)")
+                    }
+                    #expect(abs(swiftUI - uiKit) < 0.01,
+                            "\(role) \(voice) at \(step): SwiftUI \(swiftUI), UIKit \(uiKit)")
+                }
+            }
+        }
+        print("PERF[sim] VM-254 the two forms at the default text size — \(disagreements.count) disagree: "
+              + disagreements.joined(separator: " · "))
+    }
+
     /// **The editor face takes the step** on the note's body and every UIKit role
     /// that follows the text size — the chrome's UIKit roles unmoved — sharing
     /// every colour object with the voice's face; a step already worn moves
@@ -142,8 +196,19 @@ struct MobileTextSizeTests {
                 "the same step again moves nothing")
         #expect(abs(MobileEditorStyle.baseFont.pointSize - 18) < 0.01, "the note's body at Larger")
         #expect(MobileEditorStyle.baseFont.familyName == "Iowan Old Style")
-        #expect(abs(MobileEditorStyle.face.font(.rowPreview).pointSize - 14 * 1.125) < 0.01,
-                "a UIKit row preview takes the step")
+        // RECONCILE (the final evidence window's red, 0.25 off 15.75 — the trace is the
+        // record's batch-3 RECONCILE): the face's UIKit row preview at Larger is the
+        // SAME size as the role's SwiftUI form at the default text size, and a whole
+        // point (14 × 18/16 = 15.75 rounds to 16). The size it read is printed, so a
+        // red says it.
+        let preview = MobileEditorStyle.face.font(.rowPreview).pointSize
+        let previewSpec = PhoneType.spec(.rowPreview, voice: .study, wordsScale: MobileTextSize.larger.wordsScale)
+        let previewSwiftUI = PhoneType.pointSize(previewSpec, at: .large)
+        print("PERF[sim] VM-254 the face's row preview at Larger — UIKit \(preview), SwiftUI \(previewSwiftUI), "
+              + "the step's spec \(previewSpec.size)")
+        #expect(abs(preview - previewSwiftUI) < 0.01,
+                "a UIKit row preview takes the step at the SwiftUI form's size: UIKit \(preview), SwiftUI \(previewSwiftUI)")
+        #expect(abs(preview - 16) < 0.01, "the row preview at Larger is a whole point, 16: \(preview)")
         #expect(abs(MobileEditorStyle.face.font(.control).pointSize - standardControl) < 0.01,
                 "a UIKit control's word does not")
         #expect(MobileEditorStyle.face.ink === MobileEditorStyle.studyFace.ink, "the voice's colours, shared")
