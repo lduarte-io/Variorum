@@ -270,12 +270,23 @@ struct CatalogChapterLine: View {
         return head + " \u{00B7} \(tokens.chromeLabel(SearchAnswerCopy.chapterBook(book)))"
     }
 
+    /// **The book line's leading glyph, in its font — ONE spelling** (ladder
+    /// round 1 NIT 2): the book line (`CatalogBookLine`) draws it in its muted
+    /// ink, and this line's empty slot draws it hidden, so the chapter name
+    /// sits on the titles' column for as long as both read this — a change to
+    /// the glyph or its font moves both together. A symbol in a `Text` carries
+    /// the title's own baseline (a bare `Image` would hand the stack its
+    /// bottom edge). Lives here, in the shared home, beside the line it
+    /// aligns: the feature reads the shared helper, never the reverse.
+    static func bookGlyph(_ tokens: VoiceTokens) -> Text {
+        Text(Image(systemName: "book")).font(tokens.body)
+    }
+
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             if book != nil {
                 // The book line's glyph slot, empty: the name on the titles' column.
-                Text(Image(systemName: "book"))
-                    .font(tokens.body)
+                Self.bookGlyph(tokens)
                     .hidden()
             }
             Text(name)

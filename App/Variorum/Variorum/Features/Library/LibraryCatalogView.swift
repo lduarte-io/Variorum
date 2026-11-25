@@ -1666,9 +1666,9 @@ struct CatalogBookLine: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             // A symbol in a `Text` carries the title's own baseline (a bare
-            // `Image` would hand the stack its bottom edge).
-            Text(Image(systemName: "book"))
-                .font(tokens.body)
+            // `Image` would hand the stack its bottom edge). The ONE spelling
+            // the chapter line's empty slot reads too (ladder round 1 NIT 2).
+            CatalogChapterLine.bookGlyph(tokens)
                 .foregroundStyle(tokens.muted)
             Text(title)
                 .font(tokens.body)
