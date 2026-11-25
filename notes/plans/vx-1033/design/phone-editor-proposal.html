@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The phone's editor — what it should be</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{
+  --bg:#F3F2EE; --panel:#FFFFFF; --ink:#24221E; --soft:#3b3832; --muted:#5b574f; --faint:#8D8578;
+  --line:#DAD7CE; --wash:#E5F0EC; --wash2:#CBE2D9; --accent:#2F6B4F; --accent2:#3B6A59;
+  --bad:#9A3412; --badwash:#F6E7DF; --warn:#8A5A00; --warnwash:#F5EBD3; --good:#2F6B4F; --goodwash:#E1EFE8;
+  --sel:#BFD9F2; --ghost:#A9A294; --code:#E9E7E0; --shadow:0 1px 2px rgba(0,0,0,.06),0 6px 18px rgba(0,0,0,.06);
+  --prose:"Iowan Old Style","Iowan Old Style BT",Palatino,"Palatino Linotype",Georgia,serif;
+  --chrome:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1513; --panel:#15201C; --ink:#E8E3D8; --soft:#D5CFC2; --muted:#A8A092; --faint:#7C7567;
+    --line:#26362F; --wash:#162A23; --wash2:#1F382F; --accent:#90C1AF; --accent2:#90C1AF;
+    --bad:#F0A27F; --badwash:#3A2018; --warn:#E3BF6B; --warnwash:#33290F; --good:#90C1AF; --goodwash:#17302A;
+    --sel:#2C4A66; --ghost:#6F685B; --code:#22302B; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--chrome)}
+.wrap{max-width:1060px;margin:0 auto;padding:36px 24px 96px}
+h1{font:600 34px/1.15 var(--prose);letter-spacing:-.01em;margin:0 0 6px}
+h2{font:600 24px/1.2 var(--prose);margin:56px 0 10px;letter-spacing:-.005em}
+h3{font:650 16px/1.3 var(--chrome);margin:22px 0 6px}
+p{margin:8px 0;max-width:780px;color:var(--soft)}
+p.lede{font-size:17px;color:var(--ink);max-width:800px}
+.meta{color:var(--muted);font-size:13px}
+b,strong{font-weight:650;color:var(--ink)}
+code{font:12.5px/1.4 var(--mono);background:var(--code);padding:1px 5px;border-radius:4px}
+a{color:var(--accent)}
+ul{margin:6px 0;padding-left:20px;max-width:780px;color:var(--soft)}
+li{margin:4px 0}
+.nav{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -24px 8px;padding:10px 24px;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.nav a{text-decoration:none;color:var(--muted)}
+.nav a:hover{color:var(--accent)}
+.quote{font:400 17px/1.5 var(--prose);color:var(--ink);border-left:3px solid var(--wash2);padding:4px 0 4px 16px;margin:14px 0;max-width:800px}
+.quote small{display:block;font:13px/1.4 var(--chrome);color:var(--muted);margin-top:4px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);margin:14px 0}
+.box.pick{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shadow)}
+.box.tint{background:var(--wash);border-color:var(--wash2);box-shadow:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+.tag{display:inline-block;font:650 12px/1 var(--chrome);padding:5px 9px;border-radius:999px;background:var(--code);color:var(--muted);margin:0 6px 6px 0;white-space:nowrap}
+.tag.good{background:var(--goodwash);color:var(--good)}
+.tag.bad{background:var(--badwash);color:var(--bad)}
+.tag.warn{background:var(--warnwash);color:var(--warn)}
+.letter{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--bg);font:650 18px/1 var(--chrome);margin-right:10px;flex:none}
+.pick .letter{background:var(--accent)}
+.ohead{display:flex;align-items:center;margin-bottom:4px}
+.ohead h3{margin:0;font:600 21px/1.2 var(--prose)}
+.one{font-size:16px;color:var(--ink);margin:4px 0 10px;max-width:none}
+.cols{display:grid;grid-template-columns:250px 1fr;gap:20px;align-items:start}
+@media (max-width:820px){.cols{grid-template-columns:1fr}}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;margin:8px 0}
+.kv dt{font-weight:650;color:var(--ink);font-size:13.5px}
+.kv dd{margin:0;color:var(--soft)}
+.kv dd ul{margin:0;padding-left:18px}
+@media (max-width:620px){.kv{grid-template-columns:1fr}}
+.verdict{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:var(--ink)}
+
+/* mini phone sketch */
+.mini{width:250px;border-radius:26px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);padding:16px 16px 12px;font:400 14px/1.5 var(--prose);color:var(--ink)}
+.mini .para{margin:0 0 10px;position:relative}
+.mini .sel{background:var(--sel);border-radius:2px}
+.mini .ghost{color:var(--ghost)}
+.mini .caret{display:inline-block;width:2px;height:1.05em;background:var(--accent);vertical-align:-2px;margin:0 1px}
+.mini .stop{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent);vertical-align:1px;margin-left:1px}
+.mini .live{outline:1.5px solid var(--accent);outline-offset:4px;border-radius:4px}
+.mini .mark{display:block;font:650 10px/1 var(--chrome);color:var(--accent);letter-spacing:.02em;margin:0 0 3px;border-top:1px dashed var(--wash2);padding-top:4px}
+.mini .cap{font:12px/1.35 var(--chrome);color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.mini .gone{color:var(--bad);text-decoration:line-through}
+.mini .kbd{font:11px/1 var(--chrome);color:var(--muted);background:var(--code);border-radius:6px;padding:6px 8px;text-align:center;margin-top:6px}
+
+/* lanes */
+.lane{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:8px 0 14px}
+.step{flex:1 1 150px;min-width:140px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.4;color:var(--soft);position:relative}
+.step b{display:block;font-size:12px;color:var(--muted);font-weight:650;margin-bottom:2px}
+.step.badstep{background:var(--badwash);border-color:transparent;color:var(--ink)}
+.step.goodstep{background:var(--goodwash);border-color:transparent;color:var(--ink)}
+.arrow{align-self:center;color:var(--faint);font-size:18px;flex:none}
+.lanetitle{font:650 13px/1 var(--chrome);color:var(--muted);margin-top:14px;text-transform:none}
+
+/* strip of frames */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0}
+@media (max-width:900px){.strip{grid-template-columns:repeat(2,1fr)}}
+.strip .mini{width:auto}
+
+table.cmp{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+table.cmp th,table.cmp td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+table.cmp tr:last-child td{border-bottom:0}
+table.cmp thead th{font:650 13px/1.2 var(--chrome);color:var(--ink);background:var(--wash)}
+table.cmp th.row{font-weight:650;color:var(--ink);width:19%}
+table.cmp td.d,table.cmp th.d{background:var(--goodwash)}
+.y{color:var(--good);font-weight:650}.n{color:var(--bad);font-weight:650}.m{color:var(--warn);font-weight:650}
+.scrollx{overflow-x:auto}
+
+.track{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+@media (max-width:900px){.track{grid-template-columns:1fr}}
+.stop2{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--soft)}
+.stop2 .n2{font:650 12px/1 var(--chrome);color:var(--accent);margin-bottom:6px}
+.stop2 h4{margin:0 0 4px;font:650 15px/1.25 var(--chrome);color:var(--ink)}
+.stop2.gate{background:var(--warnwash);border-color:transparent}
+.stop2.gate .n2{color:var(--warn)}
+.small{font-size:13px;color:var(--muted)}
+ol.asks{max-width:800px;padding-left:22px;color:var(--soft)}
+ol.asks li{margin:8px 0}
+hr{border:0;border-top:1px solid var(--line);margin:40px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The phone's editor — what it should be</h1>
+<p class="meta">A design proposal for your decision · VX-1033 · 22 November 2026 · nothing here is built or minted until you say</p>
+
+<div class="nav">
+  <a href="#short">The short version</a>
+  <a href="#bar">The bar</a>
+  <a href="#why">Why it breaks</a>
+  <a href="#read">Is your read right?</a>
+  <a href="#options">The five options</a>
+  <a href="#table">Side by side</a>
+  <a href="#others">What other apps do</a>
+  <a href="#blocks">Blocks on new lines?</a>
+  <a href="#path">The path</a>
+  <a href="#sure">Sure and not sure</a>
+  <a href="#asks">What I need from you</a>
+</div>
+
+<div class="quote">“it seems like the phone is struggling to do what the mac did at great effort (make a block based editor FEEL like a regular editor in write), and only the fully custom text input would really bring what the mac has - right? is my read on that wrong?”</div>
+<div class="quote">“I feel like a writing app where you can't select across multiple paragraphs is going to be difficult to use / be happy with for people.”</div>
+<div class="quote">“this is the soul of the mobile app and how we make it a great app, rather than a mid one.”<small>Your words, 22 November 2026.</small></div>
+
+<!-- ================================================================== -->
+<h2 id="short">The short version</h2>
+
+<div class="box pick">
+<p class="lede"><b>Keep one page. Flip who is in charge of it.</b></p>
+<p>The phone should stay one continuous page of text that you can select and edit across paragraphs. I agree that anything less is not a writing app, so the one-block-at-a-time design I floated earlier (option B below) is out.</p>
+<p>Your read is half right. The phone is trying to do the Mac's trick without the thing that makes the trick work, and a fully custom text input is the only way to get that thing on an iPhone. But the Mac's trick is a means, not the feel itself. There is a second way to get the same feel that needs no custom input: <b>let the text view behave like any text view, and make the blocks agree with the page afterwards.</b> That is option D, and it is what I recommend.</p>
+<ul>
+  <li><b>Now:</b> the safety fixes to today's editor (VM-252, VM-250), so your writing is safe while the new core is built.</li>
+  <li><b>Beside it:</b> a new phone editor core on the "page is the truth" idea, behind a switch on your phone, with today's editor one flip away.</li>
+  <li><b>If iOS won't cooperate:</b> a custom text input (option E) goes underneath the same core. Nothing built for D is thrown away.</li>
+  <li><b>The Mac's editor does not change</b> in any option on this page.</li>
+</ul>
+<p>One 15-minute session on your phone could change this recommendation. It is the first step either way.</p>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="bar">The bar: what a great phone editor has to do</h2>
+<p>Every option below is judged against these six.</p>
+<div class="grid3">
+  <div class="box"><h3>1 · It is one page</h3><p>Tap anywhere and type. Select across paragraphs, cut, copy, paste, type over a selection, drag the handles as far as you like.</p></div>
+  <div class="box"><h3>2 · The keyboard just works</h3><p>Autocorrect, predictions, dictation, swipe typing, text replacements. None of them should ever cause a flicker, a jump or a lost letter.</p></div>
+  <div class="box"><h3>3 · Every word lands in its block</h3><p>What you type is saved into the block you put it in. Blocks join or split only when you mean it.</p></div>
+  <div class="box"><h3>4 · Nothing is lost or saved wrong</h3><p>When something goes wrong, the worst case is "nothing happened", and the app says so. Never silent damage.</p></div>
+  <div class="box"><h3>5 · It stays fast</h3><p>A keystroke costs the same in a ten-thousand-word note as in an empty one.</p></div>
+  <div class="box"><h3>6 · The Mac stays as it is</h3><p>“i like where the mac is at and I'm wary of changing it to accomodate the phone.”</p></div>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="why">Why the Mac's way works on the Mac and breaks on the phone</h2>
+<p>Both editors show the whole note in one text view and keep a private map of which characters belong to which block. The difference is who is allowed to change the text, and when the editor hears about it.</p>
+
+<div class="lanetitle">On the Mac: permission first</div>
+<div class="lane">
+  <div class="step"><b>1</b>You press a key, paste, or accept a correction.</div><div class="arrow">→</div>
+  <div class="step"><b>2</b>The text view asks the editor: may this change happen, and here?</div><div class="arrow">→</div>
+  <div class="step goodstep"><b>3</b>The editor approves it, already knowing the block. A change across two blocks is turned into a proper join first.</div><div class="arrow">→</div>
+  <div class="step"><b>4</b>The text changes. The map is updated by exactly that much.</div><div class="arrow">→</div>
+  <div class="step goodstep"><b>5</b>The block is saved.</div>
+</div>
+
+<div class="lanetitle">On the iPhone today: find out afterwards</div>
+<div class="lane">
+  <div class="step"><b>1</b>You type. The keyboard also acts on its own: a grey prediction, an autocorrection, dictation's guesses.</div><div class="arrow">→</div>
+  <div class="step badstep"><b>2</b>Some of those changes never ask. The editor learns of them from a report after the fact.</div><div class="arrow">→</div>
+  <div class="step badstep"><b>3</b>If the report seems to cross two blocks, the editor refuses it and redraws the whole page from the library.</div><div class="arrow">→</div>
+  <div class="step badstep"><b>4</b>The keyboard is still mid-word and does not know the page changed. Its next change lands at the old position.</div><div class="arrow">→</div>
+  <div class="step badstep"><b>5</b>That misplaced change looks like yours, so it is saved.</div>
+</div>
+
+<h3>Your recording of 21 November, as those five steps</h3>
+<div class="strip">
+  <div class="mini">
+    <div class="para">…making a model of a human body doing the different exerci<span class="caret"></span><span class="ghost">ses</span></div>
+    <div class="para">- how I come up with a new feature…</div>
+    <div class="cap"><b>0:07.78</b> You type “i”. The keyboard shows its grey guess “ses” at the end of the block.</div>
+  </div>
+  <div class="mini">
+    <div class="para">…making a model of a human body doing the different exerc<span class="gone">i</span></div>
+    <div class="para"><span class="caret"></span><span class="ghost">ses</span></div>
+    <div class="para">- how I come up with a new feature…</div>
+    <div class="cap"><b>0:07.80</b> One frame later: the page was redrawn. Your “i” is gone, the caret is on the next line, and the guess sits in a paragraph of its own.</div>
+  </div>
+  <div class="mini">
+    <div class="para">…doing the different exercises</div>
+    <div class="para">&nbsp;</div>
+    <div class="para">- how I come up with a new feature…</div>
+    <div class="cap"><b>0:12 → 1:36</b> You repair the word. The empty paragraph stays, and it is still there after a lock and reopen: it was saved.</div>
+  </div>
+  <div class="mini">
+    <div class="para">- tomorrow do the better ver</div>
+    <div class="para">ion<span class="caret"></span> how I come up with a new feature…</div>
+    <div class="cap"><b>3:38.83</b> The same thing again, worse: the break and the next block's “- ” are swallowed, and your letters land in the wrong block.</div>
+  </div>
+</div>
+
+<div class="box tint">
+<h3>What has been measured, on your phone and in tests</h3>
+<ul>
+  <li>On your phone, ordinary keys and autocorrections did ask first (your trace of 23 August). Dictation's guesses did not.</li>
+  <li>A change made through the system's own "replace" road never asks: 24 of 24 in tests.</li>
+  <li>The report of what changed is sometimes stretched to the end of the paragraph. The very first notice is exact, and VM-24 now reads that one.</li>
+  <li>A newly typed character never carries our block mark. Characters already on the page keep theirs.</li>
+  <li>No test today types the way a real keyboard does. None covers predictions, dictation, system undo or Writing Tools.</li>
+</ul>
+<p class="small">Sources: <code>notes/TEXTKIT2_NOTES.md</code> §3 (the iOS 26 and 26.2 findings); the editor audit in <code>notes/plans/vx-1033/phone-editor-audit.md</code>; tickets VM-250 and VM-252.</p>
+</div>
+
+<p>Every fix so far (the snap-back, the keystroke fence, the faint text after a dash) closed one road. But the roads belong to the keyboard, not to us, and each iOS release adds more. A design that is only safe when we have listed every road is the real problem.</p>
+
+<!-- ================================================================== -->
+<h2 id="read">Is your read right?</h2>
+<div class="grid2">
+  <div class="box">
+    <h3>Where you are right</h3>
+    <p>The Mac's trick is <b>permission</b>: nothing changes until the editor has approved it and knows which block it belongs to. The phone copied that design, but an iPhone keyboard does not always ask.</p>
+    <p>A fully custom text input is the only way to get full permission on an iPhone. With one, the keyboard cannot touch the text except by calling our code. So yes: if the goal is "exactly the Mac's mechanism", only option E delivers it.</p>
+  </div>
+  <div class="box">
+    <h3>Where I'd push back</h3>
+    <p>Permission is how the Mac gets the feel. It is not the feel. The feel is: one page, edits land where you make them, and blocks never get in your way.</p>
+    <p>There is a second way to get that, which needs no permission at all: let the text view be an ordinary text view, accept every change, and <b>make the blocks agree with the page afterwards</b>. An editor built that way does not care whether the keyboard asked. That is option D.</p>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="options">The five options</h2>
+<p>A and D keep one text view. B and C confine the keyboard to one block. E replaces Apple's text view with our own.</p>
+
+<!-- A -->
+<div class="box" id="A">
+  <div class="ohead"><span class="letter">A</span><h3>Keep today's editor and guard it</h3></div>
+  <p class="one">The same design, with every known hole closed.</p>
+  <div class="cols">
+    <div class="mini">
+      <div class="para">It had been raining since <span class="sel">morning.</span></div>
+      <div class="para"><span class="sel">She put the kettle</span> on and waited.</div>
+      <div class="para">The letter was still on the table.</div>
+      <div class="cap">Selection crosses paragraphs, as today. Backspace at the start of a block is still refused until wave 3 adds joining.</div>
+    </div>
+    <div>
+      <span class="tag good">Select across paragraphs: yes</span><span class="tag warn">Saved text: guarded road by road</span><span class="tag">Size: medium (two runs)</span>
+      <dl class="kv">
+        <dt>In your hand</dt><dd>Today's editor, minus the snap-back and the damage.</dd>
+        <dt>Good at</dt><dd><ul><li>The smallest change. Everything already built stays.</li><li>It reaches your phone soonest.</li></ul></dd>
+        <dt>What it costs</dt><dd>Two runs: a latch and a rule for text the keyboard is still forming, then gentler redraws and caret handling.</dd>
+        <dt>Problems we'd have</dt><dd><ul>
+          <li>It stays a list of guarded roads. The editor still keeps a map that must match the page after every change, and still redraws from the library when it is unsure.</li>
+          <li>Wave 3's "Return makes a block" and "backspace joins" would each add a redraw under a live keyboard.</li>
+          <li>A new iOS release can open a new road. It needs a phone session after every update, for good.</li>
+          <li>The editor's main file stays near 3,000 lines.</li>
+        </ul></dd>
+      </dl>
+      <div class="verdict"><b>Verdict:</b> right as the first step, because its safety fixes protect your writing now. Wrong as the destination.</div>
+    </div>
+  </div>
+</div>
+
+<!-- B -->
+<div class="box" id="B">
+  <div class="ohead"><span class="letter">B</span><h3>One block at a time</h3></div>
+  <p class="one">Every block is its own small text view. The keyboard can only touch the one you are in.</p>
+  <div class="cols">
+    <div class="mini">
+      <div class="para live">It had been raining since <span style="white-space:nowrap"><span class="sel">morning.</span><span class="stop"></span></span></div>
+      <div class="para">She put the kettle on and waited.</div>
+      <div class="para">The letter was still on the table.</div>
+      <div class="cap">The handle stops at the end of the block. Copying three paragraphs needs a separate "select blocks" mode.</div>
+    </div>
+    <div>
+      <span class="tag bad">Select across paragraphs: no</span><span class="tag good">Saved text: cannot go wrong</span><span class="tag">Size: large</span>
+      <dl class="kv">
+        <dt>In your hand</dt><dd>Typing feels the same. Tapping another paragraph moves the caret there. Selections never leave their paragraph.</dd>
+        <dt>Good at</dt><dd><ul><li>The whole bug class becomes impossible, by construction.</li><li>The simplest code and the fastest typing in long notes.</li><li>Badges, callouts and comment marks sit on their own block with no measuring.</li></ul></dd>
+        <dt>What it costs</dt><dd>A rebuild of the writing screen.</dd>
+        <dt>Problems we'd have</dt><dd><ul>
+          <li>No selecting or editing across paragraphs with the native handles. You called this out, and I agree it disqualifies it.</li>
+          <li>Moving the caret between blocks from a hardware keyboard, find across blocks and "select all" all need hand-built stand-ins.</li>
+        </ul></dd>
+      </dl>
+      <div class="verdict"><b>Verdict:</b> the safest design and the least like a writing app. Not recommended.</div>
+    </div>
+  </div>
+</div>
+
+<!-- C -->
+<div class="box" id="C">
+  <div class="ohead"><span class="letter">C</span><h3>Two layers</h3></div>
+  <p class="one">The whole note as one page you can read and select across. The paragraph you tap "blooms" into a small live editor on top of it.</p>
+  <div class="cols">
+    <div class="mini">
+      <div class="para"><span class="sel">It had been raining since morning.</span></div>
+      <div class="para"><span class="sel">She put the kettle on and waited.</span></div>
+      <div class="para live">The letter was still on the table.<span class="caret"></span></div>
+      <div class="cap">A long press selects across paragraphs for copy or delete. Typing lives in one outlined block, and a selection begun there cannot leave it.</div>
+    </div>
+    <div>
+      <span class="tag warn">Select across paragraphs: to copy, not to type over</span><span class="tag good">Saved text: cannot go wrong</span><span class="tag">Size: large to very large</span>
+      <dl class="kv">
+        <dt>In your hand</dt><dd>Two kinds of selection. One started by a long press crosses paragraphs. One started from the caret stops at the block's edge. You cannot type over a selection of several paragraphs.</dd>
+        <dt>Good at</dt><dd><ul><li>Keeps the keyboard confined, so text cannot go wrong.</li><li>Keeps copying and deleting across paragraphs.</li></ul></dd>
+        <dt>What it costs</dt><dd>Two text layouts that must agree to the pixel while the live block grows and shrinks as you type.</dd>
+        <dt>Problems we'd have</dt><dd><ul>
+          <li>A new kind of bug: the layers drifting apart, or a touch going to the wrong one.</li>
+          <li>The selection rules would feel inconsistent. Nobody would call it native.</li>
+        </ul></dd>
+      </dl>
+      <div class="verdict"><b>Verdict:</b> clever, but it swaps one fragile seam for another. Not recommended.</div>
+    </div>
+  </div>
+</div>
+
+<!-- D -->
+<div class="box pick" id="D">
+  <div class="ohead"><span class="letter">D</span><h3>The page is the truth <span class="tag good" style="margin-left:8px;vertical-align:3px">recommended</span></h3></div>
+  <p class="one">One text view, as now. But while you type, the page is right and the library follows it.</p>
+  <div class="cols">
+    <div class="mini">
+      <div class="para">It had been raining since <span class="sel">morning.</span></div>
+      <span class="mark">▸ block B starts here</span>
+      <div class="para"><span class="sel">She put the kettle</span> on and wai<span class="caret"></span><span class="ghost">ted</span></div>
+      <span class="mark">▸ block C starts here</span>
+      <div class="para">The letter was still on the table.</div>
+      <div class="cap">The marks are invisible in the app. A block is simply the text between two marks, so a grey guess or an unasked change is always inside some block.</div>
+    </div>
+    <div>
+      <span class="tag good">Select across paragraphs: yes</span><span class="tag good">Saved text: one rule, tested with random changes</span><span class="tag">Size: large</span>
+      <h3>How it works</h3>
+      <ul>
+        <li><b>Blocks are marked on the page itself.</b> Each block's start is recorded on its paragraph break. There is no separate map to fall out of step, so the "refuse and redraw" moment cannot happen.</li>
+        <li><b>Every change is accepted, then read.</b> After any change, asked-about or not, the editor re-reads the few paragraphs around it and saves each block whose text changed. It never needs to know which kind of change it was.</li>
+        <li><b>The page is never redrawn from the library while the keyboard is up.</b> A change from elsewhere (a sync, a take swap, a divide from the menu) is made as a small local edit, announced to the keyboard, and held back while the keyboard is mid-word. The paragraph you are typing in is never overwritten from outside; a conflict becomes a take, as today.</li>
+        <li><b>Structure follows the page.</b> Return's new line gets a mark: that is a new block. Backspacing over a mark joins two blocks. Selecting across three paragraphs and typing replaces them, as in any editor, and the library records the join your existing rules define. A mark the keyboard damages by itself is put back.</li>
+        <li><b>Text the keyboard is still forming is not saved until it settles.</b></li>
+      </ul>
+    </div>
+  </div>
+  <dl class="kv">
+    <dt>In your hand</dt><dd>A normal text editor. Select, cut, paste and type across paragraphs. Backspace joins. Predictions and autocorrect simply work, because nothing refuses them and nothing redraws under them.</dd>
+    <dt>Good at</dt><dd><ul>
+      <li>The feel you asked for, with native selection, loupe, handles and accessibility, because it is still Apple's text view.</li>
+      <li>Being correct without a list of the keyboard's roads. "Any change at all leaves a page the editor reads correctly" becomes a test: thousands of random edits thrown at the core on the Mac, no phone needed.</li>
+      <li>A much smaller core. The approve-first machinery, the fence and the repair road are not needed.</li>
+      <li>Wave 3's Return and backspace become cheap and safe instead of risky.</li>
+    </ul></dd>
+    <dt>What it costs</dt><dd>A new phone editor core, then moving today's features onto it: takes and the peek, the markdown look, badges and marks, the open end of a note, find. Built behind a switch in Settings ▸ Diagnostics, with today's editor one flip away until you retire it.</dd>
+    <dt>Problems we'd have</dt><dd><ul>
+      <li><b>Keeping the keyboard in step when the page changes elsewhere.</b> This is the one thing that could sink D. If the keyboard keeps writing at old positions even after being told the page changed, D cannot be made safe at structural moments, and only owning the input (E) can. It can be tested early, on your phone.</li>
+      <li><b>Knowing when predicted or dictated text has settled.</b> If iOS does not say, we either turn off the grey inline prediction (the bar above the keyboard stays), or accept that a guess can be saved for a moment and corrected at the next key, never into a commit.</li>
+      <li><b>Telling your own cross-block edit from the keyboard's accident when a mark disappears.</b> Your own edits ask first on your phone, which is how we would tell. A wrong call is never destructive: a join keeps both blocks in lineage, and a mark that was put back can be removed by doing it again.</li>
+      <li><b>System undo across a join or split</b> (shake to undo). It needs a rule. The Mac's rule is to clear the text undo at that point.</li>
+      <li><b>Badges, callouts and comment marks</b> still depend on where the text view lays lines out, as today (VM-17, VM-239). D does not fix that by itself.</li>
+    </ul></dd>
+    <dt>Has to be proven</dt><dd>The measuring session now. Then a spike: D's core in the app behind the switch, and the random-edit test on the Mac.</dd>
+  </dl>
+  <div class="verdict"><b>Verdict:</b> recommended. It gives the Mac's feel by the opposite mechanism, and it is the first half of E if E is ever needed.</div>
+</div>
+
+<!-- E -->
+<div class="box" id="E">
+  <div class="ohead"><span class="letter">E</span><h3>Build our own text input</h3></div>
+  <p class="one">A custom text view where the keyboard can only change text by calling our code.</p>
+  <div class="cols">
+    <div class="mini">
+      <div class="para">It had been raining since <span class="sel">morning.</span></div>
+      <div class="para"><span class="sel">She put the kettle</span> on and waited.</div>
+      <div class="para">The letter was still on the table.</div>
+      <div class="kbd">loupe · handles · menu · autocorrect bubble · dictation · VoiceOver: all ours to build</div>
+      <div class="cap">Finished perfectly, it looks exactly like D. Until then, a long tail of small wrongness.</div>
+    </div>
+    <div>
+      <span class="tag good">Select across paragraphs: yes</span><span class="tag good">Saved text: full permission</span><span class="tag bad">Size: very large</span>
+      <dl class="kv">
+        <dt>In your hand</dt><dd>The same as D once every detail is earned. Before that, things Apple's text view gives for free feel slightly off.</dd>
+        <dt>Good at</dt><dd><ul><li>Total control: the Mac's permission, completely.</li><li>Knowing exactly which text the keyboard is still forming.</li><li>Immunity to changes inside Apple's text view.</li></ul></dd>
+        <dt>What it costs</dt><dd>The largest thing the phone app would ever build, and a standing cost at every iOS release.</dd>
+        <dt>Problems we'd have</dt><dd><ul>
+          <li>The risk moves from data to feel. Selection, the loupe, the edit menu, spelling underlines, dictation, Scribble, a hardware keyboard and VoiceOver each have to be re-earned.</li>
+          <li>Accessibility is a project of its own.</li>
+        </ul></dd>
+      </dl>
+      <div class="verdict"><b>Verdict:</b> the fallback, and a long-run option. E is D's core with our own input layer in place of Apple's, so doing D first loses nothing.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="table">Side by side</h2>
+<div class="scrollx">
+<table class="cmp">
+<thead><tr><th></th><th>A · guard it</th><th>B · one block</th><th>C · two layers</th><th class="d">D · page is the truth</th><th>E · our own input</th></tr></thead>
+<tbody>
+<tr><th class="row">Select and edit across paragraphs</th><td><span class="y">Yes</span></td><td><span class="n">No</span></td><td><span class="m">Copy and delete only</span></td><td class="d"><span class="y">Yes</span></td><td><span class="y">Yes</span></td></tr>
+<tr><th class="row">Backspace joins, Return makes a block</th><td><span class="m">Wave 3, each a redraw under the keyboard</span></td><td><span class="y">Simple</span></td><td><span class="y">Simple</span></td><td class="d"><span class="y">Falls out of the design</span></td><td><span class="y">Falls out of the design</span></td></tr>
+<tr><th class="row">Can saved text go wrong?</th><td><span class="m">Guarded, road by road</span></td><td><span class="y">No, by construction</span></td><td><span class="y">No, by construction</span></td><td class="d"><span class="m">Only if the keyboard writes in the wrong place after we change the page. D makes that rare; the session must show it is preventable.</span></td><td><span class="y">No: nothing changes without our code</span></td></tr>
+<tr><th class="row">A new iOS keyboard feature arrives</th><td><span class="n">May open a new road</span></td><td><span class="y">Nothing to do</span></td><td><span class="y">Nothing to do</span></td><td class="d"><span class="y">Nothing to do for typing; re-run the in-step check</span></td><td><span class="m">Must be adopted by hand</span></td></tr>
+<tr><th class="row">Testable without a phone</th><td><span class="m">Partly: tests imitate the keyboard</span></td><td><span class="y">Mostly</span></td><td><span class="m">Partly</span></td><td class="d"><span class="y">The core fully, with random edits</span></td><td><span class="m">The core fully; the feel not at all</span></td></tr>
+<tr><th class="row">Native feel</th><td><span class="y">Native</span></td><td><span class="m">Native inside a block</span></td><td><span class="n">Mixed</span></td><td class="d"><span class="y">Native</span></td><td><span class="m">Has to be earned</span></td></tr>
+<tr><th class="row">Badges and marks beside a block</th><td>As today</td><td><span class="y">Solved</span></td><td><span class="m">Partly</span></td><td class="d">As today</td><td><span class="m">Ours to place</span></td></tr>
+<tr><th class="row">Size</th><td>Medium</td><td>Large</td><td>Large to very large</td><td class="d">Large</td><td><span class="n">Very large</span></td></tr>
+<tr><th class="row">The Mac's editor</th><td>Unchanged</td><td>Unchanged</td><td>Unchanged</td><td class="d">Unchanged</td><td>Unchanged</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="others">What other apps do</h2>
+<div class="box" id="others-body">
+<p>From an Opus researcher's read of Apple's documentation, Apple engineers' forum answers and other editors' source code (22 November 2026). Each claim's source, date and confidence is in <code>notes/plans/vx-1033/ios-text-input-research.md</code>.</p>
+<ul>
+  <li><b>No native block editor on iPhone lets a selection run across blocks and be typed over.</b> Anytype, which is open source and uses one text view per block, switches to whole-block selection when a drag passes a block's edge (shipped July 2026). Notion's cross-block selection exists only in its web-view editor. Craft's documented road is block selection. So option B would have put the phone in that company.</li>
+  <li><b>Selection across several text views is not supported by iOS</b> (Apple support, August 2024). That is the wall option C leans against.</li>
+  <li><b>The "ask first" road is unreliable beyond what we measured.</b> Several kinds of change never ask (the double-space period, some prediction taps, swipe typing in one report), and some that ask describe a different change from the one made. Apple lists the single-range "ask first" call as deprecated at iOS 27.</li>
+  <li><b>The grey inline prediction is text the keyboard is still forming.</b> iOS hands it to the text view as "marked" text, and one setting turns it off for a single text view. What accepting and rejecting it write is not documented; your phone has to show us.</li>
+  <li><b>Changing text under the keyboard has a right door.</b> An Apple engineer's advice (2023): never edit the text's storage directly; go through the text view's own insert and replace calls. React Native moved to this shape in October 2026: decide in the "ask" call, apply any correction as a small replace on the next turn, and never while text is being composed. That is option D's rule for changing the page from outside.</li>
+  <li><b>System replacements can drop a custom mark</b> from the characters they replace, while keeping font and colour. D has to check its marks after every change and repair them, never trust them blindly. The plan does.</li>
+  <li><b>A custom text input has a long tail in practice.</b> Runestone, a shipping custom editor, was still adding basics in late 2026: spelling underlines built by hand, Writing Tools support, fixes for composing input. In June 2026 an Apple engineer recommended a stock text view for a new iOS 27 editor.</li>
+  <li><b>iOS 27 lets a text view draw its own surfaces beside the text.</b> That could make badges and marks beside a block easier in one text view (VM-17, VM-239), which this page had counted as a weakness of D.</li>
+</ul>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="blocks">Should the phone stop making blocks on new lines?</h2>
+<div class="quote">“should the phone default to not making new blocks on new lines? not being able to drag and edit across a new line is frustrating.”</div>
+<p class="lede">No. It would not fix this, and it would cost you what blocks are for.</p>
+<div class="grid2">
+  <div class="box">
+    <h3>It would not fix it</h3>
+    <p>Most of your notes already have a block for each paragraph, made on the Mac. The phone has to edit across those boundaries whatever it does with new text.</p>
+    <h3>It would cost</h3>
+    <p>Takes are per block. If the phone wrote one big block, a paragraph written there could not have its own takes until you divided it, and the same note would be shaped differently depending on where you typed it. Today this is one library-wide setting, on purpose.</p>
+  </div>
+  <div class="box">
+    <h3>What is actually frustrating</h3>
+    <p>Today the phone refuses backspace at the start of a block, with “This keystroke can't join these two blocks. Merge the blocks deliberately instead…”. The Mac joins. That refusal is on screen at the very start of your recording.</p>
+    <p>Under D that wall is gone: backspace joins, and a selection across the line just works. Under A it goes away in wave 3, at more risk.</p>
+    <h3>The call that stays yours</h3>
+    <p>What Return does on the phone. You ruled "a new block, as on the Mac". D makes either answer cheap. I would keep your ruling.</p>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="path">The path I recommend</h2>
+<p>Each step is useful by itself, and each one tells us whether the next is needed.</p>
+<div class="track">
+  <div class="stop2"><div class="n2">Step 0 · now</div><h4>Measure on your phone</h4>Fifteen minutes with the edit trace on, on the build you already have. It settles which keyboard changes ask first and whether the grey guess is real text on the page.</div>
+  <div class="stop2"><div class="n2">Step 1 · this wave</div><h4>Make today's editor safe</h4>The latch for VM-252, a page-and-map check in the shipped app, no redraw under text still forming. Your writing is safe while the rest is built.</div>
+  <div class="stop2"><div class="n2">Step 2 · this wave, beside step 1</div><h4>Build D's core behind a switch</h4>Settings ▸ Diagnostics ▸ a switch for the new editor, on your real notes. Plus the random-edit test results from the Mac.</div>
+  <div class="stop2 gate"><div class="n2">The gate · yours</div><h4>Real writing on the new core</h4>Pass: no lost letter, no jump, selection and backspace across paragraphs feel right, and the keyboard stays in step when the page changes elsewhere.</div>
+  <div class="stop2"><div class="n2">Step 3 · after the gate</div><h4>Move everything onto it</h4>Takes, marks, the markdown look, the note's open end. Then wave 3's Writing is built on it, and the old editor is retired at your word.</div>
+</div>
+<div class="grid2">
+  <div class="box"><h3>If the gate fails on "keyboard in step"</h3><p>Build our own input layer under D's core. That is option E, started with its harder half already done.</p></div>
+  <div class="box"><h3>If the gate fails on feel somewhere else</h3><p>Stay on today's editor and run A's second half: gentler redraws, caret handling, proposals never becoming structural acts.</p></div>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="sure">What I am sure of, and what I am not</h2>
+<div class="grid2">
+  <div class="box">
+    <h3>Sure</h3>
+    <ul>
+      <li>The diagnosis. It rests on your recording, two audits and my own reading of the code.</li>
+      <li>B and C cannot give editing across paragraphs.</li>
+      <li>D's core idea can be tested thoroughly without a phone.</li>
+      <li>None of the five touches the Mac's editor.</li>
+      <li>The safety fixes in step 1 are worth doing whichever option you pick.</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>Not sure</h3>
+    <ul>
+      <li>Whether iOS keeps the keyboard in step when we announce a change elsewhere on the page. This decides D versus E.</li>
+      <li>Whether the grey inline guess is real text on the page, and whether iOS says when it has settled.</li>
+      <li>What system undo does across a join.</li>
+      <li>How long E's tail of feel problems really is.</li>
+      <li>Whether D feels right in your hand. I have reasoned about it; nobody has held it.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="asks">What I need from you</h2>
+<ol class="asks">
+  <li><b>Your pick.</b> D with A's safety fixes first (my recommendation) · A only · E from the start · or something this page has missed.</li>
+  <li><b>Return on the phone.</b> Keep "Return makes a block, as on the Mac"? I recommend yes.</li>
+  <li><b>The grey inline predictions.</b> Turn them off in the phone's editor until the safety fixes land, or leave them on. I recommend off; the bar above the keyboard stays.</li>
+  <li><b>The 15-minute session</b>, whenever you like: <code>notes/handoffs/vm-24-morning-phone-session.md</code>, plus one step for the grey prediction at a block's end. A screen recording alongside would be ideal.</li>
+</ol>
+
+<hr>
+<p class="small">Behind this page: the text-loss recording read frame by frame (VM-250); the traced corruption window (VM-252); the phone editor audit and the three other audits of 22 November in <code>notes/plans/vx-1033/</code>; <code>notes/TEXTKIT2_NOTES.md</code> §3; <code>App/Variorum/Shared/EditorBrain/</code> (the shared block map and its rules) and <code>App/Variorum/VariorumMobile/Features/Write/</code>. The words "page", "mark" and "in step" are this page's own plain names, not names in the code.</p>
+
+</div>
+</body>
+</html>
