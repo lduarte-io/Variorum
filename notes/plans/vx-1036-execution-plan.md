@@ -1,0 +1,129 @@
+# VX-1036 — Inside a book: the EXECUTION PLAN
+
+**Ticket** VX-1036 (Umbrella, Books, High) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov24 · **Design record** `notes/plans/vx-1036-organizing-inside-a-book.md` (§4f is the design as closed; rulings §5; mockups `notes/plans/vx-1036/`)
+
+**STATUS — OPEN (kickoff 2026-11-25). The plan is written; no implementer has been spawned; her word on the batches, the cast and the riders is the gate to batch 1.**
+
+---
+
+## FOR A LATER READER
+
+*(Written whole at closeout. Until then: this is the run plan for the first of the three umbrellas cut from the VX-1036 design (R-1036-44). The design is CLOSED — read the design record's §4f first, then §5. Nothing below changes the design; this file says how it builds.)*
+
+---
+
+## 1. The roster (the Linear sub-issue listing, read 2026-11-25 — the listing is the roster)
+
+VX-1039 (High, Bug) a new note in a book is shown ready to type, born where its door stands · VX-1040 (Medium, Improvement) the order dial saves · VX-881 (Medium, Feature) titles in Read ▸ Scroll · VX-1080 (Medium, Improvement) the radio-scroll long title · VX-1081 (Low, Bug) the pill's × centred · VX-1038 (High, Feature) tags seen and edited inside a book · VX-1084 (High, Feature) the book's List mode · VX-1078 (Medium, Feature) tags on a quick note.
+
+Plus one line item that is not a ticket: **main's copy of `notes/plans/vx-1036-orchestrator-handoff.md` carries a wrong sentence in its kickoff line; the correction is on this branch (`cde7ea279`) and reaches main with this run's PR. The closeout CHECKS main's copy reads right** (her word 2026-11-25, the handoff's last section).
+
+No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere in this umbrella. If a batch finds it needs an editor-seam line (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, the read tier), it STOPS and reports: that escalates the ladder to a Fable reviewer and adds the TEXTKIT2_NOTES preflight — nothing here is expected to.
+
+## 2. Binding principles, cast, environment
+
+- **The 13b constitution P-1…P-9 binds every batch** — copied verbatim into the design record's §9 at this effort's kickoff; batch briefs name it as required reading. The applying notes in the `/architect-phase` skill bind with it.
+- **Cast (CLAUDE.md's standing default, hers to redirect at this kickoff):** Fable orchestrates (this session); `opus-implementer` at xhigh, ONE per batch, fresh each batch; ONE cold-review ladder over the run's combined diff at the end. Proposed reviewer: `opus-reviewer` (the diff has no editor seam, no custody, no `Sync/`, no default's-meaning content) — hers to confirm or redirect to `fable-reviewer`.
+- **Preflight read by the orchestrator (2026-11-25), complete:** CLAUDE.md + auto-canon · the master plan incl. the in-flight table · `notes/plans/workflow-transition-2026-10-06.md` · the board snapshot in full · `notes/QUESTIONS.md` (the open tail #241–#282 whole; the body is answered history) · `notes/SessionResiliencyProtocol.md` · `notes/PhaseSizingGuidance.md` · `notes/MobileSoul.md` (the protocol + soul sections) · `notes/SurfaceContracts.md` IN FULL · `notes/MCPSpec.md` IN FULL (batch 1 touches an operation the wire calls) · the design record whole · the orchestrator handoff. TEXTKIT2_NOTES deliberately not required: no editor-seam work (Read ▸ Scroll's title line is SwiftUI chrome in `ReadingFlowView`'s lazy column — verified by reading).
+- **Environment traps (every batch brief carries these):** work ONLY in `~/dev/variorum-vx-1036`; commit by pathspec, never `git add -A`; push after every commit; LIVE STATUS from the first commit (`notes/SessionResiliencyProtocol.md` binds); headless `swift build` / `swift test` run freely; **EVERY `xcodebuild test` run and any walk/screenshot needs a HELD stage claim, announced to the nov24 coordinator first**; instance checks `pgrep -fl 'Variorum.app/Contents/MacOS'` discriminating by PATH; never touch a real-store instance; no `/Applications` install (releases only, VX-931); never a custom build configuration; suite-level `-only-testing`; zsh `pipestatus`; screenshots in gitignored `*-screens` dirs; sentence case in every rendered word, no shouty caps; THE REPO IS PUBLIC — word commits and records as public copy; no commit trailers.
+- **Overlap watched (the in-flight table):** VX-1082 is open on the same book-view area (the book row menus/badges, the Library search answer, `NoteDeletion`, the editor seam) — this run touches the mode row, the outline cards' headers, the mint roads and the Library's List row component; file-level collisions are possible in `Features/BookView/` and `Features/Library/`. **Closeouts serialize: first-ready merges first, the other rebases.** VX-1013 (custody) and VM-260 (phone faces) are disjoint.
+
+## 3. The batches — four, strictly sequential, one acceptance unit each
+
+**Sizing said plainly (the guidance):** none of these is phase-sized; batches 1, 2 and 4 each bundle two or three SMALL members on one surface (the small-run practice), batch 3 is the one medium unit (a new mode built from an existing row). Four implementer sessions, one ladder. This is within the guidance's letter (at most two phase-sized units; zero here are phase-sized).
+
+### Batch 1 — the mint lands in her hands, and the dial saves (VX-1039 + VX-1040)
+
+**Surface:** `Features/BookView/` (BookView's mint/reveal roads, `BookStructureModel.newPost`/`newPostInGathering`, `BookMastheadModeRow`'s dial) + `Operations+Reading.swift` (`newPostInReading` placement).
+
+**VX-1039 — the design is §4f over §4b's N-1…N-3; the trace is the design record's §3a (by reading, on main `99db9ee33`). PIN BEFORE FIX, per arm:**
+- Pin A (CONFIRMED by reading): the navigator-foot doors pass `reveal: false` (`BookView.swift:1494`, `:1503`, `:1162` as of the trace) — a mint from them never asks the page to go to the note. Red on old, revert-verified.
+- Pin B (SUSPECTED): the reveal race — `landOutlineReveal` consumes a reveal that arrives before the new note is among the delivered entries (`BookView.swift:2714–2717`); the entries' later arrival finds nothing parked. **Pin FIRST as the confirm: red confirms and the fix proceeds; green means record-only** (the hallucination guard).
+- **N-1:** every mint door ends with the new note on the page, live, the caret in it — the navigator foot's doors included.
+- **N-2:** where it is born — a chapter's own "+" (a new door on the chapter's page heading, the round-1 mockup frame 8's face) → that chapter, at its end; the general doors (navigator foot, page foot, ⌥⌘N) → after the note she is on, in its chapter. PROVISIONAL (named in §4f): "the note she is on" is the live or selected note, else the navigator's viewed note; with neither, the end. Under a stamp order the place is the order's, and the page goes there.
+- **N-3:** a note born past the 300-note window (`BookViewModel.entryWindow`) widens the window to hold it.
+- **The operations touch:** `newPostInReading` gains placement (a position anchor + a `section_id`), defaults preserving today's behavior byte-for-byte — **the wire calls this road (`create_note` with `book_id` files "under the book's order" — MCPSpec), so the implementer reads `notes/MCPSpec.md` in full and the wire's behavior must be provably unchanged** (a pin on the wire mint's placement). Membership position + section are §9's existing vocabulary; no schema line.
+
+**VX-1040 — D-1 as drawn, R-1036-33 confirmed:** a pick on the dial IS the book's order at once on a gathering and on a book whose order is not manual (the existing `setReadingSort` road — the same operation the wire's `set_book_order` calls; no operation change); on a HAND-ORDERED book a pick stays a look with "Save as This Book's Order" and "Back to manual order" both visible (`BookMastheadModeRow.swift:393`'s door grows its pair); a finished book looks and cannot save, as today. The save speaks the existing receipt family.
+
+**Evidence (the batch closes on this, not on "done"):** the pins red-on-old, revert-verified · state-transition tests: birth placement per door (chapter "+", after-the-note-she-is-on with each PROVISIONAL arm, stamp order, the end), window widening, the dial's writes per book kind (gathering saves at once · non-manual book saves · hand-ordered looks with the two doors · finished looks only) · the wire-unchanged pin · registry walk green (the chapter "+" and any new door declared, P-1) · **the orchestrator's hands-on walk** on the dev store (stage via nov24): mint from every door in a long chaptered book and in a gathering, watch the note arrive live with the caret; work the dial on all four book kinds.
+
+### Batch 2 — tags in the header: the pills, the switch, the long title (VX-1038 + VX-1081 + VX-1080)
+
+**Surface:** the book outline card header (`BookOutlineRows`/`BookView` card headers), the shared pill (`Features/Tags/NoteTagChips.swift`), the per-book switch, a pure Domain rule.
+
+- **VX-1081 FIRST — the pill's ×.** Mechanism (read): the chip's HStack aligns `.firstTextBaseline` and the ✕ is a 7-pt bold `Text` ON the baseline (`NoteTagChips.swift` ~:220), so its glyph sits visually low. The fix centres the × against the text's optical middle — in the ONE chip, so the Library rows, the masthead cluster and this batch's new pills all heal at once. Red-on-old where a geometry pin can prove it (the baselineProbe machinery is in the file); else the fix is traced + before/after capture at 3× (the round-2 mockup frame 1's crop is the acceptance face). **The shared-home rule:** the chip is now rendered by three features (Tags, Library, BookView) — move the chip component to the shared home at this touch per CLAUDE.md, keeping every pre-move name as forwards so existing pins compile unmodified (the 3C parity pattern); if the move proves disruptive mid-batch, STOP and report (the orchestrator tickets it with reason instead — never silently).
+- **VX-1038 — T-1/T-3/T-4/T-5 as closed by §4f:**
+  - T-1: pills in the note's header — on the title line at its trailing side beside "open ↗", wrapping to a second line when many; a title that fills the line puts the pills in their own row directly under it; always pills, the one chip. Both faces: the collapsed card and the open (live) note's header. (The round-2 mockup frame 1 is the face.)
+  - T-3: a small "+" follows the pills — the field suggests existing tags and mints a new one on ⏎ (adopt-or-mint by path in the note's wing; the ONE application road, so living books hear it — seat or bell, the standing receipts). A tagless note shows the "+" alone, only while the book shows tags.
+  - T-4: **the add-tag chord** — the implementer surveys the registry's free chords and RETURNS 2–3 candidates to the orchestrator BEFORE wiring one; the orchestrator brings them to her (§4f: "brought to her at the build"). The chord adds a tag to the note she is on, in a book and in Write; declared once in the registry.
+  - T-5 + R-1036-39: **the per-book switch, three positions — hidden (default) · other tags · all tags.** "Other tags" leaves off the tags that place the note: TODAY that is a gathering's rule-matched tags (a pure Domain function over `RuleGrammar` + the note's tags — written so VX-1085's lanes can extend it); in a plain book the middle position shows everything. The switch's face is the chip beside "expand all · collapse all" (the round-1 mockup's seat, grown to three values). Storage PROVISIONAL: per book on this Mac (the Index `group ▾` memory's class — a way of looking); logged in QUESTIONS at close.
+  - Whenever the switch is not hidden, EVERY outline card wears its pills (R-1036-30); batch 3's list rows read the same switch. Index's header rows deliberately get nothing (§4f names outline cards and list rows only) — flagged to her at the kickoff sitting.
+- **VX-1080 — T-2 as amended by R-1036-35:** a too-long title scrolls radio-style ONLY under the pointer and on the live note; at rest it is one line cut with "…"; one title moves at a time, the one under the pointer first; never under Reduce Motion. The idiom is `WingToolbarLabel`'s (Core/Views) — reuse, not a sibling.
+
+**Evidence:** the × pin (or the traced fix + 3× captures) · state tests: the switch's three positions and per-book persistence; the placing-tags Domain rule (pure, unit-tested); the "+" field's adopt-or-mint and the application heard by a living book (an intake state test) · the chord declared + registry walk green · scroll behavior pinned where testable (at-rest "…", one-at-a-time arbitration, Reduce Motion) + a short clip · screenshots both voices, light and dark · **HER FIRST WALK (before the run merges):** two of §4f's four faces-in-words are this batch's — the three-position tags switch and the "…"-at-rest long title. The orchestrator walks them with her (or captures them for her sitting on an away stretch).
+
+### Batch 3 — the List mode (VX-1084)
+
+**Surface:** `BookStructureModel.ViewMode` + the mode row, a new `Features/BookView` list face composed from the Library's row, the shared row's home.
+
+- **The fifth mode:** `list` joins `ViewMode`; the tab order becomes **outline · list · index · book · read** (R-1036-29; labels lowercase in Terminal as today's). Known cost, accepted at the sitting: five modes need about 222 pt of navigator in the Terminal voice and the order dial drops to its second line in a narrow one — the mode row's STABLE-WIDTH law (VX-896) governs, never ViewThatFits. Note for the brief: **no ⌘1–⌘4 book-mode chords exist today** (verified by reading — the design's BL-5 assumed they did; QUESTIONS #253 holds the note-mode chords' refusal on book surfaces). List therefore ships with NO chord; a mode-row chord family is NOT this run's to invent.
+- **The row is the Library's own — one shared row, never a copy (R-1036-38: rows only; outline is the cards):** title, the day word where a note has a stated day, tag pills with × and the "+" (behind batch 2's switch, same three positions), the edited stamp at the trailing edge, the Library's List face metrics (`LibraryListFace`). The row component moves to the shared home at this touch (the two-features rule), pre-move names kept as forwards — **zero edits to the Library's existing row tests is the parity proof.**
+- **Scoped to the book:** the book's order (dial, pins floating above the sort within their chapter, members only — `status='member'`), chapter headings with a count and a muted "+ new note" (batch 1's chapter-mint door, second renderer, same registry act); a gathering's List shows its assembly (lanes are VX-1085's and arrive there). A row's click selects the note (the sidebar's note box), double-click or ⏎ opens it through the one landing road (Write at the author's block — the book open-door law). NOT taken from the Library (BL-2): the search field (the book's 🔍 stays), scope/view pickers, the Library's own sort. PROVISIONAL: List is not a ⌘↑/⌘↓ stepping surface (Index's posture — the stepper's contract names Outline, Read and Book); logged at close.
+- **P1/P3:** the rows ride the Library's lazy-column engine (`LibraryListFace`'s header note is the law: rows realized ∝ viewport); the 300-note window and "show more ›" as the book's other modes.
+- Per-book mode memory includes list; the tutorial's book steps stay green (P-6 — the tour names modes by its own engine; the implementer runs TutorialWalkTests).
+
+**Evidence:** the shared-row parity (Library tests unmodified, green) · state tests: list assembly (order, chapters, pins, members-only), selection/open acts, mode memory · the realization bound (the lazy column's DEBUG counter pattern) · the mode-row width test at the stable-width law (and VX-1091's overflow NOT worsened — see riders) · registry walk · TutorialWalkTests green · screenshots both voices/dark, wide and narrow · the orchestrator's hands-on walk (a chaptered book, a gathering, a 300+ book).
+
+### Batch 4 — titles while reading, and tags on a quick note (VX-881 + VX-1078)
+
+**Surface:** `ReadingFlowView` (Read ▸ Scroll's chrome), Read's controls; the two capture doors (`Features/Shelf/QuickEntryBar.swift`, `Features/QuickNote/QuickNoteView.swift`).
+
+- **VX-881 — RT-1 as ruled (R-1036-21, R-1036-40):** each note's title as a QUIET MUTED LINE in Read ▸ Scroll (the round-1 mockup frame 10's lighter weight), a small chrome row in the flow's lazy column (the chapter headings' class — NOT the editor seam); behind a per-book switch on Read's own controls, remembered per book on this device (a way of looking; the mockup's chip "note titles: shown" beside Scroll · Pages). Untitled notes: the Library's one derivation names them everywhere else — PROVISIONAL: an untitled note shows NO title line in Read (calm default; the alternative, first-words, recorded); logged at close.
+- **VX-1078 — Q-1 as ruled (R-1036-37):** a TAG BUTTON beside the title suggestion on the new-note box (both quick-entry hosts, Bookcase band and Library foot — the one shared `QuickEntryBar`) and on the menu-bar quick note pad — pills with × and the "+" field (batch 2's components), the typed `{#tag/path}` microsyntax untouched and outranking nothing it didn't before; tags applied at the filing through the one application road (living books hear the birth; the receipts name the landing as today). The pad's wing pick (P-915-B3-1) is untouched; a redirected capture's tags adopt-or-mint in the LANDING wing (the per-wing vocabulary, R-13ia-1's class).
+
+**Evidence:** Read: the switch's per-book/device memory state test, a flow test that the title rows render ∝ viewport, screenshots both voices/dark (the quiet weight on the page) · capture: state tests that a filed capture wears the picked tags through the one road (and a living book hears them), microsyntax-unchanged pin, screenshots of both doors · **HER FIRST WALK:** §4f's third face-in-words — the tag button beside the title suggestion — shown to her before the merge · the orchestrator's walk (file a tagged quick note from both doors; read a book with titles on and off).
+
+## 4. The ladder, the walks, the closeout
+
+- **One ladder over the run's combined diff** after batch 4: a fresh cold reviewer runs `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings land repo-first in this file; fixes by a fresh implementer with red-on-old pins; each round finding a new BLOCKER/MAJOR earns the next, cap five (her standing rule 2026-11-19). Reviewer per §2's cast line (hers at kickoff).
+- **The three faces-in-words owed to her eyes before the merge** (§4f): the three-position switch, the "…"-at-rest title (batch 2), the tag button on the capture doors (batch 4). The fourth (the lane-move confirm) is VX-1085's.
+- **Closeout (CLAUDE.md's ritual, unabridged):** results here; the master plan row retired + closeout paragraph; canon deltas in the two-file shape — SurfaceContracts "The Bookcase and books" (the mode row line gains list; the dial's save rule; the card header's pills + the three-position switch; N-1/N-2/N-3's mint lines; Read's title line) and "The app" (the capture doors' tag button; the keyboard family's new chord), AppSpec §9 (the `newPostInReading` placement line) and §12's stance lines where they summarize — each a contract line + one pointer; the dated entry + narrative to `notes/AppSpecRecord.md`; the run's finals to `notes/plans/run-finals-ledger.md`; `Tools/canon-size` run, its line in the handoff; **the handoff-fix line item verified ON MAIN after the merge**; every filed ticket triaged to the labeling rule; the rulings reconciled against "every"-class wording (R-1036-30's "every outline card", N-1's "every mint door" — re-read against what shipped); the MOBILE PARITY rows in `notes/MobileSoul.md` (List mode · header pills + switch · Read titles · capture tags · the mint landing — pointing at VM-120/VM-122/VM-123/VM-126/VM-127/VM-75 where they already exist); QUESTIONS entries for this run's PROVISIONALs; the author handoff `notes/handoffs/vx-1036-handoff.md` with her checklist and the tickets-filed list (repeated as the session's last chat message); the PR merges to `main` as a MERGE COMMIT (serialized against VX-1082's closeout); worktree removed, branch deleted both sides, debris swept; the STATUS banners here and on the design record flipped CLOSED; push; hard stop.
+
+## 5. Riders offered at kickoff (the standing duty — open tickets in this run's Areas, cheapest while the code is open; HER word seats any)
+
+- **VX-1091** (Books, Bug, Backlog) — Terminal's book-navigator mode tabs overflow the 190-pt floor by ~1 pt. The mode row is batch 3's file, and a fifth tab makes it worse: RECOMMEND seating in batch 3.
+- **VX-576** (Books, Improvement, Todo) — tag pickers list most-used first. Batch 2's "+" field is a tag picker; cheap there.
+- **VX-96** (Books, Bug, Backlog) — Outline reveal-without-focus keeps a title-over-blank beat. Batch 1 rebuilds the reveal road; adjacent.
+- **VX-1032** (Library & sidebar, Feature, Backlog) — hide tags in the LIBRARY view (one setting + per-book choice): the Library twin of batch 2's switch.
+- **VX-312** (Books, Feature, Backlog) — from a book, ⌘1–⌘6 open the caret's note in that mode (QUESTIONS #253's neighbor).
+- **VX-410** (Books, Bug, Backlog) — Book Index with a live block: quiet receipts sit at opacity 0 (the receipt home).
+- Mentioned, not recommended as riders (not cheap from this run's open files): VX-856 (Outline/Index place memory), VX-153, VX-660.
+
+## 6. Open with her at this kickoff (held, bundled)
+
+1. **The batches and their evidence** (§3) — approve or re-cut.
+2. **The cast:** opus-implementer per batch (standing default) and the proposed `opus-reviewer` ladder — or Fable.
+3. **The riders** (§5) — which, if any, seat.
+4. **Index header rows:** §4f gives pills to outline cards and list rows only; Index deliberately gets nothing this run. Confirm, or seat it.
+5. **The add-tag chord** comes to her mid-run (batch 2 returns candidates; T-4).
+6. Ticket bodies that still say "drawn for her to choose" get pointer refreshes to §4f at this kickoff (records hygiene, no decision).
+
+## 7. Ledger (live; one row per item, every row owned)
+
+| # | Item | Batch | Status |
+|---|---|---|---|
+| 1 | VX-1039 mint lands + born where its door stands | 1 | NOT STARTED |
+| 2 | VX-1040 the dial saves | 1 | NOT STARTED |
+| 3 | VX-1081 the pill's × | 2 | NOT STARTED |
+| 4 | VX-1038 pills · "+" · chord · three-position switch | 2 | NOT STARTED |
+| 5 | VX-1080 the radio-scroll title | 2 | NOT STARTED |
+| 6 | VX-1084 the List mode | 3 | NOT STARTED |
+| 7 | VX-881 titles in Read ▸ Scroll | 4 | NOT STARTED |
+| 8 | VX-1078 tags on a quick note | 4 | NOT STARTED |
+| 9 | The handoff fix reaches main (`cde7ea279`) | the PR | ON THE BRANCH; closeout checks main |
+| 10 | Her first-walk faces: the switch · the "…" title · the tag button | 2, 4 | OWED BEFORE MERGE |
+
+## 8. Batch records
+
+*(Appended per batch: the brief as given, LIVE STATUS, pins, walk results, dispositions.)*
