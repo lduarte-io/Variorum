@@ -76,9 +76,10 @@ struct MobileRefusalLineTests {
     private func element(
         _ window: UIWindow, label: String, button: Bool? = nil
     ) -> NSObject? {
-        elements(window).first {
-            $0.accessibilityLabel == label
-                && (button.map { want in $0.accessibilityTraits.contains(.button) == want } ?? true)
+        elements(window).first { candidate in
+            guard candidate.accessibilityLabel == label else { return false }
+            guard let button else { return true }
+            return candidate.accessibilityTraits.contains(.button) == button
         }
     }
 
