@@ -145,7 +145,9 @@ struct MobileRefusalLineTests {
     /// then closes it.
     @Test func aTapOpensTheReasonAndItStaysWhileSheReads() async throws {
         try await withEditorWorld { session, _ in
-            session.status.dismissAfter = .milliseconds(250)
+            // (Tip: 500 ms, read at 1.2 s — margin under load; the red-on-old
+            // tree ran 250/600 and fails at the missing door before any timing.)
+            session.status.dismissAfter = .milliseconds(500)
             let model = MobileMessageLineModel(status: session.status, voice: { .terminal })
             try await standing(model) { window in
                 session.status.refuse(long)
@@ -155,7 +157,7 @@ struct MobileRefusalLineTests {
                 let line = try #require(element(window, label: long, button: true),
                                         "the line is a door to its reason: \(labels)")
                 #expect(line.accessibilityActivate())
-                try? await Task.sleep(for: .milliseconds(600))
+                try? await Task.sleep(for: .milliseconds(1200))
                 await settle(window, 10)
                 #expect(session.status.current?.id == said.id,
                         "the reason stays while she reads — the clock held")
