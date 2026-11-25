@@ -49,7 +49,10 @@ final class BookStructureModel {
     ///   is active the minimal navigator steps aside (her reconciliation
     ///   question, answered: the index IS the outline pane grown up; the
     ///   minimal pane stays beside the other modes — two grains, deliberate).
-    enum ViewMode { case outline, spread, read, index }
+    ///
+    /// (The VX-1036 run, batch 3: the cases live on `BookViewMode`, hoisted so
+    /// the mode row's pure facts compile on their own; this name forwards.)
+    typealias ViewMode = BookViewMode
 
     /// READ's two faces (13c Batch 2C — her 2026-07-23/24 direction: Read is
     /// "the Apple-Books/Kindle PAIR of modes").

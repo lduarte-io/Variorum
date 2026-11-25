@@ -244,7 +244,7 @@ struct BookMastheadStableWidths: Equatable {
     var dial: CGFloat
 
     /// The masthead's stable widths in this voice — the tabs' own words
-    /// (`BookView.tabOrder` / `tabLabel`) and the dial's drawn `face`
+    /// (`BookModeTabs` — `BookView.tabOrder` / `tabLabel`) and the dial's drawn `face`
     /// (`BookOrderDial.face` of `BookOrderDial.shownOrder` — the ONE spelling
     /// the dial draws), resolved in the view's own font context; memoized per
     /// face, so a render never re-measures.
@@ -252,9 +252,20 @@ struct BookMastheadStableWidths: Equatable {
         let regular = tokens.small.resolve(in: context).ctFont as NSFont
         let active = tokens.small.weight(.semibold).resolve(in: context).ctFont as NSFont
         return measure(
-            tabLabels: BookView.tabOrder.map { tokens.chromeLabel(BookView.tabLabel($0)) },
+            tabLabels: BookModeTabs.order.map { tokens.chromeLabel(BookModeTabs.label($0)) },
             dialFaces: [face],
             regular: regular, active: active, spacing: BookMastheadModeRowRule.tabSpacing)
+    }
+
+    /// **VX-1091 — the tab row's stable width alone** (the navigator's floor
+    /// reads it): the same measure, memoized, with no dial face.
+    static func tabs(tokens: VoiceTokens, in context: Font.Context) -> CGFloat {
+        let regular = tokens.small.resolve(in: context).ctFont as NSFont
+        let active = tokens.small.weight(.semibold).resolve(in: context).ctFont as NSFont
+        return measure(
+            tabLabels: BookModeTabs.order.map { tokens.chromeLabel(BookModeTabs.label($0)) },
+            dialFaces: [],
+            regular: regular, active: active, spacing: BookMastheadModeRowRule.tabSpacing).tabs
     }
 
     private struct MemoKey: Hashable {

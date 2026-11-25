@@ -336,7 +336,9 @@ struct BookView: View {
             subjectKey: readingID,
             edge: .leading,
             ideal: BookNavigatorLayout.idealWidth,
-            minimum: BookNavigatorLayout.minimumWidth,
+            // VX-1091: the floor holds the mode row's tabs in this voice.
+            minimum: BookNavigatorLayout.minimumWidth(
+                tabs: BookMastheadStableWidths.tabs(tokens: tokens, in: fontContext)),
             maximum: BookNavigatorLayout.maximumWidth
         ) {
             // The mode's own body. Nothing wraps it: Outline's prose column
@@ -898,17 +900,14 @@ struct BookView: View {
     }
 
     /// **The book's mode row, in order, and each tab's word** — named once
-    /// so the onboarding tour's step 11 quotes the four views it teaches
+    /// so the onboarding tour's step 11 quotes the views it teaches
     /// (VX-292 U3; 13u4 UNIT S3's rule — a door's name is its constant).
-    static let tabOrder: [BookStructureModel.ViewMode] = [.outline, .index, .spread, .read]
+    /// The table is `BookModeTabs` (the VX-1036 run, batch 3 — hoisted so the
+    /// mode row's measure compiles on its own); these names forward.
+    static var tabOrder: [BookStructureModel.ViewMode] { BookModeTabs.order }
 
     static func tabLabel(_ mode: BookStructureModel.ViewMode) -> String {
-        switch mode {
-        case .outline: "Outline"
-        case .index: "Index"
-        case .spread: "Book"
-        case .read: "Read"
-        }
+        BookModeTabs.label(mode)
     }
 
     /// 13s-b U2: a book mode in the tour's vocabulary.
@@ -1211,7 +1210,7 @@ struct BookView: View {
                 // the 13n-a walk's WA-1: ~200 pt truncated every real
                 // receipt. `BookNoteBox.quietReceiptHome` says where.)
             }
-            .padding(12)
+            .padding(BookNavigatorLayout.contentInset)
             // 18d batch 3: NO fixed width any more — `SideColumn` gives the
             // panel the width she dragged (190 … 360, remembered).
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -3453,6 +3452,14 @@ nonisolated enum BookNavigatorLayout {
     /// until she drags it.
     static let idealWidth: CGFloat = 190
     static let minimumWidth: CGFloat = 190
+    /// The navigator's own padding on each side (its content's `.padding`).
+    static let contentInset: CGFloat = 12
+    /// **VX-1091 — the floor the column is given in a voice**: the shipped
+    /// floor, read through the one rule (`BookNavigatorFloor`) with the mode
+    /// row's stable tab width in that voice (`BookMastheadStableWidths.tabs`).
+    static func minimumWidth(tabs: CGFloat) -> CGFloat {
+        BookNavigatorFloor.width(tabs: tabs, shipped: minimumWidth, inset: contentInset)
+    }
     /// *"a bit bigger"* — a chapter list dragged half the window wide is not
     /// a chapter list; the note's panels keep the brain's own 640.
     static let maximumWidth: CGFloat = 360
