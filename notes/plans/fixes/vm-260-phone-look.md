@@ -2481,10 +2481,215 @@ gate's: each root at rest and scrolled, both voices); no line in `Sources/`, `Sy
 
 | Piece | State |
 |---|---|
-| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, R-260-11/-12 verbatim, A-260-15, "Batch 4a", BATCH 1a's VM-253/VM-255 and BATCH 2's tables; the VM-259 mockup §B and its script; SurfaceContracts "The app" in full, the Library's VM-68 bullet and the Bookcase's phone paragraph; the resiliency protocol) | DONE (this commit) |
+| 0. Preflight (CLAUDE.md + canon; this record's "What binds every batch", the 13b constitution, R-260-11/-12 verbatim, A-260-15, "Batch 4a", BATCH 1a's VM-253/VM-255 and BATCH 2's tables; the VM-259 mockup §B and its script; SurfaceContracts "The app" in full, the Library's VM-68 bullet and the Bookcase's phone paragraph; the resiliency protocol) | DONE (`88e1514ae`) |
 | 1. The pins on the pre-fix tree (the Library's slim line, both states' doors, the search glyph's re-open, the ask count; R-260-11's count line moved to its new rule; the rider's label-in-name) — **that commit IS the red-on-old tree** | DONE (`0bfd8326c` — the red-on-old tree; only literals and symbols both trees declare) — the runs PENDING the gate |
 | 2. The red-on-old bundle `vm260-4a-rol` (APFS clone of `vm260-2r`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `0bfd8326c` (log `App/Variorum/DerivedData/vm260-4a-rol-build.log`) |
-| 3. The give-way rule, its tracker and the one top line (`MobileRootTop.swift`, phone target only); the Library's top gives way | DONE (this commit) — phone `build-for-testing` green on the final tree (`DerivedData/vm260-2r-4a-build3.log`); the pins PENDING the gate |
-| 4. Bookcase and Starred: the same line, the hairline on scroll; R-260-11's count line removed (`MobileWingPath(detail:)` and `MobileShelfFaces.bookCount` retired) | DONE (this commit, with the rule's own pins `MobileTopGiveWayRuleTests`) — compiled in the final tree's build (`vm260-2r-4a-build3.log`); the pins PENDING the gate |
-| 5. The rider: the picking door's VoiceOver name "Cancel picking" (C-3b-1, A-260-15) + the pins that ride the old name moved | DONE (this commit) — `doneSelectingLabel` → `pickingExitLabel`; the six references in `MobileBlockListTests` moved with it; compiled in the final tree's build; the pin PENDING the gate |
-| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
+| 3. The give-way rule, its tracker and the one top line (`MobileRootTop.swift`, phone target only); the Library's top gives way | DONE (`b1cb968cc`) — phone `build-for-testing` green on the final tree (`DerivedData/vm260-2r-4a-build3.log`); the pins PENDING the gate |
+| 4. Bookcase and Starred: the same line, the hairline on scroll; R-260-11's count line removed (`MobileWingPath(detail:)` and `MobileShelfFaces.bookCount` retired) | DONE (`a1cb1949a`, with the rule's own pins `MobileTopGiveWayRuleTests`) — compiled in the final tree's build (`vm260-2r-4a-build3.log`); the pins PENDING the gate |
+| 5. The rider: the picking door's VoiceOver name "Cancel picking" (C-3b-1, A-260-15) + the pins that ride the old name moved | DONE (`262f5115e`) — `doneSelectingLabel` → `pickingExitLabel`; the six references in `MobileBlockListTests` moved with it; compiled in the final tree's build; the pin PENDING the gate |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-ui`, `vm260-2r-mac`), incremental, `nice -n 15`; READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` at code tip `262f5115e` (logs `App/Variorum/DerivedData/vm260-2r-4a-build3.log`, `vm260-2r-ui-4a-build.log`, `vm260-2r-mac-4a-build.log`); the phone bundle compiles main's merged Core (`SearchQueries`, PRs #29/#30) with the rest of the package; no error, no new warning in a changed source file; the run list below |
+
+### VM-259 — the traced shape (what "fighting for space" is on this tree)
+
+The Library's top is three rows stacked ABOVE its listing (`MobileLibraryView.body` before this batch: `pathLine`,
+`searchField`, `filterRow`, then the `ScrollView`): the wing line (4 pt of air + a 44 pt line), the search field (its
+44 pt frame + 8 below) and the filter row (44 pt doors) — about 144 pt that never leave, whatever she is reading. The
+Bookcase's and Starred's tops are ONE such line each (the Bookcase's count rode inside the wing door's 44 —
+VM-255's C-255-1), so on those roots there was never more than one line to give. Nothing here is a defect: VM-259 is
+a change of rule (her pick), pinned red-on-old where the old rule shows.
+
+### VM-259 — as built (her pick B; `MobileRootTop.swift` + the three roots; the phone target only)
+
+- **The rule is pure and reads only the list's own scroll** (`MobileTopGiveWay`; P-4 — no broadcast decides it). The
+  list's TRAVEL is its offset from rest clamped to its real range (`travel(offset:insetTop:insetBottom:content:
+  container:)`), so a rubber-band past either end is no travel — the bounce at the foot never re-opens the top. A RUN is
+  the travel gone one way since the last turn. The top condenses when a run DOWN passes the wobble (24 pt) while the
+  list stands past the depth (60 pt); it re-opens when a run UP passes the wobble, or the list is back within its rest
+  (8 pt); between the two nothing changes (the hysteresis). These are the mockup's own numbers (§B's script:
+  `acc > 24 && y > 60` / `acc < -24 || y <= 8`).
+- **The scroll's own memory is held by the root that owns the list** (`MobileTopGiveWayTracker`, an `@Observable`
+  class in the root's `@State`): every reading moves the unobserved memory; the one observed fact, `slim`, is written
+  only when it flips (an `@Observable` setter announces even a same-value write) — so a scrolled frame never asks the
+  root's body again (P3; the Library's body re-reads hundreds of rows), and the tracker is fed by SwiftUI's own
+  scroll reading (`onScrollGeometryChange`, the Mac sidebar's and Library place's road), never a notification.
+- **The Library: the full top lies OVER the listing's head** instead of above it. The listing keeps exactly the full
+  top's height at its head (a `Color.clear` spacer, `fullTopHeight`, measured off the full top itself by
+  `onGeometryChange` — so it follows the text size), and the full top is drawn over that room on its own room ground.
+  At rest every frame is where it was (the rows start under the filter row as before). Condensed, the full top slides
+  up off the band's top and fades (under Reduce Motion it only fades), is untouchable and unheard, and keeps its
+  layout — so neither its height nor the listing's head ever moves, no row moves and the scroll offset is untouched;
+  the slim line fades in at the band's top. **Why a spacer and not an inset or content margin:** an inset moves the
+  scroll's rest (`offset = −inset`) and its reported insets on every flip, which would feed the rule a jump in travel
+  each time it flips — a flicker loop the rule cannot tell from her thumb; the spacer is content, the same in both
+  states. **Why not shrink a stacked top:** the scroll view would grow upward by ≈ 96 pt at each flip and every row
+  would slide with it, the line she is reading jumping on each nudge.
+- **The slim line** (`MobileRootTopLine` with `standing:` and `edge: true`): the wing door (the same `meta` 13 name),
+  the standing filter as a word (`MobileStandingWord.filter` — "· All", Terminal "· all", spoken "All"), the search
+  glyph (`MobileSearchGlyphDoor` — the Mac's `magnifyingglass` and its word "Search", in the accent) and New Note (the
+  same act as the full line's — `newNoteDoor`); ONE 44 pt line under the 4 pt of air every root's line keeps, so the
+  wing door stands in the same place in both states; a hairline (the palette's line, the bar's 1 pt) at its foot over
+  the list running under it. The trash, the gear and the filters are one nudge up — or the glyph — away.
+- **The search glyph re-opens and focuses** (`openSearch`): the tracker re-opens the top (the next run starts fresh),
+  and on the next turn — the field on screen and touchable again — the keyboard goes into the search field.
+- **The search field is never folded away while it holds the keyboard** (`holdOpen: searchFocused`; VM-47's focus
+  rules intact): a run down while she types condenses nothing, and a focus however it came (her tap, the glyph, a
+  restoration at Back) re-opens the top (`.onChange(of: searchFocused)` beside VM-47's own hidden-page clause, which
+  is unchanged).
+- **The listing is untouched** (VM-68): the same `ScrollView` over the same `LazyVStack`, the same rows, the same
+  `.task(id: hold)` on the same root view, the same hold key — condensing changes no part of `hold(onScreen:)`, so no
+  task restarts and no read runs; rows under the chrome were already inside the scroll view's bounds (a lazy stack
+  materializes by the scroll view's frame), so condensing materializes nothing new either.
+- **Reading order:** the chrome is declared FIRST in its `ZStack` (a stack is read in declared order — assistive
+  reading starts at the top line as before) and drawn over the listing by `.zIndex(1)`.
+- **Bookcase and Starred** (her "the same slim line (their name and their own doors)"): their top lines are now the
+  roots' one face, `MobileRootTopLine` — Bookcase: the name, New Note, the gear; Starred: the name, the gear — fed by
+  their own list's scroll (the books region; the starred rows). Their full top already IS that one 44 pt line (with
+  R-260-11 below), so nothing condenses: scrolled, the line wears the hairline over the list running under it, and
+  every door is the same door in the same place in both states. PROVISIONAL C-4a-2. A TEST SEAM on both roots,
+  `heldGiveWay` (`MobileShellView(heldDrag:)`'s precedent): a pin may hand its own tracker to read the slim/full fact;
+  the app hands nothing.
+- **R-260-11 — the Bookcase's count line is gone.** `MobileWingPath`'s quiet second line (`detail:`) and
+  `MobileShelfFaces.bookCount` are retired (their only reader was the Bookcase's top line); the wing door carries no
+  accessibility value any more (its value was "the rest of what it draws" — VM-55's finding 7 — and it draws only the
+  name). The per-shelf count is the phone's shelves' ticket (her word in R-260-11), not built here.
+
+### The rider (C-3b-1, ruled A-260-15)
+
+`MobileBlockSelectionCopy.doneSelectingLabel` ("Done picking") → `pickingExitLabel` = **"Cancel picking"** — the
+picking door's spoken name now holds the word it draws ("Cancel", P-260-3b-1), so Voice Control's "tap Cancel" reaches
+it (WCAG 2.5.3, label in name); it stays distinct from the sheet's own "Done". The six pin references that drove the
+door by the static moved with it (`MobileBlockListTests`: `theSheetsOwnDoneLeavesPickingModeAndDropsThePicks`,
+`whilePickingTheHeaderNeverDrawsOneWordOnTwoDoors` ×2, `theDonePickingDoorSurvivesTheLastRowLeaving` ×2, and the
+populated-sheet absence check); their meaning is unchanged.
+
+### Pins (all PENDING the gate)
+
+**Red on old — tree `0bfd8326c`, bundle `vm260-4a-rol`** (literals and symbols both trees declare; the pre-fix app):
+- `MobileRootTopGivesWayTests.aRealScrollCondensesTheTopAndANudgeReopensIt(voice:)` — the Library, sixty notes (one
+  page), 402 × 874, Study and Terminal: at rest the full top (the All door, no search door; trash · New Note · gear
+  44 × 44 on the wing door's line); 300 pt down the slim line (the search door; the All door, the trash and the gear
+  gone; the standing word "All" as text; wing · Search · New Note 44 × 44 on one line, pinned at the top); 10 pt up
+  and 6 down keep it (the wobble); 36 pt up re-opens it (the four doors 44 × 44 again); 10 down keeps the full top;
+  the rest is the full top. **Predicted RED: 1 issue per voice (2), at the `#require` for the slim line's search door
+  — the test stops there.**
+- `…theSlimLinesSearchGlyphReopensTheTopAndFocusesTheField` — condensed, the glyph's press brings the full top back
+  and the Library's search field (by its placeholder) holds the keyboard. **Predicted RED: 1 issue (the `#require`).**
+- `…condensingAsksTheListingNothing` — across 300 → 260 → 320 → 0 the process recorder's `libraryFetch`,
+  `booklessFetch`, `libraryDelivery`, `booklessDelivery` do not move. **A GUARD over the count (zero on both trees);
+  predicted RED on old at its premise only — "the scroll condensed the top at least once" — 1 issue; the four count
+  expectations GREEN on old.**
+- MOVED to R-260-11 in the pins' commit (so the red-on-old tree carries their new rule):
+  `MobileTopLineTests.theLineIsTheWingsNameAloneOnEveryRoot` (was `…AndTheBookcaseCountsUnderIt`; the Bookcase's
+  wing door's value "" with two books) — **RED 1 issue** ("2 books"); `MobileWingDoorGeometryTests.theShelfRootsDoor`
+  (value "") — **RED 1 issue** ("0 books"); `MobilePathLineGeometryTests.theBookcaseLineIsTheWingsNameAndTwoDoors`
+  (was `…ItsCountAndTwoDoors`; fourteen books, value "") — **RED 4 issues** (2 voices × 2 widths, "14 books").
+- `MobileBlockListTests.thePickingDoorsSpokenNameHoldsTheWordItDraws` — while picking, some header button's spoken
+  name contains the picking door's drawn "Cancel" (beside the sheet's own Done). **RED 1 issue per voice (2)** ("Done
+  picking").
+- Every other test in those suites is GREEN on old (their own laws, untouched by the pins' commit).
+
+**New behaviour's pins — tip only** (the types and the seam did not exist before; `MobileTopGiveWayRuleTests.swift`):
+- `MobileTopGiveWayRuleTests` (pure, 8): the mockup's numbers; the rest is whole; a run past the depth condenses (30
+  then 61; one 300; 20 · 40 · 61 accumulating; a first 70 at once); the wobble (300 · 290 · 296 · 280 stay, 270
+  re-opens, 280 stays whole); a nudge re-opens at 5,000; hold-open keeps it whole; the re-open starts a fresh run
+  (310 stays, 330 condenses); the travel's clamp (a pull past either end, the insets as rest, a bottom inset, a short
+  list, the foot's bounce leaving it condensed).
+- `MobileTopGiveWayTrackerTests.readingsThatDoNotFlipAnnounceNothing` — `withObservationTracking` over `slim`:
+  readings under the depth announce nothing, the flip once, further condensed readings nothing, the re-open once, a
+  second re-open nothing (P3's claim).
+- `MobileRootTopLineStatesTests` (mounted, through `heldGiveWay`): `starredsLineStandsStillAndAnswersInBothStates`
+  (forty starred notes, Study: 300 pt down → slim, 260 → whole; the wing door and the gear 44 × 44 in both states, the
+  line's frames still to the half point) and `theBookcasesLineStandsStillAndAnswersInBothStates` (thirty books,
+  Terminal, the books region scrolled: the same, with New Note; and no value on the wing door).
+
+**Suites that mount the Library's new layout and must stay green on the tip** (the likeliest place for a surprise —
+the full top moved from above the scroll view to over its head): `MobileFilterRowGeometryTests`,
+`MobileWingDoorGeometryTests.theLibraryRootsDoor` (its "nothing under the line" floor), `MobileFieldPlaceholderTests`,
+`MobileFaintOnDoorsTests`, `MobileScreenEdgeGroundsTests`, `MobileLibraryPagingTests` (the paging walk scrolls the same
+one scroll view), `MobileHiddenPageKeyboardTests`, `MobileKeyboardFloorShellTests`, `MobileSettingsGearTests`,
+`MobileTopLineTests`, `MobileRefusalLeavesItsNoteTests.theListNeverMovesWhileTheLineShows`. A red geometry pin there is
+a finding if a target moved under 44 or a frame moved at rest; it is a pin the layout moved only if it held where the
+scroll view's top edge was.
+
+### Calls made in the batch (for the merge's QUESTIONS; none gates the core)
+
+- **P-260-4a-1 — the give-way numbers as a set:** 24 pt either way, 60 pt deep, 8 pt of rest (the mockup's script she
+  picked from). Alternatives: a lighter up-nudge (12 pt — "any upward nudge" read literally, at the price of a
+  flicker under a resting thumb); a depth tied to the full top's own height (≈ 144 pt — no slim line until the top
+  has scrolled fully under).
+- **C-4a-1 — the slim line keeps the 4 pt of air above it** (the wing door in the same place full and slim; the line
+  44 pt, the band 48). Alternative: flush at the band's top (the name jumps up 4 pt on each flip).
+- **C-4a-2 — Bookcase and Starred: the same line in both states, the hairline the only change on scroll** (their top
+  was already one 44 pt line once R-260-11 took the count). Alternatives: (b) no scrolled state there at all; (c) their
+  slim line sheds the gear (as the Library's sheds its trash and gear), the gear one nudge away.
+- **C-4a-3 — the standing word names the filter even while a search stands** (hits listing, the field unfocused).
+  Alternative: the typed words in quotes.
+- **C-4a-4 — the standing word is a word, not a door** (the brief names the glyph and the nudge as the roads back; the
+  mockup's whole slim bar re-opened on a click). Alternative: the word, or the line's empty stretch, re-opens the top.
+- **C-4a-5 — the search glyph in the accent** (the tone of the doors that act; the trash's muted is the trash's).
+- **C-4a-6 — while the search field holds the keyboard the top never condenses, and any focus re-opens it.**
+- **C-4a-7 — Reduce Motion: the full top fades without sliding.**
+- **C-4a-8 — the scroll indicator runs from the band's top, under the chrome** (cosmetic, left as is): an indicator
+  margin is the one inset the design could have used, but whether SwiftUI's scroll reading counts it in its insets is
+  unverified, and a moving inset is exactly the feedback the spacer avoids. A follow-up for the gate's eye.
+- **Words DRAFT for her pass:** "Search" (the Mac's own word for its collapsed search door), "· All" (the filter row's
+  word after a middle dot); the spoken "Cancel picking" is ruled (A-260-15), not a draft.
+
+### Canon owed at closeout (drafts — the orchestrator's to land, two-file shape)
+
+- SurfaceContracts, The Library (the phone's bullet, beside VM-68's): "Scrolling down past a real scroll, the
+  phone Library's top — the wing line, the search field, the filter row — gives way to one pinned 44 pt slim line (the
+  wing's name, the standing filter as a word, a search glyph, New Note); any real nudge up, or the glyph, re-opens it
+  (the glyph also puts the keyboard in the field); while the field holds the keyboard the top stays whole; condensing
+  is chrome — the listing, its hold and its pages are untouched (VM-259, PROVISIONAL P-260-4a-1, C-4a-1…8)."
+- SurfaceContracts, The Bookcase and books (the wing switcher's phone paragraph): the Bookcase's top line reads the
+  wing's name alone — no count until the phone has shelves (R-260-11, superseding R-260-6's count line and R-47-3's
+  "N books"); Bookcase and Starred wear the same line, its hairline over the list scrolled under it (VM-259, C-4a-2).
+- QUESTIONS at the merge: P-260-4a-1, C-4a-1…8.
+
+### Batch 4a — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`. Phone: `P(folder)=DerivedData/<folder>/Build/Products/
+VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`; UI: `U(folder)=DerivedData/<folder>/Build/
+Products/TK2SpikeUITests_TK2SpikeUITests_iphonesimulator27.1-arm64-x86_64.xctestrun`; `-destination
+"platform=iOS Simulator,id=$UDID"`. **The red-on-old tree is `0bfd8326c`; the code tip is `262f5115e`.**
+
+**R-4a — red on old** (`P(vm260-4a-rol)`, the gate's suite device):
+`-only-testing:VariorumMobileTests/MobileRootTopGivesWayTests -only-testing:VariorumMobileTests/MobileTopLineTests
+-only-testing:VariorumMobileTests/MobileWingDoorGeometryTests -only-testing:VariorumMobileTests/MobilePathLineGeometryTests
+-only-testing:VariorumMobileTests/MobileBlockListTests`
+- Predicted RED, exactly: `aRealScrollCondensesTheTopAndANudgeReopensIt` (study, terminal) 1 + 1;
+  `theSlimLinesSearchGlyphReopensTheTopAndFocusesTheField` 1; `condensingAsksTheListingNothing` 1 (the premise; its
+  four counts green); `theLineIsTheWingsNameAloneOnEveryRoot` 1; `theShelfRootsDoor` 1;
+  `theBookcaseLineIsTheWingsNameAndTwoDoors` 4; `thePickingDoorsSpokenNameHoldsTheWordItDraws` 2 — **13 issues in 8
+  test cases**. Everything else in those five suites GREEN. A GREEN among the predicted reds means that pin is hollow
+  on old — record it, never claim it. A count expectation RED on old in `condensingAsksTheListingNothing` means
+  something else in the process asked the listing during the scroll — a finding about the harness, report it.
+
+**The tip** (`262f5115e`):
+- **P** — the gate's whole phone target from `vm260-2r` (`-only-testing:VariorumMobileTests`): predicted green but
+  main's known issues as the previous windows read them; every pin above GREEN, the new-behaviour suites GREEN
+  (`MobileTopGiveWayRuleTests` 8, `MobileTopGiveWayTrackerTests` 1, `MobileRootTopLineStatesTests` 2), the moved
+  `MobileBlockListTests` references GREEN, and the Library-mounting suites listed under Pins GREEN.
+- **U** — `U(vm260-2r-ui)`, `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests` on the walk device (its
+  THREE tests, ~6 min): the Library's layout changed (its search field now lies over the listing's head), so
+  `testTheBarRidesAboveTheLibrarySearchKeyboard` and the walk's-road test re-run here; predicted GREEN as batch 3b
+  predicted them (the field's place and the band are unchanged).
+- **M** — `DerivedData/vm260-2r-mac` (rebuilt at the tip): the M3 list (ThemeTokenTests NoLiteralColourTests
+  PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests
+  OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests) — this batch changes no file the Mac
+  compiles; its scans walk the phone tree (the new `MobileRootTop.swift` among it): predicted green but
+  `IndexTierMetricsTests`' 4 declared.
+
+**W-4a — the closing walk's added stops** (the Debug phone app from `vm260-2r`, both voices, light, to
+`notes/plans/vm-260-screens/batch-4a/`):
+1. **The Library at rest** — the full top (wing · trash · New Note · gear, the field, the filters).
+2. **The Library scrolled down a screen** — the slim line (name · "· All" · search · New Note) and its hairline, the
+   rows running under it; no jump in the rows at the flip (watch a row through it).
+3. **A nudge up** — the full top back; then a slow drag with a thumb resting (the wobble: no flicker).
+4. **The slim line's search glyph** — the full top back with the keyboard in the field (the bar above the keyboard,
+   VM-253/F-1a-W1's law).
+5. **The Bookcase at rest** — the name alone, no count line under it (R-260-11); with enough books to scroll, the
+   books scrolled: the hairline under the line, nothing else moved.
+6. **Starred at rest and scrolled** — the same.
+7. **The scroll indicator under the chrome** (C-4a-8) — one capture mid-scroll, for her eye.
