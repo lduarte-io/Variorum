@@ -16,12 +16,11 @@
 - **The 1.5 release's step 0: PASSED** on the code of `703c42173`, 2026-11-24 17:47–17:54, under stage coordinator
   `nov24` (claim `vx-1045`): FirstRunDrillTests 11 of 11, the first-run walk green in both arms, the dev slot back
   byte for byte. The evidence lines are in "The release's step 0" below.
-- **Variorum 1.5 is BUILT, not published** (2026-11-24 18:26–18:35): from main `83a15ac0e` (PR #22's merge), build
-  13416, both notarizations accepted, `Variorum-1.5.dmg` sha256 `5fabddcb…07c7`, the appcast made and verified. The
-  lines are in "The release run" below. `/Applications` still holds 1.4.
-- **Waiting on her:** her word to publish (the site's runbook: the DMG first, then the appcast) and to install into
-  `/Applications` behind an A1 copy. Then the sitting's close in a second PR.
-- **Still hers before 1.5 is built:** the 1.5 notes and label (put to her in chat for approval).
+- **Variorum 1.5 (build 13416) is PUBLISHED** (2026-11-24 18:43–18:44, at her word): built from main `83a15ac0e`
+  (PR #22's merge), both notarizations accepted, `Variorum-1.5.dmg` sha256 `5fabddcb…07c7` live and byte-identical,
+  the appcast live and byte-identical, the page showing 1.5. The lines are in the LIVE STATUS rows from 18:26 on.
+- **Still to do at this sitting:** the `/Applications` install on the Pro (requested of `nov24`), then the close in a
+  second, notes-only PR.
 - **Canon touched on this branch:** `notes/SurfaceContracts.md` and `notes/MCPSpec.md` (the ratified calls lose the
   word PROVISIONAL; the stated exceptions added beside the audit's pointer); `notes/QUESTIONS.md` (two addenda).
   Neither spec file is in the loaded set.
@@ -222,4 +221,8 @@ canon keeps that word on the Trash line's wording.
 | 18:26–18:34 | **`Tools/Release/release.sh --version 1.5 --stop-before-appcast`: exit 0.** Preflight passed whole. Stamped commit `83a15ac0e9b5f9608ea84de434044c8162ec3019`, build 13416, dirty files 0. The app: notarization Accepted (id `a1cc700e-88ae-48e3-9235-bb52781cd2e0`, 0 issues), Gatekeeper accepts, the ticket stapled, 58 of 58 checks. The DMG: signed, notarization Accepted (id `fbb0c3ab-bee4-4445-a092-71bbb4c65b4c`, 0 issues), stapled, Gatekeeper-accepted. The app inside the final DMG: VERDICT PASS, 58 of 58; the window layout read back PASS. `Variorum-1.5.dmg` · 33,954,921 bytes · sha256 `5fabddcb6777cd658a80b41a187a873a45cb78260e3a5efbaaa2b488ed8007c7`. dSYMs match the shipped binary; the durable record is `~/Library/Developer/Variorum/Releases/1.5/`. |
 | 18:35 | **The appcast: made**, `make-appcast.sh --release …`, exit 0, VERDICT PASS (build 13416 the highest of three items; the EdDSA signature verifies over the DMG's bytes; the description is the notes verbatim, 2,325 bytes). No Keychain prompt appeared. The feed copy's sha256 equals the build's. |
 | 18:35 | The stage released (18:35:09; 9 of 45 minutes), main unfrozen, the result line sent to `nov24`. Zero instances, no crash report, the main checkout clean at `83a15ac0e`. Nothing uploaded; `/Applications` untouched (1.4). |
+| 18:42 | Her word to publish, verbatim: "ok go ahead and publish this and push it over sparkle and all that." |
+| 18:43 | The site repo (`~/dev/stargazing.tech/stargazing-tech`) was 20 commits behind its remote on this Mac; pulled fast-forward BEFORE anything else, so the deploy carries the site as it stands. The publish preflight (cache-busted) answered 404. The DMG uploaded to the downloads bucket. `verify-published.sh dmg`: PASS — HTTP 200, `application/x-apple-diskimage`, immutable, "the published bytes are IDENTICAL to the local DMG (sha256 5fabddcb6777cd658a80b41a187a873a45cb78260e3a5efbaaa2b488ed8007c7)". |
+| 18:44 | The feed's `appcast.xml` copied into the site byte for byte, `src/data/variorum.json` set to 1.5, the site built and deployed. `verify-published.sh appcast`: PASS — the live appcast BYTE-IDENTICAL to the built one, its newest enclosure live at 33,954,921 bytes, `no-cache, must-revalidate`. The live page shows 1.5 and links `Variorum-1.5.dmg`. Site commits `b74f04d` (the appcast and the version) and `de8734b` (the downloads ledger after `npm run downloads`), both pushed. |
+| 18:46 | REQUEST and READY to `nov24` for the `/Applications` install of build 13416 by its rule card. Her sentence's "and all that" is read as covering it, with the coordinator skill's line that the release run installs the released build; said to her plainly in chat. |
 
