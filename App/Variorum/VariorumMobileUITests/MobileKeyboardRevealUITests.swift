@@ -85,6 +85,22 @@
 //  note** (the New Note door mints it, exactly as the walk did) — the dev
 //  store's replaceable content; nothing else is written.
 //
+//  VM-260 G-3 (the merge gate's closing walk, `sa5`/`ta5`) — **THE WALK'S
+//  AFTER-A-NOTE ROAD, WHOLE** (`testTheBarRidesAboveTheSearchKeyboardOnTheAfter
+//  ANoteRoad`): the gate walk's part A in its own order — the search typed and a
+//  hit opened WHILE THE FIELD HELD THE KEYBOARD (so the Library's field is the
+//  one the framework gives the keyboard back to at Back), a tap mid-note, Back
+//  with that keyboard up; Bookcase, Library; a NEW note and its copy door's
+//  refusal, Back; a NEW note's keyboard, Back with it up; the Trash and Back;
+//  the bar's Bookcase and Library (pressed only where they can be — the walk
+//  never pressed a door under the keyboard); the search tapped. Then one more
+//  leg on a settled Library: the search tapped (the control), the Trash with
+//  that keyboard up, and Back — the keyboard the field takes back DURING the
+//  pop, with no keyboard up at the press (the pop burst's `f04`). The oracle is
+//  the tests' above (each bar door draws as at rest; its frame ends above the
+//  keys), judged wherever a keyboard stands over the Library. **It WRITES two
+//  empty notes** (the walk's two New Note presses); nothing else.
+//
 
 import UIKit
 import XCTest
@@ -364,6 +380,234 @@ final class MobileKeyboardRevealUITests: XCTestCase {
 
         // Cleanup: a page change takes the keyboard down. (The empty note the door minted stays — see the header.)
         goTab("Bookcase")
+    }
+
+    // MARK: - VM-260 G-3 — the walk's after-a-note road, whole
+
+    /// **RED ON OLD (predicted, the merge gate's tip `6afaf255a`): the bar stays
+    /// at REST under the search's keyboard** wherever that keyboard was given
+    /// back to the Library's search field by the framework during a pop (the
+    /// Trash's Back, the isolating leg's Back) and on the walk's own last frame
+    /// (`sa5`: the search tapped while it already held that keyboard). The two
+    /// controls — the search taking over a keyboard still up at Back (`sa1b`),
+    /// and a search tapped on a settled Library (`sd2`) — are predicted GREEN on
+    /// both trees. The record is "Gate findings — fixes" under THE MERGE GATE in
+    /// `notes/plans/fixes/vm-260-phone-look.md`.
+    func testTheBarRidesAboveTheSearchKeyboardOnTheAfterANoteRoad() throws {
+        // Every judgement reports; the road and its cleanup always run.
+        continueAfterFailure = true
+        Self.setHardwareKeyboard(attached: false)
+        app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 20), "the app came up")
+        pause(2.0)
+        passLobby()
+        XCTAssertTrue(button("Bookcase").waitForExistence(timeout: 10), "the shell is up (its bar's Bookcase door)")
+        openThePocketGuide()   // the lesson the walk opens ("swipe & choose") exists
+
+        // AT REST — the Library's root, no keyboard: the bar's own drawing, the reference.
+        goTab("Library")
+        pause(0.8)
+        guard app.keyboards.count == 0 else {
+            XCTFail("INCONCLUSIVE: a keyboard is up before the road starts")
+            goTab("Bookcase")
+            return
+        }
+        let rest = try barShot("at rest (the after-a-note road)")
+
+        // a1 — the walk's `openChapter`: the search typed, the hit opened WHILE THE FIELD HOLDS THE KEYBOARD.
+        let field = onscreen(app.textFields, wait: 3)
+        guard field.waitForExistence(timeout: 4) else {
+            XCTFail("INCONCLUSIVE: the Library's search field is not on its root")
+            return
+        }
+        field.tap()
+        pause(1.2)
+        passKeyboardCard()
+        for attempt in 1...2 {
+            field.typeText(Self.lesson.query)
+            pause(1.2)
+            if ((field.value as? String) ?? "").lowercased().contains(Self.lesson.query) { break }
+            report("a1: the search text did not land (attempt \(attempt))")
+            field.tap()
+            pause(0.6)
+        }
+        report("a1: the search reads \(String(describing: field.value)); keyboards \(app.keyboards.count)")
+        pause(1.2)
+        let hit = onscreen(app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", Self.lesson.query)), wait: 4)
+        guard hit.exists, hit.isHittable, hit.frame.minY > field.frame.maxY else {
+            XCTFail("INCONCLUSIVE: the lesson's hit is not under the search field (the walk's `openChapter`)")
+            goTab("Bookcase")
+            return
+        }
+        hit.tap()   // the push, with the search field holding the keyboard
+        pause(2.0)
+        report("a1: the lesson pushed; keyboards \(app.keyboards.count)")
+        // The walk's `tapLowerHalf`: the editor's keyboard over the lower half.
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.62)).tap()
+        pause(1.4)
+        passKeyboardCard()
+        report("a1: a tap mid-note; keyboards \(app.keyboards.count); the editor's bar \(app.buttons.matching(NSPredicate(format: "identifier == 'kbar.block'")).firstMatch.exists)")
+        back()   // Back WITH the keyboard up (`sa1b`)
+        if app.keyboards.count > 0 {
+            pause(0.6)
+            // CONTROL J0 — the search takes over a keyboard still up at Back (the walk's `sa1b`: right).
+            judgeTheBar(try barShot("J0 the handover at Back"), rest: rest, keyboard: app.keyboards.firstMatch,
+                        leg: "J0 (CONTROL: the search takes over the keyboard still up at Back)")
+        } else {
+            report("a1: no keyboard after Back — the search did not take the keyboard over (the J0 control did not arise)")
+        }
+
+        // a2, a3 — the bar's Bookcase, then Library.
+        walkTab("Bookcase")
+        walkTab("Library")
+        report("a3: on the Library; keyboards \(app.keyboards.count)")
+
+        // a4 — a NEW note; its copy door's refusal (nothing to copy); Back.
+        walkTab("Library")
+        guard walkTap(button("New Note"), "the Library's New Note glyph") else {
+            XCTFail("INCONCLUSIVE: the Library's New Note door could not be pressed (a4)")
+            return
+        }
+        pause(1.8)
+        let copy = button("Copy Note")
+        if walkTap(copy, "the note's copy door") {
+            pause(1.2)
+            let refusal = app.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'no text to copy'")).firstMatch
+            report("a4: the refusal shown \(refusal.exists); keyboards \(app.keyboards.count)")
+        }
+        back()
+        report("a4: Back; keyboards \(app.keyboards.count)")
+
+        // a5 — a NEW note's keyboard, Back with it up; the Trash and Back.
+        walkTab("Library")
+        guard walkTap(button("New Note"), "the Library's New Note glyph") else {
+            XCTFail("INCONCLUSIVE: the Library's New Note door could not be pressed (a5)")
+            return
+        }
+        pause(1.8)
+        pause(1.0)
+        passKeyboardCard()
+        report("a5: the new note; keyboards \(app.keyboards.count)")
+        back()
+        pause(1.0)
+        report("a5: Back with the note's keyboard up; keyboards \(app.keyboards.count)")
+        if walkTap(button("Trash"), "the Library's trash door") {
+            pause(1.0)
+            report("a5: the Trash; keyboards \(app.keyboards.count)")
+            back()
+        }
+        pause(1.0)
+        let afterTheTrash = app.keyboards.count
+        report("a5: Back from the Trash; keyboards \(afterTheTrash); bar doors hittable \(barDoorsHittable())")
+        if afterTheTrash > 0 {
+            // J1 — THE FINDING: the keyboard the field took back during the pop.
+            judgeTheBar(try barShot("J1 the keyboard given back at the Trash's Back"), rest: rest,
+                        keyboard: app.keyboards.firstMatch,
+                        leg: "J1 (the search's keyboard given back during the Trash's pop)")
+        } else {
+            report("a5: no keyboard after the Trash's Back — the pop gave the field nothing back on this run")
+        }
+
+        // The bar's Bookcase, then Library — pressed only where it can be (the walk never pressed under the keys).
+        walkTab("Bookcase")
+        walkTab("Library")
+        let walkField = onscreen(app.textFields, wait: 3)
+        guard walkField.waitForExistence(timeout: 4) else {
+            XCTFail("INCONCLUSIVE: the Library's search field is not on its root (the walk's last stop)")
+            return
+        }
+        report("a5: before the search's tap; keyboards \(app.keyboards.count) (one up = the field already holds it)")
+        walkField.tap()
+        pause(1.6)
+        passKeyboardCard()
+        guard app.keyboards.count > 0 else {
+            XCTFail("INCONCLUSIVE: no keyboard after the search's tap (the walk's `sa5`)")
+            return
+        }
+        // J2 — the walk's own frame (`sa5`), and held.
+        judgeTheBar(try barShot("J2 the walk's sa5"), rest: rest, keyboard: app.keyboards.firstMatch,
+                    leg: "J2 (the walk's sa5: the search tapped at the road's end)")
+        pause(1.5)
+        judgeTheBar(try barShot("J2 held"), rest: rest, keyboard: app.keyboards.firstMatch,
+                    leg: "J2, held 1.5 s")
+
+        // THE ISOLATING LEG — no note between: the keyboard down (the Trash's push takes it), a settled Library…
+        if walkTap(button("Trash"), "the Library's trash door") { pause(1.0) }
+        walkTab("Bookcase")
+        walkTab("Library")
+        guard app.keyboards.count == 0 else {
+            report("the isolating leg: a keyboard is still up on a settled Library — the leg does not start")
+            return
+        }
+        let settledField = onscreen(app.textFields, wait: 3)
+        guard settledField.waitForExistence(timeout: 4) else {
+            XCTFail("INCONCLUSIVE: the Library's search field is not on its root (the isolating leg)")
+            return
+        }
+        settledField.tap()
+        let fresh = try softwareKeyboardUp()
+        pause(0.6)
+        // CONTROL C — the search's keyboard raised on a settled Library (the walk's `sd2`: right).
+        judgeTheBar(try barShot("C a settled Library's search"), rest: rest, keyboard: fresh,
+                    leg: "C (CONTROL: the search's keyboard raised on a settled Library)")
+        // …the Trash pushed WITH that keyboard up, and Back with none up: the field takes it back in the pop.
+        if walkTap(button("Trash"), "the Library's trash door") {
+            pause(1.0)
+            report("the isolating leg: the Trash; keyboards \(app.keyboards.count)")
+            back()
+            pause(1.0)
+            report("the isolating leg: Back; keyboards \(app.keyboards.count); bar doors hittable \(barDoorsHittable())")
+            if app.keyboards.count > 0 {
+                // J3 — the finding, isolated.
+                judgeTheBar(try barShot("J3 the keyboard given back in a pop"), rest: rest,
+                            keyboard: app.keyboards.firstMatch,
+                            leg: "J3 (the search's keyboard given back during a pop, no note on the road)")
+            } else {
+                report("the isolating leg: no keyboard after Back — the pop gave the field nothing back")
+            }
+        }
+
+        // Cleanup: the Trash's push takes the keyboard down; the bar's Bookcase from there.
+        if app.keyboards.count > 0, walkTap(button("Trash"), "the Library's trash door") { pause(1.0) }
+        walkTab("Bookcase")
+    }
+
+    /// **The walk's press** (the gate walk's `tap`): a door that is not hittable
+    /// is brought into reach by at most six slow swipes, and is SKIPPED when it
+    /// still cannot be pressed — never its centre tapped, which under a keyboard
+    /// would land on the keys. Returns whether it was pressed.
+    @discardableResult
+    private func walkTap(_ element: XCUIElement, _ what: String, timeout: Double = 4) -> Bool {
+        guard element.waitForExistence(timeout: timeout) else { report("MISSING \(what)"); return false }
+        var swipes = 0
+        while !element.isHittable && swipes < 6 {
+            let f = element.frame
+            if f.midY > app.frame.maxY * 0.75 { app.swipeUp(velocity: .slow) }
+            else if f.midY < app.frame.minY + 120 { app.swipeDown(velocity: .slow) }
+            else { break }
+            swipes += 1
+        }
+        guard element.isHittable else {
+            report("NOT-HITTABLE \(what) — skipped, never centre-tapped (the walk's own rule)")
+            return false
+        }
+        element.tap()
+        return true
+    }
+
+    /// The walk's `goTab`: the bar's door by its word, pressed the walk's way.
+    private func walkTab(_ label: String) {
+        walkTap(button(label), "the bar's \(label)")
+        pause(0.9)
+    }
+
+    /// How many of the bar's three doors XCUITest can press (the walk's reading).
+    private func barDoorsHittable() -> Int {
+        ["Starred", "Bookcase", "Library"].filter { label in
+            let e = app.buttons.matching(NSPredicate(format: "label ==[c] %@", label)).firstMatch
+            return e.exists && e.isHittable
+        }.count
     }
 
     /// The bar's three doors' frames and the screen, read together.
