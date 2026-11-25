@@ -1621,7 +1621,8 @@ only lever was the system's text size, which moves the chrome too.
   **RED ON OLD predicted** (4 issues).
 
 **The tip's own — new behaviour, GUARDS** (green on the tip predicted; their symbols are new, so no red-on-old run):
-- `MobilePhoneOwnLookTests` (8): `theLookIsKeptInThisDevicesDefaults` (fresh = Study · sea-glass · paper · default; the
+- `MobilePhoneOwnLookTests` (9): `noPhoneSourceWritesTheLibrarysLook` (a source guard: no phone file calls the library's
+  look setters or their operations — the walk seam included) · `theLookIsKeptInThisDevicesDefaults` (fresh = Study · sea-glass · paper · default; the
   four keys; a fresh owner reads them back; strange values and `custom` read the default; the inert owner remembers
   nothing; never the retired key) · `theOverlayTakesOnlyTheLook` · `everyLookChoiceWritesNoSettingRowAndMovesTheFace`
   (palette, background, text size, voice — no row, no outbox row; the accent, the ground, the body, the voice each
@@ -1740,7 +1741,7 @@ the claim, settled, shut down before release. Phone plan:
 
 **P3 — the tip, the whole phone target, one launch** (`vm260-3`): `-only-testing:VariorumMobileTests`, read against
 main's known reds (6 known issues — `MobileFilterRowGeometryTests`' two Display-Zoom pins × 2, `MobileTrashTests`'
-empty-tree diagnostic × 2). It holds the four pins above (green), the 13 new guards, the moved pins, and every suite that
+empty-tree diagnostic × 2). It holds the four pins above (green), the 14 new guards, the moved pins, and every suite that
 mounts the shell, a root, a note, Settings or a row — the tip carries batches 1a · 1b · 2, F-1a-W1 and batch 3. Predicted:
 green but those six. **The likeliest surprises, in order:** (1) a geometry pin elsewhere that measured her words at 17 /
 15 (a row's height or a title's width) — a pin the ruling moved only if it holds a drawn number of her words; a TARGET

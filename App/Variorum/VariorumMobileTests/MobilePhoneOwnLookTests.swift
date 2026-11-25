@@ -339,6 +339,35 @@ struct MobilePhoneOwnLookTests {
         }
     }
 
+    /// **No phone source writes the library's look** — the fence held by
+    /// construction beside its behavioural pins: no phone file (the debug
+    /// harnesses included — the walk's palette seam moved to the phone's owner)
+    /// calls the library's look setters, the Mac Settings' store doors or their
+    /// operations. A guard (green on the tip; on the old tree the voice row's
+    /// `theme?.setVoice` and the walk seam's `setThemePalette` were two such
+    /// calls — the fence pins' red-on-old runs prove the behaviour).
+    @Test func noPhoneSourceWritesTheLibrarysLook() throws {
+        let phone = Self.appRoot.appendingPathComponent("VariorumMobile")
+        let walker = try #require(FileManager.default.enumerator(at: phone, includingPropertiesForKeys: nil))
+        let writes = ["setThemeVoice(", "setThemePalette(", "setThemeTints(", "theme?.setVoice(", "theme.setVoice(",
+                      "theme?.setThemePalette(", "theme.setThemePalette("]
+        var scanned = 0
+        var offenders: [String] = []
+        for case let file as URL in walker where file.pathExtension == "swift" {
+            scanned += 1
+            let source = try String(contentsOf: file, encoding: .utf8)
+            for (index, line) in source.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
+                let text = line.trimmingCharacters(in: .whitespaces)
+                if text.hasPrefix("//") { continue }
+                if writes.contains(where: { text.contains($0) }) {
+                    offenders.append("\(file.lastPathComponent):\(index + 1)")
+                }
+            }
+        }
+        #expect(scanned > 50, "the walk must reach the phone's sources (\(scanned) files)")
+        #expect(offenders.isEmpty, "a phone source writes the library's look: \(offenders)")
+    }
+
     /// **The palette menu's sections** carry every palette the phone offers
     /// exactly once — the custom palette none — in the Mac's order.
     @Test func thePaletteMenuOffersEveryPresetOnce() {
