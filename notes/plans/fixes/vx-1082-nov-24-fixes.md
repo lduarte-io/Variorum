@@ -43,7 +43,7 @@ Required reading for every session on this record: this file top to bottom; `not
 
 **The rider pass:** not re-run — the umbrella IS her rider composition, minted at the Nov 24 sitting hours before this kickoff ("yeah go ahead and add those four" · "should be fixed … those are both quick" · "ok then add that too").
 
-**Away-run posture:** PROVISIONAL-and-continue; every taste call lands in HER BUNDLE below and in the handoff; nothing waits on her unless it gates a member's core (none does). The phone is LEFT OUT of VX-1077 at her word; batch S's Core changes owe a phone leg at the gate (the VX-980 lesson).
+**Away-run posture:** PROVISIONAL-and-continue; every taste call lands in HER BUNDLE below and in the handoff; nothing waits on her unless it gates a member's core (none does). The phone is LEFT OUT of VX-1077 at her word; batch S's Core changes owe a phone leg at the gate (the VX-980 lesson). **Confirmed by her at 03:3x on 2026-11-25, relayed verbatim through nov24: "I'm going to sleep overnight, everyone should rule provisionally."** The night's merge order, nov24's: vx-1082 merges first, then VX-1036, whose last act leaves the Debug dev store on latest main for her morning — so this run's closing gate walk on the dev store runs BEFORE that and leaves the dev store's posture as found.
 
 **Mobile parity (expected):** nothing mobile-visible except batch S's shared Core reads (phone leg at the gate proves no drift); the VX-1077 phone exception is hers, recorded, no VM ticket filed (her word).
 
