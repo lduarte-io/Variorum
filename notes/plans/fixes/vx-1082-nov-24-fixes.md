@@ -146,7 +146,7 @@ only=(); for t in $pins $neighbours $spine; do only+=(-only-testing:VariorumTest
 | Piece | Status |
 |---|---|
 | 0. This record + the three traced mechanisms | DONE (this commit) |
-| 1. The pins, written against the PRE-FIX tree where their API exists (`build-for-testing` green before any fix) | NOT-STARTED |
+| 1. The pins, written against the PRE-FIX tree where their API exists (`build-for-testing` green before any fix) | DONE (this commit) — `VariorumTests/SearchBandQuoteBesideATagTests.swift` (VX-1069), `SearchChapterRowsTests.swift` (VX-1074), `BookMastheadFitsItsColumnTests.swift` (VX-1014); `build-for-testing` GREEN on the pre-fix tree (`.vx1082s-logs/bft3.log`, local), no warning in a new file. Red-on-old PENDING the window (each fix lands as its own product-only commit, so the behavioral revert is that commit's product diff reverse-applied) |
 | 2. VX-1069 — the band's quote drops folded words beside a tag | NOT-STARTED |
 | 3. VX-1074 (Library half) — a chapter row in the Books section, landing in the book's Outline at the chapter | NOT-STARTED |
 | 4. VX-1014 — the masthead's title line never wider than its column | NOT-STARTED |
