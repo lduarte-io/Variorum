@@ -97,7 +97,12 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
   custody leaf's probe-by-name closure (`ProtectionSystem.touchIDCandidates`) walks both roots per listing.
 
 **Pieces:**
-1. NOT-STARTED — core: `Catalog.unreadPlaces` (D-1013-1) and `assess`'s indeterminate handling (D-1013-3) with core pins.
+1. DONE (this commit) — core: `Catalog.unreadPlaces` + `readsEveryPlace` + `build(_:unreadPlaces:)` (an unread place's
+   entries dropped) (D-1013-1); `assess` (D-1013-3): the lobby's `mightOpen` counts an unread place; the plain fact
+   `backupHoldsTheCurrentKeyFile` gains `backupMightHoldTheCurrentKeyFile` (true on a partial listing), read by rule 27's
+   two unlocked fault arms and by rule 21's offer owing (the search reads every place and answers). Pins
+   `Tests/VariorumCoreTests/Protection/FarFolderUnreadTests.swift` (6 tests) GREEN; red-on-old PENDING (next commit).
+   The no-backup-yet consult (Assess ~551) is NOT changed — see THE FORK below.
 2. NOT-STARTED — app: the lister's scope, the per-open far state, the facts' catalogue parameter, the scoped custody probe.
 3. NOT-STARTED — app: the road's plumbing (route, open, presses' join, the lobby's far landing) + the bootstrap wiring.
 4. NOT-STARTED — app pins (route zero far reads, walk count, press equivalence, lobby landing).

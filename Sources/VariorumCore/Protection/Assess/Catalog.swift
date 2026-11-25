@@ -152,12 +152,27 @@ public struct Catalog: Equatable, Sendable {
     public var copies: [CatalogCopy]
     public var keyFiles: [CatalogKeyFile]
     public var foreign: [CatalogForeignEntry]
+    /// VX-1013 (D-1013-1) — THE PLACES THIS LISTING DID NOT READ. A place here
+    /// contributed no entries, and nothing may be concluded from their
+    /// absence: a reader that would claim "none anywhere" (rule 27, the
+    /// offer's search, the no-backup-yet consult) treats an unread place as
+    /// one that might hold what it looks for. Empty — every place read — is
+    /// the default everywhere (the launch road's container-only reads are the
+    /// only partial listings: `notes/plans/fixes/vx-1013-open-far-folder-wait.md`).
+    public var unreadPlaces: Set<CatalogPlace>
 
-    public init(copies: [CatalogCopy] = [], keyFiles: [CatalogKeyFile] = [], foreign: [CatalogForeignEntry] = []) {
+    public init(
+        copies: [CatalogCopy] = [], keyFiles: [CatalogKeyFile] = [], foreign: [CatalogForeignEntry] = [],
+        unreadPlaces: Set<CatalogPlace> = []
+    ) {
         self.copies = copies
         self.keyFiles = keyFiles
         self.foreign = foreign
+        self.unreadPlaces = unreadPlaces
     }
+
+    /// Every place was read — the only listing an absence may be concluded from.
+    public var readsEveryPlace: Bool { unreadPlaces.isEmpty }
 
     static func id(place: CatalogPlace, folders: [String], name: String) -> String {
         "\(place.rawValue):" + (folders + [name]).joined(separator: "/")
@@ -223,11 +238,13 @@ public struct Catalog: Equatable, Sendable {
 
     /// **Build the catalog from a listing.** Every entry whose folders or name
     /// no build writes is FOREIGN — listed, never a candidate, never pruned.
-    public static func build(_ entries: [CatalogEntry]) -> Catalog {
+    /// `unreadPlaces` (VX-1013): the places the listing did not read — an entry
+    /// claiming one of them is dropped (an unread place contributes nothing).
+    public static func build(_ entries: [CatalogEntry], unreadPlaces: Set<CatalogPlace> = []) -> Catalog {
         var keyFiles: [CatalogKeyFile] = []
         var foreign: [CatalogForeignEntry] = []
         var placed: [(entry: CatalogEntry, location: Location, name: CatalogNames.FileName)] = []
-        for entry in entries.sorted(by: { $0.id < $1.id }) {
+        for entry in entries.sorted(by: { $0.id < $1.id }) where !unreadPlaces.contains(entry.place) {
             guard let location = location(of: entry) else {
                 foreign.append(CatalogForeignEntry(place: entry.place, folders: entry.folders, name: entry.name))
                 continue
@@ -269,7 +286,7 @@ public struct Catalog: Equatable, Sendable {
                 continue
             }
         }
-        return Catalog(copies: copies, keyFiles: keyFiles, foreign: foreign)
+        return Catalog(copies: copies, keyFiles: keyFiles, foreign: foreign, unreadPlaces: unreadPlaces)
     }
 
     private static func keyFileRole(_ name: CatalogNames.FileName, _ location: Location) -> KeyFileRole? {
