@@ -284,12 +284,18 @@ enum MobileTutorialSeeder {
             // sort a–z among themselves and a starred Journal can lead. The
             // later "also" went with the clause it leaned on. A DRAFT for her
             // wording pass; the rest of the guide is VM-212's (wave 6).
+            // VM-260 ladder round 1 (R1-3): VM-255 made the shelf's new-note
+            // door the writing glyph, so the lesson names the pencil — as the
+            // empty Library's line shows that glyph and says "New Note starts
+            // one" — never the "+ new note" words the door no longer wears.
+            // Words a DRAFT for her pass.
             "The SHELF is home: your books at the top, starred books first "
             + "— this one is starred. The daily journal's row wears a "
             + "small \(MobileShelfFaces.todayDoorTitle) badge: tap it and "
             + "today's entry opens, made if the day hasn't started yet. "
             + "(With no journal on the shelf the same door stands as its own "
-            + "row at the list's end, and pressing it makes one.) + new note "
+            + "row at the list's end, and pressing it makes one.) The pencil "
+            + "on the shelf's top line — \(MobileNewNoteDoor.spokenName) — "
             + "starts a bookless note and drops you straight into writing; "
             + "+ new book, at the list's end, starts a fresh book — "
             + "hand-picked, a dated journal, or a smart book collecting by "
