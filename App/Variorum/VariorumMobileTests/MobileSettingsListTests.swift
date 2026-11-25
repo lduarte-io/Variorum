@@ -118,9 +118,11 @@ struct MobileSettingsListTests {
     }
 
     /// **The groups, and the two choices.** The group names stand; the voice is
-    /// one choice (its two words kept) showing the library's voice selected; this
-    /// phone's appearance is the system control in the Mac's words, and a segment
-    /// drives the PHONE's owner — remembered in its own defaults.
+    /// one choice (its two words kept) showing the voice selected — the phone's
+    /// own since VM-247 (the library's before; the Look group's other choices are
+    /// pinned in `MobilePhoneOwnLookTests`); this phone's appearance is the system
+    /// control in the Mac's words, and a segment drives the PHONE's owner —
+    /// remembered in its own defaults.
     @Test func theGroupsAndTheTwoChoices() async throws {
         try await withEditorWorld { session, _ in
             let defaults = scratch("choices")
@@ -145,7 +147,7 @@ struct MobileSettingsListTests {
                 let shown = MobileSettingsView.voiceWord(router.voice)
                 let other = MobileSettingsView.voiceWord(router.voice == .study ? .terminal : .study)
                 #expect(segment(shown)?.accessibilityTraits.contains(.selected) == true,
-                        "the library's voice is the chosen segment")
+                        "the phone's voice is the chosen segment")
                 #expect(segment(other)?.accessibilityTraits.contains(.selected) == false)
 
                 for choice in AppearanceChoice.allCases {

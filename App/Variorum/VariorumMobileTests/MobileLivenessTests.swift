@@ -1103,15 +1103,13 @@ struct MobileLivenessTests {
 
     // MARK: MINOR 2 — the voice flip reaches every registered editor
 
-    /// VM-51: the flip is the LIBRARY's look landing (`adoptLanded` — the
-    /// router's one landing seam, whichever device wrote the value); the
-    /// discipline is the same — synchronous end to end.
+    /// VM-247 (MOVED with her ruling): the flip is THIS PHONE's look moving
+    /// (`MobileLookController` → the router's `lookMoved`, the one restyle seam;
+    /// VM-51 had it be the library's look landing); the discipline is the same —
+    /// synchronous end to end.
     @Test func aVoiceFlipReachesEveryRegisteredEditor() async throws {
         try await withEditorWorld { session, _ in
             defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
-            var study = Queries.ThemeSettings()
-            study.voice = .study
-            let terminal = Queries.ThemeSettings()
             let postA = try await session.runner.run { ops in
                 try ops.createPost(title: "voiced A", profile: .blog)
             }
@@ -1126,7 +1124,10 @@ struct MobileLivenessTests {
             }
             let (a, storageA) = makeEditor(session, postID: postA.id)
             let (b, storageB) = makeEditor(session, postID: postB.id)
-            let router = MobileShellRouter()
+            let router = MobileShellRouter(look: MobileLookController(defaults: nil))
+            // The phone starts in Terminal for this pin (the world's face is
+            // Terminal): the flips below are then Terminal → Study → Terminal.
+            router.setVoice(.terminal)
             await router.editors.register(a, tab: .shelf)
             await a.loadOnce()
             await router.editors.register(b, tab: .library)
@@ -1135,13 +1136,13 @@ struct MobileLivenessTests {
 
             // The flip window: synchronous end to end (the S1 MINOR-2
             // discipline — no suspension point between flip and asserts).
-            router.adoptLanded(study)
+            router.setVoice(.study)
             let fontA = storageA.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             let fontB = storageB.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             #expect(fontA == MobileEditorStyle.studyFace.body,
                     "the STOOD-DOWN editor's storage follows the flip too")
             #expect(fontB == MobileEditorStyle.studyFace.body)
-            router.adoptLanded(terminal)
+            router.setVoice(.terminal)
             let backA = storageA.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             let backB = storageB.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             #expect(backA == MobileEditorStyle.terminalFace.body)

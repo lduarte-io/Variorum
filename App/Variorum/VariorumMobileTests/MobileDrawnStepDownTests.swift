@@ -62,9 +62,11 @@ struct MobileDrawnStepDownTableTests {
         #expect(title.size == 20 && title.lineHeight == 25 && title.anchor == .title3, "noteTitle: \(title)")
         let terminalTitle = PhoneType.spec(.noteTitle, voice: .terminal)
         #expect(terminalTitle.size == 18 && terminalTitle.lineHeight == 23, "Terminal noteTitle: \(terminalTitle)")
-        #expect(study(.noteBody).size == 17 && study(.rowTitle).size == 17
-                && study(.rowPreview).size == 15 && study(.screenTitle).size == 20
-                && study(.mono).size == 17, "her other words are batch 3's to move")
+        // MOVED with VM-254 (batch 3, her R-260-2): her other words one notch under
+        // wave 1's set — 16 · 16 · 14 · 19 — the twelve words kept at 17.
+        #expect(study(.noteBody).size == 16 && study(.rowTitle).size == 16
+                && study(.rowPreview).size == 14 && study(.screenTitle).size == 19
+                && study(.mono).size == 17, "her other words: batch 3's (VM-254)")
         // The principle, as an order.
         #expect(control.size < study(.noteBody).size)
         #expect(study(.chip).size < study(.rowPreview).size && inline.size < study(.rowPreview).size)

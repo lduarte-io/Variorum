@@ -314,12 +314,14 @@ struct MobileShellTests {
 
     // MARK: - The router (voice + background flush)
 
-    /// The Settings voice door (VM-51, R-47-2) writes the LIBRARY's voice —
-    /// the synced `theme_voice` row, the Mac Settings' own write — and the
-    /// value reaches `MobileEditorStyle` and the OPEN surface where it LANDS
-    /// (the router's theme seam → `applyVoiceChange` through the liveness
-    /// authority). Before VM-51 this pinned LK2's phone-local preference.
-    @Test func theVoiceDoorWritesTheLibraryAndTheLandingReachesTheOpenSurface() async throws {
+    /// The Settings voice door is THIS PHONE's (VM-247 — MOVED with her ruling,
+    /// "the voice should also be per device"; VM-51's R-47-2 had it write the
+    /// LIBRARY's `theme_voice`): the library's row is never written, and the
+    /// value reaches `MobileEditorStyle` and the OPEN surface at once (the
+    /// router's look seam → `applyVoiceChange` through the liveness authority).
+    /// Before VM-51 this pinned LK2's phone-local preference; the fence's own
+    /// pins are `MobilePhoneOwnLookFenceTests`.
+    @Test func theVoiceDoorIsThePhonesAndReachesTheOpenSurface() async throws {
         try await withEditorWorld { session, _ in
             defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
 
@@ -341,23 +343,23 @@ struct MobileShellTests {
             let held = Task { await theme.start() }
             defer { held.cancel() }
 
-            // A fresh library carries no voice row: it reads Study (AppSpec §12).
+            // A phone that has chosen nothing wears Study (her R-260-3).
             try await untilLanded { router.voice == .study && MobileEditorStyle.voice == .study }
             let studyFont = storage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             #expect(studyFont == MobileEditorStyle.studyFace.body,
-                    "the open surface wears the library's voice")
+                    "the open surface wears the phone's voice")
 
-            // The door: the library's row is written, then the landing restyles.
+            // The door: the phone's voice moves, the face and the open surface at once.
             router.setVoice(.terminal)
-            try await untilLanded { router.voice == .terminal }
+            #expect(router.voice == .terminal && router.look.choice.voice == .terminal)
+            #expect(MobileEditorStyle.voice == .terminal, "the face moved in the same turn")
+            let terminalFont = storage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+            #expect(terminalFont == MobileEditorStyle.terminalFace.body,
+                    "the open surface follows the phone's voice")
             let stored = try await session.database.read { db in
                 try String.fetchOne(db, sql: "SELECT value FROM setting WHERE key = 'theme_voice'")
             }
-            #expect(stored == ThemeVoice.terminal.rawValue, "the LIBRARY's voice was written")
-            #expect(MobileEditorStyle.voice == .terminal)
-            let terminalFont = storage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
-            #expect(terminalFont == MobileEditorStyle.terminalFace.body,
-                    "the open surface follows the landed voice")
+            #expect(stored == nil, "the LIBRARY's voice was never written")
         }
     }
 

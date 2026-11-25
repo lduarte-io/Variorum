@@ -19,6 +19,16 @@
 //  own colour objects; the note in Write is on the paper (piece 3.10); the
 //  retired phone preference is read nowhere.
 //
+//  **VM-247 (the VM-260 run, batch 3) MOVED what her ruling moved** ("I don't
+//  like that the theme syncs between mac and phone either it's annoying" ·
+//  "the voice should also be per device"): the look is now THIS PHONE's own,
+//  laid over the library's landed settings — so a fresh phone still wears
+//  Study under the sea-glass (her R-260-3, the same constants), a look chosen
+//  ON THE PHONE re-resolves its chrome, its face and an open editor (the
+//  library-written change's old pin, re-pointed), and a library-written change
+//  moves nothing (its fence, `MobilePhoneOwnLookFenceTests`). The retired
+//  VM-51-era phone key stays unread: the phone's look keys are new names.
+//
 
 import Foundation
 import GRDB
@@ -48,7 +58,7 @@ func untilLanded(
 }
 
 @MainActor
-@Suite("VM-51 — the phone wears the library's voice and palette")
+@Suite("VM-51 · VM-247 — the phone's look: its own, over the library's settings")
 struct MobileLibraryLookTests {
     /// 24-bit sRGB of a colour as one appearance resolves it.
     private func rgb(_ color: UIColor, dark: Bool) -> UInt32 {
@@ -76,10 +86,12 @@ struct MobileLibraryLookTests {
     // MARK: - The library's look, landed
 
     /// A library that has chosen nothing reads STUDY under the SEA-GLASS
-    /// (AppSpec §12; `Queries.ThemeSettings.unsetStoreVoice/Palette`), and the
-    /// phone wears exactly that: the chrome's tokens are the four-parameter
-    /// resolver's for the landed settings, and the editor face adopted them.
-    /// Before VM-51 the phone wore its own Terminal in the Classic colours.
+    /// (AppSpec §12; `Queries.ThemeSettings.unsetStoreVoice/Palette`) — and a
+    /// phone that has chosen nothing wears exactly that too (VM-247, her R-260-3:
+    /// the same constants): the chrome's tokens are the four-parameter
+    /// resolver's for the composed settings, and the editor face adopted them at
+    /// the library's first landing. Before VM-51 the phone wore its own Terminal
+    /// in the Classic colours.
     @Test func aFreshLibraryWearsStudyUnderTheSeaGlass() async throws {
         try await withEditorWorld { session, _ in
             defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
@@ -108,10 +120,13 @@ struct MobileLibraryLookTests {
         }
     }
 
-    /// A look changed ELSEWHERE — the Mac's Settings writes the same synced
-    /// rows a sync apply lands — re-resolves the phone: the chrome, the editor
-    /// face, and an OPEN editor's storage (the landing seam's restyle).
-    @Test func aLookWrittenElsewhereReachesThePhoneAndItsOpenEditor() async throws {
+    /// **A look chosen ON THE PHONE** (VM-247 — MOVED with her ruling: this pin
+    /// was VM-51's "a look written elsewhere reaches the phone", whose road her
+    /// ruling closed; the inverse is the fence, `MobilePhoneOwnLookFenceTests`)
+    /// re-resolves the phone: the chrome, the editor face, and an OPEN editor's
+    /// storage (the look seam's restyle) — and back to the voice's own colours,
+    /// the byte-identical road.
+    @Test func aLookChosenOnThePhoneReachesItsChromeItsFaceAndAnOpenEditor() async throws {
         try await withEditorWorld { session, _ in
             defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
             let post = try await session.runner.run { ops in
@@ -127,20 +142,16 @@ struct MobileLibraryLookTests {
             await router.editors.register(model, tab: .shelf)
             try await untilLanded { MobileEditorStyle.settings.palette == .seaglass }
 
-            // The Mac's own writes (`ThemeStore.setVoice` / `.setThemePalette`
-            // run exactly these operations).
-            try await session.runner.run { ops in
-                try ops.setThemeVoice(.terminal)
-                try ops.setThemePalette(.lavender)
-            }
-            try await untilLanded {
-                router.voice == .terminal && MobileEditorStyle.settings.palette == .lavender
-            }
+            // Settings ▸ Look's own doors.
+            router.setVoice(.terminal)
+            router.look.setPalette(.lavender)
+            #expect(router.voice == .terminal && MobileEditorStyle.settings.palette == .lavender,
+                    "the phone's look moved in the same turn")
             #expect(router.tokens(dark: false) == VoiceTokens.resolve(
                 voice: .terminal, palette: .lavender, tint: .none, dark: false))
             let font = storage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
             #expect(font == MobileEditorStyle.terminalFace.body,
-                    "the OPEN editor re-based on the landed voice")
+                    "the OPEN editor re-based on the phone's voice")
             let lavender = VoiceTokens.resolve(
                 voice: .terminal, palette: .lavender, tint: .none, dark: false)
             #expect(rgb(MobileEditorStyle.face.accent, dark: false) == rgb(lavender.accent, dark: false))
@@ -148,8 +159,8 @@ struct MobileLibraryLookTests {
                     "the markdown link is the palette's accent")
 
             // And back to the voice's own colours — the byte-identical road.
-            try await session.runner.run { ops in try ops.setThemePalette(.default) }
-            try await untilLanded { MobileEditorStyle.settings.palette == .default }
+            router.look.setPalette(.default)
+            #expect(MobileEditorStyle.settings.palette == .default)
             #expect(MobileEditorStyle.face.accent == MobileEditorStyle.terminalFace.accent,
                     "`.default` is the voice's static face itself")
         }
@@ -190,9 +201,10 @@ struct MobileLibraryLookTests {
         }
     }
 
-    /// The placeholder (P-47-15) — what the lobby and the shell's first frame
-    /// wear before a library answers — IS what a library that has chosen
-    /// nothing reads, computed by the store's own read over an empty table.
+    /// The placeholder (P-47-15) — what the library's store holds before it
+    /// answers — IS what a library that has chosen nothing reads, computed by the
+    /// store's own read over an empty table; under a phone that has chosen
+    /// nothing (VM-247, R-260-3) the shell's first frame wears exactly it.
     @Test func thePlaceholderIsWhatAnEmptyLibraryReads() async throws {
         let db = try AppDatabase.inMemory()
         let empty = try await db.read { try Queries.themeSettings($0) }
@@ -204,9 +216,10 @@ struct MobileLibraryLookTests {
             router.bindTheme(session: session)
             #expect(router.settings == empty)
             #expect(router.tokens(dark: false) == VoiceTokens.resolve(settings: empty, dark: false))
-            // With NO library bound (harness use only), the router reports the
-            // editor face's own look, so a hosted masthead and the editor agree.
-            #expect(MobileShellRouter().settings == MobileEditorStyle.settings)
+            // With NO library bound (the lobby; harness use), the router lays the
+            // phone's own look over the editor face's settings (VM-247 — MOVED:
+            // it reported the face's own look, the library's, before).
+            #expect(MobileShellRouter().settings == MobileLookChoice.fresh.over(MobileEditorStyle.settings))
         }
     }
 

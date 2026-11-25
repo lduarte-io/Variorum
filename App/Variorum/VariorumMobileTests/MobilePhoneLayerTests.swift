@@ -28,15 +28,18 @@ struct MobilePhoneTypeTests {
     /// MOVED with VM-273 · VM-272 (the VM-260 run, batch 2, P-260-2a): the
     /// chrome one notch under her words (`chip` and `controlInline` 13 /
     /// 18 `.footnote`, `control` 15 / 20 `.subheadline`) and the note's title
-    /// 20 / 25 `.title3`; the bar's 17 (LK-5) and her other words as drawn.
+    /// 20 / 25 `.title3`; the bar's 17 (LK-5). MOVED again with VM-254 (batch 3,
+    /// her R-260-2, P-260-3a): her words one notch under wave 1's set — the
+    /// note's body 16 / 25, a screen's title 19 / 24, a row's title 16 / 21, its
+    /// preview 14 / 19, the anchors kept.
     @Test func theStudyTableIsTheSheetsAsDrawn() {
         typealias S = PhoneTypeSpec
         let expected: [PhoneTypeRole: S] = [
-            .noteBody: S(family: .prose, weight: .regular, size: 17, lineHeight: 27, anchor: .body, scaling: .fullRange),
+            .noteBody: S(family: .prose, weight: .regular, size: 16, lineHeight: 25, anchor: .body, scaling: .fullRange),
             .noteTitle: S(family: .prose, weight: .semibold, size: 20, lineHeight: 25, anchor: .title3, scaling: .fullRange),
-            .screenTitle: S(family: .prose, weight: .semibold, size: 20, lineHeight: 25, anchor: .title3, scaling: .fullRange),
-            .rowTitle: S(family: .prose, weight: .semibold, size: 17, lineHeight: 22, anchor: .headline, scaling: .fullRange),
-            .rowPreview: S(family: .prose, weight: .regular, size: 15, lineHeight: 20, anchor: .subheadline, scaling: .fullRange),
+            .screenTitle: S(family: .prose, weight: .semibold, size: 19, lineHeight: 24, anchor: .title3, scaling: .fullRange),
+            .rowTitle: S(family: .prose, weight: .semibold, size: 16, lineHeight: 21, anchor: .headline, scaling: .fullRange),
+            .rowPreview: S(family: .prose, weight: .regular, size: 14, lineHeight: 19, anchor: .subheadline, scaling: .fullRange),
             .meta: S(family: .chrome, weight: .regular, size: 13, lineHeight: 18, anchor: .footnote, scaling: .holdsAtXXXLarge),
             .sectionHeader: S(family: .chrome, weight: .semibold, size: 13, lineHeight: 18, anchor: .footnote, scaling: .holdsAtXXXLarge),
             .chip: S(family: .chrome, weight: .medium, size: 13, lineHeight: 18, anchor: .footnote, scaling: .holdsAtXXXLarge),
@@ -52,18 +55,23 @@ struct MobilePhoneTypeTests {
     }
 
     /// Terminal: the same roles in SF Mono; its prose roles two points under
-    /// Study's (15 · 18 · 18 for body, note title, screen title — the note
-    /// title MOVED 22 → 18 with VM-272), pitch included; chrome and the twelve
-    /// words keep Study's sizes.
+    /// Study's (14 · 18 · 17 for body, note title, screen title — the note
+    /// title MOVED 22 → 18 with VM-272, the others with VM-254), pitch included,
+    /// and NEVER UNDER THE FLOOR (VM-254, MOVED: a row's preview, 14 in Study,
+    /// holds 13 / 18 here — two under would be 12); chrome and the twelve words
+    /// keep Study's sizes.
     @Test func terminalIsTheSameRolesInMonoWithItsProseTwoUnder() {
-        #expect(PhoneType.spec(.noteBody, voice: .terminal).size == 15)
+        #expect(PhoneType.spec(.noteBody, voice: .terminal).size == 14)
         #expect(PhoneType.spec(.noteTitle, voice: .terminal).size == 18)
-        #expect(PhoneType.spec(.screenTitle, voice: .terminal).size == 18)
+        #expect(PhoneType.spec(.screenTitle, voice: .terminal).size == 17)
+        #expect(PhoneType.spec(.rowPreview, voice: .terminal).size == 13
+                && PhoneType.spec(.rowPreview, voice: .terminal).lineHeight == 18)
         for role in PhoneTypeRole.allCases {
             let study = PhoneType.spec(role, voice: .study)
             let terminal = PhoneType.spec(role, voice: .terminal)
             #expect(terminal.family == .mono, "\(role) is SF Mono in Terminal")
-            let under: CGFloat = study.family == .prose ? 2 : 0
+            let under: CGFloat = study.family == .prose
+                ? min(2, study.size - PhoneType.floorSize) : 0
             #expect(terminal.size == study.size - under, "\(role) size")
             #expect(terminal.lineHeight == study.lineHeight - under, "\(role) pitch")
             #expect(terminal.anchor == study.anchor && terminal.scaling == study.scaling

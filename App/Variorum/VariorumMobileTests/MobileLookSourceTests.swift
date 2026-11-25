@@ -89,18 +89,29 @@ struct MobileLookSourceTests {
                 "MobileReadView: never the palette's room under her words")
     }
 
-    /// **The note in Write is on the paper** (the VM-47 run, piece 3.10): the
-    /// screen's ground and her title's masthead read `tokens.surface`, and the
+    /// **The note in Write is on the paper** (the VM-47 run, piece 3.10) — **or
+    /// on the cream this phone chose** (VM-247, MOVED with her ruling: P-47-16's
+    /// road (b) as her choice). The screen's ground, her title's masthead and the
+    /// edge strips read the ONE note-ground rule (`noteGround` →
+    /// `MobileNoteGround.color`: the paper, or the voice's own room — never the
+    /// palette's, pinned as a rule in `MobilePhoneOwnLookTests`), and the
     /// editor's own ground — its one line in the fenced text view — reads the
-    /// face's paper. Nothing in Write sits on a room under her words.
+    /// face's paper (the same choice in UIKit). Nothing in Write sits on the
+    /// palette's room under her words.
     @Test func theNoteInWriteIsOnThePaper() throws {
         let write = try code("Features/Write/MobileWriteView.swift")
-        #expect(write.contains { $0.contains(".background(tokens.surface.ignoresSafeArea())") },
-                "MobileWriteView: the screen's ground is the paper")
-        #expect(write.contains { $0.contains(".background(tokens.surface)") },
-                "MobileWriteView: her title's masthead is on the paper")
+        #expect(write.contains { $0.contains(".background(noteGround.ignoresSafeArea())") },
+                "MobileWriteView: the screen's ground is the note's ground")
+        #expect(write.contains { $0.contains(".background(noteGround)") },
+                "MobileWriteView: her title's masthead is on the note's ground")
+        #expect(write.contains { $0.contains(".mobileEdgeGrounds(top: noteGround, bottom: noteGround)") },
+                "MobileWriteView: the edge strips wear the note's ground")
+        #expect(write.contains { $0.contains(".color(tokens: tokens, dark: scheme == .dark)") },
+                "MobileWriteView: the note's ground is the one rule's")
+        #expect(!write.contains { $0.contains(".background(tokens.surface") },
+                "MobileWriteView: no ground of its own beside the rule")
         #expect(!write.contains { $0.contains(".background(tokens.room") || $0.contains("ReadingPageTokens.room(") },
-                "MobileWriteView: no room under her words")
+                "MobileWriteView: no room under her words but the rule's")
         let editor = try code("Features/Write/MobileEditorTextView.swift")
         #expect(editor.contains { $0.contains("backgroundColor = face.paper") },
                 "MobileEditorTextView: the editor's ground is the face's paper")

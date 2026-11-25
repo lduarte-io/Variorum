@@ -85,7 +85,9 @@ struct MobileVoiceTests {
     /// Terminal SF Mono 15 on 25 with 12 (two under) — measured at the
     /// default text size, where `UIFontMetrics` is the identity. (They
     /// held the A3 spacing floor before: gap 1.0 × and line 0.4 × the
-    /// point size, at 14 / 16.)
+    /// point size, at 14 / 16.) **MOVED with VM-254** (the VM-260 run, batch
+    /// 3, her R-260-2): the note's body one notch under — Study Iowan 16 on
+    /// 25, Terminal SF Mono 14 on 23 — the paragraph gaps kept (14 / 12).
     @Test func surfaceWriteValuesFollowTheLiveVoice() {
         // VM-51: the baseline is the whole look (voice AND palette — the face
         // wears the library's palette now), so a landing another suite adopted
@@ -94,20 +96,20 @@ struct MobileVoiceTests {
         defer { MobileEditorStyle.adopt(Queries.ThemeSettings()) }
         let terminalFont = MobileEditorStyle.baseFont
         let terminalStyle = MobileEditorStyle.baseParagraphStyle
-        #expect(terminalFont.pointSize == 15)
+        #expect(terminalFont.pointSize == 14)
         #expect(terminalStyle.paragraphSpacing == 12)
-        #expect(abs(terminalFont.lineHeight + terminalStyle.lineSpacing - 25) <= 0.5,
+        #expect(abs(terminalFont.lineHeight + terminalStyle.lineSpacing - 23) <= 0.5,
                 "terminal pitch \(terminalFont.lineHeight + terminalStyle.lineSpacing)")
 
         MobileEditorStyle.voice = .study
         #expect(MobileEditorStyle.baseFont.familyName == "Iowan Old Style")
-        #expect(MobileEditorStyle.baseFont.pointSize == 17)
+        #expect(MobileEditorStyle.baseFont.pointSize == 16)
         #expect(MobileEditorStyle.markdownPalette
                 == MobileEditorStyle.studyFace.palette)
         #expect(MobileEditorStyle.baseParagraphStyle.paragraphSpacing == 14)
         let studyPitch = MobileEditorStyle.baseFont.lineHeight
             + MobileEditorStyle.baseParagraphStyle.lineSpacing
-        #expect(abs(studyPitch - 27) <= 0.5, "study pitch \(studyPitch)")
+        #expect(abs(studyPitch - 25) <= 0.5, "study pitch \(studyPitch)")
         #expect(MobileEditorStyle.baseFont != terminalFont)
     }
 }
