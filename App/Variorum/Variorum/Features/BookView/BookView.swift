@@ -4851,11 +4851,16 @@ nonisolated enum BookFootDoors {
 /// Read is read-only), so its doors' notes arrive live on the Outline instead
 /// of shown on the page — and, since batch 3, LIST, the other (VX-1084: rows
 /// only, no editor; N-1's letter, "every mint door ends with the new note on
-/// the page, live" — PROVISIONAL P-1036-B3-2). Outline, the spread and the
-/// Index each land a minted note their own way (batch 1's arrival).
+/// the page, live" — PROVISIONAL P-1036-B3-2) — and, since the run's ladder
+/// (round 1, R1-3), the INDEX: it makes a note live only by a BLOCK landing
+/// (`pendingLanding` → its pane's `takePendingLiveBlock`), and a note born in a
+/// book has no block yet (`newPostInReading` mints the note alone; the
+/// Outline's editor holds an empty note as its open tail, the Index's pane has
+/// nothing to go live on), so a mint there was selected, never live. Outline
+/// and the spread land a minted note their own way (batch 1's arrival).
 enum BookReadMint {
     static func turnsToOutline(_ mode: BookStructureModel.ViewMode) -> Bool {
-        mode == .read || mode == .list
+        mode == .read || mode == .list || mode == .index
     }
 }
 

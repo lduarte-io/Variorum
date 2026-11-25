@@ -154,10 +154,16 @@ struct BookListModeRulesTests {
     /// N-1's letter in a mode with no editor (PROVISIONAL P-1036-B3-2): a mint
     /// door in List turns to the Outline, as Read's does; the tagging chord
     /// turns to the Outline's card field too (P-1036-B2-4's road).
+    ///
+    /// A JUSTIFIED EDIT (the VX-1036 ladder, round 1 — R1-3): the Index turns
+    /// too now (it has no block to make a newborn note live on —
+    /// `BookMintLandingTests.aMintPressedInTheIndexTurnsToTheOutlineAndArrivesLive`),
+    /// so it left the loop of modes that stay; the List's claim is unchanged.
     @Test func aMintAndTheTaggingActTurnListToTheOutline() {
         #expect(BookReadMint.turnsToOutline(.list))
         #expect(BookReadMint.turnsToOutline(.read))
-        for mode in [BookStructureModel.ViewMode.outline, .index, .spread] {
+        #expect(BookReadMint.turnsToOutline(.index), "R1-3")
+        for mode in [BookStructureModel.ViewMode.outline, .spread] {
             #expect(!BookReadMint.turnsToOutline(mode), "\(mode)")
         }
         #expect(BookTagChord.act(mode: .list, position: .allTags).switchesToOutline)
