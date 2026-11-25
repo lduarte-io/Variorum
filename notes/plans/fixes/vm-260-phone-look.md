@@ -120,6 +120,15 @@ line is expected anywhere in this run; if a batch finds it needs one, it STOPS a
 (anything in `MobileEditorTextView` or the text view's core) escalates to a Fable review with TEXTKIT2_NOTES read
 at that batch's preflight.
 
+**Cast change, 2026-11-25 ~08:1x (hers):** *"continue - I hit my fable limit but I have opus credits."* The
+orchestrator continues on **Opus 5.5** from the final evidence window onward (same session, same record, same
+rules). **The ladder's reviewer is HER call and is held for her:** the plan names `fable-reviewer`; the diff
+carries no `Sync/`, custody or `MobileEditorTextView` line (verified per batch), but batch 3 touched
+`MobileEditorStyle` (the editor's LOOK file: fonts, grounds, faces; zero text-input lines by grep), which a
+reviewer could read as editor-adjacent. The options: (a) wait for Fable credits and run the ladder as planned;
+(b) `opus-reviewer`, per CLAUDE.md's no-editor-seam rule, with `MobileEditorStyle` named as a review focus;
+(c) Opus rounds now and one Fable round over the final diff when credits return.
+
 ## Binding principles (the 13b constitution, copied verbatim per the architect skill)
 
 - **P-1 — One capability registry.** Every user-facing act is declared exactly once: verb, scope
