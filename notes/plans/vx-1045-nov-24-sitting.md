@@ -13,8 +13,11 @@
   VX-370; the parity audit became the umbrella VX-1046 (twenty-seven members, all Todo at her word) plus VX-1068
   (Snippets, Needs Lillian); its twelve exceptions are stated in `notes/MCPSpec.md`; the coordinator skill gained the
   five lines the 2026-11-22 coordinator proposed; VX-1026 rides VX-1036; VX-460 closed; VX-1017 parked.
-- **In flight:** the 1.5 release's step 0 (FirstRunDrillTests and the scripted first-run walk) on main's tip code,
-  through stage coordinator `nov24` (session `variorum-ca`), claim name `vx-1045`, run by one Opus subagent.
+- **The 1.5 release's step 0: PASSED** on the code of `703c42173`, 2026-11-24 17:47–17:54, under stage coordinator
+  `nov24` (claim `vx-1045`): FirstRunDrillTests 11 of 11, the first-run walk green in both arms, the dev slot back
+  byte for byte. The evidence lines are in "The release's step 0" below.
+- **Order from here:** her approval of the notes and label, then this branch's first PR merges (it carries the
+  ignore line the release's clean-tree check needs), then the release run, then the sitting's close.
 - **Still hers before 1.5 is built:** the 1.5 notes and label (put to her in chat for approval).
 - **Canon touched on this branch:** `notes/SurfaceContracts.md` and `notes/MCPSpec.md` (the ratified calls lose the
   word PROVISIONAL; the stated exceptions added beside the audit's pointer); `notes/QUESTIONS.md` (two addenda).
@@ -195,4 +198,8 @@ canon keeps that word on the Trash line's wording.
 | 17:47 | GO from `nov24` (its pre-GO: she away from the keyboard, Ambient down, zero instances, no simulator, no crash reports). The takeover line run alone: the stage claimed by `vx-1045` at 17:47:24 for 45 minutes (`~/.variorum/stage.log`). The helper started on the drill only. *The three rows above first carried guessed times; they are corrected to the commit times and the stage log.* |
 | 17:48 | **The drill: GREEN.** FirstRunDrillTests by `test-without-building` on the gate build, 17:47:52–17:48:43: `executed 11 (passed 11, failed 0, expected failures 0) - skipped 0 - from the result bundle`, `VERDICT: GREEN (0) - 11 test(s) executed over 1 run(s)` (`Tools/assert-tests-ran`), "Test run with 11 tests in 1 suite passed". xcodebuild exit 0; the test host exited by itself; no crash report. Read by the orchestrator in the logs, not only in the helper's report. |
 | 17:49 | SEAM ping to `nov24` with the executed count; the helper continued to the slot's set-aside, the walk (std, both arms, one invocation) and the restore. |
+| 17:49–17:52 | **The walk: PASSED, both arms.** `first-run-walk.sh std --arm both`, exit 0, 17:49:55–17:52:37. walk.log: "P8: the set-up arm PASSED — the sheet confirmed, the row Synced, the server holds the vault, the proof, a cursor and rows" · "J8: the join arm PASSED — the sheet confirmed, the row Synced, one device cursor more, the account's lock unmoved" · "done: PASSED — 'std', arm 'both'; signed out, quit, and the account at rest (exists, confirmed, vaultless, rowless)". All thirteen captures were withheld by the words guard (the known class), so the log is the evidence. |
+| 17:53 | **The restore, verified by the orchestrator:** the dev slot back by the reverse rename, "md5 IDENTICAL (239 files)", the folder's inode as found; the Debug defaults compared against the pre-walk export after the import and the removal of the walk's four added keys: 1,356 keys, 0 added, 0 removed, 0 changed. Zero Variorum instances, no Problem Reporter, no crash report. Left as they are, with the coordinator's agreement: three values the drill's test host wrote at its launch. |
+| 17:54 | The stage released (17:54:08; 7 of 45 minutes) and the result line sent; `nov24` verified it and put step 0 PASSED on its record. |
+| 17:58 | Found before the release run: the main checkout holds an untracked folder, `notes/plans/textloss-screens/` (the Nov 22 sitting's local frames, never to be committed), and `release.sh` refuses any tree `git status --porcelain` does not read as clean. Its ignore line is added on this branch, beside the other screens folders, so this branch's first PR merges before the build. |
 
