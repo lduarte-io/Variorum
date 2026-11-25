@@ -150,7 +150,77 @@ Done means: the pins red-on-old by revert (behavioral revert, restored, said in 
      (`git checkout --`), `git diff` clean, `✔ 33 tests passed`.
    - MUTATIONS (each restored, `✔ 33 passed` after): the press's join dropped ⇒ the press pin RED alone (`refused` where
      today opens); the landing's press guard dropped ⇒ the model pin RED alone (`landings == 0` fails).
-5. NOT-STARTED — the sweep table (D-1013-3) below.
+5. DONE — the sweep table (D-1013-3) below; THE FORK below it (the no-backup-yet consult — not built, awaiting the
+   architect's ruling).
+
+**THE SWEEP TABLE (D-1013-3 — every consumer of `facts.catalog` / a `Catalog` in `Sources/VariorumCore/Protection/Assess/`,
+the 13b sweep-table law).** UNAFFECTED = reads a container-only fact (the launch road's partial listing answers it exactly);
+INDETERMINATE-HANDLED = never concludes "none" from an unread place (its pin); FULL-WALK CALLER = only ever handed a
+`.everything` listing (its callers named); FORK = see below.
+
+| # | Consumer (file:line at `54bfb63be`) | What it reads | Verdict |
+|---|---|---|---|
+| 1 | `assess` — `opensWith` over `facts.catalog.copies` (`Assess.swift:55`) | each listed copy's sentence | FULL-WALK CALLER — no reader outside the core; the launch road's assessments never read it. Per copy: an unlisted copy gets no sentence, nothing concluded from its absence |
+| 2 | `AssessRules.preDesignStore(storeFile:catalog:)` (`Assess.swift:111`) | `liveKeyFile` + `foreign` at the container's root | UNAFFECTED — container names only (`$0.place == .container`) |
+| 3 | `AssessRules.routeFinder` (`Assess.swift:186`) | the catalogue into `RouteFinder`; the live key file's id | FULL-WALK CALLER (its sentence is #1's); the live id is the container's |
+| 4 | `AssessRules.lobby` — `live` (`Assess.swift:195`) | the live key file's typed locks | UNAFFECTED — the container's |
+| 5 | `AssessRules.lobby` — `mightOpen` over `catalog.keyFiles` (`Assess.swift:223`) | every key file | INDETERMINATE-HANDLED — an unread place might hold one ⇒ rule 27 never claimed. Pins: core `FarFolderUnreadTests.ruleTwentySevenIsNeverClaimedAtTheLobbyOnAPartialListing`, `aFarKeyFileThatWouldOpenItSaysNothingReadOrUnread`; app `ruleTwentySevenIsSaidOnceTheFarWalkLandsEmpty` (rule 27 reached once the walk lands) |
+| 6 | `AssessRules.liveKeyFile` (`Assess.swift:241`) | `keyFile(id: unlocked.liveKeyFileID)` | UNAFFECTED — the container's |
+| 7 | `AssessRules.repairs` — rule 27's first arm (the live file gone) (`Assess.swift:280`) | a backup holding the current key's file | INDETERMINATE-HANDLED — `backupMightHoldTheCurrentKeyFile`. Pin: `theLiveKeyFileGoneClaimsNothingOnAPartialListing` |
+| 8 | `AssessRules.repairs` — rule 27's second arm (a stray in the live place) (`Assess.swift:303`) | the same | INDETERMINATE-HANDLED — the same reading. Pin: `aStrayInTheLivePlaceClaimsNothingMoreOnAPartialListing` |
+| 9 | `AssessRules.olderKeyFileSweep` (`Assess.swift:345`) | `catalog.foreign` at the container's root | UNAFFECTED — `entry.place == .container, entry.folders.isEmpty` |
+| 10 | `AssessRules.acts` — rule 21's `.offerKeyFile` (`Assess.swift:512`) | the same fact | INDETERMINATE-HANDLED — owed on a partial listing; `searchIfOwed` keeps its FULL walk at its call site (D-1013-4) and answers (the offer, or rule 27's refusal, which the standing faces show from the search exactly as from the fault). Healthy opens never reach it (the live file is the current key's). Pins: #7's and #8's (`acts.contains(.offerKeyFile)`) |
+| 11 | `AssessRules.backupHoldsTheCurrentKeyFile` (`Assess.swift:551`) | `catalog.keyFiles` (non-live, the current key) | the plain fact — its only readers are #7, #8, #10, each through `backupMightHoldTheCurrentKeyFile` (`Assess.swift:560`) |
+| 12 | `AssessRules.passphraseAsks` — `.beforeFirstBackup` (`Assess.swift:571`) | `copies(ofLibrary:)` holds no backup | **FORK — NOT CHANGED** (below) |
+| 13 | `AssessRules.useCastleSpec` — copies under a key this Mac can't delete (`Assess.swift:716`) | every copy and its serving files | FULL-WALK CALLER — Use Castle's door words, rendered only from the crossings' / key doors' / account section's facts (`ProtectionCrossingActs:139`, `ProtectionKeyDoorActs`, `ProtectionAccountActs:452` — all `.everything`); the launch road's assessments compute doors and discard them |
+| 14 | `RouteFinder` (`RouteFinder.swift:96,109,134`) | the catalogue, the live file, a copy's serving files | FULL-WALK CALLER — reached only through #1/#3 |
+| 15 | `OwnCopies` (`OwnCopies.swift:16–113`) | this Mac's copies per place | FULL-WALK CALLER — `ProtectionBackupHook.runPair`, `ProtectionBackupPair` (the far due-check), `ProtectionCopyCounts`, `ProtectionCopyDoors`, `CopyDoorsModel` — each `lister.catalog()` (`.everything`) |
+| 16 | `Retention.plan` (`Retention.swift:56`) | this Mac's copies per place | FULL-WALK CALLER — `ProtectionBackupPair`'s `lister.catalog()`; and safe by construction on a partial listing (it prunes only copies the listing holds) |
+| 17 | `ProtectionFacts.catalog` (`Facts.swift:204`) | — | the field itself |
+| — | `CatalogNames`, `LibraryNotice`, `Assessment` | — | no catalogue read (names, the open's notice, a doc line) |
+
+Counts: 17 rows — UNAFFECTED 4 (#2, #4, #6, #9) · INDETERMINATE-HANDLED 4 (#5, #7, #8, #10; #11 is their shared fact) ·
+FULL-WALK CALLER 6 (#1, #3, #13, #14, #15, #16) · FORK 1 (#12) · definition/plain fact 2 (#11, #17).
+
+Beside the table (the app's launch-road readers, for the reviewer): `ProtectionFactsGatherer` (live key file → hint and
+live id, rule 26's names — container), `ProtectionLobbyFace.derive` (`catalog.liveKeyFile` — container),
+`ProtectionOpenRoad.offeredTyped` / `heldKeyFiles` / `quietCandidates` (container + the far walk once landed — the typed
+roads may grow when it lands, P-1013-1; a refusing press joins, P-1013-2), `ProtectionSystem.touchIDCandidates` (scoped
+by `CatalogRead.probing` — pinned by `theCustodyProbeReadsNoFarFolderInsideTheLaunchRoad`), `searchIfOwed` (its own full
+walk, unchanged), `FileKeyFileStoreLeaf.catalogedKeyFiles` (executor acts only — Castle entry's sweep and
+`keyFileGoneEverywhere`; never the open's happy path; a settle resuming an entry walks it, as rule 11's belt needs).
+
+**THE FORK (the one half NOT built — the architect rules).** Row 12, the no-backup-yet consult (`passphraseAsks`'
+`.askPassphrase(.beforeFirstBackup)`, rule 3: "always right before the first backup"). The record says it "does not
+claim 'no backup exists' on a partial listing; its act waits for a full-listing assessment (the backup hook's own moment
+walks everything anyway)". The parenthetical does not hold in the code: the moment's ONLY consumer is the open's report →
+`RoadStandingFaces.passphraseMoment` → `PassphraseReminderModel` at ready (`ProtectionOpenFaces.swift:228, 401`); no
+post-open assessment feeds the reminder, and the backup hook (`ProtectionBackupHook.runPair`) asks nothing — it decides
+due-ness only. So the literal reading LOSES the moment wherever the launch road opens a passphrase-less library whose
+container holds no backup of it while a far folder is picked: a creation on the launch road (`.startFresh`) on a Mac with a
+picked folder, and Make this my library's reopen (`beginOpening(unlockedKey:)`) without a passphrase — after which the
+first backup runs and the moment is never owed again. Options:
+- (a) **RECOMMENDED — the container answers it on a partial listing** (the code as it stands — NOT changed): the consult
+  reads the copies the listing holds; on the launch road's container-only listing that is "no backup of this library in
+  this Mac's container", the place every backup run lands first (`runPair`: the container pair, then the picked
+  folder's). It never loses the moment; its only miss is the benign direction — a library whose container pairs were
+  removed by hand but whose far folder keeps some is reminded once more. And it overclaims nothing a face says: the
+  reminder's words are about the passphrase ("your library is only secured through iCloud Keychain right now…"), never
+  about backups, and it shows only while no passphrase is set (`!passphraseSet`). A full listing keeps today's reading.
+- (b) The record's literal reading: not owed while the far folder is unread — the moment lost in the states above (a
+  regression of rule 3's "always").
+- (c) Deferred: the report marks the consult undecided and `RoadStandingModel.make` (post-open, off the launch path) runs
+  one detached full listing, handing the reminder its moment when it proves no backup exists — new plumbing; the reminder
+  may show a beat after the window.
+Until the ruling the tree is (a) by construction (row 12 untouched); on (a) the batch adds one pin (a partial listing
+with no container backup owes the moment — the creation keeps rule 3's "always"); on (b) or (c) the implementer builds it
+with its pin.
+
+**Noticed, not taken (scope):** the relock's lobby (`ProtectionRoadLock.lobby` — VX-445's Lock Now and the idle/sleep
+monitors) reads both roots as before: its context carries no far walk (D-1013-2's default for non-launch callers), so a
+lock lands behind `.opening` for one full walk — a follow-up candidate if the architect wants the lock on the same road.
+The lobby vault road's catch-up act (`catchUpThroughTheVault` → `executor.follow`) runs inside the press's scope (its custody
+listings probe the container + the walk once landed) — by construction, no separate change.
 
 ## THE LADDER
 
