@@ -23,9 +23,11 @@
 //  keeps its row; the books count is the same on both trees.
 //
 
+import AppKit
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -105,5 +107,140 @@ struct SearchChapterRowsTests {
             let none = try await listing(shelf, "harbor dawn")
             #expect(none.books.isEmpty, "a passage inside a member names no book row")
         }
+    }
+
+    // MARK: - The chapter row (VX-1074's new face — these compile only with
+    // the fix; their red is the behavioral revert's)
+
+    private func chapterRow(_ shelf: Shelf, _ name: String) -> LibrarySearchBookRow {
+        .chapter(SearchChapterHit(
+            sectionID: shelf.chapter.id, name: name, readingID: shelf.video.id,
+            readingName: "Video ideas", isArchived: false))
+    }
+
+    /// Her search lists the CHAPTER as its own row — its exact name, the book
+    /// it is in — and nothing else; under All and under the Books facet.
+    @Test func herSearchListsTheChapterAsItsOwnRow() async throws {
+        try await withHerShelf { shelf in
+            for scope in [LibraryCatalogModel.Scope.all, .books] {
+                let answer = try await listing(shelf, "oct 9 batch", scope: scope)
+                #expect(answer.bookRows == [chapterRow(shelf, "Oct 9 batch (V01\u{2013}V49)")],
+                        "\(scope): the chapter's own row, listed \(answer.bookRows)")
+                #expect(answer.books.isEmpty, "\(scope): no book row stands in for it")
+            }
+            let notes = try await listing(shelf, "oct 9 batch", scope: .posts)
+            #expect(notes.bookRows.isEmpty, "the Notes facet lists no Books section (as before)")
+        }
+    }
+
+    /// A book found by its own name AND through a chapter lists BOTH rows —
+    /// the book once, the chapter once; two chapters of one book are two rows
+    /// and ONE book in the band's count.
+    @Test func aBookAndItsChaptersListEachOnceAndTheBandCountsTheBooks() async throws {
+        try await withHerShelf { shelf in
+            let ops = shelf.session.operations
+            let second = try ops.createSection(in: shelf.video.id, name: "Oct 16 batch")
+            let cooking = try ops.createReading(name: "Batch cooking", kind: .book)
+            let soups = try ops.createSection(in: cooking.id, name: "Soups in batch")
+            let answer = try await listing(shelf, "batch")
+            let ids = answer.bookRows.map(\.id)
+            #expect(Set(ids) == [shelf.chapter.id, second.id, cooking.id, soups.id],
+                    "two chapters of Video ideas, the cooking book by its own name, and its chapter: \(answer.bookRows)")
+            #expect(ids.count == Set(ids).count, "every row once")
+            #expect(answer.books.map(\.id) == [cooking.id], "a book row only for a book's own name")
+            #expect(answer.counts?.living.books == 2, "the band counts the two books the section names")
+        }
+    }
+
+    /// An archived book's chapter lists only under the archived facet, and
+    /// says so; a deleted chapter lists nowhere.
+    @Test func anArchivedBooksChapterWaitsForTheFacetAndADeletedOneIsGone() async throws {
+        try await withHerShelf { shelf in
+            let ops = shelf.session.operations
+            try ops.archiveReading(shelf.video.id)
+            let living = try await listing(shelf, "oct 9 batch")
+            #expect(living.bookRows.isEmpty, "the living corpus leaves the archived book's chapter out")
+            let archived = try await listing(shelf, "oct 9 batch", visibility: .includingArchived)
+            #expect(archived.bookRows == [.chapter(SearchChapterHit(
+                sectionID: shelf.chapter.id, name: "Oct 9 batch (V01\u{2013}V49)", readingID: shelf.video.id,
+                readingName: "Video ideas", isArchived: true))],
+                    "under the facet it lists, wearing its book's archived fact")
+            try ops.deleteSection(shelf.chapter.id)
+            let gone = try await listing(shelf, "oct 9 batch", visibility: .includingArchived)
+            #expect(gone.bookRows.isEmpty, "a deleted chapter is not listed")
+        }
+    }
+
+    // MARK: - What the sheet DRAWS
+
+    private nonisolated static func pumpRunLoop(_ seconds: TimeInterval) {
+        MainActor.assumeIsolated {
+            RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+        }
+    }
+
+    private static func settle(_ window: NSWindow, _ hosting: NSView, _ seconds: TimeInterval = 0.6) async {
+        let deadline = Date().addingTimeInterval(seconds)
+        while Date() < deadline {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pumpRunLoop(0.03)
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+    }
+
+    /// The MOUNTED Library, both voices: her search draws the chapter row —
+    /// its name, "chapter", "in Video ideas" in the voice's case — and the
+    /// band counts the one book (the oracle's `.chapterRow` / `.countsLine`).
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func theSheetDrawsTheChapterRow(voice: ThemeVoice) async throws {
+        #if DEBUG
+        try await withHerShelf { shelf in
+            let session = shelf.session
+            try session.operations.setThemeVoice(voice)
+            let suite = "vx-1074-chapter-row-\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let model = LibraryCatalogModel(session: session, defaults: defaults)
+            let theme = ThemeStore(session: session)
+            let observing = Task { await theme.start() }
+            defer { observing.cancel() }
+            LibrarySearchDrawnOracle.reset()
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1_100, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: AnyView(
+                LibraryCatalogView(
+                    session: session, model: model, library: LibraryViewModel(session: session),
+                    tags: TagsViewModel(session: session), onOpen: { _ in },
+                    onOpenChapter: { _, _ in })
+                .environment(theme)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1_100, height: 700)
+            window.contentView = hosting
+            window.orderFrontRegardless()
+            defer {
+                window.orderOut(nil)
+                window.contentView = nil
+                window.close()
+            }
+            await Self.settle(window, hosting, 1.0)
+            model.query = "oct 9 batch"
+            await model.search()
+            await Self.settle(window, hosting)
+            let tokens = theme.tokens(for: .light)
+            #expect(LibrarySearchDrawnOracle.drawn(.chapterRow, in: session)
+                    == CatalogChapterLine.words(
+                        tokens: tokens, name: "Oct 9 batch (V01\u{2013}V49)",
+                        detail: SearchAnswerCopy.kindWord(.chapter) ?? "", book: "Video ideas"),
+                    "\(voice): the chapter row reads name · chapter · in Video ideas — drew \(LibrarySearchDrawnOracle.drawn(.chapterRow, in: session) ?? "nil")")
+            #expect(LibrarySearchDrawnOracle.drawn(.countsLine, in: session)
+                    == tokens.chromeLabel(LibrarySearchFace.countsLead(
+                        LibrarySearchCopy.counts(.init(books: 1, notes: 0, passages: 0, scraps: 0)), afterEcho: true)),
+                    "\(voice): the band counts the one book the chapter is in")
+        }
+        #endif
     }
 }

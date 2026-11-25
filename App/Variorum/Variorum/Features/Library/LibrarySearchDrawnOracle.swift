@@ -35,6 +35,9 @@ enum LibrarySearchDrawnSlot: String, Hashable {
     /// The band's QUOTE of the question's words ("“dream”"); nil while the
     /// band draws none — a tag alone, or folded words beside a tag (VX-1069).
     case echo
+    /// The Books section's last-drawn CHAPTER row, its words as it reads
+    /// (`LibrarySearchCopy.chapterRow` — VX-1074); nil while none is drawn.
+    case chapterRow
 }
 
 #if DEBUG
