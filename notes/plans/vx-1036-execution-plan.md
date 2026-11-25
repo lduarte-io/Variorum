@@ -438,6 +438,24 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 
 **THE ROUND-1 FIX (a fresh `opus-implementer`, briefed by this section):** R1-1 · R1-2 · R1-3 · R1-4 · R1-5 · N1–N5 · R1-9's phone build. Order: the bug-class PINS FIRST (R1-1's model pin, R1-2's plan pin, R1-3's and R1-4's hosted pins — hosted ones written and built, their red-on-old recorded as a behavioural revert recipe for the stage), then the fixes, then the NITs. Rules as every batch: the environment traps (§2); `nice -n 15`, one heavy command at a time; its OWN DerivedData tag (`vx1036l1`); commit by pathspec, push each; LIVE STATUS appended under this section from the first commit; no `xcodebuild test` (the stage runs the hosted pins and suites); no schema, no `Sync/`, no custody, no editor-seam line; untouched: `BookViewModel.arrive` / `outlineRowPreMounts` beyond what R1-3 needs (state it if it touches either), `BookNavigatorFloor.width`, `BookOutlineTravelTests`. Stage list as suite TYPE names. Each MINOR deferred to her (R1-6, R1-7) gets no code.
 
+#### THE ROUND-1 FIX — LIVE STATUS (the implementer's; flipped per piece in the same commit as the piece)
+
+**NOT DONE BY THE IMPLEMENTER (read first):** no `xcodebuild test` ran (the brief — the stage runs the hosted pins and suites), so every app-host pin and suite below is PENDING the stage; R1-6 and R1-7 have NO code (deferred to her, as ruled); no walk, no captures (no stage held); no canon deltas, no `notes/QUESTIONS.md` entries (merge-moment work).
+
+*Base: `b557bb998` (round 1 recorded). Required reading done in full before any code: this file's §8 "THE LADDER" (round 1's table, its dispositions, "THE ROUND-1 FIX" — the brief), §2 (the environment traps), the batch 1, 2, 3 and 4 LIVE STATUS sections and the acceptance window between them, `notes/SessionResiliencyProtocol.md`. Headless runs and `build-for-testing` only, under `nice -n 15`, one at a time, into this fix's own derived-data path (`App/Variorum/DerivedData/vx1036l1`). Untouched by this fix, as briefed: `BookViewModel.arrive`, `outlineRowPreMounts`, `BookNavigatorFloor.width`, `BookOutlineTravelTests`.*
+
+| Piece | Status |
+|---|---|
+| P0 — the bug-class pins FIRST: R1-1 (model) · R1-2 (plan shape) · R1-3 (hosted) · R1-4 (hosted) | IN-PROGRESS — written; R1-1 RED headless on the pins-only tree (5 issues — a scratch package over the real `BookOutlineHeights.swift` + `BookHeightManifest.swift` + `ProseHeightModel.swift`, two stand-ins for the editor typography globals the metrics read); R1-2 RED for Home on this tree (`SCAN pt USING INDEX uq_post_tag_live`), the named wing's arm green; R1-3 and R1-4 hosted (their red is a behavioural revert at the stage — recipes at P-final). The pins-only tree's one production change is R1-1's API accepting the position without using it, and R1-4's row made internal (an access change) |
+| R1-1 — the Outline's heights learn the tags switch | NOT-STARTED |
+| R1-2 — `tagUseCounts` tag-first, saturating at k = 50 | NOT-STARTED |
+| R1-3 — ⌥⌘N in the Index lands the note live | NOT-STARTED |
+| R1-4 — the List's title click selects | NOT-STARTED |
+| R1-5 — `BookCardTags` stops constructing `TagAssignmentViewModel` | NOT-STARTED |
+| N1–N5 | NOT-STARTED |
+| R1-9 — the phone target's headless build | NOT-STARTED |
+| P-final — the stage list (TYPES), the revert recipes, the PROVISIONALs | NOT-STARTED |
+
 **The stage plan (nov24's queue, 2026-11-25 ~09:55):** vm-260 (to ~10:33) → VX-1082's 75-min merge gate → this run's 75-min window. By then VX-1082 has merged: main merges in first (the masthead-test re-read is this run's, §4), then ONE window runs the batch 3+4 acceptance (pins by revert, the type-named tiers), the round-1 fix's hosted pins, the post-merge BookView/Library re-run, and the walk. VX-1091 closes at the merge on batch 3's measurement (the five tabs 205 pt in the 229-pt floor's room) — relayed to nov24.
 
 ## 9. The kickoff sitting (2026-11-25, answered by dialog)

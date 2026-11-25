@@ -273,4 +273,76 @@ struct BookMintLandingTests {
                     "live, with the caret in it (editing: \(session.editorRouter.editing?.postID ?? "nothing"))")
         }
     }
+
+    /// **The VX-1036 ladder, round 1 — R1-3 (MINOR; RED ON OLD): ⌥⌘N pressed
+    /// in the INDEX.** N-1's letter is "every mint door ends with the new note
+    /// on the page, live, the caret in it". In the Index the arrival's reveal
+    /// SELECTED the new note and made nothing live: the Index makes a note live
+    /// only through a block landing (`pendingLanding` → the pane's
+    /// `takePendingLiveBlock`), and a note born in a book has NO block yet
+    /// (`newPostInReading` mints the note alone — the Outline's editor holds an
+    /// empty note as its open tail; the Index's pane has no block to go live
+    /// on, and its rows draw a blank line). So the Index joins Read and List
+    /// (`BookReadMint.turnsToOutline`): the press turns the book to the Outline
+    /// and the note arrives there, live, the caret in it — the one mint act's
+    /// arrival, unchanged.
+    ///
+    /// RED ON OLD: the book stayed in the Index; the note was selected there,
+    /// never live (no editor held it, no caret anywhere in it).
+    @Test func aMintPressedInTheIndexTurnsToTheOutlineAndArrivesLive() async throws {
+        try await withMintLandingBook(posts: 12) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await entries(db, readingID))
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            structure.adopt(try await snapshot(db, readingID))
+            // She is in the Index (the seed ran at the adopt; this sticks).
+            structure.mode = .index
+            // The hosted harness never fires a view's `.task`: run the two
+            // observations the view would.
+            let observing = Task { await model.start() }
+            let structuring = Task { await structure.start() }
+            defer {
+                observing.cancel()
+                structuring.cancel()
+            }
+            BookOutlineGeometry.forgetAnchorTops()
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: Self.windowWidth, height: Self.windowHeight),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let theme = ThemeStore(session: session)
+            @MainActor func view(_ token: UUID?) -> some View {
+                BookView(
+                    session: session, readingID: readingID, model: model, structure: structure,
+                    mintRequest: token, onMintRequestConsumed: {})
+                    .environment(theme)
+            }
+            let hosting = NSHostingView(rootView: AnyView(view(nil)))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            // The Index has seeded its selection (the book's first note).
+            await settle(window, hosting, until: { model.indexSelectedPostID != nil })
+            #expect(structure.mode == .index, "the premise: the book stands in the Index")
+
+            // ⌥⌘N.
+            hosting.rootView = AnyView(view(UUID()))
+            await settle(window, hosting, until: {
+                guard let minted = model.focusedPostID, !postIDs.contains(minted) else { return false }
+                return structure.mode == .outline
+                    && onThePage(minted) && liveWithTheCaret(minted, session: session, window: window)
+            }, maxTurns: 240)
+            let minted = try #require(model.focusedPostID, "the act minted and focused a note")
+            #expect(!postIDs.contains(minted), "a new note was made")
+            #expect(structure.mode == .outline,
+                    "the press turned the book to the Outline (the Index has no block to make live)")
+            #expect(onThePage(minted), "on the page: top \(anchorTop(minted) ?? -1)")
+            #expect(liveWithTheCaret(minted, session: session, window: window),
+                    "live, with the caret in it (editing: \(session.editorRouter.editing?.postID ?? "nothing"))")
+        }
+    }
 }

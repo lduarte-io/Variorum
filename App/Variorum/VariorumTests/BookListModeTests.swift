@@ -334,3 +334,84 @@ struct BookListMountedTests {
         }
     }
 }
+
+// MARK: - The VX-1036 ladder, round 1 — R1-4: the title's click selects
+
+/// **R1-4 (MINOR; RED ON OLD).** BL-3: "a row's click selects the note … a
+/// double-click or ⏎ opens it" — and the row's own hover says "Click to select
+/// this note". In the book's List one click on a row's TITLE opened the note:
+/// the shared line's title carries its own tap (`CatalogNoteLine.onTitleTap` —
+/// the Library's title opens at once, its own model), the List handed it its
+/// OPEN act, and a child's tap beats the row's (`rowClick` on the shell never
+/// heard a click on the title). The pin mounts ONE row alone in a real window
+/// (the `CatalogNoteRowShell` pin's shape — `LibraryRowClickTests`; the whole
+/// List under the rig's event pump is the catalog's hang class), wired exactly
+/// as `BookListView.row` wires it, and clicks the title for real.
+///
+/// RED ON OLD: the single click on the title OPENED the note (the landing into
+/// Write was asked) instead of selecting it.
+@MainActor
+@Suite("VX-1036 ladder R1-4 — a List row's title click selects", .serialized)
+struct BookListTitleClickTests {
+    @MainActor
+    final class Opened {
+        var ids: [String] = []
+    }
+
+    @Test func aClickOnTheTitleSelectsAndADoubleClickOnItOpens() async throws {
+        try await withMintLandingBook(posts: 2) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            let entries = try await db.read { try Queries.assembleReading($0, readingID: readingID) }
+            await model.adopt(entries)
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            let entry = try #require(entries.first { $0.postID == postIDs[0] })
+            let opened = Opened()
+            let suite = "BookListTitleClickTests.\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let tokens = VoiceTokens.fallback(for: .light)
+            let rig = BlocksWorkbenchFaceTests.Rig(
+                VStack(spacing: 0) {
+                    BookListNoteRow(
+                        session: session, entry: entry, tokens: tokens,
+                        tags: BookCardTagsModel(readingID: readingID, defaults: defaults),
+                        list: BookListModel(), selected: false, badge: nil, structure: structure,
+                        noteDoors: BookNoteTitleDoors(), noteRoads: BookNoteRoads(),
+                        // `BookListView.row`'s own wiring: a select is the
+                        // box's selected note; an open selects and takes the
+                        // book's one open door (the landing into Write).
+                        onSelect: { model.noteListSelection(entry.postID) },
+                        onOpen: {
+                            model.noteListSelection(entry.postID)
+                            opened.ids.append(entry.postID)
+                        })
+                    Spacer()
+                }
+                .padding(20))
+            defer { rig.close() }
+            await rig.poll(timeout: 2) { false }  // let it lay out
+            #expect(model.listSelectedPostID == nil, "the premise: nothing selected")
+
+            // On the TITLE's words ("note 0"): the row's leading inset, a few
+            // points into the text, on its line.
+            let point = rig.windowPoint(CGPoint(
+                x: 20 + LibraryListFace.rowInsets.leading + 12,
+                y: 20 + LibraryListFace.rowInsets.top + 8))
+            rig.send(.leftMouseDown, at: point)
+            rig.pump(0.005)
+            rig.send(.leftMouseUp, at: point)
+            let acted = await rig.poll(timeout: 2) { model.listSelectedPostID != nil || !opened.ids.isEmpty }
+            #expect(acted, "the click on the title acted at all")
+            #expect(opened.ids.isEmpty, "a single click on the title never opens — no landing asked")
+            #expect(model.listSelectedPostID == entry.postID, "…it selects the note")
+
+            // A DOUBLE click on the title — the row's one click brain hears it
+            // too — opens the note, once.
+            rig.send(.leftMouseDown, at: point, clickCount: 2)
+            rig.pump(0.005)
+            rig.send(.leftMouseUp, at: point, clickCount: 2)
+            #expect(await rig.poll(timeout: 2) { !opened.ids.isEmpty }, "the double opens")
+            #expect(opened.ids == [entry.postID], "…the clicked note, once")
+        }
+    }
+}

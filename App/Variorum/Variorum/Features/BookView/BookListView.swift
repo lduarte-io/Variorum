@@ -253,8 +253,10 @@ struct BookListView<ChapterDoor: View>: View {
 /// the title the book gives the note, the day she stated, the tags behind the
 /// book's switch (`BookCardTagsModel.pills(for:)` — THE read seam; hidden
 /// draws no cards and no ＋), the edited stamp at the trailing edge, the book's
-/// badge, and the pick's wash on the selected note.
-private struct BookListNoteRow: View {
+/// badge, and the pick's wash on the selected note. Internal (not private) so
+/// the ladder's R1-4 pin mounts ONE row alone in a real window and clicks it
+/// for real — the `CatalogNoteRowShell` pin's shape (`BookListTitleClickTests`).
+struct BookListNoteRow: View {
     let session: AppSession
     let entry: Queries.ReadingEntry
     let tokens: VoiceTokens

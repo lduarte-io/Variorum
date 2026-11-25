@@ -78,7 +78,9 @@ final class BookOutlineHeights {
     /// Returns whether anything moved, so the caller can decide whether the
     /// column owes itself a re-land.
     @discardableResult
-    func stand(at width: CGFloat) -> Bool {
+    func stand(at width: CGFloat, tags: BookTagsShown? = nil) -> Bool {
+        // The VX-1036 ladder R1-1 — the PINS-ONLY tree: the book's tags
+        // switch is accepted here and not yet part of the stamp (the pin's red).
         let stamp = Self.stamp(width: width)
         guard stamp != self.stamp else { return false }
         self.stamp = stamp
