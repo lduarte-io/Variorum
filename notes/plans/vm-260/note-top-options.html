@@ -73,6 +73,29 @@
   .menu.show { display: block; }
   .menu div { padding: 11px 14px; border-bottom: 1px solid #eef2ef; }
   .menu div:last-child { border-bottom: 0; }
+  /* A, as picked */
+  .stickyP { flex-direction: column; align-items: center; }
+  .rowline { display: flex; justify-content: center; }
+  .tagstrip { display: none; gap: 6px; padding: 0 20px 8px; flex-wrap: wrap; justify-content: center; }
+  .tagstrip.open { display: flex; }
+  .tag { font-size: 13px; font-weight: 500; height: 24px; border-radius: 4px; padding: 0 8px;
+         display: flex; align-items: center; background: #DCEAE0; color: var(--ink); }
+  .tag.add { background: transparent; color: var(--accent); }
+  .t.hash.on svg { stroke: var(--accent); stroke-width: 2.1; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 430px; z-index: 10;
+           background: var(--band); border-radius: 22px 22px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,.14);
+           transform: translateY(105%); transition: transform .25s ease; padding: 8px 20px; }
+  .sheet.show { transform: translateY(0); }
+  .sheethead { display: flex; justify-content: space-between; align-items: center; height: 56px;
+               font: 600 19px/1 ui-serif, Georgia, serif; }
+  .sheethead span { font: 600 15px/1 -apple-system, system-ui, sans-serif; color: var(--accent); cursor: pointer; }
+  .sheeticons { display: flex; gap: 10px; margin: 4px 0 14px; }
+  .sicon { flex: 1; height: 64px; border-radius: 8px; background: #fff; display: flex; flex-direction: column;
+           align-items: center; justify-content: center; gap: 4px; font-size: 13px; color: var(--door); cursor: pointer; }
+  .sicon svg { width: 20px; height: 20px; stroke: var(--door); fill: none; stroke-width: 1.6;
+               stroke-linecap: round; stroke-linejoin: round; }
+  .srow { height: 44px; display: flex; align-items: center; font-size: 15px; border-bottom: 1px solid var(--hairline); }
+  .srow.danger { color: #A03A2E; border-bottom: 0; }
 </style>
 </head>
 <body>
@@ -90,6 +113,53 @@
 </header>
 
 <div class="row">
+
+  <!-- ================= A, AS PICKED (R-260-13) ================= -->
+  <section class="option" id="P">
+    <h2>A, as picked (R-260-13) — what batch 4b builds</h2>
+    <p class="sub">Her refinements: no separator; <b>#</b> opens the tags in place and the same # closes them;
+    the <b>seal</b> and the <b>date</b> moved into the note's ⋯ sheet as icons at its top. The row: copy · find ·
+    book · # · blocks/lens/info · ⋯. Tap <b>#</b> and <b>⋯</b> to try them.</p>
+    <div class="toggles">
+      <label><input type="checkbox" class="longT"> long title</label>
+      <label><input type="checkbox" class="inBook"> note in a book</label>
+    </div>
+    <div class="phone">
+      <div class="statusbar"><span>10:37</span><span>▪▪▪ ᯤ ▮</span></div>
+      <div class="navbar"><div class="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div></div>
+      <div class="scroller">
+        <div class="titleA">2026-11-25</div>
+        <div class="iconrow stickyP">
+          <div class="rowline">
+            <div class="t" title="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="13" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h8"/></svg></div>
+            <div class="t" title="find"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></div>
+            <div class="t book off" title="book"><svg viewBox="0 0 24 24"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/></svg></div>
+            <div class="t hash" title="tags"><svg viewBox="0 0 24 24"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg></div>
+            <div class="t stack" title="blocks · lens · more info"><svg viewBox="0 0 24 24"><path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16l8 4 8-4"/></svg></div>
+            <div class="t dots" title="the note's sheet"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></div>
+          </div>
+          <div class="tagstrip"><span class="tag">#machiavelli</span><span class="tag">#the-prince</span><span class="tag add">+ tag</span></div>
+        </div>
+        <div class="body"></div>
+      </div>
+      <div class="menu"><div>Blocks</div><div>Lens</div><div>More info</div></div>
+      <div class="sheet">
+        <div class="sheethead"><b>Note</b><span>Done</span></div>
+        <div class="sheeticons">
+          <div class="sicon"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="11" height="9" rx="2"/><path d="M12 11V7a4 4 0 0 1 8 0v1"/></svg><span>Seal</span></div>
+          <div class="sicon"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>No date</span></div>
+        </div>
+        <div class="srow">Save a Version</div>
+        <div class="srow">Versions…</div>
+        <div class="srow">Undo · Redo</div>
+        <div class="srow danger">Delete Note…</div>
+      </div>
+    </div>
+    <p class="legend">The row is 6 × 44 pt, centred, no separator, and the only thing that stays when she
+    scrolls (with the tag strip, while it's open). Orchestrator's provisional calls for her eye: ⋯ last (the
+    iOS convention); the open tag strip travels with the row so the # that closes it is always in reach; the
+    stack door opens Blocks · Lens · More info.</p>
+  </section>
 
   <!-- ================= OPTION A ================= -->
   <section class="option" id="A">
@@ -188,7 +258,14 @@
   const LONG = "XXII. Concerning the secretaries of princes, and how they should be chosen";
 
   document.querySelectorAll('.option').forEach(opt => {
-    const mode = opt.id;
+    const mode = opt.id === 'P' ? 'A' : opt.id;
+    if (opt.id === 'P') {
+      const hash = opt.querySelector('.hash'), strip = opt.querySelector('.tagstrip');
+      hash.addEventListener('click', () => { strip.classList.toggle('open'); hash.classList.toggle('on'); });
+      const sheet = opt.querySelector('.sheet');
+      opt.querySelector('.dots').addEventListener('click', ev => { sheet.classList.add('show'); ev.stopPropagation(); });
+      opt.querySelector('.sheethead span').addEventListener('click', () => sheet.classList.remove('show'));
+    }
     const sc = opt.querySelector('.scroller');
     const nav = opt.querySelector('.navbar');
     const navtools = opt.querySelector('.navtools');

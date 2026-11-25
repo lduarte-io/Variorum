@@ -449,6 +449,30 @@ present):**
   (their name and their own doors). It rhymes with the note's top, whose pick (R-260-8, A or B) she is making
   now. **Batch 4 builds both tops together after that pick.**
 
+**Her pick for the note's top (2026-11-25 ~11:4x, in session, verbatim):**
+> "ok i like this one better: A — the title on top, one icon row that stays (her leading idea) and that's what
+> we should go with. I don't think there should be a verticle line between the options. i'd make sure it's easy
+> to click on tags to see them expand and then click on the tag icon so tags close again too. i feel like sealing
+> the note can also go in the note's menu (maybe it can stay an easy to click icon at the top of the note menu
+> instead of another row). i also think that date could go in the note menu, again it could be an easy to click
+> icon at the top."
+
+- **R-260-13 — the note's top: option A, refined.** The title on its own row on top, more room, centred,
+  wrapping instead of cut off; ONE icon row beneath it, and ONLY that row stays as she scrolls. Her
+  refinements: **no vertical separator** in the row; **#** opens the note's tags in place and the same **#**
+  closes them again (an easy toggle, never a sheet she has to dismiss); **the seal and the date move INTO the
+  note's ⋯ menu, as easy-to-tap ICONS AT THE MENU'S TOP** (the iOS compact icon group at a menu's head), not
+  as menu rows. So the row is: copy · find · book (greyed when the note is in no book; tap to add it to one) ·
+  # · the one door for blocks / lens / more info · ⋯. **PROVISIONAL, the orchestrator's (for her eye at the
+  captures):** C-13-1 the order (⋯ last, the iOS convention); C-13-2 the open tag strip sits directly under the
+  icon row and travels with it while open, so the # that closes it is always in reach; C-13-3 the stack door
+  opens a three-item menu (Blocks · Lens · More info). This supersedes VM-148's "a slim bar with the title
+  stays" for the sticky part and its "row of chips" for the note's facts; VM-148's rename-in-place and title
+  quickfill are untouched.
+- **Batch 4 splits into two acceptance units** (one surface each, the sizing rule): **4a** the roots' tops
+  (VM-259's slim bar on the Library, the same slim line on Bookcase and Starred, R-260-11's count line gone);
+  **4b** the note's top (R-260-13). Sequential, a fresh implementer each, after batch 3b.
+
 ## Adjudications (the orchestrator's, repo-first)
 
 - **A-260-1 (on batch 1a's P-260-1a, 2026-11-25).** The built arm (a) STANDS — a note or book asked for on a page
