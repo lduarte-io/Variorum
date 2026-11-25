@@ -41,4 +41,8 @@ Open with her:
 
 ## Paste-ready kickoff
 
-> /architect-phase vx-1036 (or vx-1085, or vx-1086) — you are taking over as architect/orchestrator from a session that reached its context seam. Read `notes/plans/vx-1036-orchestrator-handoff.md` first, then `notes/plans/vx-1036-organizing-inside-a-book.md` whole, in the worktree `~/dev/variorum-vx-1036`. The design is not closed and nothing is built: the design is closed (§4f) and nothing is built. The work is cut into three umbrellas (the handoff lists them). Write this umbrella's execution plan first and bring me its batches and their evidence. Do not spawn an implementer before that plan is in the repo.
+For VX-1036 (inside a book):
+
+> /architect-phase vx-1036 — you are taking over as architect/orchestrator from a session that reached its context seam. Read `notes/plans/vx-1036-orchestrator-handoff.md` first, then `notes/plans/vx-1036-organizing-inside-a-book.md` whole, in the worktree `~/dev/variorum-vx-1036`. The design is closed (§4f) and nothing is built. This umbrella is the book view: list its sub-issues on Linear for the roster. Write its execution plan first and bring me its batches and their evidence. Do not spawn an implementer before that plan is in the repo.
+
+For VX-1085 (lanes) or VX-1086 (wings), the same line with that id and without the worktree clause — each takes its own branch, worktree and in-flight row at kickoff and reads the design record from main.
