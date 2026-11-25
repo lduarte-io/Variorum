@@ -198,8 +198,11 @@ enum NoteDeletion {
             let notes = try postIDs.filter { id in
                 try Queries.containerHeader(db, containerID: id)?.kind != .pool
             }
+            // A single-note gesture names at most one note here (the pool
+            // filter may leave none): its saved versions, counted before the
+            // tombstone takes them (ladder round 1 NIT 3).
             let versions = single
-                ? try notes.reduce(0) { $0 + (try Queries.noteVersionIDs(db, of: $1).count) }
+                ? try notes.first.map { try Queries.noteVersionIDs(db, of: $0).count } ?? 0
                 : 0
             return (notes, versions)
         }
