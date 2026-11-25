@@ -154,7 +154,7 @@ final class MobileTrashModel {
             // P-55-11: unless it landed somewhere other than where she would
             // look (the end of the note, set aside, among the archived takes)
             // — a direction keeps its line, in P-55-7's class.
-            MobileLine.say(receipt, as: answer.isDirection ? .refusal : .ordinary, session: session)
+            MobileLine.say(receipt, as: answer.isDirection ? .direction : .ordinary, session: session)
         } catch let error as OperationError {
             // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
             // 6c cold review's n5 retired the one-line forward — the Archive

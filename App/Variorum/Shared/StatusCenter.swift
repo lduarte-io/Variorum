@@ -119,6 +119,15 @@ final class StatusCenter {
         /// line whose door was its own (`withdraw(owner:)` — the phone's note
         /// screen, whose structural Undo dies with it). Defaulted nil.
         var owner: ObjectIdentifier? = nil
+        /// **VM-265 — a DIRECTION, not a refusal** (QUESTIONS #277, P-55-19 →
+        /// (b): "a new item fact and a face arm"). Set by `direct(_:)` alone —
+        /// the door that already names the distinction — so it is decided where
+        /// the message is produced, never read from the words. The kind stays
+        /// `.refusal` (always drawn: the placement is untouched on both
+        /// platforms); only the phone's FACE reads this, to ink a direction in
+        /// its muted rather than the alarm. The Mac's face never reads it.
+        /// Defaulted, so every other item reads unchanged.
+        var isDirection: Bool = false
 
         struct Action: Equatable {
             let label: String
@@ -258,7 +267,12 @@ final class StatusCenter {
     /// something failed when nothing did (row 56's own distinction — the doc
     /// on `Kind.refusal` already carried it, and a name carries it better).
     func direct(_ text: String) {
-        deliver(text, kind: .refusal)
+        // VM-265: the same delivery `deliver(text, kind: .refusal)` made — the
+        // same trim, guard, slot and clock — with the item saying it is a
+        // direction (`Item.isDirection`, read by the phone's face only).
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        place(Item(id: UUID(), text: trimmed, kind: .refusal, isDirection: true))
     }
 
     /// **The receipt door** (18i): an act landed and this says what. Where

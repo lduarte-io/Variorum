@@ -115,7 +115,8 @@ enum MobileNoteClipboard {
         var line: MobileLine.Class {
             switch self {
             case .copied: return .ordinary
-            case .copiedSavedTakes, .nothingToCopy, .failed: return .refusal
+            case .copiedSavedTakes: return .direction  // VM-265: the muted ink
+            case .nothingToCopy, .failed: return .refusal
             }
         }
     }

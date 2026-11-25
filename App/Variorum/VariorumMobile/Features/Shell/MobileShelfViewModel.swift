@@ -252,7 +252,7 @@ final class MobileShelfViewModel {
             lastReport = outcome.note
             // The entry opened but was NOT filed — a direction she must see
             // (the Mac ⌘J door's own class: `status.refuse(note)`).
-            MobileLine.say(outcome.note, as: .refusal, session: session)
+            MobileLine.say(outcome.note, as: .direction, session: session)
             return outcome.postID
         } catch {
             lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)

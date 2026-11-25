@@ -500,7 +500,7 @@ final class MobileLensesModel {
                 receipt = restored == .archived
                     ? Self.restoredDeletedButArchived
                     : Self.restoredDeleted
-                if RecoveryCopy.isDirection(restored) { line = .refusal }
+                if RecoveryCopy.isDirection(restored) { line = .direction }
             case .gone, .foreign:
                 return  // unreachable — the guard above
             }

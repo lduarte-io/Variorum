@@ -187,7 +187,9 @@ struct MobileLineShowRuleTests {
     /// The copy door's outcome decides its class where the outcome is.
     @Test func theCopyOutcomesSayTheirClass() {
         #expect(MobileNoteClipboard.Outcome.copied.line == .ordinary)
-        #expect(MobileNoteClipboard.Outcome.copiedSavedTakes.line == .refusal,
+        // MOVED at VM-265 (the VM-260 run, batch 1b): the direction speaks as
+        // one — still always drawn (the seam's `direct`), in the muted ink.
+        #expect(MobileNoteClipboard.Outcome.copiedSavedTakes.line == .direction,
                 "the copy that did not follow the screen is a direction she must see")
         #expect(MobileNoteClipboard.Outcome.nothingToCopy.line == .refusal)
         #expect(MobileNoteClipboard.Outcome.failed("x").line == .refusal)

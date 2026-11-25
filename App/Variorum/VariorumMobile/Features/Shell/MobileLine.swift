@@ -32,9 +32,15 @@ import VariorumCore
 enum MobileLine {
     /// What a message IS — the door's own answer.
     enum Class: Equatable {
-        /// Nothing happened (or a direction she must see), and this says why.
-        /// Always drawn.
+        /// Nothing happened, and this says why. Always drawn, in the alarm.
         case refusal
+        /// **A direction** — an outcome other than the one she asked for
+        /// (P-55-7, P-55-11: a put back that landed elsewhere, "Already
+        /// collected", an entry opened but not filed, a copy that could not
+        /// follow the screen, a note made but not opened — A-260-1). Always
+        /// drawn — the seam's `direct`, the refusal's class — and inked in the
+        /// phone's muted, never the alarm (VM-265, P-55-19 → (b)).
+        case direction
         /// An ordinary act landed. Her ruling: no line — the seam drops it on
         /// the phone (`StatusCenter.receipt`, the phone's placement).
         case ordinary
@@ -85,6 +91,8 @@ enum MobileLine {
         switch cls {
         case .refusal:
             session.status.refuse(words)
+        case .direction:
+            session.status.direct(words)
         case .ordinary:
             session.status.receipt(words)
         case .removal(let undo):

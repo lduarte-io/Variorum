@@ -574,8 +574,10 @@ final class MobileBlockHistoryController {
         // that landed somewhere other than where she would look (`direction` —
         // a take back among the archived takes, an original at the note's end)
         // keeps its line in P-55-7's class; the face's record stays a receipt.
+        // VM-265: a direction speaks as one (the muted ink), a refusal as one.
         MobileLine.say(
-            status.text, as: status.isRefusal || direction ? .refusal : .ordinary,
+            status.text,
+            as: status.isRefusal ? .refusal : (direction ? .direction : .ordinary),
             session: session)
     }
 

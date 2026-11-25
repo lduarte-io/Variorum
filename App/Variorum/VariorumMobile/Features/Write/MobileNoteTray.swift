@@ -381,8 +381,9 @@ final class MobileNoteTrayModel {
         _ status: RecoveryStatus, removal: Bool = false, direction: Bool = false
     ) {
         self.status = status
-        let line: MobileLine.Class = status.isRefusal || direction
-            ? .refusal : (removal ? .removal(nil) : .ordinary)
+        // VM-265: a direction speaks as one (the muted ink), a refusal as one.
+        let line: MobileLine.Class = status.isRefusal
+            ? .refusal : (direction ? .direction : (removal ? .removal(nil) : .ordinary))
         MobileLine.say(status.text, as: line, session: session)
     }
 

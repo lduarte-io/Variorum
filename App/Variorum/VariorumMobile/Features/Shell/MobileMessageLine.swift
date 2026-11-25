@@ -31,8 +31,8 @@
 //  VM-55 re-land — the sizing sheet §E, "Receipt line"; PROVISIONAL with its
 //  numbers, P-47-1): ONE line, 44 tall; the words SF 15 (`controlInline`,
 //  chrome — they follow the text size to xxxLarge and hold) — a refusal in the
-//  alarm ink every phone error slot wore, a removal in the corrected muted, an
-//  offer in ink; its act 15 semibold in the accent across a 44 pt hit area
+//  alarm ink every phone error slot wore, a removal and (VM-265) a direction in
+//  the corrected muted, an offer in ink; its act 15 semibold in the accent across a 44 pt hit area
 //  (`PhoneInlineActStyle`); at the gutter, on the room with the tab bar's
 //  hairline, because a line that floats over content needs a ground to be read
 //  on — in the library's look (voice, palette and tint: the shell hands its
@@ -124,9 +124,11 @@ final class MobileMessageLineModel {
         case muted
     }
 
+    /// VM-265 (P-55-19 → (b)): a DIRECTION rides the refusal's class (always
+    /// drawn) but is no alarm — it wears the muted, the removal line's ink.
     static func ink(for item: StatusCenter.Item) -> Ink {
         switch item.kind {
-        case .refusal: return .alarm
+        case .refusal: return item.isDirection ? .muted : .alarm
         case .offer: return .ink
         case .receipt: return .muted
         }

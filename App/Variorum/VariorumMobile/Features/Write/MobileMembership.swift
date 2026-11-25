@@ -215,12 +215,13 @@ final class MobileMembershipModel {
             let result = try await session.runner.run { [postID] ops in
                 try ops.collectPostIntoSmartReading(postID, into: book.id)
             }
-            // VM-61 / P-55-11: both of the collect's outcomes speak as a
-            // REFUSAL-class line — already matching did nothing (a door that
-            // did nothing says so); a tagging that seats it applied tags (or
-            // the star) she did not ask for by name — a direction, in P-55-7's
-            // class. VM-21: the words are the shared composer's, whichever arm.
-            say(AddToBookCopy.collected(result, gatheringName: book.name), as: .refusal)
+            // VM-61 / P-55-11: both of the collect's outcomes keep their line —
+            // "Already collected" (P-55-7's own example) and a tagging that
+            // seats it, which applied tags (or the star) she did not ask for by
+            // name. Both are DIRECTIONS (VM-265, the ticket's own example: the
+            // muted ink, never the alarm). VM-21: the words are the shared
+            // composer's, whichever arm.
+            say(AddToBookCopy.collected(result, gatheringName: book.name), as: .direction)
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
                 say("“\(book.name)” can't take this note: \(reason)", as: .refusal)
