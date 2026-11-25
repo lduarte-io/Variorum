@@ -16,8 +16,11 @@
 - **The 1.5 release's step 0: PASSED** on the code of `703c42173`, 2026-11-24 17:47–17:54, under stage coordinator
   `nov24` (claim `vx-1045`): FirstRunDrillTests 11 of 11, the first-run walk green in both arms, the dev slot back
   byte for byte. The evidence lines are in "The release's step 0" below.
-- **Order from here:** her approval of the notes and label, then this branch's first PR merges (it carries the
-  ignore line the release's clean-tree check needs), then the release run, then the sitting's close.
+- **Variorum 1.5 is BUILT, not published** (2026-11-24 18:26–18:35): from main `83a15ac0e` (PR #22's merge), build
+  13416, both notarizations accepted, `Variorum-1.5.dmg` sha256 `5fabddcb…07c7`, the appcast made and verified. The
+  lines are in "The release run" below. `/Applications` still holds 1.4.
+- **Waiting on her:** her word to publish (the site's runbook: the DMG first, then the appcast) and to install into
+  `/Applications` behind an A1 copy. Then the sitting's close in a second PR.
 - **Still hers before 1.5 is built:** the 1.5 notes and label (put to her in chat for approval).
 - **Canon touched on this branch:** `notes/SurfaceContracts.md` and `notes/MCPSpec.md` (the ratified calls lose the
   word PROVISIONAL; the stated exceptions added beside the audit's pointer); `notes/QUESTIONS.md` (two addenda).
@@ -215,4 +218,8 @@ canon keeps that word on the Trash line's wording.
 | 18:24 | build-for-testing again, headless, so the test bundle carries the new notes. The stage claimed 18:24:5x for the What's New tests at `nov24`'s GO: `WhatsNewTests` 18:24:55–18:25:03, `executed 11 (passed 11, failed 0, expected failures 0) - skipped 0 - from the result bundle`, VERDICT GREEN. Released 18:25:09. |
 | 18:25 | **PR #22 merged** at `nov24`'s GO, a merge commit: `83a15ac0e`. `~/dev/variorum` pulled fast-forward; `git status --porcelain` there reads empty (the frames folder ignored, its 14 files untouched). Main's commit count is 13416. |
 | 18:26 | REQUEST and READY to `nov24` for the release run from `83a15ac0e`, 45 minutes, merges frozen for its length. |
+| 18:26 | GO from `nov24` for the release run; main frozen. The stage claimed 18:26:25. |
+| 18:26–18:34 | **`Tools/Release/release.sh --version 1.5 --stop-before-appcast`: exit 0.** Preflight passed whole. Stamped commit `83a15ac0e9b5f9608ea84de434044c8162ec3019`, build 13416, dirty files 0. The app: notarization Accepted (id `a1cc700e-88ae-48e3-9235-bb52781cd2e0`, 0 issues), Gatekeeper accepts, the ticket stapled, 58 of 58 checks. The DMG: signed, notarization Accepted (id `fbb0c3ab-bee4-4445-a092-71bbb4c65b4c`, 0 issues), stapled, Gatekeeper-accepted. The app inside the final DMG: VERDICT PASS, 58 of 58; the window layout read back PASS. `Variorum-1.5.dmg` · 33,954,921 bytes · sha256 `5fabddcb6777cd658a80b41a187a873a45cb78260e3a5efbaaa2b488ed8007c7`. dSYMs match the shipped binary; the durable record is `~/Library/Developer/Variorum/Releases/1.5/`. |
+| 18:35 | **The appcast: made**, `make-appcast.sh --release …`, exit 0, VERDICT PASS (build 13416 the highest of three items; the EdDSA signature verifies over the DMG's bytes; the description is the notes verbatim, 2,325 bytes). No Keychain prompt appeared. The feed copy's sha256 equals the build's. |
+| 18:35 | The stage released (18:35:09; 9 of 45 minutes), main unfrozen, the result line sent to `nov24`. Zero instances, no crash report, the main checkout clean at `83a15ac0e`. Nothing uploaded; `/Applications` untouched (1.4). |
 
