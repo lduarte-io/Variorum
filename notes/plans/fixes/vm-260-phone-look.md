@@ -322,15 +322,15 @@ text-input path; `Shared/` untouched; the one message line untouched (batch 1b's
 
 | Piece | State |
 |---|---|
-| 0. Preflight (CLAUDE.md + canon, this record's binding sections, the resiliency protocol, SurfaceContracts' phone bullets, the VM-47 FOR A LATER READER, the three tickets' bodies); the screens folder made gitignored | DONE (this commit) |
-| 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (this commit) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
-| 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (this commit) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) PENDING |
-| 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (this commit) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
-| 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (this commit) — phone `build-for-testing` green; the moved pins PENDING |
-| 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | DONE (this commit) — phone `build-for-testing` green; the suites PENDING |
+| 0. Preflight (CLAUDE.md + canon, this record's binding sections, the resiliency protocol, SurfaceContracts' phone bullets, the VM-47 FOR A LATER READER, the three tickets' bodies); the screens folder made gitignored | DONE (`5f70297f4`, `2c0ebf985`) |
+| 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (`b05c45bb0`) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
+| 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (`219a945d1`) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) PENDING |
+| 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (`9edeb6993`) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
+| 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (`8d7fc32cb`) — phone `build-for-testing` green; the moved pins PENDING |
+| 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | DONE (`f8aa3f6f4`; the self-review fix `74a3a7149`) — phone `build-for-testing` green; the suites PENDING |
 | 6a. The red-on-old trees built headless (no stage), each into its own DerivedData: VM-253 at `b05c45bb0` → `DerivedData/vm260-1a-rol253`; VM-256 at `9edeb6993` → `…-rol256`; VM-255 at `8d7fc32cb` + the two pin files from `f8aa3f6f4` → `…-rol255` | DONE — all three `TEST BUILD SUCCEEDED`; the worktree is back on `vm-260-phone-look`, clean (the two copied files removed before the switch) |
-| 6. Phone + Mac `build-for-testing` green on the tip; READY-FOR-TESTS | DONE (this commit) — phone `DerivedData/vm260-1a`, Mac `…-mac`, the keyboard-reveal UI bundle `…-ui`; the run list below |
-| 7. The suites (each pin red on old by behavioural revert, then the batch's suites green) | PENDING (needs the stage GO) |
+| 6. Phone + Mac `build-for-testing` green on the tip (`74a3a7149`); READY-FOR-TESTS | DONE (`1b19aba7f`) — phone `DerivedData/vm260-1a`, Mac `…-mac`, the keyboard-reveal UI bundle `…-ui`; the run list below |
+| 7. The suites — each pin red on old (`test-without-building` against the prebuilt pre-fix trees of 6a: the revert is the commit itself, the worktree never sits reverted), then the tip's suites | PENDING (needs the stage GO) |
 | 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (needs the stage GO) |
 
 
