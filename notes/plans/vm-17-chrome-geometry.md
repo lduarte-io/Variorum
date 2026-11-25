@@ -5,6 +5,11 @@ catch-up has merged to `main`; the author kicks it off. Shape: `/architect-phase
 orchestrator mints the run ticket and seats the three as sub-issues; VM-179 sits under its wave-4 umbrella until
 then).**
 
+**HELD (her word, 2026-11-24): this run does not launch until the phone editor design (VM-271's standalone design
+session) is settled.** "make a note that I will not launch a run on the stray badges until after the editor redesign -
+the board should say so." The board carries it as VM-17's blocked-by relation to VM-271; no run or rider sweep picks
+these tickets up meanwhile.
+
 This file is a kickoff and a set of pointers. It is NOT a design: the rule's shape is the architect's work.
 
 ## Kickoff message
