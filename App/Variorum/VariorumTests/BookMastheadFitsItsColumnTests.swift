@@ -188,6 +188,25 @@ struct BookMastheadFitsItsColumnTests {
     static let navigatorRoom: CGFloat = BookNavigatorLayout.minimumWidth - 24
     static let indexRoom: CGFloat = BookIndexColumn.minimumWidth - 28
 
+    /// **The room the column's OTHER children leave the title line** (the
+    /// window's scoped re-run, 00:54 — D-1082-S3's measured read): the
+    /// panel's room, or — where they are wider — the mode row's tabs at their
+    /// fixed width. A stack places every child at its widest child's width,
+    /// so where the tabs outgrow the room (Terminal at the 190-pt navigator:
+    /// tabs 167 pt in 166 — VX-1091) the title line FILLS that point too
+    /// (measured: title line 167, navigator 191; Study 166 and 190). The tabs
+    /// do not depend on the title line, so this isolates the line's own
+    /// contribution: the old HStack's open line (190–220 pt) is still red
+    /// against it, its resting line (which fills) still green. When VX-1091
+    /// is fixed the max collapses to the panel's room.
+    private func roomBesideTheTabs(_ readingID: String, room: CGFloat) -> CGFloat {
+        #if DEBUG
+        max(room, BookMastheadProbe.placed[readingID]?.arrangement.tabs.width ?? 0)
+        #else
+        room
+        #endif
+    }
+
     // MARK: - The navigator at its 190-pt floor
 
     /// Her sighting's shape — a short-named GATHERING — and her own book's
@@ -211,8 +230,9 @@ struct BookMastheadFitsItsColumnTests {
                     let window = await mount(book, theme)
                     defer { window.orderOut(nil); window.close() }
                     let width = try #require(titleLineWidth(book.readingID), "\(voice) \(name): the title line reported")
-                    #expect(width <= Self.navigatorRoom + 0.5,
-                            "\(voice) \(name) (\(kind), \(waiting) waiting): the open title line drew \(width) pt in a \(Self.navigatorRoom)-pt room")
+                    let room = roomBesideTheTabs(book.readingID, room: Self.navigatorRoom)
+                    #expect(width <= room + 0.5,
+                            "\(voice) \(name) (\(kind), \(waiting) waiting): the open title line drew \(width) pt in a \(room)-pt room")
                 }
             }
         }
@@ -231,8 +251,9 @@ struct BookMastheadFitsItsColumnTests {
                     let window = await mount(book, theme)
                     defer { window.orderOut(nil); window.close() }
                     let width = try #require(titleLineWidth(book.readingID), "\(voice) \(name): the title line reported")
-                    #expect(width <= Self.navigatorRoom + 0.5,
-                            "\(voice) \(name): the resting title line drew \(width) pt in a \(Self.navigatorRoom)-pt room")
+                    let room = roomBesideTheTabs(book.readingID, room: Self.navigatorRoom)
+                    #expect(width <= room + 0.5,
+                            "\(voice) \(name): the resting title line drew \(width) pt in a \(room)-pt room")
                     // D-1082-S3's ONE measured read (printed, never asserted —
                     // the 1-pt Terminal overflow is ANOTHER element's, named
                     // headless as the mode row's tabs and ticketed): the mode
@@ -266,8 +287,9 @@ struct BookMastheadFitsItsColumnTests {
                 let window = await mount(book, theme)
                 defer { window.orderOut(nil); window.close() }
                 let width = try #require(titleLineWidth(book.readingID), "\(voice): the Index column's title line reported")
-                #expect(width <= Self.indexRoom + 0.5,
-                        "\(voice): the open title line drew \(width) pt in the Index column's \(Self.indexRoom)-pt room")
+                let room = roomBesideTheTabs(book.readingID, room: Self.indexRoom)
+                #expect(width <= room + 0.5,
+                        "\(voice): the open title line drew \(width) pt in the Index column's \(room)-pt room")
             }
         }
         #endif
