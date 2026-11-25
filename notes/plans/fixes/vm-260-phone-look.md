@@ -737,7 +737,7 @@ present):**
 | Batch 4b (the note's top, R-260-13/14) | BUILT 2026-11-25 (red-on-old `4be933b0e` in `vm260-4b-rol`, ~34 issues in 21 cases predicted; code tip `af449326a`; trio rebuilt); ADJUDICATED A-260-17 — one departure (the title FLIPS away instead of riding frame by frame: the fence), C-4b-1 hers after the phone. PENDING the gate |
 | Batch 4 (VM-259 + the note's top + R-260-11) | BOTH PICKS IN: VM-259 B, the slim bar (R-260-12); the note's top A as picked, ratified with no further checkpoint (R-260-13, R-260-14); the Bookcase count line goes (R-260-11). 4a then 4b after batch 3b and the main merge; her judgment is the phone install after 4b |
 | Her phone (R-260-7) | INSTALLED 2026-11-25 ~11:0x at her word (*"install the build on my phone now"*): the signed device build at code tip `78ed5b4bb` (`DerivedData/vm260-device`, Release-iphoneos), `devicectl` to her iPhone 17 Pro, same bundle id (her store carried over). Her assessment on the phone is the run's real close |
-| Ladder · gate · walk | LADDER ROUND 1 RUNNING 2026-11-25 (a fresh `opus-reviewer`, R-260-10; `notes/REVIEW_PROMPT.md` verbatim with {PHASE} filled by the run's locator and the record as the plan; over the whole diff at code tip `af449326a`). VM-282 holds the owed Fable round. The gate follows the last round, queued with nov24 behind VX-1036; ROUND 1 DONE (one MAJOR, R1-1; fixes to a fresh implementer). **THE GATE'S MAC LEGS ARE FENCED** (nov24, 2026-11-25 afternoon): the dev store is dressed for her look and fenced until her "done looking"; the Mac app-suite test host opens the dev store, so every Mac `xcodebuild test` leg (the source scans, the token pins) waits for her word. The simulator legs may run any time. The REQUEST names which legs. |
+| Ladder · gate · walk | LADDER ROUND 1 RUNNING 2026-11-25 (a fresh `opus-reviewer`, R-260-10; `notes/REVIEW_PROMPT.md` verbatim with {PHASE} filled by the run's locator and the record as the plan; over the whole diff at code tip `af449326a`). VM-282 holds the owed Fable round. The gate follows the last round, queued with nov24 behind VX-1036; ROUND 1 DONE (one MAJOR, R1-1; fixes to a fresh implementer). **THE GATE'S MAC LEGS ARE FENCED** (nov24, 2026-11-25 afternoon): the dev store is dressed for her look and fenced until her "done looking"; the Mac app-suite test host opens the dev store, so every Mac `xcodebuild test` leg (the source scans, the token pins) waits for her word. The simulator legs may run any time. The REQUEST names which legs.; **THE RED-ON-OLD WINDOW RAN (14:11–14:24): every owed red-on-old leg RED as built; R1-1 NOT hollow (its fix stands)**; ROUND 2 RUNNING. Owed: the tip legs + the closing walk (simulator), then the Mac legs at her word |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
 
 ## THE LADDER — round 1 (2026-11-25; a fresh `opus-reviewer`, REVIEW_PROMPT verbatim, over the whole diff at code tip `af449326a`)
@@ -965,6 +965,22 @@ red-on-old tree is `96e07e2db`; the code tip is `8bbc18d87`.**
 - **W — the closing walk's added stop** (the Debug phone app from `vm260-2r`, both voices): a two-line note dragged into
   its room by a real thumb and released at the foot — the title stays and nothing jumps (the tip); for her eye, a long
   note's leave at its very foot.
+
+## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
+
+Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
+
+| Leg (tree) | Predicted | Read |
+|---|---|---|
+| R-r1 (`vm260-r1-rol`, `96e07e2db`) | R1-1 pin 8 issues, or GREEN ⇒ hollow; `terminalsProseStaysTwoUnderStudysAtEveryStep` 3; `theFiveStepsScaleHerWordsOnly` 23 | **R1-1 RED, 6 issues, both voices** — all at `MobileNoteTopRowTests.swift:288` (`abs(settled.offset - foot) <= 0.5`: the page does not stay at the foot she set). **NOT hollow: by A-260-18's rule decided before the window, `3651b2eb7` STANDS and C-R1-1 goes to QUESTIONS.** The count differs from the prediction (the title-state and max-offset clauses held; the foot clause carries the red). 3 ✓ · 23 ✓ |
+| R-b3r (`vm260-3r-rol`, `defecf3a9`) | `everyStepIsAWholePoint` 27; `theTwoFormsAgreeAtEveryStep` 27 (whole-point grid) or 25 (half); `theEditorFaceTakesTheStep` 1 | 27 ✓ · **15** — RED, so H1 (the two forms disagree at fractional sizes) is CONFIRMED and A-260-14's fix stands; the count says UIKit's snapping grid is neither whole nor half points (inferred: the pixel grid), which the whole-point fix is indifferent to · 1 ✓ |
+| R-3b (`vm260-3b-rol`, `b48b391e2`) | `whilePickingTheHeaderNeverDrawsOneWordOnTwoDoors` 2 | 2 ✓ |
+| R-3b-ui (`vm260-3b-rol-ui`, `b48b391e2`, walk device) | `testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` up to 12 | **12 ✓ — VM-281's road reproduces on old** (the tip's green at the gate is the claim) |
+| R-4a (`vm260-4a-rol`, `0bfd8326c`) | 12 issues in 8 cases | 10 in the five listed suites + the rider `thePickingDoorsSpokenNameHoldsTheWordItDraws` 2, run as an added leg (the record's run list named `MobileBlockListTests`; the pin's suite is `MobileBlockSelectionTests`) = **12 ✓** |
+| R-4b (`vm260-4b-rol`, `4be933b0e`) | ≈ 34 issues in 21 cases | **33** across the eleven predicted tests ✓ |
+
+Teardown verified: both devices shut down, `vm260-rol` DELETED, 0 booted sims, 0 Variorum instances, 0 Problem
+Reporter, no crash report since 14:11. Released to nov24 with the full line.
 
 ## THE CONSOLIDATED WINDOW — results (2026-11-25, claim `vm-260` 04:55–06:01:14; the GO device `vm260-suites` iOS 26.2, DELETED at close; the UI legs on `vm260-walk`)
 
