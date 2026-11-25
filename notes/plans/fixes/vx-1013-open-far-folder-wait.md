@@ -308,13 +308,33 @@ this branch and round 2's re-review covers it.
 
 ## BATCH 2 LIVE STATUS (the implementer's — round 1's fixes, then the VX-524 rider)
 
-*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight.*
+*Batch 2, opus-implementer, session 1 (2026-11-25). No behavioural revert is in flight. NEXT: a MUTATION run on
+F-R1-1's guard (the edge — a missing standing read as a whole listing), from the committed state, restored by
+`git checkout --` on `ProtectionLobbyModel.swift` (committed first, so the restore is safe).*
 
-- PHASE A — DONE (this commit): the round-1 dispositions, each from this session's own read of the named code, under
-  THE LADDER ▸ ROUND 1 DISPOSITIONS below. NO fix built. Awaiting the round-1 reviewer's final call on each (relayed by
-  the orchestrator).
-- PHASE B — NOT-STARTED: the confirmed fixes with their pins (F-R1-1's gated-refresh pin red on this tree; F-R1-2 and
-  F-R1-4 not bug-class, no pin; F-R1-3 per the final call — this session proposes ticket-instead), then VX-524 pin-first.
+- PHASE A — DONE (`8f5f1f538`): the round-1 dispositions, each from this session's own read of the named code, under
+  THE LADDER ▸ ROUND 1 DISPOSITIONS below. The reviewer's final calls landed at `30caec3fa` (ROUND 1 FINAL CALLS).
+- PHASE B:
+  - B1 F-R1-1 — DONE (`d723aa616`; this record line rode the next commit — the record edit was refused at the first
+    try because the file had moved under the pull). `ProtectionLobbyModel.take(_:)`: a read whose catalogue does not
+    read every place never replaces a standing whose catalogue does; a standing with NO facts takes any read with
+    facts, as before (the reviewer's edge). Pins (app, in `OpenFarFolderWaitTests`, now 13):
+    `aRefreshReadBeforeTheLandingNeverTakesRuleTwentySevenBackAway`,
+    `aRefreshReadBeforeTheLandingNeverTakesTheFarFilesRoadBackAway` (a `refreshRoad` held on a gate after it entered;
+    the landing runs and takes the full facts; the gate opens; the face must keep them), and the edge pin
+    `aLobbyWithNoFactsTakesAPartialReadAsBefore`. PIN BEFORE FIX, headless harness (the VX-306 recipe — the scratchpad
+    package that symlinks the worktree's files, `swift test`), on the batch-1 tree: `✘ Test run with 13 tests in 1
+    suite failed … with 2 issues` — exactly the two "never narrows" expectations (414, 444); every expectation before
+    the gate opened held (the landing did take the full facts); the edge pin green, as designed. With the guard:
+    `✔ Test run with 35 tests in 4 suites passed` (`OpenFarFolderWaitTests` 13, `ProtectionLobbyModelTests`,
+    `LobbyTouchIDReaskTests`, `RoadLockTests` — the last three UNMODIFIED). The pre-fix run IS the guard's revert (the
+    guard is the only production change in this piece).
+  - B2 F-R1-2 — NOT-STARTED: delete `CatalogLister.Scope` and `catalog(scope:)`; the header rewritten to the shipped
+    seam; an as-built line beneath D-1013-2.
+  - B3 F-R1-4 — NOT-STARTED: the two comments (`AppBootstrap.swift:642`, `ProtectionOpenRoad.swift:472`).
+  - B4 F-R1-3 — NOT-STARTED: the closing disposition line naming VX-1090; no code.
+  - B5 — NOT-STARTED: the Mac target `build-for-testing`, the phone build, the widened headless harness, the core suite.
+  - VX-524 — NOT-STARTED: pin first as the confirm (MEMBERS brief).
 
 ## THE LADDER
 
