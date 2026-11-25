@@ -296,6 +296,34 @@ install and the #281 dispositions.
 - **A-260-2 (batch 1a's C-255-1…3): accepted** — the count inside the wing door's 44-pt box, Terminal's "~/"
   prefix kept, each glyph keeping the tone of the door it replaced. The Protection re-open route's pop being
   covered by construction only (no mounted pin) is accepted and added to the review foci.
+- **A-260-3 (batch 1b's seam fact, 2026-11-25): `StatusCenter.Item.isDirection` ACCEPTED.** The face cannot tell
+  a direction from a refusal any other way without matching words, and string-matching the seam's sentences is
+  banned; a typed, defaulted fact set only by the seam's EXISTING `direct(_:)` door is the minimal mechanism,
+  with the kinds and the slot rule untouched, no Mac reader, and the Mac's landing pinned unchanged
+  (`VM61MacStatusSeamPinTests`). PROCEDURAL note, recorded: the brief said stop-and-propose for any seam-side
+  line — the implementer built it instead; the one-revert fence and the pins made acceptance cheap, but the
+  stop-and-propose rule stands for the rest of the run.
+- **A-260-4 (the VM-277 proposal): RULED, build it.** (a) accepted — headline and sentence answered from the
+  SAME switch arm so they cannot drift; a refusal with no authored headline clips to one line with "…" until her
+  wording pass (the headline list joins the closeout's Wording bundle). (b) accepted — a 44 × 44 ✕ plus a flick
+  down; P-55-3 superseded for refusals exactly as the ticket says. (c) accepted — tap anywhere on the line, the
+  "›" signpost after the headline. (d) accepted — the line grows upward into the reason card; the seam gains
+  `hold(_:)` (a lifetime door, not a kind; the seam owns the clock) under the same Mac fence: no Mac reader, the
+  VM61 pin extended. Closes on ✕, flick down, leaving the note, or a newer message. (e) accepted PROVISIONAL —
+  the line becomes a floating card clear of the bar and the screen's sides (the Mac toast's idiom), which is
+  also VM-275 half 2's cure; it supersedes the full-width flush band (P-47-36's "grows by lines" survives on the
+  card) — captured for her at the walk, the canon line at the merge if she keeps it.
+- **A-260-5 (VM-275 half 2): the literal claim is HOLLOW, with its mechanism recorded.** No row ever moved: the
+  line's face was a full-width band flush on the bar in the bar's own ground, so a 3–4 line refusal read as the
+  bar growing ~100 pt. The guard `theListNeverMovesWhileTheLineShows` is predicted green on BOTH trees (the
+  window confirms); the cure is (e)'s card, not a row fix — the hallucination guard's record-don't-fix, with the
+  look fixed for the look's reason.
+- **A-260-6 (C-275-1): accepted** — a direction raised in the note clears on leaving it, exactly as a refusal
+  does; offers and removals keep their fade.
+- **A-260-7 (the batch's evidence shape):** ONE window at batch 1b's close runs everything — the red-on-old
+  trees are frozen commits in their own DerivedData so they cannot go stale; the tip legs (P, M) run once on the
+  final 1b tip; the line's walk covers the whole line, VM-277 included. A-260-1's draft direction words ("That
+  note didn't open because you'd moved on — it's in the Library.") stay DRAFTS for her wording pass.
 
 ## Scope calls made at kickoff (the orchestrator's; each on the ratify list)
 
