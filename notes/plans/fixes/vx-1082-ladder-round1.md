@@ -185,8 +185,41 @@ green).
 row's click through the shell road; VX-1075's hover rows (the tooltip rule's last link); VX-409's
 animated-beat captures plus the five hosts' triage captures; VX-1077's door walk; VX-1070's visual.
 
-## Dispositions
+## Dispositions (the reviewer's final calls — the implementer AGREED on all three and proposed fixes)
 
-PENDING (the cross-model flow: these findings go to the implementer verbatim; its agree/dispute
-returns to this reviewer for the final call). With no BLOCKER or MAJOR found, round 1 does not earn
-round 2 by the ladder's own rule — the orchestrator's call.
+All three findings are clarity-class NITs with **no behavior change**, so none owes a red-on-old pin
+(the hallucination guard's pin requirement binds bug-class fixes); each lands with its named guard
+suites green. The implementer applies them (nothing here is Sync/ or FINDER-FIXES).
+
+1. **BookView:779 (the half-gated masthead probe) — CONFIRMED as proposed.** Wrap the WHOLE
+   `.onGeometryChange` in `#if DEBUG` (the postfix-`#if` shape ShelfView's hintBar probes use);
+   `oracleOwner` stays a plain `@State` in both builds; `recordMastheadTitleLine` is referenced only
+   inside the gate; `.onGeometryChange` affects no layout, so Debug behavior — and every pin reading
+   `BookOutlineGeometry.mastheadTitleLines` — is untouched (tests build Debug, where the gate is
+   active). Leaving the pre-existing :1197 navigator probe alone is the right scope discipline (not
+   this run's diff; sweep the file's half-gated probes under their own ticket if ever).
+   Guards sufficient: `BookMastheadTitleLineRuleTests` + `BookMastheadFitsItsColumnTests` (the
+   `mastheadTitleLines` reader — it must stay green, proving the probe still publishes under test).
+
+2. **The duplicated chapter-alignment glyph — CONFIRMED, with ONE amendment to the helper's home.**
+   Sharing glyph AND font together as one `Text`-returning helper is right (better than my constant —
+   it couples both width inputs). But put the helper in the SHARED home, not on `CatalogBookLine`:
+   `CatalogChapterLine` lives in `Core/Views/SearchAnswerFaces.swift` (moved there this run because
+   two features consume it) and must not reach back into `Features/Library/` for a symbol — the
+   dependency arrow points feature → shared, never the reverse (CLAUDE.md's shared-home rule's
+   grain). So: a static beside the line it aligns — e.g. `CatalogChapterLine.bookGlyph(_ tokens:)
+   -> Text` (or on `SearchAnswerFace`), body `Text(Image(systemName: "book")).font(tokens.body)` —
+   with `CatalogBookLine` drawing it with its muted style and `CatalogChapterLine` drawing it
+   `.hidden()`. Same two call sites, same bytes rendered. Guards sufficient:
+   `LibrarySearchFaceTests`, the catalog alignment pins, and `SearchChapterRowsTests`'
+   `theSheetDrawsTheChapterRow` (both voices).
+
+3. **NoteDeletion:201 (the plural-spelled versions read) — CONFIRMED as proposed.**
+   `single ? try notes.first.map { try Queries.noteVersionIDs(db, of: $0).count } ?? 0 : 0` with the
+   comment naming the at-most-one fact (`Optional.map` rethrows, and the `try` covers the `??`
+   expression). Behavior identical on every path, the empty-`notes` pool case included (`first` nil
+   → 0, exactly as `reduce` over empty was). Guards sufficient: `NoteDeleteUndoTests` (the
+   saved-versions toast line) + `NoteVersionsPaneTests`.
+
+With no BLOCKER or MAJOR found, round 1 does not earn round 2 by the ladder's own rule — the
+orchestrator's call.
