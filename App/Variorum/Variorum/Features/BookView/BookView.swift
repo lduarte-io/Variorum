@@ -2914,8 +2914,22 @@ struct BookView: View {
             // book shows tags, so a move drops what the column learned under
             // the old position. Handed at mount too (`initial`), so a book
             // remembered at "all tags" never learns under the default's stamp.
-            .onChange(of: cardTags.position, initial: true) { _, position in
-                model.outlineTagsShown(position)
+            //
+            // R2-2 — A MOVE KEEPS HER PLACE, as a width change does: every card
+            // drawn above the top gains or loses its pill row, so the offset
+            // kept through the move points at other rows. The column re-lands
+            // the row that was at the top (the width road's anchor, 13u2b
+            // UNIT 1), wearing QUESTIONS #115(b)'s two guards — only when
+            // `stand` says something moved, and never over a landing already
+            // in flight (a reveal in the same breath keeps its own target) —
+            // and a third: only for a MOVE while the Outline shows, never the
+            // mount's `initial` call (old == new there), whose arrival is the
+            // mode switch's own landing to make.
+            .onChange(of: cardTags.position, initial: true) { previous, position in
+                let moved = model.outlineTagsShown(position)
+                guard moved, previous != position, !landing.isPending,
+                      let top = landingBox.topRow?.id else { return }
+                landOutline(top, proxy)
             }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes

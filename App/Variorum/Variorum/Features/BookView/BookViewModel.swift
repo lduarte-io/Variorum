@@ -955,7 +955,12 @@ final class BookViewModel {
     /// The book hands it at mount too, so a book remembered at "all tags" never
     /// learns under the default's stamp. The Index pane's rows wear no pills
     /// (the design gives them none), so only the Outline re-stands.
-    func outlineTagsShown(_ position: BookTagsShown) {
+    ///
+    /// Returns `stand`'s answer — whether anything moved — so the book can
+    /// re-land the row at the top of the page (the VX-1036 ladder's R2-2: the
+    /// width road's re-land, wearing QUESTIONS #115(b)'s guards).
+    @discardableResult
+    func outlineTagsShown(_ position: BookTagsShown) -> Bool {
         outlineHeights.stand(at: outlineContentWidth, tags: position)
     }
 
