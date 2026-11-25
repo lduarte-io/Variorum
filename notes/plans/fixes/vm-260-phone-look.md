@@ -2000,3 +2000,50 @@ the test's seeded note running out of lines at its tap point, not the reveal —
 4. **A palette chosen on the phone** — the Bookcase under two palettes (sea-glass and one bold) — the screen recolours.
 5. **At the end, put the walk device back**: Settings ▸ Look to Study · Sea glass · Paper · Follow system · Default (the
    choices persist in the device's defaults).
+
+
+### Batch 3 — RECONCILE (the final evidence window's one red; implementer: Opus, the batch-3 session resumed, 2026-11-25)
+
+**What this reconcile does NOT do:** no test runs (the re-evidence rides the run's merge gate); nothing outside
+`Shared/Theme/PhoneType.swift`'s words-scale line, `MobileTextSizeTests` and this record (and the docs naming the
+steps); no `Sources/`, editor family or text-input path; no other batch's file.
+
+#### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| T. The trace, from the window's own log (`/tmp/vm260-win2/P3.log`) | DONE (this commit) — below |
+| 1. The pins on the current tree (the red-on-old for this reconcile): the two forms agree at every step; every step a whole point; the face's row preview printed and compared with the SwiftUI form | NOT STARTED |
+| 2. The red-on-old bundle `DerivedData/vm260-3r-rol` (an APFS clone of `vm260-2r`, incremental, `nice -n 15`) | NOT STARTED |
+| 3. The fix: a step's size is a whole point | NOT STARTED |
+| 4. `vm260-2r` rebuilt on the new tip; the re-evidence's run list | NOT STARTED |
+
+#### The trace — H1, a deterministic size-path miss; H2 refuted
+
+The window's failure line, expanded by Swift Testing: `abs(MobileEditorStyle.face.font(.rowPreview).pointSize - 14 *
+1.125) → 0.25`. So the face's UIKit row preview at Larger read **15.5 or 16.0**, never 15.75 — and the two lines
+before it in the same test passed: the note's body at **18.0** in Iowan Old Style, built by the same face's `scaled`.
+- **H2 is refuted by the test's shape and by the number.** `theEditorFaceTakesTheStep` is a synchronous `@MainActor`
+  test (no `await` anywhere in it; it ran in 0.008 s), and `MobileEditorStyle`'s live face is main-actor state
+  (compiler-enforced), so nothing — no other suite, no other task — can run between its `adopt` and its read. And a
+  face another suite had adopted would carry another scale: the default's row preview is 14 (|Δ| = 1.75), not 0.25.
+- **H1, traced.** The face's UIKit roles resolve through `PhoneType.uiFont(role, voice:, wordsScale:)` →
+  `spec(…, wordsScale:)` → **15.75** for the row preview at Larger (14 × 18/16) → `UIFontMetrics(forTextStyle:
+  .subheadline).scaledFont(for: Iowan 15.75)` at the host's default text size. The SwiftUI form of the same role reads
+  `PhoneType.pointSize` → `UIFontMetrics.scaledValue(for: 15.75)` = 15.75. **`scaledFont` does not return a fractional
+  size unchanged**: a whole-point base passes through it untouched at the default text size (the note's body at 18,
+  and every table size — `atTheDefaultSizeEveryRoleIsItsTableSize` pins them, green), while 15.75 came back 0.25 away.
+  The same API was measured before landing a third of a point off `scaledValue` (VM-47, `4ec664f2b`: at xxxLarge, for
+  the `.footnote` and `.body` anchors, scaledFont 1/3 pt BELOW scaledValue — consistent with scaledFont snapping to a
+  whole point; inferred, the grid not measured). So the defect is in this batch's design, not the test: VM-254's steps
+  produced **fractional** sizes for every role whose table size × the step is not a whole number — 27 of the 100 (5
+  roles × 2 voices × 4 non-default steps; the default is the table) — and at each of them the UIKit form (the editor's
+  UIKit roles, the comments sheet's draft, the take browser's and History's titles, Terminal's note body in the editor)
+  lands on a different size from the SwiftUI form of the same role, up to half a point. Which grid UIKit snaps to (a
+  whole point, or a half) is printed by the pin below: 27 disagreements if a whole point, 25 if a half (Study's note
+  title at 17.5 and 22.5 would then agree).
+- **The fix's road (P-260-3a amended, not a new design):** a step's size is a WHOLE POINT — `spec(…, wordsScale:)`
+  rounds the scaled size to the nearest point before the floor, the pitch moving with the size. A whole-point base
+  passes through both forms unchanged at the default text size, so the two forms agree at every step, and the setting's
+  numbers are the scale's own kind (whole points, as every size in the sheet). Away from the default text size the UIKit
+  form keeps the pre-existing third-of-a-point gap VM-47 measured (not this batch's; unchanged).
