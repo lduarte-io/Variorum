@@ -328,24 +328,26 @@ install and the #281 dispositions.
 
 ## BATCH 1a — record (VM-253 · VM-256 · VM-255; implementer: Opus, 2026-11-25)
 
-**What this batch did NOT do (kept current):** no test has been RUN yet — every result below is PENDING until the
-stage GO; no walk yet (captures PENDING); no line in `Sources/`, `Sync/`, custody, `MobileEditorTextView` or the
-text-input path; `Shared/` untouched; the one message line untouched (batch 1b's).
+**What this batch did NOT do (kept current):** the WALK is not done (a separate leg, a later GO — captures PENDING);
+the keyboard-reveal UI test has NO VERDICT (the window's device opens its library behind a Castle passphrase — see the
+suites block); no line in `Sources/`, `Sync/`, custody, `MobileEditorTextView` or the text-input path; `Shared/`
+untouched; the one message line untouched (batch 1b's). The suites leg RAN (2026-11-25, 01:16–01:40): every red-on-old
+as predicted, the whole phone target and the Mac legs green — the block "Batch 1a — the suites" below.
 
 ### LIVE STATUS
 
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon, this record's binding sections, the resiliency protocol, SurfaceContracts' phone bullets, the VM-47 FOR A LATER READER, the three tickets' bodies); the screens folder made gitignored | DONE (`5f70297f4`, `2c0ebf985`) |
-| 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (`b05c45bb0`) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
-| 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (`219a945d1`) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) PENDING |
-| 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (`9edeb6993`) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red-on-old PENDING (the stage) |
-| 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (`8d7fc32cb`) — phone `build-for-testing` green; the moved pins PENDING |
-| 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | DONE (`f8aa3f6f4`; the self-review fix `74a3a7149`) — phone `build-for-testing` green; the suites PENDING |
+| 1. VM-253 — the trace; the pins on the pre-fix tree (and the held-drag seam they need) | DONE (`b05c45bb0`) — `MobileTabBarStaysStillTests` (3 tests) + `MobileShellView(heldDrag:)`; phone `build-for-testing` green on this tree; red on old CONFIRMED (R1), green on the tip (P) |
+| 2. VM-253 — the fix: the bar drawn once by the shell, outside the paged band | DONE (`219a945d1`) — phone `build-for-testing` green; the moved pins (`MobileNavigationTests` copies 3 → 1, `MobileTabBarTests` route rule) GREEN (P) |
+| 3. VM-256 — the trace; the pins on the pre-fix tree | DONE (`9edeb6993`) — `MobilePageLeavingTests` (2 tests); phone `build-for-testing` green on this tree; red on old CONFIRMED (R2), green on the tip (P) |
+| 4. VM-256 — the fix: every page change returns the page left to its root; a push never lands on a page not showing | DONE (`8d7fc32cb`) — phone `build-for-testing` green; the moved pins GREEN (P) |
+| 5. VM-255 — the top line: the wing's name alone, the Bookcase's count under it, the gear, the trash on the Library only, the Mac's glyphs; pins | DONE (`f8aa3f6f4`; the self-review fix `74a3a7149`) — phone `build-for-testing` green; red on old CONFIRMED (R3; the glyph pin statically), the suites GREEN (P) |
 | 6a. The red-on-old trees built headless (no stage), each into its own DerivedData: VM-253 at `b05c45bb0` → `DerivedData/vm260-1a-rol253`; VM-256 at `9edeb6993` → `…-rol256`; VM-255 at `8d7fc32cb` + the two pin files from `f8aa3f6f4` → `…-rol255` | DONE — all three `TEST BUILD SUCCEEDED`; the worktree is back on `vm-260-phone-look`, clean (the two copied files removed before the switch) |
 | 6. Phone + Mac `build-for-testing` green on the tip (`74a3a7149`); READY-FOR-TESTS | DONE (`1b19aba7f`) — phone `DerivedData/vm260-1a`, Mac `…-mac`, the keyboard-reveal UI bundle `…-ui`; the run list below |
-| 7. The suites — each pin red on old (`test-without-building` against the prebuilt pre-fix trees of 6a: the revert is the commit itself, the worktree never sits reverted), then the tip's suites | PENDING (needs the stage GO) |
-| 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (needs the stage GO) |
+| 7. The suites — each pin red on old (`test-without-building` against the prebuilt pre-fix trees of 6a: the revert is the commit itself, the worktree never sits reverted), then the tip's suites | DONE 2026-11-25 (claim `vm-260`) — R1/R2/R3 as predicted; the whole phone target 1,235 in 218 suites PASSED; the Mac legs 53 in 9 PASSED; the UI test NO VERDICT (device locked); follow-through fixes `19b31c4c3` |
+| 8. The walk: the three roots and a swipe mid-flight, both voices | PENDING (a separate leg, a later GO) |
 
 
 ### VM-253 — the bar rides the page slide
@@ -363,12 +365,12 @@ red-on-old run is exactly this commit.
 
 **Pins** (`VariorumMobileTests/MobileTabBarStaysStillTests`):
 - `theBarIsDrawnOnceByTheShell` — one copy of each bar door in the whole walk, at rest and with the Library's Trash
-  pushed, at the same frames. Expected RED on old: three copies at rest, four with the list. PENDING.
+  pushed, at the same frames. RED on old as predicted (6 issues: three copies of each door at rest, more on the pushed list); GREEN on the tip.
 - `midSwipeTheBarHasNotMoved` — the band held 160 pt toward the Library: the Library's "All" door is on the window
   (the band moved) and every bar door is on the window once, at its resting frame, the chip still on the Bookcase.
-  Expected RED on old: "Bookcase" on the window twice, "Library" and "Starred" 160 pt off. PENDING.
+  RED on old as predicted (a door on the window twice; the frames moved); GREEN on the tip.
 - `aPageChangeMovesOnlyTheChip` — a guard (green on both by construction: at rest the old copies coincide; the motion
-  was mid-flight). PENDING.
+  was mid-flight). GREEN on old and on the tip, as predicted.
 
 **The fix (piece 2).** `MobileShellView.body` lays the ONE bar over the band's foot (`.overlay(alignment: .bottom)` on
 the band's frame, before its clip — inside the frame, so it rides above a keyboard exactly as a page's foot did) while
@@ -408,11 +410,11 @@ root (`pagingAllowed`). Two roads did not:
 - `aNoteAskedForOnAPageSheLeftNeverStandsThere` — the Library's New Note then Bookcase in ONE turn (the door only
   spawns its mint, so the page changes before it lands — the lag's window made deterministic, no store hold): no editor
   registered and none live on the hidden page; the minted note kept; Library by the bar shows its root ("All" on the
-  window). Expected RED on old (a live editor on the hidden stack; the note where the Library should be). PENDING.
+  window). RED on old as predicted (5 issues: an editor registered AND live on the hidden Library page; on return the note stood where the Library should be — no bar, no root); GREEN on the tip.
 - `leavingAPageClosesItsNoteAndSavepointsItOnce` — the ruling's sentence on the bar road: a note with unsaved words
   opened from the Library, Versions over it, Bookcase by the bar → the note closes, exactly ONE quiet leaving
   savepoint (`commit_point.kind = 'auto'`), Library shows its root, still one. A GUARD, expected GREEN on old (the bar
-  road already popped) — recorded as such, not as a red. PENDING.
+  road already popped) — recorded as such, not as a red. GREEN on old and on the tip, as predicted.
 - The Protection-ask road (2) is not mounted in a pin (a bootstrap world is the Protection suites' heavy harness); it
   is covered by construction — the pop moves INTO `selectPage`, the one page road every road takes.
 
@@ -470,17 +472,17 @@ P-260-1a into QUESTIONS.
 
 **Pins** (look-class: what is pinnable; the look itself is the walk's).
 - `MobileTopLineTests.onlyTheLibrarysTopLineCarriesTheTrash` — mounted shell: no trash door on the Bookcase or Starred,
-  one on the Library. RED on old (the Bookcase's 🗑). PENDING.
+  one on the Library. RED on old as predicted; GREEN on the tip.
 - `MobileTopLineTests.theLineIsTheWingsNameAloneAndTheBookcaseCountsUnderIt` — mounted shell, each root: the wing
   door's value is the count on the Bookcase ("2 books") and nothing elsewhere, the door one 44 pt line, no page word
-  across its band. RED on old ("Bookcase  ·  2 books", "Library", "Starred"). PENDING.
+  across its band. RED on old as predicted (the page word on all three lines); GREEN on the tip.
 - `MobileTopLineTests.theGlyphsAreTheMacsSymbols` — source: the phone draws `trash`, `square.and.pencil`, `gearshape`
   through its declarations; the Mac's sources state the same three; each is a real symbol; no 🗑 in the phone's code.
-  RED on old (no symbol declarations, no gear file, the emoji). PENDING.
+  GREEN on the tip. Its R3 run is NOT an old-tree verdict: the pin reads the WORKING TREE's sources at run time, so under the old build it read the tip's — and its one red there (the emoji walk) was a real tip finding, fixed in `19b31c4c3` (the suites block). Its old-tree red is shown statically: `8d7fc32cb` holds no `trashSymbol`, no `square.and.pencil`, no `MobileSettingsGear.swift`, and the emoji's escape.
 - `MobileSettingsGearTests` (moved from `MobileRootMenuTests`): every root's gear 44 × 44 on its line, its act the
   shell's door, no "More" beside it; no shell, no gear; `theShellsRootsCarryTheGearAndTheMenuIsGone` (RED on old: three
   "More", no "Settings" door); `theGearOpensSettingsThroughTheWholeShell` (RED on old: no gear to press); the note's ⋯
-  road unchanged. PENDING.
+  road unchanged. The four RED on old as predicted; the two guards green; all GREEN on the tip.
 - These two new files use only symbols both trees declare (plus literals), so the red-on-old run drops them into the
   pre-VM-255 tree (`8d7fc32cb`) unchanged.
 
@@ -511,9 +513,9 @@ a muted line under it on the Bookcase, the trash on the Library only, P-47-27's 
 **Self-review finding (fixed, pinned).** With the page word gone, a root's plain line for a wing whose name is not
 yet read drew Terminal's bare prefix "~/" (`tokens.path([])`); it now draws nothing (`MobileWingPath`'s plain branch).
 Pin: `MobileWingDoorGeometryTests.anUnreadNameDrawsNoBarePrefix` — red on `f8aa3f6f4` by construction (that tree drew
-"~/"), green expected on the tip; PENDING (it runs in leg P, the whole phone target).
+"~/"), GREEN on the tip (leg P).
 
-### READY-FOR-TESTS (the stage window's commands; every result PENDING until run)
+### READY-FOR-TESTS (the stage window's commands — RAN 2026-11-25; the results are the suites block below)
 
 All from `App/Variorum/`, zsh, `test-without-building` against the bundles already built (nothing builds in the
 window); `UDID` = the device the GO names (iOS 26.2), booted fresh inside the claim, settled, shut down before release.
@@ -549,3 +551,37 @@ batch 2's run covers it.
 Bookcase's count line, the Library's trash · glyph · gear, Starred's gear); a swipe held mid-flight Bookcase → Library
 (the bar unmoved, two pages showing above it); a push to a list (the Library's Trash — the bar unmoved) and into a note
 (the bar gone); the gear opening Settings; the empty Library's glyph line.
+
+
+### Batch 1a — the suites (the GO window, 2026-11-25 01:11–01:41; claim `vm-260`; the coordinator's iPhone 17 Pro, iOS 26.2 — its id is not recorded)
+
+Booted fresh 01:11, settled ~5 min. Load at R1's start 23.5 (another session's headless Mac `build-for-testing` plus
+the simulator's post-boot `trustd`); R1–R3 are not timing-sensitive, so they ran; by R2 the load was ~2 and stayed low
+for P. **Runner exit:** after each Swift Testing result `xcodebuild` lingered without exiting (R1: over 5 min); each
+verdict line was already complete, so each lingering runner (this session's) was stopped. XCTest's half of every phone
+run reads "Executed 0" — expected (these are Swift Testing suites), not a no-verdict.
+
+| Run | Tree | Result | As predicted? |
+|---|---|---|---|
+| R1 `MobileTabBarStaysStillTests` | `b05c45bb0` (pre-fix) | 3 tests: 2 FAILED (8 issues) — `theBarIsDrawnOnceByTheShell` (6), `midSwipeTheBarHasNotMoved` (2); `aPageChangeMovesOnlyTheChip` passed | YES |
+| R2 `MobilePageLeavingTests` | `9edeb6993` (pre-fix) | 2 tests: 1 FAILED (5 issues) — `aNoteAskedForOnAPageSheLeftNeverStandsThere` (editor registered and live on the hidden page; the note where the Library should be); `leavingAPageClosesItsNoteAndSavepointsItOnce` passed | YES |
+| R3 `MobileTopLineTests` + `MobileSettingsGearTests` | `8d7fc32cb` + the two pin files | 8 tests: 6 FAILED (13 issues) — `onlyTheLibrarysTopLineCarriesTheTrash`, `theLineIsTheWingsNameAloneAndTheBookcaseCountsUnderIt`, `theGlyphsAreTheMacsSymbols`, `everyRootCarriesTheGearOnItsTopLine`, `theShellsRootsCarryTheGearAndTheMenuIsGone`, `theGearOpensSettingsThroughTheWholeShell`; `noShellNoGear`, `aNotesActionsOpenSettingsThroughTheWholeShell` passed | YES (the glyph pin's old-tree red is static — see its pin line) |
+| P — the whole phone target, one launch | tip `74a3a7149` | **1,235 tests in 218 suites PASSED** after 800 s, 6 known issues (pre-existing: `MobileFilterRowGeometryTests`' two Display-Zoom pins × 2, `MobileTrashTests`' empty-tree diagnostic × 2); the gated speed suite skipped (as every whole-target run) | — |
+| M — the Mac legs (ThemeTokenTests NoLiteralColourTests PaletteDerivationTests BadgeFamilySplitTests DataSafetySearchIndexTests OneInputPathTests OneRefreshAuthorityCompositionTests DeadVocabularyTests IndexTierMetricsTests) | tip | **53 tests in 9 suites PASSED**, 4 known issues (`IndexTierMetricsTests`' declared `overTwoBlankLines` cases, Mac-only, untouched) | — |
+| U — `MobileKeyboardRevealUITests` | tip | **NO VERDICT** — 1 test, failed at its PRECONDITION ("the shell is up (its bar's Bookcase door)") after ~50 s: the device's library opens behind a Castle passphrase screen ("Open your library" — one diagnostic launch and capture, kept locally), which the test's lobby helper does not pass and this session has no passphrase for. Not retried (a retry meets the same lock). | — |
+
+**Found in the window, fixed after it (`19b31c4c3`, both VM-255 follow-through):**
+1. **The pocket guide's Trash line** (`MobileTutorialSeeder`, lesson 3) still said "the 🗑 sits on the Library's top line
+   and on the Shelf's" — stale twice since VM-255 (the emoji; the Bookcase's door retired). Now "the trash icon sits on
+   the Library's top line." (wording PROVISIONAL with the guide's copy, her voice pass). Caught by
+   `theGlyphsAreTheMacsSymbols`' emoji walk. During P the fix was on disk but not yet built: the source pin read the
+   fixed text and passed; no test reads the compiled guide text. Rebuilt green after.
+2. **The keyboard-reveal UI test reached Settings through the ⋯ ("More")**, which VM-255 retired — it would have failed
+   at that step on an open library too. It now presses the gear ("Settings"). UI bundle rebuilt green; NOT run.
+
+**Owed:** the keyboard-reveal UI test on a device whose library opens (batch 2 runs it — it changes `MobileWriteView` —
+or the next window on an unlocked device); the walk (a separate leg).
+
+**Left as found:** the simulator shut down; no runner, no booted simulator; no new Variorum crash report. Logs in
+`App/Variorum/DerivedData/vm260-1a-{R1,R2,R3,P,M,U}.log` (gitignored); the UI run's result bundle in Xcode's default
+DerivedData.
