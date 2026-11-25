@@ -90,8 +90,28 @@ struct MobilePushLandingDirectionTests {
                 #expect(line.kind == .refusal, "a direction rides the always-drawn class")
                 #expect(line.action == nil, "no Undo — nothing left the page")
                 #expect(line.text.contains("Library"), "it names where the note is: \(line.text)")
+                // (Added with the fix — the red-on-old run read the line's
+                // absence; the words are the door's one copy home.)
+                #expect(line.text == MobilePushLanding.direction(for: .note("", focus: true)))
                 expectMutedInk(line)
             }
+        }
+    }
+
+    /// **The words** (added with the fix): a note names the Library, a book
+    /// the Bookcase — the bar's own words for its rooms — and a route no door
+    /// makes says nothing. The line never says "new" (a Today entry may have
+    /// stood already).
+    @Test func theWordsNameTheRoomAndOnlyMadeThingsSpeak() throws {
+        let note = try #require(MobilePushLanding.direction(for: .note("n", focus: false)))
+        #expect(note.hasSuffix("in the \(MobileTabBar.word(.library)).") == true, "\(note)")
+        let book = try #require(MobilePushLanding.direction(for: .book("b")))
+        #expect(book.hasSuffix("on the \(MobileTabBar.word(.shelf)).") == true, "\(book)")
+        for words in [note, book] {
+            #expect(!words.lowercased().contains("new"), "never claims it was made fresh")
+        }
+        for route in [MobileRoute.bookRead("b"), .trash, .archive, .versions("n"), .protection] {
+            #expect(MobilePushLanding.direction(for: route) == nil, "\(route) is never made by its door")
         }
     }
 

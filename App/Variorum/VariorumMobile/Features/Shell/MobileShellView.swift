@@ -744,9 +744,15 @@ struct MobileShellView: View {
     /// the page she left: it would mount there hidden — an editor registering and
     /// taking the pen on a page she cannot see — and be what that page shows when
     /// she comes back. The made thing is kept (it lists where it lives); nothing
-    /// opens it. PROVISIONAL (the record's P-260-1a).
+    /// opens it. PROVISIONAL (the record's P-260-1a). **And it says so** (A-260-1,
+    /// batch 1b): a kept-not-opened note or book is an outcome other than the
+    /// one she asked for — a DIRECTION naming where it is (`MobilePushLanding`),
+    /// on the one line, never a refusal, no Undo.
     private func push(_ route: MobileRoute, in owner: MobileTab) {
-        guard owner == tab else { return }
+        guard owner == tab else {
+            MobileLine.say(MobilePushLanding.direction(for: route), as: .direction, session: session)
+            return
+        }
         switch owner {
         case .starred: starredPath.append(route)
         case .shelf: shelfPath.append(route)
