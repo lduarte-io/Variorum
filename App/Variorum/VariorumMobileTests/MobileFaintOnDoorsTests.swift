@@ -386,9 +386,11 @@ struct MobileFaintOnDoorsRenderedTests {
                 var pixels = try surface.render()
                 func ratio(_ label: String, in elements: [NSObject]) throws -> Double {
                     let bounds = surface.window.bounds.insetBy(dx: 1, dy: 1)
-                    let element = try #require(
-                        elements.first { $0.accessibilityLabel == label && bounds.intersects($0.accessibilityFrame) },
-                        "\(label): \(elements.compactMap(\.accessibilityLabel))")
+                    let found = elements.first {
+                        $0.accessibilityLabel == label && bounds.intersects($0.accessibilityFrame)
+                    }
+                    let names = elements.compactMap { $0.accessibilityLabel }
+                    let element = try #require(found, "\(label): \(names)")
                     let read = try #require(pixels.inkAndGround(in: element.accessibilityFrame),
                                             "nothing drawn in \(label)")
                     return read.ink.contrast(with: read.ground)
