@@ -764,8 +764,14 @@ nonisolated enum CapabilityRegistry {
             // rows keep their ＋ as the act's listing renderer.
             doors: [.menuBar, .palette, .surface],
             shortcutLabel: "\u{2318}\u{21e7}I", takesAccess: nil,
-            unavailableNote: "Open a note to tag it — the \u{FF03} in its masthead opens the tag field.",
-            availability: noteScoped),
+            unavailableNote: "Open a note to tag it — the \u{FF03} in its masthead opens the tag field, "
+                + "and in a book the + on a note\u{2019}s card.",
+            // VX-1038 (T-4 — her pick 2026-11-25, "Keep ⌘⇧I"): the act reaches a BOOK too — with
+            // a book in the focused pane it opens the card "+" field on the
+            // note she is on (`ShellActions.tagNote`).
+            availability: { ctx in
+                noteScoped(ctx) == .act || ctx.focusedPaneShowsBook ? .act : .unavailable
+            }),
         // 13e E7 — the canvas BANK (her sitting Round 2 pick; the 4E fork
         // she preserved, built as the FACE that ruling named). Both doors
         // are canvas-surface doors on the `.tagBlock` pattern: the target

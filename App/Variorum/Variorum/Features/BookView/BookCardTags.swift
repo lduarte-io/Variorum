@@ -308,3 +308,35 @@ struct BookCardPills: View {
 
 // (The switch's face — `BookTagsSwitch` and its words — is its own file,
 // `BookTagsSwitch.swift`: a value and a closure, no model.)
+
+// MARK: - T-4 in a book (the act's chord ruled 2026-11-25: "Keep ⌘⇧I")
+
+/// **What the tagging act does in a book** (`.tagNote` — ⌘⇧I, the View menu,
+/// ⌘K — reaching the book surface; her pick at the 2026-11-25 check-in, "Keep
+/// ⌘⇧I": T-4's act was already `.tagNote`, so it grows a book road and keeps
+/// its chord). Pure, so the choreography is pinned without a
+/// window: the "+" field lives on the Outline's cards, so another mode turns
+/// to the Outline first (P-2's fire-and-DO, the Read-mint correction's own
+/// reason); a book hiding its tags shows ALL of them for the field to stand on
+/// (all, not other: a tag she adds that places the note would vanish from
+/// "other tags" the moment she adds it — P-1036-B2-P5b).
+enum BookTagChord {
+    struct Action: Equatable, Sendable {
+        var switchesToOutline: Bool
+        /// The position to show, or nil to leave hers.
+        var showsTags: BookTagsShown?
+    }
+
+    static func act(mode: BookStructureModel.ViewMode, position: BookTagsShown) -> Action {
+        Action(
+            switchesToOutline: mode != .outline,
+            showsTags: position == .hidden ? .allTags : nil)
+    }
+}
+
+/// The tagging act's words in a book (public copy).
+nonisolated enum BookTagChordCopy {
+    /// Names no chord, so it stays true whichever key the act carries.
+    static let noNote =
+        "No note to tag yet \u{2014} put the caret in a note, or select one in the book, then try again."
+}

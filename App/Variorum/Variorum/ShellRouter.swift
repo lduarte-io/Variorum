@@ -107,6 +107,16 @@ final class ShellRouter {
         let token: UUID
     }
     var bookMintRequest: BookMintRequest?
+    /// **VX-1038 (T-4 — her pick 2026-11-25, "Keep ⌘⇧I") — the tagging act's request in a book**
+    /// (`.tagNote`, ⌘⇧I · the View menu · ⌘K): open the card's "+" field on
+    /// the note she is on in THIS book. `bookMintRequest`'s shape — the book
+    /// in the focused pane takes it once and clears it; a fresh token per
+    /// press.
+    struct BookTagRequest: Equatable, Sendable {
+        let bookID: String
+        let token: UUID
+    }
+    var bookTagRequest: BookTagRequest?
     /// **VX-377 (the VX-620 run, batch 4) — ⌘K's Move/Copy to Wing**: open the
     /// keyboard wing selector for the FOCUSED note or book. A REQUEST the
     /// window adopts (the selector is the window's sheet to present —

@@ -1579,6 +1579,11 @@ struct RootView: View {
                 mintRequest: live && router.bookMintRequest?.bookID == readingID
                     ? router.bookMintRequest?.token : nil,
                 onMintRequestConsumed: { router.bookMintRequest = nil },
+                // VX-1038 (T-4): the tagging act's request, the same live-pane
+                // rule as ⌥⌘N's.
+                tagRequest: live && router.bookTagRequest?.bookID == readingID
+                    ? router.bookTagRequest?.token : nil,
+                onTagRequestConsumed: { router.bookTagRequest = nil },
                 // 18d batch 1: the book publishes what its sidebar box shows.
                 onNoteBox: { bookID, report, door in
                     adoptNoteBox(bookID, report, door)

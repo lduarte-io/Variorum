@@ -90,6 +90,12 @@ struct BookView: View {
     /// door runs (`footMint(for:)`) — and clears it.
     var mintRequest: UUID?
     var onMintRequestConsumed: (() -> Void)?
+    /// **VX-1038 (T-4 — her pick 2026-11-25, "Keep ⌘⇧I") — the tagging act's request**
+    /// (`ShellRouter.BookTagRequest`'s token, ⌘⇧I in a book): this book
+    /// takes it once — the card "+" field opens on the note she is on — and
+    /// clears it.
+    var tagRequest: UUID?
+    var onTagRequestConsumed: (() -> Void)?
     /// **18d batch 1 (her U-10): what this book's sidebar note box shows.**
     /// A VALUE and a DOOR, published upward — the sidebar never constructs or
     /// holds this book's model, and `RootView` composes the box from what
@@ -180,6 +186,8 @@ struct BookView: View {
         onRevealSectionConsumed: (() -> Void)? = nil,
         mintRequest: UUID? = nil,
         onMintRequestConsumed: (() -> Void)? = nil,
+        tagRequest: UUID? = nil,
+        onTagRequestConsumed: (() -> Void)? = nil,
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
         onBookMode: ((String, BookStructureModel.ViewMode?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
@@ -198,6 +206,8 @@ struct BookView: View {
         self.onRevealSectionConsumed = onRevealSectionConsumed
         self.mintRequest = mintRequest
         self.onMintRequestConsumed = onMintRequestConsumed
+        self.tagRequest = tagRequest
+        self.onTagRequestConsumed = onTagRequestConsumed
         self.onNoteBox = onNoteBox
         self.onBookMode = onBookMode
         self.onOpenSearchHit = onOpenSearchHit
@@ -492,6 +502,7 @@ struct BookView: View {
             model.onPaneFocusRequest = onPaneFocusRequest
             takeAscentRequest()
             takeChapterRequest()
+            takeTagRequest()
         }
         .onChange(of: paneFocused) { _, focused in
             model.paneFocused = focused
@@ -592,8 +603,11 @@ struct BookView: View {
         .onChange(of: revealSectionID) { _, _ in takeChapterRequest() }
         // VX-570 (the VX-439 run): ⌥⌘N's request, taken once — or as soon as
         // the book's row has arrived to choose the act by.
-        .onChange(of: mintRequest) { _, _ in takeMintRequest() }
-        .onChange(of: structure.reading?.id) { _, _ in takeMintRequest() }
+        // VX-1038 (T-4): …and the tagging act's request, the same shape —
+        // one hook for both (the body's chain is at the type-checker's limit).
+        .onChange(of: BookShellRequests(mint: mintRequest, tag: tagRequest, readingID: structure.reading?.id)) { _, _ in
+            takeShellRequests()
+        }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? structure.lastError ?? bookSearch.lastError {
                 Text(error)
@@ -1608,8 +1622,15 @@ struct BookView: View {
     /// the note she is on — this mode's live or selected note, else the note
     /// the navigator marks as viewed (`BookNoteBox.mintNeighbour`, PROVISIONAL).
     private var generalMintDoor: BookMintPlacement.Door {
+        .general(onNote: noteSheIsOn)
+    }
+
+    /// **The note she is on** — P-1036-B1-1's one rule (this mode's live note,
+    /// else its selected note, else the navigator's viewed note), read by the
+    /// general mint doors and by the tagging act's request (VX-1038's T-4).
+    private var noteSheIsOn: String? {
         let mode = structure.mode
-        return .general(onNote: BookNoteBox.mintNeighbour(
+        return BookNoteBox.mintNeighbour(
             live: BookNoteBox.livePost(
                 mode: mode, liveFocusedPostID: model.liveFocusedPostID,
                 indexLivePostID: model.indexLivePostID),
@@ -1619,7 +1640,7 @@ struct BookView: View {
                 indexPostID: model.indexSelectedPostID),
             viewed: model.navigatorViewedPair(
                 mode: mode, readForm: structure.readForm,
-                chapterOf: { structure.chapterID(of: $0) }).postID))
+                chapterOf: { structure.chapterID(of: $0) }).postID)
     }
 
     /// ⌥⌘N's request, taken ONCE: the book's own foot act. The shell hands it
@@ -1630,6 +1651,33 @@ struct BookView: View {
         guard mintRequest != nil, let reading = structure.reading else { return }
         onMintRequestConsumed?()
         mint(Self.footMint(for: reading), door: generalMintDoor)
+    }
+
+    /// ⌥⌘N's and the tagging act's requests, each taken once (each guards
+    /// on its own token) — or as soon as the book's row has arrived.
+    private func takeShellRequests() {
+        takeMintRequest()
+        takeTagRequest()
+    }
+
+    /// **VX-1038 (T-4 — ruled at her 2026-11-25 check-in: "Keep ⌘⇧I") — the tagging act in a
+    /// book**, taken ONCE: the card "+" field opens on the note she is on.
+    /// P-2's fire-and-DO: the field lives on the Outline's cards, so another
+    /// mode turns to the Outline first (the tabs' own road, carrying her
+    /// place); a book hiding its tags shows them — all tags — so the field has
+    /// its "+" (P-1036-B2-P5b). No note to stand on: the registry's honest
+    /// refusal, said.
+    private func takeTagRequest() {
+        guard tagRequest != nil, structure.reading != nil else { return }
+        onTagRequestConsumed?()
+        guard let postID = noteSheIsOn else {
+            session.status.refuse(BookTagChordCopy.noNote)
+            return
+        }
+        let action = BookTagChord.act(mode: structure.mode, position: cardTags.position)
+        if action.switchesToOutline { switchMode(to: .outline) }
+        if let shown = action.showsTags { cardTags.setPosition(shown) }
+        cardTags.openField(on: postID, session: session, wingID: structure.reading?.wingId ?? "")
     }
 
     // MARK: - W21 — the mode click-over CARRIES your place
@@ -4638,4 +4686,12 @@ nonisolated enum ChapterMintDoorCopy {
     static let unavailableNote =
         "A note is made in a chapter from the \u{201C}+ new note\u{201D} on its heading, in a book that isn\u{2019}t finished."
     static let help = "A new note at the end of this chapter"
+}
+
+/// The shell's one-shot requests a book takes, as ONE value its hook watches
+/// (⌥⌘N's mint, VX-1038's tagging act, and the book's row arriving).
+struct BookShellRequests: Equatable {
+    var mint: UUID?
+    var tag: UUID?
+    var readingID: String?
 }
