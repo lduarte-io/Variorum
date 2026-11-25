@@ -1383,6 +1383,23 @@ P on `6afaf255a` (the crash; the scan red).
    eye); a search keyboard dismissed by a tab (the bar follows it down, no lag); for the eye, a field in a sheet or an
    alert over a root (the residual above).
 
+**A-260-20 (the gate findings' fixes handed back, 2026-11-25, orchestrator on Opus): ACCEPTED, G-1's source fix
+owed after the re-run names its element.** Verified against the diff (`6afaf255a..4f05e7c02`): the phone target only;
+`Sources/`, `Shared/`, the editor seam untouched; **the faint scan's own file untouched** (a narrow scan clause the
+implementer first tried was REFUSED by the session's permission classifier as weakening a check, and reverted whole —
+the right outcome, recorded). **G-1:** the harness now NAMES a non-finite frame and fails on it instead of trapping the
+host (the crash was at the test's first mount, 402 pt, not at Display Zoom — the gate row corrected here); the element is
+unknown until the re-run prints it, and the source fix is briefed from that print. **G-2:** the bookless book door draws
+in the corrected muted (PROVISIONAL C-G2-1; the faint can return only by a scan change, hers). **G-3, read line by line
+by the orchestrator (no later round reads it):** `MobileKeyboardFloor.lift`'s at-rest gate (built for a keyboard
+LEAVING) now holds only once SwiftUI's avoidance had met that keyboard (`sawAvoidance`, reset when the reading goes);
+the memory is computed from the GeometryReader's own UNLIFTED frame, so the floor's lift cannot masquerade as SwiftUI's
+avoidance; the probe re-reads the guide when a note stops showing. The floor now has the road R1-5 asked for — the
+keyboard a pop gives back. **The gate's stop rule (the implementer's, adopted):** if the new UI pin stays red with the
+bar at rest on the tip while the in-process pin is green, UIKit's guide doesn't see that keyboard either: STOP — the
+next road is the search field's focus restore at Back (VM-47's), a product call for her. Residual for the walk: a field
+in a sheet or alert over a root may lift the band behind it.
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
