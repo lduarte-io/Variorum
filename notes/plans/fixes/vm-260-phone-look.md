@@ -2283,3 +2283,64 @@ copied into the tree.
 | 4. VM-281's fix — the editor drops its keyboard bar as it resigns and puts it back as it becomes first responder | NOT-STARTED |
 | 5. F-her-1's fix — the picking door reads "Cancel" (PROVISIONAL P-260-3b-1) | NOT-STARTED |
 | 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-mac`, `vm260-2r-ui`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
+
+### VM-281 — the traced mechanism (re-traced in this session; the F-1a-W1 trace re-read, not adopted on trust)
+
+**What the pixels and logs say the 52 is** (read this session: the reproduction's captures
+`/tmp/vm260-win/W1aold-shots` s5 and s9, and the hollow pin's log `/tmp/vm260-win/RW1.log`):
+- The note's keyboard (s5, and RW1's note leg): the editor's bar stands **487–539** (its ⋯ cell at y 496.67, 29 tall),
+  the keyboard's candidate strip **539–583**, its key plane from **583** — XCUITest's keyboard element reads
+  `(0, 583, 402, 233)` on the note's keyboard AND the search's alike, so the two keyboards are the same keyboard.
+- The search's keyboard on the walk's road (s9): the band's foot — the one bar's bottom — at **591**: 52 below the
+  keyboard's true top (539), and 8 below the key plane's top (583). **So the shortfall is the accessory's 52, not a
+  lost candidate strip** (a keyboard reported without its suggestion bar — the shape Apple forum thread 798087
+  reports on iOS 26 — would put the foot at 583, 44 short). Both readers SwiftUI's avoidance and UIKit's keyboard
+  layout guide carry it (the consolidated window's reproduction row: the floor fix does not lift the band on this
+  road).
+
+**What our code does on the road** (read this session):
+- The accessory is installed ONCE, at construction — `MobileEditorTextView.make()` → `applyVoiceChrome()` →
+  `inputAccessoryView = keyboardBarController.makeBar()` — re-installed only at a voice switch, and **never removed
+  for the text view's life**.
+- The road: the Library's New Note glyph → `onOpen(.note(id, focus: true))` → `MobileEditorViewModel.arrive(focus:
+  true)` → `textView.becomeFirstResponder()` — the keyboard rises wearing the 52-pt bar (s5). **Back:** SwiftUI's
+  NavigationStack pops the Write screen while the editor still holds the keyboard, and **nothing of ours resigns it
+  first** — `standDown()` runs only on a tab switch or a liveness grant (`MobileLivenessAuthority`), the Write
+  screen's `.onDisappear` runs after the pop, the text view's `willMove(toWindow:)` only records the page's place.
+  UIKit takes that keyboard down itself, with the bar still installed in the input views it holds. The Trash and
+  two tabs follow with no keyboard; the search's tap is the first FRESH keyboard since.
+- The two roads compared: the hollow pin road (the search field held the keyboard when the lesson was pushed, so at
+  Back UIKit restored the Library's own input views — `MobileLibraryView.searchField`'s comment names that
+  restoration) judged GREEN on old; the walk's road (no responder on the Library when the note was pushed; the
+  note's keyboard taken down at Back; a fresh keyboard three screens later) RED on old. **The stale 52 shows on a
+  fresh presentation after a keyboard UIKit took down while it wore the accessory**; a restore did not show it.
+
+**External facts (fetched this session; forum reports, no Apple document):** Apple Developer Forums thread 802159
+(FB20386257, iOS 26.0, device and simulator): a focused text input that wears an input accessory (a web view's form
+bar) dismissed with its screen while its keyboard is up; then "tapping any `TextField` causes the keyboard to cover
+bottom controls … Insets are ignored until the keyboard is dismissed and reopened"; the DTS answer: "I suspect this
+may be related to a known issue"; the reporter's later hypothesis: "saved keyboard calculation inputAccessoryView
+frame"; no workaround posted and no fix reported through its last post (Feb 2026). Our shape exactly, on the native
+side. Apple's `reloadInputViews()` page: it updates the custom input and accessory views **when the object is the
+first responder** — UIKit reads a responder's input views at its becoming first responder and at that call, nowhere
+else.
+
+**NOT KNOWN (UIKit's private layer; no in-process probe without a run):** which UIKit object keeps the stale accessory
+frame, and WHEN it is captured — **(S)** as the responder resigns and its keyboard is taken down, or **(P)** earlier, as
+the navigation transition sets the disappearing screen's input views aside before the responder resigns.
+
+**The cure (the fewest lines; an editor-seam line):** the editor's text view **drops its keyboard bar as it resigns** —
+`inputAccessoryView = nil` and `reloadInputViews()` while it is still the first responder, then `super` — so the input
+views UIKit takes down never carry the bar; and it **puts the bar back as it becomes first responder** (before `super`,
+where UIKit reads it). Under (S) this cures the road; under (P) the capture precedes the resign and the pin stays RED on
+the tip — and then the next road is NOT another try here: a hook before the transition's will-disappear does not exist
+for a text view under SwiftUI's pop, so the cure would be the accessory host's rework (VM-271's) — STOP and report.
+
+### F-her-1 — the traced mechanism
+
+`MobileBlockListSheet.body` → `PhoneSheetHeader(title: "Blocks", done: …)`, whose closing act renders its default
+`doneWord`, `tokens.chromeLabel("Done")`; its trailing slot carries PR20's toggle, `Button(tokens.chromeLabel(
+model.isSelecting ? MobileBlockSelectionCopy.doneSelectingTitle /* "Done" */ : selectTitle /* "Select" */))`. So in
+picking mode the header renders two buttons with the one word "Done" (one ends picking, one closes the sheet). The code
+documents the collision itself — the toggle's explicit VoiceOver names exist because of it. Pre-existing (PR20), not
+this run's regression.
