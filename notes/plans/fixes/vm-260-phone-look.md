@@ -983,8 +983,8 @@ choice's drawing untouched (a remainder, below); no masthead rebuild (VM-148's).
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's binding sections, R-260-2, S-260-2/-3, the adjudications, batches 1a and 1b; the resiliency protocol; SurfaceContracts "The app" in full and the Library's phone bullet; the VM-47 FOR A LATER READER and §5's P-47-1, P-47-12, P-47-21; the sizing sheet; LK-5 in the VM-44 rulings) | DONE (this commit) |
-| 1. The pins on the pre-fix tree — VM-273's drawn sizes, radii and chrome roles; VM-272's note top | DONE (this commit — **it IS the red-on-old tree**: two new files, only symbols both trees declare) |
-| 2. The red-on-old tree built headless (`DerivedData/vm260-2-rol`) | NOT-STARTED |
+| 1. The pins on the pre-fix tree — VM-273's drawn sizes, radii and chrome roles; VM-272's note top | DONE (`cdc471fd2`, compile fix — two local helpers main-actor — in the next commit: **that commit IS the red-on-old tree**; two new files, only symbols both trees declare) |
+| 2. The red-on-old tree built headless (`DerivedData/vm260-2-rol`, an APFS clone of `vm260-1b`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` on the compile-fix commit's tree |
 | 3. VM-273 — the central step-down (`PhoneType` chrome roles, `PhoneControls` glyph · chip · box, `PhoneMetrics` radii) | NOT-STARTED — the settled design is the tables below |
 | 4. VM-272 — the note's top (`MobileWriteView`'s chrome only) | NOT-STARTED — the settled design below |
 | 5. Pins MOVED with the rulings | NOT-STARTED |

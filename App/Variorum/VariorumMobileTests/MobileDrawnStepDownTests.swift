@@ -171,10 +171,10 @@ struct MobileDrawnStepDownRenderedTests {
             await surface.settle(30)
             let pixels = try surface.render()
             let ground = PixelColor(UIColor(tokens.surface), traits: surface.traits)
-            func frame(_ label: String) throws -> CGRect {
+            @MainActor func frame(_ label: String) throws -> CGRect {
                 try #require(surface.onScreen(label), "\(label): \(surface.labels)").accessibilityFrame
             }
-            func drawn(_ label: String) throws -> (frame: CGRect, box: CGRect) {
+            @MainActor func drawn(_ label: String) throws -> (frame: CGRect, box: CGRect) {
                 let target = try frame(label)
                 let box = try #require(pixels.drawnBox(in: target, ground: ground),
                                        "nothing drawn in \(label) (\(target))")
@@ -247,7 +247,7 @@ struct MobileDrawnStepDownTargetTests {
         .dynamicTypeSize(size)
         try await withHostedSurface(view, size: CGSize(width: 402, height: 700)) { surface in
             await surface.settle(12)
-            func frame(_ label: String) throws -> CGRect {
+            @MainActor func frame(_ label: String) throws -> CGRect {
                 try #require(surface.element(labeled: label), "\(label): \(surface.visibleLabels)")
                     .accessibilityFrame
             }
