@@ -380,6 +380,110 @@ struct OpenFarFolderWaitTests {
         await model.farWalkLanded()
         #expect(landings == 1, "once only")
     }
+
+    // MARK: - The lobby model: a refresh never narrows what the landing took (round 1, F-R1-1 — red on the batch-1 tree)
+
+    /// A refresh (she came back to the app) whose read began BEFORE the far walk landed carries the container's partial
+    /// listing; the landing runs while it is in flight and takes the full one. When the refresh then answers, the lobby
+    /// KEEPS the landed facts: here rule 27's refusal, which only the full listing may claim. RED ON THE BATCH-1 TREE:
+    /// `take` replaced the standing whole, so the banner (and its door) vanished until the next refresh.
+    @Test func aRefreshReadBeforeTheLandingNeverTakesRuleTwentySevenBackAway() async throws {
+        var partial = try LobbyFixture.facts(file: nil, touchIDItem: false, biometry: .none)
+        partial.catalog.unreadPlaces = [.farFolder]
+        let partialFacts = partial
+        let full = try LobbyFixture.facts(file: nil, touchIDItem: false, biometry: .none)
+        let gate = RefreshGate()
+        let model = ProtectionLobbyModel(
+            standing: LobbyFixture.standing(partialFacts),
+            typedRoad: { _ in .refused(ProtectionWords.wordsDoNotOpen) },
+            touchIDRoad: { _ in .touchIDNotOpened(press: .cancelled, biometry: .none, itemGone: false) },
+            refreshRoad: {
+                await gate.hold()
+                return LobbyFixture.standing(partialFacts)
+            },
+            opened: { _ in },
+            recordMissing: {},
+            farLanding: { .lobby(LobbyFixture.standing(full)) })
+        #expect(model.face.noKeyFileAnywhere == nil, "drawn from the container's listing: rule 27 is not claimed")
+        let refresh = Task { await model.refresh() }
+        while !gate.entered { await Task.yield() }
+        await model.farWalkLanded()
+        #expect(model.face.noKeyFileAnywhere != nil, "the landing's full listing proves it: rule 27")
+        gate.open()
+        await refresh.value
+        #expect(model.face.noKeyFileAnywhere != nil, "the refresh read before the landing never narrows the lobby back")
+    }
+
+    /// The same race over a typed road only the far folder's key file carries: the landing adds the passphrase field
+    /// (P-1013-1), and a refresh read before it landed never takes the field away. RED ON THE BATCH-1 TREE.
+    @Test func aRefreshReadBeforeTheLandingNeverTakesTheFarFilesRoadBackAway() async throws {
+        let wordsOnly = try LobbyFixture.liveKeyFile(passphrase: false)
+        var partial = try LobbyFixture.facts(file: wordsOnly, touchIDItem: false, biometry: .none)
+        partial.catalog.unreadPlaces = [.farFolder]
+        let partialFacts = partial
+        let full = try LobbyFixture.facts(file: wordsOnly, touchIDItem: false, biometry: .none)
+        let gate = RefreshGate()
+        let model = ProtectionLobbyModel(
+            standing: LobbyFixture.standing(partialFacts, offered: [.words]),
+            typedRoad: { _ in .refused(ProtectionWords.wordsDoNotOpen) },
+            touchIDRoad: { _ in .touchIDNotOpened(press: .cancelled, biometry: .none, itemGone: false) },
+            refreshRoad: {
+                await gate.hold()
+                return LobbyFixture.standing(partialFacts, offered: [.words])
+            },
+            opened: { _ in },
+            recordMissing: {},
+            farLanding: { .lobby(LobbyFixture.standing(full, offered: [.words, .passphrase])) })
+        #expect(!model.face.passphraseField, "drawn from the container: the words road alone")
+        let refresh = Task { await model.refresh() }
+        while !gate.entered { await Task.yield() }
+        await model.farWalkLanded()
+        #expect(model.face.passphraseField, "the landing added the far key file's passphrase road")
+        gate.open()
+        await refresh.value
+        #expect(model.face.passphraseField, "the refresh read before the landing never takes the road away")
+    }
+
+    /// The guard's edge: a lobby whose standing has NO facts (the keychain could not be listed) takes any read that has
+    /// facts — a partial one included — exactly as before. Green on both sides by design (no width to keep); a guard
+    /// that read a missing standing as a whole listing would turn it red.
+    @Test func aLobbyWithNoFactsTakesAPartialReadAsBefore() async throws {
+        let wordsOnly = try LobbyFixture.liveKeyFile(passphrase: false)
+        var partial = try LobbyFixture.facts(file: wordsOnly, touchIDItem: false, biometry: .none)
+        partial.catalog.unreadPlaces = [.farFolder]
+        let partialFacts = partial
+        let model = ProtectionLobbyModel(
+            standing: LobbyFixture.standing(nil),
+            typedRoad: { _ in .refused(ProtectionWords.wordsDoNotOpen) },
+            touchIDRoad: { _ in .touchIDNotOpened(press: .cancelled, biometry: .none, itemGone: false) },
+            refreshRoad: { LobbyFixture.standing(partialFacts, offered: [.words]) },
+            opened: { _ in },
+            recordMissing: {})
+        #expect(model.face.keychainUnreadable, "nothing listed")
+        await model.refresh()
+        #expect(!model.face.keychainUnreadable, "the read with facts was taken")
+        #expect(!model.face.passphraseField, "its roads: the words alone")
+    }
+}
+
+/// A refresh held open until the test lets it go; `entered` once the read is in flight.
+@MainActor
+final class RefreshGate {
+    private(set) var entered = false
+    private var waiter: CheckedContinuation<Void, Never>?
+    private var opened = false
+
+    func hold() async {
+        entered = true
+        if opened { return }
+        await withCheckedContinuation { waiter = $0 }
+    }
+
+    func open() {
+        opened = true
+        waiter?.resume()
+        waiter = nil
+    }
 }
 
 /// A press held open until the test lets it go.

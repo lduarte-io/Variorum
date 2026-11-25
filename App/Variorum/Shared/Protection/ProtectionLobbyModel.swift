@@ -214,8 +214,14 @@ final class ProtectionLobbyModel {
     /// The seam both re-reads land through: a read that failed keeps the face; Touch ID items seen before stay.
     /// `keepingUnreadableLiveFile` (the far landing's): the route's finding about the live place stands — a far folder
     /// says nothing about it.
+    /// VX-1013 round 1 (F-R1-1): and a NARROWER read never replaces a wider one — a read over a partial listing (the far
+    /// folder not yet walked) never replaces a standing whose listing read every place. A refresh begun before the far
+    /// walk landed answers with the container's listing after the landing took the full one; taking it would drop rule
+    /// 27's refusal and the far key files' roads until the next refresh. A standing with no facts takes any read with
+    /// facts, as before.
     private func take(_ fresh: RoadLobbyFacts, keepingUnreadableLiveFile: Bool = false) {
         guard var facts = fresh.facts else { return }
+        if let before = standing.facts, before.catalog.readsEveryPlace, !facts.catalog.readsEveryPlace { return }
         if let before = standing.facts {
             for item in before.custody where item.itemClass == .touchid && !facts.custody.contains(item) {
                 facts.custody.append(item)
