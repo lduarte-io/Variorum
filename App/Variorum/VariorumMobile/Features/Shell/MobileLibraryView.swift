@@ -79,6 +79,16 @@ struct MobileLibraryView<TabBar: View>: View {
     /// Whether this root's page is the one on screen (the shell's band; true
     /// outside a shell).
     @Environment(\.mobilePageShowing) private var pageShowing
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// **VM-259 — the listing's own scroll, read for the top** (the slim line):
+    /// the scroll's memory, held here, its one observed fact the slim/full flag.
+    @State private var giveWay = MobileTopGiveWayTracker()
+    /// **The full top's height** — measured off the full top itself (its rows
+    /// at the current text size), so the listing keeps exactly that room at its
+    /// head and the full top lies over the paper's start as it did when it sat
+    /// above it. It never changes as the top gives way (the full top keeps its
+    /// layout while hidden), so condensing moves no row and no scroll offset.
+    @State private var fullTopHeight: CGFloat = 0
 
     var body: some View {
         // VM-68: the listings' one task key (the shown question, and whether
@@ -86,45 +96,31 @@ struct MobileLibraryView<TabBar: View>: View {
         // the Library is hidden.
         let hold = model.hold(onScreen: isOnScreen)
         let holdsScraps = isOnScreen && model.filter == .scraps
+        // VM-259: the slim line while the list has scrolled on (her pick B).
+        let slim = giveWay.slim
         VStack(spacing: 0) {
-            pathLine
-            searchField
-            filterRow
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    if let hits = model.hits {
-                        hitRows(hits)
-                    } else if model.filter == .scraps {
-                        // The scraps area (parity C3): standalone blocks
-                        // with their tags, and the mint door.
-                        MobileScrapsSection(model: scraps, tokens: tokens)
-                    } else if model.filter == .books {
-                        // #92(a): her books themselves, as openable rows.
-                        bookRows
-                    } else {
-                        // Notes — and, under `.all`, her books INTERLEAVED
-                        // with them (#93(b)'s union).
-                        listingRows
-                        // The Archived room's door belongs under a NOTE
-                        // listing — it opens archived NOTES (books CAN
-                        // archive since 13i-e; the room's BOOKS group is
-                        // the owed face, VM-6 (4d)), so it does not trail
-                        // the books or scraps listings.
-                        // **The rule is this BRANCH**, not a guard inside
-                        // the row: the two listings that are not note
-                        // listings are rendered above, so a clause on
-                        // `filter` here could never be false (the cold
-                        // review's m3 — a dead guard reads as a rule and
-                        // is not one).
-                        archiveRow
+            // VM-259 (her pick B): the full top — the wing line, the search
+            // field, the filter row — lies OVER the listing's head rather than
+            // above it, so as she scrolls on it can give way to the one slim
+            // line without moving a row: the listing keeps the full top's room
+            // at its head (`fullTopHeight`), the top slides off and the slim
+            // line takes the band's top. Chrome only — the listing, its hold
+            // and its pages are exactly what they were (VM-68). The chrome is
+            // declared FIRST, so assistive reading still starts at the top line
+            // (a stack is read in its declared order), and drawn over the
+            // listing by its z-index.
+            ZStack(alignment: .top) {
+                ZStack(alignment: .top) {
+                    fullTop(slim: slim)
+                    if slim {
+                        slimLine
+                            .transition(.opacity)
                     }
                 }
-                .padding(.horizontal, 8)
+                .animation(.easeOut(duration: 0.22), value: slim)
+                .zIndex(1)
+                listing
             }
-            // VM-51 (R-47-1, "prose should not be on the tint"): her rows,
-            // previews and search passages on the paper; the path line, the
-            // field, the filter row and the tab bar stay on the room.
-            .background(tokens.surface)
             // VM-61: the Library's error, its delete line and a star refusal
             // speak on the shell's one line (`MobileMessageLine`), never here.
             tabBar()
@@ -171,6 +167,97 @@ struct MobileLibraryView<TabBar: View>: View {
         }
     }
 
+    /// **The listing** — every row on the paper, under the full top's room at
+    /// its head (VM-259), its scroll read for the top (`mobileTopGivesWay`;
+    /// while the search field holds the keyboard the top stays whole).
+    private var listing: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                // VM-259: the full top's room at the listing's head — the
+                // full top lies over it (an empty band, never heard).
+                Color.clear
+                    .frame(height: fullTopHeight)
+                    .accessibilityHidden(true)
+                if let hits = model.hits {
+                    hitRows(hits)
+                } else if model.filter == .scraps {
+                    // The scraps area (parity C3): standalone blocks
+                    // with their tags, and the mint door.
+                    MobileScrapsSection(model: scraps, tokens: tokens)
+                } else if model.filter == .books {
+                    // #92(a): her books themselves, as openable rows.
+                    bookRows
+                } else {
+                    // Notes — and, under `.all`, her books INTERLEAVED
+                    // with them (#93(b)'s union).
+                    listingRows
+                    // The Archived room's door belongs under a NOTE
+                    // listing — it opens archived NOTES (books CAN
+                    // archive since 13i-e; the room's BOOKS group is
+                    // the owed face, VM-6 (4d)), so it does not trail
+                    // the books or scraps listings.
+                    // **The rule is this BRANCH**, not a guard inside
+                    // the row: the two listings that are not note
+                    // listings are rendered above, so a clause on
+                    // `filter` here could never be false (the cold
+                    // review's m3 — a dead guard reads as a rule and
+                    // is not one).
+                    archiveRow
+                }
+            }
+            .padding(.horizontal, 8)
+        }
+        // VM-51 (R-47-1, "prose should not be on the tint"): her rows,
+        // previews and search passages on the paper; the path line, the
+        // field, the filter row and the tab bar stay on the room.
+        .background(tokens.surface)
+        // VM-259: the listing's own scroll decides the top — never the
+        // listing's hold, its pages or its question.
+        .mobileTopGivesWay(giveWay, holdOpen: searchFocused)
+    }
+
+    /// **The full top** (VM-255's line, the search field, the filter row) on the
+    /// room, measured for the listing's head. Condensed (VM-259), it slides up
+    /// off the band's top and fades — under Reduce Motion it only fades — and
+    /// is neither touched nor heard; its layout stands, so its height and the
+    /// listing's head never move.
+    private func fullTop(slim: Bool) -> some View {
+        VStack(spacing: 0) {
+            pathLine
+            searchField
+            filterRow
+        }
+        .background(tokens.room)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { fullTopHeight = $0 }
+        .offset(y: slim && !reduceMotion ? -fullTopHeight : 0)
+        .opacity(slim ? 0 : 1)
+        .allowsHitTesting(!slim)
+        .accessibilityHidden(slim)
+    }
+
+    /// **The slim line** (VM-259, her pick B): the wing door, the standing
+    /// filter as a word, the search glyph — which re-opens the full top and puts
+    /// the keyboard in its field — and New Note; ONE 44 pt line where the wing
+    /// line stood, its hairline over the list running under it. The trash, the
+    /// gear and the filters are one nudge up (or the glyph) away.
+    private var slimLine: some View {
+        MobileRootTopLine(
+            tokens: tokens, wing: wingName, onWingDoor: onWingDoor,
+            standing: MobileStandingWord.filter(model.filter, tokens: tokens), edge: true
+        ) {
+            MobileSearchGlyphDoor(tokens: tokens) { openSearch() }
+            newNoteDoor
+        }
+        .background(tokens.room)
+    }
+
+    /// The search glyph's act: the full top back, then the keyboard in its
+    /// field (the next turn, once the field is on screen and touchable again).
+    private func openSearch() {
+        giveWay.reopen()
+        Task { @MainActor in searchFocused = true }
+    }
+
     /// **THE ARCHIVE ROOM'S DOOR — the trailing row, NARROWED** (batch 6c;
     /// batch 4's `recoveryRow`). It is the listing's own last row, the
     /// `+ new book` precedent: a list of notes ends with the way to the
@@ -209,25 +296,28 @@ struct MobileLibraryView<TabBar: View>: View {
     /// Note (P33: the Bookcase's twin), and the Settings gear (S-260-1).
     private var pathLine: some View {
         // VM-50: the Bookcase's twin — the same controls, the same one 44 pt
-        // line (icon buttons, hit areas touching).
+        // line (icon buttons, hit areas touching). VM-259: every root's line is
+        // ONE face (`MobileRootTopLine`), full or slim.
         // VM-225: the name is the wing door's (`MobileWingPath`).
-        HStack(alignment: .center, spacing: 0) {
-            MobileWingPath(tokens: tokens, wing: wingName, onDoor: onWingDoor)
-            Spacer(minLength: PhoneMetrics.Space.s16)
+        MobileRootTopLine(tokens: tokens, wing: wingName, onWingDoor: onWingDoor) {
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
             }
-            MobileNewNoteGlyphDoor(tokens: tokens) {
-                Task {
-                    if let postID = await model.newNote() {
-                        onOpen(.note(postID, focus: true))
-                    }
-                }
-            }
+            newNoteDoor
             MobileSettingsGear(tokens: tokens)
         }
-        .padding(.horizontal, PhoneMetrics.gutter)
-        .padding(.top, PhoneMetrics.Space.s4)
+    }
+
+    /// The root's New Note door — one act on both lines, full and slim (mint,
+    /// then open for writing).
+    private var newNoteDoor: some View {
+        MobileNewNoteGlyphDoor(tokens: tokens) {
+            Task {
+                if let postID = await model.newNote() {
+                    onOpen(.note(postID, focus: true))
+                }
+            }
+        }
     }
 
     private var searchField: some View {
@@ -245,6 +335,10 @@ struct MobileLibraryView<TabBar: View>: View {
             .focused($searchFocused)
             .onChange(of: searchFocused) { _, focused in
                 if focused && !pageShowing { searchFocused = false }
+                // VM-259: the field she types into is never folded away — a
+                // focus however it came (her tap at rest, the slim line's search
+                // glyph, a restoration at Back) keeps the full top up.
+                else if focused { giveWay.reopen() }
             }
             .onChange(of: pageShowing) { _, showing in
                 if !showing { searchFocused = false }

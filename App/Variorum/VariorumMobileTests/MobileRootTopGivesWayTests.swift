@@ -47,6 +47,12 @@ private func listingScroll(in view: UIView) -> UIScrollView? {
     return best
 }
 
+/// Every view in a window's tree (the hidden-page pin's walk).
+@MainActor
+private func allViews(in view: UIView) -> [UIView] {
+    [view] + view.subviews.flatMap { allViews(in: $0) }
+}
+
 @MainActor
 @Suite("VM-259 — the Library's top gives way to a slim line (batch 4a)", .serialized)
 struct MobileRootTopGivesWayTests {
@@ -225,8 +231,7 @@ struct MobileRootTopGivesWayTests {
                 #expect(search.accessibilityActivate(), "the search glyph is a real control")
                 await surface.settle(20)
                 expectFull(surface, "after the search glyph")
-                func views(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(views) }
-                let field = try #require(views(surface.window).compactMap { $0 as? UITextField }.first { field in
+                let field = try #require(allViews(in: surface.window).compactMap { $0 as? UITextField }.first { field in
                     let words = field.attributedPlaceholder?.string ?? field.placeholder ?? ""
                     return words.range(of: "search notes", options: .caseInsensitive) != nil
                 }, "the Library's search field")
