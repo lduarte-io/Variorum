@@ -3,9 +3,10 @@
 //  VariorumMobile
 //
 //  Mobile Stage 3, batch 1 — the shelf home (M7), the ratified mockup
-//  §1's shape: the voiced top line (since VM-255 the wing's name alone, the
-//  count a quiet line under it), the book rows with LK5's faces (note count +
-//  tags lead; ✓ finished a STATE on the name), the tab bar's place below. The
+//  §1's shape: the voiced top line (since VM-255 the wing's name alone; since
+//  VM-259 — batch 4a, R-260-11 — with no count under it, the roots' one
+//  `MobileRootTopLine`), the book rows with LK5's faces (note count + tags
+//  lead; ✓ finished a STATE on the name), the tab bar's place below. The
 //  settings door (a gear again since VM-255) rides the line's trailing edge.
 //
 //  ── ROUND 2, BATCH 5 — HER R26/R27 LAYOUT ─────────────────────────────
@@ -75,6 +76,11 @@ struct MobileShelfView<TabBar: View>: View {
     /// Open a note straight into typing — the Today button's landing AND
     /// the New Note door's (P33: "the note opens for writing").
     let onOpenForWriting: (String) -> Void
+    /// **VM-259 — the books' scroll, read for the top line** (the slim line's
+    /// hairline): a harness may hand its own to read the slim/full fact — a TEST
+    /// SEAM and nothing else (`MobileShellView(heldDrag:)`'s precedent); the app
+    /// hands nothing and the root holds its own.
+    var heldGiveWay: MobileTopGiveWayTracker? = nil
     // (The Trash room's SECOND renderer — batch 6c's finding 1, a deleted book
     // rows in the Trash — retired at VM-255, her words: "let's just only show
     // the trash icon within library." The Library's top line is its one door.)
@@ -83,6 +89,9 @@ struct MobileShelfView<TabBar: View>: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     @State private var createBookPresented = false
+    /// VM-259: the books region's own scroll, read for the top line.
+    @State private var ownGiveWay = MobileTopGiveWayTracker()
+    private var giveWay: MobileTopGiveWayTracker { heldGiveWay ?? ownGiveWay }
     /// VM-83: the delete confirm's title, held so a gathering's never flashes
     /// the book's word while the alert animates away (the model clears
     /// `pendingDeleteBook` on dismissal).
@@ -218,26 +227,32 @@ struct MobileShelfView<TabBar: View>: View {
             }
             .padding(.horizontal, 8)
         }
+        // VM-259: the books' own scroll decides the line's slim state (the
+        // hairline that marks the books running under it).
+        .mobileTopGivesWay(giveWay)
     }
 
     /// **The top line** (VM-255 — her four changes): the wing's name ALONE, the
     /// wing door (R-260-1: "it says on the bottom what area you're in" — the
-    /// page word left; Study "Home", Terminal "~/home"), with the Bookcase's
-    /// count as a quiet muted line UNDER it, inside the door's 44 pt box
-    /// (R-260-6, "12 books"); trailing, the Mac's writing glyph for New Note
-    /// (P33 — the Library's twin) and the Settings gear (S-260-1, the ⋯ gone).
-    /// No trash door here ("only show the trash icon within library").
+    /// page word left; Study "Home", Terminal "~/home"); trailing, the Mac's
+    /// writing glyph for New Note (P33 — the Library's twin) and the Settings
+    /// gear (S-260-1, the ⋯ gone). No trash door here ("only show the trash
+    /// icon within library"). **No count under the name** (batch 4a, R-260-11 —
+    /// her words: "i also don't like the "2 books" under Home. we don't have
+    /// shelves on here yet, but eventually each shelves should have the numbers.
+    /// in the meantime we just don't need numbers of the books i suppose until
+    /// the shelves are added."; R-260-6's muted "12 books" line is gone — the
+    /// per-shelf count is the phone's shelves' ticket).
     ///
     /// **ONE 44 pt line** (VM-50): the doors are the phone's icon buttons with
-    /// 44 pt hit areas that touch; the name's two lines sit inside the door's
-    /// own 44. Pinned by `MobilePathLineGeometryTests`.
+    /// 44 pt hit areas that touch. Pinned by `MobilePathLineGeometryTests`.
+    /// **The same line full or slim** (VM-259, her pick B: "Bookcase and Starred
+    /// get the same slim line (their name and their own doors)"): the roots' one
+    /// face, `MobileRootTopLine` — the line already IS one 44 pt line, so as the
+    /// books scroll under it nothing condenses; its hairline foot marks them
+    /// (PROVISIONAL C-4a-2).
     private var pathLine: some View {
-        HStack(alignment: .center, spacing: 0) {
-            MobileWingPath(
-                tokens: tokens, wing: wingName,
-                detail: tokens.chromeLabel(MobileShelfFaces.bookCount(model.books.count)),
-                onDoor: onWingDoor)
-            Spacer(minLength: PhoneMetrics.Space.s16)
+        MobileRootTopLine(tokens: tokens, wing: wingName, onWingDoor: onWingDoor, edge: giveWay.slim) {
             MobileNewNoteGlyphDoor(tokens: tokens) {
                 Task {
                     if let postID = await model.newNote() {
@@ -247,8 +262,6 @@ struct MobileShelfView<TabBar: View>: View {
             }
             MobileSettingsGear(tokens: tokens)
         }
-        .padding(.horizontal, PhoneMetrics.gutter)
-        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     /// One book's row. Since batch 5 the row is an HStack of two doors

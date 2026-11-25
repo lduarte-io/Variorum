@@ -131,11 +131,10 @@ final class MobileWingDoor {
 /// in"). With a door to wire and a name to say, the name is ONE text — the
 /// letters `VoiceTokens.path` draws for it (`MobileWingTitle.doorParts`,
 /// pinned) — in the accent, the ink of the other doors on these lines (P-55-17,
-/// PROVISIONAL), and the whole title is the door's target. Under it, on the
-/// Bookcase only, a quiet second line in the phone's muted ink: the count
-/// ("12 books" — her R-260-6, "Muted line under the wing name"), inside the
-/// door's own 44 pt box, so the line does not grow (R-260-1: "bookcase
-/// shouldn't have its count on the same line, but it should have its count").
+/// PROVISIONAL), and the whole title is the door's target. Nothing under it:
+/// the Bookcase's quiet count line (R-260-6) left at batch 4a (R-260-11 — no
+/// count until the phone has shelves, each shelf then carrying its own). Every
+/// root draws it through the one top line (`MobileRootTopLine`, VM-259).
 /// Without a door it is the same words as plain text.
 ///
 /// **The target is at least 44 pt tall, and it is real.** A target hung
@@ -155,48 +154,35 @@ final class MobileWingDoor {
 struct MobileWingPath: View {
     let tokens: VoiceTokens
     let wing: String?
-    /// **The quiet second line** under the name (VM-255, R-260-6): the
-    /// Bookcase's count, already voiced ("12 books"); nil on the other roots.
-    var detail: String? = nil
     let onDoor: (() -> Void)?
 
     var body: some View {
         if let wing, let onDoor {
             Button(action: onDoor) {
-                lines(Text(Self.title(MobileWingTitle.doorParts(tokens, wing: wing), tokens: tokens)))
+                line(Text(Self.title(MobileWingTitle.doorParts(tokens, wing: wing), tokens: tokens)))
                     // The line's own 44 (the hit-area helper), the words on
-                    // the line's leading edge — the count's line inside it.
+                    // the line's leading edge.
                     .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             // The wing's NAME, never its voiced casing (the tab doors'
-            // precedent).
+            // precedent). The door draws nothing else, so it carries no value
+            // (VM-55 ladder round 1, finding 7: the value was the rest of what it
+            // drew — the Bookcase's count, gone at batch 4a, R-260-11).
             .accessibilityLabel(wing)
-            // …and the rest of what the door draws — the Bookcase's count — as
-            // its value, so VoiceOver reads "Home, 12 books". No new words (VM-55
-            // ladder round 1, finding 7); none on a root that draws none.
-            .accessibilityValue(detail ?? "")
         } else {
             // An unread name says nothing — never the voice's bare prefix ("~/").
             let words = MobileWingTitle.components(wing: wing)
-            lines(Text(words.isEmpty ? "" : tokens.path(words))
+            line(Text(words.isEmpty ? "" : tokens.path(words))
                 .foregroundStyle(tokens.phone.muted))
         }
     }
 
-    /// The name on its one line, and the quiet count under it (Bookcase only).
-    private func lines(_ name: Text) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            name
-                .phoneType(.meta, tokens)
-                .lineLimit(1)
-            if let detail {
-                Text(detail)
-                    .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                    .lineLimit(1)
-            }
-        }
+    /// The name on its one line.
+    private func line(_ name: Text) -> some View {
+        name
+            .phoneType(.meta, tokens)
+            .lineLimit(1)
     }
 
     /// The name's letters: the voice's prefix in the line's muted ink (the

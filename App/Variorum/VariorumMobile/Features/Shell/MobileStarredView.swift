@@ -58,6 +58,15 @@ struct MobileStarredView<TabBar: View>: View {
     /// A row's destination, through the model's own route brain — the
     /// Library's callback shape.
     let onOpen: (MobileRoute) -> Void
+    /// **VM-259 — the list's scroll, read for the top line** (the slim line's
+    /// hairline): a harness may hand its own to read the slim/full fact — a TEST
+    /// SEAM and nothing else (`MobileShellView(heldDrag:)`'s precedent); the app
+    /// hands nothing and the root holds its own.
+    var heldGiveWay: MobileTopGiveWayTracker? = nil
+
+    /// VM-259: the list's own scroll, read for the top line.
+    @State private var ownGiveWay = MobileTopGiveWayTracker()
+    private var giveWay: MobileTopGiveWayTracker { heldGiveWay ?? ownGiveWay }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -82,6 +91,9 @@ struct MobileStarredView<TabBar: View>: View {
             // VM-51 (R-47-1, "prose should not be on the tint"): her list on
             // the paper; the path line and the tab bar stay on the room.
             .background(tokens.surface)
+            // VM-259: the list's own scroll decides the line's slim state (the
+            // hairline that marks the rows running under it).
+            .mobileTopGivesWay(giveWay)
             // VM-61: a star refusal speaks on the shell's one line
             // (`MobileMessageLine`), never here.
             tabBar()
@@ -96,19 +108,19 @@ struct MobileStarredView<TabBar: View>: View {
     /// — "Home · Starred" was her example of the page word she does not need;
     /// Study "Home", Terminal "~/home"). Nothing is minted here (P38: a strip
     /// earns its doors), so the one door trailing it is the Settings gear
-    /// (S-260-1). No trash door (the Library only).
+    /// (S-260-1). No trash door (the Library only). **The same line full or
+    /// slim** (VM-259, her pick B — "Bookcase and Starred get the same slim
+    /// line (their name and their own doors)"): the roots' one face,
+    /// `MobileRootTopLine`; the line already IS one 44 pt line, so as the rows
+    /// scroll under it nothing condenses — its hairline foot marks them
+    /// (PROVISIONAL C-4a-2).
     private var pathLine: some View {
         // VM-50: the same 44 pt line as its two siblings' (whose doors are
         // 44 pt hit areas), so the three roots' content starts level as the
         // band pages between them.
-        HStack(alignment: .center, spacing: 16) {
-            MobileWingPath(tokens: tokens, wing: wingName, onDoor: onWingDoor)
-            Spacer()
+        MobileRootTopLine(tokens: tokens, wing: wingName, onWingDoor: onWingDoor, edge: giveWay.slim) {
             MobileSettingsGear(tokens: tokens)
         }
-        .frame(minHeight: PhoneMetrics.touchMinimum)
-        .padding(.horizontal, PhoneMetrics.gutter)
-        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     /// One starred row — **the retired shelf section's row, MOVED, not
