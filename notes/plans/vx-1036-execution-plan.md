@@ -2,7 +2,7 @@
 
 **Ticket** VX-1036 (Umbrella, Books, High) · **Branch** `vx-1036-organizing-inside-a-book` · **Worktree** `~/dev/variorum-vx-1036` (Pro) · **Shape** `/architect-phase` · **Stage coordinator** nov24 · **Design record** `notes/plans/vx-1036-organizing-inside-a-book.md` (§4f is the design as closed; rulings §5; mockups `notes/plans/vx-1036/`)
 
-**STATUS — OPEN (kickoff 2026-11-25). The plan is written; no implementer has been spawned; her word on the batches, the cast and the riders is the gate to batch 1.**
+**STATUS — OPEN, BUILDING (kickoff sitting answered 2026-11-25). The batches are APPROVED as cut; the ladder's reviewer is `opus-reviewer`; the riders VX-1091 (batch 3) · VX-576 (batch 2) · VX-96 (batch 1) are SEATED (VX-1032, VX-312, VX-410 offered and not taken); Index's header rows get nothing this run, confirmed. The sitting record is §9.**
 
 ---
 
@@ -32,7 +32,7 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 
 **Sizing said plainly (the guidance):** none of these is phase-sized; batches 1, 2 and 4 each bundle two or three SMALL members on one surface (the small-run practice), batch 3 is the one medium unit (a new mode built from an existing row). Four implementer sessions, one ladder. This is within the guidance's letter (at most two phase-sized units; zero here are phase-sized).
 
-### Batch 1 — the mint lands in her hands, and the dial saves (VX-1039 + VX-1040)
+### Batch 1 — the mint lands in her hands, and the dial saves (VX-1039 + VX-1040 + rider VX-96)
 
 **Surface:** `Features/BookView/` (BookView's mint/reveal roads, `BookStructureModel.newPost`/`newPostInGathering`, `BookMastheadModeRow`'s dial) + `Operations+Reading.swift` (`newPostInReading` placement).
 
@@ -46,9 +46,13 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 
 **VX-1040 — D-1 as drawn, R-1036-33 confirmed:** a pick on the dial IS the book's order at once on a gathering and on a book whose order is not manual (the existing `setReadingSort` road — the same operation the wire's `set_book_order` calls; no operation change); on a HAND-ORDERED book a pick stays a look with "Save as This Book's Order" and "Back to manual order" both visible (`BookMastheadModeRow.swift:393`'s door grows its pair); a finished book looks and cannot save, as today. The save speaks the existing receipt family.
 
+**Rider VX-96 (Bug, Confirmed, seated 2026-11-25):** the reveal-WITHOUT-focus roads keep the title-over-blank beat — the ticket's lean is "hold the pre-mount arm for the landing's lifetime". Same reveal road as N-1; pin-before-fix binds for it too (its own red-on-old).
+
 **Evidence (the batch closes on this, not on "done"):** the pins red-on-old, revert-verified · state-transition tests: birth placement per door (chapter "+", after-the-note-she-is-on with each PROVISIONAL arm, stamp order, the end), window widening, the dial's writes per book kind (gathering saves at once · non-manual book saves · hand-ordered looks with the two doors · finished looks only) · the wire-unchanged pin · registry walk green (the chapter "+" and any new door declared, P-1) · **the orchestrator's hands-on walk** on the dev store (stage via nov24): mint from every door in a long chaptered book and in a gathering, watch the note arrive live with the caret; work the dial on all four book kinds.
 
-### Batch 2 — tags in the header: the pills, the switch, the long title (VX-1038 + VX-1081 + VX-1080)
+### Batch 2 — tags in the header: the pills, the switch, the long title (VX-1038 + VX-1081 + VX-1080 + rider VX-576)
+
+**Rider VX-576 (Improvement, Confirmed, seated 2026-11-25):** tag pickers list most-used tags first — built in this batch's "+" suggest field, and reaching the existing picker(s) only where the same suggest brain serves them (no new surface; the implementer states the reach honestly in the record).
 
 **Surface:** the book outline card header (`BookOutlineRows`/`BookView` card headers), the shared pill (`Features/Tags/NoteTagChips.swift`), the per-book switch, a pure Domain rule.
 
@@ -63,7 +67,9 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 
 **Evidence:** the × pin (or the traced fix + 3× captures) · state tests: the switch's three positions and per-book persistence; the placing-tags Domain rule (pure, unit-tested); the "+" field's adopt-or-mint and the application heard by a living book (an intake state test) · the chord declared + registry walk green · scroll behavior pinned where testable (at-rest "…", one-at-a-time arbitration, Reduce Motion) + a short clip · screenshots both voices, light and dark · **HER FIRST WALK (before the run merges):** two of §4f's four faces-in-words are this batch's — the three-position tags switch and the "…"-at-rest long title. The orchestrator walks them with her (or captures them for her sitting on an away stretch).
 
-### Batch 3 — the List mode (VX-1084)
+### Batch 3 — the List mode (VX-1084 + rider VX-1091)
+
+**Rider VX-1091 (Bug, Confirmed, seated 2026-11-25; VX-1082's filing):** in Terminal the book navigator's mode tabs are ~1 pt wider than the navigator's 190-pt floor (`BookModeTabLabel`, 168 pt in a 166-pt room). This batch's fifth tab makes the row tighter still — fix the overflow in the same pass, with the fifth tab's widths measured in BOTH voices at the floor.
 
 **Surface:** `BookStructureModel.ViewMode` + the mode row, a new `Features/BookView` list face composed from the Library's row, the shared row's home.
 
@@ -123,7 +129,24 @@ No schema change, no `Sync/`, no custody, no editor-seam line expected anywhere 
 | 8 | VX-1078 tags on a quick note | 4 | NOT STARTED |
 | 9 | The handoff fix reaches main (`cde7ea279`) | the PR | ON THE BRANCH; closeout checks main |
 | 10 | Her first-walk faces: the switch · the "…" title · the tag button | 2, 4 | OWED BEFORE MERGE |
+| 11 | RIDER VX-96 — the reveal's title-over-blank beat (hold the pre-mount arm for the landing's lifetime) | 1 | SEATED 2026-11-25 |
+| 12 | RIDER VX-576 — tag pickers list most-used first (the "+" field) | 2 | SEATED 2026-11-25 |
+| 13 | RIDER VX-1091 — Terminal's mode tabs overflow the 190-pt navigator floor by ~1 pt (`BookModeTabLabel`, 168 pt in a 166-pt room — VX-1082's filing) | 3 | SEATED 2026-11-25 |
 
 ## 8. Batch records
 
 *(Appended per batch: the brief as given, LIVE STATUS, pins, walk results, dispositions.)*
+
+### BATCH 1 BRIEF (2026-11-25 — the implementer's required reading, in this order)
+
+1. `notes/plans/vx-1036-execution-plan.md` (this file): §1, §2 (the environment traps bind you), §3 batch 1 whole (your scope: VX-1039 + VX-1040 + rider VX-96; batch 2, 3 and 4 are NOT yours — a second unit in your way means hand off with a record, never "also do"), §9 (her sitting).
+2. The design record `notes/plans/vx-1036-organizing-inside-a-book.md`: §3a (the trace, with file:line coordinates as of main `99db9ee33` — RE-VERIFY them, the tree has moved), §4f's "New notes" context via §4b N-1…N-3 and the order-dial line D-1 (§4f confirms D-1 at R-1036-33), §5's rulings R-1036-8 and R-1036-33, §9 (the constitution P-1…P-9 — binding).
+3. `notes/MCPSpec.md` IN FULL — you touch `newPostInReading` (`Sources/VariorumCore/Operations/Operations+Reading.swift:872`), which the wire's `create_note`-with-`book_id` files through; the wire's placement behavior must be provably unchanged (its own pin).
+4. `notes/SessionResiliencyProtocol.md` — the checkpoint protocol binds from your FIRST commit: LIVE STATUS section appended under this brief, commit per piece BY PATHSPEC (never `git add -A` — the orchestrator shares this worktree), push after every commit, synchronous foreground waits only, no subagents.
+5. The Linear tickets VX-1039, VX-1040, VX-96 (via `~/dev/variorum/notes/TICKETS.md` for the one-liners; the design record and this plan outrank any stale ticket prose).
+
+**The order of work:** pins FIRST (Pin A reveal:false doors · Pin B the reveal race, SUSPECTED — if the pin is GREEN on old code the finding is hollow: record it, don't fix it · VX-96's own pin · the wire-placement pin green-on-old as the unchanged-behavior baseline), then the fixes and N-1/N-2/N-3/D-1, then the suite for every file you touched. Tests at the END of each piece, never a full suite at the start. Headless `swift build`/`swift test` freely; you do NOT run `xcodebuild test` — name the suites you'd run and the orchestrator takes them through the nov24 stage. UI acceptance is the ORCHESTRATOR'S walk, not yours; your "done" is a claim with evidence lines. Refusal copy for any new door (the chapter "+") is declared in the registry (P-1) and worded as public copy, sentence case. When done: flip LIVE STATUS, state per piece DONE(hash)/evidence, list anything PENDING honestly, push, report.
+
+## 9. The kickoff sitting (2026-11-25, answered by dialog)
+
+Her picks, verbatim from the dialog: the batch cut — **"Approve the four batches"**; the ladder — **"opus-reviewer"** (escalates to Fable if any batch unexpectedly touches the editor seam); the riders — **VX-1091, VX-576, VX-96** (VX-1032, VX-312 and VX-410 offered, not taken); Index — **"Confirm — Index gets nothing"** (the List mode is the managing face; cheap to add later if she misses it in use). The riders became sub-issues of VX-1036 at the sitting (the roster stays the listing). The add-tag chord (T-4) still comes to her mid-run from batch 2. The nov24 coordinator's merge-order note, recorded: VX-1082 is two batches further along and likely merges first — after its merge this run merges main in and re-runs the BookView/Library suites before its own merge REQUEST.
