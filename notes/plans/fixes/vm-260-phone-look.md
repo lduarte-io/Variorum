@@ -1506,8 +1506,8 @@ phone's Look; the Mac's sources untouched; no canon edited (the deltas are draft
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's binding sections — What binds every batch, the 13b constitution, her kickoff rulings R-260-2/-3, the adjudications incl. A-260-3's procedural note and A-260-9's flag, the Batch 3 section, the BATCH 2 record; SurfaceContracts "The app" in full incl. the phone's Settings bullet; the resiliency protocol; QUESTIONS #281 and its addendum (P-47-16's "the cream background stays an option"); the VM-47 record's P-47-15/-16/-17/-24/-25/-26 rows; TEXTKIT2_NOTES §3) | DONE (this commit) |
-| 1. The pins on the pre-fix tree — VM-247's fence (a Look change writes no row; a library's look moves the phone nothing) and VM-254's default (her words one notch under today's, the editor's body with them) | NOT STARTED |
-| 2. The red-on-old tree built headless (`DerivedData/vm260-3-rol`, an APFS clone of `vm260-2`, incremental, `nice -n 15`) | NOT STARTED |
+| 1. The pins on the pre-fix tree — VM-247's fence (a Look change writes no row; a library's look moves the phone nothing) and VM-254's default (her words one notch under today's, the editor's body with them) | DONE (`2e03a6811` — **that commit IS the red-on-old tree**; two new files, only symbols both trees declare: `MobilePhoneOwnLookFenceTests`, `MobileHerWordsDefaultTests`) |
+| 2. The red-on-old tree built headless (`DerivedData/vm260-3-rol`, an APFS clone of `vm260-2`, incremental, `nice -n 15`) | DONE — `TEST BUILD SUCCEEDED` at `2e03a6811` |
 | 3. VM-247 — this phone's own look (voice · palette · background · appearance on the device; the router's overlay; the editor face's ground; Settings ▸ Look's rows) | NOT STARTED |
 | 4. VM-254 — the text-size row and the smaller default (the type layer's table and its words scale; the editor face's body; the environment at the roots) | NOT STARTED |
 | 5. Pins MOVED with the rulings + the tip's new pins | NOT STARTED |
