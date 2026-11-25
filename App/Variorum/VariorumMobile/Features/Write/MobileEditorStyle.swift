@@ -21,9 +21,10 @@
 //  Concurrency (QUESTIONS #195 MINOR 3, closed at VM-51): the live look is
 //  MAIN-ACTOR state — the compiler now enforces what the old comment only
 //  claimed ("main-thread written, main-thread read") — and the app has ONE
-//  writer, `adopt(_:ground:wordsScale:)`, called by the shell router where the library's
-//  settings LAND and where the phone's own look MOVES (VM-247). The two other writers (the Write screen's init and
-//  the router's init) are gone. `voice`'s setter survives as the harness
+//  writer, `adopt(_:ground:wordsScale:)`, called by the shell router where
+//  the library's settings LAND and where the phone's own look MOVES (VM-247,
+//  VM-254). The two other writers (the Write screen's init and the router's
+//  init) are gone. `voice`'s setter survives as the harness
 //  door the suites drive one voice through. The per-voice faces are cached
 //  `static let`s, and a palette face is built once per landed palette and
 //  shares every voice-owned colour object with them, so every read returns
@@ -53,9 +54,9 @@ nonisolated enum MobileEditorStyle {
     // MARK: - The live look (the phone's own — VM-247)
 
     /// The look as the editor wears it — voice, palette and the custom seeds —
-    /// the last value `adopt(_:ground:wordsScale:)` took (before anything has landed: R1's
-    /// placeholder, Terminal in the voice's own colours, which is what the
-    /// suites' editor worlds assume). MAIN-ACTOR state (MINOR 3).
+    /// the last value `adopt(_:ground:wordsScale:)` took (before anything has
+    /// landed: R1's placeholder, Terminal in the voice's own colours, which is
+    /// what the suites' editor worlds assume). MAIN-ACTOR state (MINOR 3).
     @MainActor private static var stored = Queries.ThemeSettings()
     /// The note's ground the editor wears (VM-247 — the paper, or the cream).
     @MainActor private static var storedGround: MobileNoteGround = .paper
@@ -73,8 +74,8 @@ nonisolated enum MobileEditorStyle {
     @MainActor static var ground: MobileNoteGround { storedGround }
 
     /// The live voice. Its SETTER is the harness door (the suites drive one
-    /// voice through it, the palette left as it stands); the app writes only
-    /// through `adopt(_:)`.
+    /// voice through it, the palette, the ground and the words' size left as
+    /// they stand); the app writes only through `adopt(_:ground:wordsScale:)`.
     @MainActor static var voice: ThemeVoice {
         get { stored.voice }
         set {
