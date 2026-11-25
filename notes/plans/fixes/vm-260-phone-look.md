@@ -2276,7 +2276,8 @@ batch's evidence rides the run's merge gate, so every red and green below is PEN
 gate's); no line in `Sources/`, `Sync/`, custody, `StatusCenter`, `VoiceTokens`, `MobileKeyboardBar` (its numbers
 R22/R25 untouched), the typed-Return model, crystallization or `BlockRangeIndex`; `MobileKeyboardFloor` STAYS (the
 class guard); the throwaway walk driver (`~/dev/variorum-vm260-walk/…/VM260WalkDriver1a.swift`) was read, never
-copied into the tree.
+copied into the tree. **The cure's mechanism is traced to UIKit's boundary, not through it** (the NOT KNOWN below):
+the pin's green on the tip is the only proof it cures, and the cure's look on the keyboard's going is unseen.
 
 ### LIVE STATUS
 
@@ -2288,7 +2289,7 @@ copied into the tree.
 | 3. The red-on-old bundles at piece 2's commit: the UI bundle `vm260-3b-rol-ui` (APFS clone of `vm260-2r-ui`) and the unit bundle `vm260-3b-rol` (clone of `vm260-2r`), incremental, `nice -n 15` | DONE — both `TEST BUILD SUCCEEDED` at `b48b391e2` (logs `DerivedData/vm260-3b-rol{,-ui}-build.log`; the clones' "stale file outside the allowed root paths" warnings are the clone's own, harmless) |
 | 4. VM-281's fix — the editor drops its keyboard bar as it resigns and puts it back as it becomes first responder | DONE (this commit) — phone `build-for-testing` green on it (`DerivedData/vm260-2r-3b-build.log`); the pin's green PENDING the gate |
 | 5. F-her-1's fix — the picking door reads "Cancel" (PROVISIONAL P-260-3b-1) | DONE (this commit) — compiled at piece 6; the pin's green PENDING the gate |
-| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-mac`, `vm260-2r-ui`), incremental, `nice -n 15`; READY-FOR-TESTS | NOT-STARTED |
+| 6. The trio rebuilt on the tip (`vm260-2r`, `vm260-2r-mac`, `vm260-2r-ui`), incremental, `nice -n 15`; READY-FOR-TESTS | DONE (this commit) — all three `TEST BUILD SUCCEEDED` at code tip `9bf8e6b55` (logs `DerivedData/vm260-2r-3b-build2.log`, `vm260-2r-ui-3b-build.log`, `vm260-2r-mac-3b-build.log`); no warning in a changed file; the run list below |
 
 ### VM-281 — the traced mechanism (re-traced in this session; the F-1a-W1 trace re-read, not adopted on trust)
 
@@ -2388,3 +2389,59 @@ gap this leaves, recorded rather than silently decided: a door whose spoken name
 label-in-name shape (WCAG 2.5.3) — a Voice Control user saying "tap Cancel" may not reach it. Alternative (b): name it
 "Cancel picking" (one static's value; the three existing pins drive it by the static, not the words). Hers or the
 orchestrator's; not gating.
+
+### Batch 3b — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+All from `App/Variorum/`, zsh, `test-without-building`. Phone: `P(folder)=DerivedData/<folder>/Build/Products/
+VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`; UI: `U(folder)=DerivedData/<folder>/Build/
+Products/TK2SpikeUITests_TK2SpikeUITests_iphonesimulator27.1-arm64-x86_64.xctestrun`; `-destination
+"platform=iOS Simulator,id=$UDID"`. **The red-on-old tree for BOTH pins is `b48b391e2`** (the pins, the behaviour-neutral
+rename, no fix); **the code tip is `9bf8e6b55`**.
+
+**R-3b — red on old:**
+- Unit (`P(vm260-3b-rol)`, the gate's suite device):
+  `-only-testing:VariorumMobileTests/MobileBlockSelectionTests` — predicted: `whilePickingTheHeaderNeverDrawsOneWordOnTwoDoors`
+  RED, exactly **2 issues** (one per voice, at "THE FACT" — the picking door draws "Done"/"done" beside the dismiss's
+  same word); its presence assertions and every other test of the suite GREEN.
+- UI (`U(vm260-3b-rol-ui)`, the WALK device, ~2½ min):
+  `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests/testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad`
+  — predicted **RED, up to 12 issues**: at once and held, each of the three bar doors draws differently from at rest
+  (under the candidate strip's glass) and its frame ends on the keys (≈591 against the key plane's 583); the premises
+  pass (`kbar.block` on the note's keyboard; no keyboard after Back). **A GREEN here means the road is HOLLOW on old**
+  — record it, do not claim the fix. An INCONCLUSIVE (a keyboard still up after Back, no `kbar.block`, no search field)
+  means the road did not run — not a verdict.
+
+**The tip** (`9bf8e6b55`):
+- **P** — the gate's whole phone target from `vm260-2r` carries the batch: predicted green but main's 6 known issues;
+  `whilePickingTheHeaderNeverDrawsOneWordOnTwoDoors` GREEN; the block-selection pins that drive the toggle by its
+  VoiceOver name (`theSheetsOwnDoneLeavesPickingModeAndDropsThePicks`, `theDonePickingDoorSurvivesTheLastRowLeaving`,
+  `thereIsNoMergeSelectedDoorAndTheAbsenceIsRuled`) GREEN, unchanged; every suite that becomes/resigns the editor in a
+  hosted window (liveness, takes browser, comments, history) GREEN — the overrides only move the input-views pair.
+- **U** — `U(vm260-2r-ui)`, `-only-testing:VariorumMobileUITests/MobileKeyboardRevealUITests`, the walk device, now
+  **THREE tests (~6 min)**: predicted all GREEN — `testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` GREEN is the
+  VM-281 claim; `testAMidNoteTapRisesAboveTheKeyboard` (its drag-down dismiss and re-tap ride the new resign/become
+  pair: the bar must come back for `kbar.block`) and `testTheBarRidesAboveTheLibrarySearchKeyboard` GREEN as before.
+  **If the walk's-road test stays RED on the tip with the frames ≈591 again, model (P) holds** — the capture precedes
+  the resign; STOP, do not iterate in the editor: the next road is the accessory host's rework (VM-271's) and her call.
+- **M** — `DerivedData/vm260-2r-mac` (rebuilt at the tip; this batch changes NO file the Mac compiles — all four are
+  phone-target files): the M3 list, predicted green but `IndexTierMetricsTests`' 4 declared.
+
+**W-3b — the closing walk's added stops** (the Debug phone app from `vm260-2r`, both voices, to
+`notes/plans/vm-260-screens/batch-3b/`):
+1. **The walk's road, re-taken** — a new note with its keyboard up, Back, the Trash, Bookcase, Library, the search
+   tapped: the bar stands on the keyboard's glass, not under it (the s9 frame, now right).
+2. **Back from a note with its keyboard up** — the keyboard leaves ONCE (no bounce), the bar with it.
+3. **The drag-down dismiss in a note** — the bar's exit reads clean (the bar may leave a beat before the keys).
+4. **The note's ⋯ sheet opened with the keyboard up, then closed** — if the keyboard comes back, it comes back WITH
+   its bar; and the ⑂ takes card / a comment taking the keyboard and giving it back — the bar returns.
+5. **F-her-1** — the Blocks sheet while picking: "Cancel" beside "Done" (her screenshot's frame), both voices; Cancel
+   ends picking and drops the picks; Done closes the sheet.
+
+**Review focus added (the ladder's):** VM-281's two overrides, read against TEXTKIT2_NOTES and the keyboard bar's
+rulings (R22/R25, M4 ≡ R7: an installed accessory keeps its presented height — the parked bar is the same instance at
+the same height): `reloadInputViews()` inside a resign that is a HAND-OFF (UIKit calling the old responder's resign
+from the new one's become); a refused resign; a voice switch while parked; the controller's weak `bar` kept alive by
+the park; UIKit's restore of input views after a sheet. And C-3b-1 (the label-in-name gap).
+
+**The calls of this batch (for the merge's QUESTIONS):** P-260-3b-1 (the picking door's "Cancel"; alternatives (b) and
+(c) above); C-3b-1 (the VoiceOver names kept). VM-281 is a bug-class fix, not a call — its proof is the U leg.
