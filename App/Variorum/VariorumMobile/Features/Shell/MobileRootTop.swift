@@ -79,8 +79,17 @@ nonisolated enum MobileTopGiveWay {
     static func travel(
         offset: CGFloat, insetTop: CGFloat, insetBottom: CGFloat, content: CGFloat, container: CGFloat
     ) -> CGFloat {
-        let reach = max(0, content + insetTop + insetBottom - container)
-        return min(max(offset + insetTop, 0), reach)
+        min(max(offset + insetTop, 0),
+            Self.reach(insetTop: insetTop, insetBottom: insetBottom, content: content, container: container))
+    }
+
+    /// **The reach**: the farthest the list can travel from its rest — the
+    /// range `travel` is clamped to (never negative). Its own function since
+    /// ladder round 1's R1-1, so the note's title can ask what reach a page
+    /// keeps once its viewport grows (`MobileNoteTitleGiveWay`); the roots'
+    /// rule reads it only through `travel`, exactly as before.
+    static func reach(insetTop: CGFloat, insetBottom: CGFloat, content: CGFloat, container: CGFloat) -> CGFloat {
+        max(0, content + insetTop + insetBottom - container)
     }
 
     /// The scroll view's reading as travel.

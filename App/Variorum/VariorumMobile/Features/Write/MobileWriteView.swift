@@ -492,6 +492,11 @@ struct MobileWriteScreen: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, Self.titleInset)
         .padding(.top, Self.titleTop)
+        // R1-1 (ladder round 1): the row's whole height, its own 8 above
+        // included — exactly what the masthead gives the text view when the
+        // title leaves — so the tracker decides the leave on the page's reach
+        // AFTER the flip. A write to unobserved storage: no body is asked again.
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { titleTracker.titleHeight = $0 }
     }
 
     /// **The one row** (R-260-13): six icon doors, each the phone's 44 × 44

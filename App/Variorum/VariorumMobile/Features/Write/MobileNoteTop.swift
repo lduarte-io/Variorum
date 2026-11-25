@@ -48,6 +48,18 @@ import VariorumCore
 /// it back: the title is the top of her text, and giving it back mid-note
 /// would push the line she is reading down a title's height (the jump batch
 /// 4a's spacer exists to avoid on the Library).
+///
+/// **The leave is decided on the geometry AFTER the flip** (ladder round 1,
+/// R1-1). The title leaving grows the text view by the title's row, so the
+/// page's range shrinks by that height until the text view's own layout
+/// regrows its typewriter room; where UIKit clamps the offset into the shrunk
+/// range first, a page whose whole reach is barely past the leave would land
+/// back within the rest — the title returning on its own and her page jumping.
+/// So the title leaves only when the page is past the wobble AND the reach it
+/// keeps once its viewport has grown by the title's row (`reachAfter`) stays
+/// past the rest; a page too short for that keeps its title (all of it is
+/// room). The return is unchanged: the title coming back only shrinks the
+/// viewport, which never takes a page out of its range.
 nonisolated enum MobileNoteTitleGiveWay {
     /// The page stands past this from its rest → the title has gone.
     static let leave: CGFloat = MobileTopGiveWay.wobble
@@ -56,10 +68,14 @@ nonisolated enum MobileNoteTitleGiveWay {
 
     /// **One reading**: whether the title is gone, given where the page now
     /// stands (its travel — `MobileTopGiveWay.travel`, the clamp that makes a
-    /// rubber-band no travel) and whether it was gone.
-    static func gone(_ wasGone: Bool, travel: CGFloat) -> Bool {
+    /// rubber-band no travel), whether it was gone, and — for a title still
+    /// up — the reach the page would keep with the title's row given to its
+    /// viewport (its reach less that row; negative when nothing is left). The
+    /// default, no reading, is a page the flip costs nothing (a viewport that
+    /// never grows): the rule as it was before R1-1.
+    static func gone(_ wasGone: Bool, travel: CGFloat, reachAfter: CGFloat = .infinity) -> Bool {
         if travel <= rest { return false }
-        if travel > leave { return true }
+        if travel > leave { return wasGone || reachAfter > rest }
         return wasGone
     }
 }
@@ -73,11 +89,25 @@ nonisolated enum MobileNoteTitleGiveWay {
 /// later (so a flip landing inside a layout pass never writes the screen's
 /// state from inside it). Under Reduce Motion the flip is immediate; else the
 /// title and her text slide together over 0.2 s.
+///
+/// The offset alone is observed, and that is enough (R1-1's read): on this
+/// surface a page's range does not follow its viewport (the typewriter room is
+/// a page less one line, re-derived from the live height in the text view's
+/// own layout), so a frame change moves the travel only where UIKit clamps the
+/// offset — itself an offset change, heard here — and a page whose content
+/// grows under a still offset only gains range, which the next reading weighs.
 @MainActor
 @Observable
 final class MobileNoteTitleTracker {
     /// The title has given way — the one fact the screen reads.
     private(set) var gone = false
+    /// **The title's row as last measured** (its own room above included) —
+    /// how much the text view's viewport grows when the title leaves, so the
+    /// rule can read the page's reach after the flip (R1-1). Written by the
+    /// screen's geometry reading, read only at the next scroll reading
+    /// (unobserved: a measurement never asks the screen's body again). Zero —
+    /// not yet measured — is the rule as it was.
+    @ObservationIgnored var titleHeight: CGFloat = 0
     /// The rule's latest answer (unobserved; `gone` follows it a turn later).
     @ObservationIgnored private var ruled = false
     @ObservationIgnored private var publishing = false
@@ -93,17 +123,26 @@ final class MobileNoteTitleTracker {
         }
     }
 
-    /// One reading of the scroll view as it stands.
+    /// One reading of the scroll view as it stands: its travel, and the reach
+    /// it keeps once its viewport has grown by the title's row (R1-1).
     func read(_ view: UIScrollView) {
         let insets = view.adjustedContentInset
-        observe(travel: MobileTopGiveWay.travel(
-            offset: view.contentOffset.y, insetTop: insets.top, insetBottom: insets.bottom,
-            content: view.contentSize.height, container: view.bounds.height))
+        let content = view.contentSize.height
+        let container = view.bounds.height
+        let reach = MobileTopGiveWay.reach(
+            insetTop: insets.top, insetBottom: insets.bottom, content: content, container: container)
+        observe(
+            travel: MobileTopGiveWay.travel(
+                offset: view.contentOffset.y, insetTop: insets.top, insetBottom: insets.bottom,
+                content: content, container: container),
+            reachAfter: reach - titleHeight)
     }
 
-    /// The page's travel moved.
-    func observe(travel: CGFloat) {
-        ruled = MobileNoteTitleGiveWay.gone(ruled, travel: travel)
+    /// The page's travel moved (`reachAfter`: the rule's own — the reach left
+    /// once the title's row is given to the viewport; no reading, a page the
+    /// flip costs nothing).
+    func observe(travel: CGFloat, reachAfter: CGFloat = .infinity) {
+        ruled = MobileNoteTitleGiveWay.gone(ruled, travel: travel, reachAfter: reachAfter)
         guard ruled != gone, !publishing else { return }
         publishing = true
         Task { @MainActor [weak self] in self?.publish() }
