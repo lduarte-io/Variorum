@@ -135,7 +135,8 @@ final class MobileWingDoor {
 /// the Bookcase's quiet count line (R-260-6) left at batch 4a (R-260-11 — no
 /// count until the phone has shelves, each shelf then carrying its own). Every
 /// root draws it through the one top line (`MobileRootTopLine`, VM-259).
-/// Without a door it is the same words as plain text.
+/// Without a door it is the same words as plain text; a name not yet read
+/// draws nothing at all, and is nothing in the accessibility tree (G-1).
 ///
 /// **The target is at least 44 pt tall, and it is real.** A target hung
 /// invisibly beyond its line would reach either up into the status bar's inset
@@ -171,10 +172,18 @@ struct MobileWingPath: View {
             // drew — the Bookcase's count, gone at batch 4a, R-260-11).
             .accessibilityLabel(wing)
         } else {
-            // An unread name says nothing — never the voice's bare prefix ("~/").
+            // An unread name says nothing — never the voice's bare prefix ("~/")
+            // — and IS nothing: no text at all rather than an empty one. An
+            // empty `Text` still stands in the accessibility tree, a static text
+            // with no words (a VoiceOver stop that speaks nothing; on the
+            // Library's top it was read with a frame no reader can place — the
+            // VM-260 merge gate's G-1). The line keeps its own 44 and its doors,
+            // so nothing on it moves.
             let words = MobileWingTitle.components(wing: wing)
-            line(Text(words.isEmpty ? "" : tokens.path(words))
-                .foregroundStyle(tokens.phone.muted))
+            if !words.isEmpty {
+                line(Text(tokens.path(words))
+                    .foregroundStyle(tokens.phone.muted))
+            }
         }
     }
 
