@@ -81,13 +81,18 @@ struct MobileRootTopGivesWayTests {
 
     /// The real Library, as the shell composes it (its books through a started
     /// shelf model; the shell's Settings door in the environment, so the gear
-    /// stands on the line as it does on the phone).
-    private func library(_ session: AppSession, tokens: VoiceTokens, shelf: MobileShelfViewModel) -> some View {
+    /// stands on the line as it does on the phone). `wingName` is the shell's
+    /// read of the wing's name — "Home" unless a pin hands the unread state
+    /// (`MobileWingTitle.name`'s nil: a non-Home wing whose name is not yet read).
+    private func library(
+        _ session: AppSession, tokens: VoiceTokens, shelf: MobileShelfViewModel,
+        wingName: String? = WingWords.home
+    ) -> some View {
         MobileLibraryView(
             model: MobileLibraryViewModel(session: session),
             scraps: MobileScrapsModel(session: session),
             stars: MobileStarsModel(session: session),
-            books: shelf, tokens: tokens, wingName: WingWords.home, onWingDoor: {},
+            books: shelf, tokens: tokens, wingName: wingName, onWingDoor: {},
             tabBar: { EmptyView() },
             onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
             .environment(\.mobileSettingsDoor, MobileSettingsDoor {})
@@ -276,6 +281,97 @@ struct MobileRootTopGivesWayTests {
                             "condensing asked the listing: \(counter) moved by \(after.counter(counter) - before.counter(counter))")
                 }
                 #expect(sawSlim, "the premise: the scroll condensed the top at least once")
+            }
+        }
+    }
+
+    // MARK: - G-1 (the VM-260 merge gate): no empty text in the tree
+
+    /// The static-text elements on screen that say NOTHING (an empty label),
+    /// each described whole (the G-1 harness's `describe`) — a stop VoiceOver
+    /// can land on with no words to speak.
+    private func emptyTexts<V: View>(_ surface: HostedSurface<V>) -> [String] {
+        surface.visibleElements
+            .filter { $0.accessibilityLabel?.isEmpty == true && $0.accessibilityTraits.contains(.staticText) }
+            .map { HostedSurface<V>.describe($0) }
+    }
+
+    /// **AN UNREAD WING NAME IS NOTHING IN THE TREE — at rest and on the slim
+    /// line** (the VM-260 merge gate's G-1, named at the re-run: an
+    /// `AccessibilityNode` with an empty label, static-text traits and a null
+    /// frame, directly in the Library's hosting view). The Library here is in
+    /// the app's own unread state — the wing door wired, the name not yet read
+    /// (`MobileWingTitle.name`'s nil for a non-Home wing before the wings read
+    /// lands; the gate's harness mounts the same branch with no door). The top
+    /// line's name is then `MobileWingPath`'s plain branch, whose words are
+    /// empty: the line draws nothing there, and nothing it draws may stand in
+    /// the tree as a static text with no words — nor as a frame no reader can
+    /// place. Both states, because the slim line draws the same name.
+    ///
+    /// *RED ON OLD* (`4f05e7c02`'s app code — this pin's commit is its tree):
+    /// at rest the empty text is there and its frame is null (G-1's own shape,
+    /// 2 issues per voice); on the slim line the same empty text (its frame not
+    /// known — the slim line is not under the full top's effects). The
+    /// premises (the full top's doors at rest, the slim line's search door at
+    /// 300 pt) hold on both trees.
+    @Test(arguments: [ThemeVoice.study, .terminal])
+    func anUnreadWingNameIsNothingInTheTree(voice: ThemeVoice) async throws {
+        try await withEditorWorld { session, _ in
+            try await seedNotes(session)
+            let tokens = voice == .study ? VoiceTokens.studyLight : .terminalLight
+            let (shelf, observing) = await startedShelf(session)
+            defer { observing.cancel() }
+            try await withHostedSurface(
+                library(session, tokens: tokens, shelf: shelf, wingName: nil), size: Self.size
+            ) { surface in
+                await surface.settle(40)
+                // The premise: the full top stands, its doors on screen.
+                expectFull(surface, "at rest (an unread name)")
+                for label in [MobileRecoveryDoors.trashLabel, "New Note", MobileSettingsGear.spokenLabel] {
+                    #expect(!doors(surface, label).isEmpty, "at rest: the \(label) door — labels \(surface.visibleLabels)")
+                }
+                let restEmpty = emptyTexts(surface)
+                #expect(restEmpty.isEmpty, "at rest: a static text with no words — \(restEmpty.joined(separator: " | "))")
+                let restUnplaced = surface.nonFiniteFrames
+                #expect(restUnplaced.isEmpty,
+                        "at rest: a frame no reader can place — \(restUnplaced.joined(separator: " | "))")
+
+                try await scroll(surface, to: 300)
+                _ = try #require(doors(surface, Self.searchDoor).first,
+                                 "the premise: 300 pt down the slim line stands — labels \(surface.visibleLabels)")
+                let slimEmpty = emptyTexts(surface)
+                #expect(slimEmpty.isEmpty, "slim: a static text with no words — \(slimEmpty.joined(separator: " | "))")
+                let slimUnplaced = surface.nonFiniteFrames
+                #expect(slimUnplaced.isEmpty,
+                        "slim: a frame no reader can place — \(slimUnplaced.joined(separator: " | "))")
+            }
+        }
+    }
+
+    /// **THE CONTROL: a named wing's line holds no empty text either** — the
+    /// same two states with the name read ("Home", the door wired), the shell's
+    /// everyday Library. *GREEN ON BOTH TREES by prediction* (the earlier
+    /// windows' shell dumps list the named Library with no empty label). A red
+    /// here, on either tree, says an empty text lives somewhere other than the
+    /// unread name's branch — the source fix would not be the whole cure.
+    @Test func aNamedWingsLibraryHoldsNoEmptyText() async throws {
+        try await withEditorWorld { session, _ in
+            try await seedNotes(session)
+            let (shelf, observing) = await startedShelf(session)
+            defer { observing.cancel() }
+            try await withHostedSurface(library(session, tokens: .terminalLight, shelf: shelf), size: Self.size) { surface in
+                await surface.settle(40)
+                expectFull(surface, "at rest (a named wing)")
+                let restEmpty = emptyTexts(surface)
+                #expect(restEmpty.isEmpty, "at rest: a static text with no words — \(restEmpty.joined(separator: " | "))")
+                #expect(surface.nonFiniteFrames.isEmpty, "at rest: \(surface.nonFiniteFrames.joined(separator: " | "))")
+
+                try await scroll(surface, to: 300)
+                _ = try #require(doors(surface, Self.searchDoor).first,
+                                 "the premise: 300 pt down the slim line stands — labels \(surface.visibleLabels)")
+                let slimEmpty = emptyTexts(surface)
+                #expect(slimEmpty.isEmpty, "slim: a static text with no words — \(slimEmpty.joined(separator: " | "))")
+                #expect(surface.nonFiniteFrames.isEmpty, "slim: \(surface.nonFiniteFrames.joined(separator: " | "))")
             }
         }
     }
