@@ -25,7 +25,60 @@ at the first owed step RESUME HERE names."*
 
 ## FOR A LATER READER
 
-*(Written at closeout from the settled facts. Until then, RESUME HERE and the LIVE STATUS table are the state.)*
+**State at closeout (2026-11-25).** Every member BUILT; the ladder ended at round 2 (Opus rounds at her R-260-10);
+**the phone gate GREEN** at code tip `a8c0a49ad`. **PENDING: the Mac leg — the whole Mac target — at her "done
+looking"** (the dev-store fence), then the merge. Her judgment on her phone is the umbrella's real close. Anything
+the Mac leg could still change is marked PENDING in this record and the closeout documents.
+
+**What it is.** Her explicit look changes to the phone, with no design session (her word): eleven members — VM-253 ·
+VM-255 · VM-256 · VM-265 · VM-275 · VM-277 · VM-273 · VM-272 · VM-247 · VM-254 · VM-259 — plus VM-281 (R-260-9) and
+her F-her-1, in seven batches (1a · 1b · 2 · 3 · 3b · 4a · 4b) and the merge gate's three fixes.
+
+**The mechanisms as settled, and the fix as built (one pointer each):**
+- **The bar (VM-253):** each root drew its own copy inside the paged band, so a swipe slid two half-bars → drawn ONCE
+  by the shell over the band's foot, every page keeping its place (`MobileTabBarPlace.stands`; BATCH 1a).
+- **Leaving a page (VM-256, R-260-5):** a mint's push landed on the hidden stack it was asked from, and the Protection
+  ask changed page past the pop → the pop lives in `selectPage`, every road's; `push(_:in:)` refuses a page not
+  showing, the made thing kept and said (A-260-1); P-71-1 retires with its premise.
+- **The top lines (VM-255, R-260-11):** the wing's name alone; the gear for the ⋯; the trash on the Library only; the
+  Mac's `trash` · `square.and.pencil` · `gearshape`; no count line (`MobileRootTop.swift`).
+- **The message line (VM-265 · VM-275 · VM-277):** a direction rode the refusal class in the alarm ink →
+  `StatusCenter.Item.isDirection` + the face's `ink(for:)`; a refusal carried no owner, so leaving the note never
+  withdrew it → `MobileLine.leaveNote`; "the line squeezes the list" HOLLOW (no row moved; the flush band read as the
+  bar growing — A-260-5) → the floating card; the short form from the table's one arm (`Shared/RefusalWords.swift`,
+  27 DRAFT headlines), the ✕ and the flick, the reason card holding the clock (`holdForReading`; A-260-3/-4).
+- **The drawn step-down (VM-273 · VM-272):** wave 1 drew controls at their targets' size → chrome one notch under her
+  words, glyphs 17, chips 24 near-square, boxes 36, the Mac's corners 4 and 8, every target unchanged; the note's top
+  167 → 136 measured (A-260-9, A-260-12), then 100 at rest and 48 scrolled under 4b's top.
+- **The phone's own look (VM-247 · VM-254):** the router wore the library's synced `ThemeStore` and the voice row wrote
+  `theme_voice` → `MobileLookChoice` in this device's defaults, laid over the library's settings (`MobileLook.swift`;
+  no `setting` or outbox row), the cream a choice; five whole-point text-size steps over a one-notch-smaller default,
+  Terminal from Study's rounded step (A-260-11, A-260-14, R1-9).
+- **The keyboard (F-1a-W1 · VM-281 · G-3):** after the editor's 52-pt accessory keyboard the next keyboard read 52 short
+  in BOTH SwiftUI's avoidance and UIKit's guide → the editor drops its bar as it resigns (`MobileEditorTextView`, the
+  run's one editor-seam change, A-260-15); a keyboard a pop gives back was never avoided and the floor's at-rest gate
+  gave it nothing → `MobileKeyboardFloor.sawAvoidance` (A-260-20). The floor stays, now with the road R1-5 asked for.
+- **The tops give way (VM-259 option B, R-260-12; the note's top, R-260-13/14):** one pure rule over the list's own
+  scroll (`MobileTopGiveWay`, 24 · 60 · 8); the Library's full top laid OVER the listing's head on a measured spacer,
+  so no row moves and the listing is asked nothing; the note's title on its own row over six doors, leaving on a FLIP
+  (C-4b-1 — the editor fence), refused on a page too short to keep it (R1-1, `3651b2eb7`).
+- **F-her-1:** the picking door reads "Cancel", spoken "Cancel picking" (P-260-3b-1; A-260-15).
+- **The gate's three:** G-1 an empty `Text("")` for an unread wing name (`MobileWingPath`; A-260-21); G-2 the bookless
+  book door's glyph in the corrected muted (C-G2-1); G-3 above.
+
+**Her rulings:** R-260-1…14 (R-260-11 supersedes R-260-1/-6's count line; R-260-13/-14 ratify the note's top as drawn;
+R-260-10 the Opus ladder, VM-282 holding the owed Fable round). **Adjudications:** A-260-1…21.
+
+**The evidence that matters:** the last phone window — the whole phone target 1,335 tests / 239 suites with exactly
+main's 6 known issues; the keyboard-reveal class 4 of 4 (VM-281 red on old 12, G-3 red on old 24, both green on the
+tip); every red-on-old leg red as built (THE RED-ON-OLD WINDOW, the gate's rows), VM-275 half 1 at its own assertion
+on the corrected old tree; R2-1 measured and ticketed (VM-284); the walk's 43 + 54 captures
+(`notes/plans/vm-260-screens/gate*/`, local). The Mac's nine-type legs green in two windows; **the whole Mac target
+PENDING**.
+
+**Open:** the Mac leg and the merge (PENDING); VM-282 (Fable over the whole diff, VM-281's line first); QUESTIONS #286
+(this run's calls) and the addenda #281 (2), #277 (2), #280 (2); her open calls R1-7, C-4b-1, R1-4, R1-2; tickets
+VM-279 · VM-280 · VM-283 · VM-284 · VM-285; her checklist `notes/handoffs/vm-260-handoff.md`.
 
 ## What this run is
 
