@@ -1525,6 +1525,18 @@ Simulator,id=$UDID"`. **The code tip is `a8c0a49ad`.** Red-on-old tree for the n
    file; nothing on its roads changes — the wing is named there), `vm260-2r-mac` unchanged; the Debug phone app from
    `vm260-2r` draws nothing new (an unread name drew nothing before too).
 
+**A-260-21 (G-1's source fix handed back, 2026-11-25, orchestrator on Opus): ACCEPTED, read line by line.** The
+element is the EMPTY `Text("")` `MobileWingPath` drew in its plain branch while a wing's name is unread
+(`MobileWingDoor.swift:176` at `4f05e7c02`): an empty `Text` still stands in the accessibility tree — a VoiceOver
+stop that says nothing, and on the Library's new top it carried a null frame. The fix (`a8c0a49ad`) draws no text
+at all when the words are empty; the diff is exactly that `if` plus its comments (verified); the line's 44 pt comes
+from its icon doors, so nothing moves (the geometry pins re-run in the next window confirm it). Pins: the gate's own
+`theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` (red on `4f05e7c02`), plus the narrower
+`anUnreadWingNameIsNothingInTheTree(voice:)` on its red-on-old tree `717b0fa46` (`vm260-g1-rol`) with a named-wing
+control; the implementer's pre-written rules adopted. **Filed in passing: VM-285** (Bug · Suspected · Editor · Low)
+— an older unlabelled element on the note page, outside this run. **Owed: ONE short phone window** (R-G1, the G1
+probe, P whole), then the Mac leg at her "done looking".
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
