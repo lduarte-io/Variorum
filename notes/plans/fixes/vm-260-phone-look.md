@@ -3944,7 +3944,7 @@ verbatim into `notes/PhaseCloseoutArchive.md`; fill the PR number, the merge com
 > (one MAJOR fixed, then clean), VM-282 holding the owed Fable round. The merge gate: three findings fixed with pins red
 > on the old code (G-1 an empty text for an unread wing name, G-2 the bookless book door's ink, G-3 a keyboard given back
 > at a pop); the whole phone target 1,335 / 239 with main's 6 known issues; the whole Mac target ‹the Mac leg's
-> line›. Canon: AppSpec §12 (the phone's look per device); SurfaceContracts The app ×4 · The Library · The Bookcase and
+> line›. Canon: AppSpec §12 (the phone's look per device); SurfaceContracts The app ×5 · The Library · The Bookcase and
 > books · The note. Born, triaged: VM-279 · VM-280 · VM-282 · VM-283 · VM-284 · VM-285 (VM-281 filed and fixed here).
 > MOBILE PARITY: PL-84. **Her bundle: the phone install, QUESTIONS #286 with the addenda #281 (2) · #277 (2) · #280 (2),
 > and the handoff `notes/handoffs/vm-260-handoff.md`.**
