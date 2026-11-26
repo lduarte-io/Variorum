@@ -696,7 +696,7 @@ present):**
 | Batch 4b (the note's top, R-260-13/14) | BUILT 2026-11-25 (red-on-old `4be933b0e` in `vm260-4b-rol`, ~34 issues in 21 cases predicted; code tip `af449326a`; trio rebuilt); ADJUDICATED A-260-17 — one departure (the title FLIPS away instead of riding frame by frame: the fence), C-4b-1 hers after the phone. PENDING the gate |
 | Batch 4 (VM-259 + the note's top + R-260-11) | BOTH PICKS IN: VM-259 B, the slim bar (R-260-12); the note's top A as picked, ratified with no further checkpoint (R-260-13, R-260-14); the Bookcase count line goes (R-260-11). 4a then 4b after batch 3b and the main merge; her judgment is the phone install after 4b |
 | Her phone (R-260-7) | INSTALLED 2026-11-25 ~11:0x at her word (*"install the build on my phone now"*): the signed device build at code tip `78ed5b4bb` (`DerivedData/vm260-device`, Release-iphoneos), `devicectl` to her iPhone 17 Pro, same bundle id (her store carried over). Her assessment on the phone is the run's real close |
-| Ladder · gate · walk | **THE LADDER ENDED at round 2 (no BLOCKER/MAJOR)**; round 1's MAJOR (R1-1) fixed and NOT hollow (red on old); round 2's fixes (R2-1, R2-5, R2-6) to one implementer, then the orchestrator's line-by-line check; every owed red-on-old leg RED as built (14:11–14:24). Owed: the gate's simulator legs (whole phone target, keyboard-reveal class, R2-1's red-on-old, the closing walk), then the Mac legs at her "done looking" (the dev-store fence); **THE GATE'S M LEG CORRECTED (nov24): the WHOLE Mac target**, `xcodebuild test` with no `-only-testing` (~55 min), because this run changes `Shared/` code the Mac RUNS — `StatusCenter`, `OpsRefusalTable`, `RefusalWords`, `AuthViews`, `SyncStatusViews`, `SharedPageStyle` — not phone theme alone (the VM-47 lesson). The bundle `vm260-2r-mac` is the whole `VariorumTests` target and is CURRENT for the final tip `6afaf255a` (zero non-phone-test files differ from its tree `1b4c436ee`). Still fenced until her "done looking"; read against main's Mac baseline; **M's baseline (nov24, from VX-1036's whole-target gate on `02ff20a15`, whose tree contained main; `5c0d2f930` adds notes and comment lines only):** "6652 tests in 1158 suites passed … with 14 known issues", 0 failed; the 14 are the standing `withKnownIssue` set (named: `IndexTierMetricsTests` ×4). Full-run flakes seen tonight, each green ALONE: `SpellingDoorTests.aCheckStepsToTheNextMisspellingAndTurnsNothingOn` (VX-953), `MastheadLayoutTests.thePathChipAndTheTagClusterNeverIntersectInStudy` (VX-499/614), `SidebarSectionWindowMountTests.theNinthStarIsClearTheMomentTheBeatEnds`. **The reading rule:** M passes at 0 failed with ≤ 14 known issues; any red gets a solo re-run by its TYPE before it is classified; a known-issue count above 14, or a different set, is named |
+| Ladder · gate · walk | THE LADDER ENDED at round 2; **THE PHONE GATE IS GREEN (17:58, tip `a8c0a49ad`: P 1335/239 with main's 6 known; U 4/4; every red-on-old leg red as built; the walk read)** after three findings fixed (G-1 the empty wing-name text, G-2 the book door's ink, G-3 the keyboard a pop gives back — VM-281 and G-3 proven). **Left: the Mac leg — the WHOLE Mac target (~60 min), at her "done looking"** (the dev-store fence); baseline main 0 failed / 14 known |
 | Closeout (canon deltas, #281 dispositions, #277 leftovers touched by this run, parity row, handoff) | NOT STARTED |
 
 ## THE LADDER — round 1 (2026-11-25; a fresh `opus-reviewer`, REVIEW_PROMPT verbatim, over the whole diff at code tip `af449326a`)
@@ -1536,6 +1536,18 @@ from its icon doors, so nothing moves (the geometry pins re-run in the next wind
 control; the implementer's pre-written rules adopted. **Filed in passing: VM-285** (Bug · Suspected · Editor · Low)
 — an older unlabelled element on the note page, outside this run. **Owed: ONE short phone window** (R-G1, the G1
 probe, P whole), then the Mac leg at her "done looking".
+
+## THE MERGE GATE — the LAST phone window: **THE PHONE GATE IS GREEN** (2026-11-25, claim `vm-260` 17:41–17:58; code tip `a8c0a49ad`; device `vm260-gate3` iOS 26.2, DELETED)
+
+| Leg | Result |
+|---|---|
+| R-G1 (`vm260-g1-rol`, `717b0fa46`) | `anUnreadWingNameIsNothingInTheTree` RED, 4 issues (2 per voice at `:334`/`:336` — the AT-REST half; predicted 6–8): the slim half was green on old, so by the pre-written rule that half is recorded HOLLOW and the at-rest half carries the claim; the control `aNamedWingsLibraryHoldsNoEmptyText` GREEN |
+| G1-probe (`vm260-2r`) | GREEN — 7 tests, the 4 known only, **0 G-1 lines on the tip** |
+| **P (`vm260-2r`, the whole phone target)** | **1335 tests / 239 suites PASSED with exactly main's 6 known issues** (`MobileFilterRowGeometryTests` ×4, `MobileTrashTests` ×2); `TEST EXECUTE SUCCEEDED`; no restart |
+
+With the re-run's U 4/4 and the walk retakes (54 captures; the after-a-note road and the sheet residual right),
+the gate's simulator side is complete. **Left: the Mac leg — the WHOLE Mac target, at her "done looking"** (read
+against main: 0 failed, ≤ 14 known).
 
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
