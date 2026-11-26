@@ -1400,6 +1400,20 @@ bar at rest on the tip while the in-process pin is green, UIKit's guide doesn't 
 next road is the search field's focus restore at Back (VM-47's), a product call for her. Residual for the walk: a field
 in a sheet or alert over a root may lift the band behind it.
 
+## THE MERGE GATE — RE-RUN, simulator legs (2026-11-25, claim `vm-260` from 16:34; code tip `4f05e7c02`; device `vm260-gate2` iOS 26.2; the UI legs and the walk on `vm260-walk`)
+
+| Leg | Result |
+|---|---|
+| G1-probe (`MobileFilterRowGeometryTests`, `vm260-2r`) | **G-1 NAMED — a real (accessibility) defect of 4a's Library:** `theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` RED, 2 issues (at 402 and 320): an `AccessibilityNode` with an EMPTY label, traits 64 (static text), frame `(inf, inf, 0, 0)` (a null rect — never laid out), not hidden, directly in the `_UIHostingView<MobileLibraryView>`: a stray empty text element VoiceOver could land on. Its source fix is one small batch (find the empty text in the Library's new top or its spacer and keep it out of the tree); no crash now; the 4 known issues as ever |
+| R-G3u (`vm260-g3-rol`) | RED, 3 issues ✓ (`theBarRidesOnTheKeyboardTopHandedIn`) |
+| R-G3 (`vm260-g3-rol-ui`, walk device) | RED, 24 failures ✓ (`testTheBarRidesAboveTheSearchKeyboardOnTheAfterANoteRoad`) |
+| P (`vm260-2r`, the whole phone target) | **1333 tests / 239 suites, ALL RAN (no crash, no restart)**: 8 issues = main's 6 known (`MobileFilterRowGeometryTests` ×4, `MobileTrashTests` ×2) + G-1's 2 (named above). **G-2 GREEN** (the faint scan clean). Everything else green |
+| U (`vm260-2r-ui`, walk device) | **4/4 GREEN** — `testAMidNoteTapRisesAboveTheKeyboard` 65 s, `testTheBarRidesAboveTheLibrarySearchKeyboard` 87 s, **`testTheBarRidesAboveTheSearchKeyboardOnTheAfterANoteRoad` 174 s — G-3 CURED on the tip** (red on old: 24), `testTheBarRidesAboveTheSearchKeyboardOnTheWalksRoad` 61 s (VM-281) |
+| W (the walk retakes) | RUNNING |
+
+**Owed:** G-1's source fix (one small batch), then P re-run once more (the whole phone target) and the G1 probe green;
+then the Mac leg at her "done looking".
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
