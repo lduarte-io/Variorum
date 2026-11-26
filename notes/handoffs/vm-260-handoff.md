@@ -104,6 +104,9 @@ If the phone refuses the developer signature, trust it once under Settings ▸ G
   - **VM-284** — a short note's page hops a few points when the note's top changes height. The cure is in the editor
     and waits for VM-271.
   - **VM-285** — an unlabelled element on the note page that VoiceOver can stop on. It is older than this run.
+  - **VM-286** — the bar draws over a note for a moment as you go Back from it. Visible but mild.
+  - **VM-287** — two leftovers of the drawn step-down: the segmented choice's system track (your call, P-47-30) and
+    some hand-built corners outside the central style files.
 
 ## 7 · Where the run stands
 

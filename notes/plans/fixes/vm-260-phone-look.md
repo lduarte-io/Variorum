@@ -3911,14 +3911,15 @@ record" below); no TEXTKIT2_NOTES line drafted.
 
 ### Not settled from the record (for the orchestrator)
 
-- **R1-2 / R2-2 (the bar over the leaving note on Back)** — the walk read it "visible but mild"; the disposition said a
-  later ticket if it read wrong, and no ticket exists. Put to her as an open call (#286, handoff §4), not ticketed.
-- **VM-273's two recorded remainders** (the segmented choice keeps the system's track — P-47-30's fence; the hand-built
-  radii outside the central files) — the closeout's "ticket any remainder" rule would ticket them; this session cannot
-  mint tickets. Named in the handoff's rulings-reconciled line.
-- **A TEXTKIT2_NOTES §3 line for VM-281's finding** (on iOS 26, a keyboard taken down while its responder wore an
-  `inputAccessoryView` leaves the next keyboard short by that accessory's height in both SwiftUI's avoidance and
-  UIKit's guide; dropping the accessory at resign cures it) — the VM-24 precedent would land one; not drafted here.
+- **R1-2 / R2-2 (the bar over the leaving note on Back)** — SETTLED by the orchestrator: ticketed **VM-286**
+  (Improvement · Confirmed · App shell · Low), "visible but mild" on the walk; it also stays in her #286 bundle.
+- **VM-273's two recorded remainders** — SETTLED by the orchestrator: ticketed **VM-287** (Debt · Confirmed · App
+  shell · Low): the segmented choice's system track (P-47-30's fence, hers) and the hand-built corners outside the
+  central files.
+- **A TEXTKIT2_NOTES §3 line for VM-281's finding** — DECIDED by the orchestrator: NO line. The finding is UIKit's
+  keyboard and input-accessory behaviour (a stale accessory frame carried into the next keyboard session), not a
+  TextKit 2 layout or identity behaviour, which is TEXTKIT2_NOTES' remit; its home is this record's F-1a-W1 block,
+  A-260-15 and VM-281's ticket.
 - **The Mac leg.** Every closeout document says PENDING where its result belongs; if the whole Mac target shows a
   branch red, the FOR A LATER READER, the AppSpecRecord entry, the run-finals row, the handoff §7 and the closeout
   paragraph below each carry a line to change.
