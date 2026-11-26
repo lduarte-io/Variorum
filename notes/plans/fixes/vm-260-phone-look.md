@@ -3885,3 +3885,66 @@ the mounted pins** leans on KVO hearing `setContentOffset(_:animated: false)` on
 the tracker's own pin `itReadsAScrollViewsOwnOffset` proves the road on a bare `UIScrollView`): if
 `theIconRowIsWhatStaysAsSheScrolls` is RED at "the title rode away" on the tip while the tracker's pin is GREEN, the
 flip fired and SwiftUI's animated removal outlasted the settle — read the case's printed frames first.
+
+## CLOSEOUT DOCUMENTS — record (drafted 2026-11-25; implementer: Opus, a fresh session; documents only)
+
+**What this session did NOT do (kept current):** no code, no build, no test, no walk, no stage claim; no Linear write
+(the priorities of VM-279…VM-285 were read, read-only, for the handoff's grouping); `notes/DetailedPlanForPhases.md`
+NOT edited — its two pieces are the block below, for the merging session on latest main; left for the orchestrator:
+the install block's `<TIP>` (the handoff §1), the AppSpecRecord entry's PR and merge line, the run-finals row's PR and
+merge commit, and the Mac leg's result wherever a line says PENDING; nothing ticketed (see "Not settled from the
+record" below); no TEXTKIT2_NOTES line drafted.
+
+### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 1. FOR A LATER READER at the top of this record (the placeholder replaced; the Mac leg PENDING) | DONE (`d620dfdd7`) |
+| 2. Canon in the two-file shape — AppSpec §12 The app (the phone's look per device, VM-247); SurfaceContracts The app (the look; the sizes and the drawn step-down; the one bar and the leaving law; Settings ▸ Look and the gear; the message line's card), The Library (the slim top), The Bookcase and books (the roots' top lines), The note (the note's top); MobileSoul PL-84 | DONE (`0ec4e92cc`) |
+| 3. `notes/AppSpecRecord.md`'s dated entry with its §12 narrative, the ladder, the gates and the tickets born; the run-finals row in `notes/plans/run-finals-ledger.md` (CLAUDE.md's two-file rule names it with the record) | DONE (`0ce0f3591`) — the PR and merge PENDING in both |
+| 4. QUESTIONS — #286 (the run's bundle), #281 addendum 2 (the forty-one dispositioned), #277 addendum 2, #280 addendum 2 | DONE (`7db7e2284`) |
+| 5. The handoff rewritten whole (her checklist first; `<TIP>` left; the canon-size line) | DONE (`88b9a86dc`) |
+| 6. The master plan's two pieces, drafted below | DONE (this commit) |
+
+`Tools/canon-size` after the canon deltas: `144596  total (harness limit 150000, headroom 5404)` — no crossing (it was
+143606; the AppSpec §12 line is the whole move). Nothing was removed or compressed to make room.
+
+### Not settled from the record (for the orchestrator)
+
+- **R1-2 / R2-2 (the bar over the leaving note on Back)** — the walk read it "visible but mild"; the disposition said a
+  later ticket if it read wrong, and no ticket exists. Put to her as an open call (#286, handoff §4), not ticketed.
+- **VM-273's two recorded remainders** (the segmented choice keeps the system's track — P-47-30's fence; the hand-built
+  radii outside the central files) — the closeout's "ticket any remainder" rule would ticket them; this session cannot
+  mint tickets. Named in the handoff's rulings-reconciled line.
+- **A TEXTKIT2_NOTES §3 line for VM-281's finding** (on iOS 26, a keyboard taken down while its responder wore an
+  `inputAccessoryView` leaves the next keyboard short by that accessory's height in both SwiftUI's avoidance and
+  UIKit's guide; dropping the accessory at resign cures it) — the VM-24 precedent would land one; not drafted here.
+- **The Mac leg.** Every closeout document says PENDING where its result belongs; if the whole Mac target shows a
+  branch red, the FOR A LATER READER, the AppSpecRecord entry, the run-finals row, the handoff §7 and the closeout
+  paragraph below each carry a line to change.
+
+### The master plan at the merge (for the merging session — apply on latest main, not on this branch)
+
+**1 · Retire the in-flight row:** delete the **VM-260** row from `notes/DetailedPlanForPhases.md`'s "In flight" table
+(the row beginning "**VM-260 — Umbrella: the phone's look — the explicit changes (mobile).**").
+
+**2 · The latest closeout paragraph** — it replaces the VX-1036 paragraph under "### Latest closeout", which rolls
+verbatim into `notes/PhaseCloseoutArchive.md`; fill the PR number, the merge commit and the Mac leg's line:
+
+> **→ VM-260 CLOSED 2026-11-25 — UMBRELLA: THE PHONE'S LOOK — THE EXPLICIT CHANGES (mobile; the record
+> `notes/plans/fixes/vm-260-phone-look.md`, FOR A LATER READER at its top; /architect-phase, kicked off 2026-11-24, an
+> away run overnight under her "everyone should rule provisionally" and then with her present; nov24 coordinating; PR
+> #‹N›, merge `‹SHA›`).** Eleven members in seven batches — one still bar drawn by the shell and one leaving law (VM-253,
+> VM-256; R-260-5 retired P-71-1), the roots' top lines with no count (VM-255, R-260-11), the message line as a card with
+> a short, dismissable refusal and a direction's neutral ink (VM-265, VM-275, VM-277), the drawn step-down and the
+> note's top (VM-273, VM-272), the whole look per device with a text size (VM-247, VM-254), the Library's top giving
+> way to a slim line (VM-259, her pick B) and the note's top as she picked it (R-260-13/14) — plus VM-281's keyboard fix,
+> the run's one editor-seam change, at her word, and her duplicate-Done finding. Fable orchestrated until her Fable
+> limit, Opus after; a fresh Opus implementer per batch and fix pass; a two-round opus-reviewer ladder at her R-260-10
+> (one MAJOR fixed, then clean), VM-282 holding the owed Fable round. The merge gate: three findings fixed with pins red
+> on the old code (G-1 an empty text for an unread wing name, G-2 the bookless book door's ink, G-3 a keyboard given back
+> at a pop); the whole phone target 1,335 / 239 with main's 6 known issues; the whole Mac target ‹the Mac leg's
+> line›. Canon: AppSpec §12 (the phone's look per device); SurfaceContracts The app ×4 · The Library · The Bookcase and
+> books · The note. Born, triaged: VM-279 · VM-280 · VM-282 · VM-283 · VM-284 · VM-285 (VM-281 filed and fixed here).
+> MOBILE PARITY: PL-84. **Her bundle: the phone install, QUESTIONS #286 with the addenda #281 (2) · #277 (2) · #280 (2),
+> and the handoff `notes/handoffs/vm-260-handoff.md`.**
