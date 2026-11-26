@@ -1425,10 +1425,105 @@ every red and green below is PENDING the gate; no walk and no capture; no line i
 | Piece | State |
 |---|---|
 | 0. Preflight (CLAUDE.md + canon; this record's G-1 block, the re-run's table and owed line, BATCH 4a; `MobileRootTop.swift`, `MobileLibraryView.swift`, `MobileWingDoor.swift`, the harness `MobileSurfaceDriver` / `MobileFilterRowGeometryTests`) and the evidence (`/tmp/vm260-gate2/G1-probe.log`, `P.log`; the earlier windows' label dumps) | DONE (this commit) |
-| 1. The trace — the element named, its source line | IN PROGRESS |
-| 2. The narrower pin on the pre-fix tree (its commit IS its red-on-old tree) and its bundle | TODO |
-| 3. The fix at the source | TODO |
-| 4. `vm260-2r` rebuilt at the code tip, incremental, `nice -n 15`; READY-FOR-TESTS | TODO |
+| 1. The trace — the element named, its source line | DONE (below) — `MobileWingPath`'s plain branch, `MobileWingDoor.swift:176` at `4f05e7c02`: `Text("")` for a name not yet read |
+| 2. The narrower pin on the pre-fix tree (its commit IS its red-on-old tree) and its bundle | DONE (`717b0fa46`) — `MobileRootTopGivesWayTests.anUnreadWingNameIsNothingInTheTree(voice:)` + the control `aNamedWingsLibraryHoldsNoEmptyText`; bundle `vm260-g1-rol` (APFS clone of `vm260-2r`, its `workspace-state.json` repointed ×4 from `vm260-2r/`, the original in the session scratchpad) `TEST BUILD SUCCEEDED` (log `App/Variorum/DerivedData/vm260-g1-rol-build.log`; both tests' symbols in the built binary; the only new warnings the clone's harmless "Stale file … outside the allowed root paths") — the run PENDING the gate |
+| 3. The fix at the source | DONE (`a8c0a49ad` = the code tip) — the plain branch draws no `Text` when the name's words are empty; the type's doc line |
+| 4. `vm260-2r` rebuilt at the code tip, incremental, `nice -n 15`; READY-FOR-TESTS | DONE (this commit) — `vm260-2r` `TEST BUILD SUCCEEDED` at `a8c0a49ad` (log `App/Variorum/DerivedData/vm260-2r-g1-build.log`; its `workspace-state.json` names its own folder ×4; the new tests in the binary); `vm260-2r-ui` rebuilt too (the app it hosts compiles `MobileWingDoor.swift`; log `vm260-2r-ui-g1-build.log`); `vm260-2r-mac` NOT rebuilt (the Mac compiles no file this fix changed); no warning in a changed file |
+
+#### The element and its source line
+
+- **The element** (G1-probe, `/tmp/vm260-gate2/G1-probe.log:60–67`): `AccessibilityNode label="" value=nil id=""
+  traits=64 frame=(inf, inf, 0.0, 0.0)`, its container the `_UIHostingView<MobileLibraryView<EmptyView>>` itself. Traits
+  64 is `UIAccessibilityTraitStaticText` — the trait SwiftUI gives a `Text`; the label is the empty string, not nil;
+  the container is the host, so it hangs in the chrome, not under the listing's scroll view.
+- **Its source: `MobileWingPath.body`'s plain branch** (`MobileWingDoor.swift:176` at `4f05e7c02`):
+  `line(Text(words.isEmpty ? "" : tokens.path(words)).foregroundStyle(tokens.phone.muted))`. The road, input to
+  output: the gate's mount (`MobileFilterRowGeometryTests.realLibrary`, `:499–502`) hands the Library no `wingName` and
+  no wing door → `pathLine` → `MobileRootTopLine(wing: nil, …)` → `MobileWingPath(wing: nil, onDoor: nil)` → `if let
+  wing, let onDoor` fails → `MobileWingTitle.components(wing: nil)` is `[]` → **`Text("")`**: a static text with no
+  words in the full top's first line.
+- **Why that one and nothing else** — every node the mount has at rest, read off the code: the filter doors, the sort
+  `Menu`, the trash and New Note glyphs are buttons with labels; the gear is absent (no Settings door in that mount);
+  the search field is a labelled `UITextField`; the full line's `if let standing` is nil; the slim line is never built
+  (one note and one book: the list's reach is 0, so its travel clamps to 0 and the top never condenses); the listing's
+  rows (the book, the note, Archived) are labelled buttons, its empty-state lines carry words, its head's spacer is a
+  hidden `Color.clear`. The one empty text is the unread name.
+- **The discriminating evidence, from this record's own logs:** the R-4b red-on-old window (`/tmp/vm260-win3/R-4b.log:70`,
+  tree `4be933b0e`, which carries batch 4a's Library) printed the SHELL's Library tree with the wing NAMED ("Home", the
+  door wired): `"Home", "Trash", "New Note", "Settings", "Search notes, books…", "All" … "Scraps", "Sort: edited",`
+  a book row, `"Archived"` — **no empty label**, and its listing's rows walked, so batch 4a's spacer at the listing's
+  head is no element either. The empty label stands only where the name is unread.
+- **Where it reaches in the app:** the shell hands `wingName` = `MobileWingTitle.name(of:)`, which is nil while a
+  non-Home wing's name is not yet read, with the door wired — the same plain branch, on every root (the one top line:
+  Library, Bookcase, Starred; full and slim): a VoiceOver stop that speaks nothing.
+- **NOT KNOWN — why the pre-4a dump was clean.** The same `Text("")` stood there before batch 4a (inside the retired
+  `lines`'s `VStack`), and the old `frameDump` converted every labelled element's frame without trapping — so before
+  4a SwiftUI either made no node of it or gave it a finite frame. Inference only: 4a put the line under the full top's
+  `offset`/`opacity` chain in the `ZStack`, and an empty `Text` draws nothing to place (`CGRect.null` is what an
+  intersection with nothing returns — measured headless: a zero rect ∩ a disjoint or zero rect = `(inf, inf, 0, 0)`).
+  The fix does not rest on it: the node is gone, whatever gave it its frame. (A throwaway macOS host of the two shapes
+  was tried headless and could not build SwiftUI's tree without an assistive client — no evidence either way, not
+  pursued.)
+
+#### The fix (`a8c0a49ad`; the phone target only)
+
+`MobileWingPath`'s plain branch draws its `Text` only when the name's words are non-empty: an unread name says
+nothing AND is nothing in the tree. The line keeps its own `minHeight` 44 and its doors, and the empty text had no
+width, so nothing on any root's line moves. The harness is untouched; the full top's and the slim line's reading
+order (batch 4a's chrome declared first) is unchanged — only a wordless node leaves. The door branch (a named wing) is
+untouched; an empty wing NAME cannot reach it (`createWing` / `renameWing` refuse one, `invalidWingName`).
+
+#### Pins and predictions
+
+- **The pin the brief names:** `MobileFilterRowGeometryTests.theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` —
+  RED on `4f05e7c02` (the re-run: 2 issues, the element printed at 402 and 320); **predicted GREEN on the tip** but its
+  2 known issues, no `PERF[sim] VM-260 G-1` line printed.
+- **The narrower pin** (`717b0fa46` — THE RED-ON-OLD TREE, bundle `vm260-g1-rol`):
+  `MobileRootTopGivesWayTests.anUnreadWingNameIsNothingInTheTree(voice:)` — the real Library in the app's own unread
+  state (the door wired, the name nil), sixty notes, 402 × 874, Study and Terminal: at rest, then 300 pt down (the slim
+  line), no static text with an empty label and no frame no reader can place; the premises (the full top's doors at
+  rest; the slim line's search door at 300) hold on both trees. **Predicted RED on old: at rest 2 issues per voice (the
+  empty text; its null frame) = 4; on the slim line the empty text again, 1 per voice (a second per voice if its frame
+  is null too — NOT KNOWN, the slim line is not under the full top's effects) — 6 to 8 issues.** Predicted GREEN on
+  the tip.
+- **The control:** `aNamedWingsLibraryHoldsNoEmptyText` — the same two states with the name read ("Home"), Terminal.
+  **Predicted GREEN on BOTH trees.**
+- **Rules written before the run:** the narrower pin's AT-REST half GREEN on old ⇒ the door-wired mount differs from
+  the gate's doorless one — report it, and the G1-probe on the tip alone decides the fix; its SLIM half green on old ⇒
+  SwiftUI makes no node of an empty `Text` outside the full top's effects — record that half as hollow on old, the
+  at-rest half carries the claim; **the control RED on either tree, or the G1-probe on the tip still printing a G-1
+  line ⇒ an empty text lives somewhere other than the unread name's branch: STOP, report the printed element, claim
+  nothing.**
+- **Riders predicted green on the tip:** `MobileWingDoorTests` (`anUnreadNameDrawsNoBarePrefix` — Starred, the name
+  nil, no "~/" label — and `withoutADoorTheLineIsPlainText` — a named, doorless line keeps its text),
+  `MobileWingDoorGeometryTests`, `MobilePathLineGeometryTests`, `MobileTopLineTests`, `MobileRootTopLineStatesTests`,
+  and `MobileRootTopGivesWayTests`' three batch-4a pins (the helper's new `wingName:` defaults to "Home": their mounts
+  are byte-unchanged).
+- **An observation, not this batch's:** the shell's dumps since the consolidated window (`/tmp/vm260-win/R1.log:186`,
+  pre-4a, and every window since) carry one element with an EMPTY label on the NOTE page, between its top's Back and
+  the next Back — pre-existing, outside the Library, no frame check runs over it; for the orchestrator's eye (it may be
+  the editor's text view, which a label-less `UITextView` reports as "").
+
+#### G-1 — READY-FOR-TESTS (nothing builds in the window; every bundle is prebuilt, `nice -n 15`, incremental)
+
+From `App/Variorum/`, zsh, `test-without-building`; `P(folder)` as round 1's block; `-destination "platform=iOS
+Simulator,id=$UDID"`. **The code tip is `a8c0a49ad`.** Red-on-old tree for the narrower pin: `717b0fa46`
+(`vm260-g1-rol`); the brief's pin's red-on-old is the re-run's own G1-probe on `4f05e7c02`.
+
+1. **R-G1 — red on old** (`P(vm260-g1-rol)`, seconds):
+   `-only-testing:VariorumMobileTests/MobileRootTopGivesWayTests/anUnreadWingNameIsNothingInTheTree(voice:)
+   -only-testing:VariorumMobileTests/MobileRootTopGivesWayTests/aNamedWingsLibraryHoldsNoEmptyText` (or the whole
+   `MobileRootTopGivesWayTests` suite, whose three batch-4a pins are green on this tree too) — predicted the narrower
+   pin RED, 6 to 8 issues; the control GREEN.
+2. **G1-probe on the tip** (`P(vm260-2r)`, `-only-testing:VariorumMobileTests/MobileFilterRowGeometryTests`) —
+   predicted **the 4 known issues only**, `theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` passing with its 2
+   known issues, no G-1 line.
+3. **P — the whole phone target on the tip** (`vm260-2r`, `-only-testing:VariorumMobileTests`, one launch) — predicted
+   **main's 6 known issues only** (`MobileFilterRowGeometryTests` ×4, `MobileTrashTests` ×2), no crash, every suite run
+   (the re-run's 1,333 tests plus the two new test functions, three cases), the narrower pin and the control GREEN.
+4. **U / M / W** — not owed by this fix: `vm260-2r-ui` is rebuilt at the tip (the app it hosts compiles the changed
+   file; nothing on its roads changes — the wing is named there), `vm260-2r-mac` unchanged; the Debug phone app from
+   `vm260-2r` draws nothing new (an unread name drew nothing before too).
 
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
