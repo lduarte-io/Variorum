@@ -1414,6 +1414,22 @@ in a sheet or alert over a root may lift the band behind it.
 **Owed:** G-1's source fix (one small batch), then P re-run once more (the whole phone target) and the G1 probe green;
 then the Mac leg at her "done looking".
 
+### G-1 — the source fix (implementer: Opus, a fresh session, 2026-11-25)
+
+**What this session did NOT do (kept current):** NO test has run — the stage is coordinated above this session, so
+every red and green below is PENDING the gate; no walk and no capture; no line in `Sources/`, `Shared/`,
+`MobileShellView`, `Sync/`, custody or the editor seam; the harness is untouched (never silenced).
+
+#### LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0. Preflight (CLAUDE.md + canon; this record's G-1 block, the re-run's table and owed line, BATCH 4a; `MobileRootTop.swift`, `MobileLibraryView.swift`, `MobileWingDoor.swift`, the harness `MobileSurfaceDriver` / `MobileFilterRowGeometryTests`) and the evidence (`/tmp/vm260-gate2/G1-probe.log`, `P.log`; the earlier windows' label dumps) | DONE (this commit) |
+| 1. The trace — the element named, its source line | IN PROGRESS |
+| 2. The narrower pin on the pre-fix tree (its commit IS its red-on-old tree) and its bundle | TODO |
+| 3. The fix at the source | TODO |
+| 4. `vm260-2r` rebuilt at the code tip, incremental, `nice -n 15`; READY-FOR-TESTS | TODO |
+
 ## THE RED-ON-OLD WINDOW — results (2026-11-25, claim `vm-260` 14:11–~14:24; simulator only, the dev-store fence held; device `vm260-rol` iOS 26.2, DELETED; the UI leg on `vm260-walk`)
 
 Every frozen red-on-old tree still owed, run while ladder round 2 read. **Every leg RED, as built.**
