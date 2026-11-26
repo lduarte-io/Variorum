@@ -1,95 +1,132 @@
-> **SUPERSEDED — this is the MORNING's handoff (2026-11-25), kept for the record.** The run moved on since: the
-> note's top, the slim tops, VM-281's fix and the ladder are all built, and her picks and rulings are in. The
-> current state is the run record's LIVE STATUS (`notes/plans/fixes/vm-260-phone-look.md`); the closeout rewrites
-> this file whole. The prebuilt phone app in `DerivedData/vm260-device` predates round 1's fixes (R1-1, R1-9) and
-> is rebuilt before her next install.
+# VM-260 — your handoff: the phone's look, the explicit changes (2026-11-25)
 
-# VM-260 — the morning handoff (2026-11-25; written ~06:4x overnight, brought current ~10:5x after the final evidence window)
+Everything you asked for is built, and the phone side is checked and green. **Two things are left: the Mac's whole
+test run, which waits for you to say "done looking" (the dev store is still dressed for your VX-1036 look), and then
+the merge.** After that the umbrella's real close is yours: how it feels on your phone.
 
-## 1 · FIRST: the fresh build for your phone (R-260-7)
+## Your checklist
 
-The app is PRE-BUILT and signed — nothing compiles while you wait. It is the run's code tip **`af449326a`** (rebuilt after batches 3b · 4a · 4b: VM-281, Cancel picking, the slim tops, the note's new top; earlier install: `78ed5b4bb`)
-(rebuilt ~10:5x so it carries the morning's reconciles: batches 1a + 1b + 2 + 3, the keyboard floor, the field
-drawn 36, the note's top at exactly 136, whole-point text-size steps; main merged through PR #28): the new bar,
-the top lines, the message-line card, the whole drawn step-down, the note's top, and Settings ▸ Look
-per-device with the text-size row.
+1. [ ] **Say "done looking"** when you have finished with the dressed dev store. Then the whole Mac target runs
+   (about an hour) and, if it reads at main's baseline, the branch merges. **PENDING.**
+2. [ ] **Install the build on your phone** (§1). It needs no stage and changes nothing in your store.
+3. [ ] **Try the things in §2 first.**
+4. [ ] **Judge the PROVISIONAL sets on the phone** (§3; every call is QUESTIONS #286).
+5. [ ] **Answer four open calls** (§4): R1-7 · C-4b-1 · R1-4 · R1-2.
+6. [ ] **Confirm three short addenda** (§5): QUESTIONS #281 (2) · #277 (2) · #280 (2).
+7. [ ] **Look over the tickets this run filed** (§6), grouped by priority.
+8. [ ] Later, at your own pace: **the wording pass** — every new sentence is listed at the foot of QUESTIONS #286.
+
+## 1 · The build for your phone
+
+The app is pre-built and signed from **`<TIP>`**. No schema or migration rides this run, and it keeps the same bundle
+id, so your phone's store carries over untouched.
 
 ```sh
-# 1 — plug in or have the phone on the same network, then find its identifier:
+# 1 — have the phone plugged in or on the same network, then find its identifier:
 xcrun devicectl list devices
 
-# 2 — install (substitute your phone's identifier):
+# 2 — install (put your phone's identifier in):
 xcrun devicectl device install app \
   --device <your-phone-identifier> \
   ~/dev/variorum-vm-260/App/Variorum/DerivedData/vm260-device/Build/Products/Release-iphoneos/VariorumMobile.app
 ```
 
-If the phone refuses the developer signature, trust it once under Settings ▸ General ▸ VPN & Device
-Management. Your store is untouched by the install (same bundle id, data carries over).
+If the phone refuses the developer signature, trust it once under Settings ▸ General ▸ VPN & Device Management.
 
-**What to try first:**
-- Swipe between the three pages — the bar stays put while the pages slide (VM-253).
-- Leave Library deep in the Trash, come back by the bar — it stands at its root (VM-256).
-- The roots' top lines: the wing's name alone with its count under it; the trash door only in the Library;
-  the gear where the ⋯ was (VM-255).
-- The drawn step-down everywhere: 17-pt glyphs in their 44s, near-square chips, the Mac's two corners,
-  chrome words one notch under yours (VM-273 — the whole set is yours to judge, P-260-2a…d).
-- A note's top: title 20, the four tools quiet, the rows sitting on one another (VM-272).
-- The message line: in an empty note press the copy tool — the one-line card with "›" and ✕; tap it for the
-  reason (it stays while you read); flick it down; leave the note with a refusal up — it leaves with you
-  (VM-265 · VM-275 · VM-277).
-- Settings ▸ Look: voice, colour palette, background (Paper · Cream) and text size are now THIS PHONE's own —
-  the Mac and the library's synced look are untouched (VM-247 · VM-254).
-- **One known wart, already filed:** after a note's keyboard, the NEXT keyboard (e.g. the Library search) can
-  sit 52 pt too low and hide the bar — VM-281, see §3. Dismiss the keyboard and reopen and it recovers.
+## 2 · What to try first
 
-## 2 · Your pick: the Library's top giving way (VM-259 — batch 4 waits on this)
+- **A note with the keyboard up** (your screenshot's frame). The title has its own row, centred and wrapping; under it
+  one row of six icons — copy · find · book · # · blocks/lens/more info · ⋯ — with no line between them. Scroll down:
+  the title goes and only the row stays. Type low in the note: the page gives the room back. (This is still the
+  standing first thing to try.)
+- **On that row:** # opens the note's tags in place, and the same # closes them. The book icon is grey when the note is
+  in no book, and a tap adds it to one. The stack icon opens blocks · lens · more info. ⋯ opens the Note sheet, with
+  Lock and the date as two easy buttons at its top.
+- **Swipe between Bookcase and Library.** The bar stays still; only the highlighted word moves.
+- **Leave a page with a note open** (go deep in the Library, then tap Bookcase) and come back by the bar. The page is at
+  its root, and the note was closed with its one quiet savepoint, as Back closes it.
+- **The top lines.** Each root says the wing's name alone, with no count. The trash is on the Library only; New Note is
+  the pencil; the gear opens Settings.
+- **Scroll the Library down.** The top folds into one slim line. Nudge up and it comes back; tap the slim line's search
+  icon and the field opens with the keyboard.
+- **A refusal.** In an empty note press copy: one short line with "›" and ✕. Tap it for the reason (it stays while you
+  read), flick it down, or leave the note with it up — it leaves with you. A direction now reads grey, not red.
+- **Settings ▸ Look:** Voice · Colour palette · Background (Paper · Cream) · Appearance · Text size. All of it is this
+  phone's own now; your Mac doesn't move when you change it, and the phone no longer wears the Mac's colours.
+- **The keyboard after a note.** Open a new note with the keyboard up, go Back, open the Library search: the bar rides
+  on top of the keyboard (VM-281, the fix you sanctioned). Back from a note with its keyboard up: it leaves once.
+- **The Blocks sheet while picking:** "Cancel" beside "Done" — no more two "Done" buttons.
 
-Open **`notes/plans/vm-260/vm-259-options.html`** locally — three phone frames that really scroll, drawn at
-the corrected sizes: **A** the whole top slips away with the paper · **B** a pinned slim bar (VM-148's rhyme)
-· **C** the wing line stays, search and filters fold. Each says what the Bookcase and Starred would do.
-Batch 4 builds only after your pick.
+## 3 · The PROVISIONAL sets to judge on the phone (QUESTIONS #286 has each with its options)
 
-## 3 · Needs your ruling (bundled overnight, per your away ruling)
+- **The drawn step-down as one set** (P-260-2a…2d): chrome one notch under your words, icons 17 pt in their 44-pt tap
+  areas, near-square chips, the Mac's two corners (4 and 8), field and button boxes 36 tall, the note's title at 20.
+- **The text-size steps and the smaller default** (P-260-3a/3b): five steps, whole points; Large is wave 1's size back.
+- **The look's details** (P-260-3c…3e): the palette as the system menu in the Mac's words; the cream on the note in
+  Write only, black in dark.
+- **The message line's card** (A-260-4): a floating card clear of the bar and the screen's sides.
+- **The slim top's feel** (P-260-4a-1, C-4a-1…8): how far you scroll before it folds, and how small a nudge brings
+  it back.
+- **The note's top details** (C-4b-2…13, P-260-4b-1): 100 pt at rest under a one-line title, 48 scrolled.
+- **The small ones:** the bookless book icon's grey (C-G2-1); "Cancel" on the Blocks sheet (P-260-3b-1); the push
+  that doesn't open and says where its note landed (P-260-1a).
 
-- **VM-281 (High) — the keyboard cure.** The bar-under-keyboard defect REPRODUCED on the old app and the new
-  floor guard does NOT cure the original road: both SwiftUI's avoidance and UIKit's keyboard guide report the
-  stale 52 after the editor's accessory keyboard. The traced cure is dropping the editor's accessory as its
-  text view resigns — an **editor-seam line**, yours to sanction here or fold into VM-271.
-- **VM-280 (Low, Suspected)** — a field may answer taps only across its text, not its drawn box. The windows
-  added a datapoint that strengthens it: the text field's own view measures 22 pt tall inside its 36-pt box
-  inside the 44-pt frame — if the suspicion holds, a phone field answers across ~22 pt, not 44.
-- **The ladder's reviewer (since the Fable limit):** (a) wait for Fable credits; (b) `opus-reviewer` with
-  `MobileEditorStyle` (the editor's LOOK file batch 3 touched — fonts and grounds, no typing code) named as a
-  focus; (c) Opus rounds now plus one Fable round over the final diff when credits return. The orchestrator
-  suggests (c).
-- **The PROVISIONAL sets to judge on your phone:** P-260-2a…2d (the step-down as one set; the note title at
-  20; the bar chip's corner; the 36-pt boxes), P-260-3a…3e (the text-size steps and smaller default — now WHOLE
-  POINTS, halves rounding up, two steps coinciding where the 13-pt floor meets the small end; the system palette
-  menu; cream as Write's room only, black in dark; the Read page keeping its own table), C-272-2 (the note's
-  four tools now centre on the title rather than sit on its baseline), the
-  floating card shape (A-260-4e), and the DRAFT words (the direction line's sentence, the long refusals'
-  draft headlines — the full word list is in the record for your wording pass).
+## 4 · Four open calls that need your word
 
-## 4 · Where the run stands (honesty block)
+- **R1-7.** An opened reason card raised on a Bookcase, Library or Starred page stays up until its ✕, a flick or a newer
+  message. Should a page change close it? The orchestrator recommends yes; it stays for now.
+- **C-4b-1.** Your drawing has the title ride away with your text frame by frame. That needs a change inside the
+  editor itself, so it was built as a quick slide instead: the title and your text move together once as you leave the
+  top. Feel it on the phone; the frame-by-frame version is an editor change with its own Fable review, at your word.
+- **R1-4.** With the chips gone, the lens state shows as the stack icon's colour (the accent, or red when a pick fell
+  back), not in words on the page. Keep it, or add a word or mark there?
+- **R1-2.** On Back from a note, the bar is drawn over the leaving note for the slide (about a third of a second).
+  The walk saw it as mild and no ticket was filed. Keep it, or ticket a small fix?
 
-- **Built and window-verified:** batches 1a, 1b, 2 and 3. Two evidence windows (04:55–06:01 and 09:53–10:14)
-  established red-on-old for every bug-class pin that could be (VM-275 half 1 included, on a corrected old
-  tree), the live line walk green, the Mac legs green, both keyboard UI tests green, and the whole phone target
-  (1,293 tests) green but main's 6 known issues and ONE batch-3 red.
-- **The morning's reconciles, all accepted (A-260-12…14):** batch 2's field now draws its designed 36 inside
-  the 44 (the pin had been reading the drawing); the note's top is exactly 136 (9 pt of invisible air removed);
-  1b's two harness roads fixed (the live behaviour was always right); batch 3's one red traced to a real
-  half-point mismatch between iOS's two font roads at fractional text sizes — fixed by whole-point steps. Their
-  last re-runs ride the merge gate.
-- **Not started:** batch 4 (your pick), the ladder (its reviewer is your call, §3), the merge gate (VX-1082
-  merges first; main merges in after it), closeout and canon deltas.
-- **Captures for your eyes:** `notes/plans/vm-260-screens/batch-2/` (before/after; the after run's "s" pass
-  accidentally ran in Terminal — Study after-shots come with the gate window's retakes) and `batch-1b/`
-  (the line's walk). The gitignored folders stay local.
+## 5 · Three addenda to confirm
 
-## 5 · Tickets this run has filed so far
+- **QUESTIONS #281 (2) — wave 1's forty-one look calls, against what shipped.** Nine are settled by this run, four are
+  partly overtaken, and twenty-eight stand open as built.
+- **#277 (2) — VM-55's message-line calls.** P-55-19 is built (the neutral colour), and P-55-3's refusal arm is replaced
+  by your VM-277 ruling.
+- **#280 (2) — P-71-1 retired.** Your "Note closes on leaving" made every page change a leaving.
 
-- **VM-279** (Low) — authored headlines for the editor-spoken refusals (deferred behind the editor fence).
-- **VM-280** (Low · Suspected) — the field's answering height (§3).
-- **VM-281** (High · Needs Lillian) — the keyboard cure, editor seam (§3).
+## 6 · The tickets this run filed
+
+- **High:** **VM-281** — the next keyboard after a note's keyboard sat 52 pt low and hid the bar. **Fixed in this
+  run** at your word, as the run's one change inside the editor.
+- **Medium:** **VM-282** — the Fable review round over the whole diff (VM-281's editor change first, then the editor's
+  look file), at your R-260-10. It does not gate this merge.
+- **Low:**
+  - **VM-279** — the editor's own refusals get short headlines; they use the one-line clip meanwhile.
+  - **VM-280** — a field's 44-pt tap area may be drawn only. Measured: the field's own view is about 22 pt tall.
+  - **VM-283** — one phone helper for the refusal slot, instead of thirteen copies.
+  - **VM-284** — a short note's page hops a few points when the note's top changes height. The cure is in the editor
+    and waits for VM-271.
+  - **VM-285** — an unlabelled element on the note page that VoiceOver can stop on. It is older than this run.
+
+## 7 · Where the run stands
+
+- **Built:** all eleven members, plus VM-281 and the Blocks sheet's "Cancel", in seven batches; two review rounds on
+  Opus (one major, fixed); three findings from the merge gate's checks, each fixed with a test that failed on the old
+  code.
+- **The phone gate is green** at code tip `a8c0a49ad`: the whole phone test target, 1,335 tests in 239 suites, with
+  only main's 6 known issues; the four keyboard tests green; every bug fix's test red on the old code and green on
+  the new; the walk's captures read.
+- **PENDING:** the whole Mac target (at your "done looking"; main's baseline is 0 failed, 14 known), then the merge.
+  If the Mac run finds anything, this handoff and the record say so before the merge.
+- **Not done here, on purpose:** the title's frame-by-frame ride (C-4b-1); the editor's own refusal headlines
+  (VM-279); renaming a note in place on its top (VM-148's); the Mac's toasts (untouched — yours to say later); a count
+  for each shelf on the phone (waits for the phone's shelves, VM-113).
+- **The rulings, re-read against what shipped:** R-260-5's "leaving a page returns it to its root" holds on every road
+  (the Protection ask's road by construction, with no test of its own). VM-277's shorter, dismissable refusals hold for
+  every refusal spoken through the shared table; the editor's own refusals still use the clip (VM-279). VM-273's
+  "phone-wide" step-down lives in the central files; two remainders are recorded but not ticketed: the segmented
+  control keeps the system's track, and a few hand-built corners elsewhere stay as they are.
+- **Captures,** local only: `notes/plans/vm-260-screens/` (`batch-1a`, `batch-1b`, `batch-2`, `gate`, `gate2`).
+- **Canon changed:** AppSpec §12 (the phone's look is the device's own); SurfaceContracts — the phone's look, sizes and
+  drawn step-down, the bar and the leaving law, Settings ▸ Look and the gear, the message line's card, the Library's
+  slim top, the roots' top lines, the note's top; MobileSoul PL-84 (the mobile parity row).
+  `Tools/canon-size`: `144596  total (harness limit 150000, headroom 5404)` — no crossing.
+- **The record:** `notes/plans/fixes/vm-260-phone-look.md` (FOR A LATER READER at its top); the AppSpecRecord entry of
+  2026-11-25.
